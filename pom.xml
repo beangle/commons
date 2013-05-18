@@ -1,0 +1,73 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.beangle</groupId>
+    <artifactId>beangle-scala-parent</artifactId>
+    <version>8</version>
+  </parent>
+  <groupId>org.beangle.commons</groupId>
+  <artifactId>beangle-commons-parent</artifactId>
+  <packaging>pom</packaging>
+  <name>Beangle Commons Parent</name>
+  
+  <modules>
+    <module>org.beangle.commons.core</module>
+    <module>org.beangle.commons.web</module>
+    <module>org.beangle.commons.model</module>
+  </modules>
+
+  <description>
+  The Beangle Commons Framework.
+  </description>
+
+  <url>https://github.com/beangle/commons</url>
+  
+  <issueManagement>
+    <system>github</system>
+    <url>https://github.com/beangle/commons/issues</url>
+  </issueManagement>
+
+  <scm>
+    <connection>scm:git:git://github.com/beangle/commons.git</connection>
+    <developerConnection>scm:git:git@github.com:beangle/commons.git</developerConnection>
+    <url>https://github.com/beangle/commons</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <properties>
+    <spring.version>3.1.1.RELEASE</spring.version>
+    <testng.version>6.5.2</testng.version>
+    <javax.validation.version>1.0.0.GA</javax.validation.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!--beangle-->
+      <dependency>
+        <groupId>org.beangle.commons</groupId>
+        <artifactId>beangle-commons-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.beangle.commons</groupId>
+        <artifactId>beangle-commons-model</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.beangle.commons</groupId>
+        <artifactId>beangle-commons-notification</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.beangle.commons</groupId>
+        <artifactId>beangle-commons-web</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.validation</groupId>
+        <artifactId>validation-api</artifactId>
+        <version>${javax.validation.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+</project>
