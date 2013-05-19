@@ -48,8 +48,8 @@ object Dependencies {
   val springVer="3.1.1.RELEASE"
 
   val slf4j = "org.slf4j" % "slf4j-api" % slf4jVer
-  var asm ="asm" % "asm" % "3.3"
-  var servletapi= "javax.servlet" % "servlet-api" % "2.4"
+  val asm ="asm" % "asm" % "3.3"
+  val servletapi= "javax.servlet" % "servlet-api" % "2.4"
 
   val junit = "junit" % "junit" % junitVer % "test"
   val testng= "org.testng" % "testng" % testngVer % "test"
@@ -79,26 +79,32 @@ object BeangleBuild extends Build {
  
   val commonDeps = Seq(slf4j, logbackClassic,logbackCore, junit,testng)
 
-  lazy val commons = Project("beangle-commons", file("commons"), settings = buildSettings) aggregate (commons_core,commons_web,commons_model)
+  lazy val commons = Project("beangle-commons", file("."), settings = buildSettings) aggregate (commons_core,commons_web,commons_model,commons_jdbc)
 
   lazy val commons_core = Project(
     "beangle-commons-core",
-    file("commons/org.beangle.commons.core"),
+    file("org.beangle.commons.core"),
     settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(asm))  ++ Seq(resolvers +=m2repo)
   )
 
   lazy val commons_web = Project(
     "beangle-commons-web",
-    file("commons/org.beangle.commons.web"),
+    file("org.beangle.commons.web"),
     settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(servletapi,validation)) 
                ++ Seq(resolvers += m2repo)
   ) dependsOn(commons_core)
 
   lazy val commons_model = Project(
     "beangle-commons-model",
-    file("commons/org.beangle.commons.model"),
+    file("org.beangle.commons.model"),
     settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(validation,jpa,poi,jxls)) 
                ++ Seq(resolvers += m2repo)
   ) dependsOn(commons_core)
 
+  lazy val commons_jdbc = Project(
+    "beangle-commons-jdbc",
+    file("org.beangle.commons.jdbc"),
+    settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(dbcp))  
+               ++ Seq(resolvers +=m2repo)
+  ) dependsOn(commons_core)
 }

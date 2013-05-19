@@ -1,0 +1,28 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <groupId>org.beangle.commons</groupId>
+    <artifactId>beangle-commons-parent</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.beangle.commons</groupId>
+  <artifactId>beangle-commons-model</artifactId>
+  <packaging>jar<!--bundle--></packaging>
+  <name>Beangle Commons Model</name>
+
+  <properties>
+    <bundle.symbolicName>org.beangle.commons.model</bundle.symbolicName>
+    <bundle.namespace>org.beangle.commons</bundle.namespace>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.beangle.commons</groupId>
+      <artifactId>beangle-commons-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+    </dependency>
+  </dependencies>
+</project>
