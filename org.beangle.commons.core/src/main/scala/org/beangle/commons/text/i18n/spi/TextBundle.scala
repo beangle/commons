@@ -16,49 +16,37 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.text.i18n
+package org.beangle.commons.text.i18n.spi
 
 import java.util.Locale
 
 /**
- * <p>
- * TextResource interface.
- * </p>
+ * TextBundle
  *
  * @author chaostone
- * @version $Id: $
+ * @since 3.0.0
  */
-trait TextResource {
+trait TextBundle {
 
   /**
    * Gets a message based on a message key, or null if no message is found.
    *
-   * @param key
-   *          the resource bundle key that is to be searched for
-   * @return the message as found in the resource bundle, or null if none is
-   *         found.
+   * @param key the resource bundle key that is to be searched for
+   * @return null if none is found.
    */
   def getText(key: String): Option[String]
 
   /**
-   * Gets a message based on a key using the supplied obj, as defined in
-   * {@link java.text.MessageFormat}, or, if the message is not found, a
-   * supplied default value is returned.
+   * Returns the locale of this resource bundle.
    *
-   * @param key
-   *          the resource bundle key that is to be searched for
-   * @param defaultValue
-   *          the default value which will be returned if no message is
-   *          found
-   * @param obj
-   *          obj to be used in a {@link java.text.MessageFormat} message
-   * @return the message as found in the resource bundle, or defaultValue if
-   *         none is found
-   */
-  def getText(key: String, defaultValue: String, obj: AnyRef*): String
-
-  /**
-   * @return locale
+   * @return the locale of this resource bundle
    */
   def getLocale(): Locale
+
+  /**
+   * Get the bundle resource path
+   *
+   * @return bundle resource path
+   */
+  def getResource(): String
 }

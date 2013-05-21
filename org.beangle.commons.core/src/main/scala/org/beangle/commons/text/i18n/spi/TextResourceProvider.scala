@@ -16,19 +16,22 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.text.i18n
+package org.beangle.commons.text.i18n.spi
 
 import java.util.Locale
-//remove if not needed
-import scala.collection.JavaConversions._
-
+import org.beangle.commons.text.i18n.TextResource
 /**
- * Text formater
+ * TextResource provider
  *
  * @author chaostone
- * @since 3.0.0
+ * @since 3.0.2
  */
-trait TextFormater {
+trait TextResourceProvider {
 
-  def format(text: String, locale: Locale, args: AnyRef*): String
+  /**
+   * Return text resource;
+   *
+   * @param locale default could be null.
+   */
+  def getTextResource(locale: Locale): TextResource
 }

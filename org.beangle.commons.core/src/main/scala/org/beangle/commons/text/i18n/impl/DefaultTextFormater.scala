@@ -22,7 +22,7 @@ import java.text.MessageFormat
 import java.util.Locale
 import java.util.Map
 import org.beangle.commons.collection.CollectUtils
-import org.beangle.commons.text.i18n.TextFormater
+import org.beangle.commons.text.i18n.spi.TextFormater
 import java.util.concurrent.ConcurrentHashMap
 /**
  * DefaultTextFormater with cache

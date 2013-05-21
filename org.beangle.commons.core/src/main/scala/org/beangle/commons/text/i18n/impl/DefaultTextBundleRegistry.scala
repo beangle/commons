@@ -30,8 +30,8 @@ import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.time.Stopwatch
 import org.beangle.commons.lang.Arrays
-import org.beangle.commons.text.i18n.TextBundle
-import org.beangle.commons.text.i18n.TextBundleRegistry
+import org.beangle.commons.text.i18n.spi.TextBundle
+import org.beangle.commons.text.i18n.spi.TextBundleRegistry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

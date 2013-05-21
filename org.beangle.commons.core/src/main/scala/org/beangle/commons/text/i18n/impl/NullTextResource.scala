@@ -20,8 +20,6 @@ package org.beangle.commons.text.i18n.impl
 
 import java.util.Locale
 import org.beangle.commons.text.i18n.TextResource
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * <p>

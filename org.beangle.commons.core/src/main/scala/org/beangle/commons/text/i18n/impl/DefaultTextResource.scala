@@ -19,12 +19,10 @@
 package org.beangle.commons.text.i18n.impl
 
 import java.util.Locale
-import org.beangle.commons.text.i18n.TextBundle
-import org.beangle.commons.text.i18n.TextBundleRegistry
-import org.beangle.commons.text.i18n.TextFormater
+import org.beangle.commons.text.i18n.spi.TextBundle
+import org.beangle.commons.text.i18n.spi.TextBundleRegistry
+import org.beangle.commons.text.i18n.spi.TextFormater
 import org.beangle.commons.text.i18n.TextResource
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * <p>

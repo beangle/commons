@@ -16,53 +16,57 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.text.i18n
+package org.beangle.commons.entity.meta
 
-import java.util.Locale
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
- * TextBundleRegistry
- *
+ * <p>
+ * Abstract AbstractType class.
+ * </p>
+ * 
  * @author chaostone
- * @since 3.0.0
+ * @version $Id: $
  */
-trait TextBundleRegistry {
+abstract class AbstractType extends Type {
+  /**
+   * isCollectionType.
+   */
+  override def isCollectionType =false
 
   /**
-   * Load and cache bundle
-   *
-   * @param locale
-   * @param bundleName
+   * isComponentType.
    */
-  def load(locale: Locale, bundleName: String): TextBundle
+  override def isComponentType=false
 
   /**
-   * List locale bundles
-   *
-   * @return empty list when not found
+   * isEntityType.
    */
-  def getBundles(locale: Locale): List[TextBundle]
+  override def isEntityType=false
+
+  override def getPropertyType(property:String):Type = null
+
+  override def equals(obj:Any) =  obj match{
+    case other:Type =>  name.equals(other.name)
+    case _ => false
+  }
+
+  override def hashCode = name.hashCode
 
   /**
-   * Load and cache default bundles
-   *
-   * @param bundleNames
+   * toString.
    */
-  def addDefaults(bundleNames: String*): Unit
+  override def  toString = name
 
   /**
-   * Get default locale message
-   *
-   * @param key
-   * @param locale
-   * @return null when not found
+   * newInstance.
    */
-  def getDefaultText(key: String, locale: Locale): String
-
-  /**
-   * Whether cache bundles
-   *
-   * @param reloadBundles
-   */
-  def setReloadBundles(reloadBundles: Boolean): Unit
+  def newInstance():AnyRef =  {
+    try {
+      return returnedClass.newInstance().asInstanceOf[AnyRef];
+    } catch {
+      case e:Exception =>   throw new RuntimeException(e.getMessage());
+    }
+  }
 }

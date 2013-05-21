@@ -16,39 +16,53 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.text.i18n
+package org.beangle.commons.text.i18n.spi
 
 import java.util.Locale
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
- * TextBundle
+ * TextBundleRegistry
  *
  * @author chaostone
  * @since 3.0.0
  */
-trait TextBundle {
+trait TextBundleRegistry {
 
   /**
-   * Gets a message based on a message key, or null if no message is found.
+   * Load and cache bundle
    *
-   * @param key the resource bundle key that is to be searched for
-   * @return null if none is found.
+   * @param locale
+   * @param bundleName
    */
-  def getText(key: String): Option[String]
+  def load(locale: Locale, bundleName: String): TextBundle
 
   /**
-   * Returns the locale of this resource bundle.
+   * List locale bundles
    *
-   * @return the locale of this resource bundle
+   * @return empty list when not found
    */
-  def getLocale(): Locale
+  def getBundles(locale: Locale): List[TextBundle]
 
   /**
-   * Get the bundle resource path
+   * Load and cache default bundles
    *
-   * @return bundle resource path
+   * @param bundleNames
    */
-  def getResource(): String
+  def addDefaults(bundleNames: String*): Unit
+
+  /**
+   * Get default locale message
+   *
+   * @param key
+   * @param locale
+   * @return null when not found
+   */
+  def getDefaultText(key: String, locale: Locale): String
+
+  /**
+   * Whether cache bundles
+   *
+   * @param reloadBundles
+   */
+  def setReloadBundles(reloadBundles: Boolean): Unit
 }

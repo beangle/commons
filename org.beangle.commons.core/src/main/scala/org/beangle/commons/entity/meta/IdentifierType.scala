@@ -16,27 +16,59 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.text.i18n.impl
-
-import java.util.Properties
-import org.beangle.commons.text.i18n.spi.TextBundle
-import java.util.Locale
+package org.beangle.commons.entity.meta
 
 /**
+ * <p>
+ * IdentifierType class.
+ * </p>
+ * 
  * @author chaostone
- * @since 3.0.0
+ * @version $Id: $
  */
-class DefaultTextBundle(locale: Locale, resource: String, texts: Map[String, String]) extends TextBundle() {
+class IdentifierType(val clazz:Class[_]) extends AbstractType {
+  /**
+   * <p>
+   * getName.
+   * </p>
+   * 
+   * @return a {@link java.lang.String} object.
+   */
+  override def name=clazz.toString
 
-  def this(locale: Locale, resource: String, properties: Properties) {
-    this(locale, resource, collection.JavaConversions.propertiesAsScalaMap(properties).toMap)
-  }
+  /**
+   * <p>
+   * getReturnedClass.
+   * </p>
+   * 
+   * @return a {@link java.lang.Class} object.
+   */
+  override def returnedClass = clazz
 
-  def getText(key: String): Option[String] = texts.get(key)
+  /**
+   * <p>
+   * isCollectionType.
+   * </p>
+   * 
+   * @return a boolean.
+   */
+  override def isCollectionType = false
 
-  def getLocale(): Locale = locale
+  /**
+   * <p>
+   * isComponentType.
+   * </p>
+   * 
+   * @return a boolean.
+   */
+  override def isComponentType=false
 
-  def getResource(): String = resource
-
-  override def toString(): String = resource
+  /**
+   * <p>
+   * isEntityType.
+   * </p>
+   * 
+   * @return a boolean.
+   */
+  override def  isEntityType =false
 }
