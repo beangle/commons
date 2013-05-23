@@ -6,12 +6,12 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.beangle.commons</groupId>
-  <artifactId>beangle-commons-model</artifactId>
+  <artifactId>beangle-commons-jpa</artifactId>
   <packaging>jar<!--bundle--></packaging>
-  <name>Beangle Commons Model</name>
+  <name>Beangle Commons Jpa</name>
 
   <properties>
-    <bundle.symbolicName>org.beangle.commons.model</bundle.symbolicName>
+    <bundle.symbolicName>org.beangle.commons.jpa</bundle.symbolicName>
     <bundle.namespace>org.beangle.commons</bundle.namespace>
   </properties>
 

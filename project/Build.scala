@@ -79,7 +79,7 @@ object BeangleBuild extends Build {
  
   val commonDeps = Seq(slf4j, logbackClassic,logbackCore, junit,testng)
 
-  lazy val commons = Project("beangle-commons", file("."), settings = buildSettings) aggregate (commons_core,commons_web,commons_model,commons_jdbc)
+  lazy val commons = Project("beangle-commons", file("."), settings = buildSettings) aggregate (commons_core,commons_web,commons_jpa,commons_jdbc)
 
   lazy val commons_core = Project(
     "beangle-commons-core",
@@ -94,9 +94,9 @@ object BeangleBuild extends Build {
                ++ Seq(resolvers += m2repo)
   ) dependsOn(commons_core)
 
-  lazy val commons_model = Project(
-    "beangle-commons-model",
-    file("org.beangle.commons.model"),
+  lazy val commons_jpa = Project(
+    "beangle-commons-jpa",
+    file("org.beangle.commons.jpa"),
     settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(validation,jpa,poi,jxls)) 
                ++ Seq(resolvers += m2repo)
   ) dependsOn(commons_core)

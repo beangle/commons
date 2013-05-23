@@ -13,7 +13,7 @@
   <modules>
     <module>org.beangle.commons.core</module>
     <module>org.beangle.commons.web</module>
-    <module>org.beangle.commons.model</module>
+    <module>org.beangle.commons.jpa</module>
     <module>org.beangle.commons.jdbc</module>
   </modules>
 
@@ -51,7 +51,7 @@
       </dependency>
       <dependency>
         <groupId>org.beangle.commons</groupId>
-        <artifactId>beangle-commons-model</artifactId>
+        <artifactId>beangle-commons-jpa</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
