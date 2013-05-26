@@ -16,31 +16,45 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.entity.bean
+package org.beangle.commons.entity.dao
 
-import java.util.Date
-import javax.validation.constraints.NotNull
-import org.beangle.commons.entity.Journal
+import org.beangle.commons.collection.page.PageLimit;
+
 /**
- * Jounal Entity
+ * <p>
+ * LimitQuery interface.
+ * </p>
  * 
  * @author chaostone
- * @since 3.1.0
+ * @version $Id: $
  */
-trait JournalBean extends Journal {
-  /**
-   * 起始日期
-   */
-  @NotNull
-  var beginOn:Date;
+trait LimitQuery[T] extends Query[T] {
 
   /**
-   * 结束日期
+   * <p>
+   * getLimit.
+   * </p>
+   * 
+   * @return a {@link org.beangle.commons.collection.page.PageLimit} object.
    */
-  var endOn:Option[Date];
+  def limit:  PageLimit
 
   /**
-   * 备注
+   * <p>
+   * limit.
+   * </p>
+   * 
+   * @param limit a {@link org.beangle.commons.collection.page.PageLimit} object.
+   * @return a {@link org.beangle.commons.dao.query.LimitQuery} object.
    */
-  def remark:Option[String];
+  def limit(limit:PageLimit):LimitQuery[T]
+
+  /**
+   * <p>
+   * getCountQuery.
+   * </p>
+   * 
+   * @return a {@link org.beangle.commons.dao.query.Query} object.
+   */
+  def countQuery:Query[T]
 }

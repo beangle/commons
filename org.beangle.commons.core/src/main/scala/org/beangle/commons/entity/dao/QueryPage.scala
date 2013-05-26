@@ -18,61 +18,25 @@
  */
 package org.beangle.commons.entity.dao
 
-import org.beangle.commons.entity.Entity
+import org.beangle.commons.collection.page.Page
+import org.beangle.commons.collection.page.PageLimit
+import org.beangle.commons.collection.page.SinglePage
 
 /**
  * <p>
- * Dao trait
- * [/p>
+ * QueryPage class.
+ * </p>
  * 
  * @author chaostone
  * @version $Id: $
  */
-trait Dao[T <: Entity[ID], ID] {
+class QueryPage[T](query:LimitQuery[T],val generalDao:GeneralDao) extends AbstractQueryPage[T](query){
 
-  /**
-   * get T by id.
-   */
-  def get(id:ID):T
+   next()
 
-  /**
-   * find T by id.
-   */
-  def find(id:ID):Option[T]
-
-  /**
-   * search T by id.
-   */
-  def find(first:ID,ids:ID*):  List[T]
-
-  /**
-   * save or update entities
-   */
-  def saveOrUpdate(first:T,entities:T*)
-
-  /**
-   * save or update entities
-   */
-  def saveOrUpdate(entities:collection.Seq[T]);
-
-  /**
-   * remove entities.
-   */
-  def remove(entities:collection.Seq[T]);
-
-  /**
-   * remove entities.
-   */
-  def remove(first:T,others:T*);
-
-  /**
-   * remove entities by id
-   */
-  def remove(id:ID,ids:ID*);
-
-  /**
-   * get entity type
-   */
-  def entityClass:Class[T];
-
+  def moveTo(pageNo:Int): Page[T]= {
+    query.limit(PageLimit(pageNo,query.limit.pageSize))
+    updatePage(generalDao.search(query).asInstanceOf[SinglePage[T]])
+    this
+  }
 }

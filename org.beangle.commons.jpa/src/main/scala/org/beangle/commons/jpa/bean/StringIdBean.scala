@@ -16,40 +16,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.entity.bean
+package org.beangle.commons.jpa.bean
 
-import javax.persistence.CascadeType
-import javax.persistence.FetchType
-import javax.persistence.ManyToOne
+import javax.persistence.Id;
 import javax.persistence.MappedSuperclass
-import javax.persistence.OneToMany
-import javax.persistence.OrderBy
-import javax.validation.constraints.NotNull
-import javax.validation.constraints.Size
-import scala.collection.mutable
-import org.beangle.commons.entity.Hierarchical
 import org.beangle.commons.entity.Entity
-/**
- * <p>
- * Hierarchical interface.
- * </p>
- * 
- * @author chaostone
- * @version $Id: $
- */
+
 @MappedSuperclass
-trait HierarchicalBean[T <: Entity[_]] extends Hierarchical[T]{
+@SerialVersionUID(-6898498932182877104L)
+class StringIdBean extends Entity[String]{
 
-  /** index no */
-  @Size(max = 30)
-  @NotNull
-  var indexno: String
-
-  /** 父级菜单 */
-  @ManyToOne(fetch = FetchType.LAZY)
-  var parent: Option[T]
-
-  @OneToMany(mappedBy = "parent",cascade = Array(CascadeType.ALL))
-  @OrderBy("indexno")
-  var children: mutable.Seq[T]= new mutable.ListBuffer[T]
+  @Id 
+  var id: String=_
 }

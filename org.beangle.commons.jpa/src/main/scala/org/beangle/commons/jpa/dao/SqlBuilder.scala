@@ -16,63 +16,43 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.entity.dao
+package org.beangle.commons.jpa.dao
 
-import org.beangle.commons.entity.Entity
+import java.util.Collection
+import java.util.HashMap
+import java.util.List
+import java.util.Map
 
+import org.beangle.commons.collection.CollectUtils
+import org.beangle.commons.collection.Order
+import org.beangle.commons.collection.page.PageLimit
+import org.beangle.commons.entity.dao.Query
+import org.beangle.commons.lang.Assert
+import org.beangle.commons.lang.Strings
+
+object SqlBuilder{
+  /**
+   * sql.
+   */
+  def sql(queryStr:String ) :SqlBuilder={
+    val sqlQuery = new SqlBuilder()
+    sqlQuery.statement = queryStr
+    sqlQuery
+  }
+  val Lang = Query.Lang("Sql")
+}
 /**
- * <p>
- * Dao trait
- * [/p>
+ * sql查询
  * 
  * @author chaostone
  * @version $Id: $
  */
-trait Dao[T <: Entity[ID], ID] {
+class SqlBuilder extends AbstractQueryBuilder[Array[Any]] {
 
   /**
-   * get T by id.
+   * genCountStatement.
    */
-  def get(id:ID):T
+  protected def genCountStatement() =  "select count(*) from (" + genQueryStatement(false) + ")"
 
-  /**
-   * find T by id.
-   */
-  def find(id:ID):Option[T]
-
-  /**
-   * search T by id.
-   */
-  def find(first:ID,ids:ID*):  List[T]
-
-  /**
-   * save or update entities
-   */
-  def saveOrUpdate(first:T,entities:T*)
-
-  /**
-   * save or update entities
-   */
-  def saveOrUpdate(entities:collection.Seq[T]);
-
-  /**
-   * remove entities.
-   */
-  def remove(entities:collection.Seq[T]);
-
-  /**
-   * remove entities.
-   */
-  def remove(first:T,others:T*);
-
-  /**
-   * remove entities by id
-   */
-  def remove(id:ID,ids:ID*);
-
-  /**
-   * get entity type
-   */
-  def entityClass:Class[T];
-
+  override  def lang= SqlBuilder.Lang
 }

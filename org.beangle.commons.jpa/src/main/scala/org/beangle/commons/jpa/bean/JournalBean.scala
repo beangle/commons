@@ -16,18 +16,31 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.entity.bean
+package org.beangle.commons.jpa.bean
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass
-import org.beangle.commons.entity.Entity
+import java.util.Date
+import javax.validation.constraints.NotNull
+import org.beangle.commons.entity.Journal
+/**
+ * Jounal Entity
+ * 
+ * @author chaostone
+ * @since 3.1.0
+ */
+trait JournalBean extends Journal {
+  /**
+   * 起始日期
+   */
+  @NotNull
+  var beginOn:Date;
 
-@MappedSuperclass
-@SerialVersionUID(-7530111699332363124L)
-trait NumIdBean[ID] extends Entity[ID]{
+  /**
+   * 结束日期
+   */
+  var endOn:Option[Date];
 
-  @Id
-  @GeneratedValue(generator = "table_sequence")
-  var id:ID = _
+  /**
+   * 备注
+   */
+  def remark:Option[String];
 }

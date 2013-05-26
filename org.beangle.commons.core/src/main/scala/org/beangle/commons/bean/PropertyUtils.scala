@@ -21,7 +21,6 @@ package org.beangle.commons.bean
 import java.lang.reflect.Array
 import java.util.List
 import java.util.Map
-import java.util.Set
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.Throwables
 import org.beangle.commons.lang.conversion.Conversion

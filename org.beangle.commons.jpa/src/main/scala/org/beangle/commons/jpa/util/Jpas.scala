@@ -16,40 +16,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.collection.page
-
-object PageLimit{
-  def apply(pageNo:Int,pageSize:Int) = new PageLimit(pageNo,pageSize)
-}
-/**
- * 查询分页限制
- *
- * @author chaostone
- * @version $Id: $
- */
-class PageLimit(val pageNo: Int,val pageSize: Int) extends Limit {
-
-  /**
-   * <p>
-   * isValid.
-   * </p>
-   *
-   * @return a boolean.
-   */
-  def isValid(): Boolean = pageNo > 0 && pageSize > 0
-
-  /**
-   * <p>
-   * toString.
-   * </p>
-   *
-   * @see java.lang.Object#toString()
-   * @return a {@link java.lang.String} object.
-   */
-  override def toString(): String = {
-    new StringBuilder().append("pageNo:").append(pageNo)
-      .append(" pageSize:")
-      .append(pageSize)
-      .toString
+package org.beangle.commons.jpa.util
+import org.beangle.commons.lang.Strings
+import org.beangle.commons.lang.Assert
+object Jpas{
+  def findEntityName(clazz:Class[_]):String = {
+    val annotation = clazz.getAnnotation(classOf[javax.persistence.Entity])
+    Assert.notNull(annotation);
+    if (Strings.isNotBlank(annotation.name)) annotation.name else clazz.getName
   }
 }

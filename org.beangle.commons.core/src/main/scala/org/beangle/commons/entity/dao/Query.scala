@@ -16,21 +16,50 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.entity.bean
+package org.beangle.commons.entity.dao
 
-import org.beangle.commons.entity.Enabled
+object Query{
+  case class Lang(val lang:String)
+}
+import Query._
 /**
- * 能够启用和禁用的实体
+ * 数据查询接口
  * 
  * @author chaostone
- * @version $Id: Jun 25, 2011 5:05:07 PM chaostone $
+ * @version $Id: $
  */
-trait EnabledBean extends Enabled {
+trait Query[T] {
 
   /**
-   * 查询是否启用
-   * 
-   * @return 是否启用
+   * Returns query statement.
    */
-  var enabled:Boolean;
+  def statement:String
+
+  /**
+   * <p>
+   * getParams.
+   * </p>
+   * 
+   * @return a {@link java.util.Map} object.
+   */
+  def params:Map[String, Any]
+
+  /**
+   * <p>
+   * isCacheable.
+   * </p>
+   * 
+   * @return a boolean.
+   */
+  def cacheable:Boolean
+
+  /**
+   * <p>
+   * getLang.
+   * </p>
+   * 
+   * @return a {@link org.beangle.commons.dao.query.Lang} object.
+   */
+  def lang:Lang
 }
+

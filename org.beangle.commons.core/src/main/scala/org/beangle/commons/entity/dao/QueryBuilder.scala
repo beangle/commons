@@ -18,61 +18,53 @@
  */
 package org.beangle.commons.entity.dao
 
-import org.beangle.commons.entity.Entity
+import org.beangle.commons.collection.page.PageLimit
 
 /**
  * <p>
- * Dao trait
- * [/p>
+ * QueryBuilder interface.
+ * </p>
  * 
  * @author chaostone
  * @version $Id: $
  */
-trait Dao[T <: Entity[ID], ID] {
+trait QueryBuilder[T] {
 
   /**
-   * get T by id.
+   * <p>
+   * build.
+   * </p>
+   * 
+   * @return a {@link org.beangle.commons.dao.query.Query} object.
    */
-  def get(id:ID):T
+  def build():Query[T]
 
   /**
-   * find T by id.
+   * <p>
+   * limit.
+   * </p>
+   * 
+   * @param limit a {@link org.beangle.commons.collection.page.PageLimit} object.
+   * @return a {@link org.beangle.commons.dao.query.QueryBuilder} object.
    */
-  def find(id:ID):Option[T]
+  def limit(limit:PageLimit):  QueryBuilder[T]
 
   /**
-   * search T by id.
+   * <p>
+   * getParams.
+   * </p>
+   * 
+   * @return a {@link java.util.Map} object.
    */
-  def find(first:ID,ids:ID*):  List[T]
+  def params:  Map[String, Any]
 
   /**
-   * save or update entities
+   * <p>
+   * params.
+   * </p>
+   * 
+   * @param newParams a {@link java.util.Map} object.
+   * @return a {@link org.beangle.commons.dao.query.QueryBuilder} object.
    */
-  def saveOrUpdate(first:T,entities:T*)
-
-  /**
-   * save or update entities
-   */
-  def saveOrUpdate(entities:collection.Seq[T]);
-
-  /**
-   * remove entities.
-   */
-  def remove(entities:collection.Seq[T]);
-
-  /**
-   * remove entities.
-   */
-  def remove(first:T,others:T*);
-
-  /**
-   * remove entities by id
-   */
-  def remove(id:ID,ids:ID*);
-
-  /**
-   * get entity type
-   */
-  def entityClass:Class[T];
-
+  def params(newParams:Map[String, Any]):this.type
 }

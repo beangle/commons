@@ -20,59 +20,57 @@ package org.beangle.commons.entity.dao
 
 import org.beangle.commons.entity.Entity
 
-/**
- * <p>
- * Dao trait
- * [/p>
- * 
- * @author chaostone
- * @version $Id: $
- */
-trait Dao[T <: Entity[ID], ID] {
+abstract class AbstractDao[T <: Entity[ID], ID](val entityClass:Class[T],val generalDao:GeneralDao) extends Dao[T, ID] {
 
   /**
    * get T by id.
    */
-  def get(id:ID):T
-
-  /**
-   * find T by id.
-   */
-  def find(id:ID):Option[T]
+  def get(id:ID):T = generalDao.get(entityClass, id)
 
   /**
    * search T by id.
    */
-  def find(first:ID,ids:ID*):  List[T]
+  def find(id:ID): Option[T] = generalDao.find(entityClass, id)
+ 
+  /**
+   * search T by id.
+   */
+  def find(first:ID,ids:ID*): List[T] = generalDao.find(entityClass, first,ids:_*)
 
   /**
    * save or update entities
    */
-  def saveOrUpdate(first:T,entities:T*)
+  def saveOrUpdate(first:T,entities:T*){
+    generalDao.saveOrUpdate(first,entities)
+  }
 
   /**
    * save or update entities
    */
-  def saveOrUpdate(entities:collection.Seq[T]);
+  def saveOrUpdate(entities:collection.Seq[T]){
+    generalDao.saveOrUpdate(entities)
+  }
 
   /**
    * remove entities.
    */
-  def remove(entities:collection.Seq[T]);
+  def remove(entities:collection.Seq[T]){
+    generalDao.saveOrUpdate(entities)
+  }
 
   /**
    * remove entities.
    */
-  def remove(first:T,others:T*);
+  def remove(first:T,entities:T*){
+    generalDao.remove(first,entities)
+  }
 
   /**
    * remove entities by id
    */
-  def remove(id:ID,ids:ID*);
+  def remove(id:ID,ids:ID*){
+    generalDao.remove(entityClass,id,ids)
+  }
 
-  /**
-   * get entity type
-   */
-  def entityClass:Class[T];
 
 }

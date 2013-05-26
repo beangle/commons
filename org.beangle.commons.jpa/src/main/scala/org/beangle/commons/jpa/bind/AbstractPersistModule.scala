@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.entity.orm
+package org.beangle.commons.jpa.bind
 
 import java.util.List
 
 import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.entity.Entity
 import scala.collection.JavaConversions._
-import org.beangle.commons.entity.orm.EntityPersistConfig._
+import org.beangle.commons.jpa.bind.EntityPersistConfig._
 
 abstract class AbstractPersistModule {
 

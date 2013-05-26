@@ -16,43 +16,40 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.entity.meta
+package org.beangle.commons.jpa.bean
 
+import javax.persistence.CascadeType
+import javax.persistence.FetchType
+import javax.persistence.ManyToOne
+import javax.persistence.MappedSuperclass
+import javax.persistence.OneToMany
+import javax.persistence.OrderBy
+import javax.validation.constraints.NotNull
+import javax.validation.constraints.Size
+import scala.collection.mutable
+import org.beangle.commons.entity.Hierarchical
 import org.beangle.commons.entity.Entity
-import org.beangle.commons.bean.PropertyUtils
 /**
  * <p>
- * EntityContext interface.
+ * Hierarchical interface.
  * </p>
  * 
  * @author chaostone
  * @version $Id: $
  */
-trait EntityContext {
-  /**
-   * 根据实体名查找实体类型
-   * 
-   * @param name a {@link java.lang.String} object.
-   * @return a {@link org.beangle.commons.entity.metadata.Type} object.
-   */
-  def getType(clazz:Class[_]):Option[EntityType]
+@MappedSuperclass
+trait HierarchicalBean[T <: Entity[_]] extends Hierarchical[T]{
 
-  def newInstance[T <: Entity[_]](entityClass:Class[T]):Option[T] = {
-    getType(entityClass) match{
-      case Some(t) => Some(t.newInstance().asInstanceOf[T])
-      case _ => None
-    }
-  }
+  /** index no */
+  @Size(max = 30)
+  @NotNull
+  var indexno: String
 
-  def newInstance[T <: Entity[ID],ID](entityClass:Class[T],id:ID):Option[T] = {
-    getType(entityClass) match{
-      case Some(t)=> {
-        val obj= t.newInstance()
-        PropertyUtils.setProperty(obj, t.idName, id)
-        Some(obj.asInstanceOf[T])
-      }
-      case _ => None
-    }
-  }
+  /** 父级菜单 */
+  @ManyToOne(fetch = FetchType.LAZY)
+  var parent: Option[T]
 
+  @OneToMany(mappedBy = "parent",cascade = Array(CascadeType.ALL))
+  @OrderBy("indexno")
+  var children: mutable.Seq[T]= new mutable.ListBuffer[T]
 }

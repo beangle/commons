@@ -19,7 +19,6 @@
 package org.beangle.commons.collection
 
 import org.beangle.commons.lang.Strings
-import scala.beans.{ BeanProperty, BooleanBeanProperty }
 import scala.collection.mutable.ListBuffer
 /**
  * 排序
@@ -29,9 +28,9 @@ import scala.collection.mutable.ListBuffer
  */
 object Order {
   /**
-   * Constant <code>ORDER_STR="orderBy"</code>
+   * Constant <code>OrderStr="orderBy"</code>
    */
-  val ORDER_STR = "orderBy"
+  val OrderStr = "orderBy"
 
   /**
    * <p>
@@ -65,8 +64,8 @@ object Order {
     if (null == orders || orders.isEmpty) return ""
     val buf = new StringBuilder("order by ")
     for (order <- orders) {
-      if (order.isAscending) buf.append(order.getProperty).append(',')
-      else buf.append(order.getProperty).append(" desc,")
+      if (order.ascending) buf.append(order.property).append(',')
+      else buf.append(order.property).append(" desc,")
     }
     buf.substring(0, buf.length - 1).toString
   }
@@ -101,7 +100,24 @@ object Order {
       orders.toList
     }
   }
+
+  private def analysis(orderStr:String):(String,Boolean)={
+    if (Strings.contains(orderStr, ",")) throw new RuntimeException("user parser for multiorder")
+
+    var ascending=false
+    var property=orderStr
+    if (Strings.contains(property, " desc")) {
+      ascending = false
+      property = Strings.substringBefore(property, " desc")
+    } else {
+      property = if (Strings.contains(property, " asc")) Strings.substringBefore(property, " asc") else property
+      ascending = true
+    }
+    property = property.trim()
+    (property,ascending)
+  }
 }
+
 
 /**
  * 排序
@@ -109,9 +125,7 @@ object Order {
  * @author chaostone
  * @version $Id: $
  */
-class Order(@BeanProperty var property: String, @BooleanBeanProperty var ascending: Boolean) {
-
-  private var lowerCase: Boolean = _
+class Order(val property: String,val ascending: Boolean,val lowerCase:Boolean =false) {
 
   /**
    * <p>
@@ -121,30 +135,7 @@ class Order(@BeanProperty var property: String, @BooleanBeanProperty var ascendi
    * @param property a {@link java.lang.String} object.
    */
   def this(property: String) {
-    this(property, false);
-
-    if (Strings.contains(property, ",")) throw new RuntimeException("user parser for multiorder")
-
-    if (Strings.contains(property, " desc")) {
-      this.ascending = false
-      this.property = Strings.substringBefore(property, " desc")
-    } else {
-      this.property = if (Strings.contains(property, " asc")) Strings.substringBefore(property, " asc") else property
-      this.ascending = true
-    }
-    this.property = this.property.trim()
-  }
-
-  /**
-   * <p>
-   * ignoreCase.
-   * </p>
-   *
-   * @return a {@link org.beangle.commons.collection.Order} object.
-   */
-  def ignoreCase(): Order = {
-    lowerCase = true
-    this
+    this(Order.analysis(property)._1,Order.analysis(property)._2)
   }
 
   /**

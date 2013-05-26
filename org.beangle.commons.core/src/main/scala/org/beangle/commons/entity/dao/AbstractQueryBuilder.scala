@@ -18,61 +18,46 @@
  */
 package org.beangle.commons.entity.dao
 
-import org.beangle.commons.entity.Entity
+import org.beangle.commons.collection.page.PageLimit
 
 /**
- * <p>
- * Dao trait
- * [/p>
+ * 抽象查询
  * 
  * @author chaostone
  * @version $Id: $
  */
-trait Dao[T <: Entity[ID], ID] {
+abstract class AbstractQueryBuilder[T] extends QueryBuilder[T] {
+
+  /** query 查询语句 */
+  protected var queryStr:String
+
+  /** count 计数语句 */
+  protected var countStr:String
+
+  /** 分页 */
+  protected var limit:PageLimit
+
+  /** 参数 */
+  var params:Map[String, Any]
+
+  /** 缓存查询结果 */
+  protected var cacheable = false;
 
   /**
-   * get T by id.
+   * <p>
+   * toQueryString.
+   * </p>
+   * 
+   * @return a {@link java.lang.String} object.
    */
-  def get(id:ID):T
+  def  toQueryString:String
 
   /**
-   * find T by id.
+   * <p>
+   * toCountString.
+   * </p>
+   * 
+   * @return a {@link java.lang.String} object.
    */
-  def find(id:ID):Option[T]
-
-  /**
-   * search T by id.
-   */
-  def find(first:ID,ids:ID*):  List[T]
-
-  /**
-   * save or update entities
-   */
-  def saveOrUpdate(first:T,entities:T*)
-
-  /**
-   * save or update entities
-   */
-  def saveOrUpdate(entities:collection.Seq[T]);
-
-  /**
-   * remove entities.
-   */
-  def remove(entities:collection.Seq[T]);
-
-  /**
-   * remove entities.
-   */
-  def remove(first:T,others:T*);
-
-  /**
-   * remove entities by id
-   */
-  def remove(id:ID,ids:ID*);
-
-  /**
-   * get entity type
-   */
-  def entityClass:Class[T];
-
+  def toCountString:String
 }

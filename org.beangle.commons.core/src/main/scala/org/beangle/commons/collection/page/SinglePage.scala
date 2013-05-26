@@ -32,60 +32,27 @@ import scala.collection.JavaConversions._
  * @author chaostone
  * @version $Id: $
  */
-class SinglePage[E] extends Page[E] {
+class SinglePage[E](val pageNo: Int,val pageSize: Int,val total: Int,val items: List[E]) extends Page[E] {
 
-  @BeanProperty
-  var pageNo: Int = _
+  def firstPageNo: Int = 1
 
-  @BeanProperty
-  var pageSize: Int = _
-
-  @BeanProperty
-  var total: Int = _
-
-  @BeanProperty
-  var items: List[E] = _
-
-  /**
-   * <p>
-   * Constructor for SinglePage.
-   * </p>
-   *
-   * @param pageNo a int.
-   * @param pageSize a int.
-   * @param total a int.
-   * @param dataItems a {@link java.util.List} object.
-   */
-  def this(pageNo: Int,
-    pageSize: Int,
-    total: Int,
-    dataItems: List[E]) {
-    this()
-    this.items = dataItems
-    this.pageSize = if (pageSize < 1) 2 else pageSize
-    this.pageNo = if (pageNo < 1) 1 else pageNo
-    this.total = total
-  }
-
-  def getFirstPageNo(): Int = 1
-
-  def getMaxPageNo(): Int = {
-    if (getTotal < getPageSize) {
+  def maxPageNo: Int = {
+    if (total < pageSize) {
       1
     } else {
-      val remainder = getTotal % getPageSize
-      val quotient = getTotal / getPageSize
+      val remainder = total % pageSize
+      val quotient = total / pageSize
       if ((0 == remainder)) quotient else (quotient + 1)
     }
   }
 
-  def getNextPageNo(): Int = {
-    if (getPageNo == getMaxPageNo) getMaxPageNo
-    else getPageNo + 1
+  def nextPageNo: Int = {
+    if (pageNo == maxPageNo) maxPageNo
+    else pageNo + 1
   }
-  def getPreviousPageNo(): Int = {
-    if (getPageNo == 1) getPageNo
-    else getPageNo - 1
+  def previousPageNo(): Int = {
+    if (pageNo == 1) pageNo
+    else pageNo - 1
   }
 
   def contains(obj: AnyRef): Boolean = items.contains(obj)
@@ -114,7 +81,7 @@ class SinglePage[E] extends Page[E] {
 
   def toArray[T](datas: Array[T with Object]) = items.toArray[T](datas)
 
-  def hasNext(): Boolean = getMaxPageNo > pageNo
+  def hasNext(): Boolean = maxPageNo > pageNo
 
   def hasPrevious(): Boolean = pageNo > 1
 

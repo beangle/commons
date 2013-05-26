@@ -19,23 +19,56 @@
 package org.beangle.commons.collection.page
 
 import java.util.List
-import Page._
-//remove if not needed
-import scala.collection.JavaConversions._
 
 object Page {
 
   /**
-   Constant <code>DEFAULT_PAGE_NUM=1</code>
-   */
-  val DEFAULT_PAGE_NUM = 1
+    Constant <code>DefaultPageNo=1</code>
+    */
+  val DefaultPageNo = 1
 
   /**
-   Constant <code>DEFAULT_PAGE_SIZE=20</code>
-   */
-  val DEFAULT_PAGE_SIZE = 20
+    Constant <code>DefaultPageSize=20</code>
+    */
+  val DefaultPageSize = 20
+
+  def empty[T](): Page[T] = EmptyPage.asInstanceOf[Page[T]]
+
+  private object EmptyPage extends java.util.AbstractList[Any] with Page[Any] {
+
+    def firstPageNo: Int = 0
+
+    def maxPageNo: Int = 0
+
+    def nextPageNo: Int = 0
+
+    def pageNo: Int = 0
+
+    def pageSize: Int = 0
+
+    def previousPageNo: Int = 0
+
+    def total: Int = 0
+
+    def hasNext: Boolean = false
+
+    def hasPrevious: Boolean = false
+
+    def next(): Page[Any] = this
+
+    def previous(): Page[Any] = this
+
+    def get(index: Int): Any = null.asInstanceOf[Any]
+
+    def size(): Int = 0
+
+    def moveTo(pageNo: Int): Page[Any] = this
+
+    def items: List[Any] = new java.util.ArrayList[Any](0)
+  }
 }
 
+import Page._
 /**
  * 分页对象
  *
@@ -49,49 +82,49 @@ trait Page[E] extends List[E] {
    *
    * @return 1
    */
-  def getFirstPageNo(): Int
+  def firstPageNo: Int
 
   /**
    * 最大页码
    *
    * @return a int.
    */
-  def getMaxPageNo(): Int
+  def maxPageNo: Int
 
   /**
    * 下一页页码
    *
    * @return a int.
    */
-  def getNextPageNo(): Int
+  def nextPageNo: Int
 
   /**
    * 上一页页码
    *
    * @return a int.
    */
-  def getPreviousPageNo(): Int
+  def previousPageNo: Int
 
   /**
    * 当前页码
    *
    * @return a int.
    */
-  def getPageNo(): Int
+  def pageNo: Int
 
   /**
    * 每页大小
    *
    * @return a int.
    */
-  def getPageSize(): Int
+  def pageSize: Int
 
   /**
    * 数据总量
    *
    * @return a int.
    */
-  def getTotal(): Int
+  def total: Int
 
   /**
    * 下一页
@@ -136,5 +169,5 @@ trait Page[E] extends List[E] {
    *
    * @return a {@link java.util.List} object.
    */
-  def getItems(): List[E]
+  def items: List[E]
 }

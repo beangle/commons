@@ -16,30 +16,21 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.entity
+package org.beangle.commons.jpa.bean
 
-import java.util.Date
-import javax.validation.constraints.NotNull
-
+import org.beangle.commons.entity.Enabled
 /**
- * 有时效性的实体
- * </p>
- * 指有具体生效时间和失效时间的实体。一般生效时间不能为空，失效时间可以为空。
- * 具体时间采用时间时间格式便于比对。
+ * 能够启用和禁用的实体
  * 
  * @author chaostone
- * @version $Id: $
+ * @version $Id: Jun 25, 2011 5:05:07 PM chaostone $
  */
-trait TemporalBean {
+trait EnabledBean extends Enabled {
 
   /**
-   * 获得生效时间
+   * 查询是否启用
+   * 
+   * @return 是否启用
    */
-  @NotNull
-  var effectiveAt:Date;
-
-  /**
-   * 获得失效时间
-   */
-  var invalidAt:Date;
+  var enabled:Boolean;
 }

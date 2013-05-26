@@ -19,8 +19,19 @@
 package org.beangle.commons.collection.page
 
 import java.util.List
-import scala.beans.BeanProperty
 
+object PagedList{
+  private def calcMaxPageNo(pageSize:Int,total:Int) :Int = {
+    if (total <= pageSize) {
+       1
+    } else {
+      val remainder = total % pageSize
+      val quotient = total / pageSize
+      if ((0 == remainder)) quotient else (quotient + 1)
+    }
+  }
+}
+import PagedList._
 /**
  * <p>
  * PagedList class.
@@ -31,22 +42,11 @@ import scala.beans.BeanProperty
  */
 class PagedList[E](val datas: List[E], limit: PageLimit) extends PageWapper[E]() {
 
-  @BeanProperty
-  var pageNo: Int = limit.getPageNo - 1
+  var pageNo: Int = limit.pageNo - 1
 
-  @BeanProperty
-  var maxPageNo: Int = _
+  val maxPageNo: Int = calcMaxPageNo(datas.size,limit.pageSize)
 
-  @BeanProperty
-  var pageSize: Int = limit.getPageSize
-
-  if (datas.size <= pageSize) {
-    this.maxPageNo = 1
-  } else {
-    val remainder = datas.size % pageSize
-    val quotient = datas.size / pageSize
-    this.maxPageNo = if ((0 == remainder)) quotient else (quotient + 1)
-  }
+  val pageSize: Int = limit.pageSize
 
   this.next()
 
@@ -69,7 +69,7 @@ class PagedList[E](val datas: List[E], limit: PageLimit) extends PageWapper[E]()
    *
    * @return a int.
    */
-  def getTotal(): Int = datas.size
+  def total: Int = datas.size
 
   /**
    * <p>
@@ -78,7 +78,7 @@ class PagedList[E](val datas: List[E], limit: PageLimit) extends PageWapper[E]()
    *
    * @return a int.
    */
-  def getNextPageNo(): Int = getPage.getNextPageNo
+  def nextPageNo: Int = page.nextPageNo
 
   /**
    * <p>
@@ -87,7 +87,7 @@ class PagedList[E](val datas: List[E], limit: PageLimit) extends PageWapper[E]()
    *
    * @return a int.
    */
-  def getPreviousPageNo(): Int = getPage.getPreviousPageNo
+  def previousPageNo: Int = page.previousPageNo
 
   /**
    * <p>
@@ -96,7 +96,7 @@ class PagedList[E](val datas: List[E], limit: PageLimit) extends PageWapper[E]()
    *
    * @return a boolean.
    */
-  def hasNext(): Boolean = getPageNo < getMaxPageNo
+  def hasNext: Boolean = pageNo < maxPageNo
 
   /**
    * <p>
@@ -105,7 +105,7 @@ class PagedList[E](val datas: List[E], limit: PageLimit) extends PageWapper[E]()
    *
    * @return a boolean.
    */
-  def hasPrevious(): Boolean = getPageNo > 1
+  def hasPrevious: Boolean =pageNo > 1
 
   /**
    * <p>
@@ -136,7 +136,7 @@ class PagedList[E](val datas: List[E], limit: PageLimit) extends PageWapper[E]()
     val toIndex = pageNo * pageSize
     val newPage = new SinglePage[E](pageNo, pageSize, datas.size, datas.subList((pageNo - 1) * pageSize, 
       if ((toIndex < datas.size)) toIndex else datas.size))
-    setPage(newPage)
+    this.page=newPage
     this
   }
 }

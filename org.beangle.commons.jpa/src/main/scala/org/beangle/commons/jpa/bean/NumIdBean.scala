@@ -16,16 +16,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.entity.bean
+package org.beangle.commons.jpa.bean
 
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass
 import org.beangle.commons.entity.Entity
 
 @MappedSuperclass
-@SerialVersionUID(-6898498932182877104L)
-class StringIdBean extends Entity[String]{
+@SerialVersionUID(-7530111699332363124L)
+trait NumIdBean[ID] extends Entity[ID]{
 
-  @Id 
-  var id: String=_
+  @Id
+  @GeneratedValue(generator = "table_sequence")
+  var id:ID = _
 }

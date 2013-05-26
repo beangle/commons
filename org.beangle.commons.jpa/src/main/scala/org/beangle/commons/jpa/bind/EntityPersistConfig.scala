@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.entity.orm
+package org.beangle.commons.jpa.bind
 
 import java.util.Collection
 import java.util.Map
@@ -26,6 +26,7 @@ import javax.persistence.Entity
 import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.Assert
 import org.beangle.commons.lang.Strings
+import org.beangle.commons.jpa.util.Jpas
 
 object EntityPersistConfig{
 
@@ -41,20 +42,13 @@ object EntityPersistConfig{
 
   }
 
-  object EntityDefinition{
-    def findEntityName(clazz:Class[_]):String = {
-      val annotation = clazz.getAnnotation(classOf[javax.persistence.Entity])
-      Assert.notNull(annotation);
-      if (Strings.isNotBlank(annotation.name)) annotation.name else clazz.getName
-    }
-  }
 
   final class EntityDefinition(val clazz:Class[_],val entityName:String) {
     var cacheUsage:String=_
     var cacheRegion:String=_
 
     def this(clazz:Class[_]) {
-      this(clazz,EntityDefinition.findEntityName(clazz))     
+      this(clazz,Jpas.findEntityName(clazz))     
     }
 
     def cache(region:String, usage:String) :this.type = {

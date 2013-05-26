@@ -16,63 +16,31 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.entity.dao
+package org.beangle.commons.jpa.bean
 
-import org.beangle.commons.entity.Entity
+import java.util.Date
+import org.beangle.commons.entity.Updated
+import javax.validation.constraints.NotNull
 
 /**
  * <p>
- * Dao trait
- * [/p>
+ * Contain create and update time interface.
+ * </p>
  * 
  * @author chaostone
  * @version $Id: $
  */
-trait Dao[T <: Entity[ID], ID] {
+trait UpdatedBean extends Updated{
 
   /**
-   * get T by id.
+   * Created at.
    */
-  def get(id:ID):T
+  @NotNull
+  var createdAt:Date;
 
   /**
-   * find T by id.
+   * Updated At
    */
-  def find(id:ID):Option[T]
-
-  /**
-   * search T by id.
-   */
-  def find(first:ID,ids:ID*):  List[T]
-
-  /**
-   * save or update entities
-   */
-  def saveOrUpdate(first:T,entities:T*)
-
-  /**
-   * save or update entities
-   */
-  def saveOrUpdate(entities:collection.Seq[T]);
-
-  /**
-   * remove entities.
-   */
-  def remove(entities:collection.Seq[T]);
-
-  /**
-   * remove entities.
-   */
-  def remove(first:T,others:T*);
-
-  /**
-   * remove entities by id
-   */
-  def remove(id:ID,ids:ID*);
-
-  /**
-   * get entity type
-   */
-  def entityClass:Class[T];
-
+  @NotNull
+  var updatedAt:Date;
 }

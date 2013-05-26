@@ -23,7 +23,6 @@ import java.util.Iterator
 import java.util.List
 import java.util.ListIterator
 import scala.reflect.ClassTag
-import scala.beans.BeanProperty
 
 /**
  * <p>
@@ -35,7 +34,6 @@ import scala.beans.BeanProperty
  */
 abstract class PageWapper[E] extends Page[E] {
 
-  @BeanProperty
   var page: Page[E] = _
 
   /**
@@ -45,7 +43,7 @@ abstract class PageWapper[E] extends Page[E] {
    *
    * @return a int.
    */
-  def getFirstPageNo(): Int = 1
+  def firstPageNo: Int = 1
 
   /**
    * <p>
@@ -54,7 +52,7 @@ abstract class PageWapper[E] extends Page[E] {
    *
    * @return a {@link java.util.List} object.
    */
-  def getItems(): List[E] = page.getItems
+  def items: List[E] = page.items
 
   /**
    * <p>
@@ -106,7 +104,7 @@ abstract class PageWapper[E] extends Page[E] {
    *
    * @return a boolean.
    */
-  def isEmpty(): Boolean = page.isEmpty
+  def isEmpty: Boolean = page.isEmpty
 
   /**
    * <p>
@@ -115,7 +113,7 @@ abstract class PageWapper[E] extends Page[E] {
    *
    * @return a int.
    */
-  def size(): Int = page.size
+  def size: Int = page.size
 
   /**
    * <p>
