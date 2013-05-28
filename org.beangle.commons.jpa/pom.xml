@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.beangle.commons</groupId>
   <artifactId>beangle-commons-jpa</artifactId>
-  <packaging>jar<!--bundle--></packaging>
+  <packaging>jar</packaging>
   <name>Beangle Commons Jpa</name>
 
   <properties>

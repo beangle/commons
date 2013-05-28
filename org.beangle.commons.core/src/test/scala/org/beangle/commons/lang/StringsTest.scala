@@ -23,8 +23,6 @@ import org.testng.Assert.assertEquals
 import org.testng.Assert.assertFalse
 import org.testng.Assert.assertTrue
 import org.testng.annotations.Test
-//remove if not needed
-import scala.collection.JavaConversions._
 
 @Test
 class StringsTest {
@@ -41,6 +39,7 @@ class StringsTest {
     assertEquals(unCamel("MYCOUNT", '-'), "mycount")
     assertEquals(unCamel("parent_id", '_'), "parent_id")
     assertEquals(unCamel("parentId", '_'), "parent_id")
+    assertEquals(unCamel("scoreA", '_'), "score_a")
   }
 
   def testSplit2() {

@@ -20,13 +20,10 @@ package org.beangle.commons.lang
 
 import org.testng.Assert.assertTrue
 import org.testng.annotations.Test
-//remove if not needed
-import scala.collection.JavaConversions._
-
 @Test
 class ObjectsTest {
 
   def testNullEquals() {
-    assertTrue(Objects.==(null, null))
+    assertTrue(Objects.equals(null, null))
   }
 }

@@ -24,14 +24,14 @@ import org.testng.Assert.assertFalse
 import org.testng.Assert.assertTrue
 import org.testng.annotations.Test
 
+@Test
 class OrderTest {
 
-  @Test
+
   def testToString1() {
     assertEquals(Order.toSortString(List(new Order(" teachPlan.grade desc "),new Order(" teachPlan.major.code "))), "order by teachPlan.grade desc,teachPlan.major.code")
   }
 
-  @Test
   def testToString() {
     assertEquals(Order.toSortString(List(new Order("id", false),Order.asc("name"))), "order by id desc,name")
   }
@@ -39,8 +39,8 @@ class OrderTest {
   def testParserOrder() {
     val orders = Order.parse("std.code asc")
     for (order <- orders) {
-      assertTrue(order.isAscending)
-      assertEquals(order.getProperty, "std.code")
+      assertTrue(order.ascending)
+      assertEquals(order.property, "std.code")
     }
   }
 
@@ -49,14 +49,14 @@ class OrderTest {
     val sorts = Order.parse("activity.time.year desc,activity.time.validWeeksNum,activity.time.weekId desc")
     assertEquals(sorts.size, 3)
     var order = sorts(0).asInstanceOf[Order]
-    assertEquals(order.getProperty, "activity.time.year")
-    assertFalse(order.isAscending)
+    assertEquals(order.property, "activity.time.year")
+    assertFalse(order.ascending)
     order = sorts(1).asInstanceOf[Order]
-    assertEquals(order.getProperty, "activity.time.validWeeksNum")
-    assertTrue(order.isAscending)
+    assertEquals(order.property, "activity.time.validWeeksNum")
+    assertTrue(order.ascending)
     order = sorts(2).asInstanceOf[Order]
-    assertEquals(order.getProperty, "activity.time.weekId")
-    assertFalse(order.isAscending)
+    assertEquals(order.property, "activity.time.weekId")
+    assertFalse(order.ascending)
   }
 
   @Test
@@ -64,7 +64,7 @@ class OrderTest {
     val sorts = Order.parse("(case when ware.price is null then 0 else ware.price end) desc")
     assertEquals(sorts.size, 1)
     val order = sorts(0).asInstanceOf[Order]
-    assertEquals(order.getProperty, "(case when ware.price is null then 0 else ware.price end)")
-    assertFalse(order.isAscending)
+    assertEquals(order.property, "(case when ware.price is null then 0 else ware.price end)")
+    assertFalse(order.ascending)
   }
 }
