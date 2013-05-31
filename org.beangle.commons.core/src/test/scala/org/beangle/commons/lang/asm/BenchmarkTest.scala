@@ -21,46 +21,45 @@ package org.beangle.commons.lang.asm
 import java.lang.reflect.Method
 import org.beangle.commons.lang.testbean.TestBean
 import org.beangle.commons.lang.time.Stopwatch
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.testng.annotations.Test
 import BenchmarkTest._
-//remove if not needed
-import scala.collection.JavaConversions._
 
 object BenchmarkTest {
 
   private val logger = LoggerFactory.getLogger(classOf[BenchmarkTest])
 }
 
-@Test
-class BenchmarkTest {
+class BenchmarkTest   extends FunSpec with ShouldMatchers{
 
-  var testCount: Int = 1
+  val testCount = 1000
 
-  def testJdkReflect() {
-    logger.debug("testJdkReflect...")
-    val someObject = new TestBean()
-    val method = classOf[TestBean].getMethod("setName", classOf[String])
-    for (i <- 0 until 5) {
-      val sw = new Stopwatch(true)
-      for (j <- 0 until testCount) {
-        method.invoke(someObject, "Unmi")
+  describe("Benchmark test and get"){
+    it("JdkReflect") {
+      val someObject = new TestBean()
+      val method = classOf[TestBean].getMethod("setName", classOf[String])
+      for (i <- 0 until 5) {
+        val sw = new Stopwatch(true)
+        for (j <- 0 until testCount) {
+          method.invoke(someObject, "Unmi")
+        }
+        logger.info(i+"'s reflect using :"+sw)
       }
-      logger.debug(sw + " ")
     }
-  }
 
-  def testReflectAsm() {
-    logger.debug("testReflectAsm...")
-    val someObject = new TestBean()
-    val access = Mirror.get(classOf[TestBean])
-    for (i <- 0 until 5) {
-      val begin = System.currentTimeMillis()
-      for (j <- 0 until testCount) {
-        access.invoke(someObject, access.getIndex("setName"), "Unmi")
+    it("ReflectAsm") {
+      val someObject = new TestBean()
+      val access = Mirror.get(classOf[TestBean])
+      val idx = access.getIndex("setName")
+      for (i <- 0 until 5) {
+        val sw = new Stopwatch(true)
+        for (j <- 0 until testCount) {
+           access.invoke(someObject, idx,"Unmi")
+        }
+        logger.info(i+"'s asm using :"+sw)
       }
-      logger.debug(System.currentTimeMillis() - begin + " ")
     }
   }
 }

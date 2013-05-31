@@ -93,15 +93,12 @@ class String2DateConverter extends StringConverterFactory[String, Date] {
     } else {
       if (dateStr.length >= 10) dateStr else if (dateStr.length < 8) throw new IllegalArgumentException() else {
         val value = dateStr.toCharArray()
-        var dayIndex = -1
-        if (value(6) == '-') dayIndex = 7
-        if (value(7) == '-') dayIndex = 8
+        val dayIndex = if (value(6) == '-') 7 else {if (value(7) == '-')  8 else -1}
         if (dayIndex < 0) throw new IllegalArgumentException()
         val sb = new StringBuilder(10)
-        sb.append(value, 0, 5)
-        if (dayIndex - 5 < 3) sb.append('0').append(value, 5, 2) else sb.append(value, 5, 3)
-        if (value.length - dayIndex < 2) sb.append('0').append(value, dayIndex, 1) else sb.append(value,
-          dayIndex, 2)
+        sb.appendAll(value, 0, 5)
+        if (dayIndex - 5 < 3) sb.append('0').appendAll(value, 5, 2) else sb.appendAll(value, 5, 3)
+        if (value.length - dayIndex < 2) sb.append('0').appendAll(value, dayIndex, 1) else sb.appendAll(value,dayIndex, 2)
         sb.toString
       }
     }

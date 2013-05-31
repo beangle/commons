@@ -17,23 +17,20 @@
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.lang.conversion.converter
-
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 import java.lang.reflect.InvocationTargetException
 import org.beangle.commons.lang.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.testbean.TestEnum
-import org.testng.Assert
-import org.testng.annotations.Test
-//remove if not needed
-import scala.collection.JavaConversions._
-
 /**
  * @author chaostone
  * @since 3.0.0
  */
-@Test
-class EnumConverterTest {
+class EnumConverterTest   extends FunSpec with ShouldMatchers{
 
-  def testConvertEnum() {
-    DefaultConversion.Instance.convert("Private", classOf[TestEnum.Val])
+  describe("EnumConverter"){
+    it("Convert Enum"){
+      DefaultConversion.Instance.convert("Private", classOf[TestEnum.Val])
+    }
   }
 }

@@ -19,88 +19,85 @@
 package org.beangle.commons.lang
 
 import org.beangle.commons.lang.Strings._
-import org.testng.Assert.assertEquals
-import org.testng.Assert.assertFalse
-import org.testng.Assert.assertTrue
-import org.testng.annotations.Test
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-@Test
-class StringsTest {
+class StringsTest extends FunSpec with ShouldMatchers{
 
-  def testCount() {
-    val targetStr = "11001101101111"
-    val searchStr = "11"
-    assertEquals(count(targetStr, searchStr), 5)
-  }
+  describe("Strings"){
+    it ("Count target string"){
+      count("11001101101111", "11") should be (5)
+    }
 
-  def testUnCamel() {
-    assertEquals(unCamel("MyCountInI_cbc", '-'), "my-count-ini_cbc")
-    assertEquals(unCamel("MyCounT", '_'), "my_count")
-    assertEquals(unCamel("MYCOUNT", '-'), "mycount")
-    assertEquals(unCamel("parent_id", '_'), "parent_id")
-    assertEquals(unCamel("parentId", '_'), "parent_id")
-    assertEquals(unCamel("scoreA", '_'), "score_a")
-  }
+    it("UnCamel words"){
+      unCamel("MyCountInI_cbc", '-') should equal  ("my-count-ini_cbc")
+      unCamel("MyCounT", '_') should equal ("my_coun_t")
+      unCamel("MYCOUNT", '-') should equal ("mycount")
+      unCamel("parent_id", '_') should equal ("parent_id")
+      unCamel("parentId", '_') should equal ("parent_id")
+      unCamel("scoreA", '_') should equal ("score_a")
+    }
 
-  def testSplit2() {
-    val target = " abc ,; def ,;; ghi\r\n opq"
-    val codes = split(target)
-    assertEquals(codes.length, 4)
-    assertEquals(codes(3), "opq")
-  }
+    it("Split with multi separator"){
+      val target = " abc ,; def ,;; ghi\r\n opq"
+      val codes = split(target)
+      codes.length should be  (4)
+      codes(3) should equal ("opq")
+    }
 
-  def testIsEqualSeq() {
-    val first = "123,4546,"
-    val second = ",4546,123"
-    assertTrue(isEqualSeq(first, second))
-    assertTrue(isEqualSeq(first, second, ","))
-  }
+    it ("IsEqualSeq compare different string seq") {
+      val first = "123,4546,"
+      val second = ",4546,123"
+      isEqualSeq(first, second) should be (true)
+      isEqualSeq(first, second, ",") should be (true)
+    }
 
-  def testMergeSeq() {
-    val first = ",1,2,"
-    val second = "3,"
-    val third = ""
-    val forth: String = null
-    assertTrue(isEqualSeq(mergeSeq(first, second), ",1,2,3,"))
-    assertTrue(isEqualSeq(mergeSeq(first, second), ",1,2,3,"))
-    assertTrue(isEqualSeq(mergeSeq(first, third), ",1,2,"))
-    assertTrue(isEqualSeq(mergeSeq(first, forth), ",1,2,"))
-  }
+    it("MergeSeq merge to seprated seq by ,") {
+      val first = ",1,2,"
+      val second = "3,"
+      val third = ""
+      val forth: String = null
+      isEqualSeq(mergeSeq(first, second), ",1,2,3,") should be (true)
+      isEqualSeq(mergeSeq(first, second), ",1,2,3,") should be (true)
+      isEqualSeq(mergeSeq(first, third), ",1,2,") should be (true)
+      isEqualSeq(mergeSeq(first, forth), ",1,2,")should be (true)
+    }
 
-  def testSplitNumSeq() {
-    val a = "1-2,3,5-9,3,"
-    val nums = splitNumSeq(a)
-    assertEquals(nums.length, 8)
-  }
+    it("SplitNum int array") {
+      val a = "1-2,3,5-9,3,"
+      val nums = splitNumSeq(a)
+      nums.length should be (8)
+    }
 
-  def testMisc() {
-    assertEquals(",2,", subtractSeq("1,2", "1"))
-    assertFalse(isEqualSeq(",2005-9,", ",2005-9,2006-9,"))
-  }
+    it("Misc") {
+      subtractSeq("1,2", "1") should equal (",2,")
+      isEqualSeq(",2005-9,", ",2005-9,2006-9,") should be (false)
+    }
 
-  def testRepeat() {
-    assertEquals("", repeat("ad", 0))
-    assertEquals("adadad", repeat("ad", 3))
-  }
+    it("Repeat string zero or greater") {
+      repeat("ad", 0) should equal ("")
+      repeat("ad", 3) should equal ("adadad")
+    }
 
-  def testSplit() {
-    assertEquals(Array("a", "b", "c"), split("a.b.c.", '.'))
-    assertEquals(Array("a", "b", "c"), split(".a..b.c", '.'))
-    assertEquals(Array("a:b:c"), split("a:b:c", '.'))
-    assertEquals(Array(), split("", null))
-    assertEquals(Array("abc", "def"), split("abc def", null))
-    assertEquals(Array("abc", "def"), split("abc def", " "))
-    assertEquals(Array("ab", "cd", "ef"), split("ab:cd:ef", ":"))
-  }
+    it("Split into array"){
+      split("a.b.c.", '.') should equal (Array("a", "b", "c"))
+      split(".a..b.c", '.') should equal (Array("a", "b", "c"))
+      split("a:b:c", '.')   should equal  (Array("a:b:c"))
+      split("", null) should equal (Array())
+      split("abc def", null) should equal (Array("abc", "def"))
+      split("abc def", " ") should equal (Array("abc", "def"))
+      split("ab:cd:ef", ":") should equal (Array("ab", "cd", "ef"))
+    }
 
-  def testReplace() {
-    assertEquals(replace(null, "x", null), null)
-    assertEquals(replace("", "dd", "xx"), "")
-    assertEquals(replace("any", null, "xx"), "any")
-    assertEquals(replace("any", "d", null), "any")
-    assertEquals(replace("any", "", "dd"), "any")
-    assertEquals(replace("aba", "a", null), "aba")
-    assertEquals(replace("aba", "a", ""), "b")
-    assertEquals(replace("aba", "a", "z"), "zbz")
+    it("Replace target with null or string"){
+      replace(null, "x", null) should be (null)
+      replace("", "dd", "xx") should equal ("")
+      replace("any", null, "xx") should equal ("any")
+      replace("any", "d", null) should equal("any")
+      replace("any", "", "dd") should equal("any")
+      replace("aba", "a", null) should equal("aba")
+      replace("aba", "a", "") should equal("b")
+      replace("aba", "a", "z")  should equal("zbz")
+    }
   }
 }

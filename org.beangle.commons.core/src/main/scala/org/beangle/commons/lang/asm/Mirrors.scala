@@ -18,13 +18,10 @@
  */
 package org.beangle.commons.lang.asm
 
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.conversion.Conversion
 import org.beangle.commons.lang.conversion.impl.ConvertUtils
 import org.beangle.commons.lang.reflect.ClassInfo
 import org.beangle.commons.lang.reflect.MethodInfo
-//remove if not needed
-import scala.collection.JavaConversions._
 
 object Mirrors {
 
@@ -79,8 +76,8 @@ object Mirrors {
 
   class NoneMirror extends Mirror {
 
-    this.classInfo = new ClassInfo(CollectUtils.newArrayList[MethodInfo]())
+    this.classInfo = new ClassInfo(Nil)
 
-    override def invoke(obj: AnyRef, methodIndex: Int, args: Any*): Any = null
+    override def invoke(obj: AnyRef, methodIndex: Int, args: Array[Any]): Any = null
   }
 }

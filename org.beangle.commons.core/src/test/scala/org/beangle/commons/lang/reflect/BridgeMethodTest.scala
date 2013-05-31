@@ -19,19 +19,18 @@
 package org.beangle.commons.lang.reflect
 
 import java.lang.reflect.Method
-import org.testng.Assert
-import org.testng.annotations.Test
-//remove if not needed
-import scala.collection.JavaConversions._
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-@Test
-class BridgeMethodTest {
+class BridgeMethodTest extends FunSpec with ShouldMatchers{
 
-  def testBridgeMethods() {
-    for (m <- classOf[Dog].getMethods if m.getName == "getAge" && null == m.getReturnType) {
-      if (m.getReturnType == classOf[Integer]) m.isBridge else if (m.getReturnType == classOf[Number]) {
-        m.isBridge
-        m.getDeclaringClass
+  describe("Reflection class bridge method"){
+    it ("Find bridge methods") {
+      for (m <- classOf[Dog].getMethods if m.getName == "getAge" && null == m.getReturnType) {
+        if (m.getReturnType == classOf[Integer]) m.isBridge else if (m.getReturnType == classOf[Number]) {
+          m.isBridge
+          m.getDeclaringClass
+        }
       }
     }
   }

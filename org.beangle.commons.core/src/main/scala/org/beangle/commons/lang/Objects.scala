@@ -220,7 +220,7 @@ object Objects {
      * name/value pair will not be added.
      */
     def add(name: String, value: AnyRef): ToStringBuilder = {
-      addHolder(value).builder.append(name).append('=').append(value)
+      values += new ValueHolder(name+"="+value,null!=value)
       this
     }
 
@@ -232,28 +232,12 @@ object Objects {
       var needsSeparator = false
       for (valueHolder <- values if !omitnull || !valueHolder.isNull) {
         if (needsSeparator) builder.append(", ") else needsSeparator = true
-        builder.append(valueHolder.builder)
+        builder.append(valueHolder.value)
       }
       builder.append('}').toString
     }
 
-    private def addHolder(): ValueHolder = {
-      val valueHolder = new ValueHolder()
-      values += valueHolder
-      valueHolder
-    }
-
-    private def addHolder(value: AnyRef): ValueHolder = {
-      val valueHolder = addHolder()
-      valueHolder.isNull = (value == null)
-      valueHolder
-    }
-
-    private class ValueHolder {
-
-      val builder = new StringBuilder()
-
-      var isNull: Boolean = _
+    private class ValueHolder(val value:String,val isNull:Boolean) {
     }
 
   }

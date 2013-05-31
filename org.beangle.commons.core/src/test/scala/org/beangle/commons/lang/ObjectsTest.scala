@@ -18,12 +18,14 @@
  */
 package org.beangle.commons.lang
 
-import org.testng.Assert.assertTrue
-import org.testng.annotations.Test
-@Test
-class ObjectsTest {
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-  def testNullEquals() {
-    assertTrue(Objects.equals(null, null))
+class ObjectsTest extends FunSpec with ShouldMatchers{
+
+  describe("Objects"){
+    it("Equals object and array"){
+      Objects.equals(null, null) should be (true)
+    }
   }
 }

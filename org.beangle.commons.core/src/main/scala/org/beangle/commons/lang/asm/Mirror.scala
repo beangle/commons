@@ -19,9 +19,6 @@
 package org.beangle.commons.lang.asm
 
 import org.objectweb.asm.Opcodes._
-import java.util.List
-import java.util.Map
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.reflect.ClassInfo
 import org.beangle.commons.lang.reflect.MethodInfo
 import org.objectweb.asm.ClassWriter
@@ -29,10 +26,10 @@ import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
-
+import scala.collection.mutable
 object Mirror {
 
-  private var proxies: Map[Class[_], Mirror] = CollectUtils.newHashMap[Class[_], Mirror]
+  private var proxies =new mutable.HashMap[Class[_], Mirror]
 
   /**
    * Get Mirror of given type.
@@ -40,10 +37,10 @@ object Mirror {
    * First,it search from proxies cache,if not found, then generate new proxy class using asm.
    */
   def get(clazz: Class[_]): Mirror = {
-    var proxy = proxies.get(clazz)
+    var proxy = proxies.get(clazz).orNull
     if (null != proxy) return proxy
     proxies.synchronized {
-      proxy = proxies.get(clazz)
+      proxy = proxies.get(clazz).orNull
       if (null != proxy) return proxy
       val classInfo = ClassInfo.get(clazz)
       val className = clazz.getName
@@ -73,17 +70,17 @@ object Mirror {
           mv.visitCode()
           val methods = classInfo.getMethods
           if (methods.size > 0) {
+              
             mv.visitVarInsn(ALOAD, 1)
             mv.visitTypeInsn(CHECKCAST, classNameInternal)
             mv.visitVarInsn(ASTORE, 4)
             mv.visitVarInsn(ILOAD, 2)
             val labels = new Array[Label](methods.size)
-            var i = 0
-            while (i < labels.length) labels(i) = new Label()
+            (0 until labels.length).foreach(labels(_) = new Label)
             val defaultLabel = new Label()
             mv.visitTableSwitchInsn(0, labels.length - 1, defaultLabel, labels)
             val buffer = new StringBuilder(128)
-            i = 0
+            var i = 0
             while (i < labels.length) {
               mv.visitLabel(labels(i))
               if (i == 0) mv.visitFrame(Opcodes.F_APPEND, 1, Array(classNameInternal), 0, null) else mv.visitFrame(Opcodes.F_SAME,
@@ -151,8 +148,10 @@ object Mirror {
                 case Type.FLOAT => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;")
                 case Type.LONG => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;")
                 case Type.DOUBLE => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;")
+                case _ => 
               }
               mv.visitInsn(ARETURN)
+              i+=1
             }
             mv.visitLabel(defaultLabel)
             mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null)
@@ -208,13 +207,15 @@ abstract class Mirror {
 
   var classInfo: ClassInfo = _
 
+
+  def invoke(obj: AnyRef, methodIndex: Int, args: Array[Any]): Any
+
   /**
    * Delegate invocation to object's method with arguments.
    *
    * @see #getIndex(String, Object...)
    */
-  def invoke(obj: AnyRef, methodIndex: Int, args: Any*): Any
-
+  def invoke(obj: AnyRef, methodIndex: Int, args: Any*): Any =   invoke(obj, methodIndex, args.toArray)
   /**
    * Return method index.
    * index is 0 based,if not found ,return -1.
@@ -235,7 +236,5 @@ abstract class Mirror {
    *
    * @see #invoke(Object, int, Object...)
    */
-  def invoke(obj: AnyRef, method: String, args: Any*): Any = {
-    invoke(obj, classInfo.getIndex(method, args), args)
-  }
+  def invoke(obj: AnyRef, method: String, args: Any*): Any =  invoke(obj, classInfo.getIndex(method, args), args)
 }

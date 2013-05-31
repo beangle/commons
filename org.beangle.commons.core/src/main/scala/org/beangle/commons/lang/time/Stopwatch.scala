@@ -25,16 +25,46 @@ import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.TimeUnit
 import org.beangle.commons.lang.Assert
 
+object Stopwatch{
+
+  /**
+   * Returns a string representation of the current elapsed time, choosing an
+   * appropriate unit and using the specified number of significant figures.
+   * For example, at the instant when {@code elapsedTime(NANOSECONDS)} would
+   * return {1234567}, {@code toString(4)} returns {@code "1.235 ms"}.
+   */
+  def format(nanos:Long,significantDigits: Int): String = {
+    val unit = chooseUnit(nanos)
+    val value = nanos.toDouble / NANOSECONDS.convert(1, unit)
+    String.format("%." + significantDigits + "g %s", value.asInstanceOf[AnyRef], abbreviate(unit).asInstanceOf[AnyRef])
+  }
+
+  private def chooseUnit(nanos: Long): TimeUnit = {
+    if (SECONDS.convert(nanos, NANOSECONDS) > 0) return SECONDS
+    if (MILLISECONDS.convert(nanos, NANOSECONDS) > 0) return MILLISECONDS
+    if (MICROSECONDS.convert(nanos, NANOSECONDS) > 0) return MICROSECONDS
+    NANOSECONDS
+  }
+
+  private def abbreviate(unit: TimeUnit): String = unit match {
+    case NANOSECONDS => "ns"
+    case MICROSECONDS => "μs"
+    case MILLISECONDS => "ms"
+    case SECONDS => "s"
+    case _ => throw new AssertionError()
+  }
+}
+import Stopwatch._
 /**
  * Simple Stopwatch
  * @author chaostone
  * @since 3.0.0
  */
-class Stopwatch(val ticker: Ticker, start: Boolean) {
+class Stopwatch(val ticker: Ticker=Ticker.systemTicker(), start: Boolean=true) {
 
   var running: Boolean = _
 
-  private var nanos: Long = _
+  private var elapsed: Long = _
 
   private var startTick: Long = _
 
@@ -43,17 +73,9 @@ class Stopwatch(val ticker: Ticker, start: Boolean) {
     startTick = ticker.read()
   }
 
-  /**
-   * Creates (but does not start) a new stopwatch using {@link System#nanoTime} as its time source.
-   */
-  def this() {
-    this(Ticker.systemTicker(), false)
+  def this(start:Boolean){
+    this(Ticker.systemTicker(),start)
   }
-
-  def this(start: Boolean) {
-    this(Ticker.systemTicker(), true)
-  }
-
   /**
    * Starts the stopwatch.
    *
@@ -76,9 +98,8 @@ class Stopwatch(val ticker: Ticker, start: Boolean) {
    */
   def stop(): Stopwatch = {
     val tick = ticker.read()
-    running
     running = false
-    nanos += tick - startTick
+    elapsed += tick - startTick
     this
   }
 
@@ -89,12 +110,12 @@ class Stopwatch(val ticker: Ticker, start: Boolean) {
    * @return this {@code Stopwatch} instance
    */
   def reset(): Stopwatch = {
-    nanos = 0
+    elapsed = 0
     running = false
     this
   }
 
-  private def elapsedNanos: Long = if (running) ticker.read() - startTick + nanos else nanos
+  private def elapsedNanos: Long = if (running) ticker.read() - startTick + elapsed else elapsed
 
   /**
    * Returns the current elapsed time shown on this stopwatch, expressed
@@ -103,45 +124,18 @@ class Stopwatch(val ticker: Ticker, start: Boolean) {
    * Note that the overhead of measurement can be more than a microsecond, so it is generally not
    * useful to specify {@link TimeUnit#NANOSECONDS} precision here.
    */
-  def elapsedTime(desiredUnit: TimeUnit): Long = desiredUnit.convert(nanos, NANOSECONDS)
+  def elapsedTime(desiredUnit: TimeUnit): Long = desiredUnit.convert(elapsedNanos, NANOSECONDS)
 
   /**
    * Returns the current elapsed time shown on this stopwatch, expressed
    * in milliseconds, with any fraction rounded down. This is identical to
    * {@code elapsedTime(TimeUnit.MILLISECONDS}.
    */
-  def elapsedMillis(): Long = elapsedTime(MILLISECONDS)
+  def elapsedMillis: Long = elapsedTime(MILLISECONDS)
 
   /**
    * Returns a string representation of the current elapsed time; equivalent to {@code toString(4)}
    * (four significant figures).
    */
-  override def toString(): String = toString(4)
-
-  /**
-   * Returns a string representation of the current elapsed time, choosing an
-   * appropriate unit and using the specified number of significant figures.
-   * For example, at the instant when {@code elapsedTime(NANOSECONDS)} would
-   * return {1234567}, {@code toString(4)} returns {@code "1.235 ms"}.
-   */
-  def toString(significantDigits: Int): String = {
-    val unit = chooseUnit(nanos)
-    val value = nanos.toDouble / NANOSECONDS.convert(1, unit)
-    String.format("%." + String.valueOf(significantDigits) + "g %s", String.valueOf(value), abbreviate(unit))
-  }
-
-  private def chooseUnit(nanos: Long): TimeUnit = {
-    if (SECONDS.convert(nanos, NANOSECONDS) > 0) return SECONDS
-    if (MILLISECONDS.convert(nanos, NANOSECONDS) > 0) return MILLISECONDS
-    if (MICROSECONDS.convert(nanos, NANOSECONDS) > 0) return MICROSECONDS
-    NANOSECONDS
-  }
-
-  private def abbreviate(unit: TimeUnit): String = unit match {
-    case NANOSECONDS => "ns"
-    case MICROSECONDS => "μs"
-    case MILLISECONDS => "ms"
-    case SECONDS => "s"
-    case _ => throw new AssertionError()
-  }
+  override def toString(): String = format(elapsedNanos,4)
 }

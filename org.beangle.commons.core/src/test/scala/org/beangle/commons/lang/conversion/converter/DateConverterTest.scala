@@ -18,24 +18,15 @@
  */
 package org.beangle.commons.lang.conversion.converter
 
-import org.testng.Assert.assertEquals
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
+
 import java.util.Calendar
 import java.util.Date
 import java.util.GregorianCalendar
 import org.beangle.commons.lang.conversion.Converter
-import org.testng.annotations.Test
-//remove if not needed
-import scala.collection.JavaConversions._
 
-class DateConverterTest {
-
-  @Test
-  def testConvertoDate() {
-    var date1 = "19800909"
-    converToDate(date1, 1980, 8, 9)
-    date1 = "1980-09-09"
-    converToDate(date1, 1980, 8, 9)
-  }
+class DateConverterTest extends FunSpec with ShouldMatchers{
 
   private def converToDate(dateStr: String, 
       year: Int, 
@@ -45,16 +36,23 @@ class DateConverterTest {
     val date = c.apply(dateStr)
     val calendar = new GregorianCalendar()
     calendar.setTime(date)
-    assertEquals(calendar.get(Calendar.YEAR), year)
-    assertEquals(calendar.get(Calendar.MONTH), month)
-    assertEquals(calendar.get(Calendar.DAY_OF_MONTH), day)
+    calendar.get(Calendar.YEAR) should be (year)
+    calendar.get(Calendar.MONTH) should be (month)
+    calendar.get(Calendar.DAY_OF_MONTH) should be (day)
   }
 
-  def testNormalize() {
+  describe("DateConverter"){
+  it("Convert String to date") {
+    converToDate("19800909", 1980, 8, 9)
+    converToDate("1980-09-09", 1980, 8, 9)
+  }
+
+  it("Normalize date string") {
     val converter= new String2DateConverter();
-    assertEquals("1980-09-01", converter.normalize("1980-9-1"))
-    assertEquals("1980-09-01", converter.normalize("1980-09-1"))
-    assertEquals("1980-09-01", converter.normalize("1980-9-01"))
-    assertEquals("1980-09-01", converter.normalize("1980-09-01"))
+    converter.normalize("1980-9-1") should equal("1980-09-01")
+    converter.normalize("1980-09-1") should equal("1980-09-01")
+    converter.normalize("1980-9-01") should equal("1980-09-01")
+    converter.normalize("1980-09-01") should equal("1980-09-01")
+  }
   }
 }

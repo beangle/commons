@@ -18,8 +18,7 @@
  */
 package org.beangle.commons.lang
 
-import java.lang.Character.isLowerCase
-import java.lang.Character.isUpperCase
+import java.lang.Character.{isLowerCase => isLower, isUpperCase => isUpper}
 import java.lang.Character.toLowerCase
 import java.util.ArrayList
 import java.util.Collection
@@ -170,15 +169,10 @@ object Strings {
    */
   def count(host: String, searchStr: String): Int = {
     var count = 0
-    var startIndex = 0;
-    while (startIndex > 0 && startIndex < host.length) {
-      val findLoc = host.indexOf(searchStr, startIndex)
-      if (findLoc == -1) {
-        startIndex = -1;
-      } else {
-        count += 1
-        startIndex = findLoc + searchStr.length - 1
-      }
+    var startIndex = host.indexOf(searchStr, 0)
+    while (startIndex > -1 && startIndex < host.length) {
+      count += 1
+      startIndex = host.indexOf(searchStr, startIndex+searchStr.length)
     }
     count
   }
@@ -1033,18 +1027,17 @@ object Strings {
    * @return a {@link java.lang.String} object.
    */
   def unCamel(str: String, seperator: Char, lowercase: Boolean): String = {
+    if (3 > str.length) return if (lowercase) str.toLowerCase else str
     val ca = str.toCharArray()
-    if (3 > ca.length) return if (lowercase) str.toLowerCase() else str
-
     val build = new StringBuilder(ca.length + 5)
     build.append(if (lowercase) toLowerCase(ca(0)) else ca(0))
-    var lower1 = isLowerCase(ca(0))
+    var lower1 = isLower(ca(0))
     var i = 1
     while (i < ca.length - 1) {
       val cur = ca(i)
       val next = ca(i + 1)
-      val upper2 = isUpperCase(cur)
-      val lower3 = isLowerCase(next)
+      val upper2 = isUpper(cur)
+      val lower3 = isLower(next)
       if (lower1 && upper2 && lower3) {
         build.append(seperator)
         build.append(if (lowercase) toLowerCase(cur) else cur)
@@ -1057,7 +1050,10 @@ object Strings {
         i += 1
       }
     }
-    if (i == ca.length - 1) build.append(if (lowercase) toLowerCase(ca(i)) else ca(i))
+    if (i == ca.length - 1) {
+      if(isLower(ca(i-1)) && isUpper(ca(i))) build.append(seperator)
+      build.append(if (lowercase) toLowerCase(ca(i)) else ca(i))
+    }
     build.toString
   }
 

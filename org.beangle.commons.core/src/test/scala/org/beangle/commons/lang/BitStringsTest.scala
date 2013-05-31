@@ -18,14 +18,15 @@
  */
 package org.beangle.commons.lang
 
-import org.testng.Assert.assertEquals
-import org.testng.annotations.Test
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-@Test
-class BitStringsTest {
+class BitStringsTest extends FunSpec with ShouldMatchers{
 
-  def binValueOf() {
-    assertEquals(BitStrings.binValueOf("00000000000000000000000000000000011111111111111111111"), 1048575)
-    assertEquals(BitStrings.binValueOf("00000000000000000000000000000000000011100000000000000"), 114688)
+  describe("BitStrings"){
+    it("Calculate binary value of bit string"){
+      BitStrings.binValueOf("00000000000000000000000000000000011111111111111111111") should be (1048575)
+      BitStrings.binValueOf("00000000000000000000000000000000000011100000000000000") should be (114688)
+    }
   }
 }

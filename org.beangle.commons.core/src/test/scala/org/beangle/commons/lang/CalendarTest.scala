@@ -18,23 +18,24 @@
  */
 package org.beangle.commons.lang
 
-import org.testng.Assert.assertTrue
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
+
 import java.util.Calendar
 import java.util.Date
-import org.testng.annotations.Test
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * @author chaostone
  * @version $Id: CalendarTest.java Jul 26, 2011 4:12:17 PM chaostone $
  */
-@Test
-class CalendarTest {
 
-  def testRoll() {
-    val calendar = Calendar.getInstance
-    val ajusted = Dates.rollMinutes(calendar.getTime, -30)
-    assertTrue(ajusted.before(calendar.getTime))
+class CalendarTest  extends FunSpec with ShouldMatchers{
+
+  describe("Dates"){
+    it("Roll minutes") {
+      val calendar = Calendar.getInstance
+      val ajusted = Dates.rollMinutes(calendar.getTime, -30)
+      ajusted.before(calendar.getTime) should be (true)
+    }
   }
 }

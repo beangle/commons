@@ -16,23 +16,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.conversion.converter
+package org.beangle.commons.lang.time
 
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
-import org.beangle.commons.lang.conversion.Conversion
-import org.beangle.commons.lang.conversion.impl.DefaultConversion
 
-class DefaultConverterTest  extends FunSpec with ShouldMatchers{
-
-  describe("DefaultConversion"){
-    it("Convert null"){
-      val conversion = DefaultConversion.Instance
-      conversion.convert("", classOf[Long])
-      conversion.convert(null.asInstanceOf[String], classOf[Long])
-      conversion.convert("abc", classOf[Long])
-      conversion.convert("1", classOf[Long]).asInstanceOf[AnyRef]
-      conversion.convert(1L, classOf[Long]).asInstanceOf[AnyRef]
+class StopwatchTest   extends FunSpec with ShouldMatchers{
+  describe("Stopwatch"){
+    it("Format nanos to string"){
+      Stopwatch.format(2323,4) should equal ("2.323 μs")
     }
   }
 }

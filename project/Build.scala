@@ -42,26 +42,16 @@ object ShellPrompt {
 object Dependencies {
   val h2Ver = "1.3.148"
   val slf4jVer = "1.6.1"
-  val junitVer = "4.10"
-  val testngVer = "6.5.2"
-
-  val springVer="3.1.1.RELEASE"
 
   val slf4j = "org.slf4j" % "slf4j-api" % slf4jVer
   val asm ="asm" % "asm" % "3.3"
   val servletapi= "javax.servlet" % "servlet-api" % "2.4"
+  val scalatest ="org.scalatest" % "scalatest_2.10" % "2.0.M5b" % "test"
 
-  val junit = "junit" % "junit" % junitVer % "test"
-  val testng= "org.testng" % "testng" % testngVer % "test"
   val logbackClassic="ch.qos.logback" % "logback-classic" % "1.0.3"
   val logbackCore="ch.qos.logback" % "logback-core" % "1.0.3"
 
   val dbcp = "commons-dbcp" % "commons-dbcp" % "1.3"
-  val springJdbc="org.springframework" % "spring-jdbc" % springVer
-  val commonCollection="commons-collections" % "commons-collections" % "3.2.1"
-  val javadbf="com.linuxense" % "javadbf" %"0.4.0"
-  val poi = "org.apache.poi" % "poi" % "3.7"
-  val jxls ="net.sf.jxls" % "jxls-core" % "1.0.1"
 
   val jpa = "org.hibernate.javax.persistence" % "hibernate-jpa-2.0-api" % "1.0.1.Final"
   val validation ="javax.validation" % "validation-api" % "1.0.0.GA"
@@ -77,7 +67,7 @@ object BeangleBuild extends Build {
   import BuildSettings._
   import Resolvers._
  
-  val commonDeps = Seq(slf4j, logbackClassic,logbackCore, junit,testng)
+  val commonDeps = Seq(slf4j, logbackClassic,logbackCore,scalatest)
 
   lazy val commons = Project("beangle-commons", file("."), settings = buildSettings) aggregate (commons_core,commons_web,commons_jpa,commons_jdbc)
 
@@ -97,7 +87,7 @@ object BeangleBuild extends Build {
   lazy val commons_jpa = Project(
     "beangle-commons-jpa",
     file("org.beangle.commons.jpa"),
-    settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(validation,jpa,poi,jxls)) 
+    settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(validation)) 
                ++ Seq(resolvers += m2repo)
   ) dependsOn(commons_core)
 

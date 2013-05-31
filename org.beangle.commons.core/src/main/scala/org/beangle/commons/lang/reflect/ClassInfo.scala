@@ -143,12 +143,11 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
   private def findReaders(methodinfos: Seq[MethodInfo]): Map[String, MethodInfo] = {
     val readermap = new mutable.HashMap[String, MethodInfo]
     for (info <- methodinfos) {
-      info.property() match {
-        case Some(propertyInfo) if (propertyInfo.getLeft) =>
-          readermap.put(propertyInfo.getRight, info) match {
-            case Some(old) if (info.method.getReturnType.isAssignableFrom(old.method.getReturnType)) =>
-              readermap += propertyInfo.getRight -> info
-          }
+      val property = info.property
+      if(property.isDefined && property.get.getLeft){
+        val old = readermap.put(property.get.getRight, info)
+        if(old.isDefined && info.method.getReturnType.isAssignableFrom(old.get.method.getReturnType))
+          readermap += property.get.getRight -> info
       }
     }
     Map.empty ++ readermap
@@ -157,9 +156,8 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
   private def findWriters(methodinfos: Seq[MethodInfo]): Map[String, MethodInfo] = {
     val writermap = new mutable.HashMap[String, MethodInfo]
     for (info <- methodinfos) {
-      info.property() match {
-        case Some(propertyInfo) if (!propertyInfo.getLeft) => writermap += propertyInfo.getRight -> info
-      }
+      val property = info.property
+      if(property.isDefined && !property.get.getLeft) writermap += property.get.getRight -> info
     }
     Map.empty ++ writermap
   }
@@ -237,10 +235,10 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
    * Return all public methods.
    */
   def getMethods(): Seq[MethodInfo] = {
-    val methodInfos = CollectUtils.newArrayList[MethodInfo]
-    for ((key, value) <- methods; info <- value) methodInfos.add(info)
-    Collections.sort(methodInfos)
-    methodInfos
+    val methodInfos =new mutable.ListBuffer[MethodInfo]
+    for ((key, value) <- methods;info <- value) methodInfos += info
+//    Collections.sort(methodInfos)
+    methodInfos.toList
   }
 
   def getWritableProperties(): Set[String] = writers.keySet

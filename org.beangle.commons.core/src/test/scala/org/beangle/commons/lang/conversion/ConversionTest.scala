@@ -17,34 +17,32 @@
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.lang.conversion
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
 import org.beangle.commons.lang.conversion.impl.DefaultConversion
-import org.testng.Assert
-import org.testng.annotations.Test
-//remove if not needed
-import scala.collection.JavaConversions._
 
-@Test
-class ConversionTest {
+class ConversionTest  extends FunSpec with ShouldMatchers{
 
-  def testConvert() {
-    val con = new DefaultConversion()
-    con.convert(2.5f, classOf[Integer])
-  }
+  val con = new DefaultConversion();
 
-  def testConvertArray() {
-    val con = new DefaultConversion()
-    con.convert(Array("2", "3"), classOf[Array[Integer]])
-  }
+  describe ("DefaultConversion"){    
+    it("Convert Integer"){
+      con.convert(2.5f, classOf[Integer])
+    }
 
-  def testConvertPrimitive() {
-    val con = new DefaultConversion()
-    con.convert("2", classOf[Int]).toInt
-    con.convert(3, classOf[Integer])
-  }
+    it("Convert Array"){
+      con.convert(Array("2", "3"), classOf[Array[Integer]])
+    }
 
-  def testConvertPrimitiveArray() {
-    val con = new DefaultConversion()
-    con.convert(Array("2", "3.4"), classOf[Array[Float]]).asInstanceOf[Array[Float]]
+    it("Convert Primitive") {
+      con.convert("2", classOf[Int]).toInt
+      con.convert(3, classOf[Integer])
+    }
+
+    it("Convert Primitive Array") {
+      val con = new DefaultConversion()
+      con.convert(Array("2", "3.4"), classOf[Array[Float]]).asInstanceOf[Array[Float]]
+    }
   }
 }
