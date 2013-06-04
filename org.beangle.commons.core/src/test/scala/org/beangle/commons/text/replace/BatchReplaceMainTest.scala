@@ -22,40 +22,40 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.testng.annotations.Test
-//remove if not needed
-import scala.collection.JavaConversions._
 
-@Test
-class BatchReplaceMainTest {
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-  var logger: Logger = LoggerFactory.getLogger(classOf[BatchReplaceMainTest])
-
-  def test() {
-    val clause = "<#include \"/template/head.ftl\"/>"
-    val pattern = Pattern.compile("<#(.*)/>")
-    val m = pattern.matcher(clause)
-    logger.debug(m.find() + "")
-    logger.debug(m.groupCount() + "")
-    logger.debug(Pattern.matches("<#(.*)/>", clause) + "")
-    logger.debug(m.group(1))
-    val sb = new StringBuffer()
-    m.appendReplacement(sb, "[#$1/]")
-    logger.debug(sb.toString)
-    logger.debug(Pattern.matches("template", clause) + "")
-    val p = Pattern.compile("(cat)")
-    val m1 = p.matcher("one cat two cats in the yard")
-    val sb1 = new StringBuffer()
-    while (m.find()) {
-      m1.appendReplacement(sb1, "dog")
+class BatchReplaceMainTest extends FunSpec with ShouldMatchers{
+  describe("BatchReplace"){
+    it("Test batch replace expression"){
+      var logger: Logger = LoggerFactory.getLogger(classOf[BatchReplaceMainTest])
+      val clause = "<#include \"/template/head.ftl\"/>"
+      val pattern = Pattern.compile("<#(.*)/>")
+      val m = pattern.matcher(clause)
+      logger.debug(m.find() + "")
+      logger.debug(m.groupCount() + "")
+      logger.debug(Pattern.matches("<#(.*)/>", clause) + "")
+      logger.debug(m.group(1))
+      val sb = new StringBuffer()
+      m.appendReplacement(sb, "[#$1/]")
+      logger.debug(sb.toString)
+      logger.debug(Pattern.matches("template", clause) + "")
+      val p = Pattern.compile("(cat)")
+      val m1 = p.matcher("one cat two cats in the yard")
+      val sb1 = new StringBuffer()
+      while (m.find()) {
+        m1.appendReplacement(sb1, "dog")
+      }
+      m1.appendTail(sb1)
+      logger.debug(sb1.toString)
+      logger.debug("one cat two cats in the yard".replaceAll("cat", "dog"))
+      logger.debug(clause.replaceAll("<#(.*)/>", "[#$1/]"))
+      val test = "aaa    \nbbaad\n"
+      val replacer = new Replacer("( +?)\\n", "\n")
+      logger.debug(test)
+      logger.debug(replacer.process(test))
     }
-    m1.appendTail(sb1)
-    logger.debug(sb1.toString)
-    logger.debug("one cat two cats in the yard".replaceAll("cat", "dog"))
-    logger.debug(clause.replaceAll("<#(.*)/>", "[#$1/]"))
-    val test = "aaa    \nbbaad\n"
-    val replacer = new Replacer("( +?)\\n", "\n")
-    logger.debug(test)
-    logger.debug(replacer.process(test))
   }
 }
+

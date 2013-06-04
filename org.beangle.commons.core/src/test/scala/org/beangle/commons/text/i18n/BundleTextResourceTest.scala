@@ -18,25 +18,25 @@
  */
 package org.beangle.commons.text.i18n
 
-import org.testng.Assert.assertEquals
-import org.testng.Assert.assertTrue
 import java.util.Locale
 import org.beangle.commons.text.i18n.impl.DefaultTextBundleRegistry
 import org.beangle.commons.text.i18n.impl.DefaultTextFormater
 import org.beangle.commons.text.i18n.impl.DefaultTextResource
-import org.testng.annotations.Test
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-class BundleTextResourceTest {
+class BundleTextResourceTest extends FunSpec with ShouldMatchers{
 
-  @Test
-  def testGetText() {
-    val locale = new Locale("zh", "CN")
-    val registry = new DefaultTextBundleRegistry()
-    val bundle = registry.load(locale, "message")
-    val bundle2 = registry.load(locale, "message2")
-    assertEquals(bundle.getText("hello.world"), "你好")
-    val tr = new DefaultTextResource(locale, registry, new DefaultTextFormater())
-    assertEquals(tr.getText("hello.world"), "你好")
-    assertEquals(tr.getText("china"), "中国")
+  describe("TextBundle"){
+    it("Get text from bundle"){
+      val locale = new Locale("zh", "CN")
+      val registry = new DefaultTextBundleRegistry()
+      val bundle = registry.load(locale, "message")
+      val bundle2 = registry.load(locale, "message2")
+      bundle.getText("hello.world") should equal(Some("你好"))
+      val tr = new DefaultTextResource(locale, registry, new DefaultTextFormater())
+      tr.getText("hello.world") should equal (Some("你好"))
+      tr.getText("china") should equal (Some("中国"))
+    }
   }
 }

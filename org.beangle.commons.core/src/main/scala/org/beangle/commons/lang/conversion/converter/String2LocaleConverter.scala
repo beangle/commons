@@ -21,8 +21,6 @@ package org.beangle.commons.lang.conversion.converter
 import java.util.Locale
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.conversion.Converter
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * Convert String to Locale.
@@ -30,7 +28,7 @@ import scala.collection.JavaConversions._
  * @author chaostone
  * @since 3.2.0
  */
-class String2LocaleConverter extends Converter[String, Locale] {
+object String2LocaleConverter extends Converter[String, Locale] {
 
   override def apply(localeString: String): Locale = {
     if (Strings.isBlank(localeString)) return null

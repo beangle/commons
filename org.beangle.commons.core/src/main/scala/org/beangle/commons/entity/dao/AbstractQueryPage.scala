@@ -18,8 +18,6 @@
  */
 package org.beangle.commons.entity.dao
 
-import java.util.Iterator
-
 import org.beangle.commons.collection.page._
 
 /**
@@ -57,13 +55,7 @@ abstract class AbstractQueryPage[T](val query:LimitQuery[T]) extends PageWapper[
 
   def hasPrevious:Boolean = pageNo > 1
 
-  override def firstPageNo:Int = 1
-
-  def nextPageNo :Int = page.nextPageNo
-
   def pageSize:Int= query.limit.pageSize
-
-  def previousPageNo:Int= page.previousPageNo
 
   def total:Int = page.total
   
@@ -75,16 +67,19 @@ class PageIterator[T](val queryPage:AbstractQueryPage[T] ) extends Iterator[T] {
 
   private var dataIndex:Int=0
 
+  private var innerIter:Iterator[T]=_
+
   def hasNext:Boolean=(dataIndex < queryPage.page.items.size) || queryPage.hasNext
 
   def next():T= {
     if (dataIndex < queryPage.page.size) {
       dataIndex+=1
-      queryPage.page.items.get(dataIndex)
+      innerIter.next
     } else {
       queryPage.next()
       dataIndex = 1
-      queryPage.page.items.get(dataIndex)
+      innerIter = queryPage.page.iterator
+      innerIter.next
     }
   }
 

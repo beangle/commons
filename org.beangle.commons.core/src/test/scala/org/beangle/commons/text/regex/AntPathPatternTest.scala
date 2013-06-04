@@ -18,25 +18,24 @@
  */
 package org.beangle.commons.text.regex
 
-import org.testng.Assert
-import org.testng.annotations.Test
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 import org.beangle.commons.text.regex.AntPathPattern._
-//remove if not needed
-import scala.collection.JavaConversions._
 
-@Test
-class AntPathPatternTest {
+class AntPathPatternTest extends FunSpec with ShouldMatchers{
 
-  def test() {
-    `match`("com/t?st.jsp", "com/test.jsp")
-    `match`("com/*.jsp", "com/test.jsp")
-    `match`("com/*.jsp", "com/dir/test.jsp")
-    `match`("com/**/test.jsp", "com/dir1/dir2/test.jsp")
-    `match`("com/beangle/**/*.jsp", "com/beangle/dir1/dir2/test3.jsp")
-    `match`("org/**/servlet/bla.jsp", "org/beangle/servlet/bla.jsp")
-    `match`("org/**/servlet/bla.jsp", "org/beangle/testing/servlet/bla.jsp")
-    `match`("org/**/servlet/bla.jsp", "org/servlet/bla.jsp")
-    `match`("org/**/servlet/bla.jsp", "org/anyservlet/bla.jsp")
-    `match`("org/**", "org/anyservlet/bla.jsp")
+  describe("AntPathPattern"){
+    it("Match ant pattern expression"){
+      matches("com/t?st.jsp", "com/test.jsp") should be (true)
+      matches("com/*.jsp", "com/test.jsp")
+      matches("com/*.jsp", "com/dir/test.jsp")
+      matches("com/**/test.jsp", "com/dir1/dir2/test.jsp")
+      matches("com/beangle/**/*.jsp", "com/beangle/dir1/dir2/test3.jsp")
+      matches("org/**/servlet/bla.jsp", "org/beangle/servlet/bla.jsp")
+      matches("org/**/servlet/bla.jsp", "org/beangle/testing/servlet/bla.jsp")
+      matches("org/**/servlet/bla.jsp", "org/servlet/bla.jsp")
+      matches("org/**/servlet/bla.jsp", "org/anyservlet/bla.jsp")
+      matches("org/**", "org/anyservlet/bla.jsp")
+    }
   }
 }

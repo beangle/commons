@@ -18,22 +18,21 @@
  */
 package org.beangle.commons.csv
 
-import org.testng.Assert.assertEquals
-import org.testng.Assert.assertTrue
-import org.testng.annotations.Test
-//remove if not needed
-import scala.collection.JavaConversions._
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-@Test
-class CsvTest {
+class CsvTest extends FunSpec with ShouldMatchers{
 
-  def testFormat() {
-    val builder = new CsvFormat.Builder()
-    builder.separator(CsvConstants.Comma).separator(CsvConstants.Semicolon)
-      .delimiter(CsvConstants.Quote)
-    val csv = new Csv(builder.build())
-    assertTrue(csv.format.isSeparator(CsvConstants.Comma))
-    assertTrue(csv.format.isSeparator(CsvConstants.Semicolon))
-    assertEquals(csv.format.getDelimiter, CsvConstants.Quote)
+  describe("CsvFormat"){
+    it("Format") {
+      val builder = new CsvFormat.Builder
+      builder.separator(CsvConstants.Comma).separator(CsvConstants.Semicolon)
+        .delimiter(CsvConstants.Quote)
+      val csv = new Csv(builder.build())
+      csv.format.isSeparator(CsvConstants.Comma) should be (true)
+      csv.format.isSeparator(CsvConstants.Semicolon) should be (true)
+      csv.format.delimiter should equal (CsvConstants.Quote)
+    }
   }
+
 }

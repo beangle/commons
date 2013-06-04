@@ -21,24 +21,23 @@ package org.beangle.commons.entity
 import java.util.Date
 
 /**
- * Jounal Entity
+ * 有时效性的实体
+ * </p>
+ * 指有具体生效时间和失效时间的实体。一般生效时间不能为空，失效时间可以为空。
+ * 具体时间采用时间时间格式便于比对。
  * 
  * @author chaostone
- * @since 3.1.0
+ * @version $Id: $
  */
-trait Journal {
+trait TemporalAt {
+
   /**
    * 起始日期
    */
-  def beginOn:Date;
+  def beginAt:Date
 
   /**
    * 结束日期
    */
-  def endOn:Option[Date];
-
-  /**
-   * 备注
-   */
-  def remark:Option[String];
+  def endAt:Option[Date]
 }

@@ -20,23 +20,24 @@ package org.beangle.commons.config.property
 
 import org.beangle.commons.inject.Resources
 import org.beangle.commons.lang.ClassLoaders
-import org.testng.Assert.assertEquals
-import org.testng.annotations.Test
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-@Test
-class UrlConfigProviderTest {
+class UrlConfigProviderTest extends FunSpec with ShouldMatchers{
 
-  def testConfig() {
-    val config = new MultiProviderPropertyConfig()
-    val provider = new UrlPropertyConfigProvider()
-    val resources = new Resources()
-    resources.setGlobal(ClassLoaders.getResource("system-default.properties", getClass))
-    resources.setUser(ClassLoaders.getResource("system.properties", getClass))
-    provider.setResources(resources)
-    val properties = provider.getConfig
-    config.add(properties)
-    assertEquals(1, config.get(classOf[Integer], "testInt"))
-    assertEquals("beangle.org", config.get("system.vendor"))
-    assertEquals("http://localhost", config.get("system.url"))
+  describe("UrlConfigProvider"){
+    it("Get Property") {
+      val config = new MultiProviderPropertyConfig
+      val provider = new UrlPropertyConfigProvider
+      val resources = new Resources
+      resources.setGlobal(ClassLoaders.getResource("system-default.properties", getClass))
+      resources.setUser(ClassLoaders.getResource("system.properties", getClass))
+      provider.setResources(resources)
+      val properties = provider.getConfig
+      config.add(properties)
+      config.get(classOf[Integer], "testInt") should be (1)
+      config.get("system.vendor") should equal ("beangle.org")
+      config.get("system.url") should equal ("http://localhost")
+    }
   }
 }

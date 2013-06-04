@@ -29,15 +29,15 @@ import java.util.Date
  * @author chaostone
  * @version $Id: $
  */
-trait Temporal {
+trait TemporalOn {
 
   /**
-   * 获得生效时间
+   * 起始日期
    */
-  def effectiveAt:Date;
+  def beginOn:Date
 
   /**
-   * 获得失效时间
+   * 结束日期
    */
-  def invalidAt:Option[Date];
+  def endOn:Option[Date]
 }

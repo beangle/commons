@@ -17,34 +17,23 @@
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.collection.page
-
-import org.testng.Assert.assertEquals
-import org.testng.Assert.assertNotNull
-import java.util.ArrayList
-import java.util.List
-import org.testng.annotations.Test
-//remove if not needed
-import scala.collection.JavaConversions._
-
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 /**
  * @author zhouqi
- */
-class PageAdapterTest {
+  */
+class PageAdapterTest extends FunSpec with ShouldMatchers{
 
-  @Test
-  def testD() {
-    val datas = new ArrayList[String](26)
-    for (i <- 0 until 26) {
-      datas.add(String.valueOf(i))
+  describe("PagedSeq"){
+    it("Move next or previous") {
+      val page = new PagedSeq[Int](( 0 until 26).toList, 20)
+      page.iterator.next should be (0)
+      page.next()
+      page.iterator.next should be (20)
+      page.moveTo(2)
+      page.iterator.next should be (20)
+      page.previous()
+      page.iterator.next should be (0)
     }
-    val page = new PagedList[String](datas, 20)
-    assertNotNull(page.iterator())
-    assertEquals(page.iterator().next(), "0")
-    page.next()
-    assertEquals(page.iterator().next(), "20")
-    page.moveTo(2)
-    assertEquals(page.iterator().next(), "20")
-    page.previous()
-    assertEquals(page.iterator().next(), "0")
   }
 }

@@ -25,8 +25,8 @@ import AntPathPattern._
 
 object AntPathPattern {
 
-  def `match`(pattern: String, path: String): Boolean = {
-    new AntPathPattern(pattern).`match`(path)
+  def matches(pattern: String, path: String): Boolean = {
+    new AntPathPattern(pattern).matches(path)
   }
 }
 
@@ -59,11 +59,9 @@ object AntPathPattern {
  * @author chaostone
  * @since 3.1.0
  */
-class AntPathPattern(antstring: String) {
+class AntPathPattern(val antstring: String) {
 
-  var antpattern: String = antstring
-
-  var pattern: Pattern = Pattern.compile(preprocess(antstring))
+  val pattern: Pattern = Pattern.compile(preprocess(antstring))
 
   /**
    * translate ant string to regex string
@@ -94,20 +92,21 @@ class AntPathPattern(antstring: String) {
         }
       }
       sb.append(substr)
+      i+=1
     }
     sb.toString
   }
 
-  override def hashCode(): Int = antpattern.hashCode
+  override def hashCode(): Int = antstring.hashCode
 
   override def equals(obj: Any): Boolean = obj match {
-    case obj: AntPathPattern => Objects.==(antpattern, obj.antpattern)
+    case obj: AntPathPattern => Objects.==(antstring, obj.antstring)
     case _ => false
   }
 
-  def `match`(path: String): Boolean = pattern.matcher(path).matches()
+  def matches(path: String): Boolean = pattern.matcher(path).matches()
 
   override def toString(): String = {
-    Strings.concat("ant:[", antpattern, "] regex:[", pattern.toString, "]")
+    Strings.concat("ant:[", antstring, "] regex:[", pattern.toString, "]")
   }
 }

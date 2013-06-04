@@ -18,53 +18,50 @@
  */
 package org.beangle.commons.collection
 
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-import org.testng.Assert.assertEquals
-import org.testng.Assert.assertFalse
-import org.testng.Assert.assertTrue
-import org.testng.annotations.Test
+class OrderTest extends FunSpec with ShouldMatchers{
 
-@Test
-class OrderTest {
-
-
-  def testToString1() {
-    assertEquals(Order.toSortString(List(new Order(" teachPlan.grade desc "),new Order(" teachPlan.major.code "))), "order by teachPlan.grade desc,teachPlan.major.code")
-  }
-
-  def testToString() {
-    assertEquals(Order.toSortString(List(new Order("id", false),Order.asc("name"))), "order by id desc,name")
-  }
-
-  def testParserOrder() {
-    val orders = Order.parse("std.code asc")
-    for (order <- orders) {
-      assertTrue(order.ascending)
-      assertEquals(order.property, "std.code")
+  describe("Order"){
+    it("ToString1"){
+      Order.toSortString(List(Order("teachPlan.grade desc"),Order("teachPlan.major.code"))) should equal ("order by teachPlan.grade desc,teachPlan.major.code")
     }
-  }
 
-  @Test
-  def testParserMutiOrder() {
-    val sorts = Order.parse("activity.time.year desc,activity.time.validWeeksNum,activity.time.weekId desc")
-    assertEquals(sorts.size, 3)
-    var order = sorts(0).asInstanceOf[Order]
-    assertEquals(order.property, "activity.time.year")
-    assertFalse(order.ascending)
-    order = sorts(1).asInstanceOf[Order]
-    assertEquals(order.property, "activity.time.validWeeksNum")
-    assertTrue(order.ascending)
-    order = sorts(2).asInstanceOf[Order]
-    assertEquals(order.property, "activity.time.weekId")
-    assertFalse(order.ascending)
-  }
+    it("ToString2") {
+      Order.toSortString(List(Order("id", false),Order.asc("name"))) should equal ("order by id desc,name")
+    }
 
-  @Test
-  def testParserComplexOrder() {
-    val sorts = Order.parse("(case when ware.price is null then 0 else ware.price end) desc")
-    assertEquals(sorts.size, 1)
-    val order = sorts(0).asInstanceOf[Order]
-    assertEquals(order.property, "(case when ware.price is null then 0 else ware.price end)")
-    assertFalse(order.ascending)
+    it("ParserOrder") {
+      val orders = Order.parse("std.code asc")
+      orders.size should be (1)
+      for (order <- orders) {
+        order.ascending should be (true)
+        order.property should equal ("std.code")
+      }
+    }
+
+    
+    it("ParserMutiOrder") {
+      val sorts = Order.parse("activity.time.year desc,activity.time.validWeeksNum,activity.time.weekId desc")
+      sorts.size should be (3)
+      var order = sorts(0).asInstanceOf[Order]
+      order.property should equal ("activity.time.year")
+      order.ascending should be (false)
+      order = sorts(1).asInstanceOf[Order]
+      order.property should equal ("activity.time.validWeeksNum")
+      order.ascending should be (true)
+      order = sorts(2).asInstanceOf[Order]
+      order.property should equal ("activity.time.weekId")
+      order.ascending should be (false)
+    }
+
+    it("ParserComplexOrder") {
+      val sorts = Order.parse("(case when ware.price is null then 0 else ware.price end) desc")
+      sorts.size should be(1)
+      val order = sorts(0).asInstanceOf[Order]
+      order.property should equal ("(case when ware.price is null then 0 else ware.price end)")
+      order.ascending should be (false)
+    }
   }
 }

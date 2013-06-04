@@ -18,21 +18,15 @@
  */
 package org.beangle.commons.csv
 
-import org.testng.Assert.assertEquals
-import org.testng.Assert.assertNull
 import java.io.StringReader
-import org.testng.annotations.BeforeClass
-import org.testng.annotations.Test
-//remove if not needed
-import scala.collection.JavaConversions._
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-@Test
-class CsvReaderTest {
+class CsvReaderTest extends FunSpec with ShouldMatchers{
 
-  var reader: CsvReader = null
+  var reader: CsvReader = buildReader
 
-  @BeforeClass
-  def builderReader() {
+  def buildReader() :CsvReader = {
     val sb = new StringBuilder()
     sb.append("a,b,c").append("\n")
     sb.append("a,\"b,b,b\",c").append("\n")
@@ -41,33 +35,35 @@ class CsvReaderTest {
     sb.append("\"Glen \"\"The Man\"\" Smith\",Athlete,Developer\n")
     sb.append("\"\"\"\"\"\",\"test\"\n")
     sb.append("\"a\nb\",b,\"\nd\",e\n")
-    reader = new CsvReader(new StringReader(sb.toString))
+    new CsvReader(new StringReader(sb.toString))
   }
 
   /**
-   * Tests iterating over a reader.
-   */
-  @Test
-  def testRead() {
-    var nextLine = reader.readNext()
-    assertEquals("a", nextLine(0))
-    assertEquals("b", nextLine(1))
-    assertEquals("c", nextLine(2))
-    nextLine = reader.readNext()
-    assertEquals("a", nextLine(0))
-    assertEquals("b,b,b", nextLine(1))
-    assertEquals("c", nextLine(2))
-    nextLine = reader.readNext()
-    assertEquals(3, nextLine.length)
-    nextLine = reader.readNext()
-    assertEquals(3, nextLine.length)
-    nextLine = reader.readNext()
-    assertEquals("Glen \"The Man\" Smith", nextLine(0))
-    nextLine = reader.readNext()
-    assertEquals("\"\"", nextLine(0))
-    assertEquals("test", nextLine(1))
-    nextLine = reader.readNext()
-    assertEquals(4, nextLine.length)
-    assertNull(reader.readNext())
+    * Tests iterating over a reader.
+    */
+  describe("CsvReader"){
+    it("Read next"){
+      var nextLine = reader.readNext()
+      nextLine(0) should equal ("a")
+      nextLine(1) should equal ("b")
+      nextLine(2) should equal ("c")
+      nextLine = reader.readNext()
+      nextLine(0)  should equal("a")
+      nextLine(1) should equal ("b,b,b")
+      nextLine(2) should equal ("c")
+      nextLine = reader.readNext()
+      nextLine.length should be (3)
+      nextLine = reader.readNext()
+      nextLine.length should be (3)
+      nextLine = reader.readNext()
+      nextLine(0) should equal ( "Glen \"The Man\" Smith")
+      nextLine = reader.readNext()
+      nextLine(0) should equal("\"\"")
+      nextLine(1) should equal ("test")
+      nextLine = reader.readNext()
+      nextLine.length should be (4)
+      reader.readNext() should be (null)
+    }
   }
 }
+

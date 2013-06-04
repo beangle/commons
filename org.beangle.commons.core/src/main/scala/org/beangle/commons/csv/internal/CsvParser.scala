@@ -117,13 +117,13 @@ class CsvParser(var format: CsvFormat) {
           sb.append(nextLine.charAt(i + 1))
           i += 1
         }
-      } else if (c == format.getDelimiter) {
+      } else if (c == format.delimiter) {
         if (isNextCharacterEscapedQuote(nextLine, inQuotes || inField, i)) {
           sb.append(nextLine.charAt(i + 1))
           i += 1
         } else {
           inQuotes = !inQuotes
-          if (!format.isStrictQuotes) {
+          if (!format.strictQuotes) {
             if (i > 2 && !format.isSeparator(nextLine.charAt(i - 1)) && 
               nextLine.length > (i + 1) && 
               !format.isSeparator(nextLine.charAt(i + 1))) {
@@ -141,7 +141,7 @@ class CsvParser(var format: CsvFormat) {
         sb = new StringBuilder(InitialReadSize)
         inField = false
       } else {
-        if (!format.isStrictQuotes || inQuotes) {
+        if (!format.strictQuotes || inQuotes) {
           sb.append(c)
           inField = true
         }

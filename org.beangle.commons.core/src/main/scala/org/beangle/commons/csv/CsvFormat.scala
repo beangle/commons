@@ -18,8 +18,6 @@
  */
 package org.beangle.commons.csv
 import CsvFormat._
-import scala.beans.BooleanBeanProperty
-import scala.beans.BeanProperty
 
 object CsvFormat {
 
@@ -59,12 +57,10 @@ object CsvFormat {
  * @author chaostone
  * @version $Id: $
  */
-class CsvFormat private (@BeanProperty val separators: Set[Char], @BeanProperty val delimiter: Char) {
+class CsvFormat private (val separators: Set[Char],val delimiter: Char) {
 
-  @BeanProperty
   var escape = CsvConstants.Escape
 
-  @BooleanBeanProperty
   val strictQuotes = false
 
   private def this(separators: Set[Char], delimiter: Char, escape: Char) {

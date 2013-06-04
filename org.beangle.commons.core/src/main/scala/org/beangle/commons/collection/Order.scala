@@ -32,6 +32,11 @@ object Order {
    */
   val OrderStr = "orderBy"
 
+  def apply(property:String) = new  Order(property, true)
+
+  def apply(property:String,ascending: Boolean) = new  Order(property, ascending)
+
+
   /**
    * <p>
    * asc.

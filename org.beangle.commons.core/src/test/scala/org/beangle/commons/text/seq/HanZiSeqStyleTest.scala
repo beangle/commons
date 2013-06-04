@@ -17,17 +17,17 @@
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.text.seq
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-import org.testng.Assert.assertEquals
-import org.testng.annotations.Test
+class HanZiSeqStyleTest extends FunSpec with ShouldMatchers{
 
-@Test
-class HanZiSeqStyleTest {
-
-  def testBuildText() {
-    val style = new HanZiSeqStyle()
-    assertEquals("二百一十一", style.build(211))
-    assertEquals("二百零一", style.build(201))
-    assertEquals("三千零十一", style.build(3011))
+  describe("HanZiSeqStyle"){
+    it("Build HanZi Sequence"){
+      val style = new HanZiSeqStyle
+      style.build(211) should equal ("二百一十一")
+      style.build(201) should equal ("二百零一")
+      style.build(3011) should equal ("三千零十一")
+    }
   }
 }

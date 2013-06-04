@@ -20,8 +20,6 @@ package org.beangle.commons.lang.conversion.impl
 
 import org.beangle.commons.lang.conversion.converter._
 import DefaultConversion._
-//remove if not needed
-import scala.collection.JavaConversions._
 
 object DefaultConversion {
 
@@ -47,9 +45,9 @@ class DefaultConversion extends AbstractGenericConversion {
 
   addConverter(new String2EnumConverter())
 
-  addConverter(new String2LocaleConverter())
+  addConverter(String2LocaleConverter)
 
   addConverter(new Number2NumberConverter())
 
-  addConverter(new Object2StringConverter())
+  addConverter(Object2StringConverter)
 }

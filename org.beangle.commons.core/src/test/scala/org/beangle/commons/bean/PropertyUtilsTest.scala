@@ -18,18 +18,17 @@
  */
 package org.beangle.commons.bean
 
-import org.testng.Assert.assertEquals
 import org.beangle.commons.lang.testbean.TestBean
-import org.testng.annotations.Test
-//remove if not needed
-import scala.collection.JavaConversions._
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-@Test
-class PropertyUtilsTest {
+class PropertyUtilsTest extends FunSpec with ShouldMatchers{
 
-  def testSet() {
-    val bean = new TestBean()
-    PropertyUtils.setProperty(bean, "intValue", 2)
-    assertEquals(bean.getIntValue, 2)
+  describe("PropertyUtils"){
+    it("Get or Set property"){
+      val bean = new TestBean
+      PropertyUtils.setProperty(bean, "intValue", 2)
+      bean.getIntValue should  be (2)
+    }
   }
 }

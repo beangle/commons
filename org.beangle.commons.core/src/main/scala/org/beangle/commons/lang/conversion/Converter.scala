@@ -19,9 +19,6 @@
 package org.beangle.commons.lang.conversion
 
 import org.beangle.commons.lang.functor.UnaryFunction
-//remove if not needed
-import scala.collection.JavaConversions._
-
 /**
  * Convert source to target
  *

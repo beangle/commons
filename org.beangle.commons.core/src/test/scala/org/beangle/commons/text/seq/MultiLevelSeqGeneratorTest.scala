@@ -17,27 +17,27 @@
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.text.seq
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-import org.testng.Assert.assertEquals
-import org.testng.annotations.Test
+class MultiLevelSeqGeneratorTest extends FunSpec with ShouldMatchers{
 
-@Test
-class MultiLevelSeqGeneratorTest {
-
-  def testGenerator() {
-    val sg = new MultiLevelSeqGenerator()
-    sg.add(new SeqPattern(SeqNumStyle.HANZI, "{1}"))
-    sg.add(new SeqPattern(SeqNumStyle.HANZI, "({2})"))
-    sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}"))
-    sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}.{4}"))
-    sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}.{4}.{5}"))
-    sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}.{4}.{5}.{6}"))
-    sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}.{4}.{5}.{6}.{7}"))
-    sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}.{4}.{5}.{6}.{7}.{8}"))
-    sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}.{4}.{5}.{6}.{7}.{8}.{9}"))
-    assertEquals("一", sg.getSytle(1).next())
-    assertEquals("(一)", sg.getSytle(2).next())
-    assertEquals("1", sg.getSytle(3).next())
-    assertEquals("1.1", sg.getSytle(4).next())
+  describe("MultiLevelSeqGenerator"){
+    it("Generate multi level sequence"){
+      val sg = new MultiLevelSeqGenerator
+      sg.add(new SeqPattern(SeqNumStyle.HANZI, "{1}"))
+      sg.add(new SeqPattern(SeqNumStyle.HANZI, "({2})"))
+      sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}"))
+      sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}.{4}"))
+      sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}.{4}.{5}"))
+      sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}.{4}.{5}.{6}"))
+      sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}.{4}.{5}.{6}.{7}"))
+      sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}.{4}.{5}.{6}.{7}.{8}"))
+      sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}.{4}.{5}.{6}.{7}.{8}.{9}"))
+      sg.getSytle(1).next() should equal ("一")
+      sg.getSytle(2).next() should equal ("(一)")
+      sg.getSytle(3).next() should equal ("1")
+      sg.getSytle(4).next() should equal ("1.1")
+    }
   }
 }

@@ -18,9 +18,8 @@
  */
 package org.beangle.commons.collection.page
 
-import java.util.List
 
-object PagedList{
+object PagedSeq{
   private def calcMaxPageNo(pageSize:Int,total:Int) :Int = {
     if (total <= pageSize) {
        1
@@ -31,7 +30,7 @@ object PagedList{
     }
   }
 }
-import PagedList._
+import PagedSeq._
 /**
  * <p>
  * PagedList class.
@@ -40,7 +39,7 @@ import PagedList._
  * @author chaostone
  * @version $Id: $
  */
-class PagedList[E](val datas: List[E], limit: PageLimit) extends PageWapper[E]() {
+class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends PageWapper[E]() {
 
   var pageNo: Int = limit.pageNo - 1
 
@@ -49,7 +48,6 @@ class PagedList[E](val datas: List[E], limit: PageLimit) extends PageWapper[E]()
   val pageSize: Int = limit.pageSize
 
   this.next()
-
   /**
    * <p>
    * Constructor for PagedList.
@@ -58,7 +56,7 @@ class PagedList[E](val datas: List[E], limit: PageLimit) extends PageWapper[E]()
    * @param datas a {@link java.util.List} object.
    * @param pageSize a int.
    */
-  def this(datas: List[E], pageSize: Int) {
+  def this(datas:Seq[E], pageSize: Int) {
     this(datas, new PageLimit(1, pageSize))
   }
 
@@ -70,24 +68,6 @@ class PagedList[E](val datas: List[E], limit: PageLimit) extends PageWapper[E]()
    * @return a int.
    */
   def total: Int = datas.size
-
-  /**
-   * <p>
-   * getNextPageNo.
-   * </p>
-   *
-   * @return a int.
-   */
-  def nextPageNo: Int = page.nextPageNo
-
-  /**
-   * <p>
-   * getPreviousPageNo.
-   * </p>
-   *
-   * @return a int.
-   */
-  def previousPageNo: Int = page.previousPageNo
 
   /**
    * <p>
@@ -134,7 +114,7 @@ class PagedList[E](val datas: List[E], limit: PageLimit) extends PageWapper[E]()
     }
     this.pageNo = pageNo
     val toIndex = pageNo * pageSize
-    val newPage = new SinglePage[E](pageNo, pageSize, datas.size, datas.subList((pageNo - 1) * pageSize, 
+    val newPage = new SinglePage[E](pageNo, pageSize, datas.size, datas.slice((pageNo - 1) * pageSize, 
       if ((toIndex < datas.size)) toIndex else datas.size))
     this.page=newPage
     this

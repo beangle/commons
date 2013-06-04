@@ -19,18 +19,15 @@
 package org.beangle.commons.lang.conversion.converter
 
 import org.beangle.commons.lang.conversion.Converter
-//remove if not needed
-import scala.collection.JavaConversions._
-
 /**
  * Convert Object to String
  *
  * @author chaostone
  * @since 3.2.0
  */
-class Object2StringConverter extends Converter[AnyRef, String] {
+object Object2StringConverter extends Converter[AnyRef, String] {
 
   override def apply(input: AnyRef): String = {
-    if ((input == null)) null else input.toString
+    if ((input == null)) "null" else input.toString
   }
 }

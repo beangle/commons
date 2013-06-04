@@ -18,23 +18,13 @@
  */
 package org.beangle.commons.collection.page
 
-import java.util.Collection
-import java.util.Iterator
-import java.util.List
-import java.util.ListIterator
-import scala.reflect.{ BeanProperty, BooleanBeanProperty }
-//remove if not needed
-import scala.collection.JavaConversions._
-
 /**
  * 分页对象
  *
  * @author chaostone
  * @version $Id: $
  */
-class SinglePage[E](val pageNo: Int,val pageSize: Int,val total: Int,val items: List[E]) extends Page[E] {
-
-  def firstPageNo: Int = 1
+class SinglePage[E](val pageNo: Int,val pageSize: Int,val total: Int,val items: Seq[E]) extends Page[E] {
 
   def maxPageNo: Int = {
     if (total < pageSize) {
@@ -46,44 +36,9 @@ class SinglePage[E](val pageNo: Int,val pageSize: Int,val total: Int,val items: 
     }
   }
 
-  def nextPageNo: Int = {
-    if (pageNo == maxPageNo) maxPageNo
-    else pageNo + 1
-  }
-  def previousPageNo(): Int = {
-    if (pageNo == 1) pageNo
-    else pageNo - 1
-  }
+  def hasNext: Boolean = maxPageNo > pageNo
 
-  def contains(obj: AnyRef): Boolean = items.contains(obj)
-
-  def containsAll(datas: Collection[_]): Boolean = items.containsAll(datas)
-
-  def isEmpty(): Boolean = items.isEmpty
-
-  def iterator(): Iterator[E] = items.iterator()
-
-  def add(obj: E): Boolean = throw new RuntimeException("unsupported add")
-
-  def addAll(datas: Collection[_ <: E]): Boolean = throw new RuntimeException("unsupported addAll")
-
-  def clear() { throw new RuntimeException("unsupported clear") }
-
-  def remove(obj: AnyRef): Boolean = throw new RuntimeException("unsupported removeAll")
-
-  def removeAll(datas: Collection[_]): Boolean = throw new RuntimeException("unsupported removeAll")
-
-  def retainAll(datas: Collection[_]): Boolean = throw new RuntimeException("unsupported retailAll")
-
-  def size(): Int = items.size
-
-  def toArray(): Array[AnyRef] = items.toArray()
-
-  def toArray[T](datas: Array[T with Object]) = items.toArray[T](datas)
-
-  def hasNext(): Boolean = maxPageNo > pageNo
-
-  def hasPrevious(): Boolean = pageNo > 1
+  def hasPrevious: Boolean = pageNo > 1
 
   def next(): Page[E] = this
 
@@ -91,25 +46,9 @@ class SinglePage[E](val pageNo: Int,val pageSize: Int,val total: Int,val items: 
 
   def moveTo(pageNo: Int): Page[E] = this
 
-  def add(arg0: Int, arg1: E) {
-    items.add(arg0, arg1)
-  }
+  def apply(index: Int): E = items(index)
 
-  def get(index: Int): E = items.get(index)
+  def length: Int = items.size
 
-  def indexOf(o: AnyRef): Int = items.indexOf(o)
-
-  def lastIndexOf(o: AnyRef): Int = items.lastIndexOf(o)
-
-  def listIterator(): ListIterator[E] = items.listIterator()
-
-  def listIterator(index: Int): ListIterator[E] = items.listIterator(index)
-
-  def remove(index: Int): E = items.remove(index)
-
-  def addAll(arg0: Int, arg1: Collection[_ <: E]): Boolean = items.addAll(arg0, arg1)
-
-  def set(arg0: Int, arg1: E): E = items.set(arg0, arg1)
-
-  def subList(fromIndex: Int, toIndex: Int): List[E] = items.subList(fromIndex, toIndex)
+  def iterator: Iterator[E] = items.iterator
 }
