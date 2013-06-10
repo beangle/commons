@@ -18,10 +18,8 @@
  */
 package org.beangle.commons.entity.meta
 
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.entity.Entity
 import scala.collection.mutable.ListBuffer
-import scala.collection.JavaConversions._
 
 object AbstractEntityContext{
 

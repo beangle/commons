@@ -92,12 +92,7 @@ class Condition(val content:String,initParams:Any*) {
   }
 
   /**
-   * <p>
    * params.
-   * </p>
-   * 
-   * @param values a {@link java.util.List} object.
-   * @return a {@link org.beangle.commons.dao.query.builder.Condition} object.
    */
   def params(values: List[Any]):this.type= {
     params.clear()

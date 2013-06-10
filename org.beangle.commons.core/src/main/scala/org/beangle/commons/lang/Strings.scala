@@ -20,14 +20,8 @@ package org.beangle.commons.lang
 
 import java.lang.Character.{isLowerCase => isLower, isUpperCase => isUpper}
 import java.lang.Character.toLowerCase
-import java.util.ArrayList
-import java.util.Collection
-import java.util.Iterator
-import java.util.List
-import java.util.Set
-import org.beangle.commons.collection.CollectUtils
-import scala.collection.JavaConversions._
-
+import org.beangle.commons.collection.Collections
+import scala.collection.mutable
 /**
  * Operations on {@link java.lang.String} that are {@code null} safe.
  *
@@ -259,9 +253,7 @@ object Strings {
    */
   def intersectSeq(first: String, second: String, delimiter: String): String = {
     if (isEmpty(first) || isEmpty(second)) return ""
-    val firstSeq = java.util.Arrays.asList(split(first, ','): _*)
-    val secondSeq = java.util.Arrays.asList(split(second, ','): _*)
-    val rs = CollectUtils.intersection(firstSeq, secondSeq)
+    val rs = Collections.intersection(split(first, ',').toList,split(second, ',').toList)
     val buf = new StringBuilder()
     for (ele <- rs) buf.append(delimiter).append(ele)
     if (buf.length > 0) buf.append(delimiter)
@@ -319,14 +311,7 @@ object Strings {
    */
   def isEqualSeq(first: String, second: String, delimiter: String): Boolean = {
     if (isNotEmpty(first) && isNotEmpty(second)) {
-      val firstWords = split(first, delimiter)
-      val firstSet = CollectUtils.newHashSet[String]
-      for (i <- 0 until firstWords.length) firstSet.add(firstWords(i))
-
-      val secondWords = split(second, delimiter)
-      val secondSet = CollectUtils.newHashSet[String]
-      for (i <- 0 until secondWords.length) secondSet.add(secondWords(i))
-      firstSet == secondSet
+      split(first, delimiter).toSet == split(second, delimiter).toSet
     } else {
       isEmpty(first) & isEmpty(second)
     }
@@ -359,17 +344,13 @@ object Strings {
   def isNotEmpty(cs: CharSequence): Boolean = !isEmpty(cs)
 
   /**
-   * <p>
    * join.
-   * </p>
    *
    * @param seq
-   *          a {@link java.util.Collection} object.
-   * @param delimiter
-   *          a {@link java.lang.String} object.
+   * @param delimiter a {@link java.lang.String} object.
    * @return a {@link java.lang.String} object.
    */
-  def join(seq: Collection[String], delimiter: String): String = {
+  def join(seq: Seq[String], delimiter: String): String = {
     if (null == seq || seq.size < 1) {
       ""
     } else {
@@ -421,13 +402,13 @@ object Strings {
    * @return a {@link java.lang.String} object.
    */
   def keepSeqUnique(keyString: String): String = {
-    val keysArray = split(keyString, ",")
-    val keys = CollectUtils.newArrayList[String]()
-    for (i <- 0 until keysArray.length if !keys.contains(keysArray(i))) keys.add(keysArray(i))
+    val keyList = split(keyString, ",").toList
+    val keys= keyList.toSet
     val keyBuf = new StringBuilder()
-    var iter = keys.iterator()
+    val iter = keyList.iterator
     while (iter.hasNext) {
-      keyBuf.append(iter.next())
+      val key= iter.next
+      if(!keys(key))keyBuf.append(key)
       if (iter.hasNext) keyBuf.append(',')
     }
     keyBuf.toString
@@ -532,9 +513,9 @@ object Strings {
    */
   def mergeSeq(first: String, second: String, delimiter: String): String = {
     if (isNotEmpty(second) && isNotEmpty(first)) {
-      val firstSeq = java.util.Arrays.asList(split(first, delimiter): _*)
-      val secondSeq = java.util.Arrays.asList(split(second, delimiter): _*)
-      val rs = CollectUtils.union(firstSeq, secondSeq)
+      val firstSeq = split(first, delimiter).toList
+      val secondSeq = split(second, delimiter).toList
+      val rs = Collections.union(firstSeq, secondSeq)
       val buf = new StringBuilder()
       for (ele <- rs) buf.append(delimiter).append(ele)
       if (buf.length > 0) buf.append(delimiter)
@@ -730,14 +711,14 @@ object Strings {
     if (str == null) return null
     val len = str.length
     if (len == 0) return new Array[String](0)
-    val list = new ArrayList[String]()
+    val list = new mutable.ListBuffer[String]
     var i = 0
     var start = 0
     var matched = false
     while (i < len) {
       if (str.charAt(i) == separatorChar) {
         if (matched) {
-          list.add(str.substring(start, i))
+          list+=str.substring(start, i)
           matched = false
         }
         start = i + 1
@@ -746,8 +727,8 @@ object Strings {
       }
       i += 1
     }
-    if (matched) list.add(str.substring(start, i))
-    list.toArray(new Array[String](list.size))
+    if (matched) list+=str.substring(start, i)
+    list.toArray
   }
 
   /**
@@ -764,14 +745,12 @@ object Strings {
   def split2(target: String, separatorChars: Array[Char]): Array[String] = {
     if (null == target) return new Array[String](0)
 
-    val sb = target.toCharArray()
+    val sb = target.toCharArray
     for (separator <- separatorChars if separator != ','; i <- 0 until sb.length if sb(i) == separator) sb(i) = ','
     val targets = split(new String(sb), ',')
-    val list = CollectUtils.newArrayList[String]
-    for (one <- targets if isNotBlank(one)) list.add(one.trim())
-    val rs = new Array[String](list.size)
-    list.toArray(rs)
-    rs
+    val list = new mutable.ListBuffer[String]
+    for (one <- targets if isNotBlank(one)) list += one.trim
+    list.toArray
   }
 
   /**
@@ -800,14 +779,14 @@ object Strings {
     }
     val len = str.length
     if (len == 0) return new Array[String](0)
-    val list = new ArrayList[String]()
+    val list = new mutable.ListBuffer[String]
     var i, start = 0
     var matched = false
     val sepChars = if (null == separatorChars) " " else separatorChars
     while (i < len) {
       if (sepChars.indexOf(str.charAt(i)) >= 0) {
         if (matched) {
-          list.add(str.substring(start, i))
+          list+=str.substring(start, i)
           matched = false
         }
         start = i + 1
@@ -816,20 +795,20 @@ object Strings {
       }
       i += 1
     }
-    if (matched) list.add(str.substring(start, i))
-    list.toArray(new Array[String](list.size))
+    if (matched) list+=str.substring(start, i)
+    list.toArray
   }
 
   /**
    * 将1-2,3,4-9之类的序列拆分成数组
    *
    * @param numSeq a {@link java.lang.String} object.
-   * @return an array of {@link java.lang.Integer} objects.
+   * @return an array of Int objects.
    */
-  def splitNumSeq(numSeq: String): Array[Integer] = {
+  def splitNumSeq(numSeq: String): Array[Int] = {
     if (isEmpty(numSeq)) return null
     val numArray = split(numSeq, ',')
-    val numSet = CollectUtils.newHashSet[Integer]()
+    val numSet = new mutable.HashSet[Int]
     for (i <- 0 until numArray.length) {
       val num = numArray(i)
       if (num.contains("-")) {
@@ -842,12 +821,10 @@ object Strings {
           j += 1
         }
       } else {
-        numSet.add(new java.lang.Integer(num))
+        numSet.add(Numbers.toInt(num))
       }
     }
-    val nums = new Array[Integer](numSet.size)
-    numSet.toArray(nums)
-    nums
+    numSet.toArray
   }
 
   /**
@@ -953,9 +930,9 @@ object Strings {
       if (!first.endsWith(delimiter)) builder.append(first).append(delimiter)
       return builder.toString
     }
-    val firstSeq = java.util.Arrays.asList(split(first, delimiter): _*)
-    val secondSeq = java.util.Arrays.asList(split(second, delimiter): _*)
-    val rs = CollectUtils.subtract(firstSeq, secondSeq)
+    val firstSeq = split(first, delimiter).toList
+    val secondSeq = split(second, delimiter).toList
+    val rs = Collections.subtract(firstSeq, secondSeq)
     val buf = new StringBuilder()
     for (ele <- rs) buf.append(delimiter).append(ele)
     if (buf.length > 0) buf.append(delimiter)

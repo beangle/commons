@@ -18,8 +18,6 @@
  */
 package org.beangle.commons.config
 
-import scala.beans.BeanProperty
-
 /**
  * <p>
  * Version class.
@@ -31,18 +29,13 @@ import scala.beans.BeanProperty
  */
 class Version {
 
-  @BeanProperty
   var name: String = _
 
-  @BeanProperty
   var vendor: String = _
 
-  @BeanProperty
   var version: String = _
 
-  @BeanProperty
   var majorVersion: Int = _
 
-  @BeanProperty
   var minorVersion: Int = _
 }

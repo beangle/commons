@@ -33,13 +33,15 @@ object PagedSeq{
 import PagedSeq._
 /**
  * <p>
- * PagedList class.
+ * PagedSeq class.
  * </p>
  *
  * @author chaostone
  * @version $Id: $
  */
-class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends PageWapper[E]() {
+class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends Page[E]() {
+
+  var page: Page[E] = _
 
   var pageNo: Int = limit.pageNo - 1
 
@@ -48,65 +50,61 @@ class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends PageWapper[E]() {
   val pageSize: Int = limit.pageSize
 
   this.next()
+
   /**
-   * <p>
-   * Constructor for PagedList.
-   * </p>
-   *
-   * @param datas a {@link java.util.List} object.
-   * @param pageSize a int.
+   * Constructor for PagedSeq
    */
   def this(datas:Seq[E], pageSize: Int) {
-    this(datas, new PageLimit(1, pageSize))
+    this(datas, PageLimit(1, pageSize))
   }
 
   /**
-   * <p>
-   * getTotal.
-   * </p>
+   * getItems.
+   */
+  def items = page.items
+
+  /**
+   * iterator.
+   */
+  def iterator = page.iterator
+
+  /**
+   * size
+   */
+  def length = page.length
+
+  /**
    *
-   * @return a int.
+   */
+  def apply(index: Int): E = page(index)
+
+  /**
+   * getTotal.
    */
   def total: Int = datas.size
 
   /**
-   * <p>
    * hasNext.
-   * </p>
-   *
-   * @return a boolean.
    */
   def hasNext: Boolean = pageNo < maxPageNo
 
   /**
-   * <p>
    * hasPrevious.
-   * </p>
-   *
-   * @return a boolean.
    */
   def hasPrevious: Boolean =pageNo > 1
 
   /**
-   * <p>
    * next.
-   * </p>
-   *
-   * @return a {@link org.beangle.commons.collection.page.Page} object.
    */
   def next(): Page[E] = moveTo(pageNo + 1)
 
   /**
-   * <p>
    * previous.
-   * </p>
-   *
-   * @return a {@link org.beangle.commons.collection.page.Page} object.
    */
   def previous(): Page[E] = moveTo(pageNo - 1)
 
   /**
-   {@inheritDoc}
+   *
    */
   def moveTo(pageNo: Int): Page[E] = {
     if (pageNo < 1) {

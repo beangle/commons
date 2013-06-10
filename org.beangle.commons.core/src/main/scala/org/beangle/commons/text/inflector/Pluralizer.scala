@@ -18,8 +18,6 @@
  */
 package org.beangle.commons.text.inflector
 
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * <code>Pluralizer</code> converts singular word forms to their plural forms.

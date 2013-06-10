@@ -19,10 +19,6 @@
 package org.beangle.commons.event
 
 import java.util.EventObject
-import scala.beans.{BeanProperty, BooleanBeanProperty}
-//remove if not needed
-import scala.collection.JavaConversions._
-
 /**
  * <p>
  * Abstract Event class.
@@ -37,24 +33,20 @@ abstract class Event(source: Any) extends EventObject(source) {
   /**
    System time when the event happened
    */
-  @BeanProperty
   val timestamp = System.currentTimeMillis()
 
   /**
    event subject
    */
-  @BeanProperty
   var subject: String = _
 
   /**
    event details
    */
-  @BeanProperty
   var detail: String = _
 
   /**
    resource where the event happened
    */
-  @BeanProperty
   var resource: String = _
 }

@@ -19,7 +19,6 @@
 package org.beangle.commons.config.property
 
 import java.util.Properties
-import java.util.Set
 import PropertyConfig._
 
 object PropertyConfig {
@@ -39,36 +38,20 @@ object PropertyConfig {
 trait PropertyConfig {
 
   /**
-   * <p>
    * get.
-   * </p>
-   *
-   * @param name a {@link java.lang.String} object.
-   * @return a {@link java.lang.Object} object.
    */
-  def get(name: String): Any
+  def get(name: String): Option[Any]
 
   /**
-   * <p>
    * set.
-   * </p>
    *
-   * @param name a {@link java.lang.String} object.
-   * @param value a {@link java.lang.Object} object.
    */
   def set(name: String, value: Any): Unit
 
   /**
-   * <p>
    * get.
-   * </p>
-   *
-   * @param clazz a {@link java.lang.Class} object.
-   * @param name a {@link java.lang.String} object.
-   * @param <T> a T object.
-   * @return a T object.
    */
-  def get[T](clazz: Class[T], name: String): T
+  def get[T](clazz: Class[T], name: String): Option[T]
 
   /**
    * <p>
@@ -80,13 +63,9 @@ trait PropertyConfig {
   def add(properties: Properties): Unit
 
   /**
-   * <p>
-   * getNames.
-   * </p>
-   *
-   * @return a {@link java.util.Set} object.
+   * names.
    */
-  def getNames(): Set[String]
+  def names: Set[String]
 
   /**
    * <p>

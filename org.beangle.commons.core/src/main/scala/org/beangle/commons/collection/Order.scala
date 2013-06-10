@@ -58,12 +58,7 @@ object Order {
   def desc(property: String): Order = new Order(property, false)
 
   /**
-   * <p>
    * toSortString.
-   * </p>
-   *
-   * @param orders a {@link java.util.List} object.
-   * @return a {@link java.lang.String} object.
    */
   def toSortString(orders: List[Order]): String = {
     if (null == orders || orders.isEmpty) return ""
@@ -78,10 +73,6 @@ object Order {
   /**
    * <p>
    * parse.
-   * </p>
-   *
-   * @param orderString a {@link java.lang.String} object.
-   * @return a {@link java.util.List} object.
    */
   def parse(orderString: String): List[Order] = {
     if (Strings.isBlank(orderString)) {

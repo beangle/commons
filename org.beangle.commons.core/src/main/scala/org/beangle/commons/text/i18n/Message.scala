@@ -18,8 +18,6 @@
  */
 package org.beangle.commons.text.i18n
 
-import scala.beans.BeanProperty
-
 /**
  * <p>
  * Message class.
@@ -28,7 +26,7 @@ import scala.beans.BeanProperty
  * @author chaostone
  * @version $Id: $
  */
-class Message(@BeanProperty val key: String, @BeanProperty val params: List[Any]) {
+class Message(val key: String, val params: List[Any]) {
 
   /**
    * <p>

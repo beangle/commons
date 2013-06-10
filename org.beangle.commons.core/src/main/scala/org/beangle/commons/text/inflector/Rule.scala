@@ -18,8 +18,6 @@
  */
 package org.beangle.commons.text.inflector
 
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * <p>

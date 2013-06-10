@@ -26,7 +26,6 @@ import java.util.Locale
 import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
 
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.time.Stopwatch
 import org.beangle.commons.lang.Arrays
@@ -193,6 +192,7 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
     }
   }
 
+  //FIXME
   def getDefaultText(key: String, locale: Locale): String = {
     var msg: String = null
     for (defaultBundleName <- defaultBundleNames) {

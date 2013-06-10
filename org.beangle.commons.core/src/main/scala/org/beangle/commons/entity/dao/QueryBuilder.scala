@@ -31,40 +31,22 @@ import org.beangle.commons.collection.page.PageLimit
 trait QueryBuilder[T] {
 
   /**
-   * <p>
    * build.
-   * </p>
-   * 
-   * @return a {@link org.beangle.commons.dao.query.Query} object.
    */
   def build():Query[T]
 
   /**
-   * <p>
    * limit.
-   * </p>
-   * 
-   * @param limit a {@link org.beangle.commons.collection.page.PageLimit} object.
-   * @return a {@link org.beangle.commons.dao.query.QueryBuilder} object.
    */
   def limit(limit:PageLimit):  QueryBuilder[T]
 
   /**
-   * <p>
    * getParams.
-   * </p>
-   * 
-   * @return a {@link java.util.Map} object.
    */
   def params:  Map[String, Any]
 
   /**
-   * <p>
    * params.
-   * </p>
-   * 
-   * @param newParams a {@link java.util.Map} object.
-   * @return a {@link org.beangle.commons.dao.query.QueryBuilder} object.
    */
   def params(newParams:Map[String, Any]):this.type
 }

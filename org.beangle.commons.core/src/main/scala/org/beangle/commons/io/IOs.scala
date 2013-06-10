@@ -19,10 +19,7 @@
 package org.beangle.commons.io
 
 import java.io._
-import java.util.ArrayList
-import java.util.List
-//remove if not needed
-import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 object IOs {
 
@@ -86,13 +83,13 @@ object IOs {
    */
   def readLines(input: Reader): List[String] = {
     val reader = toBufferedReader(input)
-    val list = new ArrayList[String]()
+    val list = new mutable.ListBuffer[String]
     var line = reader.readLine()
     while (line != null) {
-      list.add(line)
+      list+=line
       line = reader.readLine()
     }
-    list
+    list.toList
   }
 
   def readLines(input: InputStream): List[String] = readLines(new InputStreamReader(input))

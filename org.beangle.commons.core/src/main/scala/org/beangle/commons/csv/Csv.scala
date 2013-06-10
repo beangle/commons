@@ -19,7 +19,6 @@
 package org.beangle.commons.csv
 
 import scala.collection.mutable.ListBuffer
-import scala.beans.BeanProperty
 
 /**
  * csv document object.
@@ -27,9 +26,8 @@ import scala.beans.BeanProperty
  * @author chaostone
  * @version $Id: $
  */
-class Csv(@BeanProperty val format: CsvFormat = new CsvFormat.Builder().build()) {
+class Csv(val format: CsvFormat = new CsvFormat.Builder().build()) {
 
-  @BeanProperty
   var contents = new ListBuffer[Array[String]]()
 
 }

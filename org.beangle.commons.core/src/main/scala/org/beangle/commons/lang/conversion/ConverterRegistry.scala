@@ -18,9 +18,6 @@
  */
 package org.beangle.commons.lang.conversion
 
-//remove if not needed
-import scala.collection.JavaConversions._
-
 /**
  * Converter Registry.
  *

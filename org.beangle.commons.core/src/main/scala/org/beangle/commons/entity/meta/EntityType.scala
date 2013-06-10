@@ -18,10 +18,6 @@
  */
 package org.beangle.commons.entity.meta
 
-import java.io.Serializable
-import java.util.Map
-
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.entity.Entity
 import org.beangle.commons.lang.Assert
 import org.beangle.commons.lang.reflect.Reflections
@@ -46,9 +42,7 @@ class EntityType(val entityName:String,val entityClass:Class[_],val idName:Strin
   Assert.notNull(entityName)
   Assert.notNull(entityClass)
 
-  val propertyTypes: Map[String, Type] = CollectUtils.newHashMap[String,Type]
-  if(null!=idType) propertyTypes.put(idName,idType)
-
+  var propertyTypes: Map[String, Type] = if(null!=idType) Map((idName->idType)) else Map()
 
   def this(entityName:String, entityClass:Class[_],  idName:String) {
     this(entityName,entityClass,idName,EntityType.extractIdType(entityClass,idName))
@@ -64,7 +58,7 @@ class EntityType(val entityName:String,val entityClass:Class[_],val idName:Strin
    * Get the type of a particular (named) property
    */
   override def getPropertyType(property:String):Type = {
-    val t = propertyTypes.get(property)
+    val t = propertyTypes.get(property).orNull
     if (null == t) {
       val propertyType = Reflections.getPropertyType(entityClass, property)
       if (null != propertyType) new IdentifierType(propertyType) else null
@@ -74,4 +68,9 @@ class EntityType(val entityName:String,val entityClass:Class[_],val idName:Strin
   override def name :String= entityName
 
   override def returnedClass = entityClass
+
+  def addProperty(name:String,t:Type):this.type={
+    propertyTypes+=(name->t)
+    this
+  }
 }

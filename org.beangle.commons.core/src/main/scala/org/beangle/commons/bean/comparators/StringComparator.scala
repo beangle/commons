@@ -19,8 +19,6 @@
 package org.beangle.commons.bean.comparators
 
 import java.util.Comparator
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * 根据local对两个非空字符串进行比较。

@@ -20,8 +20,6 @@ package org.beangle.commons.lang.conversion.impl
 
 import org.beangle.commons.lang.conversion.Converter
 import org.beangle.commons.lang.tuple.Pair
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * Adapte a Converter to GenericConverter

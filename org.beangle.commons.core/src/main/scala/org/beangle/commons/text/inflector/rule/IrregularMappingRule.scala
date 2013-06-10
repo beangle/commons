@@ -18,11 +18,7 @@
  */
 package org.beangle.commons.text.inflector.rule
 
-import java.util.Map
 import java.util.regex.Matcher
-//remove if not needed
-import scala.collection.JavaConversions._
-
 /**
  * <p>
  * IrregularMappingRule class.
@@ -36,8 +32,5 @@ class IrregularMappingRule(wordMappings: Map[String, String], regex: String)
 
   protected val mappings = wordMappings
 
-  /**
-   {@inheritDoc}
-   */
-  override def replace(m: Matcher): String = mappings.get(m.group(0).toLowerCase())
+  override def replace(m: Matcher): String = mappings(m.group(0).toLowerCase())
 }

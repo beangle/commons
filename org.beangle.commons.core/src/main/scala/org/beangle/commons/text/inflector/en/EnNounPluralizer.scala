@@ -22,7 +22,6 @@ import org.beangle.commons.text.inflector.rule.AbstractRegexReplacementRule.disj
 import java.util.Arrays
 import java.util.Locale
 import java.util.regex.Matcher
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.text.inflector.Rule
 import org.beangle.commons.text.inflector.RuleBasedPluralizer
 import org.beangle.commons.text.inflector.rule.AbstractRegexReplacementRule
@@ -41,11 +40,11 @@ object EnNounPluralizer {
 
   private val PREPOSITIONS = Array("about", "above", "across", "after", "among", "around", "at", "athwart", "before", "behind", "below", "beneath", "beside", "besides", "between", "betwixt", "beyond", "but", "by", "during", "except", "for", "from", "in", "into", "near", "of", "off", "on", "onto", "out", "over", "since", "till", "to", "under", "until", "unto", "upon", "with")
 
-  private val NOMINATIVE_PRONOUNS = CollectUtils.toMap(Array("i", "we"), Array("myself", "ourselves"), Array("you", "you"), Array("yourself", "yourselves"), Array("she", "they"), Array("herself", "themselves"), Array("he", "they"), Array("himself", "themselves"), Array("it", "they"), Array("itself", "themselves"), Array("they", "they"), Array("themself", "themselves"), Array("mine", "ours"), Array("yours", "yours"), Array("hers", "theirs"), Array("his", "theirs"), Array("its", "theirs"), Array("theirs", "theirs"))
+  private val NOMINATIVE_PRONOUNS =Map(("i" -> "we"),("myself" -> "ourselves"),("you"-> "you"), ("yourself" -> "yourselves"), ("she" -> "they"),("herself"->"themselves"), ("he" -> "they"),("himself"->"themselves"),("it"->"they"),("itself"-> "themselves"), ("they"-> "they"),("themself"->"themselves"),("mine"->"ours"),("yours"->"yours"),("hers"->"theirs"),("his"->"theirs"),("its"->"theirs"),("theirs"->"theirs"))
 
-  private val ACCUSATIVE_PRONOUNS = CollectUtils.toMap(Array("me", "us"), Array("myself", "ourselves"), Array("you", "you"), Array("yourself", "yourselves"), Array("her", "them"), Array("herself", "themselves"), Array("him", "them"), Array("himself", "themselves"), Array("it", "them"), Array("itself", "themselves"), Array("them", "them"), Array("themself", "themselves"))
+  private val ACCUSATIVE_PRONOUNS = Map(("me"->"us"), ("myself"->"ourselves"), ("you"->"you"), ("yourself"->"yourselves"), ("her"->"them"), ("herself"->"themselves"), ("him"->"them"), ("himself"->"themselves"), ("it"->"them"), ("itself"->"themselves"), ("them"->"them"), ("themself"->"themselves"))
 
-  private val IRREGULAR_NOUNS = CollectUtils.toMap(Array("child", "children"), Array("brother", "brothers"), Array("loaf", "loaves"), Array("hoof", "hoofs"), Array("beef", "beefs"), Array("money", "monies"), Array("mongoose", "mongooses"), Array("ox", "oxen"), Array("cow", "cows"), Array("soliloquy", "soliloquies"), Array("graffito", "graffiti"), Array("prima donna", "prima donnas"), Array("octopus", "octopuses"), Array("genie", "genies"), Array("ganglion", "ganglions"), Array("trilby", "trilbys"), Array("turf", "turfs"), Array("numen", "numina"), Array("atman", "atmas"), Array("occiput", "occiputs"), Array("corpus", "corpuses"), Array("opus", "opuses"), Array("genus", "genera"), Array("mythos", "mythoi"), Array("penis", "penises"), Array("testis", "testes"), Array("atlas", "atlases"))
+  private val IRREGULAR_NOUNS = Map(("child"->"children"), ("brother"->"brothers"), ("loaf"->"loaves"), ("hoof"->"hoofs"), ("beef"->"beefs"), ("money"->"monies"), ("mongoose"->"mongooses"), ("ox"->"oxen"), ("cow"->"cows"), ("soliloquy"->"soliloquies"), ("graffito"->"graffiti"), ("prima donna"->"prima donnas"), ("octopus"->"octopuses"), ("genie"->"genies"), ("ganglion"->"ganglions"), ("trilby"->"trilbys"), ("turf"->"turfs"), ("numen"->"numina"), ("atman"->"atmas"), ("occiput"->"occiputs"), ("corpus"->"corpuses"), ("opus"->"opuses"), ("genus"->"genera"), ("mythos"->"mythoi"), ("penis"->"penises"), ("testis"->"testes"), ("atlas"->"atlases"))
 
   private val CATEGORY_UNINFLECTED_NOUNS = Array(".*fish", "tuna", "salmon", "mackerel", "trout", "bream", "sea[- ]bass", "carp", "cod", "flounder", "whiting", ".*deer", ".*sheep", "Portuguese", "Amoyese", "Borghese", "Congoese", "Faroese", "Foochowese", "Genevese", "Genoese", "Gilbertese", "Hottentotese", "Kiplingese", "Kongoese", "Lucchese", "Maltese", "Nankingese", "Niasese", "Pekingese", "Piedmontese", "Pistoiese", "Sarawakese", "Shavese", "Vermontese", "Wenchowese", "Yengeese", ".*[nrlm]ese", ".*pox", "graffiti", "djinn", "breeches", "britches", "clippers", "gallows", "hijinks", "headquarters", "pliers", "scissors", "testes", "herpes", "pincers", "shears", "proceedings", "trousers", "cantus", "coitus", "nexus", "contretemps", "corps", "debris", ".*ois", "siemens", ".*measles", "mumps", "diabetes", "jackanapes", "series", "species", "rabies", "chassis", "innings", "news", "mews")
 
@@ -122,9 +121,9 @@ class EnNounPluralizer extends RuleBasedPluralizer {
     "-o", "-os"), new SuffixInflectionRule("-[aeiou]o", "-o", "-os"), new SuffixInflectionRule("-o",
     "-o", "-oes"), new SuffixInflectionRule("-", "-s"))
 
-  setRules(enrules)
+  rules = enrules
 
-  setLocale(Locale.ENGLISH)
+  locale = Locale.ENGLISH
 
   protected override def postProcess(trimmedWord: String, pluralizedWord: String): String = {
     if (trimmedWord == "I") {

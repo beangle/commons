@@ -36,11 +36,7 @@ trait Query[T] {
   def statement:String
 
   /**
-   * <p>
    * getParams.
-   * </p>
-   * 
-   * @return a {@link java.util.Map} object.
    */
   def params:Map[String, Any]
 

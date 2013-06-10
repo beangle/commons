@@ -19,9 +19,6 @@
 package org.beangle.commons.bean.comparators
 
 import java.text.Collator
-import scala.reflect.{ BeanProperty, BooleanBeanProperty }
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * <p>
@@ -31,18 +28,7 @@ import scala.collection.JavaConversions._
  * @author chaostone
  * @version $Id: $
  */
-class CollatorStringComparator(asc: Boolean, collator: Collator) extends StringComparator {
-  /**
-   * <p>
-   * Constructor for CollatorStringComparator.
-   * </p>
-   *
-   * @param asc a boolean.
-   */
-  def this(asc: Boolean) {
-    this(asc, Collator.getInstance)
-  }
-
+class CollatorStringComparator(val asc: Boolean, val collator: Collator=Collator.getInstance) extends StringComparator {
   /**
    * <p>
    * compare.

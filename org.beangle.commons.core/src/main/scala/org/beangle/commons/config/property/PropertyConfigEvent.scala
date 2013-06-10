@@ -19,9 +19,6 @@
 package org.beangle.commons.config.property
 
 import java.util.EventObject
-//remove if not needed
-import scala.collection.JavaConversions._
-
 /**
  * <p>
  * PropertyConfigEvent class.

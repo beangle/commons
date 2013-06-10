@@ -85,7 +85,7 @@ object TimerTrace {
         printTimes(currentNode)
         curStack.set(null)
       } else {
-        if (total > mintime) parent.children.add(currentNode)
+        if (total > mintime) parent.children += currentNode
       }
     }
   }

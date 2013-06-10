@@ -25,7 +25,6 @@ import org.beangle.commons.inject.Resources
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import UrlPropertyConfigProvider._
-import scala.beans.BeanProperty
 
 object UrlPropertyConfigProvider {
 
@@ -45,7 +44,6 @@ object UrlPropertyConfigProvider {
  */
 class UrlPropertyConfigProvider extends PropertyConfig.Provider {
 
-  @BeanProperty
   protected var resources: Resources = _
 
   /**

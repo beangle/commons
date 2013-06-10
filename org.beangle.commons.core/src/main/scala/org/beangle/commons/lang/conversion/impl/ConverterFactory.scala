@@ -20,13 +20,10 @@ package org.beangle.commons.lang.conversion.impl
 
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
-import java.util.Map
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.conversion.Converter
 import org.beangle.commons.lang.tuple.Pair
-import scala.collection.JavaConversions._
 import org.beangle.commons.lang.Objects
-
+import scala.collection.mutable
 /**
  * A converter factory that can convert objects from S to subtypes of R.
  *
@@ -37,13 +34,13 @@ import org.beangle.commons.lang.Objects
  */
 abstract class ConverterFactory[S, R] extends GenericConverter {
 
-  protected var converters: Map[Class[_], Converter[S, _ <: R]] = CollectUtils.newHashMap()
+  protected val converters = new mutable.HashMap[Class[_], Converter[S, _ <: R]]
 
   /**
    * Return convert from S to T
    */
-  def getConverter[T <: R](targetType: Class[T]): Converter[S, T] = {
-    converters.get(targetType).asInstanceOf[Converter[S, T]]
+  def getConverter[T <: R](targetType: Class[T]):Option[Converter[S, T]] = {
+    converters.get(targetType).asInstanceOf[Option[Converter[S, T]]]
   }
 
   private def classof(clazz: Type): Class[_] = {
@@ -66,8 +63,10 @@ abstract class ConverterFactory[S, R] extends GenericConverter {
   }
 
   override def convert(input: Any, sourceType: Class[_], targetType: Class[_]): Any = {
-    val converter = getConverter(targetType.asInstanceOf[Class[R]])
-    if ((null == converter)) Objects.default(targetType) else converter.apply(input.asInstanceOf[S])
+    getConverter(targetType.asInstanceOf[Class[R]]) match{
+      case Some(converter) => converter.apply(input.asInstanceOf[S])
+      case _ => Objects.default(targetType)
+    }
   }
 
   protected def register(targetType: Class[_], converter: Converter[S, _ <: R]) {

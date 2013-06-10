@@ -19,12 +19,9 @@
 package org.beangle.commons.csv.internal
 
 import java.io.IOException
-import java.util.ArrayList
-import java.util.List
 import org.beangle.commons.csv.CsvFormat
+import scala.collection.mutable
 import CsvParser._
-//remove if not needed
-import scala.collection.JavaConversions._
 
 object CsvParser {
 
@@ -101,7 +98,7 @@ class CsvParser(var format: CsvFormat) {
         return null
       }
     }
-    val tokensOnThisLine = new ArrayList[String]()
+    val tokensOnThisLine = new mutable.ListBuffer[String]()
     var sb = new StringBuilder(InitialReadSize)
     var inQuotes = false
     if (pending != null) {
@@ -137,7 +134,7 @@ class CsvParser(var format: CsvFormat) {
         }
         inField = !inField
       } else if (format.isSeparator(c) && !inQuotes) {
-        tokensOnThisLine.add(sb.toString)
+        tokensOnThisLine += sb.toString
         sb = new StringBuilder(InitialReadSize)
         inField = false
       } else {
@@ -158,9 +155,9 @@ class CsvParser(var format: CsvFormat) {
       }
     }
     if (sb != null) {
-      tokensOnThisLine.add(sb.toString)
+      tokensOnThisLine += sb.toString
     }
-    tokensOnThisLine.toArray(new Array[String](tokensOnThisLine.size))
+    tokensOnThisLine.toArray
   }
 
   /**

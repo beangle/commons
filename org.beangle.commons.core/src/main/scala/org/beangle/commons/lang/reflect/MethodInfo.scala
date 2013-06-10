@@ -24,8 +24,6 @@ import org.beangle.commons.lang.Strings.uncapitalize
 import java.lang.reflect.Method
 import org.beangle.commons.lang.Objects
 import org.beangle.commons.lang.tuple.Pair
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * Method name and return type and parameters type

@@ -28,7 +28,7 @@ import org.beangle.commons.lang.Objects
  * @author chaostone
  * @since 3.2.0
  */
-trait UnaryFunction[I, R] {
+trait UnaryFunction[I, +R] {
 
   /**
    * Returns the result of applying this function to {@code input}. This method is <i>generally

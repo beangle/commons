@@ -18,22 +18,13 @@
  */
 package org.beangle.commons.text.replace
 
-import java.util.List
 import java.util.regex.Pattern
-import Replacer._
-//remove if not needed
-import scala.collection.JavaConversions._
 
 object Replacer {
 
   /**
-   * <p>
    * process.
-   * </p>
    *
-   * @param input a {@link java.lang.String} object.
-   * @param replacers a {@link java.util.List} object.
-   * @return a {@link java.lang.String} object.
    */
   def process(input: String, replacers: List[Replacer]): String = {
     if (null eq input) return null

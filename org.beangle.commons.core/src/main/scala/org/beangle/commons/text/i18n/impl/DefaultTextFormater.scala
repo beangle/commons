@@ -20,8 +20,6 @@ package org.beangle.commons.text.i18n.impl
 
 import java.text.MessageFormat
 import java.util.Locale
-import java.util.Map
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.text.i18n.spi.TextFormater
 import java.util.concurrent.ConcurrentHashMap
 /**
@@ -40,7 +38,7 @@ class DefaultTextFormater extends TextFormater {
     if (null eq localeCache) {
       caches.synchronized {
         localeCache = caches.get(locale).orNull
-        if (null eq localeCache) {
+        if (null == localeCache) {
           localeCache = new ConcurrentHashMap[String, MessageFormat]
           caches.put(locale, localeCache)
         }

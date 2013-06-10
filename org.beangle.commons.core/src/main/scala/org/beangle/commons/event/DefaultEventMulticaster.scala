@@ -18,13 +18,6 @@
  */
 package org.beangle.commons.event
 
-import java.util.List
-import java.util.Map
-import org.beangle.commons.collection.CollectUtils
-import DefaultEventMulticaster._
-//remove if not needed
-import scala.collection.JavaConversions._
-
 object DefaultEventMulticaster {
 
   private class ListenerCacheKey(val eventType: Class[_], val sourceType: Class[_]) {
@@ -40,6 +33,8 @@ object DefaultEventMulticaster {
   }
 }
 
+import DefaultEventMulticaster._
+import scala.collection.mutable
 /**
  * <p>
  * DefaultEventMulticaster class.
@@ -50,9 +45,9 @@ object DefaultEventMulticaster {
  */
 class DefaultEventMulticaster extends EventMulticaster {
 
-  protected var listeners: List[EventListener[Event]] = CollectUtils.newArrayList()
+  protected var listeners: List[EventListener[Event]] = Nil
 
-  private var listenerCache: Map[ListenerCacheKey, List[EventListener[Event]]] = CollectUtils.newConcurrentHashMap()
+  private var listenerCache: Map[ListenerCacheKey, List[EventListener[Event]]] = Map.empty
 
   def multicast(e: Event) {
     val adapted = getListeners(e)
@@ -60,17 +55,13 @@ class DefaultEventMulticaster extends EventMulticaster {
   }
 
   def addListener(listener: EventListener[_]) {
-    this.synchronized {
-      listeners.add(listener.asInstanceOf[EventListener[Event]])
-      listenerCache.clear()
-    }
+    listeners ::= listener.asInstanceOf[EventListener[Event]]
+    listenerCache=Map.empty
   }
   
   def removeListener(listener: EventListener[_]) {
-    this.synchronized {
-      listeners.remove(listener)
-      listenerCache.clear()
-    }
+    listeners = listeners diff List(listener.asInstanceOf[EventListener[Event]])
+    listenerCache=Map.empty
   }
 
   /**
@@ -79,10 +70,8 @@ class DefaultEventMulticaster extends EventMulticaster {
    * </p>
    */
   def removeAllListeners() {
-    this.synchronized {
-      listeners.clear()
-      listenerCache.clear()
-    }
+    listeners= Nil
+    listenerCache=Map.empty
   }
 
   protected def initListeners() {
@@ -91,15 +80,16 @@ class DefaultEventMulticaster extends EventMulticaster {
   private def getListeners(e: Event): List[EventListener[Event]] = {
     initListeners()
     val key = new ListenerCacheKey(e.getClass, e.getSource.getClass)
-    var adapted = listenerCache.get(key)
+    var adapted = listenerCache.get(key).orNull
     if (null == adapted) {
       this.synchronized {
         if (null == adapted) {
-          adapted = CollectUtils.newArrayList()
+          val newer =new mutable.ListBuffer[EventListener[Event]]
           for (listener <- listeners if listener.supportsEventType(e.getClass) && listener.supportsSourceType(e.getSource.getClass)) {
-            adapted.add(listener)
+            newer += listener
           }
-          listenerCache.put(key, adapted)
+          adapted= newer.toList
+          listenerCache += (key -> adapted)
         }
       }
     }

@@ -19,11 +19,6 @@
 package org.beangle.commons.bean.comparators
 
 import java.util.Comparator
-
-import scala.beans.BeanProperty
-import scala.beans.BooleanBeanProperty
-import scala.collection.JavaConversions._
-
 import org.beangle.commons.bean.PropertyUtils
 import org.beangle.commons.lang.Numbers
 import org.beangle.commons.lang.Strings
@@ -36,21 +31,16 @@ import org.beangle.commons.lang.Strings
  */
 class PropertyComparator(cmpStr: String) extends Comparator[Any] {
 
-  @BeanProperty
   var name: String = cmpStr.trim()
 
   private var index: Int = -1
 
-  @BooleanBeanProperty
   var asc: Boolean = true
 
-  @BooleanBeanProperty
   var nullFirst: Boolean = true
 
-  @BeanProperty
   var comparator: Comparator[Any] = _
 
-  @BeanProperty
   var stringComparator: StringComparator = new CollatorStringComparator(asc)
 
   assert(Strings.isNotEmpty(cmpStr))

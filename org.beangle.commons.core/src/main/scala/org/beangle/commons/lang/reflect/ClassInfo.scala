@@ -30,7 +30,6 @@ import java.util.Collections
 import scala.language.existentials
 import scala.collection.JavaConversions._
 import scala.collection.mutable
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.tuple.Pair
 
 object ClassInfo {
@@ -144,10 +143,10 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
     val readermap = new mutable.HashMap[String, MethodInfo]
     for (info <- methodinfos) {
       val property = info.property
-      if(property.isDefined && property.get.getLeft){
-        val old = readermap.put(property.get.getRight, info)
+      if(property.isDefined && property.get._1){
+        val old = readermap.put(property.get._2, info)
         if(old.isDefined && info.method.getReturnType.isAssignableFrom(old.get.method.getReturnType))
-          readermap += property.get.getRight -> info
+          readermap += property.get._2 -> info
       }
     }
     Map.empty ++ readermap
@@ -157,7 +156,7 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
     val writermap = new mutable.HashMap[String, MethodInfo]
     for (info <- methodinfos) {
       val property = info.property
-      if(property.isDefined && !property.get.getLeft) writermap += property.get.getRight -> info
+      if(property.isDefined && !property.get._1) writermap += property.get._2 -> info
     }
     Map.empty ++ writermap
   }

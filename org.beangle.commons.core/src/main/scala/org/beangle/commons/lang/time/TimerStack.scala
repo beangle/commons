@@ -19,8 +19,6 @@
 package org.beangle.commons.lang.time
 
 import java.util.Arrays
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * Record timer nodes

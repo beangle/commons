@@ -22,9 +22,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.net.URL
 import java.util.Enumeration
-import java.util.List
-import org.beangle.commons.collection.CollectUtils
-
+import scala.collection.mutable
 /**
  * ClassLoaders
  */
@@ -105,9 +103,9 @@ object ClassLoaders {
     } catch {
       case e: IOException => e.printStackTrace()
     }
-    val urls = CollectUtils.newArrayList[URL]
-    while (null != em && em.hasMoreElements()) urls.add(em.nextElement)
-    urls
+    val urls = new mutable.ListBuffer[URL]
+    while (null != em && em.hasMoreElements()) urls+=em.nextElement
+    urls.toList
   }
 
   /**

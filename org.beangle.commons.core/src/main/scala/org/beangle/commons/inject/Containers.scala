@@ -18,20 +18,15 @@
  */
 package org.beangle.commons.inject
 
-import java.util.ArrayList
-import java.util.List
-import java.util.Map
-import org.beangle.commons.collection.CollectUtils
-//remove if not needed
-import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 object Containers {
 
   var root: Container = _
 
-  val hooks = new ArrayList[ContainerHook]()
+  var hooks: List[ContainerHook]=_
 
-  var subContainers: Map[Long, Container] = CollectUtils.newHashMap()
+  var subContainers = new mutable.HashMap[Long,Container]
 
   def getRoot(): Container = root
 
@@ -41,13 +36,13 @@ object Containers {
 
   def getHooks(): List[ContainerHook] = hooks
 
-  def register(id: java.lang.Long, container: Container) {
+  def register(id: Long, container: Container) {
     subContainers.put(id, container)
   }
 
-  def remove(id: java.lang.Long) {
+  def remove(id: Long) {
     subContainers.remove(id)
   }
 
-  def get(id: java.lang.Long): Container = subContainers.get(id)
+  def get(id: Long): Container = subContainers(id)
 }

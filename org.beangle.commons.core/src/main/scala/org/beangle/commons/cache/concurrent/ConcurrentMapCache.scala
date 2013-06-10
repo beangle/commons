@@ -20,7 +20,6 @@ package org.beangle.commons.cache.concurrent
 
 import java.util.concurrent.ConcurrentMap
 import org.beangle.commons.cache.Cache
-import org.beangle.commons.collection.CollectUtils
 
 /**
  * Cache based Concurrent Map.
@@ -30,12 +29,9 @@ import org.beangle.commons.collection.CollectUtils
  */
 class ConcurrentMapCache[K, V](var name: String) extends Cache[K, V]() {
 
-  private val store = CollectUtils.newConcurrentHashMap[K,V]()
+  private val store = new collection.concurrent.TrieMap[K,V]()
 
-  override def get(key: K): Option[V] = {
-    val v = store.get(key)
-    if (null == v) None else Some(v)
-  }
+  override def get(key: K): Option[V] = store.get(key)
 
   override def put(key: K, value: V) {
     store.put(key, value)
@@ -45,8 +41,7 @@ class ConcurrentMapCache[K, V](var name: String) extends Cache[K, V]() {
     store.remove(key)
   }
 
-  import scala.collection.JavaConverters._
-  override def keys(): Set[K] = store.keySet.asScala.toSet
+  override def keys(): Set[K] = store.keySet.toSet
 
   override def clear() {
     store.clear()

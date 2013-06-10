@@ -18,18 +18,14 @@
  */
 package org.beangle.commons.bean.comparators
 
-import java.util.Collection
 import java.util.Comparator
-//remove if not needed
-import scala.collection.JavaConversions._
-
 /**
  * 比较两个集合，元素多的大
  *
  * @author chaostone
  * @version $Id: $
  */
-class CollectionSizeComparator[T <: Collection[_]] extends Comparator[T] {
+class CollectionSizeComparator[T <: Iterator[_]] extends Comparator[T] {
 
   /**
    * <p>

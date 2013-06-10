@@ -23,7 +23,6 @@ import java.util.Locale
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import RuleBasedPluralizer._
-import scala.beans.BeanProperty
 
 object RuleBasedPluralizer {
 
@@ -51,7 +50,7 @@ object RuleBasedPluralizer {
  * @author chaostone
  * @version $Id: $
  */
-class RuleBasedPluralizer(@BeanProperty var rules: List[Rule], @BeanProperty var locale: Locale, @BeanProperty var fallbackPluralizer: Pluralizer)
+class RuleBasedPluralizer(var rules: List[Rule],var locale: Locale,var fallbackPluralizer: Pluralizer)
     extends Pluralizer {
 
   /**

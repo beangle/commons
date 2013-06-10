@@ -19,8 +19,6 @@
 package org.beangle.commons.config.property
 
 import java.util.EventListener
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * <p>

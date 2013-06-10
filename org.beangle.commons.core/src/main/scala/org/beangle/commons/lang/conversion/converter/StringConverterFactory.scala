@@ -20,8 +20,6 @@ package org.beangle.commons.lang.conversion.converter
 
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.conversion.impl.ConverterFactory
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * String to Object

@@ -20,8 +20,6 @@ package org.beangle.commons.text.inflector.rule
 
 import java.util.regex.Pattern
 import org.beangle.commons.text.inflector.Rule
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * <p>

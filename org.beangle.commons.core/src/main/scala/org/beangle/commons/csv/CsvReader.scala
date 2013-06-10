@@ -22,8 +22,6 @@ import java.io.BufferedReader
 import java.io.IOException
 import java.io.Reader
 import org.beangle.commons.csv.internal.CsvParser
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * <p>

@@ -17,10 +17,8 @@
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.entity.meta
-import java.util.Map
 
 import org.beangle.commons.bean.PropertyUtils
-import org.beangle.commons.collection.CollectUtils
 
 /**
  * <p>
@@ -32,7 +30,7 @@ import org.beangle.commons.collection.CollectUtils
  */
 class ComponentType(val componentClass:Class[_]) extends AbstractType {
 
-  val propertyTypes :Map[String, Type] = CollectUtils.newHashMap()
+  var propertyTypes :Map[String, Type] = Map()
 
   override def isComponentType = true
 
@@ -44,7 +42,7 @@ class ComponentType(val componentClass:Class[_]) extends AbstractType {
    * Get the type of a particular (named) property
    */
   override def getPropertyType(propertyName:String ) :Type = {
-    val t  = propertyTypes.get(propertyName)
+    val t  = propertyTypes.get(propertyName).orNull
     if (null == t) {
       val propertyType = PropertyUtils.getPropertyType(componentClass, propertyName)
       if (null != propertyType)  return new IdentifierType(propertyType)
@@ -52,9 +50,8 @@ class ComponentType(val componentClass:Class[_]) extends AbstractType {
     } else t
   }
 
-  /**
-   * Getter for the field <code>propertyTypes</code>.
-   */
-  def getPropertyTypes:Map[String, Type] = propertyTypes
-
+  def addProperty(name:String,t:Type):this.type={
+    propertyTypes+=(name->t)
+    this
+  }
 }

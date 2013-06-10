@@ -19,10 +19,8 @@
 package org.beangle.commons.text.seq
 
 import java.util.Collections
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.Numbers
 import org.beangle.commons.lang.Strings
-import scala.beans.BeanProperty
 
 /**
  * <p>
@@ -32,16 +30,11 @@ import scala.beans.BeanProperty
  * @author chaostone
  * @version $Id: $
  */
-class SeqPattern(seqStyle: SeqNumStyle, @BeanProperty var pattern: String) {
+class SeqPattern(val seqNumStyle: SeqNumStyle, val pattern: String) {
 
-  @BeanProperty
   var generator: MultiLevelSeqGenerator = _
 
-  @BeanProperty
   var level: Int = 0
-
-  @BeanProperty
-  var seqNumStyle: SeqNumStyle = seqStyle
 
   private var seq: Int = 0
 
@@ -85,7 +78,7 @@ class SeqPattern(seqStyle: SeqNumStyle, @BeanProperty var pattern: String) {
     seq += 1
     var text = pattern
     for (paramLevel <- params) {
-      text = Strings.replace(text, "{" + paramLevel + "}", generator.getSytle(paramLevel.intValue()).curSeqText())
+      text = Strings.replace(text, "{" + paramLevel + "}", generator.getPattern(paramLevel).curSeqText())
     }
     Strings.replace(text, "{" + level + "}", seqNumStyle.build(seq))
   }

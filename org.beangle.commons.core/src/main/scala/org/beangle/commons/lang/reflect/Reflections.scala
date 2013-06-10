@@ -24,9 +24,6 @@ import java.beans.Introspector
 import java.beans.PropertyDescriptor
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
-import java.util.List
-import scala.collection.JavaConversions._
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.Throwables
 import org.beangle.commons.lang.Objects
@@ -79,14 +76,18 @@ object Reflections {
    * @param clazz
    */
   def getBeanSetters(clazz: Class[_]): List[Method] = {
-    val methods = CollectUtils.newArrayList[Method]
-    for (m <- clazz.getMethods) {
+    val methods = new collection.mutable.ListBuffer[Method]
+    var i=0
+    val allmethods=clazz.getMethods
+    while(i < allmethods.size) {
+      val m =allmethods(i)
       if (m.getName.startsWith("set") && m.getName.length > 3
         && Modifier.isPublic(m.getModifiers) && !Modifier.isStatic(m.getModifiers) &&
         m.getParameterTypes.length == 1)
-        methods.add(m)
+        methods+=m
+        i+=1
     }
-    methods
+    methods.toList
   }
 
   def newInstance[T](clazz: Class[T]): T = {

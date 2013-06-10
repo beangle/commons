@@ -18,10 +18,6 @@
  */
 package org.beangle.commons.lang
 
-import scala.collection.JavaConversions._
-
-import org.beangle.commons.collection.CollectUtils
-
 /**
  * Wrap or Unwrap primitive
  *
@@ -33,35 +29,16 @@ object Primitives {
   /**
    * Primitive types to their corresponding wrapper types.
    */
-  private val PrimitiveToWrappers = CollectUtils.newHashMap[Class[_], Class[_]]
+  private val PrimitiveToWrappers:Map[Class[_],Class[_]] = Map((classOf[Boolean] -> classOf[java.lang.Boolean]),
+    (classOf[Byte]->classOf[java.lang.Byte]),(classOf[Char]->classOf[java.lang.Character]),
+    (classOf[Int]->classOf[java.lang.Integer]),(classOf[Short]->classOf[java.lang.Short]),
+    (classOf[Long]->classOf[java.lang.Long]),(classOf[Float]->classOf[java.lang.Float]),
+    (classOf[Double]->classOf[java.lang.Double]))
 
   /**
    * Wrapper types to their corresponding primitive types.
    */
-  private val WrapperToPrimitives = CollectUtils.newHashMap[Class[_], Class[_]]
-
-  private val primitiveValues = CollectUtils.newHashMap[Class[_], Any];
-
-  add(java.lang.Boolean.TYPE, classOf[Boolean])
-
-  add(java.lang.Byte.TYPE, classOf[Byte])
-
-  add(java.lang.Character.TYPE, classOf[Character])
-
-  add(java.lang.Double.TYPE, classOf[Double])
-
-  add(java.lang.Float.TYPE, classOf[Float])
-
-  add(java.lang.Integer.TYPE, classOf[Integer])
-
-  add(java.lang.Long.TYPE, classOf[Long])
-
-  add(java.lang.Short.TYPE, classOf[Short])
-
-  private def add(primitive: Class[_], wrapper: Class[_]) {
-    PrimitiveToWrappers.put(primitive, wrapper)
-    WrapperToPrimitives.put(wrapper, primitive)
-  }
+  private val WrapperToPrimitives = PrimitiveToWrappers.map(_.swap)
 
   def default[T](clazz: Class[T]): T = {
     if (clazz.isPrimitive) {
@@ -75,7 +52,7 @@ object Primitives {
    *
    * @see Class#isPrimitive
    */
-  def isWrapperType(clazz: Class[_]): Boolean = WrapperToPrimitives.containsKey(clazz)
+  def isWrapperType(clazz: Class[_]): Boolean = WrapperToPrimitives.contains(clazz)
 
   /**
    * Returns the corresponding wrapper type of {@code type} if it is a primitive

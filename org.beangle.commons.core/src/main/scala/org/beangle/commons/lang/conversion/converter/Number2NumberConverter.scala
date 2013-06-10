@@ -22,35 +22,32 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import org.beangle.commons.lang.conversion.Converter
 import org.beangle.commons.lang.conversion.impl.ConverterFactory
-import Number2NumberConverter._
-//remove if not needed
-import scala.collection.JavaConversions._
 
 object Number2NumberConverter {
 
   private class ShortConverter extends Converter[Number, java.lang.Short] {
 
-    override def apply(number: Number): java.lang.Short = number.shortValue()
+    override def apply(number: Number):  java.lang.Short = number.shortValue()
   }
 
-  private class IntConverter extends Converter[Number, Integer] {
+  private class IntegerConverter extends Converter[Number,java.lang.Integer] {
 
-    override def apply(number: Number): java.lang.Integer = number.intValue()
+    override def apply(number: Number):  java.lang.Integer = number.intValue()
   }
 
   private class LongConverter extends Converter[Number, java.lang.Long] {
 
-    override def apply(number: Number): java.lang.Long = number.intValue()
+    override def apply(number: Number):  java.lang.Long = number.longValue()
   }
 
   private class FloatConverter extends Converter[Number, java.lang.Float] {
 
-    override def apply(number: Number): java.lang.Float = number.floatValue()
+    override def apply(number: Number):  java.lang.Float = number.floatValue()
   }
 
-  private class DoubleConverter extends Converter[Number, java.lang.Double] {
+  private class DoubleConverter extends Converter[Number,  java.lang.Double] {
 
-    override def apply(number: Number): java.lang.Double = number.doubleValue()
+    override def apply(number: Number):  java.lang.Double = number.doubleValue()
   }
 
   private class BigIntegerConverter extends Converter[Number, BigInteger] {
@@ -64,6 +61,7 @@ object Number2NumberConverter {
   }
 }
 
+import Number2NumberConverter._
 /**
  * Number Converter Factory
  *
@@ -74,7 +72,7 @@ class Number2NumberConverter extends ConverterFactory[Number, Number] {
 
   register(classOf[java.lang.Short], new ShortConverter())
 
-  register(classOf[Integer], new IntConverter())
+  register(classOf[java.lang.Integer], new IntegerConverter())
 
   register(classOf[java.lang.Long], new LongConverter())
 

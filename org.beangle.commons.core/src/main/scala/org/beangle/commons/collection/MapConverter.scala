@@ -173,11 +173,7 @@ class MapConverter(val conversion: DefaultConversion=DefaultConversion.Instance)
    * sub map
    */
   def sub(data: Map[String, Any], prefix: String, exclusiveAttrNames: String, stripPrefix: Boolean): Map[String, Any] = {
-    val excludes = CollectUtils.newHashSet[String]
-    if (Strings.isNotEmpty(exclusiveAttrNames)) {
-      val exclusiveAttrs = Strings.split(exclusiveAttrNames, ",")
-      for (i <- 0 until exclusiveAttrs.length) excludes.add(exclusiveAttrs(i))
-    }
+    val excludes:Set[String] = if (Strings.isNotEmpty(exclusiveAttrNames)) Strings.split(exclusiveAttrNames, ",").toSet else Set.empty
     val newParams = new collection.mutable.HashMap[String, Any]
     for ((key, value) <- data) {
       val attr = key

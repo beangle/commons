@@ -18,13 +18,9 @@
  */
 package org.beangle.commons.text.inflector.rule
 
-import java.util.Set
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import org.beangle.commons.text.inflector.Rule
-import AbstractRegexReplacementRule._
-//remove if not needed
-import scala.collection.JavaConversions._
 
 object AbstractRegexReplacementRule {
 
@@ -60,10 +56,11 @@ object AbstractRegexReplacementRule {
    * @return a pattern that matches if any of the input patterns match
    */
   def disjunction(patterns: Set[String]): String = {
-    disjunction(patterns.toArray(new Array[String](0)))
+    disjunction(patterns.toArray)
   }
 }
 
+import AbstractRegexReplacementRule._
 /**
  * <p>
  * Abstract AbstractRegexReplacementRule class.

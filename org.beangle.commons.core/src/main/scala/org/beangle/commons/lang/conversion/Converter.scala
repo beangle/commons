@@ -26,4 +26,4 @@ import org.beangle.commons.lang.functor.UnaryFunction
  * @param <S> source
  * @param <T> target
  */
-trait Converter[S, T] extends UnaryFunction[S, T]
+trait Converter[S, +T] extends UnaryFunction[S, T]

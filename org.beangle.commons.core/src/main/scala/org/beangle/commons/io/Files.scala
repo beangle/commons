@@ -21,10 +21,7 @@ package org.beangle.commons.io
 import java.io._
 import java.nio.channels.FileChannel
 import java.nio.charset.Charset
-import java.util.List
 import org.beangle.commons.lang.Assert
-//remove if not needed
-import scala.collection.JavaConversions._
 
 object Files {
 

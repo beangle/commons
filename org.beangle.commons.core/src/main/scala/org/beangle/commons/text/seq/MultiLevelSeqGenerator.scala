@@ -18,10 +18,7 @@
  */
 package org.beangle.commons.text.seq
 
-import java.util.Map
-import org.beangle.commons.collection.CollectUtils
-//remove if not needed
-import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 /**
  * <p>
@@ -33,48 +30,30 @@ import scala.collection.JavaConversions._
  */
 class MultiLevelSeqGenerator {
 
-  private val patterns = CollectUtils.newHashMap[Int,SeqPattern]()
+  private val patterns = new mutable.HashMap[Int,SeqPattern]
 
   /**
-   * <p>
-   * getSytle.
-   * </p>
-   *
-   * @param level a int.
-   * @return a {@link org.beangle.commons.text.seq.SeqPattern} object.
+   * getPattern.
    */
-  def getSytle(level: Int): SeqPattern = patterns.get(level)
+  def getPattern(level: Int): SeqPattern = patterns(level)
 
   /**
-   * <p>
    * next.
-   * </p>
-   *
-   * @param level a int.
-   * @return a {@link java.lang.String} object.
    */
-  def next(level: Int): String = getSytle(level).next()
+  def next(level: Int): String = getPattern(level).next()
 
   /**
-   * <p>
    * add.
-   * </p>
-   *
-   * @param style a {@link org.beangle.commons.text.seq.SeqPattern} object.
    */
   def add(style: SeqPattern) {
-    style.setGenerator(this)
-    patterns.put(style.getLevel, style)
+    style.generator = this
+    patterns.put(style.level, style)
   }
 
   /**
-   * <p>
    * reset.
-   * </p>
-   *
-   * @param level a int.
    */
   def reset(level: Int) {
-    patterns.get(level).reset()
+    getPattern(level).reset()
   }
 }

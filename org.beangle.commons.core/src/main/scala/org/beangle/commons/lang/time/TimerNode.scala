@@ -17,10 +17,7 @@
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.lang.time
-
-import java.util.ArrayList
-import java.util.List
-import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 /**
  * Timer Node in stack
@@ -29,9 +26,9 @@ import scala.collection.JavaConversions._
  * @since 3.0.0
  */
 @SerialVersionUID(-6180672043920208784L)
-class TimerNode(val resource: String, var startTime: Long) extends java.io.Serializable {
+class TimerNode(val resource: String, var startTime: Long) extends Serializable {
 
-  var children: List[TimerNode] = new ArrayList[TimerNode]()
+  var children= new mutable.ListBuffer[TimerNode]
 
   var totalTime: Long = _
 

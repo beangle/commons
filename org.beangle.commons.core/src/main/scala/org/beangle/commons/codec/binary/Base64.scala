@@ -20,8 +20,6 @@ package org.beangle.commons.codec.binary
 
 import java.io.UnsupportedEncodingException
 import org.beangle.commons.codec.net.BCoder
-//remove if not needed
-import scala.collection.JavaConversions._
 
 object Base64 {
 

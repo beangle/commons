@@ -20,9 +20,6 @@ package org.beangle.commons.bean.transformers
 
 import org.beangle.commons.bean.PropertyUtils
 import org.beangle.commons.lang.functor.Transformer
-import scala.beans.{BeanProperty, BooleanBeanProperty}
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * bean属性提取器<br>

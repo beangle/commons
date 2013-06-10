@@ -28,7 +28,9 @@ import org.beangle.commons.collection.page._
  * @author chaostone
  * @version $Id: $
  */
-abstract class AbstractQueryPage[T](val query:LimitQuery[T]) extends PageWapper[T] {
+abstract class AbstractQueryPage[T](val query:LimitQuery[T]) extends Page[T] {
+
+  var page: Page[T] = _
 
   var pageNo = if(null!=query.limit) query.limit.pageNo-1 else 0
 
@@ -58,6 +60,12 @@ abstract class AbstractQueryPage[T](val query:LimitQuery[T]) extends PageWapper[
   def pageSize:Int= query.limit.pageSize
 
   def total:Int = page.total
+
+  def items = page.items
+
+  def length = page.length
+
+  def apply(index: Int): T = page(index)
   
   override def iterator:Iterator[T]=new PageIterator[T](this)
 

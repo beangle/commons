@@ -24,7 +24,6 @@ import org.beangle.commons.inject.bind.BeanConfig.Definition
 import org.beangle.commons.inject.bind.BeanConfig.DefinitionBinder
 import org.beangle.commons.inject.bind.BeanConfig.ReferenceValue
 import org.beangle.commons.lang.Assert
-import org.beangle.commons.collection.CollectUtils
 import scala.collection.mutable.ListBuffer
 
 /**

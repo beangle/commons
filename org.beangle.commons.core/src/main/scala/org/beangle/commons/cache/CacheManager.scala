@@ -34,5 +34,5 @@ trait CacheManager {
   /**
    * Return a collection of the caches known by this cache manager.
    */
-  def getCacheNames(): Set[String]
+  def cacheNames: Set[String]
 }

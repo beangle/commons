@@ -18,14 +18,12 @@
  */
 package org.beangle.commons.config.property
 
-import java.util._
 import org.beangle.commons.bean.Initializing
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.Numbers
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.conversion.impl.DefaultConversion
-import scala.collection.JavaConversions._
 import org.beangle.commons.lang.conversion.converter.String2BooleanConverter
+import scala.collection.mutable
 
 /**
  * 系统配置
@@ -35,11 +33,11 @@ import org.beangle.commons.lang.conversion.converter.String2BooleanConverter
  */
 class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
 
-  private var properties: Map[String, Any] = new HashMap[String, Any]()
+  private var properties = new mutable.HashMap[String, Any]
 
-  private var listeners: List[PropertyConfigListener] = CollectUtils.newArrayList()
+  private var listeners = new mutable.ListBuffer[PropertyConfigListener]
 
-  private var providers: List[PropertyConfig.Provider] = new ArrayList[PropertyConfig.Provider]()
+  private var providers = new mutable.ListBuffer[PropertyConfig.Provider]
 
   def init() {
     reload()
@@ -48,7 +46,7 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
   /**
    * Get value according to name
    */
-  def get(name: String): Any = properties.get(name)
+  def get(name: String): Option[Any] = properties.get(name)
 
   /**
    * Insert or Update name's value
@@ -57,48 +55,48 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
     properties.put(name, value)
   }
 
-  def get[T](clazz: Class[T], name: String): T = {
-    val value = get(name)
-    if (null == value) null.asInstanceOf[T]
-    else DefaultConversion.Instance.convert(value, clazz)
+  def get[T](clazz: Class[T], name: String): Option[T] = {
+    get(name) match {
+        case Some(value) => 
+            if (null == value) None
+            else Some(DefaultConversion.Instance.convert(value, clazz))
+        case _ => None
+    }
   }
 
   /**
-   * <p>
    * getInt.
-   * </p>
-   *
-   * @param name a {@link java.lang.String} object.
-   * @return a int.
    */
-  def getInt(name: String): Int = {
-    Numbers.toInt(get(name).asInstanceOf[String])
+  def getInt(name: String): Option[Int] = {
+    get(name) match {
+        case Some(value) =>  Some(Numbers.toInt(value.asInstanceOf[String]))
+        case _ => None
+    }
   }
 
   /**
-   * <p>
-   * getBool.
-   * </p>
-   *
-   * @param name a {@link java.lang.String} object.
-   * @return a boolean.
+   * getBoolean.
    */
-  def getBool(name: String): Boolean = {
-    String2BooleanConverter.apply(get(name).asInstanceOf[String]).booleanValue()
+  def getBoolean(name: String): Option[Boolean] = {
+    get(name) match {
+        case Some(value) =>  Some(String2BooleanConverter.apply(value.asInstanceOf[String]))
+        case _ => None
+    }
   }
 
-  def add(newer: Properties) {
+  def add(newer: java.util.Properties) {
+    import scala.collection.JavaConversions._
     for (key <- newer.keySet) {
       this.properties.put(key.toString, newer.get(key))
     }
   }
 
   def addListener(listener: PropertyConfigListener) {
-    listeners.add(listener)
+    listeners+=listener
   }
 
   def removeListener(listener: PropertyConfigListener) {
-    listeners.remove(listener)
+    listeners-=listener
   }
 
   /**
@@ -114,16 +112,11 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
   }
 
   /**
-   * <p>
    * toString.
-   * </p>
-   *
-   * @return a {@link java.lang.String} object.
    */
   override def toString(): String = {
     val sb = new StringBuilder("DefaultSystemConfig[")
-    val props = new ArrayList[String](properties.keySet)
-    Collections.sort(props)
+    val props = properties.keySet.toList
     var maxlength = 0
     for (property <- props if property.length > maxlength) {
       maxlength = property.length
@@ -138,24 +131,16 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
   }
 
   /**
-   * <p>
    * getNames.
-   * </p>
-   *
-   * @return a {@link java.util.Set} object.
    */
-  def getNames(): Set[String] = {
-    CollectUtils.newHashSet(properties.keySet)
-  }
+  def names: Set[String] =  properties.keySet.toSet
 
   def addProvider(provider: PropertyConfig.Provider) {
-    providers.add(provider)
+    providers+=provider
   }
 
   /**
-   * <p>
    * reload.
-   * </p>
    */
   def reload() {
     synchronized {
@@ -165,13 +150,11 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
   }
 
   /**
-   * <p>
    * Setter for the field <code>providers</code>.
-   * </p>
    *
-   * @param providers a {@link java.util.List} object.
    */
   def setProviders(providers: List[PropertyConfig.Provider]) {
-    this.providers = providers
+    this.providers.clear()
+    this.providers ++= providers
   }
 }

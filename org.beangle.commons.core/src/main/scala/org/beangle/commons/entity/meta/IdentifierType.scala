@@ -19,54 +19,42 @@
 package org.beangle.commons.entity.meta
 
 /**
- * <p>
  * IdentifierType class.
- * </p>
  * 
  * @author chaostone
  * @version $Id: $
  */
 class IdentifierType(val clazz:Class[_]) extends AbstractType {
   /**
-   * <p>
    * getName.
-   * </p>
    * 
    * @return a {@link java.lang.String} object.
    */
   override def name=clazz.toString
 
   /**
-   * <p>
    * getReturnedClass.
-   * </p>
    * 
    * @return a {@link java.lang.Class} object.
    */
   override def returnedClass = clazz
 
   /**
-   * <p>
    * isCollectionType.
-   * </p>
    * 
    * @return a boolean.
    */
   override def isCollectionType = false
 
   /**
-   * <p>
    * isComponentType.
-   * </p>
    * 
    * @return a boolean.
    */
   override def isComponentType=false
 
   /**
-   * <p>
    * isEntityType.
-   * </p>
    * 
    * @return a boolean.
    */

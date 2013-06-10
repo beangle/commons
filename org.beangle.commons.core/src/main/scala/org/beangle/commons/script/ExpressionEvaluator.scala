@@ -18,8 +18,6 @@
  */
 package org.beangle.commons.script
 
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * 表达式执行器

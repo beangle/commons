@@ -20,9 +20,7 @@ package org.beangle.commons.bean.comparators
 
 import java.util.Comparator
 
-import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
-
 import org.beangle.commons.lang.Strings
 
 /**

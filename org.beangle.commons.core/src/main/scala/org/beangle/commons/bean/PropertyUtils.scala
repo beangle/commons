@@ -19,8 +19,6 @@
 package org.beangle.commons.bean
 
 import java.lang.reflect.Array
-import java.util.List
-import java.util.Map
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.Throwables
 import org.beangle.commons.lang.conversion.Conversion
@@ -29,7 +27,6 @@ import org.beangle.commons.lang.reflect.ClassInfo
 import org.beangle.commons.lang.reflect.MethodInfo
 import org.slf4j.LoggerFactory
 import org.slf4j.Logger
-import scala.collection.JavaConversions._
 
 object PropertyUtils {
 
@@ -63,7 +60,7 @@ object PropertyUtils {
     while (resolver.hasNested(name)) {
       val next = resolver.next(name)
       result =
-        if (result.isInstanceOf[Map[_, _]]) getPropertyOfMapBean(result.asInstanceOf[Map[_, _]], next)
+        if (result.isInstanceOf[Map[_, _]]) getPropertyOfMapBean(result.asInstanceOf[Map[Any, _]], next)
         else if (resolver.isMapped(next)) getMappedProperty(result, next)
         else if (resolver.isIndexed(next)) getIndexedProperty(result, next)
         else getSimpleProperty(result, next)
@@ -71,7 +68,7 @@ object PropertyUtils {
 
       name = resolver.remove(name)
     }
-    result = if (result.isInstanceOf[Map[_, _]]) getPropertyOfMapBean(result.asInstanceOf[Map[_, _]], name)
+    result = if (result.isInstanceOf[Map[_, _]]) getPropertyOfMapBean(result.asInstanceOf[Map[Any, _]], name)
     else if (resolver.isMapped(name)) getMappedProperty(result, name)
     else if (resolver.isIndexed(name)) getIndexedProperty(result, name)
     else getSimpleProperty(result, name)
@@ -123,11 +120,11 @@ object PropertyUtils {
     }
   }
 
-  private def getPropertyOfMapBean(bean: Map[_, _], propertyName: String): Any = {
+  private def getPropertyOfMapBean(bean: Map[Any, _], propertyName: String): Any = {
     var name = resolver.getProperty(propertyName)
     if (name == null || name.length == 0) name = resolver.getKey(propertyName)
     else name = propertyName
-    bean.get(name)
+    bean.get(name).orNull
   }
 
   private def getMappedProperty(bean: Any, name: String): Any = {
@@ -135,8 +132,8 @@ object PropertyUtils {
     if (key == null) {
       throw new IllegalArgumentException("Invalid mapped property '" + name + "'")
     }
-    val value = getSimpleProperty[Map[_, _]](bean, resolver.getProperty(name))
-    if (null == value) null else value.get(key)
+    val value = getSimpleProperty[Map[Any, _]](bean, resolver.getProperty(name))
+    if (null == value) null else value.get(key).orNull
   }
 
   private def getIndexedProperty(bean: Any, name: String): Any = {
@@ -146,6 +143,6 @@ object PropertyUtils {
     }
     val value = getSimpleProperty[AnyRef](bean, resolver.getProperty(name))
     if (null == value) return null
-    if (!value.getClass.isArray) (Array.get(value, index)) else value.asInstanceOf[List[_]].get(index)
+    if (!value.getClass.isArray) (Array.get(value, index)) else value.asInstanceOf[Seq[_]](index)
   }
 }

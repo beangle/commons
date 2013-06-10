@@ -19,20 +19,19 @@
 package org.beangle.commons.lang.asm
 
 import java.lang.reflect.Method
-import java.util.Map
-import org.beangle.commons.collection.CollectUtils
+import scala.collection.mutable
 
 object MirrorClassLoader {
 
-  private val proxyClassLoaders = CollectUtils.newHashMap[ClassLoader, MirrorClassLoader]
+  private val proxyClassLoaders = new mutable.HashMap[ClassLoader, MirrorClassLoader]
 
   def get(clazz: Class[_]): MirrorClassLoader = {
     val parent = clazz.getClassLoader
     if (null == parent) return null
-    var loader = proxyClassLoaders.get(parent)
+    var loader = proxyClassLoaders.get(parent).orNull
     if (null == loader) {
       proxyClassLoaders.synchronized {
-        loader = proxyClassLoaders.get(parent)
+        loader = proxyClassLoaders.get(parent).orNull
         if (null == loader) {
           loader = new MirrorClassLoader(parent)
           proxyClassLoaders.put(parent, loader)

@@ -21,16 +21,7 @@ package org.beangle.commons.lang
 import java.net.InetAddress
 import java.net.NetworkInterface
 import java.net.UnknownHostException
-import java.util.Enumeration
-import java.util.HashMap
-import java.util.HashSet
-import java.util.List
-import java.util.Map
-import java.util.Set
-import org.beangle.commons.collection.CollectUtils
-import scala.reflect.{ BeanProperty, BooleanBeanProperty }
-import scala.collection.JavaConversions._
-import java.util.Properties
+import scala.collection.mutable
 /**
  * System information
  *
@@ -39,241 +30,154 @@ import java.util.Properties
  */
 object SystemInfo {
 
-  private var os: Os = _
-
-  private var user: User = _
-
-  private var java: Java = _
-
-  private var jvm: Jvm = _
-
-  private var javaSpec: JavaSpec = _
-
-  private var jvmSpec: JvmSpec = _
-
-  private var javaRuntime: JavaRuntime = _
-
-  private val usedProperties = CollectUtils.newHashSet[String]
-
-  private def init() {
-    val origin = new HashMap[String, String]
+  private def sysProperties():Map[String,String]={
+    val origin = new mutable.HashMap[String, String]
     val enumer = System.getProperties().propertyNames
     while (enumer.hasMoreElements()) {
       val name = enumer.nextElement().asInstanceOf[String]
       origin.put(name, System.getProperties().getProperty(name))
     }
-    val properties = CollectUtils.newHashMap[String, String](origin)
-    os = new Os(properties)
-    user = new User(properties)
-    java = new Java(properties)
-    jvm = new Jvm(properties)
-    javaSpec = new JavaSpec(properties)
-    jvmSpec = new JvmSpec(properties)
-    javaRuntime = new JavaRuntime(properties)
-    origin.keySet().removeAll(properties.keySet())
-    usedProperties.addAll(origin.keySet())
+    origin.toMap
   }
 
-  init()
+  val properties= sysProperties
 
-  def getOs = os
-  def getUser = user
-  def getJava = java
-  def getJvm = jvm
-  def getJavaSpec = javaSpec
-  def getJvmSpec = jvmSpec
-  def getJavaRuntime = javaRuntime
+  val os = new Os(properties)
 
-  def getTmpDir(): String = System.getProperty("java.io.tmpdir")
+  val user = new User(properties)
 
-  def getUsedproperties(): Set[String] = usedProperties
+  val java =new Java(properties)
 
-  def getHost(): Host = new Host()
+  val jvm = new Jvm(properties)
 
-  class Host() {
+  val javaSpec = new JavaSpec(properties)
 
-    var hostname: String = _
+  val jvmSpec  = new JvmSpec(properties)
 
-    val addresses = CollectUtils.newHashMap[String, List[String]]
+  val javaRuntime = new JavaRuntime(properties)
 
-    try {
-      val localhost = InetAddress.getLocalHost
-      hostname = localhost.getHostName
-    } catch {
-      case e: UnknownHostException => hostname = "localhost"
-    }
+  def tmpDir: String = System.getProperty("java.io.tmpdir")
 
-    try {
-      var e = NetworkInterface.getNetworkInterfaces
-      while (e.hasMoreElements()) {
-        val networkInterface = e.nextElement()
-        val name = networkInterface.getDisplayName
-        val addrs = CollectUtils.newArrayList[String]
-        var e2 = networkInterface.getInetAddresses
-        while (e2.hasMoreElements()) addrs.add(e2.nextElement().getHostAddress)
-        addresses.put(name, addrs)
+  def host = new Host()
+
+  class Host {
+
+    def hostname: String = {
+      try {
+        InetAddress.getLocalHost.getHostName
+      } catch {
+        case e: UnknownHostException => "unknownhost"
       }
-    } catch {
-      case e: Exception =>
     }
 
-    def getHostname(): String = hostname
+    def addresses: Map[String, List[String]] = {
+      val addresses = new mutable.HashMap[String, List[String]]
 
-    def getAddresses(): Map[String, List[String]] = addresses
+      try {
+        val e = NetworkInterface.getNetworkInterfaces
+        while (e.hasMoreElements) {
+          val networkInterface = e.nextElement()
+          val name = networkInterface.getDisplayName
+          val e2 = networkInterface.getInetAddresses
+          while (e2.hasMoreElements()) {
+            addresses+=(name -> (e2.nextElement().getHostAddress::addresses.getOrElse(name,Nil)))
+          }
+        }
+      } catch {
+        case e: Exception =>
+      }
+      addresses.toMap
+    }
   }
 
   class User(properties: Map[String, String]) {
 
-    val name = properties.remove("user.name")
+    val name = properties("user.name")
 
-    val home = properties.remove("user.home")
+    val home = properties("user.home")
 
-    val language = properties.remove("user.language")
+    val language = properties("user.language")
 
-    var country = properties.remove("user.country")
-
-    if (null == country) country = properties.remove("user.region")
-
-    def getName(): String = name
-
-    def getHome(): String = home
-
-    def getLanguage(): String = language
-
-    def getCountry(): String = country
+    val country = properties.get("user.country") match {
+      case Some(c) => c
+      case _ => properties.get("user.region").orNull
+    }
   }
 
   class JavaRuntime(properties: Map[String, String]) {
 
-    val name = properties.remove("java.runtime.name")
+    val name = properties("java.runtime.name")
 
-    val version = properties.remove("java.runtime.version")
+    val version = properties("java.runtime.version")
 
-    val home = properties.remove("java.home")
+    val home = properties("java.home")
 
-    val extDirs = properties.remove("java.ext.dirs")
+    val extDirs = properties("java.ext.dirs")
 
-    val endorsedDirs = properties.remove("java.endorsed.dirs")
+    val endorsedDirs = properties("java.endorsed.dirs")
 
-    val classpath = properties.remove("java.class.path")
+    val classpath = properties("java.class.path")
 
-    val classVersion = properties.remove("java.class.version")
+    val classVersion = properties("java.class.version")
 
-    val libraryPath = properties.remove("java.library.path")
+    val libraryPath = properties("java.library.path")
 
-    val tmpDir = properties.remove("java.io.tmpdir")
+    val tmpDir = properties("java.io.tmpdir")
 
-    val fileEncoding = properties.remove("file.encoding")
-
-    def getName(): String = name
-
-    def getVersion(): String = version
-
-    def getHome(): String = home
-
-    def getExtDirs(): String = extDirs
-
-    def getEndorsedDirs(): String = endorsedDirs
-
-    def getClasspath(): String = classpath
-
-    def getClassVersion(): String = classVersion
-
-    def getLibraryPath(): String = libraryPath
-
-    def getTmpDir(): String = tmpDir
-
-    def getFileEncoding(): String = fileEncoding
+    val fileEncoding = properties("file.encoding")
   }
 
   class JvmSpec(properties: Map[String, String]) {
 
-    val name = properties.remove("java.vm.specification.name")
+    val name = properties("java.vm.specification.name")
 
-    val version = properties.remove("java.vm.specification.version")
+    val version = properties("java.vm.specification.version")
 
-    val vendor = properties.remove("java.vm.specification.vendor")
-
-    def getName(): String = name
-
-    def getVersion(): String = version
-
-    def getVendor(): String = vendor
+    val vendor = properties("java.vm.specification.vendor")
   }
 
   class JavaSpec(properties: Map[String, String]) {
 
-    val name = properties.remove("java.specification.name")
+    val name = properties("java.specification.name")
 
-    val version = properties.remove("java.specification.version")
+    val version = properties("java.specification.version")
 
-    val vendor = properties.remove("java.specification.vendor")
-
-    def getName(): String = name
-
-    def getVersion(): String = version
-
-    def getVendor(): String = vendor
+    val vendor = properties("java.specification.vendor")
   }
 
   class Jvm(properties: Map[String, String]) {
 
-    val name = properties.remove("java.vm.name")
+    val name = properties("java.vm.name")
 
-    val version = properties.remove("java.vm.version")
+    val version = properties("java.vm.version")
 
-    val vendor = properties.remove("java.vm.vendor")
+    val vendor = properties("java.vm.vendor")
 
-    val info = properties.remove("java.vm.info")
-
-    def getName(): String = name
-
-    def getVersion(): String = version
-
-    def getVendor(): String = vendor
-
-    def getInfo(): String = info
+    val info = properties("java.vm.info")
   }
 
   class Java(properties: Map[String, String]) {
 
-    val version = properties.remove("java.version")
+    val version = properties("java.version")
 
-    val vendor = properties.remove("java.vendor")
+    val vendor = properties("java.vendor")
 
-    val vendorUrl = properties.remove("java.vendor.url")
+    val vendorUrl = properties("java.vendor.url")
 
-    def getVersion(): String = version
-
-    def getVendor(): String = vendor
-
-    def getVendorUrl(): String = vendorUrl
   }
 
   class Os(properties: Map[String, String]) {
 
-    val name = properties.remove("os.name")
+    val name = properties("os.name")
 
-    val version = properties.remove("os.version")
+    val version = properties("os.version")
 
-    val arch = properties.remove("os.arch")
+    val arch = properties("os.arch")
 
-    val fileSeparator = properties.remove("file.separator")
+    val fileSeparator = properties("file.separator")
 
-    val lineSeparator = properties.remove("line.separator")
+    val lineSeparator = properties("line.separator")
 
-    val pathSeparator = properties.remove("path.separator")
-
-    def getName(): String = name
-
-    def getVersion(): String = version
-
-    def getArch(): String = arch
-
-    def getFileSeparator(): String = fileSeparator
-
-    def getLineSeparator(): String = lineSeparator
-
-    def getPathSeparator(): String = pathSeparator
+    val pathSeparator = properties("path.separator")
   }
 }

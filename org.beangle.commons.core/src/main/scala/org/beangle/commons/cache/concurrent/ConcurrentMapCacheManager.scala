@@ -18,13 +18,8 @@
  */
 package org.beangle.commons.cache.concurrent
 
-import java.util.Collection
-import java.util.Map
 import org.beangle.commons.cache.Cache
 import org.beangle.commons.cache.CacheManager
-import org.beangle.commons.collection.CollectUtils
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * Concurrent Map Cache Manager.
@@ -50,5 +45,5 @@ class ConcurrentMapCacheManager extends CacheManager {
     cache.asInstanceOf[Cache[K, V]]
   }
 
-  override def getCacheNames(): Set[String] = caches.keySet.toSet
+  override def cacheNames: Set[String] = caches.keySet.toSet
 }

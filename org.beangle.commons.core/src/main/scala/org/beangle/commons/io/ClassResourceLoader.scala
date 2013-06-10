@@ -21,7 +21,6 @@ package org.beangle.commons.io
 import java.io.IOException
 import java.net.URL
 import java.util.Enumeration
-import org.beangle.commons.collection.CollectUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import ClassResourceLoader._

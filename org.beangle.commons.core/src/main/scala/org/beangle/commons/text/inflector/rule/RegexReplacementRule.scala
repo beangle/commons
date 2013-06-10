@@ -19,8 +19,6 @@
 package org.beangle.commons.text.inflector.rule
 
 import java.util.regex.Matcher
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * <p>

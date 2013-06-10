@@ -19,7 +19,6 @@
 package org.beangle.commons.bean.comparators
 
 import java.util.Comparator
-import org.beangle.commons.collection.CollectUtils
 
 /**
  * 组合比较器

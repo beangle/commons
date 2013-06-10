@@ -1,3 +1,4 @@
+
 /*
  * Beangle, Agile Java/Scala Development Scaffold and Toolkit
  *
@@ -24,16 +25,11 @@ import java.io.FileOutputStream
 import java.io.FilenameFilter
 import java.io.OutputStreamWriter
 import java.nio.charset.Charset
-import java.util.List
-import java.util.Map
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.io.Files
 import org.beangle.commons.lang.Strings
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-//remove if not needed
-import scala.collection.JavaConversions._
-
+import scala.collection.mutable
 class BatchReplaceMain{
   
 }
@@ -63,15 +59,13 @@ object BatchReplaceMain {
       charset = Charset.forName(args(2))
     }
     val lines = Files.readLines(new File(properties))
-    val profiles = CollectUtils.newHashMap[String,List[Replacer]]()
-    var replacers: List[Replacer] = null
-    for (line <- lines) {
-      if (Strings.isEmpty(line)) {
-        //continue
-      }
+    val profiles = new mutable.HashMap[String,List[Replacer]]
+
+    var profileName=""
+    for (line <- lines if Strings.isNotEmpty(line)) {
       if (-1 == line.indexOf('=')) {
-        replacers = CollectUtils.newArrayList()
-        profiles.put(line, replacers)
+        profileName=line
+        profiles.put(line, Nil)
       } else {
         val replacedline = Strings.replace(line, "\\=", "~~~~")
         var older = Strings.replace(Strings.substringBefore(replacedline, "="), "~~~~", "=")
@@ -80,31 +74,20 @@ object BatchReplaceMain {
         older = Strings.replace(older, "\\t", "\t")
         newer = Strings.replace(newer, "\\n", "\n")
         newer = Strings.replace(newer, "\\t", "\t")
-        val pair = new Replacer(older, newer)
-        replacers.add(pair)
+        profiles.put(profileName,  new Replacer(older, newer)::profiles(profileName))
       }
     }
-    replaceFile(dir, profiles, charset)
+    replaceFile(dir, profiles.toMap, charset)
   }
 
   /**
-   * <p>
    * replaceFile.
-   * </p>
-   *
-   * @param fileName a {@link java.lang.String} object.
-   * @param profiles a {@link java.util.Map} object.
-   * @param encoding a {@link java.lang.String} object.
-   * @throws java.lang.Exception if any.
-   * @throws java.io.FileNotFoundException if any.
    */
   def replaceFile(fileName: String, profiles: Map[String, List[Replacer]], charset: Charset) {
     val file = new File(fileName)
     if (file.isFile && !file.isHidden) {
-      val replacers = profiles.get(Strings.substringAfterLast(fileName, "."))
-      if (null == replacers) {
-        return
-      }
+      val replacers = profiles.get(Strings.substringAfterLast(fileName, ".")).orNull
+      if (null == replacers) return
       logger.info("processing {}", fileName)
       var filecontent = Files.readFileToString(file, charset)
       filecontent = Replacer.process(filecontent, replacers)

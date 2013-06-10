@@ -18,19 +18,12 @@
  */
 package org.beangle.commons.lang.testbean
 
-import scala.beans.{BeanProperty, BooleanBeanProperty}
-//remove if not needed
-import scala.collection.JavaConversions._
-
 class TestBean {
 
-  @BeanProperty
   var id: java.lang.Integer = _
 
-  @BeanProperty
   var name: String = _
 
-  @BeanProperty
   var intValue: Int = _
 
   var testEnum: TestEnum.Val= _

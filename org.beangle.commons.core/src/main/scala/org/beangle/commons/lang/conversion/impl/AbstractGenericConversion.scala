@@ -21,22 +21,15 @@ package org.beangle.commons.lang.conversion.impl
 import java.lang.reflect.Array
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
-import java.util.Collections
-import java.util.HashSet
-import java.util.LinkedHashSet
-import java.util.LinkedList
-import java.util.Map
-import java.util.Set
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.Primitives
 import org.beangle.commons.lang.conversion.Conversion
 import org.beangle.commons.lang.conversion.Converter
 import org.beangle.commons.lang.conversion.ConverterRegistry
 import org.beangle.commons.lang.tuple.Pair
-import scala.collection.JavaConversions._
 import org.beangle.commons.lang.Objects
 import scala.language.existentials
-
+import scala.collection.mutable
+import scala.collection.concurrent
 /**
  * Generic Conversion Super class
  * It provider converter registry and converter search machanism.
@@ -46,14 +39,18 @@ import scala.language.existentials
  */
 abstract class AbstractGenericConversion extends Conversion with ConverterRegistry {
 
-  var converters: Map[Class[_], Map[Class[_], GenericConverter]] = CollectUtils.newHashMap()
+  val converters = new mutable.HashMap[Class[_], Map[Class[_], GenericConverter]]
 
-  var cache: Map[Pair[Class[_], Class[_]], GenericConverter] = CollectUtils.newConcurrentHashMap()
+  val cache = new concurrent.TrieMap[Pair[Class[_], Class[_]], GenericConverter]
 
   protected def addConverter(converter: GenericConverter) {
     val key = converter.getTypeinfo
-    getOrCreateConverters(key.getLeft.asInstanceOf[Class[_]])
-      .put(key.getRight.asInstanceOf[Class[_]], converter)
+    val sourceType:Class[_] = key._2.asInstanceOf[Class[_]]
+    converters.get(sourceType) match{
+      case Some(existed) => 
+        converters += (sourceType -> (existed + (sourceType->converter)))
+      case _ => converters += (sourceType -> Map((sourceType->converter)))
+    }
     cache.clear()
   }
 
@@ -64,67 +61,70 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
       key = Pair.of[Class[_], Class[_]](m.getParameterTypes()(0), m.getReturnType)
     }
     if (null == key) throw new IllegalArgumentException("Cannot find convert type pair " + converter.getClass)
-    getOrCreateConverters(key.getLeft.asInstanceOf[Class[_]])
-      .put(key.getRight.asInstanceOf[Class[_]], new ConverterAdapter(converter, key))
+    val sourceType = key._2.asInstanceOf[Class[_]]
+    val adapter =  new ConverterAdapter(converter, key)
+    converters.get(sourceType) match{
+      case Some(existed) => converters += (sourceType -> (existed+(sourceType -> adapter)))
+      case _ => converters += (sourceType -> Map((sourceType-> adapter)))
+    }
     cache.clear()
   }
 
-  private def getOrCreateConverters(sourceType: Class[_]): Map[Class[_], GenericConverter] = {
-    var exists = converters.get(sourceType)
-    if (null == exists) {
-      exists = CollectUtils.newHashMap()
-      converters.put(sourceType, exists)
-    }
-    exists
-  }
-
   private def getConverters(sourceType: Class[_]): Map[Class[_], GenericConverter] = {
-    val exists = converters.get(sourceType)
-    if (null == exists) Collections.emptyMap() else exists
+    converters.get(sourceType) match {
+      case Some(existed) => existed
+      case _ => Map.empty
+    }
   }
 
   private def getConverter(targetType: Class[_], converters: Map[Class[_], GenericConverter]): GenericConverter = {
-    val interfaces = new LinkedHashSet[Class[_]]()
-    val queue = new LinkedList[Class[_]]()
-    queue.addFirst(targetType)
+    val interfaces = new mutable.LinkedHashSet[Class[_]]
+    val queue = new mutable.Queue[Class[_]]()
+    queue += targetType
     while (!queue.isEmpty) {
-      val cur = queue.removeLast()
-      val converter = converters.get(cur)
+      val cur = queue.dequeue()
+      val converter = converters.get(cur).orNull
       if (converter != null) return converter
       val superClass = cur.getSuperclass
-      if (superClass != null && superClass != classOf[AnyRef]) queue.addFirst(superClass)
+      if (superClass != null && superClass != classOf[AnyRef]) queue += superClass
       for (interfaceType <- cur.getInterfaces) addInterfaces(interfaceType, interfaces)
     }
     for (interfaceType <- interfaces) {
-      val converter = converters.get(interfaceType)
+      val converter = converters.get(interfaceType).orNull
       if (converter != null) return converter
     }
     null
   }
 
-  private def addInterfaces(interfaceType: Class[_], interfaces: Set[Class[_]]) {
+  private def addInterfaces(interfaceType: Class[_], interfaces: mutable.Set[Class[_]]) {
     interfaces.add(interfaceType)
     for (inheritedInterface <- interfaceType.getInterfaces) addInterfaces(inheritedInterface, interfaces)
   }
 
   protected def findConverter(sourceType: Class[_], targetType: Class[_]): GenericConverter = {
     val key = Pair.of(sourceType, targetType)
-    var converter = cache.get(key)
-    if (null == converter) converter = searchConverter(sourceType, targetType) else return converter
-    if (null == converter) converter = NoneConverter else cache.put(key.asInstanceOf[Pair[Class[_], Class[_]]], converter)
+    var converter = cache.get(key).orNull
+    if (null == converter) {
+      converter = searchConverter(sourceType, targetType)
+    }
+    if (null == converter) {
+      converter = NoneConverter
+    }else{
+      cache.put(key.asInstanceOf[Pair[Class[_], Class[_]]], converter)
+    }
     converter
   }
 
   protected def searchConverter(sourceType: Class[_], targetType: Class[_]): GenericConverter = {
-    val interfaces = new LinkedHashSet[Class[_]]()
-    val classQueue = new LinkedList[Class[_]]()
-    classQueue.addFirst(sourceType)
+    val interfaces = new mutable.LinkedHashSet[Class[_]]
+    val classQueue = new mutable.Queue[Class[_]]
+    classQueue += sourceType
     while (!classQueue.isEmpty) {
-      val currentClass = classQueue.removeLast()
+      val currentClass = classQueue.dequeue
       val converter = getConverter(targetType, getConverters(currentClass))
       if (converter != null) return converter
       val superClass = currentClass.getSuperclass
-      if (superClass != null && superClass != classOf[AnyRef]) classQueue.addFirst(superClass)
+      if (superClass != null && superClass != classOf[AnyRef]) classQueue+=superClass
       for (interfaceType <- currentClass.getInterfaces) addInterfaces(interfaceType, interfaces)
     }
     for (interfaceType <- interfaces) {

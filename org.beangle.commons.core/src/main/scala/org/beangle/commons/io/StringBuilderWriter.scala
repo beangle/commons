@@ -18,11 +18,7 @@
  */
 package org.beangle.commons.io
 
-import java.io.Serializable
 import java.io.Writer
-import scala.reflect.{ BeanProperty, BooleanBeanProperty }
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * {@link Writer} implementation that outputs to a {@link StringBuilder}.
@@ -36,7 +32,7 @@ import scala.collection.JavaConversions._
  * @since 3.1
  */
 @SerialVersionUID(1L)
-class StringBuilderWriter(@BeanProperty val builder: StringBuilder) extends Writer with Serializable {
+class StringBuilderWriter(val builder: StringBuilder) extends Writer with Serializable {
 
   /**
    * Construct a new {@link StringBuilder} instance with the specified capacity.

@@ -22,8 +22,6 @@ import java.nio.charset.Charset
 import org.beangle.commons.codec.binary.Base64
 import org.beangle.commons.lang.Charsets
 import BCoder._
-//remove if not needed
-import scala.collection.JavaConversions._
 
 object BCoder {
 
