@@ -34,31 +34,32 @@ object BenchmarkTest {
 
 class BenchmarkTest   extends FunSpec with ShouldMatchers{
 
-  val testCount = 1000
+  val testCount = 10000
 
   describe("Benchmark test and get"){
     it("JdkReflect") {
       val someObject = new TestBean()
-      val method = classOf[TestBean].getMethod("setName", classOf[String])
+      val method = classOf[TestBean].getMethod("name_$eq", classOf[String])
       for (i <- 0 until 5) {
         val sw = new Stopwatch(true)
         for (j <- 0 until testCount) {
           method.invoke(someObject, "Unmi")
         }
-        logger.info(i+"'s reflect using :"+sw)
+        logger.info(i+"'s "+testCount+" reflect in "+sw)
       }
     }
 
     it("ReflectAsm") {
       val someObject = new TestBean()
       val access = Mirror.get(classOf[TestBean])
-      val idx = access.getIndex("setName")
+      val idx = access.getIndex("name_$eq")
       for (i <- 0 until 5) {
         val sw = new Stopwatch(true)
         for (j <- 0 until testCount) {
-           access.invoke(someObject, idx,"Unmi")
+          access.invoke(someObject, idx,"Unmi")
+          //someObject.name="Unmi"
         }
-        logger.info(i+"'s asm using :"+sw)
+        logger.info(i+"'s "+testCount+" asm in "+sw)
       }
     }
   }

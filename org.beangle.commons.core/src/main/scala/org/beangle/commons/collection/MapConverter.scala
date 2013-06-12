@@ -112,7 +112,9 @@ class MapConverter(val conversion: DefaultConversion=DefaultConversion.Instance)
    */
   def get[T](data: Map[String, Any], name: String, clazz: Class[T]): Option[T] ={
     get(data, name) match{
-      case Some(value) => Some(convert(value,clazz))
+      case Some(value) =>
+        val rs = convert(value,clazz) 
+        if(null==rs) None else Some(rs)
       case _ => None
     }
   }

@@ -70,7 +70,6 @@ object Mirror {
           mv.visitCode()
           val methods = classInfo.getMethods
           if (methods.size > 0) {
-              
             mv.visitVarInsn(ALOAD, 1)
             mv.visitTypeInsn(CHECKCAST, classNameInternal)
             mv.visitVarInsn(ASTORE, 4)

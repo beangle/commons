@@ -207,16 +207,15 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
   def getIndex(name: String, args: Any*): Int = {
     methodIndexs.get(name) match {
       case Some(index) => index
-      case _ => {
+      case _ =>
         methods.get(name) match {
-          case Some(exists) => {
-            exists.find(info => info.matches(args)) match {
-              case Some(info) => info.index; case _ => -1
+          case Some(exists) =>
+            exists.find(_.matches(args)) match {
+              case Some(info) => info.index
+              case _ => -1
             }
-          }
           case _ => -1
         }
-      }
     }
   }
 
@@ -236,8 +235,7 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
   def getMethods(): Seq[MethodInfo] = {
     val methodInfos =new mutable.ListBuffer[MethodInfo]
     for ((key, value) <- methods;info <- value) methodInfos += info
-//    Collections.sort(methodInfos)
-    methodInfos.toList
+    methodInfos.sorted.toList
   }
 
   def getWritableProperties(): Set[String] = writers.keySet

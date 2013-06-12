@@ -34,10 +34,10 @@ class MultiLevelSeqGeneratorTest extends FunSpec with ShouldMatchers{
       sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}.{4}.{5}.{6}.{7}"))
       sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}.{4}.{5}.{6}.{7}.{8}"))
       sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}.{4}.{5}.{6}.{7}.{8}.{9}"))
-      sg.getSytle(1).next() should equal ("一")
-      sg.getSytle(2).next() should equal ("(一)")
-      sg.getSytle(3).next() should equal ("1")
-      sg.getSytle(4).next() should equal ("1.1")
+      sg.getPattern(1).next() should equal ("一")
+      sg.getPattern(2).next() should equal ("(一)")
+      sg.getPattern(3).next() should equal ("1")
+      sg.getPattern(4).next() should equal ("1.1")
     }
   }
 }

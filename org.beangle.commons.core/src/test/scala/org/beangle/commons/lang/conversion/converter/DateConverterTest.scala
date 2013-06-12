@@ -32,7 +32,7 @@ class DateConverterTest extends FunSpec with ShouldMatchers{
       year: Int, 
       month: Int, 
       day: Int) {
-    val c = new String2DateConverter().getConverter(classOf[Date])
+    val c = new String2DateConverter().getConverter(classOf[Date]).orNull
     val date = c.apply(dateStr)
     val calendar = new GregorianCalendar()
     calendar.setTime(date)

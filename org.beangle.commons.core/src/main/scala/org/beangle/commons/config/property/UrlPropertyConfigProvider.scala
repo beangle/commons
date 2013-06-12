@@ -44,7 +44,7 @@ object UrlPropertyConfigProvider {
  */
 class UrlPropertyConfigProvider extends PropertyConfig.Provider {
 
-  protected var resources: Resources = _
+  var resources: Resources = _
 
   /**
    * <p>

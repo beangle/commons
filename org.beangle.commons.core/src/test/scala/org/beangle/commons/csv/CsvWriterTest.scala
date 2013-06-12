@@ -150,7 +150,7 @@ class CsvWriterTest extends FunSpec with ShouldMatchers{
     }
 
     it("testStreamFlushing") {
-      val WRITE_FILE = SystemInfo.getTmpDir + "/myfile.csv"
+      val WRITE_FILE = SystemInfo.tmpDir + "/myfile.csv"
       val nextLine = Array("aaaa", "bbbb", "cccc", "dddd")
       val fileWriter = new FileWriter(WRITE_FILE)
       val writer = new CsvWriter(fileWriter)

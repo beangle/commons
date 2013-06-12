@@ -19,8 +19,7 @@
 package org.beangle.commons.lang.reflect
 
 import java.lang.Character.isUpperCase
-import org.beangle.commons.lang.Strings.substringAfter
-import org.beangle.commons.lang.Strings.uncapitalize
+import org.beangle.commons.lang.Strings._
 import java.lang.reflect.Method
 import org.beangle.commons.lang.Objects
 import org.beangle.commons.lang.tuple.Pair
@@ -32,27 +31,31 @@ import org.beangle.commons.lang.tuple.Pair
  * @since 3.2.0
  */
 class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[Class[_]])
-    extends Comparable[MethodInfo]() {
+    extends Ordered[MethodInfo]() {
 
   /**
-   * Return thid method is property read method (0) or write method(1) or none(-1).
+   * Return this method is property read method (0) or write method(1) or none(-1).
    */
   def property(): Option[Pair[Boolean, String]] = {
     val name = method.getName
-    if (name.length > 3 && name.startsWith("get") && isUpperCase(name.charAt(3)) && 
-      parameterTypes.length == 0) {
-      return Some(Pair.of(true, uncapitalize(substringAfter(name, "get"))))
-    } else if (name.length > 2 && name.startsWith("is") && isUpperCase(name.charAt(2)) && 
-      parameterTypes.length == 0) {
-      return Some(Pair.of(true, uncapitalize(substringAfter(name, "is"))))
-    } else if (name.length > 3 && name.startsWith("set") && isUpperCase(name.charAt(3)) && 
-      parameterTypes.length == 1) {
-      return Some(Pair.of(false, uncapitalize(substringAfter(name, "set"))))
-    }
-    None
+    if (parameterTypes.length == 0 && null != method.getReturnType){
+      val propertyName = if( name.startsWith("get") && name.length > 3 && isUpperCase(name.charAt(3)))
+        uncapitalize(substringAfter(name, "get"))
+      else if(name.startsWith("is") && name.length > 2 && isUpperCase(name.charAt(2)))
+        uncapitalize(substringAfter(name, "is"))
+      else name
+      Some(Pair.of(true, propertyName))
+    } else if (parameterTypes.length == 1){
+      val propertyName= if(name.startsWith("set") && name.length > 3 && isUpperCase(name.charAt(3)))
+        uncapitalize(substringAfter(name, "set"))
+        else if (name.endsWith("_$eq")) substringBefore(name,"_$eq")
+        else null
+        if(null==propertyName)None else Some(Pair.of(false, propertyName))
+
+    }else None
   }
 
-  override def compareTo(o: MethodInfo): Int = this.index - o.index
+  override def compare(o: MethodInfo): Int = this.index - o.index
 
   def matches(args:  Any*): Boolean = {
     if (parameterTypes.length != args.length) return false
@@ -69,8 +72,8 @@ class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[C
       sb.append("()")
     } else {
       sb.append('(')
-      for (`type` <- parameterTypes) {
-        sb.append(`type`.getSimpleName).append(",")
+      for (t <- parameterTypes) {
+        sb.append(t.getSimpleName).append(",")
       }
       sb.deleteCharAt(sb.length - 1)
       sb.append(')')
@@ -81,7 +84,7 @@ class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[C
   override def hashCode(): Int = {
     var hash = 0
     for (t <- parameterTypes) hash += t.hashCode
-    method.getName.hashCode + hash
+    hash + method.getName.hashCode
   }
 
   override def equals(obj: Any): Boolean = obj match {

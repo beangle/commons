@@ -28,7 +28,7 @@ class PropertyUtilsTest extends FunSpec with ShouldMatchers{
     it("Get or Set property"){
       val bean = new TestBean
       PropertyUtils.setProperty(bean, "intValue", 2)
-      bean.getIntValue should  be (2)
+      bean.intValue should  be (2)
     }
   }
 }

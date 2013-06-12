@@ -32,12 +32,12 @@ class UrlConfigProviderTest extends FunSpec with ShouldMatchers{
       val resources = new Resources
       resources.setGlobal(ClassLoaders.getResource("system-default.properties", getClass))
       resources.setUser(ClassLoaders.getResource("system.properties", getClass))
-      provider.setResources(resources)
+      provider.resources =resources
       val properties = provider.getConfig
       config.add(properties)
-      config.get(classOf[Integer], "testInt") should be (1)
-      config.get("system.vendor") should equal ("beangle.org")
-      config.get("system.url") should equal ("http://localhost")
+      config.get(classOf[Integer], "testInt") should be (Some(1))
+      config.get("system.vendor") should equal (Some("beangle.org"))
+      config.get("system.url") should equal (Some("http://localhost"))
     }
   }
 }

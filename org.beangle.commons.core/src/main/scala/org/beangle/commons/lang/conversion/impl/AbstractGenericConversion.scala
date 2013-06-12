@@ -45,11 +45,11 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
 
   protected def addConverter(converter: GenericConverter) {
     val key = converter.getTypeinfo
-    val sourceType:Class[_] = key._2.asInstanceOf[Class[_]]
+    val sourceType = key._1.asInstanceOf[Class[_]]
     converters.get(sourceType) match{
       case Some(existed) => 
-        converters += (sourceType -> (existed + (sourceType->converter)))
-      case _ => converters += (sourceType -> Map((sourceType->converter)))
+        converters += (key._1 -> (existed + (key._2->converter)))
+      case _ => converters += (key._1 -> Map((key._2->converter)))
     }
     cache.clear()
   }
@@ -61,21 +61,16 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
       key = Pair.of[Class[_], Class[_]](m.getParameterTypes()(0), m.getReturnType)
     }
     if (null == key) throw new IllegalArgumentException("Cannot find convert type pair " + converter.getClass)
-    val sourceType = key._2.asInstanceOf[Class[_]]
+    val sourceType = key._1.asInstanceOf[Class[_]]
     val adapter =  new ConverterAdapter(converter, key)
     converters.get(sourceType) match{
-      case Some(existed) => converters += (sourceType -> (existed+(sourceType -> adapter)))
-      case _ => converters += (sourceType -> Map((sourceType-> adapter)))
+      case Some(existed) => converters += (sourceType -> (existed+(key._2 -> adapter)))
+      case _ => converters += (sourceType -> Map((key._2-> adapter)))
     }
     cache.clear()
   }
 
-  private def getConverters(sourceType: Class[_]): Map[Class[_], GenericConverter] = {
-    converters.get(sourceType) match {
-      case Some(existed) => existed
-      case _ => Map.empty
-    }
-  }
+  private def getConverters(sourceType: Class[_]) = converters.get(sourceType).getOrElse(Map.empty)
 
   private def getConverter(targetType: Class[_], converters: Map[Class[_], GenericConverter]): GenericConverter = {
     val interfaces = new mutable.LinkedHashSet[Class[_]]

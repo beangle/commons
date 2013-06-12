@@ -28,12 +28,12 @@ class TestBean {
 
   var testEnum: TestEnum.Val= _
 
-  def getTestEnum(): TestEnum.Val = testEnum
+/*  def getTestEnum(): TestEnum.Val = testEnum
 
   def setTestEnum(testEnum: TestEnum.Val) {
     this.testEnum = testEnum
   }
-
+ */
   def methodWithManyArguments(i: Int, 
       f: Float, 
       I: java.lang.Integer, 

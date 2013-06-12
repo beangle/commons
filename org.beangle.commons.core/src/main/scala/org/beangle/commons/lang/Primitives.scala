@@ -29,7 +29,7 @@ object Primitives {
   /**
    * Primitive types to their corresponding wrapper types.
    */
-  private val PrimitiveToWrappers:Map[Class[_],Class[_]] = Map((classOf[Boolean] -> classOf[java.lang.Boolean]),
+  private val primitiveToWrappers:Map[Class[_],Class[_]] = Map((classOf[Boolean] -> classOf[java.lang.Boolean]),
     (classOf[Byte]->classOf[java.lang.Byte]),(classOf[Char]->classOf[java.lang.Character]),
     (classOf[Int]->classOf[java.lang.Integer]),(classOf[Short]->classOf[java.lang.Short]),
     (classOf[Long]->classOf[java.lang.Long]),(classOf[Float]->classOf[java.lang.Float]),
@@ -38,7 +38,7 @@ object Primitives {
   /**
    * Wrapper types to their corresponding primitive types.
    */
-  private val WrapperToPrimitives = PrimitiveToWrappers.map(_.swap)
+  private val wrapperToPrimitives = primitiveToWrappers.map(_.swap)
 
   def default[T](clazz: Class[T]): T = {
     if (clazz.isPrimitive) {
@@ -52,7 +52,7 @@ object Primitives {
    *
    * @see Class#isPrimitive
    */
-  def isWrapperType(clazz: Class[_]): Boolean = WrapperToPrimitives.contains(clazz)
+  def isWrapperType(clazz: Class[_]): Boolean = wrapperToPrimitives.contains(clazz)
 
   /**
    * Returns the corresponding wrapper type of {@code type} if it is a primitive
@@ -65,7 +65,7 @@ object Primitives {
    * </pre>
    */
   def wrap[T](clazz: Class[T]): Class[T] = {
-    if ((clazz.isPrimitive || (clazz eq classOf[Unit]))) PrimitiveToWrappers.get(clazz).asInstanceOf[Class[T]] else clazz
+    if ((clazz.isPrimitive || (clazz eq classOf[Unit]))) primitiveToWrappers.get(clazz).get.asInstanceOf[Class[T]] else clazz
   }
 
   /**
@@ -78,8 +78,5 @@ object Primitives {
    *     unwrap(String.class) == String.class
    * </pre>
    */
-  def unwrap[T](clazz: Class[T]): Class[T] = {
-    val unwrapped = WrapperToPrimitives.get(clazz).asInstanceOf[Class[T]]
-    if ((unwrapped == null)) clazz else unwrapped
-  }
+  def unwrap[T](clazz: Class[T]): Class[T] = wrapperToPrimitives.get(clazz).getOrElse(clazz).asInstanceOf[Class[T]]
 }
