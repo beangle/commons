@@ -34,7 +34,7 @@ object BenchmarkTest {
 
 class BenchmarkTest   extends FunSpec with ShouldMatchers{
 
-  val testCount = 10000
+  val testCount = 1000000
 
   describe("Benchmark test and get"){
     it("JdkReflect") {
@@ -57,7 +57,6 @@ class BenchmarkTest   extends FunSpec with ShouldMatchers{
         val sw = new Stopwatch(true)
         for (j <- 0 until testCount) {
           access.invoke(someObject, idx,"Unmi")
-          //someObject.name="Unmi"
         }
         logger.info(i+"'s "+testCount+" asm in "+sw)
       }

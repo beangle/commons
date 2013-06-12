@@ -58,14 +58,15 @@ object Mirror {
           val cw = new ClassWriter(ClassWriter.COMPUTE_MAXS)
           cw.visit(V1_1, ACC_PUBLIC + ACC_SUPER, accessClassNameInternal, null, "org/beangle/commons/lang/asm/Mirror",
             null)
-          var mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null)
-          mv.visitCode()
-          mv.visitVarInsn(ALOAD, 0)
-          mv.visitMethodInsn(INVOKESPECIAL, "org/beangle/commons/lang/asm/Mirror", "<init>", "()V")
-          mv.visitInsn(RETURN)
-          mv.visitMaxs(0, 0)
-          mv.visitEnd()
-          mv = cw.visitMethod(ACC_PUBLIC + ACC_FINAL + ACC_VARARGS, "invoke", "(Ljava/lang/Object;I[Ljava/lang/Object;)Ljava/lang/Object;",
+          val initMv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null)
+          initMv.visitCode()
+          initMv.visitVarInsn(ALOAD, 0)
+          initMv.visitMethodInsn(INVOKESPECIAL, "org/beangle/commons/lang/asm/Mirror", "<init>", "()V")
+          initMv.visitInsn(RETURN)
+          initMv.visitMaxs(0, 0)
+          initMv.visitEnd()
+
+          val mv = cw.visitMethod(ACC_PUBLIC + ACC_FINAL, "invoke", "(Ljava/lang/Object;ILscala/collection/Seq;)Ljava/lang/Object;",
             null, null)
           mv.visitCode()
           val methods = classInfo.getMethods
@@ -91,8 +92,8 @@ object Mirror {
               val paramTypes = info.method.getParameterTypes
               for (paramIndex <- 0 until paramTypes.length) {
                 mv.visitVarInsn(ALOAD, 3)
-                mv.visitIntInsn(BIPUSH, paramIndex)
-                mv.visitInsn(AALOAD)
+                mv.visitIntInsn(BIPUSH,paramIndex)
+                mv.visitMethodInsn(INVOKEINTERFACE, "scala/collection/Seq", "apply", "(I)Ljava/lang/Object;")
                 val paramType = Type.getType(paramTypes(paramIndex))
                 paramType.getSort match {
                   case Type.BOOLEAN =>
@@ -168,6 +169,7 @@ object Mirror {
           mv.visitInsn(ATHROW)
           mv.visitMaxs(0, 0)
           mv.visitEnd()
+
           cw.visitEnd()
           val data = cw.toByteArray()
           try {
@@ -206,15 +208,12 @@ abstract class Mirror {
 
   var classInfo: ClassInfo = _
 
-
-  def invoke(obj: AnyRef, methodIndex: Int, args: Array[Any]): Any
-
   /**
    * Delegate invocation to object's method with arguments.
    *
    * @see #getIndex(String, Object...)
    */
-  def invoke(obj: AnyRef, methodIndex: Int, args: Any*): Any =   invoke(obj, methodIndex, args.toArray)
+  def invoke(obj: AnyRef, methodIndex: Int, args: Any*): Any
   /**
    * Return method index.
    * index is 0 based,if not found ,return -1.

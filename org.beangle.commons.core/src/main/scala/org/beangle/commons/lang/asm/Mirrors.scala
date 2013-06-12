@@ -78,6 +78,6 @@ object Mirrors {
 
     this.classInfo = new ClassInfo(Nil)
 
-    override def invoke(obj: AnyRef, methodIndex: Int, args: Array[Any]): Any = null
+    override def invoke(obj: AnyRef, methodIndex: Int, args: Any*): Any = null
   }
 }
