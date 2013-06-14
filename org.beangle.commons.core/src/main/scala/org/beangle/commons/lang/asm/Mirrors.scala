@@ -47,6 +47,7 @@ object Mirrors {
   def getProperty[T](bean: AnyRef, name: String): T = {
     val mirror = Mirror.get(bean.getClass)
     mirror.invoke(bean, mirror.classInfo.getReadIndex(name)).asInstanceOf[T]
+   null.asInstanceOf[T]
   }
 
   def copyProperty(bean: AnyRef, name: String, value: Any, conversion: Conversion): Any = {
@@ -78,6 +79,8 @@ object Mirrors {
 
     this.classInfo = new ClassInfo(Nil)
 
+    override def read(obj: AnyRef, methodIndex: Int): Any = null
+    override def write(obj: AnyRef, methodIndex: Int, arg: Any ): Any = null
     override def invoke(obj: AnyRef, methodIndex: Int, args: Any*): Any = null
   }
 }

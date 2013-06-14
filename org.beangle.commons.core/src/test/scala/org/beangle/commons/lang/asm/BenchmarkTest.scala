@@ -56,9 +56,20 @@ class BenchmarkTest   extends FunSpec with ShouldMatchers{
       for (i <- 0 until 5) {
         val sw = new Stopwatch(true)
         for (j <- 0 until testCount) {
-          access.invoke(someObject, idx,"Unmi")
+          access.write(someObject, idx,"Unmi")
         }
         logger.info(i+"'s "+testCount+" asm in "+sw)
+      }
+    }
+
+    it("Direct access") {
+      val someObject = new TestBean()
+      for (i <- 0 until 5) {
+        val sw = new Stopwatch(true)
+        for (j <- 0 until testCount) {
+          someObject.name="Unmi"
+        }
+        logger.info(i+"'s "+testCount+" direct in "+sw)
       }
     }
   }

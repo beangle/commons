@@ -65,110 +65,9 @@ object Mirror {
           initMv.visitInsn(RETURN)
           initMv.visitMaxs(0, 0)
           initMv.visitEnd()
-
-          val mv = cw.visitMethod(ACC_PUBLIC + ACC_FINAL, "invoke", "(Ljava/lang/Object;ILscala/collection/Seq;)Ljava/lang/Object;",
-            null, null)
-          mv.visitCode()
-          val methods = classInfo.getMethods
-          if (methods.size > 0) {
-            mv.visitVarInsn(ALOAD, 1)
-            mv.visitTypeInsn(CHECKCAST, classNameInternal)
-            mv.visitVarInsn(ASTORE, 4)
-            mv.visitVarInsn(ILOAD, 2)
-            val labels = new Array[Label](methods.size)
-            (0 until labels.length).foreach(labels(_) = new Label)
-            val defaultLabel = new Label()
-            mv.visitTableSwitchInsn(0, labels.length - 1, defaultLabel, labels)
-            val buffer = new StringBuilder(128)
-            var i = 0
-            while (i < labels.length) {
-              mv.visitLabel(labels(i))
-              if (i == 0) mv.visitFrame(Opcodes.F_APPEND, 1, Array(classNameInternal), 0, null) else mv.visitFrame(Opcodes.F_SAME,
-                0, null, 0, null)
-              mv.visitVarInsn(ALOAD, 4)
-              buffer.setLength(0)
-              buffer.append('(')
-              val info = methods(i)
-              val paramTypes = info.method.getParameterTypes
-              for (paramIndex <- 0 until paramTypes.length) {
-                mv.visitVarInsn(ALOAD, 3)
-                mv.visitIntInsn(BIPUSH,paramIndex)
-                mv.visitMethodInsn(INVOKEINTERFACE, "scala/collection/Seq", "apply", "(I)Ljava/lang/Object;")
-                val paramType = Type.getType(paramTypes(paramIndex))
-                paramType.getSort match {
-                  case Type.BOOLEAN =>
-                    mv.visitTypeInsn(CHECKCAST, "java/lang/Boolean")
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z")
-
-                  case Type.BYTE =>
-                    mv.visitTypeInsn(CHECKCAST, "java/lang/Byte")
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Byte", "byteValue", "()B")
-
-                  case Type.CHAR =>
-                    mv.visitTypeInsn(CHECKCAST, "java/lang/Character")
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Character", "charValue", "()C")
-
-                  case Type.SHORT =>
-                    mv.visitTypeInsn(CHECKCAST, "java/lang/Short")
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Short", "shortValue", "()S")
-
-                  case Type.INT =>
-                    mv.visitTypeInsn(CHECKCAST, "java/lang/Integer")
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I")
-
-                  case Type.FLOAT =>
-                    mv.visitTypeInsn(CHECKCAST, "java/lang/Float")
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Float", "floatValue", "()F")
-
-                  case Type.LONG =>
-                    mv.visitTypeInsn(CHECKCAST, "java/lang/Long")
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Long", "longValue", "()J")
-
-                  case Type.DOUBLE =>
-                    mv.visitTypeInsn(CHECKCAST, "java/lang/Double")
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Double", "doubleValue", "()D")
-
-                  case Type.ARRAY => mv.visitTypeInsn(CHECKCAST, paramType.getDescriptor)
-                  case Type.OBJECT => mv.visitTypeInsn(CHECKCAST, paramType.getInternalName)
-                }
-                buffer.append(paramType.getDescriptor)
-              }
-              buffer.append(')')
-              buffer.append(Type.getDescriptor(info.method.getReturnType))
-              mv.visitMethodInsn(INVOKEVIRTUAL, classNameInternal, info.method.getName, buffer.toString)
-              Type.getType(info.method.getReturnType).getSort match {
-                case Type.VOID => mv.visitInsn(ACONST_NULL)
-                case Type.BOOLEAN => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Boolean", "valueOf",
-                  "(Z)Ljava/lang/Boolean;")
-                case Type.BYTE => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;")
-                case Type.CHAR => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Character", "valueOf",
-                  "(C)Ljava/lang/Character;")
-                case Type.SHORT => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;")
-                case Type.INT => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;")
-                case Type.FLOAT => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;")
-                case Type.LONG => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;")
-                case Type.DOUBLE => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;")
-                case _ => 
-              }
-              mv.visitInsn(ARETURN)
-              i+=1
-            }
-            mv.visitLabel(defaultLabel)
-            mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null)
-          }
-          mv.visitTypeInsn(NEW, "java/lang/IllegalArgumentException")
-          mv.visitInsn(DUP)
-          mv.visitTypeInsn(NEW, "java/lang/StringBuilder")
-          mv.visitInsn(DUP)
-          mv.visitLdcInsn("Method not found: ")
-          mv.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "(Ljava/lang/String;)V")
-          mv.visitVarInsn(ILOAD, 2)
-          mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(I)Ljava/lang/StringBuilder;")
-          mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;")
-          mv.visitMethodInsn(INVOKESPECIAL, "java/lang/IllegalArgumentException", "<init>", "(Ljava/lang/String;)V")
-          mv.visitInsn(ATHROW)
-          mv.visitMaxs(0, 0)
-          mv.visitEnd()
+          visitRead(cw,classInfo,classNameInternal)
+          visitWrite(cw,classInfo,classNameInternal)
+          visitInvoke(cw,classInfo,classNameInternal)
 
           cw.visitEnd()
           val data = cw.toByteArray()
@@ -186,6 +85,221 @@ object Mirror {
       proxies.put(clazz, proxy)
       return proxy
     }
+  }
+
+  private def box(clazz:Class[_],mv:MethodVisitor):Type={
+    val t= Type.getType(clazz)
+    t.getSort match {
+      case Type.VOID => mv.visitInsn(ACONST_NULL)
+      case Type.BOOLEAN => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Boolean", "valueOf","(Z)Ljava/lang/Boolean;")
+      case Type.BYTE => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;")
+      case Type.CHAR => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Character", "valueOf",
+        "(C)Ljava/lang/Character;")
+      case Type.SHORT => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;")
+      case Type.INT => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;")
+      case Type.FLOAT => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;")
+      case Type.LONG => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;")
+      case Type.DOUBLE => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;")
+      case _ =>
+    }
+    t
+  }
+
+  private def unbox(clazz:Class[_],mv:MethodVisitor):Type={
+    val t = Type.getType(clazz)
+    t.getSort match {
+      case Type.BOOLEAN =>
+        mv.visitTypeInsn(CHECKCAST, "java/lang/Boolean")
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z")
+
+      case Type.BYTE =>
+        mv.visitTypeInsn(CHECKCAST, "java/lang/Byte")
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Byte", "byteValue", "()B")
+
+      case Type.CHAR =>
+        mv.visitTypeInsn(CHECKCAST, "java/lang/Character")
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Character", "charValue", "()C")
+
+      case Type.SHORT =>
+        mv.visitTypeInsn(CHECKCAST, "java/lang/Short")
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Short", "shortValue", "()S")
+
+      case Type.INT =>
+        mv.visitTypeInsn(CHECKCAST, "java/lang/Integer")
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I")
+
+      case Type.FLOAT =>
+        mv.visitTypeInsn(CHECKCAST, "java/lang/Float")
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Float", "floatValue", "()F")
+
+      case Type.LONG =>
+        mv.visitTypeInsn(CHECKCAST, "java/lang/Long")
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Long", "longValue", "()J")
+
+      case Type.DOUBLE =>
+        mv.visitTypeInsn(CHECKCAST, "java/lang/Double")
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Double", "doubleValue", "()D")
+
+      case Type.ARRAY => mv.visitTypeInsn(CHECKCAST, t.getDescriptor)
+      case Type.OBJECT => mv.visitTypeInsn(CHECKCAST, t.getInternalName)
+    }
+    t
+  }
+
+  private def visitException(mv:MethodVisitor){
+    mv.visitTypeInsn(NEW, "java/lang/IllegalArgumentException")
+    mv.visitInsn(DUP)
+    mv.visitTypeInsn(NEW, "java/lang/StringBuilder")
+    mv.visitInsn(DUP)
+    mv.visitLdcInsn("Method not found: ")
+    mv.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "(Ljava/lang/String;)V")
+    mv.visitVarInsn(ILOAD, 2)
+    mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(I)Ljava/lang/StringBuilder;")
+    mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;")
+    mv.visitMethodInsn(INVOKESPECIAL, "java/lang/IllegalArgumentException", "<init>", "(Ljava/lang/String;)V")
+    mv.visitInsn(ATHROW)
+  }
+
+  private def visitRead(cw:ClassWriter,classInfo:ClassInfo,classNameInternal:String):MethodVisitor ={
+    val mv = cw.visitMethod(ACC_PUBLIC + ACC_FINAL, "read", "(Ljava/lang/Object;I)Ljava/lang/Object;",null, null)
+    mv.visitCode()
+    val methods = classInfo.readers.values.toList.sorted
+    if (methods.size > 0) {
+      mv.visitVarInsn(ALOAD, 1)
+      mv.visitTypeInsn(CHECKCAST, classNameInternal)
+      mv.visitVarInsn(ASTORE, 4)
+      mv.visitVarInsn(ILOAD, 2)
+      val labels = new Array[Label](methods.size)
+      val indexes= new Array[Int](methods.size)
+      var j=0
+      while(j<labels.length){
+        labels(j)=new Label
+        indexes(j)=methods(j).index
+        j+=1
+      }
+      val defaultLabel = new Label()
+      mv.visitLookupSwitchInsn(defaultLabel,indexes,labels)
+      val buffer = new StringBuilder(128)
+      var i = 0
+      while (i < labels.length) {
+        mv.visitLabel(labels(i))
+        if (i == 0) mv.visitFrame(Opcodes.F_APPEND, 1, Array(classNameInternal), 0, null) else mv.visitFrame(Opcodes.F_SAME,0, null, 0, null)
+        mv.visitVarInsn(ALOAD, 4)
+        val info = methods(i)
+        buffer.setLength(0)
+        buffer.append("()")
+        buffer.append(Type.getDescriptor(info.method.getReturnType))
+        mv.visitMethodInsn(INVOKEVIRTUAL, classNameInternal, info.method.getName, buffer.toString)
+        box(info.method.getReturnType,mv)
+        mv.visitInsn(ARETURN)
+        i+=1
+      }
+      mv.visitLabel(defaultLabel)
+      mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null)
+    }
+    visitException(mv)
+    mv.visitMaxs(0, 0)
+    mv.visitEnd()
+    mv
+  }
+
+
+  private def visitWrite(cw:ClassWriter,classInfo:ClassInfo,classNameInternal:String):MethodVisitor = {
+    val mv = cw.visitMethod(ACC_PUBLIC + ACC_FINAL, "write", "(Ljava/lang/Object;ILjava/lang/Object;)Ljava/lang/Object;",
+      null, null)
+    mv.visitCode()
+    val methods = classInfo.writers.values.toList.sorted
+    if (methods.size > 0) {
+      mv.visitVarInsn(ALOAD, 1)
+      mv.visitTypeInsn(CHECKCAST, classNameInternal)
+      mv.visitVarInsn(ASTORE, 4)
+      mv.visitVarInsn(ILOAD, 2)
+      val labels = new Array[Label](methods.size)
+      val indexes= new Array[Int](methods.size)
+      var j=0
+      while(j<labels.length){
+        labels(j)=new Label
+        indexes(j)=methods(j).index
+        j+=1
+      }
+      val defaultLabel = new Label
+      mv.visitLookupSwitchInsn(defaultLabel,indexes,labels)
+      val buffer = new StringBuilder(128)
+      var i = 0
+      while (i < labels.length) {
+        mv.visitLabel(labels(i))
+        if (i == 0) mv.visitFrame(Opcodes.F_APPEND, 1, Array(classNameInternal), 0, null) else mv.visitFrame(Opcodes.F_SAME,
+          0, null, 0, null)
+        mv.visitVarInsn(ALOAD, 4)
+        buffer.setLength(0)
+        buffer.append('(')
+        val info = methods(i)
+        mv.visitVarInsn(ALOAD, 3)
+        val paramType = unbox(info.method.getParameterTypes()(0),mv)
+        buffer.append(paramType.getDescriptor)
+        buffer.append(')')
+        buffer.append(Type.getDescriptor(info.method.getReturnType))
+        mv.visitMethodInsn(INVOKEVIRTUAL, classNameInternal, info.method.getName, buffer.toString)
+        box(info.method.getReturnType,mv)
+        mv.visitInsn(ARETURN)
+        i+=1
+      }
+      mv.visitLabel(defaultLabel)
+      mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null)
+    }
+    visitException(mv)
+    mv.visitMaxs(0, 0)
+    mv.visitEnd()
+    mv
+  }
+
+  private def visitInvoke(cw:ClassWriter,classInfo:ClassInfo,classNameInternal:String):MethodVisitor ={
+    val mv = cw.visitMethod(ACC_PUBLIC + ACC_FINAL, "invoke", "(Ljava/lang/Object;ILscala/collection/Seq;)Ljava/lang/Object;",
+      null, null)
+    mv.visitCode()
+    val methods = classInfo.getMethods
+    if (methods.size > 0) {
+      mv.visitVarInsn(ALOAD, 1)
+      mv.visitTypeInsn(CHECKCAST, classNameInternal)
+      mv.visitVarInsn(ASTORE, 4)
+      mv.visitVarInsn(ILOAD, 2)
+      val labels = new Array[Label](methods.size)
+        (0 until labels.length).foreach(labels(_) = new Label)
+      val defaultLabel = new Label()
+      mv.visitTableSwitchInsn(0, labels.length - 1, defaultLabel, labels)
+      val buffer = new StringBuilder(128)
+      var i = 0
+      while (i < labels.length) {
+        mv.visitLabel(labels(i))
+        if (i == 0) mv.visitFrame(Opcodes.F_APPEND, 1, Array(classNameInternal), 0, null) else mv.visitFrame(Opcodes.F_SAME,
+          0, null, 0, null)
+        mv.visitVarInsn(ALOAD, 4)
+        buffer.setLength(0)
+        buffer.append('(')
+        val info = methods(i)
+        val paramTypes = info.method.getParameterTypes
+        for (paramIndex <- 0 until paramTypes.length) {
+          mv.visitVarInsn(ALOAD, 3)
+          mv.visitIntInsn(BIPUSH,paramIndex)
+          mv.visitMethodInsn(INVOKEINTERFACE, "scala/collection/Seq", "apply", "(I)Ljava/lang/Object;")
+          val paramType = unbox(paramTypes(paramIndex),mv)
+          buffer.append(paramType.getDescriptor)
+        }
+        buffer.append(')')
+        buffer.append(Type.getDescriptor(info.method.getReturnType))
+
+        mv.visitMethodInsn(INVOKEVIRTUAL, classNameInternal, info.method.getName, buffer.toString)
+        box(info.method.getReturnType,mv)
+        mv.visitInsn(ARETURN)
+        i+=1
+      }
+      mv.visitLabel(defaultLabel)
+      mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null)
+    }
+    visitException(mv)
+    mv.visitMaxs(0, 0)
+    mv.visitEnd()
+    mv
   }
 }
 
@@ -207,6 +321,10 @@ object Mirror {
 abstract class Mirror {
 
   var classInfo: ClassInfo = _
+
+  def read(obj: AnyRef, methodIndex: Int): Any
+
+  def write(obj: AnyRef, methodIndex: Int, args: Any): Any
 
   /**
    * Delegate invocation to object's method with arguments.
