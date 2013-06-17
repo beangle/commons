@@ -25,9 +25,6 @@ import javax.servlet.FilterConfig
 import javax.servlet.ServletException
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
-import scala.beans.{BeanProperty, BooleanBeanProperty}
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * A simple filter that the test case can delegate to.
@@ -37,13 +34,10 @@ import scala.collection.JavaConversions._
  */
 class MockFilter extends Filter {
 
-  @BooleanBeanProperty
   var destroyed: Boolean = false
 
-  @BooleanBeanProperty
   var doFiltered: Boolean = false
 
-  @BooleanBeanProperty
   var initialized: Boolean = false
 
   def destroy() {

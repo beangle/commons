@@ -201,7 +201,7 @@ abstract class AbstractQueryBuilder[T] extends QueryBuilder[T] {
   /**
    * where
    * 
-   * @param condition a {@link org.beangle.commons.dao.query.builder.Condition} object.
+   * @param condition  object.
    */
   def where(condition:Condition):this.type= {
     if (isNotEmpty(statement)) { throw new RuntimeException(
@@ -214,7 +214,7 @@ abstract class AbstractQueryBuilder[T] extends QueryBuilder[T] {
    * 添加一组条件[br]
    * query中不能添加条件集合作为一个条件,因此这里命名没有采用有区别性的addAll
    * 
-   * @param cons a {@link java.util.Collection} object.
+   * @param cons.
    * @return a {@link org.beangle.commons.jpa.dao.OqlBuilder} object.
    */
   def where(cons:Seq[Condition]):this.type= {
@@ -271,7 +271,7 @@ abstract class AbstractQueryBuilder[T] extends QueryBuilder[T] {
   /**
    * orderBy.
    * 
-   * @param orders a {@link java.util.List} object.
+   * @param orders
    */
   def orderBy(orders:List[Order]):this.type= {
     if (null != orders) {

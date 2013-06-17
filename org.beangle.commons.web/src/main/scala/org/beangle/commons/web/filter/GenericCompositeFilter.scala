@@ -19,14 +19,11 @@
 package org.beangle.commons.web.filter
 
 import java.io.IOException
-import java.util.List
 import javax.servlet.Filter
 import javax.servlet.FilterChain
 import javax.servlet.ServletException
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
-//remove if not needed
-import scala.collection.JavaConversions._
 
 object GenericCompositeFilter {
 
@@ -35,20 +32,14 @@ object GenericCompositeFilter {
    * {@link FilterChain#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse)} is
    * called.
    */
-  protected class VirtualFilterChain(chain: FilterChain, val additionalFilters: List[_ <: Filter])
+  protected class VirtualFilterChain(val originalChain: FilterChain, additionalFilters: List[_ <: Filter])
       extends FilterChain {
 
-    private val originalChain = chain
-
-    private var currentPosition: Int = 0
+    private val iter: Iterator[_<:Filter] = additionalFilters.iterator
 
     def doFilter(request: ServletRequest, response: ServletResponse) {
-      if (currentPosition == additionalFilters.size) {
-        originalChain.doFilter(request, response)
-      } else {
-        currentPosition += 1
-        additionalFilters.get(currentPosition - 1).doFilter(request, response, this)
-      }
+      if (iter.hasNext) iter.next.doFilter(request, response, this)
+      else originalChain.doFilter(request, response)
     }
   }
 }

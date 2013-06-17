@@ -18,11 +18,9 @@
  */
 package org.beangle.commons.web.access
 
-import java.io.Serializable
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import javax.validation.constraints.NotNull
-import scala.beans.{BeanProperty, BooleanBeanProperty}
 /**
  * Access Request
  *
@@ -36,47 +34,40 @@ class AccessRequest extends Serializable {
    会话ID
    */
   @NotNull
-  @BeanProperty
   var sessionid: String = _
 
   /**
    用户名
    */
   @NotNull
-  @BeanProperty
   var username: String = _
 
   /**
    Response status
    */
-  @BeanProperty
   var status: Int = 200
 
   /**
    资源
    */
   @NotNull
-  @BeanProperty
   var uri: String = _
 
   /**
    查询字符串
    */
-  @BeanProperty
   var params: String = _
 
   /**
    开始时间
    */
   @NotNull
-  @BeanProperty
   var beginAt: Long = _
 
   /**
    结束时间
    */
   @NotNull
-  @BeanProperty
   var endAt: Long = 0
 
   def this(sessionid: String, username: String, resource: String) {

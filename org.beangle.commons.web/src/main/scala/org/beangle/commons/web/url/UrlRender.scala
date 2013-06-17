@@ -22,14 +22,11 @@ import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
 import org.beangle.commons.lang.Assert
 import org.beangle.commons.lang.Strings
-import scala.beans.{ BeanProperty, BooleanBeanProperty }
 
 class UrlRender(var initSuffix: String=null) {
 
-  @BeanProperty
   val suffix = if (null != initSuffix  && initSuffix.charAt(0) != '.')  "." + initSuffix else initSuffix
 
-  @BooleanBeanProperty
   var escapeAmp: Boolean = _
 
   def render(referer: String, uri: String, params: Map[String, String]): String = {

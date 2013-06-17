@@ -43,10 +43,10 @@ class MemAccessMonitor extends AccessMonitor with EventListener[HttpSessionDestr
   def begin(request: HttpServletRequest): AccessRequest = {
     val r = builder.build(request)
     if (null != r) {
-      var quene = requests.get(r.getSessionid).orNull
+      var quene = requests.get(r.sessionid).orNull
       if (null == quene) {
         quene = new mutable.ListBuffer[AccessRequest]
-        requests.put(r.getSessionid, quene)
+        requests.put(r.sessionid, quene)
       }
       quene += r
     }
@@ -55,10 +55,10 @@ class MemAccessMonitor extends AccessMonitor with EventListener[HttpSessionDestr
 
   def end(request: AccessRequest, response: HttpServletResponse) {
     if (null == request) return
-    val quene = requests.get(request.getSessionid).orNull
+    val quene = requests.get(request.sessionid).orNull
     if (null != quene) quene-=request
     if (null != logger) {
-      request.setEndAt(System.currentTimeMillis())
+      request.endAt= System.currentTimeMillis()
       logger.log(request)
     }
   }

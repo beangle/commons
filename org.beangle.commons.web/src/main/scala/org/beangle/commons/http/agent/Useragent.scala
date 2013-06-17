@@ -18,11 +18,6 @@
  */
 package org.beangle.commons.http.agent
 
-import java.io.Serializable
-import scala.beans.{BeanProperty, BooleanBeanProperty}
-//remove if not needed
-import scala.collection.JavaConversions._
-
 /**
  * Container class for user-agent information with operating system and browser details.
  * Resources:<br>
@@ -49,5 +44,4 @@ import scala.collection.JavaConversions._
  * @version $Id: Useragent.java Nov 15, 2010 7:39:29 AM chaostone $
  */
 @SerialVersionUID(367387526753100612L)
-class Useragent(@BeanProperty val ip: String, @BeanProperty val browser: Browser, @BeanProperty val os: Os)
-    extends Serializable()
+class Useragent(val ip: String, val browser: Browser,val os: Os) extends Serializable
