@@ -18,18 +18,13 @@
  */
 package org.beangle.commons.web.access
 
-import java.util.Collections
-import java.util.LinkedList
-import java.util.List
-import java.util.Map
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.event.Event
 import org.beangle.commons.event.EventListener
 import org.beangle.commons.web.session.HttpSessionDestroyedEvent
-//remove if not needed
-import scala.collection.JavaConversions._
+import scala.collection.mutable
+import scala.collection.concurrent
 
 /**
  * Memory access monitor.
@@ -43,37 +38,37 @@ class MemAccessMonitor extends AccessMonitor with EventListener[HttpSessionDestr
 
   private var builder: AccessRequestBuilder = _
 
-  private var requests: Map[String, List[AccessRequest]] = CollectUtils.newConcurrentHashMap[String, List[AccessRequest]]
+  private var requests = new concurrent.TrieMap[String, mutable.ListBuffer[AccessRequest]]
 
   def begin(request: HttpServletRequest): AccessRequest = {
     val r = builder.build(request)
     if (null != r) {
-      var quene = requests.get(r.getSessionid)
+      var quene = requests.get(r.getSessionid).orNull
       if (null == quene) {
-        quene = Collections.synchronizedList(new LinkedList[AccessRequest]())
+        quene = new mutable.ListBuffer[AccessRequest]
         requests.put(r.getSessionid, quene)
       }
-      quene.add(r)
+      quene += r
     }
     r
   }
 
   def end(request: AccessRequest, response: HttpServletResponse) {
     if (null == request) return
-    val quene = requests.get(request.getSessionid)
-    if (null != quene) quene.remove(request)
+    val quene = requests.get(request.getSessionid).orNull
+    if (null != quene) quene-=request
     if (null != logger) {
       request.setEndAt(System.currentTimeMillis())
       logger.log(request)
     }
   }
 
-  def getRequests(): List[AccessRequest] = {
-    val result = CollectUtils.newArrayList[AccessRequest](requests.size)
+  def snapshot: List[AccessRequest] = {
+    val result = new mutable.ListBuffer[AccessRequest]
     for (quene <- requests.values) {
-      result.addAll(quene)
+      result ++= quene
     }
-    result
+    result.toList
   }
 
   def setLogger(logger: AccessLogger) {

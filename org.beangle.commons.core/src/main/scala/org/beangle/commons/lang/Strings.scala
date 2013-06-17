@@ -350,8 +350,8 @@ object Strings {
    * @param delimiter a {@link java.lang.String} object.
    * @return a {@link java.lang.String} object.
    */
-  def join(seq: Seq[String], delimiter: String): String = {
-    if (null == seq || seq.size < 1) {
+  def join(seq: Iterable[String], delimiter: String): String = {
+    if (null == seq) {
       ""
     } else {
       val aim = new StringBuilder()

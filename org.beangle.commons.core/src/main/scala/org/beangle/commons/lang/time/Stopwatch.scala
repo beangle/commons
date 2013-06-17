@@ -60,7 +60,7 @@ import Stopwatch._
  * @author chaostone
  * @since 3.0.0
  */
-class Stopwatch(val ticker: Ticker=Ticker.systemTicker(), start: Boolean=true) {
+class Stopwatch(val ticker: Ticker=Ticker.systemTicker(), start: Boolean=false) {
 
   var running: Boolean = _
 

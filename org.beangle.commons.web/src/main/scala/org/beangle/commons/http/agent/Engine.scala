@@ -18,10 +18,6 @@
  */
 package org.beangle.commons.http.agent
 
-import java.util.List
-import org.beangle.commons.collection.CollectUtils
-//remove if not needed
-import scala.collection.JavaConversions._
 
 object Engines extends Enumeration {
 
@@ -43,12 +39,10 @@ object Engines extends Enumeration {
 
   class Engine(var name: String) extends Val {
 
-    var browserCategories = CollectUtils.newArrayList[Browsers.Category]
-
-    def getBrowserCategories = browserCategories
+    var categories:List[Browsers.Category] = Nil
 
     def addCategory(category: Browsers.Category) {
-      browserCategories.add(category)
+      categories = category::categories
     }
   }
 

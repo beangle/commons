@@ -18,14 +18,11 @@
  */
 package org.beangle.commons.http.agent
 
-import java.util.List
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.tuple.Pair
-import scala.beans.{BeanProperty, BooleanBeanProperty}
-import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 object Oss extends Enumeration {
 
@@ -75,9 +72,9 @@ object Oss extends Enumeration {
 
   val Unknown = new Category("Unknown")
 
-  class Category(@BeanProperty val name: String, versions: String*) extends Val {
+  class Category(val name: String, versions: String*) extends Val {
 
-    private val versionPairs = CollectUtils.newArrayList[Pair[Pattern,String]]
+    private val versionPairs = new mutable.ListBuffer[Pair[Pattern,String]]
 
     for (version <- versions) {
       var matcheTarget = version
@@ -86,15 +83,15 @@ object Oss extends Enumeration {
         matcheTarget = "(?i)" + Strings.substringBefore(version, "->")
         versionNum = Strings.substringAfter(version, "->")
       }
-      versionPairs.add(Pair.of(Pattern.compile(matcheTarget), versionNum))
+      versionPairs+=Pair.of(Pattern.compile(matcheTarget), versionNum)
     }
 
-    def `match`(agentString: String): String = {
+    def matches(agentString: String): String = {
       for (entry <- versionPairs) {
-        val m = entry.getKey.matcher(agentString)
+        val m = entry._1.matcher(agentString)
         if (m.find()) {
           val sb = new StringBuffer()
-          m.appendReplacement(sb, entry.getValue)
+          m.appendReplacement(sb, entry._2)
           sb.delete(0, m.start())
           return sb.toString
         }

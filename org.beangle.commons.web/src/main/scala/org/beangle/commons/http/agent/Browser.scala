@@ -18,17 +18,12 @@
  */
 package org.beangle.commons.http.agent
 
-import java.io.Serializable
-import java.util.Map
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.Strings
-import Browser._
-//remove if not needed
-import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 object Browser {
 
-  var browsers: Map[String, Browser] = CollectUtils.newHashMap()
+  var browsers = new mutable.HashMap[String, Browser]
 
   val UNKNOWN = new Browser(Browsers.Unknown, null)
 
@@ -46,11 +41,11 @@ object Browser {
     for (engine <- Engines.values) {
       val egineName = engine.name
       if (agentString.contains(egineName)) {
-        for (category <- engine.browserCategories) {
-          val version = category.`match`(agentString)
+        for (category <- engine.categories) {
+          val version = category.matches(agentString)
           if (version != null) {
-            val key = category.getName + "/" + version
-            var browser = browsers.get(key)
+            val key = category.name + "/" + version
+            var browser = browsers.get(key).orNull
             if (null == browser) {
               browser = new Browser(category, version)
               browsers.put(key, browser)
@@ -61,10 +56,10 @@ object Browser {
       }
     }
     for (category <- Browsers.values) {
-      val version = category.`match`(agentString)
+      val version = category.matches(agentString)
       if (version != null) {
-        val key = category.getName + "/" + version
-        var browser = browsers.get(key)
+        val key = category.name + "/" + version
+        var browser = browsers.get(key).orNull
         if (null == browser) {
           browser = new Browser(category, version)
           browsers.put(key, browser)
@@ -76,17 +71,18 @@ object Browser {
   }
 }
 
+import Browser._
 /**
  * Web browser
  *
  * @author chaostone
  */
 @SerialVersionUID(-6200607575108416928L)
-class Browser(val category: Browsers.Category, val version: String) extends Serializable() with Comparable[Browser] {
+class Browser(val category: Browsers.Category, val version: String) extends Serializable with Ordered[Browser] {
 
   override def toString(): String = {
-    category.getName + " " + (if (version == null) "" else version)
+    category.name + " " + (if (version == null) "" else version)
   }
 
-  def compareTo(o: Browser): Int = category.compareTo(o.category)
+  def compare(o: Browser): Int = category.compareTo(o.category)
 }

@@ -18,11 +18,8 @@
  */
 package org.beangle.commons.web.access
 
-import java.util.List
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * @author chaostone
@@ -45,5 +42,5 @@ trait AccessMonitor {
   /**
    * Return current request list.
    */
-  def getRequests(): List[AccessRequest]
+  def snapshot: List[AccessRequest]
 }

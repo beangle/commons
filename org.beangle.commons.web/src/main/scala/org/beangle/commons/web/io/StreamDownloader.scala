@@ -23,8 +23,6 @@ import java.io.InputStream
 import java.net.URL
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * Stream Downloader

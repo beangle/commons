@@ -18,17 +18,12 @@
  */
 package org.beangle.commons.http.agent
 
-import java.io.Serializable
-import java.util.Map
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.Strings
-import Os._
-//remove if not needed
-import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 object Os {
 
-  var osMap: Map[String, Os] = CollectUtils.newHashMap()
+  val osMap = new mutable.HashMap[String, Os]
 
   val UNKNOWN = new Os(Oss.Unknown, null)
 
@@ -44,10 +39,10 @@ object Os {
       return Os.UNKNOWN
     }
     for (category <- Oss.values) {
-      val version = category.`match`(agentString)
+      val version = category.matches(agentString)
       if (version != null) {
-        val key = category.getName + "/" + version
-        var os = osMap.get(key)
+        val key = category.name + "/" + version
+        var os = osMap.get(key).orNull
         if (null == os) {
           os = new Os(category, version)
           osMap.put(key, os)
@@ -59,12 +54,13 @@ object Os {
   }
 }
 
+import Os._
 @SerialVersionUID(-7506270303767154240L)
-class Os private (val category: Oss.Category, val version: String) extends Serializable() with Comparable[Os] {
+class Os private (val category: Oss.Category, val version: String) extends Serializable with Ordered[Os] {
 
   override def toString(): String = {
-    category.getName + " " + (if (version == null) "" else version)
+    category.name + " " + (if (version == null) "" else version)
   }
 
-  def compareTo(o: Os): Int = category.compareTo(o.category)
+  def compare(o: Os): Int = category.compareTo(o.category)
 }

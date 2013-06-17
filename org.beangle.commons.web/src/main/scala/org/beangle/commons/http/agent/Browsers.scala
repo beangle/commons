@@ -21,10 +21,8 @@ package org.beangle.commons.http.agent
 import org.beangle.commons.http.agent.Engines._
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.tuple.Pair
-import scala.beans.{BeanProperty, BooleanBeanProperty}
 
 object Browsers extends Enumeration {
 
@@ -107,8 +105,7 @@ object Browsers extends Enumeration {
 
   val Unknown = new Category("Unknown", Other)
 
-  class Category(@BeanProperty val name: String, @BeanProperty val engine: Engine, versions: String*)
-      extends Val {
+  class Category(val name: String,val engine: Engine, versions: String*) extends Val {
     private val versionPairs = build(versions)
 
     engine.addCategory(this)
@@ -127,12 +124,12 @@ object Browsers extends Enumeration {
       pairs.toList
     }
 
-    def `match`(agentString: String): String = {
+    def matches(agentString: String): String = {
       for (pair <- versionPairs) {
-        val m = pair.getKey.matcher(agentString)
+        val m = pair._1.matcher(agentString)
         if (m.find()) {
           val sb = new StringBuffer()
-          m.appendReplacement(sb, pair.getValue)
+          m.appendReplacement(sb, pair._2)
           sb.delete(0, m.start())
           return sb.toString
         }

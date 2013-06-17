@@ -58,7 +58,7 @@ class AntPathRequestMatcher(val pattern: AntPathPattern,val httpMethod: String) 
     }
     var url = request.getServletPath
     if (null != request.getPathInfo) url += request.getPathInfo
-    pattern.`match`(url)
+    pattern.matches(url)
   }
 
   override def equals(obj: Any): Boolean = {

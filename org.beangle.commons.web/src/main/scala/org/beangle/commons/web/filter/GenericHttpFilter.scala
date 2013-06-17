@@ -19,8 +19,6 @@
 package org.beangle.commons.web.filter
 
 import java.util.Enumeration
-import java.util.HashSet
-import java.util.Set
 import javax.servlet.Filter
 import javax.servlet.FilterConfig
 import javax.servlet.ServletContext
@@ -30,30 +28,20 @@ import org.beangle.commons.bean.Initializing
 import org.beangle.commons.bean.PropertyUtils
 import org.beangle.commons.lang.Assert
 import org.beangle.commons.lang.Strings
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import scala.beans.{BeanProperty, BooleanBeanProperty}
-//remove if not needed
-import scala.collection.JavaConversions._
-
+import org.beangle.commons.logging.Logging
+import scala.collection.mutable
 /**
  * @author chaostone
  * @version $Id: GenericHttpFilter.java Nov 20, 2010 7:12:16 PM chaostone $
  */
-abstract class GenericHttpFilter extends Filter with Initializing with Disposable {
-
-  /**
-   Logger available to subclasses
-   */
-  protected val logger = LoggerFactory.getLogger(getClass)
+abstract class GenericHttpFilter extends Filter with Initializing with Logging {
 
   /**
    * Set of required properties (Strings) that must be supplied as config
    * parameters to this filter.
    */
-  private val requiredProperties = new HashSet[String]()
+  private val requiredProperties = new mutable.HashSet[String]
 
-  @BeanProperty
   var filterConfig: FilterConfig = _
 
   private var servletContext: ServletContext = _
@@ -108,17 +96,16 @@ abstract class GenericHttpFilter extends Filter with Initializing with Disposabl
   }
 
   protected def initParams(config: FilterConfig) {
-    val missingProps = if ((requiredProperties != null && !requiredProperties.isEmpty)) new HashSet[String](requiredProperties) else null
+    val missingProps = new mutable.HashSet[String]
+    if ((requiredProperties != null && !requiredProperties.isEmpty)) missingProps ++= requiredProperties
     val en = config.getInitParameterNames
     while (en.hasMoreElements()) {
       val property = en.nextElement().asInstanceOf[String]
       val value = config.getInitParameter(property)
       PropertyUtils.setProperty(this, property, value)
-      if (missingProps != null) {
-        missingProps.remove(property)
-      }
+      missingProps.remove(property)
     }
-    if (missingProps != null && missingProps.size > 0) {
+    if (missingProps.size > 0) {
       throw new ServletException("Initialization from FilterConfig for filter '" + config.getFilterName + 
         "' failed; the following required properties were missing: " + 
         Strings.join(missingProps, ", "))

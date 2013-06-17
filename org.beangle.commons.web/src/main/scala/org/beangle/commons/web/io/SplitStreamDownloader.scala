@@ -27,8 +27,6 @@ import org.beangle.commons.http.mime.MimeTypeProvider
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.time.Stopwatch
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * SplitStreamDownloader
@@ -73,7 +71,7 @@ class SplitStreamDownloader(mimeTypeProvider: MimeTypeProvider) extends DefaultS
     var start = 0L
     var begin = 0L
     var stop = 0L
-    val watch = new Stopwatch().start()
+    val watch = new Stopwatch(true)
     try {
       length = input.available()
       stop = length - 1
@@ -110,14 +108,9 @@ class SplitStreamDownloader(mimeTypeProvider: MimeTypeProvider) extends DefaultS
     } finally {
       IOs.close(input)
       if (logger.isDebugEnabled) {
-        var percent: String = null
-        percent = if (length == 0) "100%" else (((start - begin) * 1.0 / length) * 10000).toInt / 100.0f + 
-          "%"
-        val time = watch.elapsedMillis()
-        var rate = 0
-        if (start - begin > 0) {
-          rate = (((start - begin) * 1.0 / time * 1000) / 1024).toInt
-        }
+        var percent = if (length == 0) "100%" else (((start - begin) * 1.0 / length) * 10000).toInt / 100.0f + "%"
+        val time = watch.elapsedMillis
+        var rate =  if (start - begin > 0) (((start - begin) * 1.0 / time * 1000) / 1024).toInt else 0
         logger.debug("{}({}-{}/{}) download {}[{}] in {} ms with {} KB/s", List(attach, begin, stop, 
           length, start - begin, percent, time, rate).toArray)
       }

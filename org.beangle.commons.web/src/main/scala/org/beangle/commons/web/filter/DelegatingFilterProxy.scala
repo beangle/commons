@@ -28,7 +28,6 @@ import org.beangle.commons.inject.Container
 import org.beangle.commons.inject.ContainerHook
 import org.beangle.commons.inject.Containers
 import org.beangle.commons.lang.Throwables
-import scala.beans.{BeanProperty, BooleanBeanProperty}
 
 /**
  * Proxy for a standard Servlet 2.3 Filter, delegating to a managed
@@ -42,7 +41,6 @@ class DelegatingFilterProxy extends GenericHttpFilter with ContainerHook {
 
   private var delegate: Filter = _
 
-  @BeanProperty
   protected var targetBeanName: String = _
 
   def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
@@ -60,7 +58,7 @@ class DelegatingFilterProxy extends GenericHttpFilter with ContainerHook {
   protected override def initFilterBean() {
     if (null == targetBeanName) targetBeanName = getFilterName
     val wac = Containers.getRoot
-    if (wac != null) delegate = initDelegate(wac) else Containers.getHooks.add(this)
+    if (wac != null) delegate = initDelegate(wac) else Containers.addHook(this)
   }
 
   override def destroy() {
@@ -69,7 +67,7 @@ class DelegatingFilterProxy extends GenericHttpFilter with ContainerHook {
 
   protected def initDelegate(container: Container): Filter = {
     val delegate = container.getBean[Filter](targetBeanName)
-    delegate.get.init(getFilterConfig)
+    delegate.get.init(filterConfig)
     delegate.get
   }
 
