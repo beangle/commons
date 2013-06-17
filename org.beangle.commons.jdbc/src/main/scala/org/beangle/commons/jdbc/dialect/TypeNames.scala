@@ -4,12 +4,7 @@
  */
 package org.beangle.commons.jdbc.dialect
 
-import java.util.Map
-import java.util.TreeMap
-import collection.JavaConversions._
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.Strings
-
 /**
  * This class maps a type to names. Associations may be marked with a capacity.
  * Calling the get() method with a type and actual size n will return the
@@ -49,43 +44,34 @@ import org.beangle.commons.lang.Strings
  */
 class TypeNames {
 
-  var weighted = CollectUtils.newHashMap[Int, Map[Int, String]]
-  var defaults = CollectUtils.newHashMap[Int, String]
+  var weighted:Map[Int, Map[Int, String]]=Map.empty
+  var defaults:Map[Int, String]=Map.empty
 
   /**
    * get default type name for specified type
    *
-   * @param typecode
-   * the type key
+   * @param typecode the type key
    * @return the default type name associated with specified key
    */
-  def get(typecode: Int) = {
-    val result = defaults.get(typecode);
-    if (result == null) throw new RuntimeException("No Dialect mapping for JDBC type: " + typecode);
-    result
-  }
+  def get(typecode: Int) = defaults(typecode)
 
   /**
    * get type name for specified type and size
    *
-   * @param typecode
-   * the type key
-   * @param size
-   * the SQL length
-   * @param precision
-   * the SQL precision
-   * @param scale
-   * the SQL scale
+   * @param typecode  the type key
+   * @param size the SQL length
+   * @param precision  the SQL precision
+   * @param scale the SQL scale
    * @return the associated name with smallest capacity >= size, if available
    *         and the default type name otherwise
    */
   def get(typecode: Int, size: Int, precision: Int, scale: Int): String = {
-    val map = weighted.get(typecode); //Map[Int, String]
-    if (map != null && map.size() > 0) {
+    val map = weighted.get(typecode).orNull //Map[Int, String]
+    if (map != null && map.size > 0) {
       // iterate entries ordered by capacity to find first fit
-      for (entry <- map.entrySet()) {
-        if (size <= entry.getKey()) {
-          return replace(entry.getValue(), size, precision, scale);
+      for ((k,v) <- map) {
+        if (size <= k) {
+          return replace(v, size, precision, scale);
         }
       }
     }
@@ -106,13 +92,8 @@ class TypeNames {
    * the type key
    */
   def put(typecode: Int, capacity: Int, value: String) {
-    var map = weighted.get(typecode); //Map[Int, String]
-    if (map == null) {
-      // add new ordered map
-      map = new TreeMap[Int, String]();
-      weighted.put(typecode, map);
-    }
-    map.put(capacity, value);
+    val map = weighted.get(typecode).getOrElse(new collection.immutable.TreeMap[Int, String]) //Map[Int, String]
+    weighted += (typecode-> (map+(capacity-> value)))
   }
 
   /**
@@ -122,6 +103,6 @@ class TypeNames {
    * the type key
    */
   def put(typecode: Int, value: String) {
-    defaults.put(typecode, value);
+    defaults+=(typecode-> value)
   }
 }

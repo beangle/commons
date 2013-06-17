@@ -5,9 +5,7 @@
 package org.beangle.commons.jdbc.dialect
 
 import java.lang.reflect.Constructor
-import java.util.Map
 import org.beangle.commons.jdbc.dialect.vendors._
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.Strings
 
 object Dialects {
@@ -26,10 +24,10 @@ object Dialects {
 
   def SQLServer2005: String = "SQLServer2005"
 
-  val constructors = CollectUtils.newHashMap[String, Constructor[_ <: Dialect]] 
+  var constructors:Map[String, Constructor[_ <: Dialect]] =Map.empty
 
   def getDialect(dialectName: String): Dialect = {
-    val con: Constructor[_ <: Dialect] = constructors.get(dialectName)
+    val con: Constructor[_ <: Dialect] = constructors.get(dialectName).orNull
     if (null == con) {
       throw new RuntimeException(dialectName + " not supported")
     } else {
@@ -37,15 +35,13 @@ object Dialects {
     }
   }
 
-  def register(clazz: Class[_ <: Dialect]) = {
+  def register(clazz: Class[_ <: Dialect]) {
     val name: String = Strings.substringBefore(clazz.getSimpleName(),"Dialect")
-    val con: Constructor[_ <: Dialect] = clazz.getConstructor()
-    constructors.put(name, con)
+    constructors+=(name-> clazz.getConstructor())
   }
 
-  def register(shortname: String, clazz: Class[_ <: Dialect]) = {
-    val con: Constructor[_ <: Dialect] = clazz.getConstructor()
-    constructors.put(shortname, con)
+  def register(shortname: String, clazz: Class[_ <: Dialect]) {
+    constructors += (shortname -> clazz.getConstructor())
   }
 
   register(classOf[DB2Dialect])

@@ -7,22 +7,16 @@ package org.beangle.commons.jdbc.util
 import java.io.IOException
 import java.io.InputStream
 import java.util.Enumeration
-import java.util.List
-import java.util.Map
 import java.util.Properties
-import java.util.Set
 
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.Strings
-import org.slf4j._
+import org.beangle.commons.logging.Logging
 
 import javax.sql.DataSource
 
 class DataSourceUtil
 
-object DataSourceUtil {
-
-  val logger: Logger = LoggerFactory.getLogger(classOf[DataSourceUtil])
+object DataSourceUtil extends Logging{
 
   def getDataSource(datasourceName: String): DataSource = {
     val props: Properties = new Properties()
@@ -36,7 +30,7 @@ object DataSourceUtil {
       case e: IOException => throw new RuntimeException("cannot find database.properties")
     }
     val names: Enumeration[String] = props.propertyNames().asInstanceOf[Enumeration[String]]
-    val sourceProps = CollectUtils.newHashMap[String, String]
+    val sourceProps = new collection.mutable.HashMap[String, String]
     while (names.hasMoreElements()) {
       val propertyName = names.nextElement()
       if (propertyName.startsWith(datasourceName + ".")) {
@@ -44,16 +38,12 @@ object DataSourceUtil {
           props.getProperty(propertyName))
       }
     }
-    if (sourceProps.isEmpty()) {
-      return null
-    } else {
-      return build(sourceProps)
-    }
+    if (sourceProps.isEmpty) null else build(sourceProps)
   }
 
-  def build(properties: Map[String, String]): DataSource = {
-    new PoolingDataSourceFactory(properties.get("driverClassName"), properties.get("url"),
-      properties.get("username"), properties.get("password")).getObject
+  private def build(properties: collection.Map[String, String]): DataSource = {
+    new PoolingDataSourceFactory(properties("driverClassName"), properties("url"),
+      properties("username"), properties("password")).getObject
   }
 
   def getDataSourceNames(): List[String] = {
@@ -64,16 +54,16 @@ object DataSourceUtil {
     } else {
       throw new RuntimeException("cannot find database.properties")
     }
-    val dialects = CollectUtils.newHashSet[String]
+    val dialects = new collection.mutable.HashSet[String]
     val names: Enumeration[String] = props.propertyNames().asInstanceOf[Enumeration[String]]
     while (names.hasMoreElements()) {
       val propertyName = names.nextElement()
       val dialect = Strings.substringBefore(propertyName, ".")
       if (!dialects.contains(dialect)) {
-        dialects.add(dialect)
+        dialects+=dialect
       }
     }
-    CollectUtils.newArrayList(dialects)
+    dialects.toList
   }
 
 }

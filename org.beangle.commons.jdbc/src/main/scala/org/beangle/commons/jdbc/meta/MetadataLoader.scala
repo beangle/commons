@@ -15,16 +15,13 @@ import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.mutable.ListBuffer
 import org.beangle.commons.jdbc.dialect.Dialect
 import org.beangle.commons.jdbc.dialect.SequenceGrammar
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.Strings.lowerCase
 import org.beangle.commons.lang.Strings.replace
 import org.beangle.commons.lang.Strings.upperCase
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import org.beangle.commons.logging.Logging
 import scala.collection.mutable
 
-class MetadataLoader(initDialect: Dialect, initMeta: DatabaseMetaData) {
-  val logger: Logger = LoggerFactory.getLogger(classOf[MetadataLoader])
+class MetadataLoader(initDialect: Dialect, initMeta: DatabaseMetaData) extends Logging{
   val dialect: Dialect = initDialect
   val meta: DatabaseMetaData = initMeta
   val tables = new mutable.HashMap[String, Table]
