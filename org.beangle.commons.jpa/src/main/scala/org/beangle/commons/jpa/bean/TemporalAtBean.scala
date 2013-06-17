@@ -20,27 +20,26 @@ package org.beangle.commons.jpa.bean
 
 import java.util.Date
 import javax.validation.constraints.NotNull
-import org.beangle.commons.entity.Journal
+import org.beangle.commons.entity.TemporalAt
 /**
- * Jounal Entity
+ * 有时效性的实体
+ * </p>
+ * 指有具体生效时间和失效时间的实体。一般生效时间不能为空，失效时间可以为空。
+ * 具体时间采用时间时间格式便于比对。
  * 
  * @author chaostone
- * @since 3.1.0
+ * @version $Id: $
  */
-trait JournalBean extends Journal {
+trait TemporalAtBean extends TemporalAt{
+
   /**
-   * 起始日期
+   * 获得生效时间
    */
   @NotNull
-  var beginOn:Date;
+  var effectiveAt:Date
 
   /**
-   * 结束日期
+   * 获得失效时间
    */
-  var endOn:Option[Date];
-
-  /**
-   * 备注
-   */
-  def remark:Option[String];
+  var invalidAt:Option[Date]
 }

@@ -18,12 +18,9 @@
  */
 package org.beangle.commons.jpa.bind
 
-import java.util.Collection
-import java.util.Map
 
 import javax.persistence.Entity
 
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.lang.Assert
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.jpa.util.Jpas
@@ -59,7 +56,6 @@ object EntityPersistConfig{
 
     override def hashCode:Int= clazz.hashCode()
 
-    @Override
     override def equals(obj:Any):Boolean = clazz.equals(obj)
   }
 
@@ -73,27 +69,28 @@ import EntityPersistConfig._
  */
 final class EntityPersistConfig {
 
+  import scala.collection.mutable
   /**
    * Classname -> EntityDefinition
    */
-  val  entityMap = CollectUtils.newHashMap[String, EntityDefinition]
+  val  entityMap = new mutable.HashMap[String, EntityDefinition]
 
   /**
    * Classname.property -> CollectionDefinition
    */
-  val collectMap = CollectUtils.newHashMap[String, CollectionDefinition]
+  val collectMap = new mutable.HashMap[String, CollectionDefinition]
 
   val cache = new CacheConfig();
 
-  def entities:Collection[EntityDefinition] = entityMap.values()
+  def entities:Iterable[EntityDefinition] = entityMap.values
 
-  def collections: Collection[CollectionDefinition] = collectMap.values()
+  def collections: Iterable[CollectionDefinition] = collectMap.values
 
-  def getEntity(clazz:Class[_]):EntityDefinition = entityMap.get(clazz.getName())
+  def getEntity(clazz:Class[_]):EntityDefinition = entityMap(clazz.getName)
 
   def addEntity(definition:EntityDefinition):this.type= {
     entityMap.put(definition.clazz.getName(), definition)
-    this;
+    this
   }
 
  def addCollection(definition:CollectionDefinition ):this.type = {

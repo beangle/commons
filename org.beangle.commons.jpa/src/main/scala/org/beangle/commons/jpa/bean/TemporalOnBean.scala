@@ -18,28 +18,29 @@
  */
 package org.beangle.commons.jpa.bean
 
-import java.util.Date
+import java.sql.Date
 import javax.validation.constraints.NotNull
-
+import org.beangle.commons.entity.TemporalOn
 /**
- * 有时效性的实体
- * </p>
- * 指有具体生效时间和失效时间的实体。一般生效时间不能为空，失效时间可以为空。
- * 具体时间采用时间时间格式便于比对。
+ * Jounal Entity
  * 
  * @author chaostone
- * @version $Id: $
+ * @since 3.1.0
  */
-trait TemporalBean {
-
+trait TemporalOnBean extends TemporalOn {
   /**
-   * 获得生效时间
+   * 起始日期
    */
   @NotNull
-  var effectiveAt:Date;
+  var beginOn:Date;
 
   /**
-   * 获得失效时间
+   * 结束日期
    */
-  var invalidAt:Date;
+  var endOn:Option[Date];
+
+  /**
+   * 备注
+   */
+  def remark:Option[String];
 }

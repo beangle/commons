@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.entity
 
-import java.util.Date
+import java.sql.Date
 
 /**
  * 有时效性的实体

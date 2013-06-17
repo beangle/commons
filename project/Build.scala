@@ -87,7 +87,7 @@ object BeangleBuild extends Build {
   lazy val commons_jpa = Project(
     "beangle-commons-jpa",
     file("org.beangle.commons.jpa"),
-    settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(validation)) 
+    settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(validation,jpa)) 
                ++ Seq(resolvers += m2repo)
   ) dependsOn(commons_core)
 

@@ -18,12 +18,6 @@
  */
 package org.beangle.commons.jpa.dao
 
-import java.util.Collection
-import java.util.HashMap
-import java.util.List
-import java.util.Map
-
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.collection.Order
 import org.beangle.commons.collection.page.PageLimit
 import org.beangle.commons.entity.dao.Query

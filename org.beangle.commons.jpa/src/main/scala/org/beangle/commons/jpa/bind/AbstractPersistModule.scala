@@ -18,9 +18,6 @@
  */
 package org.beangle.commons.jpa.bind
 
-import java.util.List
-
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.entity.Entity
 import scala.collection.JavaConversions._
 import org.beangle.commons.jpa.bind.EntityPersistConfig._
@@ -46,18 +43,19 @@ abstract class AbstractPersistModule {
   }
 
   protected final def collection(clazz:Class[_],properties:String*):List[CollectionDefinition] = {
-    val definitions = CollectUtils.newArrayList[CollectionDefinition](properties.length);
+    import scala.collection.mutable
+    val definitions = new mutable.ListBuffer[CollectionDefinition]
     for (property <- properties) {
-      definitions.add(new CollectionDefinition(clazz, property));
+      definitions+=new CollectionDefinition(clazz, property)
     }
-    definitions
+    definitions.toList
   }
 
   protected final def defaultCache(region:String,usage: String) {
     config.cache.region = region;
     config.cache.usage =usage;
   }
-
+  
   final def getConfig(): EntityPersistConfig= {
     config = new EntityPersistConfig()
     doConfig()

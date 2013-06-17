@@ -18,7 +18,6 @@
  */
 package org.beangle.commons.jpa.dao
 
-import org.beangle.commons.collection.CollectUtils
 import org.beangle.commons.collection.Order
 import org.beangle.commons.collection.page.PageLimit
 import org.beangle.commons.entity.dao._
