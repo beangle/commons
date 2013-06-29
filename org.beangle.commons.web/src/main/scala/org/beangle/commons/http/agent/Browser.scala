@@ -25,18 +25,18 @@ object Browser {
 
   var browsers = new mutable.HashMap[String, Browser]
 
-  val UNKNOWN = new Browser(Browsers.Unknown, null)
+  val Unknown = new Browser(Browsers.Unknown, null)
 
   /**
    * Iterates over all Browsers to compare the browser signature with the user
-   * agent string. If no match can be found Browser.UNKNOWN will be returned.
+   * agent string. If no match can be found Browser.Unknown will be returned.
    *
    * @param agentString
    * @return Browser
    */
   def parse(agentString: String): Browser = {
     if (Strings.isEmpty(agentString)) {
-      return Browser.UNKNOWN
+      return Browser.Unknown
     }
     for (engine <- Engines.values) {
       val egineName = engine.name
@@ -67,7 +67,7 @@ object Browser {
         return browser
       }
     }
-    Browser.UNKNOWN
+    Browser.Unknown
   }
 }
 

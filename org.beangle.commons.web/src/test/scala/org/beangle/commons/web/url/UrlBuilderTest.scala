@@ -18,34 +18,34 @@
  */
 package org.beangle.commons.web.url
 
-import org.testng.Assert.assertEquals
-import org.testng.annotations.Test
-//remove if not needed
-import scala.collection.JavaConversions._
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
 /**
  * @author chaostone
  * @version $Id: UrlBuilderTest.java Nov 13, 2010 9:39:00 AM chaostone $
  */
-@Test
-class UrlBuilderTest {
+class UrlBuilderTest extends FunSpec with ShouldMatchers{
 
-  def buildFullUrl() {
-    val builder = new UrlBuilder("/")
-    builder.scheme("http").serverName("localhost").port(80)
-    builder.requestURI("/demo/security/user")
-    builder.queryString("name=1&fullname=join")
-    assertEquals(builder.buildUrl(), "http://localhost/demo/security/user?name=1&fullname=join")
-    builder.requestURI(null).port(8080).servletPath("/security")
-    assertEquals(builder.buildUrl(), "http://localhost:8080/security?name=1&fullname=join")
-  }
+  describe("UrlBuilder"){
+    it("build full url"){
+      val builder = new UrlBuilder("/")
+      builder.setScheme("http").setServerName("localhost").setPort(80)
+      builder.setRequestURI("/demo/security/user")
+      builder.setQueryString("name=1&fullname=join")
+      builder.buildUrl() should be equals ("http://localhost/demo/security/user?name=1&fullname=join")
+      builder.setRequestURI(null).setPort(8080).setServletPath("/security")
+      builder.buildUrl() should be equals ("http://localhost:8080/security?name=1&fullname=join")
+    }
+    
 
-  def build() {
-    val builder = new UrlBuilder("/")
-    builder.servletPath("/security/user")
-    builder.queryString("name=1&fullname=join")
-    assertEquals(builder.buildRequestUrl(), "/security/user?name=1&fullname=join")
-    builder.requestURI("/demo/security/user")
-    assertEquals(builder.buildRequestUrl(), "/security/user?name=1&fullname=join")
+    it("build simple url") {
+      val builder = new UrlBuilder("/")
+      builder.setServletPath("/security/user")
+      builder.setQueryString("name=1&fullname=join")
+      builder.buildRequestUrl() should be equals ("/security/user?name=1&fullname=join")
+      builder.setRequestURI("/demo/security/user")
+      builder.buildRequestUrl() should be equals ("/security/user?name=1&fullname=join")
+    }
   }
 }

@@ -55,6 +55,8 @@ object Dependencies {
 
   val jpa = "org.hibernate.javax.persistence" % "hibernate-jpa-2.0-api" % "1.0.1.Final"
   val validation ="javax.validation" % "validation-api" % "1.0.0.GA"
+
+  val mockito ="org.mockito" % "mockito-core" % "1.9.0" % "test"
 }
 
 object Resolvers {
@@ -80,7 +82,7 @@ object BeangleBuild extends Build {
   lazy val commons_web = Project(
     "beangle-commons-web",
     file("org.beangle.commons.web"),
-    settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(servletapi,validation)) 
+    settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(servletapi,validation,mockito)) 
                ++ Seq(resolvers += m2repo)
   ) dependsOn(commons_core)
 

@@ -31,43 +31,42 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import org.beangle.commons.http.mime.MimeTypeProvider
 import org.beangle.commons.lang.ClassLoaders
-import org.testng.annotations.Test
-//remove if not needed
-import scala.collection.JavaConversions._
 
-@Test
-class SplitStreamDownloaderTest {
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-  var streamDownloader: StreamDownloader = new SplitStreamDownloader(new MimeTypeProvider())
+class SplitStreamDownloaderTest  extends FunSpec with ShouldMatchers {
 
-  def download() {
-    var request = mock(classOf[HttpServletRequest])
-    var response = mock(classOf[HttpServletResponse])
-    when(response.getOutputStream).thenReturn(new ServletOutputStream() {
+  val streamDownloader: StreamDownloader = new SplitStreamDownloader(new MimeTypeProvider())
 
-      var outputStream: OutputStream = new ByteArrayOutputStream()
+  describe("SplitStreamDownloader"){
+    it("download") {
+      var request = mock(classOf[HttpServletRequest])
+      var response = mock(classOf[HttpServletResponse])
+      when(response.getOutputStream).thenReturn(new ServletOutputStream() {
+        var outputStream: OutputStream = new ByteArrayOutputStream()
+        def write(b: Int) {
+          outputStream.write(b)
+        }
+      })
+      val testDoc = ClassLoaders.getResource("download.txt", getClass)
+      streamDownloader.download(request, response, testDoc, null)
+      verify(response).setHeader("Accept-Ranges", "bytes")
+      val file = new File(testDoc.toURI())
+      request = mock(classOf[HttpServletRequest])
+      response = mock(classOf[HttpServletResponse])
+      when(response.getOutputStream).thenReturn(new ServletOutputStream() {
 
-      def write(b: Int) {
-        outputStream.write(b)
-      }
-    })
-    val testDoc = ClassLoaders.getResource("download.txt", getClass)
-    streamDownloader.download(request, response, testDoc, null)
-    verify(response).setHeader("Accept-Ranges", "bytes")
-    val file = new File(testDoc.toURI())
-    request = mock(classOf[HttpServletRequest])
-    response = mock(classOf[HttpServletResponse])
-    when(response.getOutputStream).thenReturn(new ServletOutputStream() {
+        var outputStream: OutputStream = new ByteArrayOutputStream()
 
-      var outputStream: OutputStream = new ByteArrayOutputStream()
-
-      def write(b: Int) {
-        outputStream.write(b)
-      }
-    })
-    when(request.getHeader("Range")).thenReturn("bytes=5-12")
-    streamDownloader.download(request, response, testDoc, null)
-    verify(response).setStatus(206)
-    verify(response).setHeader("Content-Range", "bytes 5-12/" + file.length)
+        def write(b: Int) {
+          outputStream.write(b)
+        }
+      })
+      when(request.getHeader("Range")).thenReturn("bytes=5-12")
+      streamDownloader.download(request, response, testDoc, null)
+      verify(response).setStatus(206)
+      verify(response).setHeader("Content-Range", "bytes 5-12/" + file.length)
+    }
   }
 }

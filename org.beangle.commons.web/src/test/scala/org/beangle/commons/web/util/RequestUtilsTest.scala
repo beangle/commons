@@ -19,28 +19,27 @@
 package org.beangle.commons.web.util
 
 import javax.servlet.http.HttpServletRequest
-import org.testng.Assert
-import org.testng.annotations.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.when
-//remove if not needed
-import scala.collection.JavaConversions._
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-@Test
-class RequestUtilsTest {
+class RequestUtilsTest extends FunSpec with ShouldMatchers{
 
-  def testGetServletPath() {
-    var request = mock(classOf[HttpServletRequest])
-    when(request.getContextPath).thenReturn("/")
-    when(request.getRequestURI).thenReturn("/")
-    RequestUtils.getServletPath(request)
-    request = mock(classOf[HttpServletRequest])
-    when(request.getContextPath).thenReturn("/")
-    when(request.getRequestURI).thenReturn("/demo")
-    RequestUtils.getServletPath(request)
-    request = mock(classOf[HttpServletRequest])
-    when(request.getContextPath).thenReturn("")
-    when(request.getRequestURI).thenReturn("/demo")
-    RequestUtils.getServletPath(request)
+  describe("RequestUtils"){
+    it("testGetServletPath") {
+      var request = mock(classOf[HttpServletRequest])
+      when(request.getContextPath).thenReturn("/")
+      when(request.getRequestURI).thenReturn("/")
+      RequestUtils.getServletPath(request)
+      request = mock(classOf[HttpServletRequest])
+      when(request.getContextPath).thenReturn("/")
+      when(request.getRequestURI).thenReturn("/demo")
+      RequestUtils.getServletPath(request)
+      request = mock(classOf[HttpServletRequest])
+      when(request.getContextPath).thenReturn("")
+      when(request.getRequestURI).thenReturn("/demo")
+      RequestUtils.getServletPath(request)
+    }
   }
 }

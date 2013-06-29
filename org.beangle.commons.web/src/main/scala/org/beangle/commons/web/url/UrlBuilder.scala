@@ -20,9 +20,6 @@ package org.beangle.commons.web.url
 
 import org.beangle.commons.lang.Objects
 import org.beangle.commons.lang.Strings
-//remove if not needed
-import scala.collection.JavaConversions._
-
 /**
  * @author chaostone
  * @version $Id: UrlBuilder.java Nov 12; 2010 5:42:10 PM chaostone $
@@ -63,12 +60,8 @@ class UrlBuilder(cxtPath: String) {
   def buildRequestUrl(): String = {
     val sb = new StringBuilder()
     sb.append(buildServletPath())
-    if (null != pathInfo) {
-      sb.append(pathInfo)
-    }
-    if (null != queryString) {
-      sb.append('?').append(queryString)
-    }
+    if (null != pathInfo) sb.append(pathInfo)
+    if (null != queryString) sb.append('?').append(queryString)
     sb.toString
   }
 
@@ -88,9 +81,7 @@ class UrlBuilder(cxtPath: String) {
         sb.append(':').append(port)
       }
     }
-    if (Objects.!=(contextPath, "/")) {
-      sb.append(contextPath)
-    }
+    if (Objects.!=(contextPath, "/")) sb.append(contextPath)
     sb.append(buildRequestUrl())
     sb.toString
   }

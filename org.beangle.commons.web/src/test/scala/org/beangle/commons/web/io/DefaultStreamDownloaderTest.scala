@@ -32,42 +32,38 @@ import javax.servlet.http.HttpServletResponse
 import org.beangle.commons.codec.net.BCoder
 import org.beangle.commons.http.mime.MimeTypeProvider
 import org.beangle.commons.lang.ClassLoaders
-import org.testng.Assert
-import org.testng.annotations.Test
-//remove if not needed
-import scala.collection.JavaConversions._
 
-@Test
-class DefaultStreamDownloaderTest {
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-  var streamDownloader: StreamDownloader = new DefaultStreamDownloader(new MimeTypeProvider())
+class DefaultStreamDownloaderTest  extends FunSpec with ShouldMatchers {
 
-  def download() {
-    val request = mock(classOf[HttpServletRequest])
-    val response = mock(classOf[HttpServletResponse])
-    when(response.getOutputStream).thenReturn(new ServletOutputStream() {
+  val streamDownloader: StreamDownloader = new DefaultStreamDownloader(new MimeTypeProvider())
 
-      var outputStream: OutputStream = new ByteArrayOutputStream()
+  describe("DefaultStreamDownloader"){
+    it("download") {
+      val request = mock(classOf[HttpServletRequest])
+      val response = mock(classOf[HttpServletResponse])
+      when(response.getOutputStream).thenReturn(new ServletOutputStream() {
+        val outputStream: OutputStream = new ByteArrayOutputStream()
+        def write(b: Int) {
+          outputStream.write(b)
+        }
+      })
+      val testDoc = ClassLoaders.getResource("download.txt", getClass)
+      streamDownloader.download(request, response, testDoc, null)
+    }
 
-      def write(b: Int) {
-        outputStream.write(b)
-      }
-    })
-    val testDoc = ClassLoaders.getResource("download.txt", getClass)
-    streamDownloader.download(request, response, testDoc, null)
-  }
+    it("encode/decode") {
+      val value = "汉字-english and .;"
+      val ecodedValue = URLEncoder.encode(value, "utf-8")
+      URLDecoder.decode(ecodedValue, "utf-8") should equal(value)
+    }
 
-  def ecode() {
-    val value = "汉字-english and .;"
-    val ecodedValue = URLEncoder.encode(value, "utf-8")
-    val orginValue = URLDecoder.decode(ecodedValue, "utf-8")
-    orginValue
-  }
-
-  def ecode2() {
-    val value = "汉字-english and .;"
-    val encodedValue = new BCoder().encode(value)
-    val orginValue = new BCoder().decode(encodedValue)
-    orginValue
+    it("Bcoder encode/decode") {
+      val value = "汉字-english and .;"
+      val encodedValue = new BCoder().encode(value)
+      new BCoder().decode(encodedValue) should equal(value)
+    }
   }
 }
