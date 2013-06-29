@@ -1,4 +1,4 @@
-package org.beangle.jdbc.meta.model
+package org.beangle.commons.jdbc.meta
 
 class PrimaryKeyTest {
 

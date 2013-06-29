@@ -2,13 +2,12 @@
  * Licensed under GNU  LESSER General Public License, Version 3.
  * http://www.gnu.org/licenses
  */
-package org.beangle.jdbc.meta.dialect
+package org.beangle.commons.jdbc.dialect
 
 import java.sql.Types
-import org.beangle.jdbc.meta.dialect.vendors.PostgreSQLDialect
+import org.beangle.commons.jdbc.dialect.vendors.PostgreSQLDialect
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.junit.JUnitRunner
 
 class PostgreSQLDialectTest extends FlatSpec with ShouldMatchers {
 

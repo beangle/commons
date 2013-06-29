@@ -2,11 +2,11 @@
  * Licensed under GNU  LESSER General Public License, Version 3.
  * http://www.gnu.org/licenses
  */
-package org.beangle.jdbc.meta.model
+package org.beangle.commons.jdbc.meta
 
 import java.sql.Types
 
-import org.beangle.jdbc.meta.dialect.vendors.OracleDialect
+import org.beangle.commons.jdbc.dialect.vendors.OracleDialect
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FlatSpec

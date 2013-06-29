@@ -1,4 +1,4 @@
-package org.beangle.jdbc.meta.dialect
+package org.beangle.commons.jdbc.dialect
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers

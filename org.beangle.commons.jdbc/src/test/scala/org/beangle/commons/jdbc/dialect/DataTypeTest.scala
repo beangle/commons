@@ -2,7 +2,7 @@
  * Licensed under GNU  LESSER General def License, Version 3.
  * http://www.gnu.org/licenses
  */
-package org.beangle.jdbc.meta.dialect
+package org.beangle.commons.jdbc.dialect
 
 import java.sql.Types.{
   BOOLEAN,
@@ -28,7 +28,7 @@ import java.sql.Types.{
   CLOB
 }
 
-import org.beangle.jdbc.meta.dialect.vendors.{
+import org.beangle.commons.jdbc.dialect.vendors.{
   HSQL2Dialect,
   H2Dialect,
   MySQLDialect,

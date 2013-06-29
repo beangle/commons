@@ -1,7 +1,4 @@
-package org.beangle.jdbc.meta
-
-import org.beangle.jdbc.meta.model.Database
-import org.beangle.jdbc.meta.model.Table
+package org.beangle.commons.jdbc.meta
 
 import scala.collection.JavaConversions._
 import java.util.Map

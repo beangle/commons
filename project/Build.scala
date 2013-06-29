@@ -48,10 +48,11 @@ object Dependencies {
   val servletapi= "javax.servlet" % "servlet-api" % "2.4"
   val scalatest ="org.scalatest" % "scalatest_2.10" % "2.0.M5b" % "test"
 
-  val logbackClassic="ch.qos.logback" % "logback-classic" % "1.0.3"
-  val logbackCore="ch.qos.logback" % "logback-core" % "1.0.3"
+  val logbackClassic="ch.qos.logback" % "logback-classic" % "1.0.3" % "test"
+  val logbackCore="ch.qos.logback" % "logback-core" % "1.0.3"% "test"
 
-  val dbcp = "commons-dbcp" % "commons-dbcp" % "1.3"
+  val h2 = "com.h2database" % "h2" % h2Ver
+  val dbcp = "commons-dbcp" % "commons-dbcp" % "1.3" 
 
   val jpa = "org.hibernate.javax.persistence" % "hibernate-jpa-2.0-api" % "1.0.1.Final"
   val validation ="javax.validation" % "validation-api" % "1.0.0.GA"
@@ -96,7 +97,7 @@ object BeangleBuild extends Build {
   lazy val commons_jdbc = Project(
     "beangle-commons-jdbc",
     file("org.beangle.commons.jdbc"),
-    settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(dbcp))  
+    settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(h2,dbcp))  
                ++ Seq(resolvers +=m2repo)
   ) dependsOn(commons_core)
 }
