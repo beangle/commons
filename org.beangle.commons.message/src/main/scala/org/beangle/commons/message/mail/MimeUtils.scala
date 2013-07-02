@@ -21,7 +21,6 @@ import java.util.List
 import javax.mail.internet.InternetAddress
 import java.util.Collections
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.collection.CollectUtils
 import scala.collection.JavaConversions._
 
 object MimeUtils {
@@ -30,7 +29,7 @@ object MimeUtils {
     if (Strings.isEmpty(address)) Collections.emptyList()
     try {
       var parsed = InternetAddress.parse(address)
-      var returned = CollectUtils.newArrayList[InternetAddress]()
+      var returned = new java.util.ArrayList[InternetAddress]()
       parsed.foreach(raw => returned.add(if (encoding != null) new InternetAddress(raw.getAddress(), raw.getPersonal(), encoding) else raw))
       returned
     } catch {

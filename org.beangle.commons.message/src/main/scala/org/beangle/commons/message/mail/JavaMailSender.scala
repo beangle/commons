@@ -24,7 +24,6 @@ import JavaMailSender._
 import java.util.Properties
 import javax.mail.Session
 import scala.beans.BeanProperty
-import org.beangle.commons.collection.CollectUtils
 import javax.mail.MessagingException
 import javax.mail.internet.MimeMessage
 import java.util.Date
@@ -73,7 +72,7 @@ class JavaMailSender extends MailSender {
   var defaultEncoding: String = _
 
   def send(messages: MailMessage*) {
-    var mimeMsgs = CollectUtils.newArrayList[MimeMessage]()
+    var mimeMsgs = new java.util.ArrayList[MimeMessage]()
     for (m <- messages) {
       try {
         mimeMsgs.add(createMimeMessage(m))

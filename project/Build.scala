@@ -45,19 +45,20 @@ object Dependencies {
 
   val slf4j = "org.slf4j" % "slf4j-api" % slf4jVer
   val asm ="asm" % "asm" % "3.3"
-  val servletapi= "javax.servlet" % "servlet-api" % "2.4"
   val scalatest ="org.scalatest" % "scalatest_2.10" % "2.0.M5b" % "test"
+  val mockito ="org.mockito" % "mockito-core" % "1.9.0" % "test"
 
   val logbackClassic="ch.qos.logback" % "logback-classic" % "1.0.3" % "test"
   val logbackCore="ch.qos.logback" % "logback-core" % "1.0.3"% "test"
 
   val h2 = "com.h2database" % "h2" % h2Ver
   val dbcp = "commons-dbcp" % "commons-dbcp" % "1.3" 
-
   val jpa = "org.hibernate.javax.persistence" % "hibernate-jpa-2.0-api" % "1.0.1.Final"
   val validation ="javax.validation" % "validation-api" % "1.0.0.GA"
 
-  val mockito ="org.mockito" % "mockito-core" % "1.9.0" % "test"
+  val servletapi= "javax.servlet" % "servlet-api" % "2.4"
+  val javamail= "javax.mail" % "mail" % "1.4" 
+  val greenmail ="com.icegreen" % "greenmail" % "1.3.1b"
 }
 
 object Resolvers {
@@ -69,10 +70,13 @@ object BeangleBuild extends Build {
   import Dependencies._
   import BuildSettings._
   import Resolvers._
+
+  publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository")))
+
  
   val commonDeps = Seq(slf4j, logbackClassic,logbackCore,scalatest)
 
-  lazy val commons = Project("beangle-commons", file("."), settings = buildSettings) aggregate (commons_core,commons_web,commons_jpa,commons_jdbc)
+  lazy val commons = Project("beangle-commons", file("."), settings = buildSettings) aggregate (commons_core,commons_web,commons_jpa,commons_jdbc,commons_message)
 
   lazy val commons_core = Project(
     "beangle-commons-core",
@@ -100,4 +104,12 @@ object BeangleBuild extends Build {
     settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(h2,dbcp))  
                ++ Seq(resolvers +=m2repo)
   ) dependsOn(commons_core)
+
+  lazy val commons_message = Project(
+    "beangle-commons-message",
+    file("org.beangle.commons.message"),
+    settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(javamail,greenmail))  
+               ++ Seq(resolvers +=m2repo)
+  ) dependsOn(commons_core)
+
 }

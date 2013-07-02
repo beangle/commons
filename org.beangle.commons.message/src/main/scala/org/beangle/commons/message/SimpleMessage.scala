@@ -18,14 +18,12 @@
  */
 package org.beangle.commons.message
 
-import org.beangle.commons.collection.CollectUtils
 import java.util.List
-//remove if not needed
 import scala.collection.JavaConversions._
 
 class SimpleMessage extends AbstractMessage {
 
-  private var recipients: List[String] = CollectUtils.newArrayList()
+  private var recipients: List[String] = new java.util.ArrayList()
 
   def this(recipient: String, subject: String, text: String) {
     this()

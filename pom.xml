@@ -16,6 +16,7 @@
     <module>org.beangle.commons.web</module>
     <module>org.beangle.commons.jpa</module>
     <module>org.beangle.commons.jdbc</module>
+    <module>org.beangle.commons.message</module>
   </modules>
 
   <description>

@@ -41,7 +41,7 @@ object Files {
     var in: InputStream = null
     try {
       in = new FileInputStream(file)
-      val sw = new StringBuilderWriter()
+      val sw = new StringBuilderWriter(16)
       if (null == charset) IOs.copy(new InputStreamReader(in), sw) else IOs.copy(new InputStreamReader(in, 
         charset.name()), sw)
       sw.toString

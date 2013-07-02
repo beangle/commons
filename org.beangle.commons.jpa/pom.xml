@@ -13,6 +13,7 @@
   <properties>
     <bundle.symbolicName>org.beangle.commons.jpa</bundle.symbolicName>
     <bundle.namespace>org.beangle.commons</bundle.namespace>
+    <jpa.version>1.0.1.Final</jpa.version>
   </properties>
 
   <dependencies>
@@ -23,6 +24,11 @@
     <dependency>
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate.javax.persistence</groupId>
+      <artifactId>hibernate-jpa-2.0-api</artifactId>
+      <version>${jpa.version}</version>
     </dependency>
   </dependencies>
 </project>

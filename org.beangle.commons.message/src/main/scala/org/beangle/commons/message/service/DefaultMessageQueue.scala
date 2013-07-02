@@ -22,7 +22,6 @@ import org.beangle.commons.message.MessageQueue
 import org.beangle.commons.message.Message
 import java.util.Queue
 import java.util.concurrent.LinkedBlockingQueue
-import org.beangle.commons.collection.CollectUtils
 import java.util.List
 import scala.collection.JavaConversions._
 
@@ -30,7 +29,7 @@ class DefaultMessageQueue[T <: Message] extends MessageQueue[T] {
 
   private var queue: Queue[T] = new LinkedBlockingQueue[T]
 
-  def getMessages(): List[T] = CollectUtils.newArrayList[T](queue)
+  def getMessages(): List[T] = new java.util.ArrayList[T](queue)
 
   def addMessage(message: T) {
     queue.add(message)

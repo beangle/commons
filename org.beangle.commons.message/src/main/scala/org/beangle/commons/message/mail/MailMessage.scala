@@ -15,11 +15,11 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
- */ package org.beangle.commons.message.mail
+ */
+ package org.beangle.commons.message.mail
 
 import org.beangle.commons.message.AbstractMessage
 import javax.mail.internet.InternetAddress
-import org.beangle.commons.collection.CollectUtils
 import java.util.List
 import java.util.Date
 import scala.beans.BeanProperty
@@ -32,11 +32,11 @@ class MailMessage extends AbstractMessage {
 
   private var from: InternetAddress = null
 
-  private var to: List[InternetAddress] = CollectUtils.newArrayList()
+  private var to: List[InternetAddress] = new ArrayList()
 
-  private var cc: List[InternetAddress] = CollectUtils.newArrayList()
+  private var cc: List[InternetAddress] = new ArrayList()
 
-  private var bcc: List[InternetAddress] = CollectUtils.newArrayList()
+  private var bcc: List[InternetAddress] = new ArrayList()
 
   private var sentAt: Date = _
 
