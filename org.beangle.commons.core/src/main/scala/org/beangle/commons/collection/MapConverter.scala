@@ -24,7 +24,7 @@ import org.beangle.commons.lang.conversion.Conversion
 import org.beangle.commons.lang.conversion.impl.DefaultConversion
 import scala.reflect.ClassTag
 import org.beangle.commons.lang.Objects
-
+import scala.collection.Map
 /**
  * <p>
  * MapConverter class.
@@ -144,7 +144,7 @@ class MapConverter(val conversion: DefaultConversion=DefaultConversion.Instance)
    * getInteger.
    * </p>
    */
-  def getInteger(data: Map[String, Any], name: String):Option[Integer] = get(data, name, classOf[Integer])
+  def getInt(data: Map[String, Any], name: String):Option[Int] = get(data, name, classOf[Int])
 
   /**
    * Get Short.

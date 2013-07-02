@@ -21,8 +21,8 @@ package org.beangle.commons.jpa.dao
 import org.beangle.commons.collection.Order
 import org.beangle.commons.collection.page.PageLimit
 import org.beangle.commons.entity.dao._
-import org.beangle.commons.lang.Strings._
 import org.beangle.commons.lang.Assert
+import org.beangle.commons.lang.Strings._
 
 object AbstractQueryBuilder{
   val InnerJoin=" left join "
@@ -53,7 +53,7 @@ abstract class AbstractQueryBuilder[T] extends QueryBuilder[T] {
   protected var from:String=_
 
   /** 别名 */
-  protected var alias:String = _
+  var alias:String = _
 
   protected var conditions :List[Condition]= Nil
 
@@ -201,7 +201,7 @@ abstract class AbstractQueryBuilder[T] extends QueryBuilder[T] {
   /**
    * where
    * 
-   * @param condition  object.
+   * @param condition a {@link org.beangle.commons.dao.query.builder.Condition} object.
    */
   def where(condition:Condition):this.type= {
     if (isNotEmpty(statement)) { throw new RuntimeException(
@@ -214,7 +214,7 @@ abstract class AbstractQueryBuilder[T] extends QueryBuilder[T] {
    * 添加一组条件[br]
    * query中不能添加条件集合作为一个条件,因此这里命名没有采用有区别性的addAll
    * 
-   * @param cons.
+   * @param cons a {@link java.util.Collection} object.
    * @return a {@link org.beangle.commons.jpa.dao.OqlBuilder} object.
    */
   def where(cons:Seq[Condition]):this.type= {
@@ -271,7 +271,7 @@ abstract class AbstractQueryBuilder[T] extends QueryBuilder[T] {
   /**
    * orderBy.
    * 
-   * @param orders
+   * @param orders a {@link java.util.List} object.
    */
   def orderBy(orders:List[Order]):this.type= {
     if (null != orders) {
