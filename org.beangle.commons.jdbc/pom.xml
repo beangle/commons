@@ -6,7 +6,6 @@
     <version>4.0.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.beangle.commons</groupId>
   <artifactId>beangle-commons-jdbc</artifactId>
   <packaging>jar</packaging>
   <name>Beangle Commons JDBC</name>
