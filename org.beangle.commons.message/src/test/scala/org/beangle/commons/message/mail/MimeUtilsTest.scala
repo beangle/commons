@@ -20,24 +20,25 @@ package org.beangle.commons.message.mail
 
 import java.util.List
 import javax.mail.internet.InternetAddress
-import org.testng.annotations.Test
 import scala.collection.JavaConversions._
-import org.testng.Assert
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-@Test
-class MimeUtilsTest {
+class MimeUtilsTest extends FunSpec with ShouldMatchers{
 
-  def testParseAddress() {
-    var me = "段体华<duantihua@gmail.com>,程序员<programer@gmail.com>"
-    var adds = MimeUtils.parseAddress(me, "UTF-8")
-    var i = 0
-    for (add <- adds) {
-      if (i == 0) {
-        Assert.assertEquals("段体华", add.getPersonal())
-      } else {
-        Assert.assertEquals("程序员", add.getPersonal())
+  describe("MimeUtils"){
+    it("testParseAddress") {
+      var me = "段体华<duantihua@gmail.com>,程序员<programer@gmail.com>"
+      var adds = MimeUtils.parseAddress(me, "UTF-8")
+      var i = 0
+      for (add <- adds) {
+        if (i == 0) {
+          add.getPersonal() should equal ("段体华")
+        } else {
+          add.getPersonal() should equal ("程序员")
+        }
+        i += 1
       }
-      i += 1
     }
   }
 }

@@ -18,47 +18,50 @@
  */
 package org.beangle.commons.message.mail
 
-import org.testng.annotations.Test
 import java.lang.Boolean
 //remove if not needed
 import scala.collection.JavaConversions._
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-@Test
-class DefaultMailNotifierTest {
+class DefaultMailNotifierTest  extends FunSpec with ShouldMatchers{
 
   private var online: Boolean = false;
 
-  def testGmail() {
-    var mailSender = new JavaMailSender();
-    mailSender.setHost("smtp.gmail.com");
-    mailSender.setUsername("eams.demon");
-    mailSender.setPassword("xxxxxs");
-    mailSender.setPort(465);
-    mailSender.setProtocol("smtp");
-    mailSender.getJavaMailProperties().put("mail.smtp.auth", "true");
-    mailSender.getJavaMailProperties().put("mail.smtp.port", new Integer(465));
-    mailSender.getJavaMailProperties().put("mail.smtp.starttls.enable", "true");
-    mailSender.getJavaMailProperties().put("mail.smtp.socketFactory.port", new Integer(465));
-    mailSender.getJavaMailProperties().put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-    mailSender.getJavaMailProperties().put("mail.smtp.socketFactory.fallback", "false");
+  describe("JavaMailSender"){
+    it("testGmail") {
+      var mailSender = new JavaMailSender();
+      mailSender.setHost("smtp.gmail.com");
+      mailSender.setUsername("eams.demon");
+      mailSender.setPassword("xxxxxs");
+      mailSender.setPort(465);
+      mailSender.setProtocol("smtp");
+      mailSender.getJavaMailProperties().put("mail.smtp.auth", "true");
+      mailSender.getJavaMailProperties().put("mail.smtp.port", new Integer(465));
+      mailSender.getJavaMailProperties().put("mail.smtp.starttls.enable", "true");
+      mailSender.getJavaMailProperties().put("mail.smtp.socketFactory.port", new Integer(465));
+      mailSender.getJavaMailProperties().put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+      mailSender.getJavaMailProperties().put("mail.smtp.socketFactory.fallback", "false");
 
-    var mmc = new MailMessage("测试", "测试简单邮件发送机制", "duantihua@163.com");
-    var mailNotifier = new DefaultMailNotifier[MailMessage](mailSender);
-    mailNotifier.setFrom("段体华<duantihua@gmail.com>");
-    if (online) mailNotifier.deliver(mmc);
-  }
+      var mmc = new MailMessage("测试", "测试简单邮件发送机制", "duantihua@163.com");
+      var mailNotifier = new DefaultMailNotifier[MailMessage](mailSender);
+      mailNotifier.setFrom("段体华<duantihua@gmail.com>");
+      if (online) mailNotifier.deliver(mmc);
+    }
 
-  def testSimple() {
-    var mailSender = new JavaMailSender();
-    mailSender.setHost("mail.shufe.edu.cn");
-    mailSender.setUsername("infocms");
-    mailSender.setPassword("xxxx");
-    mailSender.getJavaMailProperties().put("mail.smtp.auth", "true");
+    it("testSimple") {
+      var mailSender = new JavaMailSender();
+      mailSender.setHost("mail.shufe.edu.cn");
+      mailSender.setUsername("infocms");
+      mailSender.setPassword("xxxx");
+      mailSender.getJavaMailProperties().put("mail.smtp.auth", "true");
 
-    var mmc = new MailMessage("测试", "测试简单邮件发送机制", "infocms@mail.shufe.edu.cn");
-    var mailNotifier = new DefaultMailNotifier[MailMessage];
-    mailNotifier.setMailSender(mailSender);
-    mailNotifier.setFrom("<测试name>infocms@mail.shufe.edu.cn");
-    if (online) mailNotifier.deliver(mmc);
+      var mmc = new MailMessage("测试", "测试简单邮件发送机制", "infocms@mail.shufe.edu.cn");
+      var mailNotifier = new DefaultMailNotifier[MailMessage];
+      mailNotifier.setMailSender(mailSender);
+      mailNotifier.setFrom("<测试name>infocms@mail.shufe.edu.cn");
+      if (online) mailNotifier.deliver(mmc);
+    }
   }
 }
+

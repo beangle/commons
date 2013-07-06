@@ -18,11 +18,7 @@
  */
 package org.beangle.commons.message.service
 
-import org.testng.Assert.assertEquals
-import org.testng.annotations.Test
 import com.icegreen.greenmail.util.GreenMail
-import org.testng.annotations.BeforeClass
-import org.testng.annotations.AfterClass
 import com.icegreen.greenmail.util.ServerSetupTest
 import org.beangle.commons.message.mail.JavaMailSender
 import org.beangle.commons.message.mail.DefaultMailNotifier
@@ -31,44 +27,41 @@ import javax.mail.MessagingException
 import org.beangle.commons.lang.Throwables
 //remove if not needed
 import scala.collection.JavaConversions._
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
 
-@Test
-class DefaultNotifictionTaskTest {
-  private var greenMail: GreenMail = _
 
-  @BeforeClass
-  def setUp() {
-    greenMail = new GreenMail(ServerSetupTest.ALL)
-    // uses test ports by default
-    greenMail.start()
-    greenMail.setUser("test1@localhost", "user1", "password")
-    greenMail.setUser("test2@localhost", "user2", "password")
-  }
+class DefaultNotifictionTaskTest extends FunSpec with ShouldMatchers{
+  private var greenMail = new GreenMail(ServerSetupTest.ALL)
+  greenMail.start()
+  greenMail.setUser("test1@localhost", "user1", "password")
+  greenMail.setUser("test2@localhost", "user2", "password")
+  
 
-  @AfterClass
-  def tearDown() {
-    greenMail.stop()
-  }
+  describe("JavaMailSender"){
+    it("testMail") {
+      try {
+        var mailSender = new JavaMailSender()
+        mailSender.setHost("localhost")
+        mailSender.setUsername("user1")
+        mailSender.setPassword("password")
+        mailSender.setPort(3025)
 
-  def testMail() {
-    try {
-      var mailSender = new JavaMailSender()
-      mailSender.setHost("localhost")
-      mailSender.setUsername("user1")
-      mailSender.setPassword("password")
-      mailSender.setPort(3025)
-
-      var notifier = new DefaultMailNotifier[MailMessage](mailSender)
-      notifier.setFrom("测试name<user1@localhost>")
-      var task = new DefaultNotificationTask[MailMessage]()
-      task.setNotifier(notifier)
-      var mmc = new MailMessage("测试", "测试简单邮件发送机制", "user2@localhost")
-      task.getMessageQueue().addMessage(mmc)
-      task.send()
-      var msgs = greenMail.getReceivedMessages()
-      assertEquals(1, msgs.length)
-    } catch {
-      case e: MessagingException => Throwables.propagate(e)
+        var notifier = new DefaultMailNotifier[MailMessage](mailSender)
+        notifier.setFrom("测试name<user1@localhost>")
+        var task = new DefaultNotificationTask[MailMessage]()
+        task.setNotifier(notifier)
+        var mmc = new MailMessage("测试", "测试简单邮件发送机制", "user2@localhost")
+        task.getMessageQueue().addMessage(mmc)
+        task.send()
+        var msgs = greenMail.getReceivedMessages()
+        msgs.length should be (1)
+        greenMail.stop()
+      } catch {
+        case e: MessagingException => Throwables.propagate(e)
+      }
     }
   }
+
+
 }
