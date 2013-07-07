@@ -4,13 +4,14 @@ import Keys._
 object BuildSettings {
   val buildOrganization = "org.beangle"
   val buildVersion = "4.0.0-SNAPSHOT"
-  val buildScalaVersion = "2.10.0"
+  val buildScalaVersion = "2.10.2"
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
     organization := buildOrganization,
     version := buildVersion,
     scalaVersion := buildScalaVersion,
-    shellPrompt := ShellPrompt.buildShellPrompt
+    shellPrompt := ShellPrompt.buildShellPrompt,
+    crossPaths   := false
   )
 }
 
