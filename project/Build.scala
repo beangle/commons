@@ -81,20 +81,20 @@ object BeangleBuild extends Build {
 
   lazy val commons_core = Project(
     "beangle-commons-core",
-    file("org.beangle.commons.core"),
+    file("core"),
     settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(asm))  ++ Seq(resolvers +=m2repo)
   )
 
   lazy val commons_web = Project(
     "beangle-commons-web",
-    file("org.beangle.commons.web"),
+    file("web"),
     settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(servletapi,validation,mockito)) 
                ++ Seq(resolvers += m2repo)
   ) dependsOn(commons_core)
 
   lazy val commons_jpa = Project(
     "beangle-commons-jpa",
-    file("org.beangle.commons.jpa"),
+    file("jpa"),
     settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(validation,jpa)) 
                ++ Seq(resolvers += m2repo)
   ) dependsOn(commons_core)
@@ -108,7 +108,7 @@ object BeangleBuild extends Build {
 
   lazy val commons_message = Project(
     "beangle-commons-message",
-    file("org.beangle.commons.message"),
+    file("message"),
     settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(javamail,greenmail))  
                ++ Seq(resolvers +=m2repo)
   ) dependsOn(commons_core)
