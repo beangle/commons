@@ -21,7 +21,6 @@ package org.beangle.commons.http.agent
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.tuple.Pair
 import scala.collection.mutable
 
 object Oss extends Enumeration {
@@ -83,7 +82,7 @@ object Oss extends Enumeration {
         matcheTarget = "(?i)" + Strings.substringBefore(version, "->")
         versionNum = Strings.substringAfter(version, "->")
       }
-      versionPairs+=Pair.of(Pattern.compile(matcheTarget), versionNum)
+      versionPairs+=Pair(Pattern.compile(matcheTarget), versionNum)
     }
 
     def matches(agentString: String): String = {

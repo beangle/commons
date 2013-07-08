@@ -22,7 +22,6 @@ import org.beangle.commons.http.agent.Engines._
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.tuple.Pair
 
 object Browsers extends Enumeration {
 
@@ -119,7 +118,7 @@ object Browsers extends Enumeration {
           matcheTarget = "(?i)" + Strings.substringBefore(version, "->")
           versionNum = Strings.substringAfter(version, "->")
         }
-        pairs += Pair.of(Pattern.compile(matcheTarget), versionNum)
+        pairs += Pair(Pattern.compile(matcheTarget), versionNum)
       }
       pairs.toList
     }

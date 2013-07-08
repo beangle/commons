@@ -19,7 +19,6 @@
 package org.beangle.commons.lang.conversion.impl
 
 import org.beangle.commons.lang.Objects
-import org.beangle.commons.lang.tuple.Pair
 
 /**
  * Convert anything to null.
@@ -31,7 +30,5 @@ object NoneConverter extends GenericConverter {
 
   override def convert(input: Any, sourceType: Class[_], targetType: Class[_]): Any = Objects.default(targetType)
 
-  override def getTypeinfo(): Pair[Class[_], Class[_]] = {
-    Pair.of[Class[_], Class[_]](classOf[AnyRef], classOf[AnyRef])
-  }
+  override def getTypeinfo(): Pair[Class[_], Class[_]] = (classOf[AnyRef], classOf[AnyRef])
 }

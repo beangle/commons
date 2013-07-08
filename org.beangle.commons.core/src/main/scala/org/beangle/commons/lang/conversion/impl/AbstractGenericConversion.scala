@@ -25,7 +25,6 @@ import org.beangle.commons.lang.Primitives
 import org.beangle.commons.lang.conversion.Conversion
 import org.beangle.commons.lang.conversion.Converter
 import org.beangle.commons.lang.conversion.ConverterRegistry
-import org.beangle.commons.lang.tuple.Pair
 import org.beangle.commons.lang.Objects
 import scala.language.existentials
 import scala.collection.mutable
@@ -56,9 +55,9 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
 
   override def addConverter(converter: Converter[_, _]) {
     var key: Pair[Class[_], Class[_]] = null
-    val defaultKey = Pair.of(classOf[Any], classOf[Any])
+    val defaultKey = (classOf[Any], classOf[Any])
     for (m <- converter.getClass.getMethods if m.getName == "apply" && Modifier.isPublic(m.getModifiers) && !m.isBridge()) {
-      key = Pair.of[Class[_], Class[_]](m.getParameterTypes()(0), m.getReturnType)
+      key = (m.getParameterTypes()(0), m.getReturnType)
     }
     if (null == key) throw new IllegalArgumentException("Cannot find convert type pair " + converter.getClass)
     val sourceType = key._1.asInstanceOf[Class[_]]
@@ -97,7 +96,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
   }
 
   protected def findConverter(sourceType: Class[_], targetType: Class[_]): GenericConverter = {
-    val key = Pair.of(sourceType, targetType)
+    val key = (sourceType, targetType)
     var converter = cache.get(key).orNull
     if (null == converter) {
       converter = searchConverter(sourceType, targetType)

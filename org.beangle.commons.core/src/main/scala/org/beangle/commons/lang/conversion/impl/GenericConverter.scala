@@ -18,7 +18,6 @@
  */
 package org.beangle.commons.lang.conversion.impl
 
-import org.beangle.commons.lang.tuple.Pair
 /**
  * Generic Converter using in DefaultConversion
  * <p>

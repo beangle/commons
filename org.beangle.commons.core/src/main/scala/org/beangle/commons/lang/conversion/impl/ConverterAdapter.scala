@@ -19,7 +19,6 @@
 package org.beangle.commons.lang.conversion.impl
 
 import org.beangle.commons.lang.conversion.Converter
-import org.beangle.commons.lang.tuple.Pair
 
 /**
  * Adapte a Converter to GenericConverter

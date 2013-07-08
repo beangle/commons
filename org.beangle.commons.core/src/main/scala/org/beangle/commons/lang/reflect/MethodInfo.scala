@@ -22,7 +22,6 @@ import java.lang.Character.isUpperCase
 import org.beangle.commons.lang.Strings._
 import java.lang.reflect.Method
 import org.beangle.commons.lang.Objects
-import org.beangle.commons.lang.tuple.Pair
 
 /**
  * Method name and return type and parameters type
@@ -44,13 +43,13 @@ class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[C
       else if(name.startsWith("is") && name.length > 2 && isUpperCase(name.charAt(2)))
         uncapitalize(substringAfter(name, "is"))
       else name
-      Some(Pair.of(true, propertyName))
+      Some((true, propertyName))
     } else if (parameterTypes.length == 1){
       val propertyName= if(name.startsWith("set") && name.length > 3 && isUpperCase(name.charAt(3)))
         uncapitalize(substringAfter(name, "set"))
         else if (name.endsWith("_$eq")) substringBefore(name,"_$eq")
         else null
-        if(null==propertyName)None else Some(Pair.of(false, propertyName))
+        if(null==propertyName)None else Some((false, propertyName))
 
     }else None
   }

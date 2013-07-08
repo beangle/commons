@@ -30,7 +30,6 @@ import java.util.Collections
 import scala.language.existentials
 import scala.collection.JavaConversions._
 import scala.collection.mutable
-import org.beangle.commons.lang.tuple.Pair
 
 object ClassInfo {
 

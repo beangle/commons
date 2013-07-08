@@ -21,7 +21,6 @@ package org.beangle.commons.lang.conversion.impl
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import org.beangle.commons.lang.conversion.Converter
-import org.beangle.commons.lang.tuple.Pair
 import org.beangle.commons.lang.Objects
 import scala.collection.mutable
 /**
@@ -56,7 +55,8 @@ abstract class ConverterFactory[S, R] extends GenericConverter {
     val superType = getClass.getGenericSuperclass
     if ((superType.isInstanceOf[ParameterizedType])) {
       val ptype = superType.asInstanceOf[ParameterizedType]
-      Pair.of[Class[_], Class[_]](classof(ptype.getActualTypeArguments()(0)), classof(ptype.getActualTypeArguments()(1)))
+      //Pair.of[Class[_], Class[_]]
+      (classof(ptype.getActualTypeArguments()(0)), classof(ptype.getActualTypeArguments()(1)))
     } else {
       throw new RuntimeException("Cannot identify type of " + getClass)
     }
