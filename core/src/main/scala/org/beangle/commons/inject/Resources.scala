@@ -19,7 +19,6 @@
 package org.beangle.commons.inject
 
 import java.net.URL
-import scala.collection.mutable.ListBuffer
 
 /**
  * <p>
@@ -38,10 +37,10 @@ class Resources {
   protected var user: URL = _
 
   /**
-   * getAllPaths.
+   * All Paths.
    */
-  def getAllPaths(): List[URL] = {
-    val all = new ListBuffer[URL]
+  def paths: List[URL] = {
+    val all = new collection.mutable.ListBuffer[URL]
     if (null != global) all += global
     if (null != locals) all ++= locals
     if (null != user) all += user

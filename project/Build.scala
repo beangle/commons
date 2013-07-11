@@ -2,7 +2,7 @@ import sbt._
 import Keys._
 
 object BuildSettings {
-  val buildOrganization = "org.beangle"
+  val buildOrganization = "org.beangle.commons"
   val buildVersion = "4.0.0-SNAPSHOT"
   val buildScalaVersion = "2.10.2"
 
@@ -71,9 +71,6 @@ object BeangleBuild extends Build {
   import Dependencies._
   import BuildSettings._
   import Resolvers._
-
-  publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository")))
-
  
   val commonDeps = Seq(slf4j, logbackClassic,logbackCore,scalatest)
 
@@ -101,7 +98,7 @@ object BeangleBuild extends Build {
 
   lazy val commons_jdbc = Project(
     "beangle-commons-jdbc",
-    file("org.beangle.commons.jdbc"),
+    file("jdbc"),
     settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(h2,dbcp))  
                ++ Seq(resolvers +=m2repo)
   ) dependsOn(commons_core)

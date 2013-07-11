@@ -42,7 +42,7 @@ trait BindRegistry {
    * register.
    *
    */
-  def register(clazz: Class[_], name: String, args: AnyRef*): Unit
+  def register(clazz: Class[_], name: String, args: Any*): Unit
 
   /**
    * contains.
@@ -51,9 +51,9 @@ trait BindRegistry {
   def contains(beanName: String): Boolean
 
   /**
-   * getBeanNames.
+   * bean names.
    */
-  def getBeanNames(): Set[String]
+  def beanNames: Set[String]
 
   /**
    * Whether the bean is primary

@@ -55,15 +55,9 @@ object ClassInfo {
   }
 
   /**
-   * Get ClassInfo by type.
-   * It search from cache, when failure build it and put it into cache.
+   * Load ClassInfo using reflections
    */
-  def get(clazz: Class[_]): ClassInfo = {
-    var exist = cache.get(clazz)
-    if (exist.isDefined) return exist.get
-    cache.synchronized {
-      exist = cache.get(clazz)
-      if (exist.isDefined) return exist.get
+  def load(clazz: Class[_]): ClassInfo = {
       val methods = new mutable.HashSet[MethodInfo]
       var nextClass = clazz
       var index = 0
@@ -107,7 +101,20 @@ object ClassInfo {
           nextParamTypes = Map.empty
         }
       }
-      val newClassInfo = new ClassInfo(methods.toSeq)
+      new ClassInfo(methods.toSeq)
+  }
+
+  /**
+   * Get ClassInfo from cache or load it by type.
+   * It search from cache, when failure build it and put it into cache.
+   */
+  def get(clazz: Class[_]): ClassInfo = {
+    var exist = cache.get(clazz)
+    if (exist.isDefined) return exist.get
+    cache.synchronized {
+      exist = cache.get(clazz)
+      if (exist.isDefined) return exist.get
+      val newClassInfo=load(clazz)
       cache.put(clazz, newClassInfo)
       newClassInfo
     }

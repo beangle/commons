@@ -75,20 +75,8 @@ object Reflections {
    *
    * @param clazz
    */
-  def getBeanSetters(clazz: Class[_]): List[Method] = {
-    val methods = new collection.mutable.ListBuffer[Method]
-    var i=0
-    val allmethods=clazz.getMethods
-    while(i < allmethods.size) {
-      val m =allmethods(i)
-      if (m.getName.startsWith("set") && m.getName.length > 3
-        && Modifier.isPublic(m.getModifiers) && !Modifier.isStatic(m.getModifiers) &&
-        m.getParameterTypes.length == 1)
-        methods+=m
-        i+=1
-    }
-    methods.toList
-  }
+  def getSetters(clazz: Class[_]): Map[String,MethodInfo] =  ClassInfo.load(clazz).writers
+
 
   def newInstance[T](clazz: Class[T]): T = {
     try {
