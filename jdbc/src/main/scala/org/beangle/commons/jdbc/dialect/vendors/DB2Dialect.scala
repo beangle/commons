@@ -43,10 +43,10 @@ class DB2Dialect extends AbstractDialect("[8.0]") {
     registerType(Types.SMALLINT, "smallint")
     registerType(Types.TINYINT, "smallint")
     registerType(Types.INTEGER, "integer")
-    
+
     registerType(Types.CHAR, "char($l)")
     registerType(Types.VARCHAR, "varchar($l)")
-    
+
     registerType(Types.FLOAT, "float")
     registerType(Types.DOUBLE, "double")
     registerType(Types.DATE, "date")
@@ -81,7 +81,7 @@ class DB2Dialect extends AbstractDialect("[8.0]") {
 
   protected override def buildLimitGrammar = {
     class DB2LimitGrammar(pattern: String, offsetPattern: String, bindInReverseOrder: Boolean,
-                          bindFirst: Boolean, useMax: Boolean) extends LimitGrammarBean(pattern: String, offsetPattern: String, bindInReverseOrder: Boolean,
+      bindFirst: Boolean, useMax: Boolean) extends LimitGrammarBean(pattern: String, offsetPattern: String, bindInReverseOrder: Boolean,
       bindFirst: Boolean, useMax: Boolean) {
       override def limit(sql: String, hasOffset: Boolean) = {
         val startOfSelect = sql.toLowerCase().indexOf("select")

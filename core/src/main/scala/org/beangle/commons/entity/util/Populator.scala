@@ -18,13 +18,13 @@
  */
 package org.beangle.commons.entity.util
 
-import  org.beangle.commons.entity.meta._
-import  org.beangle.commons.entity._
+import org.beangle.commons.entity.meta._
+import org.beangle.commons.entity._
 /**
  * <p>
  * Populator interface.
  * </p>
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
@@ -32,15 +32,15 @@ trait Populator {
   /**
    * populate.
    */
-  def populate(target:Entity[_],entityType:EntityType, params:Map[String, Any])
+  def populate(target: Entity[_], entityType: EntityType, params: Map[String, Any])
 
   /**
    * @return true when success populate.
    */
-  def populate(target:Entity[_], entityType:EntityType,attr:String, value:Any):Boolean
+  def populate(target: Entity[_], entityType: EntityType, attr: String, value: Any): Boolean
 
   /**
    * initProperty.
    */
-  def init(target:Entity[_],t: Type,attr:String):(Any,Type)
+  def init(target: Entity[_], t: Type, attr: String): (Any, Type)
 }

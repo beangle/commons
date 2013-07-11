@@ -33,7 +33,7 @@ import scala.collection.Map
  * @author chaostone
  * @version $Id: $
  */
-class MapConverter(val conversion: DefaultConversion=DefaultConversion.Instance) {
+class MapConverter(val conversion: DefaultConversion = DefaultConversion.Instance) {
 
   /**
    * getAll.
@@ -48,36 +48,35 @@ class MapConverter(val conversion: DefaultConversion=DefaultConversion.Instance)
   }
 
   /**
-    * get parameter named attr
-    */
+   * get parameter named attr
+   */
   def getString(data: Map[String, Any], attr: String): Option[String] = {
     data.get(attr) match {
       case Some(value) =>
-        if(null==value) None
-        else{
-          if (value.getClass.isArray){
+        if (null == value) None
+        else {
+          if (value.getClass.isArray) {
             val values = value.asInstanceOf[Array[String]]
             if (values.length == 1) Some(values(0))
             else Some(Strings.join(values, ","))
-          }
-          else  Some(value.toString)
+          } else Some(value.toString)
         }
       case _ => None
     }
   }
 
   /**
-    * get parameter named attr
-    */
+   * get parameter named attr
+   */
   def get(data: Map[String, Any], name: String): Option[Any] = {
-    data.get(name) match{
-      case Some(value)=>
-        if(null==value) None
-        else{
+    data.get(name) match {
+      case Some(value) =>
+        if (null == value) None
+        else {
           if (value.getClass.isArray) {
             val values = value.asInstanceOf[Array[Any]]
             if (values.length == 1) Some(values(0)) else Some(values)
-          }else Some(value)
+          } else Some(value)
         }
       case _ => None
     }
@@ -110,11 +109,11 @@ class MapConverter(val conversion: DefaultConversion=DefaultConversion.Instance)
   /**
    * get.
    */
-  def get[T](data: Map[String, Any], name: String, clazz: Class[T]): Option[T] ={
-    get(data, name) match{
+  def get[T](data: Map[String, Any], name: String, clazz: Class[T]): Option[T] = {
+    get(data, name) match {
       case Some(value) =>
-        val rs = convert(value,clazz) 
-        if(null==rs) None else Some(rs)
+        val rs = convert(value, clazz)
+        if (null == rs) None else Some(rs)
       case _ => None
     }
   }
@@ -137,24 +136,24 @@ class MapConverter(val conversion: DefaultConversion=DefaultConversion.Instance)
   /**
    * getFloat.
    */
-  def getFloat(data: Map[String, Any], name: String):Option[Float] = get(data, name, classOf[Float])
+  def getFloat(data: Map[String, Any], name: String): Option[Float] = get(data, name, classOf[Float])
 
   /**
    * <p>
    * getInteger.
    * </p>
    */
-  def getInt(data: Map[String, Any], name: String):Option[Int] = get(data, name, classOf[Int])
+  def getInt(data: Map[String, Any], name: String): Option[Int] = get(data, name, classOf[Int])
 
   /**
    * Get Short.
    */
-  def getShort(data: Map[String, Any], name: String):Option[Short] = get(data, name, classOf[Short])
+  def getShort(data: Map[String, Any], name: String): Option[Short] = get(data, name, classOf[Short])
 
   /**
    * getLong.
    */
-  def getLong(data: Map[String, Any], name: String):Option[Long] = get(data, name, classOf[Long])
+  def getLong(data: Map[String, Any], name: String): Option[Long] = get(data, name, classOf[Long])
 
   /**
    * 返回request中以prefix.开头的参数
@@ -175,7 +174,7 @@ class MapConverter(val conversion: DefaultConversion=DefaultConversion.Instance)
    * sub map
    */
   def sub(data: Map[String, Any], prefix: String, exclusiveAttrNames: String, stripPrefix: Boolean): Map[String, Any] = {
-    val excludes:Set[String] = if (Strings.isNotEmpty(exclusiveAttrNames)) Strings.split(exclusiveAttrNames, ",").toSet else Set.empty
+    val excludes: Set[String] = if (Strings.isNotEmpty(exclusiveAttrNames)) Strings.split(exclusiveAttrNames, ",").toSet else Set.empty
     val newParams = new collection.mutable.HashMap[String, Any]
     for ((key, value) <- data) {
       val attr = key

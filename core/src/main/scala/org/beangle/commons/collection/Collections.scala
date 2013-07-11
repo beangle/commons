@@ -104,7 +104,7 @@ object Collections {
     elts ++= first
     elts ++= second
     val list = new mutable.ListBuffer[T]
-    for (obj <- elts; i <- 0 until Math.max(getFreq(obj, mapa), getFreq(obj, mapb))) list+=obj
+    for (obj <- elts; i <- 0 until Math.max(getFreq(obj, mapa), getFreq(obj, mapb))) list += obj
     list.toList
   }
 
@@ -113,17 +113,17 @@ object Collections {
     var it = coll.iterator
     while (it.hasNext) {
       val obj = it.next()
-      count.get(obj) match{
+      count.get(obj) match {
         case Some(c) => count.put(obj, c + 1)
-        case _ =>  count.put(obj, 1)
+        case _ => count.put(obj, 1)
       }
     }
     count.toMap
   }
 
   private def getFreq[T](obj: T, freqMap: Map[T, Int]): Int = {
-    freqMap.get(obj) match{
-      case Some(count)=> count
+    freqMap.get(obj) match {
+      case Some(count) => count
       case _ => 0
     }
   }
@@ -135,7 +135,7 @@ object Collections {
     val elts = new mutable.HashSet[T]
     elts ++= first
     elts ++= second
-    for (obj <- elts; i <- 0 until Math.min(getFreq(obj, mapa), getFreq(obj, mapb))) list+=obj
+    for (obj <- elts; i <- 0 until Math.min(getFreq(obj, mapa), getFreq(obj, mapb))) list += obj
     list.toList
   }
 
@@ -148,7 +148,7 @@ object Collections {
 
   def select[T](datas: List[T], predicate: Predicate[T]): List[T] = {
     val rs = new mutable.ListBuffer[T]
-    for (t <- datas if predicate(t)) rs+=t
+    for (t <- datas if predicate(t)) rs += t
     rs.toList
   }
 

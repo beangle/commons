@@ -31,5 +31,5 @@ import org.beangle.commons.lang.functor.Transformer
 class PropertyTransformer[I, R](property: String) extends Transformer[I, R]() {
 
   def apply(arg0: I): R = PropertyUtils.getProperty(arg0, property)
-  
+
 }

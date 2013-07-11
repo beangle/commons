@@ -18,7 +18,6 @@
  */
 package org.beangle.commons.text.seq
 
-
 /**
  * <p>
  * NbspGenerator class.

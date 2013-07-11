@@ -31,41 +31,41 @@ import javax.validation.constraints.NotNull
 class AccessRequest extends Serializable {
 
   /**
-   会话ID
+   * 会话ID
    */
   @NotNull
   var sessionid: String = _
 
   /**
-   用户名
+   * 用户名
    */
   @NotNull
   var username: String = _
 
   /**
-   Response status
+   * Response status
    */
   var status: Int = 200
 
   /**
-   资源
+   * 资源
    */
   @NotNull
   var uri: String = _
 
   /**
-   查询字符串
+   * 查询字符串
    */
   var params: String = _
 
   /**
-   开始时间
+   * 开始时间
    */
   @NotNull
   var beginAt: Long = _
 
   /**
-   结束时间
+   * 结束时间
    */
   @NotNull
   var endAt: Long = 0

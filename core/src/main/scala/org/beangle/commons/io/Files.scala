@@ -42,7 +42,7 @@ object Files {
     try {
       in = new FileInputStream(file)
       val sw = new StringBuilderWriter(16)
-      if (null == charset) IOs.copy(new InputStreamReader(in), sw) else IOs.copy(new InputStreamReader(in, 
+      if (null == charset) IOs.copy(new InputStreamReader(in), sw) else IOs.copy(new InputStreamReader(in,
         charset.name()), sw)
       sw.toString
     } finally {
@@ -99,7 +99,7 @@ object Files {
       throw new IOException("Source '" + srcFile + "' exists but is a directory")
     }
     if (srcFile.getCanonicalPath == destFile.getCanonicalPath) {
-      throw new IOException("Source '" + srcFile + "' and destination '" + destFile + 
+      throw new IOException("Source '" + srcFile + "' and destination '" + destFile +
         "' are the same")
     }
     val parentFile = destFile.getParentFile
@@ -141,8 +141,8 @@ object Files {
       IOs.close(fis)
     }
     if (srcFile.length != destFile.length) {
-      throw new IOException("Failed to copy full contents from '" + srcFile + "' to '" + 
-        destFile + 
+      throw new IOException("Failed to copy full contents from '" + srcFile + "' to '" +
+        destFile +
         "'")
     }
     if (preserveFileDate) {

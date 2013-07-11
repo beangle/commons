@@ -37,26 +37,26 @@ class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[C
    */
   def property(): Option[Pair[Boolean, String]] = {
     val name = method.getName
-    if (parameterTypes.length == 0 && null != method.getReturnType){
-      val propertyName = if( name.startsWith("get") && name.length > 3 && isUpperCase(name.charAt(3)))
+    if (parameterTypes.length == 0 && null != method.getReturnType) {
+      val propertyName = if (name.startsWith("get") && name.length > 3 && isUpperCase(name.charAt(3)))
         uncapitalize(substringAfter(name, "get"))
-      else if(name.startsWith("is") && name.length > 2 && isUpperCase(name.charAt(2)))
+      else if (name.startsWith("is") && name.length > 2 && isUpperCase(name.charAt(2)))
         uncapitalize(substringAfter(name, "is"))
       else name
       Some((true, propertyName))
-    } else if (parameterTypes.length == 1){
-      val propertyName= if(name.startsWith("set") && name.length > 3 && isUpperCase(name.charAt(3)))
+    } else if (parameterTypes.length == 1) {
+      val propertyName = if (name.startsWith("set") && name.length > 3 && isUpperCase(name.charAt(3)))
         uncapitalize(substringAfter(name, "set"))
-        else if (name.endsWith("_$eq")) substringBefore(name,"_$eq")
-        else null
-        if(null==propertyName)None else Some((false, propertyName))
+      else if (name.endsWith("_$eq")) substringBefore(name, "_$eq")
+      else null
+      if (null == propertyName) None else Some((false, propertyName))
 
-    }else None
+    } else None
   }
 
   override def compare(o: MethodInfo): Int = this.index - o.index
 
-  def matches(args:  Any*): Boolean = {
+  def matches(args: Any*): Boolean = {
     if (parameterTypes.length != args.length) return false
     for (i <- 0 until args.length if null != args(i) && !parameterTypes(i).isInstance(args(i))) return false
     true

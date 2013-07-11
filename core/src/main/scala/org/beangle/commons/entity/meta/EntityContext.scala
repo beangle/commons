@@ -24,30 +24,30 @@ import org.beangle.commons.bean.PropertyUtils
  * <p>
  * EntityContext interface.
  * </p>
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
 trait EntityContext {
   /**
    * 根据实体名查找实体类型
-   * 
+   *
    * @param name a {@link java.lang.String} object.
    * @return a {@link org.beangle.commons.entity.metadata.Type} object.
    */
-  def getType(clazz:Class[_]):Option[EntityType]
+  def getType(clazz: Class[_]): Option[EntityType]
 
-  def newInstance[T <: Entity[_]](entityClass:Class[T]):Option[T] = {
-    getType(entityClass) match{
+  def newInstance[T <: Entity[_]](entityClass: Class[T]): Option[T] = {
+    getType(entityClass) match {
       case Some(t) => Some(t.newInstance().asInstanceOf[T])
       case _ => None
     }
   }
 
-  def newInstance[T <: Entity[ID],ID](entityClass:Class[T],id:ID):Option[T] = {
-    getType(entityClass) match{
-      case Some(t)=> {
-        val obj= t.newInstance()
+  def newInstance[T <: Entity[ID], ID](entityClass: Class[T], id: ID): Option[T] = {
+    getType(entityClass) match {
+      case Some(t) => {
+        val obj = t.newInstance()
         PropertyUtils.setProperty(obj, t.idName, id)
         Some(obj.asInstanceOf[T])
       }

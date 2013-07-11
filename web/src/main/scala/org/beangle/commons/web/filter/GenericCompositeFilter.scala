@@ -35,7 +35,7 @@ object GenericCompositeFilter {
   protected class VirtualFilterChain(val originalChain: FilterChain, additionalFilters: List[_ <: Filter])
       extends FilterChain {
 
-    private val iter: Iterator[_<:Filter] = additionalFilters.iterator
+    private val iter: Iterator[_ <: Filter] = additionalFilters.iterator
 
     def doFilter(request: ServletRequest, response: ServletResponse) {
       if (iter.hasNext) iter.next.doFilter(request, response, this)

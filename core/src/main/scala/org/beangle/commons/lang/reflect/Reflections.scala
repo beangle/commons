@@ -75,8 +75,7 @@ object Reflections {
    *
    * @param clazz
    */
-  def getSetters(clazz: Class[_]): Map[String,MethodInfo] =  ClassInfo.load(clazz).writers
-
+  def getSetters(clazz: Class[_]): Map[String, MethodInfo] = ClassInfo.load(clazz).writers
 
   def newInstance[T](clazz: Class[T]): T = {
     try {

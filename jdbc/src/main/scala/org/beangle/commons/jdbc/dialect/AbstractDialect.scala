@@ -36,7 +36,7 @@ abstract class AbstractDialect(versions: String) extends Dialect {
   def sequenceGrammar = ss
 
   def getAddForeignKeyConstraintString(constraintName: String, foreignKey: Array[String],
-                                       referencedTable: String, primaryKey: Array[String], referencesPrimaryKey: Boolean) = {
+    referencedTable: String, primaryKey: Array[String], referencesPrimaryKey: Boolean) = {
     val res: StringBuffer = new StringBuffer(30)
     res.append(" add constraInt ").append(constraintName).append(" foreign key (")
       .append(Strings.join(foreignKey, ", ")).append(") references ").append(referencedTable)

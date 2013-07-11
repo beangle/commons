@@ -38,7 +38,7 @@ object Dialects {
 
   def SQLServer2005: String = "SQLServer2005"
 
-  var constructors:Map[String, Constructor[_ <: Dialect]] =Map.empty
+  var constructors: Map[String, Constructor[_ <: Dialect]] = Map.empty
 
   def getDialect(dialectName: String): Dialect = {
     val con: Constructor[_ <: Dialect] = constructors.get(dialectName).orNull
@@ -50,8 +50,8 @@ object Dialects {
   }
 
   def register(clazz: Class[_ <: Dialect]) {
-    val name: String = Strings.substringBefore(clazz.getSimpleName(),"Dialect")
-    constructors+=(name-> clazz.getConstructor())
+    val name: String = Strings.substringBefore(clazz.getSimpleName(), "Dialect")
+    constructors += (name -> clazz.getConstructor())
   }
 
   def register(shortname: String, clazz: Class[_ <: Dialect]) {
@@ -87,6 +87,6 @@ abstract class Dialect {
   def isCaseSensitive: Boolean
 
   def getAddForeignKeyConstraintString(constraintName: String, foreignKey: Array[String],
-                                       referencedTable: String, primaryKey: Array[String], referencesPrimaryKey: Boolean): String
+    referencedTable: String, primaryKey: Array[String], referencesPrimaryKey: Boolean): String
 
 }

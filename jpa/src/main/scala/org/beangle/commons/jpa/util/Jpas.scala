@@ -19,8 +19,8 @@
 package org.beangle.commons.jpa.util
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.Assert
-object Jpas{
-  def findEntityName(clazz:Class[_]):String = {
+object Jpas {
+  def findEntityName(clazz: Class[_]): String = {
     val annotation = clazz.getAnnotation(classOf[javax.persistence.Entity])
     Assert.notNull(annotation);
     if (Strings.isNotBlank(annotation.name)) annotation.name else clazz.getName

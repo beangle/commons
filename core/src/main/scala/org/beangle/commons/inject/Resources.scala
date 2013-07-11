@@ -32,7 +32,7 @@ class Resources {
 
   protected var global: URL = _
 
-  protected var locals: List[URL]=_
+  protected var locals: List[URL] = _
 
   protected var user: URL = _
 

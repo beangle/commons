@@ -21,12 +21,12 @@ package org.beangle.commons.lang
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class BitStringsTest extends FunSpec with ShouldMatchers{
+class BitStringsTest extends FunSpec with ShouldMatchers {
 
-  describe("BitStrings"){
-    it("Calculate binary value of bit string"){
-      BitStrings.binValueOf("00000000000000000000000000000000011111111111111111111") should be (1048575)
-      BitStrings.binValueOf("00000000000000000000000000000000000011100000000000000") should be (114688)
+  describe("BitStrings") {
+    it("Calculate binary value of bit string") {
+      BitStrings.binValueOf("00000000000000000000000000000000011111111111111111111") should be(1048575)
+      BitStrings.binValueOf("00000000000000000000000000000000000011100000000000000") should be(114688)
     }
   }
 }

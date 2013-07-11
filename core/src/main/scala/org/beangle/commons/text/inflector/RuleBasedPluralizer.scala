@@ -50,7 +50,7 @@ object RuleBasedPluralizer {
  * @author chaostone
  * @version $Id: $
  */
-class RuleBasedPluralizer(var rules: List[Rule],var locale: Locale,var fallbackPluralizer: Pluralizer)
+class RuleBasedPluralizer(var rules: List[Rule], var locale: Locale, var fallbackPluralizer: Pluralizer)
     extends Pluralizer {
 
   /**
@@ -59,7 +59,7 @@ class RuleBasedPluralizer(var rules: List[Rule],var locale: Locale,var fallbackP
    * </p>
    */
   def this() {
-    this(List.empty, Locale.getDefault,null)
+    this(List.empty, Locale.getDefault, null)
   }
 
   /**

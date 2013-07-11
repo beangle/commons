@@ -30,7 +30,7 @@ import javax.sql.DataSource
 
 class DataSourceUtil
 
-object DataSourceUtil extends Logging{
+object DataSourceUtil extends Logging {
 
   def getDataSource(datasourceName: String): DataSource = {
     val props: Properties = new Properties()
@@ -74,7 +74,7 @@ object DataSourceUtil extends Logging{
       val propertyName = names.nextElement()
       val dialect = Strings.substringBefore(propertyName, ".")
       if (!dialects.contains(dialect)) {
-        dialects+=dialect
+        dialects += dialect
       }
     }
     dialects.toList

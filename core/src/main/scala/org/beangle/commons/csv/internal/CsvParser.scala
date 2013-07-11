@@ -26,7 +26,7 @@ import CsvParser._
 object CsvParser {
 
   /**
-   Constant <code>InitialReadSize=128</code>
+   * Constant <code>InitialReadSize=128</code>
    */
   val InitialReadSize = 128
 }
@@ -106,8 +106,8 @@ class CsvParser(var format: CsvFormat) {
       pending = null
       inQuotes = true
     }
-    var i=0
-    while (i < nextLine.length ) {
+    var i = 0
+    while (i < nextLine.length) {
       val c = nextLine.charAt(i)
       if (format.isEscape(c)) {
         if (isNextCharacterEscapable(nextLine, inQuotes || inField, i)) {
@@ -121,8 +121,8 @@ class CsvParser(var format: CsvFormat) {
         } else {
           inQuotes = !inQuotes
           if (!format.strictQuotes) {
-            if (i > 2 && !format.isSeparator(nextLine.charAt(i - 1)) && 
-              nextLine.length > (i + 1) && 
+            if (i > 2 && !format.isSeparator(nextLine.charAt(i - 1)) &&
+              nextLine.length > (i + 1) &&
               !format.isSeparator(nextLine.charAt(i + 1))) {
               if (ignoreLeadingWhiteSpace && sb.length > 0 && isAllWhiteSpace(sb)) {
                 sb = new StringBuilder(InitialReadSize)
@@ -143,7 +143,7 @@ class CsvParser(var format: CsvFormat) {
           inField = true
         }
       }
-      i+=1
+      i += 1
     }
     if (inQuotes) {
       if (multi) {
@@ -181,7 +181,7 @@ class CsvParser(var format: CsvFormat) {
    * @return true if the following character is a Quote
    */
   protected def isNextCharacterEscapable(nextLine: String, inQuotes: Boolean, i: Int): Boolean = {
-    inQuotes && nextLine.length > (i + 1) && 
+    inQuotes && nextLine.length > (i + 1) &&
       (format.isDelimiter(nextLine.charAt(i + 1)) || format.isEscape(nextLine.charAt(i + 1)))
   }
 

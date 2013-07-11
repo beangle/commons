@@ -21,103 +21,103 @@ package org.beangle.commons.entity.dao
 import org.beangle.commons.lang.Arrays
 import scala.collection.mutable.ListBuffer
 /**
-  * <p>
-  * Operation class.
-  * </p>
-  * 
-  * @author chaostone
-  * @version $Id: Operation.java Jul 25, 2011 2:21:27 PM chaostone $
-  */
-object Operation{
-  case class Type private(){}
-  object Type{
+ * <p>
+ * Operation class.
+ * </p>
+ *
+ * @author chaostone
+ * @version $Id: Operation.java Jul 25, 2011 2:21:27 PM chaostone $
+ */
+object Operation {
+  case class Type private () {}
+  object Type {
     val SaveUpdate = new Type()
-    val Remove= new Type()
+    val Remove = new Type()
   }
 
-  def apply(t:Operation.Type,data:AnyRef) = new Operation(t,data)
+  def apply(t: Operation.Type, data: AnyRef) = new Operation(t, data)
 
   class Builder {
     private val operations = new ListBuffer[Operation]
 
-    def saveOrUpdate(entities:Seq[AnyRef]):this.type= {
-      if (!entities.isEmpty){
+    def saveOrUpdate(entities: Seq[AnyRef]): this.type = {
+      if (!entities.isEmpty) {
         for (entity <- entities) {
-          if (null != entity) operations+=Operation(Type.SaveUpdate, entity)
+          if (null != entity) operations += Operation(Type.SaveUpdate, entity)
         }
       }
       this
     }
 
-    def saveOrUpdate(first:AnyRef, entities:AnyRef*):this.type= {
-      operations+=Operation(Type.SaveUpdate, first)
+    def saveOrUpdate(first: AnyRef, entities: AnyRef*): this.type = {
+      operations += Operation(Type.SaveUpdate, first)
       for (entity <- entities) {
-        if (null != entity) operations+=Operation(Type.SaveUpdate, entity)
+        if (null != entity) operations += Operation(Type.SaveUpdate, entity)
       }
       this
     }
 
-    def remove(entities:Seq[AnyRef]) :this.type={
-      if (!entities.isEmpty){
+    def remove(entities: Seq[AnyRef]): this.type = {
+      if (!entities.isEmpty) {
         for (entity <- entities) {
-          if (null != entity) operations+=Operation(Type.Remove, entity)
+          if (null != entity) operations += Operation(Type.Remove, entity)
         }
       }
       this
     }
 
-    def remove(first:AnyRef, entities:AnyRef*):this.type= {
-      operations+=Operation(Type.Remove, first)
+    def remove(first: AnyRef, entities: AnyRef*): this.type = {
+      operations += Operation(Type.Remove, first)
       for (entity <- entities) {
-        if (null != entity) operations+=Operation(Type.Remove, entity)
+        if (null != entity) operations += Operation(Type.Remove, entity)
       }
       this
     }
 
-    def build():List[Operation]= operations.toList
+    def build(): List[Operation] = operations.toList
   }
 
   /**
-    * <p>
-    * saveOrUpdate.
-    * </p>
-    * 
-    * @param entities a {@link java.util.Collection} object.
-    * @return a {@link org.beangle.commons.dao.Operation.Builder} object.
-    */
-  def saveOrUpdate(entities:Seq[_]): Builder= new Builder().saveOrUpdate(entities)
+   * <p>
+   * saveOrUpdate.
+   * </p>
+   *
+   * @param entities a {@link java.util.Collection} object.
+   * @return a {@link org.beangle.commons.dao.Operation.Builder} object.
+   */
+  def saveOrUpdate(entities: Seq[_]): Builder = new Builder().saveOrUpdate(entities)
 
   /**
-    * <p>
-    * saveOrUpdate.
-    * </p>
-    * 
-    * @param entities a {@link java.lang.Object} object.
-    * @return a {@link org.beangle.commons.dao.Operation.Builder} object.
-    */
-  def saveOrUpdate(first:AnyRef, entities:AnyRef*):Builder= new Builder().saveOrUpdate(first,entities:_*)
+   * <p>
+   * saveOrUpdate.
+   * </p>
+   *
+   * @param entities a {@link java.lang.Object} object.
+   * @return a {@link org.beangle.commons.dao.Operation.Builder} object.
+   */
+  def saveOrUpdate(first: AnyRef, entities: AnyRef*): Builder = new Builder().saveOrUpdate(first, entities: _*)
 
   /**
-    * <p>
-    * remove.
-    * </p>
-    * 
-    * @param entities a {@link java.util.Collection} object.
-    * @return a {@link org.beangle.commons.dao.Operation.Builder} object.
-    */
-  def remove(entities:Seq[_]):Builder= new Builder().remove(entities)
+   * <p>
+   * remove.
+   * </p>
+   *
+   * @param entities a {@link java.util.Collection} object.
+   * @return a {@link org.beangle.commons.dao.Operation.Builder} object.
+   */
+  def remove(entities: Seq[_]): Builder = new Builder().remove(entities)
 
   /**
-    * <p>
-    * remove.
-    * </p>
-    * 
-    * @param entities a {@link java.lang.Object} object.
-    * @return a {@link org.beangle.commons.dao.Operation.Builder} object.
-    */
-  def remove(first:AnyRef,entities:AnyRef*):Builder= new Builder().remove(first,entities)
+   * <p>
+   * remove.
+   * </p>
+   *
+   * @param entities a {@link java.lang.Object} object.
+   * @return a {@link org.beangle.commons.dao.Operation.Builder} object.
+   */
+  def remove(first: AnyRef, entities: AnyRef*): Builder = new Builder().remove(first, entities)
 
 }
-class Operation(val t:Operation.Type,val data:AnyRef) {
+class Operation(val t: Operation.Type, val data: AnyRef) {
 
 }

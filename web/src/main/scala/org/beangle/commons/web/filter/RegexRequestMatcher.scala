@@ -40,7 +40,7 @@ object RegexRequestMatcher {
  *
  * @author chaostone
  */
-class RegexRequestMatcher(pattern: Pattern, httpMethod:String) extends RequestMatcher {
+class RegexRequestMatcher(pattern: Pattern, httpMethod: String) extends RequestMatcher {
 
   /**
    * Creates a case-sensitive {@code Pattern} instance to match against the
@@ -49,8 +49,8 @@ class RegexRequestMatcher(pattern: Pattern, httpMethod:String) extends RequestMa
    * @param pattern  the regular expression to compile into a pattern.
    * @param httpMethod  the HTTP method to match. May be null to match all methods.
    */
-  def this(patternStr: String, httpMethod: String,caseInsensitive:Boolean) {
-    this(if (caseInsensitive) Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE) else Pattern.compile(patternStr),httpMethod)
+  def this(patternStr: String, httpMethod: String, caseInsensitive: Boolean) {
+    this(if (caseInsensitive) Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE) else Pattern.compile(patternStr), httpMethod)
   }
 
   /**

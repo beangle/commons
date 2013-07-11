@@ -36,11 +36,11 @@ import org.beangle.commons.lang.ClassLoaders
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class DefaultStreamDownloaderTest  extends FunSpec with ShouldMatchers {
+class DefaultStreamDownloaderTest extends FunSpec with ShouldMatchers {
 
   val streamDownloader: StreamDownloader = new DefaultStreamDownloader(new MimeTypeProvider())
 
-  describe("DefaultStreamDownloader"){
+  describe("DefaultStreamDownloader") {
     it("download") {
       val request = mock(classOf[HttpServletRequest])
       val response = mock(classOf[HttpServletResponse])

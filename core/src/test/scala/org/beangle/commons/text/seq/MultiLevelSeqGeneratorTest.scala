@@ -20,10 +20,10 @@ package org.beangle.commons.text.seq
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class MultiLevelSeqGeneratorTest extends FunSpec with ShouldMatchers{
+class MultiLevelSeqGeneratorTest extends FunSpec with ShouldMatchers {
 
-  describe("MultiLevelSeqGenerator"){
-    it("Generate multi level sequence"){
+  describe("MultiLevelSeqGenerator") {
+    it("Generate multi level sequence") {
       val sg = new MultiLevelSeqGenerator
       sg.add(new SeqPattern(SeqNumStyle.HANZI, "{1}"))
       sg.add(new SeqPattern(SeqNumStyle.HANZI, "({2})"))
@@ -34,10 +34,10 @@ class MultiLevelSeqGeneratorTest extends FunSpec with ShouldMatchers{
       sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}.{4}.{5}.{6}.{7}"))
       sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}.{4}.{5}.{6}.{7}.{8}"))
       sg.add(new SeqPattern(SeqNumStyle.ARABIC, "{3}.{4}.{5}.{6}.{7}.{8}.{9}"))
-      sg.getPattern(1).next() should equal ("一")
-      sg.getPattern(2).next() should equal ("(一)")
-      sg.getPattern(3).next() should equal ("1")
-      sg.getPattern(4).next() should equal ("1.1")
+      sg.getPattern(1).next() should equal("一")
+      sg.getPattern(2).next() should equal("(一)")
+      sg.getPattern(3).next() should equal("1")
+      sg.getPattern(4).next() should equal("1.1")
     }
   }
 }

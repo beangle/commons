@@ -69,7 +69,7 @@ class DataTypeTest extends FlatSpec with ShouldMatchers {
     testGetTypeName(new MySQLDialect)
     testGetTypeName(new PostgreSQLDialect)
     testGetTypeName(new DerbyDialect)
-    
+
     testGetTypeName(new DB2Dialect)
     testGetTypeName(new SQLServer2005Dialect)
     testGetTypeName(new H2Dialect)

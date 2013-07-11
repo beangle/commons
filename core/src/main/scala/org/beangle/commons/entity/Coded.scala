@@ -22,11 +22,11 @@ package org.beangle.commons.entity
  * <p>
  * Coded interface.
  * </p>
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
 trait Coded {
 
-  def code:String;
+  def code: String;
 }

@@ -24,18 +24,18 @@ import scala.collection.JavaConversions._
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class MimeUtilsTest extends FunSpec with ShouldMatchers{
+class MimeUtilsTest extends FunSpec with ShouldMatchers {
 
-  describe("MimeUtils"){
+  describe("MimeUtils") {
     it("testParseAddress") {
       var me = "段体华<duantihua@gmail.com>,程序员<programer@gmail.com>"
       var adds = MimeUtils.parseAddress(me, "UTF-8")
       var i = 0
       for (add <- adds) {
         if (i == 0) {
-          add.getPersonal() should equal ("段体华")
+          add.getPersonal() should equal("段体华")
         } else {
-          add.getPersonal() should equal ("程序员")
+          add.getPersonal() should equal("程序员")
         }
         i += 1
       }

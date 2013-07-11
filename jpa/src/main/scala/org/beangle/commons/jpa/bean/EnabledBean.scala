@@ -21,7 +21,7 @@ package org.beangle.commons.jpa.bean
 import org.beangle.commons.entity.Enabled
 /**
  * 能够启用和禁用的实体
- * 
+ *
  * @author chaostone
  * @version $Id: Jun 25, 2011 5:05:07 PM chaostone $
  */
@@ -29,8 +29,8 @@ trait EnabledBean extends Enabled {
 
   /**
    * 查询是否启用
-   * 
+   *
    * @return 是否启用
    */
-  var enabled:Boolean;
+  var enabled: Boolean;
 }

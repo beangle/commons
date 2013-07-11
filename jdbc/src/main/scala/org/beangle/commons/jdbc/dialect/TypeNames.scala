@@ -58,8 +58,8 @@ import org.beangle.commons.lang.Strings
  */
 class TypeNames {
 
-  var weighted:Map[Int, Map[Int, String]]=Map.empty
-  var defaults:Map[Int, String]=Map.empty
+  var weighted: Map[Int, Map[Int, String]] = Map.empty
+  var defaults: Map[Int, String] = Map.empty
 
   /**
    * get default type name for specified type
@@ -83,7 +83,7 @@ class TypeNames {
     val map = weighted.get(typecode).orNull //Map[Int, String]
     if (map != null && map.size > 0) {
       // iterate entries ordered by capacity to find first fit
-      for ((k,v) <- map) {
+      for ((k, v) <- map) {
         if (size <= k) {
           return replace(v, size, precision, scale);
         }
@@ -107,7 +107,7 @@ class TypeNames {
    */
   def put(typecode: Int, capacity: Int, value: String) {
     val map = weighted.get(typecode).getOrElse(new collection.immutable.TreeMap[Int, String]) //Map[Int, String]
-    weighted += (typecode-> (map+(capacity-> value)))
+    weighted += (typecode -> (map + (capacity -> value)))
   }
 
   /**
@@ -117,6 +117,6 @@ class TypeNames {
    * the type key
    */
   def put(typecode: Int, value: String) {
-    defaults+=(typecode-> value)
+    defaults += (typecode -> value)
   }
 }

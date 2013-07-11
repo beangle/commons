@@ -21,19 +21,19 @@ import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 /**
  * @author zhouqi
-  */
-class PageAdapterTest extends FunSpec with ShouldMatchers{
+ */
+class PageAdapterTest extends FunSpec with ShouldMatchers {
 
-  describe("PagedSeq"){
+  describe("PagedSeq") {
     it("Move next or previous") {
-      val page = new PagedSeq[Int](( 0 until 26).toList, 20)
-      page.iterator.next should be (0)
+      val page = new PagedSeq[Int]((0 until 26).toList, 20)
+      page.iterator.next should be(0)
       page.next()
-      page.iterator.next should be (20)
+      page.iterator.next should be(20)
       page.moveTo(2)
-      page.iterator.next should be (20)
+      page.iterator.next should be(20)
       page.previous()
-      page.iterator.next should be (0)
+      page.iterator.next should be(0)
     }
   }
 }

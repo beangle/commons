@@ -18,7 +18,6 @@
  */
 package org.beangle.commons.http.agent
 
-
 object Engines extends Enumeration {
 
   val Trident = new Engine("Trident")
@@ -39,7 +38,7 @@ object Engines extends Enumeration {
 
   class Engine(var name: String) extends Val {
 
-    var categories:List[Browsers.Category] = Nil
+    var categories: List[Browsers.Category] = Nil
 
     def addCategory(category: Browsers.Category) {
       categories = categories ::: List(category)

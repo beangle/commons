@@ -22,16 +22,16 @@ import org.scalatest.matchers.ShouldMatchers
 
 import org.beangle.commons.lang.conversion.impl.DefaultConversion
 
-class ConversionTest  extends FunSpec with ShouldMatchers{
+class ConversionTest extends FunSpec with ShouldMatchers {
 
   val con = new DefaultConversion();
 
-  describe ("DefaultConversion"){    
-    it("Convert Integer"){
+  describe("DefaultConversion") {
+    it("Convert Integer") {
       con.convert(2.5f, classOf[Integer])
     }
 
-    it("Convert Array"){
+    it("Convert Array") {
       con.convert(Array("2", "3"), classOf[Array[Integer]])
     }
 

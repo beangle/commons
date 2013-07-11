@@ -33,12 +33,12 @@ import org.beangle.commons.entity.Entity
  * <p>
  * Hierarchical interface.
  * </p>
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
 @MappedSuperclass
-trait HierarchicalBean[T <: Entity[_]] extends Hierarchical[T]{
+trait HierarchicalBean[T <: Entity[_]] extends Hierarchical[T] {
 
   /** index no */
   @Size(max = 30)
@@ -49,7 +49,7 @@ trait HierarchicalBean[T <: Entity[_]] extends Hierarchical[T]{
   @ManyToOne(fetch = FetchType.LAZY)
   var parent: Option[T]
 
-  @OneToMany(mappedBy = "parent",cascade = Array(CascadeType.ALL))
+  @OneToMany(mappedBy = "parent", cascade = Array(CascadeType.ALL))
   @OrderBy("indexno")
-  var children: mutable.Seq[T]= new mutable.ListBuffer[T]
+  var children: mutable.Seq[T] = new mutable.ListBuffer[T]
 }

@@ -28,7 +28,7 @@ import org.beangle.commons.logging.Logging
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class DialectTestCase extends FlatSpec with ShouldMatchers with Logging{
+class DialectTestCase extends FlatSpec with ShouldMatchers with Logging {
   protected var dialect: Dialect = _
   protected var database: Database = _
 

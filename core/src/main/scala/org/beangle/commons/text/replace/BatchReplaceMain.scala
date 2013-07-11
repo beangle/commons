@@ -47,8 +47,8 @@ import org.beangle.commons.lang.Strings
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import scala.collection.mutable
-class BatchReplaceMain{
-  
+class BatchReplaceMain {
+
 }
 object BatchReplaceMain {
 
@@ -76,12 +76,12 @@ object BatchReplaceMain {
       charset = Charset.forName(args(2))
     }
     val lines = Files.readLines(new File(properties))
-    val profiles = new mutable.HashMap[String,List[Replacer]]
+    val profiles = new mutable.HashMap[String, List[Replacer]]
 
-    var profileName=""
+    var profileName = ""
     for (line <- lines if Strings.isNotEmpty(line)) {
       if (-1 == line.indexOf('=')) {
-        profileName=line
+        profileName = line
         profiles.put(line, Nil)
       } else {
         val replacedline = Strings.replace(line, "\\=", "~~~~")
@@ -91,7 +91,7 @@ object BatchReplaceMain {
         older = Strings.replace(older, "\\t", "\t")
         newer = Strings.replace(newer, "\\n", "\n")
         newer = Strings.replace(newer, "\\t", "\t")
-        profiles.put(profileName,  new Replacer(older, newer)::profiles(profileName))
+        profiles.put(profileName, new Replacer(older, newer) :: profiles(profileName))
       }
     }
     replaceFile(dir, profiles.toMap, charset)
@@ -137,7 +137,7 @@ object BatchReplaceMain {
    */
   def writeToFile(str: String, fileName: String, charset: Charset) {
     var writer: OutputStreamWriter = null
-    writer = if (null == charset) new OutputStreamWriter(new FileOutputStream(fileName)) else new OutputStreamWriter(new FileOutputStream(fileName), 
+    writer = if (null == charset) new OutputStreamWriter(new FileOutputStream(fileName)) else new OutputStreamWriter(new FileOutputStream(fileName),
       charset.name())
     writer.write(str)
     writer.close()

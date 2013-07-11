@@ -30,7 +30,7 @@ import scala.collection.mutable
  */
 object SystemInfo {
 
-  private def sysProperties():Map[String,String]={
+  private def sysProperties(): Map[String, String] = {
     val origin = new mutable.HashMap[String, String]
     val enumer = System.getProperties().propertyNames
     while (enumer.hasMoreElements()) {
@@ -40,19 +40,19 @@ object SystemInfo {
     origin.toMap
   }
 
-  val properties= sysProperties
+  val properties = sysProperties
 
   val os = new Os(properties)
 
   val user = new User(properties)
 
-  val java =new Java(properties)
+  val java = new Java(properties)
 
   val jvm = new Jvm(properties)
 
   val javaSpec = new JavaSpec(properties)
 
-  val jvmSpec  = new JvmSpec(properties)
+  val jvmSpec = new JvmSpec(properties)
 
   val javaRuntime = new JavaRuntime(properties)
 
@@ -80,7 +80,7 @@ object SystemInfo {
           val name = networkInterface.getDisplayName
           val e2 = networkInterface.getInetAddresses
           while (e2.hasMoreElements()) {
-            addresses+=(name -> (e2.nextElement().getHostAddress::addresses.getOrElse(name,Nil)))
+            addresses += (name -> (e2.nextElement().getHostAddress :: addresses.getOrElse(name, Nil)))
           }
         }
       } catch {

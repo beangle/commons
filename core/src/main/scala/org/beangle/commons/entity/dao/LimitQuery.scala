@@ -24,7 +24,7 @@ import org.beangle.commons.collection.page.PageLimit;
  * <p>
  * LimitQuery interface.
  * </p>
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
@@ -34,27 +34,27 @@ trait LimitQuery[T] extends Query[T] {
    * <p>
    * getLimit.
    * </p>
-   * 
+   *
    * @return a {@link org.beangle.commons.collection.page.PageLimit} object.
    */
-  def limit:  PageLimit
+  def limit: PageLimit
 
   /**
    * <p>
    * limit.
    * </p>
-   * 
+   *
    * @param limit a {@link org.beangle.commons.collection.page.PageLimit} object.
    * @return a {@link org.beangle.commons.dao.query.LimitQuery} object.
    */
-  def limit(limit:PageLimit):LimitQuery[T]
+  def limit(limit: PageLimit): LimitQuery[T]
 
   /**
    * <p>
    * getCountQuery.
    * </p>
-   * 
+   *
    * @return a {@link org.beangle.commons.dao.query.Query} object.
    */
-  def countQuery:Query[T]
+  def countQuery: Query[T]
 }

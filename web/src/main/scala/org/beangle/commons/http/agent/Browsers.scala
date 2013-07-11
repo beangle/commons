@@ -63,14 +63,14 @@ object Browsers extends Enumeration {
 
   val ChromeMobile = new Category("Chrome Mobile", WebKit, "CrMo/(\\S*)->$1")
 
-  val SafariMobile = new Category("Mobile Safari", WebKit, "Mobile Safari", "Mobile/5A347 Safari", 
+  val SafariMobile = new Category("Mobile Safari", WebKit, "Mobile Safari", "Mobile/5A347 Safari",
     "Mobile/3A101a Safari", "Mobile/7B367 Safari")
 
   val Silk = new Category("Silk", WebKit, "Silk/(\\S*)->$1")
 
   val Dolfin = new Category("Samsung Dolphin", WebKit, "Dolfin/(\\S*)->$1")
 
-  val Opera = new Category("Opera", Presto, "Opera/(.*?)Version/(\\S*)->$2", "Opera Mini->Mini", 
+  val Opera = new Category("Opera", Presto, "Opera/(.*?)Version/(\\S*)->$2", "Opera Mini->Mini",
     "Opera")
 
   val Konqueror = new Category("Konqueror", Khtml, "Konqueror")
@@ -79,7 +79,7 @@ object Browsers extends Enumeration {
 
   val LotusNotes = new Category("Lotus Notes", Other, "Lotus-Notes")
 
-  val Bot = new Category("Robot/Spider", Other, "Googlebot", "bot", "spider", "crawler", "Feedfetcher", 
+  val Bot = new Category("Robot/Spider", Other, "Googlebot", "bot", "spider", "crawler", "Feedfetcher",
     "Slurp", "Twiceler", "Nutch", "BecomeBot")
 
   val Mozilla = new Category("Mozilla", Other, "Mozilla", "Moozilla")
@@ -104,13 +104,13 @@ object Browsers extends Enumeration {
 
   val Unknown = new Category("Unknown", Other)
 
-  class Category(val name: String,val engine: Engine, versions: String*) extends Val {
+  class Category(val name: String, val engine: Engine, versions: String*) extends Val {
     private val versionPairs = build(versions)
 
     engine.addCategory(this)
 
-    private def build(versions: Seq[String]):List[Pair[Pattern,String]] = {
-      val pairs=new collection.mutable.ListBuffer[Pair[Pattern,String]]
+    private def build(versions: Seq[String]): List[Pair[Pattern, String]] = {
+      val pairs = new collection.mutable.ListBuffer[Pair[Pattern, String]]
       for (version <- versions) {
         var matcheTarget = version
         var versionNum = ""

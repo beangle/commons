@@ -21,7 +21,7 @@ package org.beangle.commons.jdbc.dialect
 import org.beangle.commons.lang.Strings
 
 class LimitGrammarBean(pattern: String, offsetPattern: String, bindInReverseOrder: Boolean,
-                       bindFirst: Boolean, useMax: Boolean) extends LimitGrammar {
+    bindFirst: Boolean, useMax: Boolean) extends LimitGrammar {
 
   def limit(query: String, hasOffset: Boolean) =
     if (hasOffset) Strings.replace(offsetPattern, "{}", query) else Strings.replace(pattern, "{}", query)

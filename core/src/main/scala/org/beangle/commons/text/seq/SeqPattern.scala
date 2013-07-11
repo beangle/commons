@@ -54,8 +54,8 @@ class SeqPattern(val seqNumStyle: SeqNumStyle, val pattern: String) {
       remainder = Strings.substringAfter(remainder, "{" + p + "}")
     }
     val rs = paramBuffer.sorted
-    level=rs(rs.size-1)
-    rs.take(rs.size -1).toList
+    level = rs(rs.size - 1)
+    rs.take(rs.size - 1).toList
   }
 
   /**

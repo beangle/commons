@@ -34,7 +34,7 @@ object HttpUtils {
 
   def getResponseText(urlString: String): String = {
     var url = new URL(urlString)
-    val uri = new URI(url.getProtocol, url.getUserInfo, url.getHost, url.getPort, url.getPath, url.getQuery, 
+    val uri = new URI(url.getProtocol, url.getUserInfo, url.getHost, url.getPort, url.getPath, url.getQuery,
       url.getRef)
     url = uri.toURL()
     getResponseText(url, null)
@@ -52,7 +52,7 @@ object HttpUtils {
         conn.asInstanceOf[HttpsURLConnection].setHostnameVerifier(hostnameVerifier)
       }
       var in: BufferedReader = null
-      in = if (null == encoding) new BufferedReader(new InputStreamReader(conn.getInputStream)) else new BufferedReader(new InputStreamReader(conn.getInputStream, 
+      in = if (null == encoding) new BufferedReader(new InputStreamReader(conn.getInputStream)) else new BufferedReader(new InputStreamReader(conn.getInputStream,
         encoding))
       var line: String = in.readLine()
       val stringBuffer = new StringBuffer(255)
@@ -60,7 +60,7 @@ object HttpUtils {
         while (line != null) {
           stringBuffer.append(line)
           stringBuffer.append("\n")
-          line=in.readLine()
+          line = in.readLine()
         }
         stringBuffer.toString
       }

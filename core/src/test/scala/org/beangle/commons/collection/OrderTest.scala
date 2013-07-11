@@ -21,47 +21,46 @@ package org.beangle.commons.collection
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class OrderTest extends FunSpec with ShouldMatchers{
+class OrderTest extends FunSpec with ShouldMatchers {
 
-  describe("Order"){
-    it("ToString1"){
-      Order.toSortString(List(Order("teachPlan.grade desc"),Order("teachPlan.major.code"))) should equal ("order by teachPlan.grade desc,teachPlan.major.code")
+  describe("Order") {
+    it("ToString1") {
+      Order.toSortString(List(Order("teachPlan.grade desc"), Order("teachPlan.major.code"))) should equal("order by teachPlan.grade desc,teachPlan.major.code")
     }
 
     it("ToString2") {
-      Order.toSortString(List(Order("id", false),Order.asc("name"))) should equal ("order by id desc,name")
+      Order.toSortString(List(Order("id", false), Order.asc("name"))) should equal("order by id desc,name")
     }
 
     it("ParserOrder") {
       val orders = Order.parse("std.code asc")
-      orders.size should be (1)
+      orders.size should be(1)
       for (order <- orders) {
-        order.ascending should be (true)
-        order.property should equal ("std.code")
+        order.ascending should be(true)
+        order.property should equal("std.code")
       }
     }
 
-    
     it("ParserMutiOrder") {
       val sorts = Order.parse("activity.time.year desc,activity.time.validWeeksNum,activity.time.weekId desc")
-      sorts.size should be (3)
+      sorts.size should be(3)
       var order = sorts(0).asInstanceOf[Order]
-      order.property should equal ("activity.time.year")
-      order.ascending should be (false)
+      order.property should equal("activity.time.year")
+      order.ascending should be(false)
       order = sorts(1).asInstanceOf[Order]
-      order.property should equal ("activity.time.validWeeksNum")
-      order.ascending should be (true)
+      order.property should equal("activity.time.validWeeksNum")
+      order.ascending should be(true)
       order = sorts(2).asInstanceOf[Order]
-      order.property should equal ("activity.time.weekId")
-      order.ascending should be (false)
+      order.property should equal("activity.time.weekId")
+      order.ascending should be(false)
     }
 
     it("ParserComplexOrder") {
       val sorts = Order.parse("(case when ware.price is null then 0 else ware.price end) desc")
       sorts.size should be(1)
       val order = sorts(0).asInstanceOf[Order]
-      order.property should equal ("(case when ware.price is null then 0 else ware.price end)")
-      order.ascending should be (false)
+      order.property should equal("(case when ware.price is null then 0 else ware.price end)")
+      order.ascending should be(false)
     }
   }
 }

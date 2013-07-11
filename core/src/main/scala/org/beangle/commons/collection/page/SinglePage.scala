@@ -24,7 +24,7 @@ package org.beangle.commons.collection.page
  * @author chaostone
  * @version $Id: $
  */
-class SinglePage[E](val pageNo: Int,val pageSize: Int,val total: Int,val items: Seq[E]) extends Page[E] {
+class SinglePage[E](val pageNo: Int, val pageSize: Int, val total: Int, val items: Seq[E]) extends Page[E] {
 
   def maxPageNo: Int = {
     if (total < pageSize) {

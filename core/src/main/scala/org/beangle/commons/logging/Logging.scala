@@ -31,7 +31,7 @@ import org.slf4j.Logger
  */
 trait Logging {
 
-  protected lazy val logger: Logger =  LoggerFactory getLogger getClass
+  protected lazy val logger: Logger = LoggerFactory getLogger getClass
 }
 
 /**

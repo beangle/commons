@@ -26,20 +26,20 @@ import org.beangle.commons.entity.TemporalAt
  * </p>
  * 指有具体生效时间和失效时间的实体。一般生效时间不能为空，失效时间可以为空。
  * 具体时间采用时间时间格式便于比对。
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
-trait TemporalAtBean extends TemporalAt{
+trait TemporalAtBean extends TemporalAt {
 
   /**
    * 获得生效时间
    */
   @NotNull
-  var effectiveAt:Date
+  var effectiveAt: Date
 
   /**
    * 获得失效时间
    */
-  var invalidAt:Option[Date]
+  var invalidAt: Option[Date]
 }

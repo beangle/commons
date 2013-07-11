@@ -29,7 +29,7 @@ import UrlPropertyConfigProvider._
 object UrlPropertyConfigProvider {
 
   /**
-   Constant <code>logger</code>
+   * Constant <code>logger</code>
    */
   protected val logger = LoggerFactory.getLogger(classOf[UrlPropertyConfigProvider])
 }

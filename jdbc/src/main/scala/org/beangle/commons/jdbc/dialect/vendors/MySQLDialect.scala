@@ -74,7 +74,7 @@ class MySQLDialect extends AbstractDialect("[5.0,)") {
   }
 
   override def getAddForeignKeyConstraintString(constraintName: String, foreignKey: Array[String],
-                                                referencedTable: String, primaryKey: Array[String], referencesPrimaryKey: Boolean) = {
+    referencedTable: String, primaryKey: Array[String], referencesPrimaryKey: Boolean) = {
     val cols = Strings.join(foreignKey, ", ")
     new StringBuffer(30).append(" add index ").append(constraintName).append(" (").append(cols)
       .append("), add constraInt ").append(constraintName).append(" foreign key (").append(cols)

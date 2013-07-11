@@ -18,11 +18,10 @@
  */
 package org.beangle.commons.collection.page
 
-
-object PagedSeq{
-  private def calcMaxPageNo(pageSize:Int,total:Int) :Int = {
+object PagedSeq {
+  private def calcMaxPageNo(pageSize: Int, total: Int): Int = {
     if (total <= pageSize) {
-       1
+      1
     } else {
       val remainder = total % pageSize
       val quotient = total / pageSize
@@ -45,7 +44,7 @@ class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends Page[E]() {
 
   var pageNo: Int = limit.pageNo - 1
 
-  val maxPageNo: Int = calcMaxPageNo(datas.size,limit.pageSize)
+  val maxPageNo: Int = calcMaxPageNo(datas.size, limit.pageSize)
 
   val pageSize: Int = limit.pageSize
 
@@ -54,7 +53,7 @@ class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends Page[E]() {
   /**
    * Constructor for PagedSeq
    */
-  def this(datas:Seq[E], pageSize: Int) {
+  def this(datas: Seq[E], pageSize: Int) {
     this(datas, PageLimit(1, pageSize))
   }
 
@@ -91,7 +90,7 @@ class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends Page[E]() {
   /**
    * hasPrevious.
    */
-  def hasPrevious: Boolean =pageNo > 1
+  def hasPrevious: Boolean = pageNo > 1
 
   /**
    * next.
@@ -112,9 +111,9 @@ class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends Page[E]() {
     }
     this.pageNo = pageNo
     val toIndex = pageNo * pageSize
-    val newPage = new SinglePage[E](pageNo, pageSize, datas.size, datas.slice((pageNo - 1) * pageSize, 
+    val newPage = new SinglePage[E](pageNo, pageSize, datas.size, datas.slice((pageNo - 1) * pageSize,
       if ((toIndex < datas.size)) toIndex else datas.size))
-    this.page=newPage
+    this.page = newPage
     this
   }
 }

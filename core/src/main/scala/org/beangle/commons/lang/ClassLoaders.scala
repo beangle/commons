@@ -104,7 +104,7 @@ object ClassLoaders {
       case e: IOException => e.printStackTrace()
     }
     val urls = new mutable.ListBuffer[URL]
-    while (null != em && em.hasMoreElements()) urls+=em.nextElement
+    while (null != em && em.hasMoreElements()) urls += em.nextElement
     urls.toList
   }
 

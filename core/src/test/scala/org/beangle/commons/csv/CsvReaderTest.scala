@@ -22,11 +22,11 @@ import java.io.StringReader
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class CsvReaderTest extends FunSpec with ShouldMatchers{
+class CsvReaderTest extends FunSpec with ShouldMatchers {
 
   var reader: CsvReader = buildReader
 
-  def buildReader() :CsvReader = {
+  def buildReader(): CsvReader = {
     val sb = new StringBuilder()
     sb.append("a,b,c").append("\n")
     sb.append("a,\"b,b,b\",c").append("\n")
@@ -39,30 +39,30 @@ class CsvReaderTest extends FunSpec with ShouldMatchers{
   }
 
   /**
-    * Tests iterating over a reader.
-    */
-  describe("CsvReader"){
-    it("Read next"){
+   * Tests iterating over a reader.
+   */
+  describe("CsvReader") {
+    it("Read next") {
       var nextLine = reader.readNext()
-      nextLine(0) should equal ("a")
-      nextLine(1) should equal ("b")
-      nextLine(2) should equal ("c")
+      nextLine(0) should equal("a")
+      nextLine(1) should equal("b")
+      nextLine(2) should equal("c")
       nextLine = reader.readNext()
-      nextLine(0)  should equal("a")
-      nextLine(1) should equal ("b,b,b")
-      nextLine(2) should equal ("c")
+      nextLine(0) should equal("a")
+      nextLine(1) should equal("b,b,b")
+      nextLine(2) should equal("c")
       nextLine = reader.readNext()
-      nextLine.length should be (3)
+      nextLine.length should be(3)
       nextLine = reader.readNext()
-      nextLine.length should be (3)
+      nextLine.length should be(3)
       nextLine = reader.readNext()
-      nextLine(0) should equal ( "Glen \"The Man\" Smith")
+      nextLine(0) should equal("Glen \"The Man\" Smith")
       nextLine = reader.readNext()
       nextLine(0) should equal("\"\"")
-      nextLine(1) should equal ("test")
+      nextLine(1) should equal("test")
       nextLine = reader.readNext()
-      nextLine.length should be (4)
-      reader.readNext() should be (null)
+      nextLine.length should be(4)
+      reader.readNext() should be(null)
     }
   }
 }

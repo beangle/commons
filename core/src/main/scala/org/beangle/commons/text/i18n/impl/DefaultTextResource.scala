@@ -33,7 +33,7 @@ import org.beangle.commons.text.i18n.TextResource
  * @version $Id: $
  */
 class DefaultTextResource(protected val locale: Locale, protected val registry: TextBundleRegistry, protected val formater: TextFormater)
-  extends TextResource() {
+    extends TextResource() {
 
   protected var keyAsDefault: Boolean = true
 

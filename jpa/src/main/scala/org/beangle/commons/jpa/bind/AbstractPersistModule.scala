@@ -24,49 +24,49 @@ import org.beangle.commons.jpa.bind.EntityPersistConfig._
 
 abstract class AbstractPersistModule {
 
-  private var config :EntityPersistConfig = _
+  private var config: EntityPersistConfig = _
 
   protected def doConfig()
 
-  protected final def add(classes:Class[_ <: Entity[_]]*): EntityHolder= {
+  protected final def add(classes: Class[_ <: Entity[_]]*): EntityHolder = {
     for (cls <- classes)
       config.addEntity(new EntityDefinition(cls))
-    new EntityHolder(config,classes: _*)
+    new EntityHolder(config, classes: _*)
   }
 
-  protected final def cache(region:String):CacheHolder = {
+  protected final def cache(region: String): CacheHolder = {
     new CacheHolder(config).cache(region).usage(config.cache.usage);
   }
 
-  protected final def cache():CacheHolder= {
+  protected final def cache(): CacheHolder = {
     new CacheHolder(config).cache(config.cache.region).usage(config.cache.usage);
   }
 
-  protected final def collection(clazz:Class[_],properties:String*):List[CollectionDefinition] = {
+  protected final def collection(clazz: Class[_], properties: String*): List[CollectionDefinition] = {
     import scala.collection.mutable
     val definitions = new mutable.ListBuffer[CollectionDefinition]
     for (property <- properties) {
-      definitions+=new CollectionDefinition(clazz, property)
+      definitions += new CollectionDefinition(clazz, property)
     }
     definitions.toList
   }
 
-  protected final def defaultCache(region:String,usage: String) {
+  protected final def defaultCache(region: String, usage: String) {
     config.cache.region = region;
-    config.cache.usage =usage;
+    config.cache.usage = usage;
   }
-  
-  final def getConfig(): EntityPersistConfig= {
+
+  final def getConfig(): EntityPersistConfig = {
     config = new EntityPersistConfig()
     doConfig()
     config
   }
 
-  final class CacheHolder(val config:EntityPersistConfig) {
-    var cacheUsage: String =_
-    var cacheRegion:  String =_
+  final class CacheHolder(val config: EntityPersistConfig) {
+    var cacheUsage: String = _
+    var cacheRegion: String = _
 
-    def add(first:List[CollectionDefinition],definitionLists:List[CollectionDefinition]*):this.type ={
+    def add(first: List[CollectionDefinition], definitionLists: List[CollectionDefinition]*): this.type = {
       for (definition <- first) {
         config.addCollection(definition.cache(cacheRegion, cacheUsage));
       }
@@ -78,42 +78,42 @@ abstract class AbstractPersistModule {
       this
     }
 
-    def add(first:Class[_ <: Entity[_]],classes:Class[_ <: Entity[_]]*):this.type= {
-        config.getEntity(first).cache(cacheRegion, cacheUsage)
+    def add(first: Class[_ <: Entity[_]], classes: Class[_ <: Entity[_]]*): this.type = {
+      config.getEntity(first).cache(cacheRegion, cacheUsage)
       for (clazz <- classes)
         config.getEntity(clazz).cache(cacheRegion, cacheUsage)
       this
     }
 
-    def usage(cacheUsage:String):this.type = {
+    def usage(cacheUsage: String): this.type = {
       this.cacheUsage = cacheUsage
       this
     }
 
-    def cache(cacheRegion:String):this.type= {
+    def cache(cacheRegion: String): this.type = {
       this.cacheRegion = cacheRegion
       this
     }
 
   }
 
-  final class EntityHolder(val config:EntityPersistConfig,val classes:Class[_]*) {
+  final class EntityHolder(val config: EntityPersistConfig, val classes: Class[_]*) {
 
-    def cacheable() :EntityHolder ={
+    def cacheable(): EntityHolder = {
       for (clazz <- classes) {
         config.getEntity(clazz).cache(config.cache.region, config.cache.usage);
       }
       this
     }
 
-    def cache(region:String):EntityHolder ={
+    def cache(region: String): EntityHolder = {
       for (clazz <- classes) {
         config.getEntity(clazz).cacheRegion = region
       }
       return this
     }
 
-    def usage(usage:String): EntityHolder= {
+    def usage(usage: String): EntityHolder = {
       for (clazz <- classes) {
         config.getEntity(clazz).cacheUsage = usage
       }

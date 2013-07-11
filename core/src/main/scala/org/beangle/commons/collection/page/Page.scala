@@ -21,13 +21,13 @@ package org.beangle.commons.collection.page
 object Page {
 
   /**
-    Constant <code>DefaultPageNo=1</code>
-    */
+   * Constant <code>DefaultPageNo=1</code>
+   */
   val DefaultPageNo = 1
 
   /**
-    Constant <code>DefaultPageSize=20</code>
-    */
+   * Constant <code>DefaultPageSize=20</code>
+   */
   val DefaultPageSize = 20
 
   def empty[T](): Page[T] = EmptyPage.asInstanceOf[Page[T]]
@@ -58,7 +58,7 @@ object Page {
 
     def items: Seq[Any] = Nil
 
-    def iterator=Nil.iterator
+    def iterator = Nil.iterator
   }
 }
 

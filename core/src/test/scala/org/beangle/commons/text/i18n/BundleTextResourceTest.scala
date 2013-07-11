@@ -25,18 +25,18 @@ import org.beangle.commons.text.i18n.impl.DefaultTextResource
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class BundleTextResourceTest extends FunSpec with ShouldMatchers{
+class BundleTextResourceTest extends FunSpec with ShouldMatchers {
 
-  describe("TextBundle"){
-    it("Get text from bundle"){
+  describe("TextBundle") {
+    it("Get text from bundle") {
       val locale = new Locale("zh", "CN")
       val registry = new DefaultTextBundleRegistry()
       val bundle = registry.load(locale, "message")
       val bundle2 = registry.load(locale, "message2")
       bundle.getText("hello.world") should equal(Some("你好"))
       val tr = new DefaultTextResource(locale, registry, new DefaultTextFormater())
-      tr.getText("hello.world") should equal (Some("你好"))
-      tr.getText("china") should equal (Some("中国"))
+      tr.getText("hello.world") should equal(Some("你好"))
+      tr.getText("china") should equal(Some("中国"))
     }
   }
 }

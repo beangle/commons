@@ -21,17 +21,17 @@ package org.beangle.commons.csv
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class CsvTest extends FunSpec with ShouldMatchers{
+class CsvTest extends FunSpec with ShouldMatchers {
 
-  describe("CsvFormat"){
+  describe("CsvFormat") {
     it("Format") {
       val builder = new CsvFormat.Builder
       builder.separator(CsvConstants.Comma).separator(CsvConstants.Semicolon)
         .delimiter(CsvConstants.Quote)
       val csv = new Csv(builder.build())
-      csv.format.isSeparator(CsvConstants.Comma) should be (true)
-      csv.format.isSeparator(CsvConstants.Semicolon) should be (true)
-      csv.format.delimiter should equal (CsvConstants.Quote)
+      csv.format.isSeparator(CsvConstants.Comma) should be(true)
+      csv.format.isSeparator(CsvConstants.Semicolon) should be(true)
+      csv.format.delimiter should equal(CsvConstants.Quote)
     }
   }
 

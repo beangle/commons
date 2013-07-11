@@ -23,9 +23,9 @@ import java.net.URLEncoder
 import org.beangle.commons.lang.Assert
 import org.beangle.commons.lang.Strings
 
-class UrlRender(var initSuffix: String=null) {
+class UrlRender(var initSuffix: String = null) {
 
-  val suffix = if (null != initSuffix  && initSuffix.charAt(0) != '.')  "." + initSuffix else initSuffix
+  val suffix = if (null != initSuffix && initSuffix.charAt(0) != '.') "." + initSuffix else initSuffix
 
   var escapeAmp: Boolean = _
 
@@ -34,7 +34,7 @@ class UrlRender(var initSuffix: String=null) {
     if (escapeAmp) separator = "&amp;"
     val sb = renderUri(referer, uri)
     sb.append(separator)
-    for ((key,value) <- params) {
+    for ((key, value) <- params) {
       try {
         sb.append(key).append('=').append(URLEncoder.encode(value, "UTF-8")).append(separator)
       } catch {
@@ -74,7 +74,7 @@ class UrlRender(var initSuffix: String=null) {
     }
     var questIndex = uriStr.indexOf('?')
     val queryStr = if (-1 != questIndex) uriStr.substring(questIndex + 1) else null
-    val uri = if (-1 == questIndex) uriStr else  uriStr.substring(0, questIndex)
+    val uri = if (-1 == questIndex) uriStr else uriStr.substring(0, questIndex)
     if (-1 == questIndex) questIndex = uriStr.length
 
     if (uri.startsWith("/")) {

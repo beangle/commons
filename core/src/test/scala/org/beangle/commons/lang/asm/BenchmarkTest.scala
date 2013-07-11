@@ -32,11 +32,11 @@ object BenchmarkTest {
   private val logger = LoggerFactory.getLogger(classOf[BenchmarkTest])
 }
 
-class BenchmarkTest   extends FunSpec with ShouldMatchers{
+class BenchmarkTest extends FunSpec with ShouldMatchers {
 
   val testCount = 1000000
 
-  describe("Benchmark test and get"){
+  describe("Benchmark test and get") {
     it("JdkReflect") {
       val someObject = new TestBean()
       val method = classOf[TestBean].getMethod("name_$eq", classOf[String])
@@ -45,7 +45,7 @@ class BenchmarkTest   extends FunSpec with ShouldMatchers{
         for (j <- 0 until testCount) {
           method.invoke(someObject, "Unmi")
         }
-        logger.info(i+"'s "+testCount+" reflect in "+sw)
+        logger.info(i + "'s " + testCount + " reflect in " + sw)
       }
     }
 
@@ -56,9 +56,9 @@ class BenchmarkTest   extends FunSpec with ShouldMatchers{
       for (i <- 0 until 5) {
         val sw = new Stopwatch(true)
         for (j <- 0 until testCount) {
-          access.write(someObject, idx,"Unmi")
+          access.write(someObject, idx, "Unmi")
         }
-        logger.info(i+"'s "+testCount+" asm in "+sw)
+        logger.info(i + "'s " + testCount + " asm in " + sw)
       }
     }
 
@@ -67,9 +67,9 @@ class BenchmarkTest   extends FunSpec with ShouldMatchers{
       for (i <- 0 until 5) {
         val sw = new Stopwatch(true)
         for (j <- 0 until testCount) {
-          someObject.name="Unmi"
+          someObject.name = "Unmi"
         }
-        logger.info(i+"'s "+testCount+" direct in "+sw)
+        logger.info(i + "'s " + testCount + " direct in " + sw)
       }
     }
   }

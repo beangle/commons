@@ -23,13 +23,13 @@ import java.util.Calendar
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class MapConverterTest extends FunSpec with ShouldMatchers{
+class MapConverterTest extends FunSpec with ShouldMatchers {
 
   val datas = Map[String, Any](("empty1" -> ""), ("empty2" -> null), ("empty3" -> Array("")))
 
   var converter: MapConverter = new MapConverter()
 
-  describe("MapConverter"){
+  describe("MapConverter") {
     it("Convert Date") {
       val year = 2010
       val month = 9
@@ -38,23 +38,23 @@ class MapConverterTest extends FunSpec with ShouldMatchers{
       val birthday = converter.get(dateDatas, "birthday", classOf[Date]).get
       val calendar = Calendar.getInstance
       calendar.setTime(birthday)
-      calendar.get(Calendar.YEAR) should be (year)
-      calendar.get(Calendar.MONTH) should be ( month - 1)
-      calendar.get(Calendar.DAY_OF_MONTH) should be (day)
-      dateDatas = this.datas + ("birthday" ->  Array(birthday))
+      calendar.get(Calendar.YEAR) should be(year)
+      calendar.get(Calendar.MONTH) should be(month - 1)
+      calendar.get(Calendar.DAY_OF_MONTH) should be(day)
+      dateDatas = this.datas + ("birthday" -> Array(birthday))
       converter.get(dateDatas, "birthday", classOf[Date]) should equal(Some(birthday))
     }
 
     it("Get from Array") {
-      converter.get( datas + ("name" -> Array("me")), "name") should equal (Some("me"))
+      converter.get(datas + ("name" -> Array("me")), "name") should equal(Some("me"))
     }
 
     it("Get Null") {
-      converter.getBoolean(datas, "empty1")  should be (Some(false))
-      converter.getBoolean(datas, "empty2")  should be (None)
-      converter.getLong(datas, "empty1")  should be (Some(0))
-      converter.getLong(datas, "empty2")  should be (None)
-      converter.getLong(datas, "empty3")  should be (Some(0))
+      converter.getBoolean(datas, "empty1") should be(Some(false))
+      converter.getBoolean(datas, "empty2") should be(None)
+      converter.getLong(datas, "empty1") should be(Some(0))
+      converter.getLong(datas, "empty2") should be(None)
+      converter.getLong(datas, "empty3") should be(Some(0))
     }
   }
 }

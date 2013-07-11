@@ -24,8 +24,8 @@ import org.beangle.commons.entity.Entity
 
 @MappedSuperclass
 @SerialVersionUID(-6898498932182877104L)
-class StringIdBean extends Entity[String]{
+class StringIdBean extends Entity[String] {
 
-  @Id 
-  var id: String=_
+  @Id
+  var id: String = _
 }

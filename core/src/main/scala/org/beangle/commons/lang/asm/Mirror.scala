@@ -29,7 +29,7 @@ import org.objectweb.asm.Type
 import scala.collection.mutable
 object Mirror {
 
-  private var proxies =new mutable.HashMap[Class[_], Mirror]
+  private var proxies = new mutable.HashMap[Class[_], Mirror]
 
   /**
    * Get Mirror of given type.
@@ -65,9 +65,9 @@ object Mirror {
           initMv.visitInsn(RETURN)
           initMv.visitMaxs(0, 0)
           initMv.visitEnd()
-          visitRead(cw,classInfo,classNameInternal)
-          visitWrite(cw,classInfo,classNameInternal)
-          visitInvoke(cw,classInfo,classNameInternal)
+          visitRead(cw, classInfo, classNameInternal)
+          visitWrite(cw, classInfo, classNameInternal)
+          visitInvoke(cw, classInfo, classNameInternal)
 
           cw.visitEnd()
           val data = cw.toByteArray()
@@ -87,11 +87,11 @@ object Mirror {
     }
   }
 
-  private def box(clazz:Class[_],mv:MethodVisitor):Type={
-    val t= Type.getType(clazz)
+  private def box(clazz: Class[_], mv: MethodVisitor): Type = {
+    val t = Type.getType(clazz)
     t.getSort match {
       case Type.VOID => mv.visitInsn(ACONST_NULL)
-      case Type.BOOLEAN => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Boolean", "valueOf","(Z)Ljava/lang/Boolean;")
+      case Type.BOOLEAN => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;")
       case Type.BYTE => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;")
       case Type.CHAR => mv.visitMethodInsn(INVOKESTATIC, "java/lang/Character", "valueOf",
         "(C)Ljava/lang/Character;")
@@ -105,7 +105,7 @@ object Mirror {
     t
   }
 
-  private def unbox(clazz:Class[_],mv:MethodVisitor):Type={
+  private def unbox(clazz: Class[_], mv: MethodVisitor): Type = {
     val t = Type.getType(clazz)
     t.getSort match {
       case Type.BOOLEAN =>
@@ -146,7 +146,7 @@ object Mirror {
     t
   }
 
-  private def visitException(mv:MethodVisitor){
+  private def visitException(mv: MethodVisitor) {
     mv.visitTypeInsn(NEW, "java/lang/IllegalArgumentException")
     mv.visitInsn(DUP)
     mv.visitTypeInsn(NEW, "java/lang/StringBuilder")
@@ -160,8 +160,8 @@ object Mirror {
     mv.visitInsn(ATHROW)
   }
 
-  private def visitRead(cw:ClassWriter,classInfo:ClassInfo,classNameInternal:String):MethodVisitor ={
-    val mv = cw.visitMethod(ACC_PUBLIC + ACC_FINAL, "read", "(Ljava/lang/Object;I)Ljava/lang/Object;",null, null)
+  private def visitRead(cw: ClassWriter, classInfo: ClassInfo, classNameInternal: String): MethodVisitor = {
+    val mv = cw.visitMethod(ACC_PUBLIC + ACC_FINAL, "read", "(Ljava/lang/Object;I)Ljava/lang/Object;", null, null)
     mv.visitCode()
     val methods = classInfo.readers.values.toList.sorted
     if (methods.size > 0) {
@@ -170,29 +170,29 @@ object Mirror {
       mv.visitVarInsn(ASTORE, 4)
       mv.visitVarInsn(ILOAD, 2)
       val labels = new Array[Label](methods.size)
-      val indexes= new Array[Int](methods.size)
-      var j=0
-      while(j<labels.length){
-        labels(j)=new Label
-        indexes(j)=methods(j).index
-        j+=1
+      val indexes = new Array[Int](methods.size)
+      var j = 0
+      while (j < labels.length) {
+        labels(j) = new Label
+        indexes(j) = methods(j).index
+        j += 1
       }
       val defaultLabel = new Label()
-      mv.visitLookupSwitchInsn(defaultLabel,indexes,labels)
+      mv.visitLookupSwitchInsn(defaultLabel, indexes, labels)
       val buffer = new StringBuilder(128)
       var i = 0
       while (i < labels.length) {
         mv.visitLabel(labels(i))
-        if (i == 0) mv.visitFrame(Opcodes.F_APPEND, 1, Array(classNameInternal), 0, null) else mv.visitFrame(Opcodes.F_SAME,0, null, 0, null)
+        if (i == 0) mv.visitFrame(Opcodes.F_APPEND, 1, Array(classNameInternal), 0, null) else mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null)
         mv.visitVarInsn(ALOAD, 4)
         val info = methods(i)
         buffer.setLength(0)
         buffer.append("()")
         buffer.append(Type.getDescriptor(info.method.getReturnType))
         mv.visitMethodInsn(INVOKEVIRTUAL, classNameInternal, info.method.getName, buffer.toString)
-        box(info.method.getReturnType,mv)
+        box(info.method.getReturnType, mv)
         mv.visitInsn(ARETURN)
-        i+=1
+        i += 1
       }
       mv.visitLabel(defaultLabel)
       mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null)
@@ -203,8 +203,7 @@ object Mirror {
     mv
   }
 
-
-  private def visitWrite(cw:ClassWriter,classInfo:ClassInfo,classNameInternal:String):MethodVisitor = {
+  private def visitWrite(cw: ClassWriter, classInfo: ClassInfo, classNameInternal: String): MethodVisitor = {
     val mv = cw.visitMethod(ACC_PUBLIC + ACC_FINAL, "write", "(Ljava/lang/Object;ILjava/lang/Object;)Ljava/lang/Object;",
       null, null)
     mv.visitCode()
@@ -215,15 +214,15 @@ object Mirror {
       mv.visitVarInsn(ASTORE, 4)
       mv.visitVarInsn(ILOAD, 2)
       val labels = new Array[Label](methods.size)
-      val indexes= new Array[Int](methods.size)
-      var j=0
-      while(j<labels.length){
-        labels(j)=new Label
-        indexes(j)=methods(j).index
-        j+=1
+      val indexes = new Array[Int](methods.size)
+      var j = 0
+      while (j < labels.length) {
+        labels(j) = new Label
+        indexes(j) = methods(j).index
+        j += 1
       }
       val defaultLabel = new Label
-      mv.visitLookupSwitchInsn(defaultLabel,indexes,labels)
+      mv.visitLookupSwitchInsn(defaultLabel, indexes, labels)
       val buffer = new StringBuilder(128)
       var i = 0
       while (i < labels.length) {
@@ -235,14 +234,14 @@ object Mirror {
         buffer.append('(')
         val info = methods(i)
         mv.visitVarInsn(ALOAD, 3)
-        val paramType = unbox(info.method.getParameterTypes()(0),mv)
+        val paramType = unbox(info.method.getParameterTypes()(0), mv)
         buffer.append(paramType.getDescriptor)
         buffer.append(')')
         buffer.append(Type.getDescriptor(info.method.getReturnType))
         mv.visitMethodInsn(INVOKEVIRTUAL, classNameInternal, info.method.getName, buffer.toString)
-        box(info.method.getReturnType,mv)
+        box(info.method.getReturnType, mv)
         mv.visitInsn(ARETURN)
-        i+=1
+        i += 1
       }
       mv.visitLabel(defaultLabel)
       mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null)
@@ -253,7 +252,7 @@ object Mirror {
     mv
   }
 
-  private def visitInvoke(cw:ClassWriter,classInfo:ClassInfo,classNameInternal:String):MethodVisitor ={
+  private def visitInvoke(cw: ClassWriter, classInfo: ClassInfo, classNameInternal: String): MethodVisitor = {
     val mv = cw.visitMethod(ACC_PUBLIC + ACC_FINAL, "invoke", "(Ljava/lang/Object;ILscala/collection/Seq;)Ljava/lang/Object;",
       null, null)
     mv.visitCode()
@@ -264,7 +263,7 @@ object Mirror {
       mv.visitVarInsn(ASTORE, 4)
       mv.visitVarInsn(ILOAD, 2)
       val labels = new Array[Label](methods.size)
-        (0 until labels.length).foreach(labels(_) = new Label)
+      (0 until labels.length).foreach(labels(_) = new Label)
       val defaultLabel = new Label()
       mv.visitTableSwitchInsn(0, labels.length - 1, defaultLabel, labels)
       val buffer = new StringBuilder(128)
@@ -280,18 +279,18 @@ object Mirror {
         val paramTypes = info.method.getParameterTypes
         for (paramIndex <- 0 until paramTypes.length) {
           mv.visitVarInsn(ALOAD, 3)
-          mv.visitIntInsn(BIPUSH,paramIndex)
+          mv.visitIntInsn(BIPUSH, paramIndex)
           mv.visitMethodInsn(INVOKEINTERFACE, "scala/collection/Seq", "apply", "(I)Ljava/lang/Object;")
-          val paramType = unbox(paramTypes(paramIndex),mv)
+          val paramType = unbox(paramTypes(paramIndex), mv)
           buffer.append(paramType.getDescriptor)
         }
         buffer.append(')')
         buffer.append(Type.getDescriptor(info.method.getReturnType))
 
         mv.visitMethodInsn(INVOKEVIRTUAL, classNameInternal, info.method.getName, buffer.toString)
-        box(info.method.getReturnType,mv)
+        box(info.method.getReturnType, mv)
         mv.visitInsn(ARETURN)
-        i+=1
+        i += 1
       }
       mv.visitLabel(defaultLabel)
       mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null)
@@ -352,5 +351,5 @@ abstract class Mirror {
    *
    * @see #invoke(Object, int, Object...)
    */
-  def invoke(obj: AnyRef, method: String, args: Any*): Any =  invoke(obj, classInfo.getIndex(method, args), args)
+  def invoke(obj: AnyRef, method: String, args: Any*): Any = invoke(obj, classInfo.getIndex(method, args), args)
 }

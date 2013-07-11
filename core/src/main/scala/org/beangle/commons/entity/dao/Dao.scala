@@ -24,7 +24,7 @@ import org.beangle.commons.entity.Entity
  * <p>
  * Dao trait
  * [/p>
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
@@ -33,46 +33,46 @@ trait Dao[T <: Entity[ID], ID] {
   /**
    * get T by id.
    */
-  def get(id:ID):T
+  def get(id: ID): T
 
   /**
    * find T by id.
    */
-  def find(id:ID):Option[T]
+  def find(id: ID): Option[T]
 
   /**
    * search T by id.
    */
-  def find(first:ID,ids:ID*):  List[T]
+  def find(first: ID, ids: ID*): List[T]
 
   /**
    * save or update entities
    */
-  def saveOrUpdate(first:T,entities:T*)
+  def saveOrUpdate(first: T, entities: T*)
 
   /**
    * save or update entities
    */
-  def saveOrUpdate(entities:collection.Seq[T]);
+  def saveOrUpdate(entities: collection.Seq[T]);
 
   /**
    * remove entities.
    */
-  def remove(entities:collection.Seq[T]);
+  def remove(entities: collection.Seq[T]);
 
   /**
    * remove entities.
    */
-  def remove(first:T,others:T*);
+  def remove(first: T, others: T*);
 
   /**
    * remove entities by id
    */
-  def remove(id:ID,ids:ID*);
+  def remove(id: ID, ids: ID*);
 
   /**
    * get entity type
    */
-  def entityClass:Class[T];
+  def entityClass: Class[T];
 
 }

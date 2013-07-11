@@ -26,21 +26,21 @@ import javax.validation.constraints.NotNull
  * <p>
  * Contain create and update time interface.
  * </p>
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
-trait UpdatedBean extends Updated{
+trait UpdatedBean extends Updated {
 
   /**
    * Created at.
    */
   @NotNull
-  var createdAt:Date;
+  var createdAt: Date;
 
   /**
    * Updated At
    */
   @NotNull
-  var updatedAt:Date;
+  var updatedAt: Date;
 }

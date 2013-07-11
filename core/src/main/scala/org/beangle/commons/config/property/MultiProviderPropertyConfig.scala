@@ -57,10 +57,10 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
 
   def get[T](clazz: Class[T], name: String): Option[T] = {
     get(name) match {
-        case Some(value) => 
-            if (null == value) None
-            else Some(DefaultConversion.Instance.convert(value, clazz))
-        case _ => None
+      case Some(value) =>
+        if (null == value) None
+        else Some(DefaultConversion.Instance.convert(value, clazz))
+      case _ => None
     }
   }
 
@@ -69,8 +69,8 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
    */
   def getInt(name: String): Option[Int] = {
     get(name) match {
-        case Some(value) =>  Some(Numbers.toInt(value.asInstanceOf[String]))
-        case _ => None
+      case Some(value) => Some(Numbers.toInt(value.asInstanceOf[String]))
+      case _ => None
     }
   }
 
@@ -79,8 +79,8 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
    */
   def getBoolean(name: String): Option[Boolean] = {
     get(name) match {
-        case Some(value) =>  Some(String2BooleanConverter.apply(value.asInstanceOf[String]))
-        case _ => None
+      case Some(value) => Some(String2BooleanConverter.apply(value.asInstanceOf[String]))
+      case _ => None
     }
   }
 
@@ -92,11 +92,11 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
   }
 
   def addListener(listener: PropertyConfigListener) {
-    listeners+=listener
+    listeners += listener
   }
 
   def removeListener(listener: PropertyConfigListener) {
-    listeners-=listener
+    listeners -= listener
   }
 
   /**
@@ -133,10 +133,10 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
   /**
    * getNames.
    */
-  def names: Set[String] =  properties.keySet.toSet
+  def names: Set[String] = properties.keySet.toSet
 
   def addProvider(provider: PropertyConfig.Provider) {
-    providers+=provider
+    providers += provider
   }
 
   /**

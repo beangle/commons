@@ -45,10 +45,10 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
   protected def addConverter(converter: GenericConverter) {
     val key = converter.getTypeinfo
     val sourceType = key._1.asInstanceOf[Class[_]]
-    converters.get(sourceType) match{
-      case Some(existed) => 
-        converters += (key._1 -> (existed + (key._2->converter)))
-      case _ => converters += (key._1 -> Map((key._2->converter)))
+    converters.get(sourceType) match {
+      case Some(existed) =>
+        converters += (key._1 -> (existed + (key._2 -> converter)))
+      case _ => converters += (key._1 -> Map((key._2 -> converter)))
     }
     cache.clear()
   }
@@ -61,10 +61,10 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
     }
     if (null == key) throw new IllegalArgumentException("Cannot find convert type pair " + converter.getClass)
     val sourceType = key._1.asInstanceOf[Class[_]]
-    val adapter =  new ConverterAdapter(converter, key)
-    converters.get(sourceType) match{
-      case Some(existed) => converters += (sourceType -> (existed+(key._2 -> adapter)))
-      case _ => converters += (sourceType -> Map((key._2-> adapter)))
+    val adapter = new ConverterAdapter(converter, key)
+    converters.get(sourceType) match {
+      case Some(existed) => converters += (sourceType -> (existed + (key._2 -> adapter)))
+      case _ => converters += (sourceType -> Map((key._2 -> adapter)))
     }
     cache.clear()
   }
@@ -103,7 +103,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
     }
     if (null == converter) {
       converter = NoneConverter
-    }else{
+    } else {
       cache.put(key.asInstanceOf[Pair[Class[_], Class[_]]], converter)
     }
     converter
@@ -118,7 +118,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
       val converter = getConverter(targetType, getConverters(currentClass))
       if (converter != null) return converter
       val superClass = currentClass.getSuperclass
-      if (superClass != null && superClass != classOf[AnyRef]) classQueue+=superClass
+      if (superClass != null && superClass != classOf[AnyRef]) classQueue += superClass
       for (interfaceType <- currentClass.getInterfaces) addInterfaces(interfaceType, interfaces)
     }
     for (interfaceType <- interfaces) {

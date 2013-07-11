@@ -37,12 +37,12 @@ class String2EnumConverter extends StringConverterFactory[String, Enum[_]] {
   }
 
   override def getConverter[T <: Enum[_]](targetType: Class[T]): Option[Converter[String, T]] = {
-    val converter= super.getConverter(targetType)
-    if(converter.isEmpty){
-      val enumconverter= new EnumConverter(targetType)
+    val converter = super.getConverter(targetType)
+    if (converter.isEmpty) {
+      val enumconverter = new EnumConverter(targetType)
       register(targetType, enumconverter)
       Some(enumconverter)
-    }else{
+    } else {
       converter
     }
   }

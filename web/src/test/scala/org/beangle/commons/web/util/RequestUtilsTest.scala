@@ -24,9 +24,9 @@ import org.mockito.Mockito.when
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class RequestUtilsTest extends FunSpec with ShouldMatchers{
+class RequestUtilsTest extends FunSpec with ShouldMatchers {
 
-  describe("RequestUtils"){
+  describe("RequestUtils") {
     it("testGetServletPath") {
       var request = mock(classOf[HttpServletRequest])
       when(request.getContextPath).thenReturn("/")

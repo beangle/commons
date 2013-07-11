@@ -23,7 +23,6 @@ import javax.servlet.http.HttpSession
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.web.util.RequestUtils
 
-
 /**
  * Default access request builder
  *
@@ -40,7 +39,7 @@ class DefaultAccessRequestBuilder extends AccessRequestBuilder {
       val username = abtainUsername(request)
       if (Strings.isNotEmpty(username)) {
         ar = new AccessRequest(sessionid, username, RequestUtils.getServletPath(request))
-        ar.params=request.getQueryString
+        ar.params = request.getQueryString
       }
     }
     ar

@@ -21,15 +21,15 @@ package org.beangle.commons.entity
  * <p>
  * Hierarchical interface.
  * </p>
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
-trait Hierarchical[T <: Entity[_]]{
+trait Hierarchical[T <: Entity[_]] {
 
-  def indexno:String;
+  def indexno: String;
 
-  def parent:Option[T];
+  def parent: Option[T];
 
-  def children:collection.Seq[T];
+  def children: collection.Seq[T];
 }

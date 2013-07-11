@@ -32,10 +32,9 @@ object Order {
    */
   val OrderStr = "orderBy"
 
-  def apply(property:String) = new  Order(property, true)
+  def apply(property: String) = new Order(property, true)
 
-  def apply(property:String,ascending: Boolean) = new  Order(property, ascending)
-
+  def apply(property: String, ascending: Boolean) = new Order(property, ascending)
 
   /**
    * <p>
@@ -97,11 +96,11 @@ object Order {
     }
   }
 
-  private def analysis(orderStr:String):(String,Boolean)={
+  private def analysis(orderStr: String): (String, Boolean) = {
     if (Strings.contains(orderStr, ",")) throw new RuntimeException("user parser for multiorder")
 
-    var ascending=false
-    var property=orderStr
+    var ascending = false
+    var property = orderStr
     if (Strings.contains(property, " desc")) {
       ascending = false
       property = Strings.substringBefore(property, " desc")
@@ -110,10 +109,9 @@ object Order {
       ascending = true
     }
     property = property.trim()
-    (property,ascending)
+    (property, ascending)
   }
 }
-
 
 /**
  * 排序
@@ -121,7 +119,7 @@ object Order {
  * @author chaostone
  * @version $Id: $
  */
-class Order(val property: String,val ascending: Boolean,val lowerCase:Boolean =false) {
+class Order(val property: String, val ascending: Boolean, val lowerCase: Boolean = false) {
 
   /**
    * <p>
@@ -131,7 +129,7 @@ class Order(val property: String,val ascending: Boolean,val lowerCase:Boolean =f
    * @param property a {@link java.lang.String} object.
    */
   def this(property: String) {
-    this(Order.analysis(property)._1,Order.analysis(property)._2)
+    this(Order.analysis(property)._1, Order.analysis(property)._2)
   }
 
   /**

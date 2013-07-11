@@ -28,66 +28,66 @@ import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.conversion.Conversion
 import org.beangle.commons.lang.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.reflect.Reflections
-import org.beangle.commons.bean.PropertyUtils.{getProperty,setProperty,copyProperty}
+import org.beangle.commons.bean.PropertyUtils.{ getProperty, setProperty, copyProperty }
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-object ConvertPopulator{
+object ConvertPopulator {
   /** Constant <code>logger</code> */
   val logger = LoggerFactory.getLogger(this.getClass);
-  val TrimStr=true
+  val TrimStr = true
 }
 /**
  * <p>
  * ConvertPopulatorBean class.
  * </p>
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
 import ConvertPopulator._
 
-class ConvertPopulator(val conversion:Conversion=DefaultConversion.Instance) extends Populator {
+class ConvertPopulator(val conversion: Conversion = DefaultConversion.Instance) extends Populator {
 
   /**
    * Initialize target's attribuate path,Return the last property value and type.
    */
-  def init(target:Entity[_],t:Type, attr:String):(Any,Type) = {
-    var propObj :Any = target
-    var property:Any = null
-    var objtype=t
+  def init(target: Entity[_], t: Type, attr: String): (Any, Type) = {
+    var propObj: Any = target
+    var property: Any = null
+    var objtype = t
 
     var index = 0;
     val attrs = Strings.split(attr, ".");
     while (index < attrs.length) {
-      val nested=attrs(index)
+      val nested = attrs(index)
       try {
-        property = getProperty(propObj,nested );
+        property = getProperty(propObj, nested);
         val propertyType = objtype.getPropertyType(nested);
         // 初始化
         if (null == propertyType) {
-          logger.error("Cannot find property type [{}] of {}",nested, propObj.getClass());
-          throw new RuntimeException("Cannot find property type " +nested + " of "
-              + propObj.getClass().getName());
+          logger.error("Cannot find property type [{}] of {}", nested, propObj.getClass());
+          throw new RuntimeException("Cannot find property type " + nested + " of "
+            + propObj.getClass().getName());
         }
         if (null == property) {
           property = propertyType.newInstance();
           try {
             setProperty(propObj.asInstanceOf[AnyRef], nested, property);
           } catch {
-            case e:Exception =>
-            // Try fix jdk error for couldn't find correct setter when object's Set required type is
-            // diffent with Get's return type declared in interface.
-            val setter = Reflections.getSetter(propObj.getClass(),nested);
-            if (null != setter) setter.invoke(propObj, property.asInstanceOf[AnyRef]);
-            else throw e;
+            case e: Exception =>
+              // Try fix jdk error for couldn't find correct setter when object's Set required type is
+              // diffent with Get's return type declared in interface.
+              val setter = Reflections.getSetter(propObj.getClass(), nested);
+              if (null != setter) setter.invoke(propObj, property.asInstanceOf[AnyRef]);
+              else throw e;
           }
         }
-        index+=1
+        index += 1
         propObj = property
         objtype = propertyType
       } catch {
-        case e:Exception => throw new RuntimeException(e);
+        case e: Exception => throw new RuntimeException(e);
       }
     }
     return (property, objtype);
@@ -96,7 +96,7 @@ class ConvertPopulator(val conversion:Conversion=DefaultConversion.Instance) ext
   /**
    * 安静的拷贝属性，如果属性非法或其他错误则记录日志
    */
-  def populate(target:Entity[_],entityType: EntityType,attr:String,value:Any):Boolean= {
+  def populate(target: Entity[_], entityType: EntityType, attr: String, value: Any): Boolean = {
     try {
       if (attr.indexOf('.') > -1) {
         val ot = init(target, entityType, Strings.substringBeforeLast(attr, "."));
@@ -107,10 +107,10 @@ class ConvertPopulator(val conversion:Conversion=DefaultConversion.Instance) ext
       }
       return true;
     } catch {
-      case e:Exception =>
-      logger.warn("copy property failure:[class:" + entityType.entityName + " attr:" + attr + " value:"
+      case e: Exception =>
+        logger.warn("copy property failure:[class:" + entityType.entityName + " attr:" + attr + " value:"
           + value + "]:", e);
-      return false;
+        return false;
     }
   }
 
@@ -121,9 +121,9 @@ class ConvertPopulator(val conversion:Conversion=DefaultConversion.Instance) ext
    * 如果params中的id为null，则将该实体的置为null.<br>
    * 否则新生成一个实体，将其id设为params中指定的值。 空字符串按照null处理
    */
-  def populate(entity:Entity[_],entityType: EntityType,params: Map[String, Any]) {
-    for ((attr,v) <- params) {
-      var value=v
+  def populate(entity: Entity[_], entityType: EntityType, params: Map[String, Any]) {
+    for ((attr, v) <- params) {
+      var value = v
       if (value.isInstanceOf[String]) {
         if (Strings.isEmpty(value.asInstanceOf[String])) value = null
         else if (TrimStr) value = (value.asInstanceOf[String]).trim()
@@ -142,7 +142,7 @@ class ConvertPopulator(val conversion:Conversion=DefaultConversion.Instance) ext
           val ot = init(entity, entityType, parentAttr);
           if (null == ot) {
             logger.error("error attr:[" + attr + "] value:[" + value + "]")
-          }else{
+          } else {
             // 属性也是实体类对象
             if (ot._2.isEntityType) {
               val foreignKey = ot._2.asInstanceOf[EntityType].idName
@@ -169,19 +169,19 @@ class ConvertPopulator(val conversion:Conversion=DefaultConversion.Instance) ext
             }
           }
         } catch {
-          case e:Exception => logger.error("error attr:[" + attr + "] value:[" + value + "]", e);
+          case e: Exception => logger.error("error attr:[" + attr + "] value:[" + value + "]", e);
         }
       }
     }
   }
 
-  private def convert(t:Type,attr: String,value:Any):Any = {
+  private def convert(t: Type, attr: String, value: Any): Any = {
     if (value.isInstanceOf[AnyRef] && null == value) null else conversion.convert(value, t.getPropertyType(attr).returnedClass)
   }
 
-  private def copyValue(target:AnyRef,attr:String, value:Any):Any= {
+  private def copyValue(target: AnyRef, attr: String, value: Any): Any = {
     // try {
-     copyProperty(target, attr, value, conversion);
+    copyProperty(target, attr, value, conversion);
     // } catch (Exception e) {
     // logger.error("copy property failure:[class:" + target.getClass().getName() + " attr:" + attr
     // + " value:" + value + "]:", e);

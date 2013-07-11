@@ -24,7 +24,6 @@ import org.beangle.commons.jdbc.dialect.AbstractDialect;
 
 import org.beangle.commons.jdbc.dialect.LimitGrammarBean;
 
-
 class SQLServer2005Dialect extends AbstractDialect("[2005,2008)") {
 
   private val SELECT: String = "select"
@@ -62,7 +61,7 @@ class SQLServer2005Dialect extends AbstractDialect("[2005,2008)") {
 
   protected override def buildLimitGrammar = {
     class SqlServer2005LimitGrammar(pattern: String, offsetPattern: String, bindInReverseOrder: Boolean,
-                                    bindFirst: Boolean, useMax: Boolean) extends LimitGrammarBean(pattern: String, offsetPattern: String, bindInReverseOrder: Boolean,
+      bindFirst: Boolean, useMax: Boolean) extends LimitGrammarBean(pattern: String, offsetPattern: String, bindInReverseOrder: Boolean,
       bindFirst: Boolean, useMax: Boolean) {
       override def limit(querySqlString: String, hasOffset: Boolean) = {
         val sb: StringBuilder = new StringBuilder(querySqlString.trim().toLowerCase())

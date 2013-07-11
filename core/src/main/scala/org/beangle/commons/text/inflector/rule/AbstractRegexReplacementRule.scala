@@ -74,12 +74,12 @@ abstract class AbstractRegexReplacementRule(regex: String) extends Rule {
   private val pattern = Pattern.compile(regex)
 
   /**
-   {@inheritDoc}
+   * {@inheritDoc}
    */
   def applies(word: String): Boolean = pattern.matcher(word).matches()
 
   /**
-   {@inheritDoc}
+   * {@inheritDoc}
    */
   def apply(word: String): String = {
     val matcher = pattern.matcher(word)

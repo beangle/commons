@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.lang
 
-import java.lang.Character.{isLowerCase => isLower, isUpperCase => isUpper}
+import java.lang.Character.{ isLowerCase => isLower, isUpperCase => isUpper }
 import java.lang.Character.toLowerCase
 import org.beangle.commons.collection.Collections
 import scala.collection.mutable
@@ -166,7 +166,7 @@ object Strings {
     var startIndex = host.indexOf(searchStr, 0)
     while (startIndex > -1 && startIndex < host.length) {
       count += 1
-      startIndex = host.indexOf(searchStr, startIndex+searchStr.length)
+      startIndex = host.indexOf(searchStr, startIndex + searchStr.length)
     }
     count
   }
@@ -253,7 +253,7 @@ object Strings {
    */
   def intersectSeq(first: String, second: String, delimiter: String): String = {
     if (isEmpty(first) || isEmpty(second)) return ""
-    val rs = Collections.intersection(split(first, ',').toList,split(second, ',').toList)
+    val rs = Collections.intersection(split(first, ',').toList, split(second, ',').toList)
     val buf = new StringBuilder()
     for (ele <- rs) buf.append(delimiter).append(ele)
     if (buf.length > 0) buf.append(delimiter)
@@ -403,12 +403,12 @@ object Strings {
    */
   def keepSeqUnique(keyString: String): String = {
     val keyList = split(keyString, ",").toList
-    val keys= keyList.toSet
+    val keys = keyList.toSet
     val keyBuf = new StringBuilder()
     val iter = keyList.iterator
     while (iter.hasNext) {
-      val key= iter.next
-      if(!keys(key))keyBuf.append(key)
+      val key = iter.next
+      if (!keys(key)) keyBuf.append(key)
       if (iter.hasNext) keyBuf.append(',')
     }
     keyBuf.toString
@@ -718,7 +718,7 @@ object Strings {
     while (i < len) {
       if (str.charAt(i) == separatorChar) {
         if (matched) {
-          list+=str.substring(start, i)
+          list += str.substring(start, i)
           matched = false
         }
         start = i + 1
@@ -727,7 +727,7 @@ object Strings {
       }
       i += 1
     }
-    if (matched) list+=str.substring(start, i)
+    if (matched) list += str.substring(start, i)
     list.toArray
   }
 
@@ -786,7 +786,7 @@ object Strings {
     while (i < len) {
       if (sepChars.indexOf(str.charAt(i)) >= 0) {
         if (matched) {
-          list+=str.substring(start, i)
+          list += str.substring(start, i)
           matched = false
         }
         start = i + 1
@@ -795,7 +795,7 @@ object Strings {
       }
       i += 1
     }
-    if (matched) list+=str.substring(start, i)
+    if (matched) list += str.substring(start, i)
     list.toArray
   }
 
@@ -1028,7 +1028,7 @@ object Strings {
       }
     }
     if (i == ca.length - 1) {
-      if(isLower(ca(i-1)) && isUpper(ca(i))) build.append(seperator)
+      if (isLower(ca(i - 1)) && isUpper(ca(i))) build.append(seperator)
       build.append(if (lowercase) toLowerCase(ca(i)) else ca(i))
     }
     build.toString

@@ -18,7 +18,6 @@
  */
 package org.beangle.commons.bean
 
-
 /**
  * <p>
  * Disposable interface.

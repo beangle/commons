@@ -18,7 +18,6 @@
  */
 package org.beangle.commons.cache
 
-
 /**
  * Common interface of Cache
  *

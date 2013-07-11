@@ -24,11 +24,11 @@ import org.beangle.commons.entity.dao.Query
 import org.beangle.commons.lang.Assert
 import org.beangle.commons.lang.Strings
 
-object SqlBuilder{
+object SqlBuilder {
   /**
    * sql.
    */
-  def sql(queryStr:String ) :SqlBuilder={
+  def sql(queryStr: String): SqlBuilder = {
     val sqlQuery = new SqlBuilder()
     sqlQuery.statement = queryStr
     sqlQuery
@@ -37,7 +37,7 @@ object SqlBuilder{
 }
 /**
  * sql查询
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
@@ -46,7 +46,7 @@ class SqlBuilder extends AbstractQueryBuilder[Array[Any]] {
   /**
    * genCountStatement.
    */
-  protected def genCountStatement() =  "select count(*) from (" + genQueryStatement(false) + ")"
+  protected def genCountStatement() = "select count(*) from (" + genQueryStatement(false) + ")"
 
-  override  def lang= SqlBuilder.Lang
+  override def lang = SqlBuilder.Lang
 }

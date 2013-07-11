@@ -86,7 +86,7 @@ object IOs {
     val list = new mutable.ListBuffer[String]
     var line = reader.readLine()
     while (line != null) {
-      list+=line
+      list += line
       line = reader.readLine()
     }
     list.toList

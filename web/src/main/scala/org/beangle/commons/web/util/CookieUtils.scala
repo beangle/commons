@@ -96,12 +96,12 @@ object CookieUtils {
    * @param value
    * @param path
    */
-  def addCookie(request: HttpServletRequest, 
-      response: HttpServletResponse, 
-      name: String, 
-      value: String, 
-      path: String, 
-      age: Int) {
+  def addCookie(request: HttpServletRequest,
+    response: HttpServletResponse,
+    name: String,
+    value: String,
+    path: String,
+    age: Int) {
     Log.debug("add cookie[name:{},value={},path={}]", Array(name, value, path))
     var cookie: Cookie = null
     cookie = new Cookie(name, URLEncoder.encode(value, "utf-8"))
@@ -121,11 +121,11 @@ object CookieUtils {
    * @param age
    * @throws Exception
    */
-  def addCookie(request: HttpServletRequest, 
-      response: HttpServletResponse, 
-      name: String, 
-      value: String, 
-      age: Int) {
+  def addCookie(request: HttpServletRequest,
+    response: HttpServletResponse,
+    name: String,
+    value: String,
+    age: Int) {
     var contextPath = request.getContextPath
     if (!contextPath.endsWith("/")) {
       contextPath += "/"

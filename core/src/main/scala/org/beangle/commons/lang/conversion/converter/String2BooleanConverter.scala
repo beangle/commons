@@ -32,10 +32,10 @@ import org.beangle.commons.lang.conversion.Converter
  */
 object String2BooleanConverter extends Converter[String, Boolean] {
 
-  private val trues = Set("true","on","Y","1","yes")
+  private val trues = Set("true", "on", "Y", "1", "yes")
 
   override def apply(input: String): Boolean = {
     if (Strings.isEmpty(input)) return false
-    if (trues.contains(input.toLowerCase())) true else  false
+    if (trues.contains(input.toLowerCase())) true else false
   }
 }

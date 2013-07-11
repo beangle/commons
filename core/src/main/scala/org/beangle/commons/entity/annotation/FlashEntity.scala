@@ -25,8 +25,8 @@ import scala.annotation.StaticAnnotation
  * <p>
  * 例如消息队列处理程序中需要先行持久化的消息，发送完成后再删除；实时监控程序中，监控的各类计数。 这类数据实在程序运行时有意义，一旦程序停止则不需要进行处理，可以进行删除。因此它和生产结果数据
  * 以及日志数据需要分开标记，以便独立处理。
- * 
+ *
  * @author chaostone
  * @version $Id: FlashEntity.scala Jul 1, 2011 8:39:49 AM chaostone $
  */
-class FlashEntity  extends StaticAnnotation
+class FlashEntity extends StaticAnnotation

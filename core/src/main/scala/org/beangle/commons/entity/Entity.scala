@@ -20,22 +20,22 @@ package org.beangle.commons.entity
 
 import org.beangle.commons.entity.util.ValidKey
 
-trait Entity[ID] extends Serializable{
+trait Entity[ID] extends Serializable {
 
   /**
    * Return Identifier
    */
-   def id: ID
+  def id: ID
 
   /**
    * Return true if persisted
    */
- def persisted:Boolean = ValidKey(id)
+  def persisted: Boolean = ValidKey(id)
 
   /**
    * @see java.lang.Object#hashCode()
    */
-  override def hashCode:Int = if(null == id)  629 else id.hashCode()
+  override def hashCode: Int = if (null == id) 629 else id.hashCode()
 
   /**
    * <p>
@@ -43,12 +43,12 @@ trait Entity[ID] extends Serializable{
    * </p>
    * 由于业务对象被CGlib或者javassist增强的原因，这里只提供一般的基于id的比较,不提供基于Class的比较。<br>
    * 如果在存在继承结构， 请重置equals方法。
-   * 
+   *
    * @see java.lang.Object#equals(Object)
    */
-   override def equals(other: Any):Boolean = other match {
-     case that: Entity[_] => (this eq that) || (null != id && null!= that.id && id==that.id)
-     case _ => false
-   }
+  override def equals(other: Any): Boolean = other match {
+    case that: Entity[_] => (this eq that) || (null != id && null != that.id && id == that.id)
+    case _ => false
+  }
 }
 

@@ -22,10 +22,10 @@ import java.lang.reflect.Method
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class BridgeMethodTest extends FunSpec with ShouldMatchers{
+class BridgeMethodTest extends FunSpec with ShouldMatchers {
 
-  describe("Reflection class bridge method"){
-    it ("Find bridge methods") {
+  describe("Reflection class bridge method") {
+    it("Find bridge methods") {
       for (m <- classOf[Dog].getMethods if m.getName == "getAge" && null == m.getReturnType) {
         if (m.getReturnType == classOf[Integer]) m.isBridge else if (m.getReturnType == classOf[Number]) {
           m.isBridge

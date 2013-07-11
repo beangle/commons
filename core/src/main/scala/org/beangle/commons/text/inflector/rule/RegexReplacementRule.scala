@@ -31,7 +31,7 @@ import java.util.regex.Matcher
 class RegexReplacementRule(regex: String, val replacement: String) extends AbstractRegexReplacementRule(regex) {
 
   /**
-   {@inheritDoc}
+   * {@inheritDoc}
    */
   override def replace(matcher: Matcher): String = matcher.replaceFirst(replacement)
 }

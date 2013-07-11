@@ -25,10 +25,10 @@ import org.scalatest.matchers.ShouldMatchers
  * @author chaostone
  * @version $Id: UrlBuilderTest.java Nov 13, 2010 9:39:00 AM chaostone $
  */
-class UrlBuilderTest extends FunSpec with ShouldMatchers{
+class UrlBuilderTest extends FunSpec with ShouldMatchers {
 
-  describe("UrlBuilder"){
-    it("build full url"){
+  describe("UrlBuilder") {
+    it("build full url") {
       val builder = new UrlBuilder("/")
       builder.setScheme("http").setServerName("localhost").setPort(80)
       builder.setRequestURI("/demo/security/user")
@@ -37,7 +37,6 @@ class UrlBuilderTest extends FunSpec with ShouldMatchers{
       builder.setRequestURI(null).setPort(8080).setServletPath("/security")
       builder.buildUrl() should be equals ("http://localhost:8080/security?name=1&fullname=join")
     }
-    
 
     it("build simple url") {
       val builder = new UrlBuilder("/")

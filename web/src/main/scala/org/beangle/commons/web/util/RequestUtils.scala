@@ -79,9 +79,9 @@ object RequestUtils extends Logging {
   }
 
   def getRealPath(servletContext: ServletContext, path: String): String = {
-    val realPath = if (!path.startsWith("/")) servletContext.getRealPath("/"+ path) else  servletContext.getRealPath(path)
+    val realPath = if (!path.startsWith("/")) servletContext.getRealPath("/" + path) else servletContext.getRealPath(path)
     if (realPath == null) {
-      throw new RuntimeException("ServletContext resource [" + path + "] cannot be resolved to absolute file path - " + 
+      throw new RuntimeException("ServletContext resource [" + path + "] cannot be resolved to absolute file path - " +
         "web application archive not expanded?")
     }
     realPath

@@ -23,12 +23,12 @@ import SeqNumStyle._
 object SeqNumStyle {
 
   /**
-   中文数字
+   * 中文数字
    */
   val HANZI = new HanZiSeqStyle()
 
   /**
-   数字
+   * 数字
    */
   val ARABIC = new ArabicSeqStyle()
 }

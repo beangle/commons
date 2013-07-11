@@ -22,13 +22,13 @@ import org.beangle.commons.lang.testbean.TestBean
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class PropertyUtilsTest extends FunSpec with ShouldMatchers{
+class PropertyUtilsTest extends FunSpec with ShouldMatchers {
 
-  describe("PropertyUtils"){
-    it("Get or Set property"){
+  describe("PropertyUtils") {
+    it("Get or Set property") {
       val bean = new TestBean
       PropertyUtils.setProperty(bean, "intValue", 2)
-      bean.intValue should  be (2)
+      bean.intValue should be(2)
     }
   }
 }

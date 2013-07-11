@@ -22,9 +22,9 @@ import org.beangle.commons.entity.Entity
 
 /**
  * 实体删除事件
- * 
+ *
  * @author chaostone
  * @version $Id: EntityRemovalEvent.scala Mar 3, 2012 9:01:44 PM chaostone $
  */
-class EntityRemovalEvent[T <: Entity[_]](clazz:Class[T],source:List[T]) extends AbstractEntityEvent[T](clazz,source) {
+class EntityRemovalEvent[T <: Entity[_]](clazz: Class[T], source: List[T]) extends AbstractEntityEvent[T](clazz, source) {
 }

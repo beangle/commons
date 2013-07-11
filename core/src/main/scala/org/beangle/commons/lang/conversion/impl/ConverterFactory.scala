@@ -38,7 +38,7 @@ abstract class ConverterFactory[S, R] extends GenericConverter {
   /**
    * Return convert from S to T
    */
-  def getConverter[T <: R](targetType: Class[T]):Option[Converter[S, T]] = {
+  def getConverter[T <: R](targetType: Class[T]): Option[Converter[S, T]] = {
     converters.get(targetType).asInstanceOf[Option[Converter[S, T]]]
   }
 
@@ -63,7 +63,7 @@ abstract class ConverterFactory[S, R] extends GenericConverter {
   }
 
   override def convert(input: Any, sourceType: Class[_], targetType: Class[_]): Any = {
-    getConverter(targetType.asInstanceOf[Class[R]]) match{
+    getConverter(targetType.asInstanceOf[Class[R]]) match {
       case Some(converter) => converter.apply(input.asInstanceOf[S])
       case _ => Objects.default(targetType)
     }

@@ -26,10 +26,10 @@ import org.beangle.commons.lang.testbean.TestEnum
  * @author chaostone
  * @since 3.0.0
  */
-class EnumConverterTest   extends FunSpec with ShouldMatchers{
+class EnumConverterTest extends FunSpec with ShouldMatchers {
 
-  describe("EnumConverter"){
-    it("Convert Enum"){
+  describe("EnumConverter") {
+    it("Convert Enum") {
       DefaultConversion.Instance.convert("Private", classOf[TestEnum.Val])
     }
   }

@@ -25,9 +25,9 @@ import org.beangle.commons.entity.Entity
 
 @MappedSuperclass
 @SerialVersionUID(-7530111699332363124L)
-trait NumIdBean[ID] extends Entity[ID]{
+trait NumIdBean[ID] extends Entity[ID] {
 
   @Id
   @GeneratedValue(generator = "table_sequence")
-  var id:ID = _
+  var id: ID = _
 }

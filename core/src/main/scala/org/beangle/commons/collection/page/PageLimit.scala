@@ -18,8 +18,8 @@
  */
 package org.beangle.commons.collection.page
 
-object PageLimit{
-  def apply(pageNo:Int,pageSize:Int) = new PageLimit(pageNo,pageSize)
+object PageLimit {
+  def apply(pageNo: Int, pageSize: Int) = new PageLimit(pageNo, pageSize)
 }
 /**
  * 查询分页限制
@@ -27,7 +27,7 @@ object PageLimit{
  * @author chaostone
  * @version $Id: $
  */
-class PageLimit(val pageNo: Int,val pageSize: Int) extends Limit {
+class PageLimit(val pageNo: Int, val pageSize: Int) extends Limit {
 
   /**
    * <p>

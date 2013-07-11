@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class BatchReplaceMainTest extends FunSpec with ShouldMatchers{
-  describe("BatchReplace"){
-    it("Test batch replace expression"){
+class BatchReplaceMainTest extends FunSpec with ShouldMatchers {
+  describe("BatchReplace") {
+    it("Test batch replace expression") {
       var logger: Logger = LoggerFactory.getLogger(classOf[BatchReplaceMainTest])
       val clause = "<#include \"/template/head.ftl\"/>"
       val pattern = Pattern.compile("<#(.*)/>")

@@ -18,17 +18,16 @@
  */
 package org.beangle.commons.entity.event
 
-
 import org.beangle.commons.entity.Entity;
 import org.beangle.commons.event.Event;
 
 /**
  * 实体操作相关事件
- * 
+ *
  * @author chaostone
  * @version $Id: AbstractEntityEvent.scala Mar 3, 2012 9:05:40 PM chaostone $
  */
-abstract class AbstractEntityEvent[T <: Entity[_]](clazz:Class[T],source:List[T]) extends Event(source) {
+abstract class AbstractEntityEvent[T <: Entity[_]](clazz: Class[T], source: List[T]) extends Event(source) {
 
-    def  entities:List[T] = source
+  def entities: List[T] = source
 }

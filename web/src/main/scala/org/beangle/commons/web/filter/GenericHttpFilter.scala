@@ -106,8 +106,8 @@ abstract class GenericHttpFilter extends Filter with Initializing with Logging {
       missingProps.remove(property)
     }
     if (missingProps.size > 0) {
-      throw new ServletException("Initialization from FilterConfig for filter '" + config.getFilterName + 
-        "' failed; the following required properties were missing: " + 
+      throw new ServletException("Initialization from FilterConfig for filter '" + config.getFilterName +
+        "' failed; the following required properties were missing: " +
         Strings.join(missingProps, ", "))
     }
   }

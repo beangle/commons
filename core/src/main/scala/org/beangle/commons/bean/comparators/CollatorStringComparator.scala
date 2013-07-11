@@ -28,7 +28,7 @@ import java.text.Collator
  * @author chaostone
  * @version $Id: $
  */
-class CollatorStringComparator(val asc: Boolean, val collator: Collator=Collator.getInstance) extends StringComparator {
+class CollatorStringComparator(val asc: Boolean, val collator: Collator = Collator.getInstance) extends StringComparator {
   /**
    * <p>
    * compare.

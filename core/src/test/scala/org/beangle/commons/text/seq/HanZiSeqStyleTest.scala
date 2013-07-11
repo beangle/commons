@@ -20,14 +20,14 @@ package org.beangle.commons.text.seq
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class HanZiSeqStyleTest extends FunSpec with ShouldMatchers{
+class HanZiSeqStyleTest extends FunSpec with ShouldMatchers {
 
-  describe("HanZiSeqStyle"){
-    it("Build HanZi Sequence"){
+  describe("HanZiSeqStyle") {
+    it("Build HanZi Sequence") {
       val style = new HanZiSeqStyle
-      style.build(211) should equal ("二百一十一")
-      style.build(201) should equal ("二百零一")
-      style.build(3011) should equal ("三千零十一")
+      style.build(211) should equal("二百一十一")
+      style.build(201) should equal("二百零一")
+      style.build(3011) should equal("三千零十一")
     }
   }
 }

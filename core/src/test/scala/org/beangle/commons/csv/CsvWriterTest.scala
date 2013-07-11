@@ -28,7 +28,7 @@ import org.beangle.commons.lang.SystemInfo
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class CsvWriterTest extends FunSpec with ShouldMatchers{
+class CsvWriterTest extends FunSpec with ShouldMatchers {
 
   private def invokeWriter(args: Array[String]): String = {
     val sw = new StringWriter()
@@ -52,42 +52,42 @@ class CsvWriterTest extends FunSpec with ShouldMatchers{
     val csvw = new CsvWriter(sw, new CsvFormat.Builder().escape('\'').build())
     csvw.write(null.asInstanceOf[Array[String]])
     csvw.close()
-    assert(0== sw.toString.length)
+    assert(0 == sw.toString.length)
   }
 
   /**
    * Tests parsing individual lines.
    */
-  describe("CsvWriter"){
+  describe("CsvWriter") {
     it("TestParseLine") {
       invokeWriter(Array("a", "b", "c")) should equal("'a','b','c'\n")
-      invokeWriter(Array("a", "b,b,b", "c")) should equal ("'a','b,b,b','c'\n")
-      invokeWriter(Array[String]()) should equal ("\n")
-      invokeWriter(Array("This is a \n multiline entry", "so is \n this")) should equal ("'This is a \n multiline entry','so is \n this'\n")
-      invokeWriter(Array("This is a \" multiline entry", "so is \n this")) should equal ("'This is a \" multiline entry','so is \n this'\n")
+      invokeWriter(Array("a", "b,b,b", "c")) should equal("'a','b,b,b','c'\n")
+      invokeWriter(Array[String]()) should equal("\n")
+      invokeWriter(Array("This is a \n multiline entry", "so is \n this")) should equal("'This is a \n multiline entry','so is \n this'\n")
+      invokeWriter(Array("This is a \" multiline entry", "so is \n this")) should equal("'This is a \" multiline entry','so is \n this'\n")
     }
 
     it("parseLineWithBothEscapeAndQuoteChar") {
-      invokeWriter( Array("This is a 'multiline' entry", "so is \n this")) should equal("'This is a \\'multiline\\' entry','so is \n this'\n")
+      invokeWriter(Array("This is a 'multiline' entry", "so is \n this")) should equal("'This is a \\'multiline\\' entry','so is \n this'\n")
     }
 
     /**
-      * Tests parsing individual lines.
-      */
+     * Tests parsing individual lines.
+     */
     it("testParseLineWithNoEscapeChar") {
-      invokeNoEscapeWriter( Array("a", "b", "c")) should equal ("'a','b','c'\n")
-      invokeNoEscapeWriter(Array("a", "b,b,b", "c")) should equal ("'a','b,b,b','c'\n")
+      invokeNoEscapeWriter(Array("a", "b", "c")) should equal("'a','b','c'\n")
+      invokeNoEscapeWriter(Array("a", "b,b,b", "c")) should equal("'a','b,b,b','c'\n")
       invokeNoEscapeWriter(Array[String]()) should equal("\n")
-      invokeNoEscapeWriter(Array("This is a \n multiline entry", "so is \n this")) should equal ("'This is a \n multiline entry','so is \n this'\n")
+      invokeNoEscapeWriter(Array("This is a \n multiline entry", "so is \n this")) should equal("'This is a \n multiline entry','so is \n this'\n")
     }
 
     it("parseLineWithNoEscapeCharAndQuotes") {
-      invokeNoEscapeWriter(Array("This is a \" 'multiline' entry", "so is \n this")) should equal ("'This is a \" 'multiline' entry','so is \n this'\n")
+      invokeNoEscapeWriter(Array("This is a \" 'multiline' entry", "so is \n this")) should equal("'This is a \" 'multiline' entry','so is \n this'\n")
     }
 
     /**
-      * Test parsing from to a list.
-      */
+     * Test parsing from to a list.
+     */
     it("testParseAll") {
       val elements = new collection.mutable.ListBuffer[Array[String]]()
       val line1 = "Name#Phone#Email".split("#")
@@ -102,12 +102,12 @@ class CsvWriterTest extends FunSpec with ShouldMatchers{
       csvw.close()
       val result = sw.toString
       val lines = result.split("\n")
-      lines.length should be (3)
+      lines.length should be(3)
     }
 
     /**
-      * Tests the option of having omitting quotes in the output stream.
-      */
+     * Tests the option of having omitting quotes in the output stream.
+     */
     it("testNoQuoteChars") {
       val line = Array("Foo", "Bar", "Baz")
       val sw = new StringWriter()
@@ -116,13 +116,13 @@ class CsvWriterTest extends FunSpec with ShouldMatchers{
       csvw.write(line)
       val result = sw.toString
       csvw.close()
-      result should be ("Foo,Bar,Baz\n")
+      result should be("Foo,Bar,Baz\n")
     }
 
     /**
-      * Tests the option of having omitting quotes in the output stream.
-      *
-      */
+     * Tests the option of having omitting quotes in the output stream.
+     *
+     */
     it("testNoQuoteCharsAndNoEscapeChars") {
       val line = Array("Foo", "Bar", "Baz")
       val sw = new StringWriter()
@@ -136,9 +136,9 @@ class CsvWriterTest extends FunSpec with ShouldMatchers{
     }
 
     /**
-      * Test null values.
-      *
-      */
+     * Test null values.
+     *
+     */
     it("testNullValues") {
       val line = Array("Foo", null, "Bar", "baz")
       val sw = new StringWriter()

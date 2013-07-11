@@ -30,15 +30,13 @@ import scala.collection.JavaConversions._
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-
-class DefaultNotifictionTaskTest extends FunSpec with ShouldMatchers{
+class DefaultNotifictionTaskTest extends FunSpec with ShouldMatchers {
   private var greenMail = new GreenMail(ServerSetupTest.ALL)
   greenMail.start()
   greenMail.setUser("test1@localhost", "user1", "password")
   greenMail.setUser("test2@localhost", "user2", "password")
-  
 
-  describe("JavaMailSender"){
+  describe("JavaMailSender") {
     it("testMail") {
       try {
         var mailSender = new JavaMailSender()
@@ -55,13 +53,12 @@ class DefaultNotifictionTaskTest extends FunSpec with ShouldMatchers{
         task.getMessageQueue().addMessage(mmc)
         task.send()
         var msgs = greenMail.getReceivedMessages()
-        msgs.length should be (1)
+        msgs.length should be(1)
         greenMail.stop()
       } catch {
         case e: MessagingException => Throwables.propagate(e)
       }
     }
   }
-
 
 }

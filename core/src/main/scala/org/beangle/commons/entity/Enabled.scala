@@ -20,7 +20,7 @@ package org.beangle.commons.entity
 
 /**
  * 能够启用和禁用的实体
- * 
+ *
  * @author chaostone
  * @version $Id: Jun 25, 2011 5:05:07 PM chaostone $
  */
@@ -28,9 +28,9 @@ trait Enabled {
 
   /**
    * 查询是否启用
-   * 
+   *
    * @return 是否启用
    */
-  def enabled:Boolean;
+  def enabled: Boolean;
 
 }

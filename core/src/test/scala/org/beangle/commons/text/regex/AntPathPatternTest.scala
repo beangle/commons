@@ -22,11 +22,11 @@ import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.beangle.commons.text.regex.AntPathPattern._
 
-class AntPathPatternTest extends FunSpec with ShouldMatchers{
+class AntPathPatternTest extends FunSpec with ShouldMatchers {
 
-  describe("AntPathPattern"){
-    it("Match ant pattern expression"){
-      matches("com/t?st.jsp", "com/test.jsp") should be (true)
+  describe("AntPathPattern") {
+    it("Match ant pattern expression") {
+      matches("com/t?st.jsp", "com/test.jsp") should be(true)
       matches("com/*.jsp", "com/test.jsp")
       matches("com/*.jsp", "com/dir/test.jsp")
       matches("com/**/test.jsp", "com/dir1/dir2/test.jsp")

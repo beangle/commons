@@ -24,34 +24,34 @@ import org.beangle.commons.lang.Strings._
 import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.entity.dao.Query
 import org.beangle.commons.jpa.util.Jpas
-object OqlBuilder{
+object OqlBuilder {
   val Lang = Query.Lang("Oql")
   /**
-    * hql.
-    * 
-    * @param hql a {@link java.lang.String} object.
-    * @param [E] a E object.
-    * @return a {@link org.beangle.commons.dao.query.builder.OqlBuilder} object.
-    */
-  def hql[E](hql:String):OqlBuilder[E]= {
+   * hql.
+   *
+   * @param hql a {@link java.lang.String} object.
+   * @param [E] a E object.
+   * @return a {@link org.beangle.commons.dao.query.builder.OqlBuilder} object.
+   */
+  def hql[E](hql: String): OqlBuilder[E] = {
     val query = new OqlBuilder[E]()
     query.statement = hql
     query
   }
 
   /**
-    * from
-    */
-  def from[E](from:String):OqlBuilder[E] = {
+   * from
+   */
+  def from[E](from: String): OqlBuilder[E] = {
     val query = new OqlBuilder[E]()
     query.newFrom(from)
     query
   }
 
   /**
-    * from
-    */
-  def from[E](entityName: String ,alias: String): OqlBuilder[E] = {
+   * from
+   */
+  def from[E](entityName: String, alias: String): OqlBuilder[E] = {
     val query = new OqlBuilder[E]()
     query.entityClass = ClassLoaders.loadClass(entityName).asInstanceOf[Class[E]]
     query.alias = alias
@@ -61,27 +61,27 @@ object OqlBuilder{
   }
 
   /**
-    * from.
-    * 
-    * @param entityClass a {@link java.lang.Class} object.
-    * @param [E] a E object.
-    * @return a {@link org.beangle.commons.jpa.dao.OqlBuilder} object.
-    */
-  def from[E](entityClass:Class[E]): OqlBuilder[E]= {
-    from(entityClass,uncapitalize(substringAfterLast(Jpas.findEntityName(entityClass), ".")))
+   * from.
+   *
+   * @param entityClass a {@link java.lang.Class} object.
+   * @param [E] a E object.
+   * @return a {@link org.beangle.commons.jpa.dao.OqlBuilder} object.
+   */
+  def from[E](entityClass: Class[E]): OqlBuilder[E] = {
+    from(entityClass, uncapitalize(substringAfterLast(Jpas.findEntityName(entityClass), ".")))
   }
 
   /**
-    * [p]
-    * from.
-    * [/p]
-    * 
-    * @param entityClass a {@link java.lang.Class} object.
-    * @param alias a {@link java.lang.String} object.
-    * @param [E] a E object.
-    * @return a {@link org.beangle.commons.jpa.dao.OqlBuilder} object.
-    */
-  def from[E](entityClass:Class[E], alias: String): OqlBuilder[E]= {
+   * [p]
+   * from.
+   * [/p]
+   *
+   * @param entityClass a {@link java.lang.Class} object.
+   * @param alias a {@link java.lang.String} object.
+   * @param [E] a E object.
+   * @return a {@link org.beangle.commons.jpa.dao.OqlBuilder} object.
+   */
+  def from[E](entityClass: Class[E], alias: String): OqlBuilder[E] = {
     val query = new OqlBuilder[E]()
     query.entityClass = entityClass
     query.alias = alias
@@ -93,21 +93,21 @@ object OqlBuilder{
 }
 /**
  * 实体类查询 Object Query Language Builder
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
 class OqlBuilder[T] private () extends AbstractQueryBuilder[T] {
 
   /** 查询实体类 */
-  var entityClass:Class[T]=_
+  var entityClass: Class[T] = _
 
   /**
    * 形成计数查询语句，如果不能形成，则返回""
-   * 
+   *
    * @return a {@link java.lang.String} object.
    */
-  protected def  genCountStatement():String= {
+  protected def genCountStatement(): String = {
     val countString = new StringBuilder("select count(*) ")
     // 原始查询语句
     val genQueryStr = genQueryStatement(false)
@@ -139,11 +139,11 @@ class OqlBuilder[T] private () extends AbstractQueryBuilder[T] {
 
   /**
    * Find index of from
-   * 
+   *
    * @param query
    * @return -1 or from index
    */
-  private def findIndexOfFrom(query:String):Int= {
+  private def findIndexOfFrom(query: String): Int = {
     if (query.startsWith("from")) return 0
     var fromIdx = query.indexOf(" from ")
     if (-1 == fromIdx) return -1
@@ -152,14 +152,14 @@ class OqlBuilder[T] private () extends AbstractQueryBuilder[T] {
       var leftCnt = 1
       var i = first + 1
       while (leftCnt != 0 && i < query.length) {
-        if (query.charAt(i) == '(') leftCnt+=1
-        else if (query.charAt(i) == ')') leftCnt-=1
-        i+=1
+        if (query.charAt(i) == '(') leftCnt += 1
+        else if (query.charAt(i) == ')') leftCnt -= 1
+        i += 1
       }
       if (leftCnt > 0) return -1
       else {
         fromIdx = query.indexOf(" from ", i)
-        return if(fromIdx == -1)  -1 else fromIdx + 1
+        return if (fromIdx == -1) -1 else fromIdx + 1
       }
     } else {
       return fromIdx + 1
@@ -169,10 +169,10 @@ class OqlBuilder[T] private () extends AbstractQueryBuilder[T] {
   /**
    * forEntity.
    */
-  def forEntity(entityClass:Class[T] ): this.type= {
+  def forEntity(entityClass: Class[T]): this.type = {
     this.entityClass = entityClass
     this
   }
 
-  override def lang= OqlBuilder.Lang
+  override def lang = OqlBuilder.Lang
 }

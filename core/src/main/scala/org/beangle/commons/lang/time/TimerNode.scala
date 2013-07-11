@@ -28,7 +28,7 @@ import scala.collection.mutable
 @SerialVersionUID(-6180672043920208784L)
 class TimerNode(val resource: String, var startTime: Long) extends Serializable {
 
-  var children= new mutable.ListBuffer[TimerNode]
+  var children = new mutable.ListBuffer[TimerNode]
 
   var totalTime: Long = _
 

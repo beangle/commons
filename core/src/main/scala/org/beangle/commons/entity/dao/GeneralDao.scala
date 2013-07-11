@@ -20,85 +20,85 @@ package org.beangle.commons.entity.dao
 
 /**
  * dao 查询辅助类
- * 
+ *
  * @author chaostone
  */
 trait GeneralDao {
   /**
    * 查询指定id的对象
-   * 
+   *
    * @param clazz 类型
    * @param id 唯一标识
    * @return null
    */
-  def get[T,ID](clazz:Class[T], id:ID):T
+  def get[T, ID](clazz: Class[T], id: ID): T
 
   /**
    * find T by id.
    */
-  def find[T,ID](clazz:Class[T],id:ID):Option[T]
+  def find[T, ID](clazz: Class[T], id: ID): Option[T]
 
   /**
    * search T by id.
    */
-  def find[T,ID](clazz:Class[T],first:ID,ids:ID*):  List[T]
+  def find[T, ID](clazz: Class[T], first: ID, ids: ID*): List[T]
 
   /**
    * save or update entities
    */
-  def saveOrUpdate[T](first:T,entities:T*)
+  def saveOrUpdate[T](first: T, entities: T*)
 
   /**
    * save or update entities
    */
-  def saveOrUpdate[T](entities:collection.Seq[T])
+  def saveOrUpdate[T](entities: collection.Seq[T])
 
   /**
    * remove entities.
    */
-  def remove[T](entities:collection.Seq[T])
+  def remove[T](entities: collection.Seq[T])
 
   /**
    * remove entities.
    */
-  def remove[T](first:T,entities:T*)
+  def remove[T](first: T, entities: T*)
 
   /**
    * remove entities by id
    */
-  def remove[T,ID](clazz:Class[T],id:ID,ids:ID*)
+  def remove[T, ID](clazz: Class[T], id: ID, ids: ID*)
 
-  def search[T](query:Query[T]):List[T]
+  def search[T](query: Query[T]): List[T]
 
   /**
    * 在同一个session保存、删除
    */
-  def execute(opts:Operation*)
+  def execute(opts: Operation*)
 
   /**
    * 执行一个操作构建者提供的一系列操作
-   * 
+   *
    * @param builder
    */
-  def execute(builder:Operation.Builder)
+  def execute(builder: Operation.Builder)
 
   // 容器相关
-  def evict(entity:AnyRef)
+  def evict(entity: AnyRef)
 
   /**
    * Initialize entity whenever session close or open
-   * 
+   *
    * @param <T>
    * @param entity
    */
-  def initialize[T](entity:T):T
+  def initialize[T](entity: T): T
 
-  def refresh[T](entity:T):T
+  def refresh[T](entity: T): T
 
-  def count(entityClass:Class[_], keyName:String,value:Any):Long
+  def count(entityClass: Class[_], keyName: String, value: Any): Long
 
-  def exists(entityClass:Class[_],attr:String,value:Any):Boolean
+  def exists(entityClass: Class[_], attr: String, value: Any): Boolean
 
-  def duplicate(entityClass:Class[_],id:Any, params: Map[String, Any]):Boolean
+  def duplicate(entityClass: Class[_], id: Any, params: Map[String, Any]): Boolean
 
 }

@@ -24,64 +24,64 @@ import org.beangle.commons.collection.page._
  * 基于查询的分页。<br>
  * 当使用或导出大批量数据时，使用者仍以List的方式进行迭代。<br>
  * 该实现则是内部采用分页方式。
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
-abstract class AbstractQueryPage[T](val query:LimitQuery[T]) extends Page[T] {
+abstract class AbstractQueryPage[T](val query: LimitQuery[T]) extends Page[T] {
 
   var page: Page[T] = _
 
-  var pageNo = if(null!=query.limit) query.limit.pageNo-1 else 0
+  var pageNo = if (null != query.limit) query.limit.pageNo - 1 else 0
 
   var maxPageNo = 0
 
-  if(null==query.limit) query.limit(PageLimit(Page.DefaultPageNo,Page.DefaultPageSize))
+  if (null == query.limit) query.limit(PageLimit(Page.DefaultPageNo, Page.DefaultPageSize))
 
   /**
    * 按照单个分页数据设置.
-   * 
+   *
    * @param page a {@link org.beangle.commons.collection.page.SinglePage} object.
    */
-  protected def updatePage(page:SinglePage[T]) {
-    this.page=page
+  protected def updatePage(page: SinglePage[T]) {
+    this.page = page
     this.pageNo = page.pageNo
     this.maxPageNo = page.maxPageNo
   }
 
-  def next():Page[T]=moveTo(pageNo + 1)
+  def next(): Page[T] = moveTo(pageNo + 1)
 
   def previous(): Page[T] = moveTo(pageNo - 1)
 
-  def hasNext :Boolean=maxPageNo > pageNo
+  def hasNext: Boolean = maxPageNo > pageNo
 
-  def hasPrevious:Boolean = pageNo > 1
+  def hasPrevious: Boolean = pageNo > 1
 
-  def pageSize:Int= query.limit.pageSize
+  def pageSize: Int = query.limit.pageSize
 
-  def total:Int = page.total
+  def total: Int = page.total
 
   def items = page.items
 
   def length = page.length
 
   def apply(index: Int): T = page(index)
-  
-  override def iterator:Iterator[T]=new PageIterator[T](this)
+
+  override def iterator: Iterator[T] = new PageIterator[T](this)
 
 }
 
-class PageIterator[T](val queryPage:AbstractQueryPage[T] ) extends Iterator[T] {
+class PageIterator[T](val queryPage: AbstractQueryPage[T]) extends Iterator[T] {
 
-  private var dataIndex:Int=0
+  private var dataIndex: Int = 0
 
-  private var innerIter:Iterator[T]=_
+  private var innerIter: Iterator[T] = _
 
-  def hasNext:Boolean=(dataIndex < queryPage.page.items.size) || queryPage.hasNext
+  def hasNext: Boolean = (dataIndex < queryPage.page.items.size) || queryPage.hasNext
 
-  def next():T= {
+  def next(): T = {
     if (dataIndex < queryPage.page.size) {
-      dataIndex+=1
+      dataIndex += 1
       innerIter.next
     } else {
       queryPage.next()

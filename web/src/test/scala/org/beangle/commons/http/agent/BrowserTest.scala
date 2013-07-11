@@ -21,7 +21,7 @@ package org.beangle.commons.http.agent
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class BrowserTest  extends FunSpec with ShouldMatchers {
+class BrowserTest extends FunSpec with ShouldMatchers {
 
   val firefox3 = "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.14) Gecko/2009090216 Ubuntu/9.04 (jaunty) Firefox/3.0.14"
 
@@ -41,7 +41,7 @@ class BrowserTest  extends FunSpec with ShouldMatchers {
 
   val validator = Array("Total Validator")
 
-  describe("Browser"){
+  describe("Browser") {
     it("Parser usage string") {
       var browser = Browser.parse(firefox3)
       browser.version should equal("3.0.14")
@@ -54,19 +54,19 @@ class BrowserTest  extends FunSpec with ShouldMatchers {
       browser.version should equal("")
       browser.category should equal(Browsers.Firefox)
       browser = Browser.parse(ie(0))
-      browser.version  should equal("6.0")
+      browser.version should equal("6.0")
       browser.category should equal(Browsers.IE)
       browser = Browser.parse(chrome(0))
-      browser.version  should equal("5.0.310.0")
+      browser.version should equal("5.0.310.0")
       browser.category should equal(Browsers.Chrome)
-      Browser.parse(opera(0)).version  should equal("11.10")
-      Browser.parse(opera(1)).version  should equal("10.63")
-      Browser.parse(opera(2)).version  should equal("12.02")
+      Browser.parse(opera(0)).version should equal("11.10")
+      Browser.parse(opera(1)).version should equal("10.63")
+      Browser.parse(opera(2)).version should equal("12.02")
       browser = Browser.parse(validator(0))
-      browser.version should be (null)
+      browser.version should be(null)
       browser.category should equal(Browsers.Unknown)
       browser = Browser.parse(maxthon(0))
-      browser.category  should equal(Browsers.Maxthon)
+      browser.category should equal(Browsers.Maxthon)
       browser = Browser.parse(sogo(0))
       browser.category should equal(Browsers.Sogo)
       browser = Browser.parse(theworld(0))

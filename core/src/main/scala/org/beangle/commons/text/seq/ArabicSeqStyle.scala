@@ -29,7 +29,7 @@ package org.beangle.commons.text.seq
 class ArabicSeqStyle extends SeqNumStyle {
 
   /**
-   {@inheritDoc}
+   * {@inheritDoc}
    */
   def build(seq: Int): String = String.valueOf(seq)
 }

@@ -24,11 +24,11 @@ import scala.collection.JavaConversions._
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class DefaultMailNotifierTest  extends FunSpec with ShouldMatchers{
+class DefaultMailNotifierTest extends FunSpec with ShouldMatchers {
 
   private var online: Boolean = false;
 
-  describe("JavaMailSender"){
+  describe("JavaMailSender") {
     it("testGmail") {
       var mailSender = new JavaMailSender();
       mailSender.setHost("smtp.gmail.com");

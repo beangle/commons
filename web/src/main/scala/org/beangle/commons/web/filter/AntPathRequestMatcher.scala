@@ -30,7 +30,7 @@ import org.beangle.commons.text.regex.AntPathPattern
  *
  * @see AntPathMatcher
  */
-class AntPathRequestMatcher(val pattern: AntPathPattern,val httpMethod: String) extends RequestMatcher {
+class AntPathRequestMatcher(val pattern: AntPathPattern, val httpMethod: String) extends RequestMatcher {
 
   /**
    * Creates a matcher with the specific pattern which will match all HTTP
@@ -39,8 +39,8 @@ class AntPathRequestMatcher(val pattern: AntPathPattern,val httpMethod: String) 
    * @param pattern
    *          the ant pattern to use for matching
    */
-  def this(patternStr: String,httpMethod:String=null) {
-    this( new AntPathPattern(patternStr),  httpMethod)
+  def this(patternStr: String, httpMethod: String = null) {
+    this(new AntPathPattern(patternStr), httpMethod)
   }
 
   /**

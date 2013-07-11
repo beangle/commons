@@ -18,13 +18,13 @@
  */
 package org.beangle.commons.entity.dao
 
-object Query{
-  case class Lang(val lang:String)
+object Query {
+  case class Lang(val lang: String)
 }
 import Query._
 /**
  * 数据查询接口
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
@@ -33,29 +33,29 @@ trait Query[T] {
   /**
    * Returns query statement.
    */
-  def statement:String
+  def statement: String
 
   /**
    * getParams.
    */
-  def params:Map[String, Any]
+  def params: Map[String, Any]
 
   /**
    * <p>
    * isCacheable.
    * </p>
-   * 
+   *
    * @return a boolean.
    */
-  def cacheable:Boolean
+  def cacheable: Boolean
 
   /**
    * <p>
    * getLang.
    * </p>
-   * 
+   *
    * @return a {@link org.beangle.commons.dao.query.Lang} object.
    */
-  def lang:Lang
+  def lang: Lang
 }
 

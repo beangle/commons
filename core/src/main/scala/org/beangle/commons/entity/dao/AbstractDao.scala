@@ -20,57 +20,56 @@ package org.beangle.commons.entity.dao
 
 import org.beangle.commons.entity.Entity
 
-abstract class AbstractDao[T <: Entity[ID], ID](val entityClass:Class[T],val generalDao:GeneralDao) extends Dao[T, ID] {
+abstract class AbstractDao[T <: Entity[ID], ID](val entityClass: Class[T], val generalDao: GeneralDao) extends Dao[T, ID] {
 
   /**
    * get T by id.
    */
-  def get(id:ID):T = generalDao.get(entityClass, id)
+  def get(id: ID): T = generalDao.get(entityClass, id)
 
   /**
    * search T by id.
    */
-  def find(id:ID): Option[T] = generalDao.find(entityClass, id)
- 
+  def find(id: ID): Option[T] = generalDao.find(entityClass, id)
+
   /**
    * search T by id.
    */
-  def find(first:ID,ids:ID*): List[T] = generalDao.find(entityClass, first,ids:_*)
+  def find(first: ID, ids: ID*): List[T] = generalDao.find(entityClass, first, ids: _*)
 
   /**
    * save or update entities
    */
-  def saveOrUpdate(first:T,entities:T*){
-    generalDao.saveOrUpdate(first,entities)
+  def saveOrUpdate(first: T, entities: T*) {
+    generalDao.saveOrUpdate(first, entities)
   }
 
   /**
    * save or update entities
    */
-  def saveOrUpdate(entities:collection.Seq[T]){
+  def saveOrUpdate(entities: collection.Seq[T]) {
     generalDao.saveOrUpdate(entities)
   }
 
   /**
    * remove entities.
    */
-  def remove(entities:collection.Seq[T]){
+  def remove(entities: collection.Seq[T]) {
     generalDao.saveOrUpdate(entities)
   }
 
   /**
    * remove entities.
    */
-  def remove(first:T,entities:T*){
-    generalDao.remove(first,entities)
+  def remove(first: T, entities: T*) {
+    generalDao.remove(first, entities)
   }
 
   /**
    * remove entities by id
    */
-  def remove(id:ID,ids:ID*){
-    generalDao.remove(entityClass,id,ids)
+  def remove(id: ID, ids: ID*) {
+    generalDao.remove(entityClass, id, ids)
   }
-
 
 }

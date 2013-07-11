@@ -26,16 +26,16 @@ import org.beangle.commons.collection.page.SinglePage
  * <p>
  * QueryPage class.
  * </p>
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
-class QueryPage[T](query:LimitQuery[T],val generalDao:GeneralDao) extends AbstractQueryPage[T](query){
+class QueryPage[T](query: LimitQuery[T], val generalDao: GeneralDao) extends AbstractQueryPage[T](query) {
 
-   next()
+  next()
 
-  def moveTo(pageNo:Int): Page[T]= {
-    query.limit(PageLimit(pageNo,query.limit.pageSize))
+  def moveTo(pageNo: Int): Page[T] = {
+    query.limit(PageLimit(pageNo, query.limit.pageSize))
     updatePage(generalDao.search(query).asInstanceOf[SinglePage[T]])
     this
   }

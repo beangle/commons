@@ -23,21 +23,21 @@ import org.beangle.commons.lang.ClassLoaders
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class UrlConfigProviderTest extends FunSpec with ShouldMatchers{
+class UrlConfigProviderTest extends FunSpec with ShouldMatchers {
 
-  describe("UrlConfigProvider"){
+  describe("UrlConfigProvider") {
     it("Get Property") {
       val config = new MultiProviderPropertyConfig
       val provider = new UrlPropertyConfigProvider
       val resources = new Resources
       resources.setGlobal(ClassLoaders.getResource("system-default.properties", getClass))
       resources.setUser(ClassLoaders.getResource("system.properties", getClass))
-      provider.resources =resources
+      provider.resources = resources
       val properties = provider.getConfig
       config.add(properties)
-      config.get(classOf[Integer], "testInt") should be (Some(1))
-      config.get("system.vendor") should equal (Some("beangle.org"))
-      config.get("system.url") should equal (Some("http://localhost"))
+      config.get(classOf[Integer], "testInt") should be(Some(1))
+      config.get("system.vendor") should equal(Some("beangle.org"))
+      config.get("system.url") should equal(Some("http://localhost"))
     }
   }
 }

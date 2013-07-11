@@ -23,10 +23,10 @@ import org.scalatest.matchers.ShouldMatchers
 import org.beangle.commons.lang.conversion.Conversion
 import org.beangle.commons.lang.conversion.impl.DefaultConversion
 
-class DefaultConverterTest  extends FunSpec with ShouldMatchers{
+class DefaultConverterTest extends FunSpec with ShouldMatchers {
 
-  describe("DefaultConversion"){
-    it("Convert null"){
+  describe("DefaultConversion") {
+    it("Convert null") {
       val conversion = DefaultConversion.Instance
       conversion.convert("", classOf[Long])
       conversion.convert(null.asInstanceOf[String], classOf[Long])

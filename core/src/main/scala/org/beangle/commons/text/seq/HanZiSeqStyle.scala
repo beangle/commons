@@ -23,17 +23,17 @@ import HanZiSeqStyle._
 object HanZiSeqStyle {
 
   /**
-   Constant <code>MAX=99999</code>
+   * Constant <code>MAX=99999</code>
    */
   val MAX = 99999
 
   /**
-   Constant <code>CHINESE_NAMES="{ 零, 一, 二, 三, 四, 五, 六, 七, 八, 九, 十 }"</code>
+   * Constant <code>CHINESE_NAMES="{ 零, 一, 二, 三, 四, 五, 六, 七, 八, 九, 十 }"</code>
    */
   val CHINESE_NAMES = Array("零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十")
 
   /**
-   Constant <code>PRIORITIES="{ 十, 百, 千, 万 }"</code>
+   * Constant <code>PRIORITIES="{ 十, 百, 千, 万 }"</code>
    */
   val PRIORITIES = Array("十", "百", "千", "万")
 }
@@ -47,7 +47,7 @@ object HanZiSeqStyle {
 class HanZiSeqStyle extends SeqNumStyle {
 
   /**
-   {@inheritDoc}
+   * {@inheritDoc}
    */
   def build(seq: Int): String = {
     if (seq > MAX) {

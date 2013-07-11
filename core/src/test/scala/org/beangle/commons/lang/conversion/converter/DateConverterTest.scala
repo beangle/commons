@@ -26,33 +26,33 @@ import java.util.Date
 import java.util.GregorianCalendar
 import org.beangle.commons.lang.conversion.Converter
 
-class DateConverterTest extends FunSpec with ShouldMatchers{
+class DateConverterTest extends FunSpec with ShouldMatchers {
 
-  private def converToDate(dateStr: String, 
-      year: Int, 
-      month: Int, 
-      day: Int) {
+  private def converToDate(dateStr: String,
+    year: Int,
+    month: Int,
+    day: Int) {
     val c = new String2DateConverter().getConverter(classOf[Date]).orNull
     val date = c.apply(dateStr)
     val calendar = new GregorianCalendar()
     calendar.setTime(date)
-    calendar.get(Calendar.YEAR) should be (year)
-    calendar.get(Calendar.MONTH) should be (month)
-    calendar.get(Calendar.DAY_OF_MONTH) should be (day)
+    calendar.get(Calendar.YEAR) should be(year)
+    calendar.get(Calendar.MONTH) should be(month)
+    calendar.get(Calendar.DAY_OF_MONTH) should be(day)
   }
 
-  describe("DateConverter"){
-  it("Convert String to date") {
-    converToDate("19800909", 1980, 8, 9)
-    converToDate("1980-09-09", 1980, 8, 9)
-  }
+  describe("DateConverter") {
+    it("Convert String to date") {
+      converToDate("19800909", 1980, 8, 9)
+      converToDate("1980-09-09", 1980, 8, 9)
+    }
 
-  it("Normalize date string") {
-    val converter= new String2DateConverter();
-    converter.normalize("1980-9-1") should equal("1980-09-01")
-    converter.normalize("1980-09-1") should equal("1980-09-01")
-    converter.normalize("1980-9-01") should equal("1980-09-01")
-    converter.normalize("1980-09-01") should equal("1980-09-01")
-  }
+    it("Normalize date string") {
+      val converter = new String2DateConverter();
+      converter.normalize("1980-9-1") should equal("1980-09-01")
+      converter.normalize("1980-09-1") should equal("1980-09-01")
+      converter.normalize("1980-9-01") should equal("1980-09-01")
+      converter.normalize("1980-09-01") should equal("1980-09-01")
+    }
   }
 }

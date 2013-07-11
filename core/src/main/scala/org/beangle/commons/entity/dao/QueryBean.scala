@@ -18,7 +18,6 @@
  */
 package org.beangle.commons.entity.dao
 
-
 import org.beangle.commons.collection.page.PageLimit
 import org.beangle.commons.lang.Strings
 
@@ -26,39 +25,39 @@ import org.beangle.commons.lang.Strings
  * <p>
  * QueryBean class.
  * </p>
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
 class QueryBean[T] extends LimitQuery[T] {
 
-  var lang:Query.Lang=_
+  var lang: Query.Lang = _
 
-  var statement:String=_
+  var statement: String = _
 
-  var countStatement:String=_
+  var countStatement: String = _
 
-  var limit:PageLimit=_
+  var limit: PageLimit = _
 
-  var cacheable:Boolean=false
+  var cacheable: Boolean = false
 
-  var params:Map[String, Any]=_
+  var params: Map[String, Any] = _
 
   /**
    * Returns count query {@link org.beangle.commons.dao.query.Query}.
    */
-  def countQuery:Query[T]= {
+  def countQuery: Query[T] = {
     if (Strings.isEmpty(countStatement)) return null
     val bean = new QueryBean[T]();
     bean.statement = countStatement
-    bean.lang=lang
+    bean.lang = lang
     bean.params = params
     bean.cacheable = cacheable
     bean
   }
 
   /** {@inheritDoc} */
-  def limit(limit:PageLimit):LimitQuery[T]= {
+  def limit(limit: PageLimit): LimitQuery[T] = {
     this.limit = limit
     this
   }

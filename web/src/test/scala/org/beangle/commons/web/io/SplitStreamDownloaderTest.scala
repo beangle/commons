@@ -35,11 +35,11 @@ import org.beangle.commons.lang.ClassLoaders
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class SplitStreamDownloaderTest  extends FunSpec with ShouldMatchers {
+class SplitStreamDownloaderTest extends FunSpec with ShouldMatchers {
 
   val streamDownloader: StreamDownloader = new SplitStreamDownloader(new MimeTypeProvider())
 
-  describe("SplitStreamDownloader"){
+  describe("SplitStreamDownloader") {
     it("download") {
       var request = mock(classOf[HttpServletRequest])
       var response = mock(classOf[HttpServletResponse])

@@ -21,9 +21,9 @@ package org.beangle.commons.entity.annotation;
 import scala.annotation.StaticAnnotation
 /**
  *  TemporalEntity
- * 
+ *
  * @author chaostone
  */
-class TempEntity extends StaticAnnotation{
+class TempEntity extends StaticAnnotation {
 
 }

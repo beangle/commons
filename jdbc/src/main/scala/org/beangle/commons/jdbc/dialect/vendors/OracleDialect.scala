@@ -38,7 +38,7 @@ class OracleDialect() extends AbstractDialect("[10.1)") {
   protected override def registerType = {
     registerType(CHAR, "char($l)");
     registerType(VARCHAR, "varchar2($l)")
-    registerType(VARCHAR, 4000, "varchar2($l)" );
+    registerType(VARCHAR, 4000, "varchar2($l)");
     registerType(LONGVARCHAR, "long");
 
     registerType(BOOLEAN, "number(1,0)");
@@ -71,7 +71,7 @@ class OracleDialect() extends AbstractDialect("[10.1)") {
 
   protected override def buildLimitGrammar: LimitGrammar = {
     class OracleLimitGrammar(pattern: String, offsetPattern: String, bindInReverseOrder: Boolean,
-                             bindFirst: Boolean, useMax: Boolean) extends LimitGrammarBean(pattern: String, offsetPattern: String, bindInReverseOrder: Boolean,
+      bindFirst: Boolean, useMax: Boolean) extends LimitGrammarBean(pattern: String, offsetPattern: String, bindInReverseOrder: Boolean,
       bindFirst: Boolean, useMax: Boolean) {
       override def limit(sqlStr: String, hasOffset: Boolean) = {
         var sql = sqlStr.trim();

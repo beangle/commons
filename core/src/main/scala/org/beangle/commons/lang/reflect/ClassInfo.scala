@@ -58,50 +58,50 @@ object ClassInfo {
    * Load ClassInfo using reflections
    */
   def load(clazz: Class[_]): ClassInfo = {
-      val methods = new mutable.HashSet[MethodInfo]
-      var nextClass = clazz
-      var index = 0
-      var nextParamTypes: collection.Map[String, Class[_]] = null
-      while (null != nextClass && classOf[AnyRef] != nextClass) {
-        val declaredMethods = nextClass.getDeclaredMethods
-        var i = 0
-        while (i < declaredMethods.length) {
-          val method = declaredMethods(i)
-          i += 1
-          if (goodMethod(method)) {
-            val types = method.getGenericParameterTypes
-            val paramsTypes = new Array[Class[_]](types.length)
-            for (j <- 0 until types.length) {
-              val t = types(j)
-              paramsTypes(j) =
-                if (t.isInstanceOf[ParameterizedType])
-                  t.asInstanceOf[ParameterizedType].getRawType.asInstanceOf[Class[_]]
-                else if (t.isInstanceOf[TypeVariable[_]]) nextParamTypes.get(t.asInstanceOf[TypeVariable[_]].getName).get
-                else t.asInstanceOf[Class[_]]
-            }
-            if (!methods.add(new MethodInfo(index, method, paramsTypes))) index -= 1
-            index += 1
+    val methods = new mutable.HashSet[MethodInfo]
+    var nextClass = clazz
+    var index = 0
+    var nextParamTypes: collection.Map[String, Class[_]] = null
+    while (null != nextClass && classOf[AnyRef] != nextClass) {
+      val declaredMethods = nextClass.getDeclaredMethods
+      var i = 0
+      while (i < declaredMethods.length) {
+        val method = declaredMethods(i)
+        i += 1
+        if (goodMethod(method)) {
+          val types = method.getGenericParameterTypes
+          val paramsTypes = new Array[Class[_]](types.length)
+          for (j <- 0 until types.length) {
+            val t = types(j)
+            paramsTypes(j) =
+              if (t.isInstanceOf[ParameterizedType])
+                t.asInstanceOf[ParameterizedType].getRawType.asInstanceOf[Class[_]]
+              else if (t.isInstanceOf[TypeVariable[_]]) nextParamTypes.get(t.asInstanceOf[TypeVariable[_]].getName).get
+              else t.asInstanceOf[Class[_]]
           }
-        }
-        val nextType = nextClass.getGenericSuperclass
-        nextClass = nextClass.getSuperclass
-        if (nextType.isInstanceOf[ParameterizedType]) {
-          val tmp = new mutable.HashMap[String, Class[_]]
-          val ps = nextType.asInstanceOf[ParameterizedType].getActualTypeArguments
-          val tvs = nextClass.getTypeParameters
-          for (k <- 0 until ps.length) {
-            if (ps(k).isInstanceOf[Class[_]]) {
-              tmp.put(tvs(k).getName, ps(k).asInstanceOf[Class[_]])
-            } else if (ps(k).isInstanceOf[TypeVariable[_]]) {
-              tmp.put(tvs(k).getName, nextParamTypes.get(ps(k).asInstanceOf[TypeVariable[_]].getName).get)
-            }
-          }
-          nextParamTypes = tmp
-        } else {
-          nextParamTypes = Map.empty
+          if (!methods.add(new MethodInfo(index, method, paramsTypes))) index -= 1
+          index += 1
         }
       }
-      new ClassInfo(methods.toSeq)
+      val nextType = nextClass.getGenericSuperclass
+      nextClass = nextClass.getSuperclass
+      if (nextType.isInstanceOf[ParameterizedType]) {
+        val tmp = new mutable.HashMap[String, Class[_]]
+        val ps = nextType.asInstanceOf[ParameterizedType].getActualTypeArguments
+        val tvs = nextClass.getTypeParameters
+        for (k <- 0 until ps.length) {
+          if (ps(k).isInstanceOf[Class[_]]) {
+            tmp.put(tvs(k).getName, ps(k).asInstanceOf[Class[_]])
+          } else if (ps(k).isInstanceOf[TypeVariable[_]]) {
+            tmp.put(tvs(k).getName, nextParamTypes.get(ps(k).asInstanceOf[TypeVariable[_]].getName).get)
+          }
+        }
+        nextParamTypes = tmp
+      } else {
+        nextParamTypes = Map.empty
+      }
+    }
+    new ClassInfo(methods.toSeq)
   }
 
   /**
@@ -114,7 +114,7 @@ object ClassInfo {
     cache.synchronized {
       exist = cache.get(clazz)
       if (exist.isDefined) return exist.get
-      val newClassInfo=load(clazz)
+      val newClassInfo = load(clazz)
       cache.put(clazz, newClassInfo)
       newClassInfo
     }
@@ -149,9 +149,9 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
     val readermap = new mutable.HashMap[String, MethodInfo]
     for (info <- methodinfos) {
       val property = info.property
-      if(property.isDefined && property.get._1){
+      if (property.isDefined && property.get._1) {
         val old = readermap.put(property.get._2, info)
-        if(old.isDefined && info.method.getReturnType.isAssignableFrom(old.get.method.getReturnType))
+        if (old.isDefined && info.method.getReturnType.isAssignableFrom(old.get.method.getReturnType))
           readermap += property.get._2 -> info
       }
     }
@@ -162,7 +162,7 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
     val writermap = new mutable.HashMap[String, MethodInfo]
     for (info <- methodinfos) {
       val property = info.property
-      if(property.isDefined && !property.get._1) writermap += property.get._2 -> info
+      if (property.isDefined && !property.get._1) writermap += property.get._2 -> info
     }
     Map.empty ++ writermap
   }
@@ -239,8 +239,8 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
    * Return all public methods.
    */
   def getMethods(): Seq[MethodInfo] = {
-    val methodInfos =new mutable.ListBuffer[MethodInfo]
-    for ((key, value) <- methods;info <- value) methodInfos += info
+    val methodInfos = new mutable.ListBuffer[MethodInfo]
+    for ((key, value) <- methods; info <- value) methodInfos += info
     methodInfos.sorted.toList
   }
 

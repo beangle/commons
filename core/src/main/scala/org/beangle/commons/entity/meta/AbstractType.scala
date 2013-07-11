@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory
  * <p>
  * Abstract AbstractType class.
  * </p>
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
@@ -33,22 +33,22 @@ abstract class AbstractType extends Type {
   /**
    * isCollectionType.
    */
-  override def isCollectionType =false
+  override def isCollectionType = false
 
   /**
    * isComponentType.
    */
-  override def isComponentType=false
+  override def isComponentType = false
 
   /**
    * isEntityType.
    */
-  override def isEntityType=false
+  override def isEntityType = false
 
-  override def getPropertyType(property:String):Type = null
+  override def getPropertyType(property: String): Type = null
 
-  override def equals(obj:Any) =  obj match{
-    case other:Type =>  name.equals(other.name)
+  override def equals(obj: Any) = obj match {
+    case other: Type => name.equals(other.name)
     case _ => false
   }
 
@@ -57,16 +57,16 @@ abstract class AbstractType extends Type {
   /**
    * toString.
    */
-  override def  toString = name
+  override def toString = name
 
   /**
    * newInstance.
    */
-  def newInstance():AnyRef =  {
+  def newInstance(): AnyRef = {
     try {
       return returnedClass.newInstance().asInstanceOf[AnyRef];
     } catch {
-      case e:Exception =>   throw new RuntimeException(e.getMessage());
+      case e: Exception => throw new RuntimeException(e.getMessage());
     }
   }
 }

@@ -22,14 +22,14 @@ import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.beangle.commons.lang.testbean.TestBean
 
-class MirrorTest  extends FunSpec with ShouldMatchers{
+class MirrorTest extends FunSpec with ShouldMatchers {
 
-  describe("Mirror"){
-    it("Access property"){
+  describe("Mirror") {
+    it("Access property") {
       val access = Mirror.get(classOf[TestBean])
       val someObject = new TestBean()
-//      access.invoke(someObject, "getName") should be (null)
-/*      access.invoke(someObject, "setName", "sweet") should be (null)
+      //      access.invoke(someObject, "getName") should be (null)
+      /*      access.invoke(someObject, "setName", "sweet") should be (null)
       access.invoke(someObject, "getName") should equal ("sweet")
       access.invoke(someObject, "setName", null.asInstanceOf[AnyRef]) should be (null)
       access.invoke(someObject, "getName") should be (null)

@@ -21,9 +21,9 @@ package org.beangle.commons.entity.annotation;
 import scala.annotation.StaticAnnotation
 /**
  * Logger Entity
- * 
+ *
  * @author chaostone
  */
-class LogEntity extends StaticAnnotation{
+class LogEntity extends StaticAnnotation {
 
 }

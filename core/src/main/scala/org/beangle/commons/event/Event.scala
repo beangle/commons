@@ -31,22 +31,22 @@ import java.util.EventObject
 abstract class Event(source: Any) extends EventObject(source) {
 
   /**
-   System time when the event happened
+   * System time when the event happened
    */
   val timestamp = System.currentTimeMillis()
 
   /**
-   event subject
+   * event subject
    */
   var subject: String = _
 
   /**
-   event details
+   * event details
    */
   var detail: String = _
 
   /**
-   resource where the event happened
+   * resource where the event happened
    */
   var resource: String = _
 }

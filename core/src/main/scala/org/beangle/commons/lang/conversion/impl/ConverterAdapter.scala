@@ -27,7 +27,7 @@ import org.beangle.commons.lang.conversion.Converter
  * @since 3.2.0
  */
 class ConverterAdapter(iconverter: Converter[_, _], typeinfo: Pair[Class[_], Class[_]])
-  extends GenericConverter() {
+    extends GenericConverter() {
 
   val converter = iconverter.asInstanceOf[Converter[Any, Any]]
 

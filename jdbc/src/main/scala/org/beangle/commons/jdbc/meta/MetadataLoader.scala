@@ -35,7 +35,7 @@ import org.beangle.commons.lang.Strings.upperCase
 import org.beangle.commons.logging.Logging
 import scala.collection.mutable
 
-class MetadataLoader(initDialect: Dialect, initMeta: DatabaseMetaData) extends Logging{
+class MetadataLoader(initDialect: Dialect, initMeta: DatabaseMetaData) extends Logging {
   val dialect: Dialect = initDialect
   val meta: DatabaseMetaData = initMeta
   val tables = new mutable.HashMap[String, Table]

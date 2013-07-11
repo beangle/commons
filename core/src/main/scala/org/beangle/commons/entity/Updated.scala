@@ -42,7 +42,7 @@ import java.util.Date
  * <p>
  * Contain create and update time interface.
  * </p>
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
@@ -51,11 +51,11 @@ trait Updated {
   /**
    * Created at.
    */
-  def createdAt:Date;
+  def createdAt: Date;
 
   /**
    * Updated At
    */
-  def updatedAt:Date;
+  def updatedAt: Date;
 
 }

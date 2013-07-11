@@ -56,12 +56,12 @@ class DefaultEventMulticaster extends EventMulticaster {
 
   def addListener(listener: EventListener[_]) {
     listeners ::= listener.asInstanceOf[EventListener[Event]]
-    listenerCache=Map.empty
+    listenerCache = Map.empty
   }
-  
+
   def removeListener(listener: EventListener[_]) {
     listeners = listeners diff List(listener.asInstanceOf[EventListener[Event]])
-    listenerCache=Map.empty
+    listenerCache = Map.empty
   }
 
   /**
@@ -70,8 +70,8 @@ class DefaultEventMulticaster extends EventMulticaster {
    * </p>
    */
   def removeAllListeners() {
-    listeners= Nil
-    listenerCache=Map.empty
+    listeners = Nil
+    listenerCache = Map.empty
   }
 
   protected def initListeners() {
@@ -84,11 +84,11 @@ class DefaultEventMulticaster extends EventMulticaster {
     if (null == adapted) {
       this.synchronized {
         if (null == adapted) {
-          val newer =new mutable.ListBuffer[EventListener[Event]]
+          val newer = new mutable.ListBuffer[EventListener[Event]]
           for (listener <- listeners if listener.supportsEventType(e.getClass) && listener.supportsSourceType(e.getSource.getClass)) {
             newer += listener
           }
-          adapted= newer.toList
+          adapted = newer.toList
           listenerCache += (key -> adapted)
         }
       }

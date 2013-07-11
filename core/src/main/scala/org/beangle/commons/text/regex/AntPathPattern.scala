@@ -92,7 +92,7 @@ class AntPathPattern(val antstring: String) {
         }
       }
       sb.append(substr)
-      i+=1
+      i += 1
     }
     sb.toString
   }

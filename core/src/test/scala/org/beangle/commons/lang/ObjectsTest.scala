@@ -21,11 +21,11 @@ package org.beangle.commons.lang
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class ObjectsTest extends FunSpec with ShouldMatchers{
+class ObjectsTest extends FunSpec with ShouldMatchers {
 
-  describe("Objects"){
-    it("Equals object and array"){
-      Objects.equals(null, null) should be (true)
+  describe("Objects") {
+    it("Equals object and array") {
+      Objects.equals(null, null) should be(true)
     }
   }
 }

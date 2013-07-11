@@ -23,7 +23,7 @@ import javax.validation.constraints.NotNull
 import org.beangle.commons.entity.TemporalOn
 /**
  * Jounal Entity
- * 
+ *
  * @author chaostone
  * @since 3.1.0
  */
@@ -32,15 +32,15 @@ trait TemporalOnBean extends TemporalOn {
    * 起始日期
    */
   @NotNull
-  var beginOn:Date;
+  var beginOn: Date;
 
   /**
    * 结束日期
    */
-  var endOn:Option[Date];
+  var endOn: Option[Date];
 
   /**
    * 备注
    */
-  def remark:Option[String];
+  def remark: Option[String];
 }

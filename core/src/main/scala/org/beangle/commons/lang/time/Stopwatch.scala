@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.TimeUnit
 import org.beangle.commons.lang.Assert
 
-object Stopwatch{
+object Stopwatch {
 
   /**
    * Returns a string representation of the current elapsed time, choosing an
@@ -33,7 +33,7 @@ object Stopwatch{
    * For example, at the instant when {@code elapsedTime(NANOSECONDS)} would
    * return {1234567}, {@code toString(4)} returns {@code "1.235 ms"}.
    */
-  def format(nanos:Long,significantDigits: Int): String = {
+  def format(nanos: Long, significantDigits: Int): String = {
     val unit = chooseUnit(nanos)
     val value = nanos.toDouble / NANOSECONDS.convert(1, unit)
     String.format("%." + significantDigits + "g %s", value.asInstanceOf[AnyRef], abbreviate(unit).asInstanceOf[AnyRef])
@@ -60,7 +60,7 @@ import Stopwatch._
  * @author chaostone
  * @since 3.0.0
  */
-class Stopwatch(val ticker: Ticker=Ticker.systemTicker(), start: Boolean=false) {
+class Stopwatch(val ticker: Ticker = Ticker.systemTicker(), start: Boolean = false) {
 
   var running: Boolean = _
 
@@ -73,8 +73,8 @@ class Stopwatch(val ticker: Ticker=Ticker.systemTicker(), start: Boolean=false) 
     startTick = ticker.read()
   }
 
-  def this(start:Boolean){
-    this(Ticker.systemTicker(),start)
+  def this(start: Boolean) {
+    this(Ticker.systemTicker(), start)
   }
   /**
    * Starts the stopwatch.
@@ -137,5 +137,5 @@ class Stopwatch(val ticker: Ticker=Ticker.systemTicker(), start: Boolean=false) 
    * Returns a string representation of the current elapsed time; equivalent to {@code toString(4)}
    * (four significant figures).
    */
-  override def toString(): String = format(elapsedNanos,4)
+  override def toString(): String = format(elapsedNanos, 4)
 }

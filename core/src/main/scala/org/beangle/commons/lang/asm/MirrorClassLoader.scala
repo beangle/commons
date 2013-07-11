@@ -52,7 +52,7 @@ class MirrorClassLoader private (parent: ClassLoader) extends ClassLoader(parent
 
   def defineClass(name: String, bytes: Array[Byte]): Class[_] = {
     try {
-      val method = classOf[ClassLoader].getDeclaredMethod("defineClass",classOf[String], classOf[Array[Byte]], classOf[Int], classOf[Int])
+      val method = classOf[ClassLoader].getDeclaredMethod("defineClass", classOf[String], classOf[Array[Byte]], classOf[Int], classOf[Int])
       method.setAccessible(true)
       return method.invoke(getParent, Array(name, bytes, 0, bytes.length)).asInstanceOf[Class[_]]
     } catch {

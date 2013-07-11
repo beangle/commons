@@ -18,20 +18,19 @@
  */
 package org.beangle.commons.jpa.bind
 
-
 import javax.persistence.Entity
 
 import org.beangle.commons.lang.Assert
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.jpa.util.Jpas
 
-object EntityPersistConfig{
+object EntityPersistConfig {
 
-  final class CollectionDefinition(val clazz:Class[_],val property: String) {
-    var cacheRegion:String=_
-    var cacheUsage:String=_
+  final class CollectionDefinition(val clazz: Class[_], val property: String) {
+    var cacheRegion: String = _
+    var cacheUsage: String = _
 
-    def cache(region:String, usage:String) :this.type = {
+    def cache(region: String, usage: String): this.type = {
       this.cacheRegion = region;
       this.cacheUsage = usage;
       return this;
@@ -39,27 +38,26 @@ object EntityPersistConfig{
 
   }
 
+  final class EntityDefinition(val clazz: Class[_], val entityName: String) {
+    var cacheUsage: String = _
+    var cacheRegion: String = _
 
-  final class EntityDefinition(val clazz:Class[_],val entityName:String) {
-    var cacheUsage:String=_
-    var cacheRegion:String=_
-
-    def this(clazz:Class[_]) {
-      this(clazz,Jpas.findEntityName(clazz))     
+    def this(clazz: Class[_]) {
+      this(clazz, Jpas.findEntityName(clazz))
     }
 
-    def cache(region:String, usage:String) :this.type = {
+    def cache(region: String, usage: String): this.type = {
       this.cacheRegion = region;
       this.cacheUsage = usage;
       return this;
     }
 
-    override def hashCode:Int= clazz.hashCode()
+    override def hashCode: Int = clazz.hashCode()
 
-    override def equals(obj:Any):Boolean = clazz.equals(obj)
+    override def equals(obj: Any): Boolean = clazz.equals(obj)
   }
 
-  final class CacheConfig(var region:String=null,var usage:String=null){
+  final class CacheConfig(var region: String = null, var usage: String = null) {
   }
 }
 import EntityPersistConfig._
@@ -73,7 +71,7 @@ final class EntityPersistConfig {
   /**
    * Classname -> EntityDefinition
    */
-  val  entityMap = new mutable.HashMap[String, EntityDefinition]
+  val entityMap = new mutable.HashMap[String, EntityDefinition]
 
   /**
    * Classname.property -> CollectionDefinition
@@ -82,18 +80,18 @@ final class EntityPersistConfig {
 
   val cache = new CacheConfig();
 
-  def entities:Iterable[EntityDefinition] = entityMap.values
+  def entities: Iterable[EntityDefinition] = entityMap.values
 
   def collections: Iterable[CollectionDefinition] = collectMap.values
 
-  def getEntity(clazz:Class[_]):EntityDefinition = entityMap(clazz.getName)
+  def getEntity(clazz: Class[_]): EntityDefinition = entityMap(clazz.getName)
 
-  def addEntity(definition:EntityDefinition):this.type= {
+  def addEntity(definition: EntityDefinition): this.type = {
     entityMap.put(definition.clazz.getName(), definition)
     this
   }
 
- def addCollection(definition:CollectionDefinition ):this.type = {
+  def addCollection(definition: CollectionDefinition): this.type = {
     collectMap.put(definition.clazz.getName() + definition.property, definition)
     return this
   }

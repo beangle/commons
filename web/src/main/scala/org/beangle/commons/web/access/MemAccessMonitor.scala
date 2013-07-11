@@ -56,9 +56,9 @@ class MemAccessMonitor extends AccessMonitor with EventListener[HttpSessionDestr
   def end(request: AccessRequest, response: HttpServletResponse) {
     if (null == request) return
     val quene = requests.get(request.sessionid).orNull
-    if (null != quene) quene-=request
+    if (null != quene) quene -= request
     if (null != logger) {
-      request.endAt= System.currentTimeMillis()
+      request.endAt = System.currentTimeMillis()
       logger.log(request)
     }
   }

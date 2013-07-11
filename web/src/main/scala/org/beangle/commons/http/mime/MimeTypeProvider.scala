@@ -27,7 +27,7 @@ import org.beangle.commons.lang.time.Stopwatch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import MimeTypeProvider._
-import scala.beans.{BeanProperty, BooleanBeanProperty}
+import scala.beans.{ BeanProperty, BooleanBeanProperty }
 //remove if not needed
 import scala.collection.JavaConversions._
 

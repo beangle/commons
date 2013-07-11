@@ -29,7 +29,7 @@ import org.beangle.commons.cache.Cache
  */
 class ConcurrentMapCache[K, V](var name: String) extends Cache[K, V]() {
 
-  private val store = new collection.concurrent.TrieMap[K,V]()
+  private val store = new collection.concurrent.TrieMap[K, V]()
 
   override def get(key: K): Option[V] = store.get(key)
 

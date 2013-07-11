@@ -44,7 +44,7 @@ object Objects {
    * @return {@code true} if the values of both objects are the same
    * @since 3.0
    */
-  def equals(a: Any, b: Any): Boolean = (a==b)
+  def equals(a: Any, b: Any): Boolean = (a == b)
 
   /**
    * <p>
@@ -220,7 +220,7 @@ object Objects {
      * name/value pair will not be added.
      */
     def add(name: String, value: AnyRef): ToStringBuilder = {
-      values += new ValueHolder(name+"="+value,null!=value)
+      values += new ValueHolder(name + "=" + value, null != value)
       this
     }
 
@@ -237,7 +237,7 @@ object Objects {
       builder.append('}').toString
     }
 
-    private class ValueHolder(val value:String,val isNull:Boolean) {
+    private class ValueHolder(val value: String, val isNull: Boolean) {
     }
 
   }

@@ -25,7 +25,7 @@ import java.sql.Date
  * </p>
  * 指有具体生效时间和失效时间的实体。一般生效时间不能为空，失效时间可以为空。
  * 具体时间采用时间时间格式便于比对。
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
@@ -34,10 +34,10 @@ trait TemporalOn {
   /**
    * 起始日期
    */
-  def beginOn:Date
+  def beginOn: Date
 
   /**
    * 结束日期
    */
-  def endOn:Option[Date]
+  def endOn: Option[Date]
 }

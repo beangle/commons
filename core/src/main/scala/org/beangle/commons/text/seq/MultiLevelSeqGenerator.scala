@@ -30,7 +30,7 @@ import scala.collection.mutable
  */
 class MultiLevelSeqGenerator {
 
-  private val patterns = new mutable.HashMap[Int,SeqPattern]
+  private val patterns = new mutable.HashMap[Int, SeqPattern]
 
   /**
    * getPattern.

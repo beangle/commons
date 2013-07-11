@@ -18,7 +18,6 @@
  */
 package org.beangle.commons.text.inflector
 
-
 /**
  * <p>
  * Rule interface.

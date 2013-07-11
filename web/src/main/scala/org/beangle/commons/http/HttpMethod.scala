@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.http
 
-object HttpMethods{
+object HttpMethods {
 
   val GET = "GET"
 

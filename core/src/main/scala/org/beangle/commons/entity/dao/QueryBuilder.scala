@@ -24,7 +24,7 @@ import org.beangle.commons.collection.page.PageLimit
  * <p>
  * QueryBuilder interface.
  * </p>
- * 
+ *
  * @author chaostone
  * @version $Id: $
  */
@@ -33,20 +33,20 @@ trait QueryBuilder[T] {
   /**
    * build.
    */
-  def build():Query[T]
+  def build(): Query[T]
 
   /**
    * limit.
    */
-  def limit(limit:PageLimit):  QueryBuilder[T]
+  def limit(limit: PageLimit): QueryBuilder[T]
 
   /**
    * getParams.
    */
-  def params:  Map[String, Any]
+  def params: Map[String, Any]
 
   /**
    * params.
    */
-  def params(newParams:Map[String, Any]):this.type
+  def params(newParams: Map[String, Any]): this.type
 }

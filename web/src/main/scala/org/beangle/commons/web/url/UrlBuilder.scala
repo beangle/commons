@@ -106,7 +106,7 @@ class UrlBuilder(cxtPath: String) {
    *
    * @param contextPath
    */
-  def setContextPath(contextPath: String): this.type= {
+  def setContextPath(contextPath: String): this.type = {
     this.contextPath = contextPath
     this
   }

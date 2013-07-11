@@ -24,9 +24,9 @@ object Containers {
 
   var root: Container = _
 
-  var hooks: List[ContainerHook]=Nil
+  var hooks: List[ContainerHook] = Nil
 
-  val subContainers = new mutable.HashMap[Long,Container]
+  val subContainers = new mutable.HashMap[Long, Container]
 
   def getRoot(): Container = root
 
@@ -36,8 +36,8 @@ object Containers {
 
   def getHooks(): List[ContainerHook] = hooks
 
-  def addHook(hook:ContainerHook){
-    hooks = hook::hooks
+  def addHook(hook: ContainerHook) {
+    hooks = hook :: hooks
   }
 
   def register(id: Long, container: Container) {
