@@ -16,19 +16,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.conversion.impl
-
-import org.beangle.commons.lang.Objects
+package org.beangle.commons.conversion
 
 /**
- * Convert anything to null.
+ * Converter Registry.
  *
  * @author chaostone
  * @since 3.2.0
  */
-object NoneConverter extends GenericConverter {
+trait ConverterRegistry {
 
-  override def convert(input: Any, sourceType: Class[_], targetType: Class[_]): Any = Objects.default(targetType)
-
-  override def getTypeinfo(): Pair[Class[_], Class[_]] = (classOf[AnyRef], classOf[AnyRef])
+  def addConverter(converter: Converter[_, _]): Unit
 }

@@ -16,15 +16,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.conversion.impl
+package org.beangle.commons.conversion.impl
 
 import java.lang.reflect.Array
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import org.beangle.commons.lang.Primitives
-import org.beangle.commons.lang.conversion.Conversion
-import org.beangle.commons.lang.conversion.Converter
-import org.beangle.commons.lang.conversion.ConverterRegistry
+import org.beangle.commons.conversion.Conversion
+import org.beangle.commons.conversion.Converter
+import org.beangle.commons.conversion.ConverterRegistry
 import org.beangle.commons.lang.Objects
 import scala.language.existentials
 import scala.collection.mutable

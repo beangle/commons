@@ -30,11 +30,11 @@ import java.net.URL
  */
 class Resources {
 
-  protected var global: URL = _
+  var global: URL = _
 
-  protected var locals: List[URL] = _
+  var locals: List[URL] = _
 
-  protected var user: URL = _
+  var user: URL = _
 
   /**
    * All Paths.
@@ -50,43 +50,9 @@ class Resources {
   /**
    * Return true is empty
    */
-  def isEmpty(): Boolean = {
+  def isEmpty: Boolean = {
     null == global && null == user && (null == locals || locals.isEmpty)
   }
 
-  /**
-   * Getter for the field <code>global</code>.
-   */
-  def getGlobal(): URL = global
-
-  /**
-   * Setter for the field <code>global</code>.
-   */
-  def setGlobal(first: URL) {
-    this.global = first
-  }
-
-  /**
-   * Getter for the field <code>locals</code>.
-   */
-  def getLocals(): List[URL] = locals
-
-  /**
-   * Setter for the field <code>locals</code>.
-   */
-  def setLocals(paths: List[URL]) {
-    this.locals = paths
-  }
-
-  /**
-   * Getter for the field <code>user</code>.
-   */
-  def getUser(): URL = user
-
-  /**
-   * Setter for the field <code>user</code>.
-   */
-  def setUser(last: URL) {
-    this.user = last
-  }
+  override def toString():String= "{global:"+global+"  locals:"+locals+"  user:"+user+"}"
 }

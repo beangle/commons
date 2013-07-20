@@ -16,21 +16,19 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.conversion.converter
+package org.beangle.commons.conversion.impl
 
-import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.conversion.impl.ConverterFactory
+import org.beangle.commons.lang.Objects
 
 /**
- * String to Object
+ * Convert anything to null.
  *
  * @author chaostone
  * @since 3.2.0
  */
-class StringConverterFactory[S, R] extends ConverterFactory[S, R] {
+object NoneConverter extends GenericConverter {
 
-  override def convert(input: Any, sourceType: Class[_], targetType: Class[_]): Any = {
-    if (Strings.isEmpty(input.asInstanceOf[String])) return null
-    super.convert(input, sourceType, targetType)
-  }
+  override def convert(input: Any, sourceType: Class[_], targetType: Class[_]): Any = Objects.default(targetType)
+
+  override def getTypeinfo(): Pair[Class[_], Class[_]] = (classOf[AnyRef], classOf[AnyRef])
 }

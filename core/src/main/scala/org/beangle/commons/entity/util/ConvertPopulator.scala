@@ -25,8 +25,8 @@ import org.beangle.commons.entity.meta.EntityType
 import org.beangle.commons.entity.meta.Type
 import org.beangle.commons.lang.Objects
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.conversion.Conversion
-import org.beangle.commons.lang.conversion.impl.DefaultConversion
+import org.beangle.commons.conversion.Conversion
+import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.reflect.Reflections
 import org.beangle.commons.bean.PropertyUtils.{ getProperty, setProperty, copyProperty }
 import org.slf4j.Logger

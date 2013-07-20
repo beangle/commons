@@ -16,15 +16,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.conversion
+package org.beangle.commons.conversion
 
+import org.beangle.commons.lang.functor.UnaryFunction
 /**
- * Converter Registry.
+ * Convert source to target
  *
  * @author chaostone
- * @since 3.2.0
+ * @param <S> source
+ * @param <T> target
  */
-trait ConverterRegistry {
-
-  def addConverter(converter: Converter[_, _]): Unit
-}
+trait Converter[S, +T] extends UnaryFunction[S, T]

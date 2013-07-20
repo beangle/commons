@@ -24,19 +24,10 @@ import java.net.URL
 import java.util.Properties
 import org.beangle.commons.inject.Resources
 import org.beangle.commons.lang.time.Stopwatch
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import MimeTypeProvider._
-import scala.beans.{ BeanProperty, BooleanBeanProperty }
-//remove if not needed
-import scala.collection.JavaConversions._
+import org.beangle.commons.logging.Logging
 
-object MimeTypeProvider {
 
-  private var logger: Logger = LoggerFactory.getLogger(classOf[MimeTypeProvider])
-}
-
-class MimeTypeProvider {
+class MimeTypeProvider extends Logging{
 
   private val contentTypes = new Properties()
 
@@ -70,16 +61,14 @@ class MimeTypeProvider {
   def setResources(resources: Resources) {
     this.resources = resources
     if (null == resources) return
-    if (null != resources.getGlobal) {
-      loadMimeType(resources.getGlobal)
+    if (null != resources.global) {
+      loadMimeType(resources.global)
     }
-    if (null != resources.getLocals) {
-      for (path <- resources.getLocals) {
+    if (null != resources.locals) {
+      for (path <- resources.locals) {
         loadMimeType(path)
       }
     }
-    if (null != resources.getUser) {
-      loadMimeType(resources.getUser)
-    }
+    if (null != resources.user) loadMimeType(resources.user)
   }
 }

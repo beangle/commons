@@ -16,12 +16,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.conversion.converter
+package org.beangle.commons.conversion.converter
 
 import java.math.BigDecimal
 import java.math.BigInteger
-import org.beangle.commons.lang.conversion.Converter
-import org.beangle.commons.lang.conversion.impl.ConverterFactory
+import org.beangle.commons.conversion.Converter
+import org.beangle.commons.conversion.impl.ConverterFactory
 
 object Number2NumberConverter {
 

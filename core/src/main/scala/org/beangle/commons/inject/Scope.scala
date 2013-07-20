@@ -23,7 +23,7 @@ object Scope extends Enumeration {
 
   val Singleton = new Val("")
 
-  val ProtoType = new Val("prototype")
+  val Prototype = new Val("prototype")
 
   val Request = new Val("request")
 

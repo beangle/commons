@@ -21,16 +21,13 @@ package org.beangle.commons.bean
 import java.lang.reflect.Array
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.Throwables
-import org.beangle.commons.lang.conversion.Conversion
-import org.beangle.commons.lang.conversion.impl.ConvertUtils
 import org.beangle.commons.lang.reflect.ClassInfo
 import org.beangle.commons.lang.reflect.MethodInfo
-import org.slf4j.LoggerFactory
-import org.slf4j.Logger
+import org.beangle.commons.conversion.Conversion
+import org.beangle.commons.conversion.impl.ConvertUtils
+import org.beangle.commons.logging.Logging
 
-object PropertyUtils {
-
-  private val logger = LoggerFactory getLogger getClass
+object PropertyUtils extends Logging{
 
   private val resolver = new PropertyNameResolver()
 

@@ -16,22 +16,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.conversion.impl
+package org.beangle.commons.conversion.converter
 
-import org.beangle.commons.lang.conversion.Converter
-
+import org.beangle.commons.conversion.Converter
 /**
- * Adapte a Converter to GenericConverter
+ * Convert Object to String
  *
  * @author chaostone
  * @since 3.2.0
  */
-class ConverterAdapter(iconverter: Converter[_, _], typeinfo: Pair[Class[_], Class[_]])
-    extends GenericConverter() {
+object Object2StringConverter extends Converter[AnyRef, String] {
 
-  val converter = iconverter.asInstanceOf[Converter[Any, Any]]
-
-  override def convert(input: Any, sourceType: Class[_], targetType: Class[_]): Any = converter.apply(input)
-
-  override def getTypeinfo(): Pair[Class[_], Class[_]] = typeinfo
+  override def apply(input: AnyRef): String = {
+    if ((input == null)) "null" else input.toString
+  }
 }

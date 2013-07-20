@@ -16,23 +16,33 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.conversion.converter
-
+package org.beangle.commons.conversion
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
-import org.beangle.commons.lang.conversion.Conversion
-import org.beangle.commons.lang.conversion.impl.DefaultConversion
 
-class DefaultConverterTest extends FunSpec with ShouldMatchers {
+import org.beangle.commons.conversion.impl.DefaultConversion
+
+class ConversionTest extends FunSpec with ShouldMatchers {
+
+  val con = new DefaultConversion();
 
   describe("DefaultConversion") {
-    it("Convert null") {
-      val conversion = DefaultConversion.Instance
-      conversion.convert("", classOf[Long])
-      conversion.convert(null.asInstanceOf[String], classOf[Long])
-      conversion.convert("abc", classOf[Long])
-      conversion.convert("1", classOf[Long]).asInstanceOf[AnyRef]
-      conversion.convert(1L, classOf[Long]).asInstanceOf[AnyRef]
+    it("Convert Integer") {
+      con.convert(2.5f, classOf[Integer])
+    }
+
+    it("Convert Array") {
+      con.convert(Array("2", "3"), classOf[Array[Integer]])
+    }
+
+    it("Convert Primitive") {
+      con.convert("2", classOf[Int]).toInt
+      con.convert(3, classOf[Integer])
+    }
+
+    it("Convert Primitive Array") {
+      val con = new DefaultConversion()
+      con.convert(Array("2", "3.4"), classOf[Array[Float]]).asInstanceOf[Array[Float]]
     }
   }
 }

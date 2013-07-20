@@ -18,8 +18,8 @@
  */
 package org.beangle.commons.lang.asm
 
-import org.beangle.commons.lang.conversion.Conversion
-import org.beangle.commons.lang.conversion.impl.ConvertUtils
+import org.beangle.commons.conversion.Conversion
+import org.beangle.commons.conversion.impl.ConvertUtils
 import org.beangle.commons.lang.reflect.ClassInfo
 import org.beangle.commons.lang.reflect.MethodInfo
 

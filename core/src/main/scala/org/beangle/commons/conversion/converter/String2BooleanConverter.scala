@@ -16,33 +16,26 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.conversion
-import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+package org.beangle.commons.conversion.converter
 
-import org.beangle.commons.lang.conversion.impl.DefaultConversion
+import org.beangle.commons.lang.Strings
+import org.beangle.commons.conversion.Converter
 
-class ConversionTest extends FunSpec with ShouldMatchers {
+/**
+ * Convert String to Boolean.
+ * <p>
+ * Convert true,on,yes,Y,1 to Boolean.TRUE.<br>
+ * Convert false,off,no,N,0,"" to Boolean.FALSE. <br>
+ *
+ * @author chaostone
+ * @since 3.2.0
+ */
+object String2BooleanConverter extends Converter[String, Boolean] {
 
-  val con = new DefaultConversion();
+  private val trues = Set("true", "on", "Y", "1", "yes")
 
-  describe("DefaultConversion") {
-    it("Convert Integer") {
-      con.convert(2.5f, classOf[Integer])
-    }
-
-    it("Convert Array") {
-      con.convert(Array("2", "3"), classOf[Array[Integer]])
-    }
-
-    it("Convert Primitive") {
-      con.convert("2", classOf[Int]).toInt
-      con.convert(3, classOf[Integer])
-    }
-
-    it("Convert Primitive Array") {
-      val con = new DefaultConversion()
-      con.convert(Array("2", "3.4"), classOf[Array[Float]]).asInstanceOf[Array[Float]]
-    }
+  override def apply(input: String): Boolean = {
+    if (Strings.isEmpty(input)) return false
+    if (trues.contains(input.toLowerCase())) true else false
   }
 }

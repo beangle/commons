@@ -20,8 +20,8 @@ package org.beangle.commons.collection
 
 import java.util.Date
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.conversion.Conversion
-import org.beangle.commons.lang.conversion.impl.DefaultConversion
+import org.beangle.commons.conversion.Conversion
+import org.beangle.commons.conversion.impl.DefaultConversion
 import scala.reflect.ClassTag
 import org.beangle.commons.lang.Objects
 import scala.collection.Map

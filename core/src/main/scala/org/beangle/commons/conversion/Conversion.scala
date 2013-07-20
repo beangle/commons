@@ -16,18 +16,21 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.conversion.converter
-
-import org.beangle.commons.lang.conversion.Converter
+package org.beangle.commons.conversion
 /**
- * Convert Object to String
+ * convert a source to target type.
  *
  * @author chaostone
  * @since 3.2.0
  */
-object Object2StringConverter extends Converter[AnyRef, String] {
+trait Conversion {
 
-  override def apply(input: AnyRef): String = {
-    if ((input == null)) "null" else input.toString
-  }
+  /**
+   * Convert to target type.
+   * <ul>
+   * <li>convert null to null;
+   * <li>convert array to array ,when cannot find converter return targetType[0]
+   * </ul>
+   */
+  def convert[T](source: Any, targetType: Class[T]): T
 }

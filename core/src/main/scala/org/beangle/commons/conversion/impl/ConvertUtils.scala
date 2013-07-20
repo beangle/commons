@@ -16,19 +16,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.conversion.impl
+package org.beangle.commons.conversion.impl
 
-/**
- * Generic Converter using in DefaultConversion
- * <p>
- * It's a SPI interface.
- *
- * @author chaostone
- * @since 3.2.0
- */
-trait GenericConverter {
+object ConvertUtils {
 
-  def getTypeinfo(): Pair[Class[_], Class[_]]
-
-  def convert(input: Any, sourceType: Class[_], targetType: Class[_]): Any
+  def convert[T](value: Any, targetType: Class[T]): T = {
+    DefaultConversion.Instance.convert(value, targetType)
+  }
 }

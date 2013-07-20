@@ -16,26 +16,21 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.conversion.converter
-
-import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.conversion.Converter
-
+package org.beangle.commons.conversion.converter
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
+import java.lang.reflect.InvocationTargetException
+import org.beangle.commons.conversion.impl.DefaultConversion
+import org.beangle.commons.lang.testbean.TestEnum
 /**
- * Convert String to Boolean.
- * <p>
- * Convert true,on,yes,Y,1 to Boolean.TRUE.<br>
- * Convert false,off,no,N,0,"" to Boolean.FALSE. <br>
- *
  * @author chaostone
- * @since 3.2.0
+ * @since 3.0.0
  */
-object String2BooleanConverter extends Converter[String, Boolean] {
+class EnumConverterTest extends FunSpec with ShouldMatchers {
 
-  private val trues = Set("true", "on", "Y", "1", "yes")
-
-  override def apply(input: String): Boolean = {
-    if (Strings.isEmpty(input)) return false
-    if (trues.contains(input.toLowerCase())) true else false
+  describe("EnumConverter") {
+    it("Convert Enum") {
+      DefaultConversion.Instance.convert("Private", classOf[TestEnum.Val])
+    }
   }
 }

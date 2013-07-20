@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.conversion.converter
+package org.beangle.commons.conversion.converter
 
 import java.util.Locale
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.conversion.Converter
+import org.beangle.commons.conversion.Converter
 
 /**
  * Convert String to Locale.

@@ -16,14 +16,19 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.conversion
+package org.beangle.commons.conversion.impl
 
-import org.beangle.commons.lang.functor.UnaryFunction
 /**
- * Convert source to target
+ * Generic Converter using in DefaultConversion
+ * <p>
+ * It's a SPI interface.
  *
  * @author chaostone
- * @param <S> source
- * @param <T> target
+ * @since 3.2.0
  */
-trait Converter[S, +T] extends UnaryFunction[S, T]
+trait GenericConverter {
+
+  def getTypeinfo(): Pair[Class[_], Class[_]]
+
+  def convert(input: Any, sourceType: Class[_], targetType: Class[_]): Any
+}

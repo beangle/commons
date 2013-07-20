@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.conversion.impl
+package org.beangle.commons.conversion.impl
 
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
-import org.beangle.commons.lang.conversion.Converter
+import org.beangle.commons.conversion.Converter
 import org.beangle.commons.lang.Objects
 import scala.collection.mutable
 /**

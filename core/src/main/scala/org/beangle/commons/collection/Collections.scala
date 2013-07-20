@@ -25,6 +25,24 @@ import scala.collection.mutable
 
 object Collections {
 
+  def findFirstMatch[T](source:Iterable[T], candidates:Iterable[T]):Option[T]= {
+    var finded = new mutable.ListBuffer[T]
+    if (isNotEmpty(source) && isNotEmpty(candidates)) {
+      source match {
+        case set:Set[T] =>
+          for (candidate <- candidates if finded.isEmpty) {
+            if (set.contains(candidate)) finded += candidate
+          }
+        case seq:Seq[T] =>
+          for (candidate <- candidates if finded.isEmpty) {
+            if (seq.contains(candidate)) finded += candidate
+          }
+        case _ => 
+      }
+    }
+    if(finded.isEmpty)None else Some(finded.head)
+  }
+
   /**
    * 将一个集合按照固定大小查分成若干个集合。
    */
@@ -84,7 +102,7 @@ object Collections {
    * @return true if empty or null
    * @since 3.1
    */
-  def isEmpty(coll: Seq[_]): Boolean = (coll == null || coll.isEmpty)
+  def isEmpty(coll: Iterable[_]): Boolean = (coll == null || coll.isEmpty)
 
   /**
    * Null-safe check if the specified collection is not empty.
@@ -95,7 +113,7 @@ object Collections {
    * @return true if non-null and non-empty
    * @since 3.1
    */
-  def isNotEmpty(coll: Seq[_]): Boolean = null != coll && !coll.isEmpty
+  def isNotEmpty(coll: Iterable[_]): Boolean = null != coll && !coll.isEmpty
 
   def union[T](first: List[T], second: List[T]): List[T] = {
     val mapa = getCardinalityMap(first)

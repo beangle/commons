@@ -56,13 +56,13 @@ class UrlPropertyConfigProvider extends PropertyConfig.Provider {
   def getConfig(): Properties = {
     try {
       val properties = new Properties()
-      if (null != resources.getGlobal) populateConfigItems(properties, resources.getGlobal)
-      if (null != resources.getLocals) {
-        for (url <- resources.getLocals) {
+      if (null != resources.global) populateConfigItems(properties, resources.global)
+      if (null != resources.locals) {
+        for (url <- resources.locals) {
           populateConfigItems(properties, url)
         }
       }
-      if (null != resources.getUser) populateConfigItems(properties, resources.getUser)
+      if (null != resources.user) populateConfigItems(properties, resources.user)
       properties
     } catch {
       case e: Exception => {

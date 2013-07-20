@@ -16,21 +16,22 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.conversion.converter
-import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
-import java.lang.reflect.InvocationTargetException
-import org.beangle.commons.lang.conversion.impl.DefaultConversion
-import org.beangle.commons.lang.testbean.TestEnum
-/**
- * @author chaostone
- * @since 3.0.0
- */
-class EnumConverterTest extends FunSpec with ShouldMatchers {
+package org.beangle.commons.conversion.impl
 
-  describe("EnumConverter") {
-    it("Convert Enum") {
-      DefaultConversion.Instance.convert("Private", classOf[TestEnum.Val])
-    }
-  }
+import org.beangle.commons.conversion.Converter
+
+/**
+ * Adapte a Converter to GenericConverter
+ *
+ * @author chaostone
+ * @since 3.2.0
+ */
+class ConverterAdapter(iconverter: Converter[_, _], typeinfo: Pair[Class[_], Class[_]])
+    extends GenericConverter() {
+
+  val converter = iconverter.asInstanceOf[Converter[Any, Any]]
+
+  override def convert(input: Any, sourceType: Class[_], targetType: Class[_]): Any = converter.apply(input)
+
+  override def getTypeinfo(): Pair[Class[_], Class[_]] = typeinfo
 }

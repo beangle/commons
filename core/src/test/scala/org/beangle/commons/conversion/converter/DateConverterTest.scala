@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.conversion.converter
+package org.beangle.commons.conversion.converter
 
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
@@ -24,7 +24,7 @@ import org.scalatest.matchers.ShouldMatchers
 import java.util.Calendar
 import java.util.Date
 import java.util.GregorianCalendar
-import org.beangle.commons.lang.conversion.Converter
+import org.beangle.commons.conversion.Converter
 
 class DateConverterTest extends FunSpec with ShouldMatchers {
 
