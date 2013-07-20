@@ -21,14 +21,7 @@ package org.beangle.commons.web.filter
 import java.util.regex.Pattern
 import javax.servlet.http.HttpServletRequest
 import org.beangle.commons.lang.Strings
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import RegexRequestMatcher._
-
-object RegexRequestMatcher {
-
-  private val logger = LoggerFactory.getLogger(classOf[RegexRequestMatcher])
-}
+import org.beangle.commons.logging.Logging
 
 /**
  * Uses a regular expression to decide whether a supplied the URL of a supplied
@@ -40,7 +33,7 @@ object RegexRequestMatcher {
  *
  * @author chaostone
  */
-class RegexRequestMatcher(pattern: Pattern, httpMethod: String) extends RequestMatcher {
+class RegexRequestMatcher(pattern: Pattern, httpMethod: String) extends RequestMatcher with Logging {
 
   /**
    * Creates a case-sensitive {@code Pattern} instance to match against the

@@ -19,34 +19,35 @@
 package org.beangle.commons.message.mail
 
 import scala.collection.Seq
-import org.slf4j.LoggerFactory
-import JavaMailSender._
-import java.util.Properties
-import javax.mail.Session
 import scala.beans.BeanProperty
-import javax.mail.MessagingException
-import javax.mail.internet.MimeMessage
-import java.util.Date
-import org.beangle.commons.lang.Strings
-import javax.mail.internet.MimeUtility
-import java.io.UnsupportedEncodingException
-import org.beangle.commons.lang.Throwables
-import javax.mail.Transport
-import javax.mail.NoSuchProviderException
-import java.util.LinkedHashMap
-import javax.mail.AuthenticationFailedException
-import org.beangle.commons.message.NotificationException
-import org.beangle.commons.message.NotificationSendException
 import scala.collection.JavaConversions._
 
-object JavaMailSender {
+import java.util.LinkedHashMap
+import java.io.UnsupportedEncodingException
+import java.util.Date
+import java.util.Properties
 
-  protected val logger = LoggerFactory getLogger getClass
+import javax.mail.Session
+import javax.mail.MessagingException
+import javax.mail.internet.MimeMessage
+import javax.mail.internet.MimeUtility
+import javax.mail.Transport
+import javax.mail.NoSuchProviderException
+import javax.mail.AuthenticationFailedException
+
+import org.beangle.commons.lang.Strings
+import org.beangle.commons.lang.Throwables
+import org.beangle.commons.logging.Logging
+import org.beangle.commons.message.NotificationException
+import org.beangle.commons.message.NotificationSendException
+
+object JavaMailSender {
 
   private val HEADER_MESSAGE_ID = "Message-ID"
 }
 
-class JavaMailSender extends MailSender {
+import JavaMailSender._
+class JavaMailSender extends MailSender with Logging {
 
   @BeanProperty
   var javaMailProperties: Properties = new Properties()

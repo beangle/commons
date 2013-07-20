@@ -20,16 +20,14 @@ package org.beangle.commons.text.replace
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import org.beangle.commons.logging.Logging
 
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class BatchReplaceMainTest extends FunSpec with ShouldMatchers {
+class BatchReplaceMainTest extends FunSpec with ShouldMatchers  with Logging {
   describe("BatchReplace") {
     it("Test batch replace expression") {
-      var logger: Logger = LoggerFactory.getLogger(classOf[BatchReplaceMainTest])
       val clause = "<#include \"/template/head.ftl\"/>"
       val pattern = Pattern.compile("<#(.*)/>")
       val m = pattern.matcher(clause)

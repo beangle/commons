@@ -18,12 +18,9 @@
  */
 package org.beangle.commons.lang.time
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import org.beangle.commons.logging.Logging
 
-object TimerTrace {
-
-  private val logger = LoggerFactory.getLogger(this.getClass())
+object TimerTrace extends Logging {
 
   protected var curStack: ThreadLocal[TimerStack] = new ThreadLocal[TimerStack]()
 

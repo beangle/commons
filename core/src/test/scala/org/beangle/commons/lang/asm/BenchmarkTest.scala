@@ -21,18 +21,11 @@ package org.beangle.commons.lang.asm
 import java.lang.reflect.Method
 import org.beangle.commons.lang.testbean.TestBean
 import org.beangle.commons.lang.time.Stopwatch
+import org.beangle.commons.logging.Logging
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import BenchmarkTest._
 
-object BenchmarkTest {
-
-  private val logger = LoggerFactory.getLogger(classOf[BenchmarkTest])
-}
-
-class BenchmarkTest extends FunSpec with ShouldMatchers {
+class BenchmarkTest extends FunSpec with ShouldMatchers with Logging {
 
   val testCount = 1000000
 

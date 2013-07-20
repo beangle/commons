@@ -21,15 +21,8 @@ package org.beangle.commons.io
 import java.io.IOException
 import java.net.URL
 import java.util.Enumeration
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import ClassResourceLoader._
+import org.beangle.commons.logging.Logging
 import scala.collection.mutable.ListBuffer
-
-object ClassResourceLoader {
-
-  private val logger = LoggerFactory.getLogger(classOf[ClassResourceLoader])
-}
 
 /**
  * Load resource by class loader.
@@ -37,7 +30,7 @@ object ClassResourceLoader {
  * @author chaostone
  * @since 3.3.0
  */
-class ClassResourceLoader(loaders: List[ClassLoader]) extends ResourceLoader {
+class ClassResourceLoader(loaders: List[ClassLoader]) extends ResourceLoader with Logging {
 
   def this(loaderArray: ClassLoader*) {
     this(loaderArray.toList)

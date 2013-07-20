@@ -24,85 +24,64 @@ import java.net.URLEncoder
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-//remove if not needed
-import scala.collection.JavaConversions._
+import org.beangle.commons.logging.Logging
 
-object CookieUtils {
+object CookieUtils extends Logging {
 
-  private val Log = LoggerFactory.getLogger(this.getClass)
+def getCookieValue(cookie: Cookie): String = {
+  try {
+    URLDecoder.decode(cookie.getValue, "utf-8")
+  } catch {
+    case e: Exception => null
+  }
+}
 
-  def getCookieValue(cookie: Cookie): String = {
-    try {
+/**
+  * 获取cookie中的value<br>
+  * 自动负责解码<br>
+  */
+def getCookieValue(request: HttpServletRequest, cookieName: String): String = {
+  try {
+    val cookie = getCookie(request, cookieName)
+    if (null == cookie) {
+      null
+    } else {
       URLDecoder.decode(cookie.getValue, "utf-8")
-    } catch {
-      case e: Exception => null
+    }
+  } catch {
+    case e: Exception => null
+  }
+}
+
+/**
+  * Convenience method to get a cookie by name
+  */
+def getCookie(request: HttpServletRequest, name: String): Cookie = {
+  val cookies = request.getCookies
+  var returnCookie: Cookie = null
+  if (cookies == null) {
+    return returnCookie
+  }
+  for (i <- 0 until cookies.length; if (null==returnCookie)) {
+    val thisCookie = cookies(i)
+    if (thisCookie.getName == name && thisCookie.getValue != "") {
+      returnCookie = thisCookie
     }
   }
-
-  /**
-   * 获取cookie中的value<br>
-   * 自动负责解码<br>
-   *
-   * @param request
-   * @param cookieName
-   * @return null when cannot find the cookie
-   */
-  def getCookieValue(request: HttpServletRequest, cookieName: String): String = {
-    try {
-      val cookie = getCookie(request, cookieName)
-      if (null == cookie) {
-        null
-      } else {
-        URLDecoder.decode(cookie.getValue, "utf-8")
-      }
-    } catch {
-      case e: Exception => null
-    }
-  }
-
-  /**
-   * Convenience method to get a cookie by name
-   *
-   * @param request
-   *          the current request
-   * @param name
-   *          the name of the cookie to find
-   * @return the cookie (if found), null if not found
-   */
-  def getCookie(request: HttpServletRequest, name: String): Cookie = {
-    val cookies = request.getCookies
-    var returnCookie: Cookie = null
-    if (cookies == null) {
-      return returnCookie
-    }
-    for (i <- 0 until cookies.length) {
-      val thisCookie = cookies(i)
-      if (thisCookie.getName == name && thisCookie.getValue != "") {
-        returnCookie = thisCookie
-        //break
-      }
-    }
     returnCookie
   }
 
   /**
-   * Convenience method to set a cookie <br>
-   * 刚方法自动将value进行编码存储<br>
-   *
-   * @param response
-   * @param name
-   * @param value
-   * @param path
-   */
+    * Convenience method to set a cookie <br>
+    * 刚方法自动将value进行编码存储
+    */
   def addCookie(request: HttpServletRequest,
     response: HttpServletResponse,
     name: String,
     value: String,
     path: String,
     age: Int) {
-    Log.debug("add cookie[name:{},value={},path={}]", Array(name, value, path))
+    logger.debug("add cookie[name:{},value={},path={}]", Array(name, value, path))
     var cookie: Cookie = null
     cookie = new Cookie(name, URLEncoder.encode(value, "utf-8"))
     cookie.setSecure(false)
@@ -112,24 +91,14 @@ object CookieUtils {
   }
 
   /**
-   * 默认按照应用上下文进行设置
-   *
-   * @param request
-   * @param response
-   * @param name
-   * @param value
-   * @param age
-   * @throws Exception
-   */
+    * 默认按照应用上下文进行设置
+    */
   def addCookie(request: HttpServletRequest,
     response: HttpServletResponse,
     name: String,
     value: String,
     age: Int) {
-    var contextPath = request.getContextPath
-    if (!contextPath.endsWith("/")) {
-      contextPath += "/"
-    }
+    val contextPath = if(!request.getContextPath.endsWith("/")) request.getContextPath + "/"else request.getContextPath
     addCookie(request, response, name, value, contextPath, age)
   }
 
@@ -138,15 +107,8 @@ object CookieUtils {
   }
 
   /**
-   * Convenience method for deleting a cookie by name
-   *
-   * @param response
-   *          the current web response
-   * @param cookie
-   *          the cookie to delete
-   * @param path
-   *          the path on which the cookie was set (i.e. /appfuse)
-   */
+    * Convenience method for deleting a cookie by name
+    */
   def deleteCookie(response: HttpServletResponse, cookie: Cookie, path: String) {
     if (cookie != null) {
       cookie.setMaxAge(0)

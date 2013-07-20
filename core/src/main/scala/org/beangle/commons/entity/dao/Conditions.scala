@@ -23,16 +23,14 @@ import org.beangle.commons.entity.Component
 import org.beangle.commons.entity.Entity
 import org.beangle.commons.entity.util.ValidKey
 import org.beangle.commons.lang.Strings
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import org.beangle.commons.logging.Logging
 
 /**
  * 条件提取辅助类
  *
  * @author chaostone
  */
-object Conditions {
-  private val logger = LoggerFactory.getLogger(this.getClass);
+object Conditions extends Logging {
 
   def toQueryString(conditions: List[Condition]): String = {
     if (null == conditions || conditions.isEmpty) return ""

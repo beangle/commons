@@ -18,10 +18,9 @@
  */
 package org.beangle.commons.message.service
 
+import org.beangle.commons.logging.Logging
 import org.beangle.commons.message.NotificationTask
 import org.beangle.commons.message.Message
-import org.slf4j.LoggerFactory
-import DefaultNotificationTask._
 import org.beangle.commons.message.MessageQueue
 import scala.beans.BeanProperty
 import org.beangle.commons.message.Notifier
@@ -29,12 +28,7 @@ import org.beangle.commons.message.NotificationException
 //remove if not needed
 import scala.collection.JavaConversions._
 
-object DefaultNotificationTask {
-
-  protected val logger = LoggerFactory getLogger getClass
-}
-
-class DefaultNotificationTask[T <: Message] extends NotificationTask[T] {
+class DefaultNotificationTask[T <: Message] extends NotificationTask[T] with Logging {
 
   private var queue: MessageQueue[T] = new DefaultMessageQueue[T]
 

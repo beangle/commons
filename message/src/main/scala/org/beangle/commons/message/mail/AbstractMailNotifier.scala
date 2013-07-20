@@ -19,21 +19,15 @@
 package org.beangle.commons.message.mail
 
 import org.beangle.commons.message.Notifier
-import org.slf4j.LoggerFactory
-import AbstractMailNotifier._
 import scala.collection.JavaConversions._
 import org.beangle.commons.message.Message
 import org.beangle.commons.lang.Assert
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.message.NotificationException
 import org.beangle.commons.lang.Throwables
+import org.beangle.commons.logging.Logging
 
-object AbstractMailNotifier {
-
-  protected val logger = LoggerFactory getLogger getClass
-}
-
-abstract class AbstractMailNotifier[T <: MailMessage] extends Notifier[T] {
+abstract class AbstractMailNotifier[T <: MailMessage] extends Notifier[T] with Logging {
 
   protected var mailSender: MailSender = _
 
