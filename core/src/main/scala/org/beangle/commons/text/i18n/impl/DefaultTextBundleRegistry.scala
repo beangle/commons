@@ -29,22 +29,13 @@ import java.util.concurrent.ConcurrentHashMap
 import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.time.Stopwatch
 import org.beangle.commons.lang.Arrays
+import org.beangle.commons.logging.Logging
 import org.beangle.commons.text.i18n.spi.TextBundle
 import org.beangle.commons.text.i18n.spi.TextBundleRegistry
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
-import DefaultTextBundleRegistry._
-
-object DefaultTextBundleRegistry {
-
-  private val logger = LoggerFactory.getLogger(classOf[DefaultTextBundleRegistry])
-}
-
 /**
  * @since 3.0.0
  */
-class DefaultTextBundleRegistry extends TextBundleRegistry {
+class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
 
   protected val caches = new collection.mutable.HashMap[Locale, ConcurrentHashMap[String, TextBundle]]
 

@@ -26,15 +26,10 @@ import java.sql.Clob
 import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.Timestamp
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.StringReader
+import org.beangle.commons.logging.Logging
 
-class StatementUtils
-
-object StatementUtils {
-
-  val logger: Logger = LoggerFactory.getLogger(classOf[StatementUtils]);
+object StatementUtils extends Logging {
 
   def setValue(ps: PreparedStatement, index: Int, value: Object, sqlType: Int) = {
     if (null == value) {

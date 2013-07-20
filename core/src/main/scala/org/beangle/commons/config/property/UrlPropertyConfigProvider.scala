@@ -22,17 +22,7 @@ import java.io.InputStream
 import java.net.URL
 import java.util.Properties
 import org.beangle.commons.inject.Resources
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import UrlPropertyConfigProvider._
-
-object UrlPropertyConfigProvider {
-
-  /**
-   * Constant <code>logger</code>
-   */
-  protected val logger = LoggerFactory.getLogger(classOf[UrlPropertyConfigProvider])
-}
+import org.beangle.commons.logging.Logging
 
 /**
  * <p>
@@ -42,7 +32,7 @@ object UrlPropertyConfigProvider {
  * @author chaostone
  * @version $Id: $
  */
-class UrlPropertyConfigProvider extends PropertyConfig.Provider {
+class UrlPropertyConfigProvider extends PropertyConfig.Provider with Logging {
 
   var resources: Resources = _
 

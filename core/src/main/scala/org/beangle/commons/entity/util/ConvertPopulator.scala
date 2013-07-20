@@ -25,16 +25,13 @@ import org.beangle.commons.entity.meta.EntityType
 import org.beangle.commons.entity.meta.Type
 import org.beangle.commons.lang.Objects
 import org.beangle.commons.lang.Strings
+import org.beangle.commons.logging.Logging
 import org.beangle.commons.conversion.Conversion
 import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.reflect.Reflections
 import org.beangle.commons.bean.PropertyUtils.{ getProperty, setProperty, copyProperty }
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
-object ConvertPopulator {
-  /** Constant <code>logger</code> */
-  val logger = LoggerFactory.getLogger(this.getClass);
+object ConvertPopulator extends Logging{
   val TrimStr = true
 }
 /**
@@ -47,7 +44,7 @@ object ConvertPopulator {
  */
 import ConvertPopulator._
 
-class ConvertPopulator(val conversion: Conversion = DefaultConversion.Instance) extends Populator {
+class ConvertPopulator(val conversion: Conversion = DefaultConversion.Instance) extends Populator with Logging {
 
   /**
    * Initialize target's attribuate path,Return the last property value and type.

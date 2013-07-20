@@ -30,9 +30,7 @@ import org.beangle.commons.http.mime.MimeTypeProvider
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Assert
 import org.beangle.commons.lang.Strings
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import scala.collection.JavaConversions._
+import org.beangle.commons.logging.Logging
 import org.beangle.commons.bean.Initializing
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Strings
@@ -45,9 +43,7 @@ import org.beangle.commons.io.IOs
  * @author chaostone
  * @since 2.4
  */
-class DefaultStreamDownloader(protected var mimeTypeProvider: MimeTypeProvider) extends Initializing with StreamDownloader {
-
-  protected var logger: Logger = LoggerFactory.getLogger(getClass)
+class DefaultStreamDownloader(protected var mimeTypeProvider: MimeTypeProvider) extends Initializing with StreamDownloader  with Logging {
 
   def init() {
     Assert.notNull(mimeTypeProvider, "mimeTypeProvider must be set");
