@@ -28,53 +28,53 @@ import org.beangle.commons.logging.Logging
 
 object CookieUtils extends Logging {
 
-def getCookieValue(cookie: Cookie): String = {
-  try {
-    URLDecoder.decode(cookie.getValue, "utf-8")
-  } catch {
-    case e: Exception => null
-  }
-}
-
-/**
-  * 获取cookie中的value<br>
-  * 自动负责解码<br>
-  */
-def getCookieValue(request: HttpServletRequest, cookieName: String): String = {
-  try {
-    val cookie = getCookie(request, cookieName)
-    if (null == cookie) {
-      null
-    } else {
+  def getCookieValue(cookie: Cookie): String = {
+    try {
       URLDecoder.decode(cookie.getValue, "utf-8")
+    } catch {
+      case e: Exception => null
     }
-  } catch {
-    case e: Exception => null
   }
-}
 
-/**
-  * Convenience method to get a cookie by name
-  */
-def getCookie(request: HttpServletRequest, name: String): Cookie = {
-  val cookies = request.getCookies
-  var returnCookie: Cookie = null
-  if (cookies == null) {
-    return returnCookie
-  }
-  for (i <- 0 until cookies.length; if (null==returnCookie)) {
-    val thisCookie = cookies(i)
-    if (thisCookie.getName == name && thisCookie.getValue != "") {
-      returnCookie = thisCookie
+  /**
+   * 获取cookie中的value<br>
+   * 自动负责解码<br>
+   */
+  def getCookieValue(request: HttpServletRequest, cookieName: String): String = {
+    try {
+      val cookie = getCookie(request, cookieName)
+      if (null == cookie) {
+        null
+      } else {
+        URLDecoder.decode(cookie.getValue, "utf-8")
+      }
+    } catch {
+      case e: Exception => null
     }
   }
+
+  /**
+   * Convenience method to get a cookie by name
+   */
+  def getCookie(request: HttpServletRequest, name: String): Cookie = {
+    val cookies = request.getCookies
+    var returnCookie: Cookie = null
+    if (cookies == null) {
+      return returnCookie
+    }
+    for (i <- 0 until cookies.length; if (null == returnCookie)) {
+      val thisCookie = cookies(i)
+      if (thisCookie.getName == name && thisCookie.getValue != "") {
+        returnCookie = thisCookie
+      }
+    }
     returnCookie
   }
 
   /**
-    * Convenience method to set a cookie <br>
-    * 刚方法自动将value进行编码存储
-    */
+   * Convenience method to set a cookie <br>
+   * 刚方法自动将value进行编码存储
+   */
   def addCookie(request: HttpServletRequest,
     response: HttpServletResponse,
     name: String,
@@ -91,14 +91,14 @@ def getCookie(request: HttpServletRequest, name: String): Cookie = {
   }
 
   /**
-    * 默认按照应用上下文进行设置
-    */
+   * 默认按照应用上下文进行设置
+   */
   def addCookie(request: HttpServletRequest,
     response: HttpServletResponse,
     name: String,
     value: String,
     age: Int) {
-    val contextPath = if(!request.getContextPath.endsWith("/")) request.getContextPath + "/"else request.getContextPath
+    val contextPath = if (!request.getContextPath.endsWith("/")) request.getContextPath + "/" else request.getContextPath
     addCookie(request, response, name, value, contextPath, age)
   }
 
@@ -107,8 +107,8 @@ def getCookie(request: HttpServletRequest, name: String): Cookie = {
   }
 
   /**
-    * Convenience method for deleting a cookie by name
-    */
+   * Convenience method for deleting a cookie by name
+   */
   def deleteCookie(response: HttpServletResponse, cookie: Cookie, path: String) {
     if (cookie != null) {
       cookie.setMaxAge(0)

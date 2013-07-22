@@ -27,7 +27,7 @@ import org.beangle.commons.conversion.Conversion
 import org.beangle.commons.conversion.impl.ConvertUtils
 import org.beangle.commons.logging.Logging
 
-object PropertyUtils extends Logging{
+object PropertyUtils extends Logging {
 
   private val resolver = new PropertyNameResolver()
 

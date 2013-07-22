@@ -54,5 +54,5 @@ class Resources {
     null == global && null == user && (null == locals || locals.isEmpty)
   }
 
-  override def toString():String= "{global:"+global+"  locals:"+locals+"  user:"+user+"}"
+  override def toString(): String = "{global:" + global + "  locals:" + locals + "  user:" + user + "}"
 }

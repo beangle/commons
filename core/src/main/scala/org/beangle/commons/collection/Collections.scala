@@ -25,22 +25,22 @@ import scala.collection.mutable
 
 object Collections {
 
-  def findFirstMatch[T](source:Iterable[T], candidates:Iterable[T]):Option[T]= {
+  def findFirstMatch[T](source: Iterable[T], candidates: Iterable[T]): Option[T] = {
     var finded = new mutable.ListBuffer[T]
     if (isNotEmpty(source) && isNotEmpty(candidates)) {
       source match {
-        case set:Set[T] =>
+        case set: Set[T] =>
           for (candidate <- candidates if finded.isEmpty) {
             if (set.contains(candidate)) finded += candidate
           }
-        case seq:Seq[T] =>
+        case seq: Seq[T] =>
           for (candidate <- candidates if finded.isEmpty) {
             if (seq.contains(candidate)) finded += candidate
           }
-        case _ => 
+        case _ =>
       }
     }
-    if(finded.isEmpty)None else Some(finded.head)
+    if (finded.isEmpty) None else Some(finded.head)
   }
 
   /**

@@ -43,7 +43,7 @@ import org.beangle.commons.io.IOs
  * @author chaostone
  * @since 2.4
  */
-class DefaultStreamDownloader(protected var mimeTypeProvider: MimeTypeProvider) extends Initializing with StreamDownloader  with Logging {
+class DefaultStreamDownloader(protected var mimeTypeProvider: MimeTypeProvider) extends Initializing with StreamDownloader with Logging {
 
   def init() {
     Assert.notNull(mimeTypeProvider, "mimeTypeProvider must be set");

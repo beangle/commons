@@ -18,7 +18,6 @@
  */
 package org.beangle.commons.bean.orderings
 
-
 /**
  * 组合比较器
  *
