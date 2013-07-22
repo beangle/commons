@@ -3,20 +3,20 @@
   <parent>
     <groupId>org.beangle</groupId>
     <artifactId>beangle-scala-parent</artifactId>
-    <version>8</version>
+    <version>9</version>
   </parent>
   <groupId>org.beangle.commons</groupId>
   <artifactId>beangle-commons-parent</artifactId>
   <packaging>pom</packaging>
-  <version>4.0.0-SNAPSHOT</version>
+  <version>4.0.0</version>
   <name>Beangle Commons Parent</name>
   
   <modules>
-    <module>org.beangle.commons.core</module>
-    <module>org.beangle.commons.web</module>
-    <module>org.beangle.commons.jpa</module>
-    <module>org.beangle.commons.jdbc</module>
-    <module>org.beangle.commons.message</module>
+    <module>core</module>
+    <module>web</module>
+    <module>jpa</module>
+    <module>jdbc</module>
+    <module>message</module>
   </modules>
 
   <description>
