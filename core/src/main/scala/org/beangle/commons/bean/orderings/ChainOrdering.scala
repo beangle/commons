@@ -16,16 +16,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.bean.comparators
+package org.beangle.commons.bean.orderings
 
-import java.util.Comparator
+
 /**
- * 比较两个集合，元素多的大
+ * 组合比较器
  *
  * @author chaostone
  * @version $Id: $
  */
-class CollectionSizeComparator[T <: Iterator[_]] extends Comparator[T] {
+class ChainOrdering[T](comparators: List[Ordering[T]]) extends Ordering[T] {
 
   /**
    * <p>
@@ -34,9 +34,11 @@ class CollectionSizeComparator[T <: Iterator[_]] extends Comparator[T] {
    *
    * @param first a T object.
    * @param second a T object.
-   * @return equals : 0,first less then second : -1 or small , first greate then second : 1 or big
+   * @return 0 is equals,-1 first &lt; second ,1 first &gt; second
    */
   def compare(first: T, second: T): Int = {
-    if (first == second) 0 else first.size - second.size
+    var rs = 0
+    for (com <- comparators if rs != 0) rs = com.compare(first, second)
+    rs
   }
 }

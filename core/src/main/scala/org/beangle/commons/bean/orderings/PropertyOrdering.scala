@@ -16,9 +16,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.bean.comparators
+package org.beangle.commons.bean.orderings
 
-import java.util.Comparator
 import org.beangle.commons.bean.PropertyUtils
 import org.beangle.commons.lang.Numbers
 import org.beangle.commons.lang.Strings
@@ -29,7 +28,7 @@ import org.beangle.commons.lang.Strings
  * @author chaostone
  * @version $Id: $
  */
-class PropertyComparator(cmpStr: String) extends Comparator[Any] {
+class PropertyOrdering(cmpStr: String) extends Ordering[Any] {
 
   var name: String = cmpStr.trim()
 
@@ -39,14 +38,14 @@ class PropertyComparator(cmpStr: String) extends Comparator[Any] {
 
   var nullFirst: Boolean = true
 
-  var comparator: Comparator[Any] = _
+  var comparator: Ordering[Any] = _
 
-  var stringComparator: StringComparator = new CollatorStringComparator(asc)
+  var collatorOrdering = new CollatorOrdering(asc)
 
   assert(Strings.isNotEmpty(cmpStr))
 
   if (Strings.contains(cmpStr, ',')) {
-    throw new RuntimeException("PropertyComparator don't support comma based order by. Use MultiPropertyComparator instead.")
+    throw new RuntimeException("PropertyOrdering don't support comma based order by. Use MultiPropertyOrdering instead.")
   }
 
   if ('[' == name.charAt(0)) {
@@ -62,14 +61,6 @@ class PropertyComparator(cmpStr: String) extends Comparator[Any] {
     name = name.substring(0, name.indexOf(' '))
   }
 
-  /**
-   * <p>
-   * Constructor for PropertyComparator.
-   * </p>
-   *
-   * @param cmpWhat a {@link java.lang.String} object.
-   * @param asc a boolean.
-   */
   def this(cmpWhat: String, asc: Boolean) {
     this(cmpWhat + " " + (if (asc) "" else "desc"))
   }
@@ -93,7 +84,7 @@ class PropertyComparator(cmpStr: String) extends Comparator[Any] {
       if (first != null && null == second) return if (asc && nullFirst) 1 else -1
 
       if (first.isInstanceOf[String] || second.isInstanceOf[String]) {
-        stringComparator.compare(first.toString, second.toString)
+        collatorOrdering.compare(first.toString, second.toString)
       } else {
         if (asc) {
           first.asInstanceOf[Comparable[Any]].compareTo(second)

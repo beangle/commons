@@ -45,5 +45,6 @@ object Engines extends Enumeration {
     }
   }
 
+  import scala.language.implicitConversions
   implicit def convertValue(v: Value): Engine = v.asInstanceOf[Engine]
 }

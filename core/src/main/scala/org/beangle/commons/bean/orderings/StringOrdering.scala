@@ -16,9 +16,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.bean.comparators
+package org.beangle.commons.bean.orderings
 
-import java.util.Comparator
 
 /**
  * 根据local对两个非空字符串进行比较。
@@ -26,4 +25,4 @@ import java.util.Comparator
  * @author chaostone
  * @version $Id: $
  */
-trait StringComparator extends Comparator[String]
+trait StringOrdering extends Ordering[String]

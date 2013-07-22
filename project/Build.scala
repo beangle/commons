@@ -11,6 +11,7 @@ object BuildSettings {
     version := buildVersion,
     scalaVersion := buildScalaVersion,
     shellPrompt := ShellPrompt.buildShellPrompt,
+    scalacOptions := Seq("-unchecked", "-deprecation","-feature","-target:jvm-1.6"),
     crossPaths := false)
 }
 

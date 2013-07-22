@@ -16,30 +16,28 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.bean.comparators
+package org.beangle.commons.bean.orderings
 
-import java.text.Collator
+import scala.collection.mutable.ListBuffer
+import org.beangle.commons.lang.Strings
 
 /**
- * <p>
- * CollatorStringComparator class.
- * </p>
+ * 多个属性的比较
  *
  * @author chaostone
  * @version $Id: $
  */
-class CollatorStringComparator(val asc: Boolean, val collator: Collator = Collator.getInstance) extends StringComparator {
-  /**
-   * <p>
-   * compare.
-   * </p>
-   *
-   * @param what0 a {@link java.lang.String} object.
-   * @param what1 a {@link java.lang.String} object.
-   * @return a int.
-   */
-  def compare(what0: String, what1: String): Int = {
-    (if (asc) 1 else -1) *
-      (collator.compare(if ((null == what0)) "" else what0, if ((null == what1)) "" else what1))
+class MultiPropertyOrdering(propertyStr: String) extends Ordering[Any] {
+
+  val chain = buildChainOrdering(propertyStr);
+
+  def buildChainOrdering(propertyStr: String): ChainOrdering[Any] = {
+    val properties = Strings.split(propertyStr, ',')
+    val comparators = new ListBuffer[PropertyOrdering]
+    properties.foreach(property => comparators += new PropertyOrdering(property.trim()))
+    return new ChainOrdering(comparators.toList)
   }
+
+  override def compare(arg0: Any, arg1: Any): Int = chain.compare(arg0, arg1)
+
 }

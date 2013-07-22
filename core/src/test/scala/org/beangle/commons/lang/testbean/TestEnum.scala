@@ -28,5 +28,6 @@ object TestEnum extends Enumeration {
 
   class Val extends super.Val
 
+  import scala.language.implicitConversions
   implicit def convertValue(v: Value): Val = v.asInstanceOf[Val]
 }

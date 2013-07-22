@@ -137,5 +137,6 @@ object Browsers extends Enumeration {
     }
   }
 
+  import scala.language.implicitConversions
   implicit def convertValue(v: Value): Category = v.asInstanceOf[Category]
 }
