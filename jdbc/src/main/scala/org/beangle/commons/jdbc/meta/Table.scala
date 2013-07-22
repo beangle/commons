@@ -117,7 +117,7 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
 
     }
     if (hasPrimaryKey && pk.enabled) {
-      buf.append(", ").append(pk sqlConstraintString)
+      buf.append(", ").append(pk.sqlConstraintString)
     }
     buf.append(')')
     if (null != comment && !comment.isEmpty()) {
@@ -166,13 +166,13 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
     if (null != pk) pk.lowerCase
 
     for (fk <- foreignKeys)
-      fk lowerCase;
+      fk.lowerCase;
 
     for (uk <- uniqueKeys)
-      uk lowerCase;
+      uk.lowerCase;
 
     for (idx <- indexes)
-      idx lowerCase;
+      idx.lowerCase;
   }
 
   def compareTo(o: Table): Int = this.identifier.compareTo(o.identifier)

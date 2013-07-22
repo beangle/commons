@@ -19,40 +19,12 @@
 package org.beangle.commons
 
 object BeangleVersion {
+  
+  def name: String = "Beangle Scala Development Toolkit"
 
-  /**
-   * <p>
-   * getName.
-   * </p>
-   *
-   * @return a {@link java.lang.String} object.
-   */
-  def getName(): String = "Beangle Java Development Toolkit"
+  def version: String = "4.0.0"
 
-  /**
-   * <p>
-   * getVersion.
-   * </p>
-   *
-   * @return a {@link java.lang.String} object.
-   */
-  def getVersion(): String = "3.2.0"
+  def major: Int = 4
 
-  /**
-   * <p>
-   * getMajorVersion.
-   * </p>
-   *
-   * @return a int.
-   */
-  def getMajorVersion(): Int = 3
-
-  /**
-   * <p>
-   * getMinorVersion.
-   * </p>
-   *
-   * @return a int.
-   */
-  def getMinorVersion(): Int = 2
+  def minor: Int = 0
 }
