@@ -26,8 +26,7 @@ import org.beangle.commons.inject.Resources
 import org.beangle.commons.lang.time.Stopwatch
 import org.beangle.commons.logging.Logging
 
-
-class MimeTypeProvider extends Logging{
+class MimeTypeProvider extends Logging {
 
   private val contentTypes = new Properties()
 

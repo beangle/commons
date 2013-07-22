@@ -19,7 +19,7 @@
 package org.beangle.commons
 
 object BeangleVersion {
-  
+
   def name: String = "Beangle Scala Development Toolkit"
 
   def version: String = "4.0.0"

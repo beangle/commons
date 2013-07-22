@@ -31,7 +31,7 @@ import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.reflect.Reflections
 import org.beangle.commons.bean.PropertyUtils.{ getProperty, setProperty, copyProperty }
 
-object ConvertPopulator extends Logging{
+object ConvertPopulator extends Logging {
   val TrimStr = true
 }
 /**

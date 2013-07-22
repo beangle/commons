@@ -31,7 +31,7 @@ class UrlConfigProviderTest extends FunSpec with ShouldMatchers {
       val provider = new UrlPropertyConfigProvider
       val resources = new Resources
       resources.global = ClassLoaders.getResource("system-default.properties", getClass)
-      resources.user =ClassLoaders.getResource("system.properties", getClass)
+      resources.user = ClassLoaders.getResource("system.properties", getClass)
       provider.resources = resources
       val properties = provider.getConfig
       config.add(properties)
