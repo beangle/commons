@@ -19,7 +19,9 @@
 package org.beangle.commons.entity.dao
 
 object Query {
-  case class Lang(val lang: String)
+  case class Lang(val name: String)
+  val hql = new Lang("hql")
+  val sql = new Lang("sql")
 }
 import Query._
 /**

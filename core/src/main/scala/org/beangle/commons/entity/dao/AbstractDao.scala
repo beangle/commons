@@ -35,7 +35,7 @@ abstract class AbstractDao[T <: Entity[ID], ID](val entityClass: Class[T], val g
   /**
    * search T by id.
    */
-  def find(first: ID, ids: ID*): List[T] = generalDao.find(entityClass, first, ids: _*)
+  def find(first: ID, ids: ID*): Seq[T] = generalDao.find(entityClass, first, ids: _*)
 
   /**
    * save or update entities
@@ -47,14 +47,14 @@ abstract class AbstractDao[T <: Entity[ID], ID](val entityClass: Class[T], val g
   /**
    * save or update entities
    */
-  def saveOrUpdate(entities: collection.Seq[T]) {
+  def saveOrUpdate(entities:Seq[T]) {
     generalDao.saveOrUpdate(entities)
   }
 
   /**
    * remove entities.
    */
-  def remove(entities: collection.Seq[T]) {
+  def remove(entities:Seq[T]) {
     generalDao.saveOrUpdate(entities)
   }
 
