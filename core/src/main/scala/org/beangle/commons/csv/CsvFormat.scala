@@ -55,7 +55,6 @@ object CsvFormat {
  * csv format definition
  *
  * @author chaostone
- * @version $Id: $
  */
 class CsvFormat private (val separators: Set[Char], val delimiter: Char) {
 

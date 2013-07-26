@@ -30,12 +30,9 @@ object AbstractQueryBuilder {
   val RightOuterJoin = " right outer join "
 }
 /**
- * <p>
  * Abstract AbstractQueryBuilder class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 abstract class AbstractQueryBuilder[T] extends QueryBuilder[T] {
 

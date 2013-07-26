@@ -19,12 +19,9 @@
 package org.beangle.commons.inject.bind
 
 /**
- * <p>
  * BindRegistry interface.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 trait BindRegistry {
 

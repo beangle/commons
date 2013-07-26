@@ -38,7 +38,6 @@ object Replacer {
  * Replace target with value on any input.
  *
  * @author chaostone
- * @version $Id: $
  */
 class Replacer(key: String, var value: String) {
 

@@ -19,11 +19,10 @@
 package org.beangle.commons.entity.meta
 
 import org.beangle.commons.entity.Entity
-import scala.collection.mutable.ListBuffer
 
-object AbstractEntityContext {
+object DefaultEntityContext {
 
-  def buildClassEntities(entityTypes: List[EntityType]): Map[String, EntityType] = {
+  def buildClassEntities(entityTypes: Iterable[EntityType]): Map[String, EntityType] = {
     val builder = new collection.mutable.HashMap[String, EntityType]
     for (entityType <- entityTypes) {
       builder.put(entityType.name, entityType)
@@ -34,16 +33,13 @@ object AbstractEntityContext {
 }
 
 /**
- * <p>
- * AbstractEntityContext class.
- * </p>
+ * DefaultEntityContext 
  *
  * @author chaostone
- * @version $Id: $
  */
-abstract class AbstractEntityContext(entityTypes: List[EntityType]) extends EntityContext {
+class DefaultEntityContext(entityTypes: Iterable[EntityType]) extends EntityContext {
 
-  val entities = AbstractEntityContext.buildClassEntities(entityTypes)
+  val entities = DefaultEntityContext.buildClassEntities(entityTypes)
 
   override def getType(clazz: Class[_]): Option[EntityType] = entities.get(clazz.getName)
 }

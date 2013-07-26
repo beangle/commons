@@ -21,12 +21,9 @@ package org.beangle.commons.text.inflector.rule
 import java.util.regex.Matcher
 
 /**
- * <p>
  * RegexReplacementRule class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class RegexReplacementRule(regex: String, val replacement: String) extends AbstractRegexReplacementRule(regex) {
 

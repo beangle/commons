@@ -24,7 +24,6 @@ package org.beangle.commons.config
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  * @since 3.2.0
  */
 class Version {

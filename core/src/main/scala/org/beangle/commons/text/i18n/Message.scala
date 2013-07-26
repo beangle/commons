@@ -19,19 +19,14 @@
 package org.beangle.commons.text.i18n
 
 /**
- * <p>
  * Message class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class Message(val key: String, val params: List[Any]) {
 
   /**
-   * <p>
    * Constructor for Message.
-   * </p>
    *
    * @param key a {@link java.lang.String} object.
    * @param objs an array of {@link java.lang.Object} objects.

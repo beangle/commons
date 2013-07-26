@@ -25,7 +25,6 @@ object PageLimit {
  * 查询分页限制
  *
  * @author chaostone
- * @version $Id: $
  */
 class PageLimit(val pageNo: Int, val pageSize: Int) extends Limit {
 

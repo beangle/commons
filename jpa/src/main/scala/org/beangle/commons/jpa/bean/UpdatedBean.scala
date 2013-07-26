@@ -23,12 +23,9 @@ import org.beangle.commons.entity.Updated
 import javax.validation.constraints.NotNull
 
 /**
- * <p>
  * Contain create and update time interface.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 trait UpdatedBean extends Updated {
 

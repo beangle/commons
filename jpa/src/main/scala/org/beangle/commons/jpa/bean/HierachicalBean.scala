@@ -30,12 +30,9 @@ import scala.collection.mutable
 import org.beangle.commons.entity.Hierarchical
 import org.beangle.commons.entity.Entity
 /**
- * <p>
  * Hierarchical interface.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 @MappedSuperclass
 trait HierarchicalBean[T <: Entity[_]] extends Hierarchical[T] {

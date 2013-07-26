@@ -21,12 +21,9 @@ package org.beangle.commons.text.inflector.rule
 import java.util.regex.Pattern
 
 /**
- * <p>
  * CategoryInflectionRule class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class CategoryInflectionRule(words: Array[String], singularSuffix: String, pluralSuffix: String)
     extends SuffixInflectionRule(singularSuffix, pluralSuffix) {

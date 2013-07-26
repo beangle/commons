@@ -25,12 +25,9 @@ import org.beangle.commons.text.i18n.spi.TextFormater
 import org.beangle.commons.text.i18n.TextResource
 
 /**
- * <p>
  * Abstract BundleTextResource class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class DefaultTextResource(protected val locale: Locale, protected val registry: TextBundleRegistry, protected val formater: TextFormater)
     extends TextResource() {

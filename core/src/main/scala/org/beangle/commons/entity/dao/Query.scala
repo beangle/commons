@@ -28,7 +28,6 @@ import Query._
  * 数据查询接口
  *
  * @author chaostone
- * @version $Id: $
  */
 trait Query[T] {
 

@@ -41,7 +41,6 @@ package org.beangle.commons.http.agent
  *
  * @author chaostone
  * @since 2.4
- * @version $Id: Useragent.java Nov 15, 2010 7:39:29 AM chaostone $
  */
 @SerialVersionUID(367387526753100612L)
 class Useragent(val ip: String, val browser: Browser, val os: Os) extends Serializable

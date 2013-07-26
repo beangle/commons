@@ -22,7 +22,6 @@ package org.beangle.commons.collection.page
  * 分页对象
  *
  * @author chaostone
- * @version $Id: $
  */
 class SinglePage[E](val pageNo: Int, val pageSize: Int, val total: Int, val items: Seq[E]) extends Page[E] {
 

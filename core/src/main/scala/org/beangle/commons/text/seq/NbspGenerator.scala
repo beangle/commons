@@ -19,19 +19,14 @@
 package org.beangle.commons.text.seq
 
 /**
- * <p>
  * NbspGenerator class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class NbspGenerator {
 
   /**
-   * <p>
    * generator.
-   * </p>
    *
    * @param repeat a int.
    * @return a {@link java.lang.String} object.

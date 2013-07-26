@@ -26,7 +26,6 @@ import scala.collection.mutable
  * Operations on {@link java.lang.String} that are {@code null} safe.
  *
  * @author chaostone 2005-11-15
- * @version $Id: $
  * @since 3.0
  */
 object Strings {

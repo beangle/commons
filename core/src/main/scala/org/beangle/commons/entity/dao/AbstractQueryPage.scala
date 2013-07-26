@@ -26,7 +26,6 @@ import org.beangle.commons.collection.page._
  * 该实现则是内部采用分页方式。
  *
  * @author chaostone
- * @version $Id: $
  */
 abstract class AbstractQueryPage[T](val query: LimitQuery[T]) extends Page[T] {
 

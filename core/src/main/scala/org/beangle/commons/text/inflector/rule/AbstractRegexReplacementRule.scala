@@ -67,7 +67,6 @@ import AbstractRegexReplacementRule._
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 abstract class AbstractRegexReplacementRule(regex: String) extends Rule {
 

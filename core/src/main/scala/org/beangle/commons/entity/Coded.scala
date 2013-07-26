@@ -24,7 +24,6 @@ package org.beangle.commons.entity
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 trait Coded {
 

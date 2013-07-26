@@ -26,7 +26,6 @@ import org.beangle.commons.lang.Strings
  * 属性比较器。<br>
  *
  * @author chaostone
- * @version $Id: $
  */
 class PropertyOrdering(cmpStr: String) extends Ordering[Any] {
 

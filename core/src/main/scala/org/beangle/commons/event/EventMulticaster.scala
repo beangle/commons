@@ -24,7 +24,6 @@ package org.beangle.commons.event
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 trait EventMulticaster {
 

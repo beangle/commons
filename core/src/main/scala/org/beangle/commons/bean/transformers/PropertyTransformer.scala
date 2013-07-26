@@ -26,7 +26,6 @@ import org.beangle.commons.lang.functor.Transformer
  * CollectionUtils.transform(collections,new PropertyTransformer('myAttr'))
  *
  * @author chaostone
- * @version $Id: $
  */
 class PropertyTransformer[I, R](property: String) extends Transformer[I, R]() {
 

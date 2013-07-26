@@ -26,7 +26,6 @@ import java.util.Date
 
 /**
  * @author chaostone
- * @version $Id: CalendarTest.java Jul 26, 2011 4:12:17 PM chaostone $
  */
 
 class CalendarTest extends FunSpec with ShouldMatchers {

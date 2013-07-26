@@ -26,7 +26,6 @@ import java.util.Locale
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 trait TextResource {
 

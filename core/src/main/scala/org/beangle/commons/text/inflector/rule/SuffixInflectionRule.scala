@@ -22,12 +22,9 @@ import java.util.regex.Pattern
 import org.beangle.commons.text.inflector.Rule
 
 /**
- * <p>
  * SuffixInflectionRule class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class SuffixInflectionRule(suffix: String, val singularSuffix: String, val pluralSuffix: String)
     extends Rule {

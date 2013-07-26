@@ -73,7 +73,6 @@ object EnNounPluralizer {
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class EnNounPluralizer extends RuleBasedPluralizer {
 

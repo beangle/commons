@@ -21,19 +21,14 @@ package org.beangle.commons.entity.dao
 import org.beangle.commons.lang.Arrays
 import scala.collection.mutable.ListBuffer
 /**
- * <p>
  * Operation class.
- * </p>
  *
  * @author chaostone
- * @version $Id: Operation.java Jul 25, 2011 2:21:27 PM chaostone $
  */
 object Operation {
-  case class Type private () {}
-  object Type {
-    val SaveUpdate = new Type()
-    val Remove = new Type()
-  }
+  case class Type protected[dao] () {}
+  val SaveUpdate = new Type()
+  val Remove = new Type()
 
   def apply(t: Operation.Type, data: AnyRef) = new Operation(t, data)
 
@@ -43,16 +38,16 @@ object Operation {
     def saveOrUpdate(entities: Seq[AnyRef]): this.type = {
       if (!entities.isEmpty) {
         for (entity <- entities) {
-          if (null != entity) operations += Operation(Type.SaveUpdate, entity)
+          if (null != entity) operations += Operation(SaveUpdate, entity)
         }
       }
       this
     }
 
     def saveOrUpdate(first: AnyRef, entities: AnyRef*): this.type = {
-      operations += Operation(Type.SaveUpdate, first)
+      operations += Operation(SaveUpdate, first)
       for (entity <- entities) {
-        if (null != entity) operations += Operation(Type.SaveUpdate, entity)
+        if (null != entity) operations += Operation(SaveUpdate, entity)
       }
       this
     }
@@ -60,16 +55,16 @@ object Operation {
     def remove(entities: Seq[AnyRef]): this.type = {
       if (!entities.isEmpty) {
         for (entity <- entities) {
-          if (null != entity) operations += Operation(Type.Remove, entity)
+          if (null != entity) operations += Operation(Remove, entity)
         }
       }
       this
     }
 
     def remove(first: AnyRef, entities: AnyRef*): this.type = {
-      operations += Operation(Type.Remove, first)
+      operations += Operation(Remove, first)
       for (entity <- entities) {
-        if (null != entity) operations += Operation(Type.Remove, entity)
+        if (null != entity) operations += Operation(Remove, entity)
       }
       this
     }

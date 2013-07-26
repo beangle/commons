@@ -24,7 +24,6 @@ import scala.collection.mutable.ListBuffer
  * 排序
  *
  * @author chaostone
- * @version $Id: $
  */
 object Order {
   /**
@@ -117,7 +116,6 @@ object Order {
  * 排序
  *
  * @author chaostone
- * @version $Id: $
  */
 class Order(val property: String, val ascending: Boolean, val lowerCase: Boolean = false) {
 

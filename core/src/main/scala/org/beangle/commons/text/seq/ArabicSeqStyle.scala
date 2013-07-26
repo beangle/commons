@@ -24,7 +24,6 @@ package org.beangle.commons.text.seq
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class ArabicSeqStyle extends SeqNumStyle {
 

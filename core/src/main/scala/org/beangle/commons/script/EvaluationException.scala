@@ -24,7 +24,6 @@ package org.beangle.commons.script
  * </p>
  *
  * @author chaostone
- * @version $Id: EvaluationException.java Mar 5, 2012 12:13:41 AM chaostone $
  */
 @SerialVersionUID(7366966661039007890L)
 class EvaluationException(message: String, cause: Throwable) extends RuntimeException(message, cause) {

@@ -30,7 +30,6 @@ import org.beangle.commons.logging.Logging
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class UrlPropertyConfigProvider extends PropertyConfig.Provider with Logging {
 

@@ -26,7 +26,6 @@ import org.beangle.commons.entity._
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 trait Populator {
   /**

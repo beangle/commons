@@ -24,12 +24,9 @@ import java.io.Reader
 import org.beangle.commons.csv.internal.CsvParser
 
 /**
- * <p>
  * CsvReader class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class CsvReader(reader: Reader, format: CsvFormat) {
 

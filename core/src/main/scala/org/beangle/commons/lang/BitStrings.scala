@@ -19,12 +19,9 @@
 package org.beangle.commons.lang
 
 /**
- * <p>
  * BitStrings class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 object BitStrings {
 

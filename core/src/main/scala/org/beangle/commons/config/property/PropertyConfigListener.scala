@@ -26,7 +26,6 @@ import java.util.EventListener
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 trait PropertyConfigListener extends EventListener {
 

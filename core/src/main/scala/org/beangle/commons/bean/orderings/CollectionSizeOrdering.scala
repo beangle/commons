@@ -22,7 +22,6 @@ package org.beangle.commons.bean.orderings
  * 比较两个集合，元素多的大
  *
  * @author chaostone
- * @version $Id: $
  */
 class CollectionSizeOrdering[T <: Iterator[_]] extends Ordering[T] {
 

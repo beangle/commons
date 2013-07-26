@@ -40,7 +40,6 @@ object ConvertPopulator extends Logging {
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 import ConvertPopulator._
 

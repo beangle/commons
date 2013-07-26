@@ -26,7 +26,6 @@ import org.beangle.commons.bean.PropertyUtils
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class ComponentType(val componentClass: Class[_]) extends AbstractType {
 

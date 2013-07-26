@@ -25,7 +25,6 @@ import java.util.regex.Matcher
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class IrregularMappingRule(wordMappings: Map[String, String], regex: String)
     extends AbstractRegexReplacementRule(regex) {

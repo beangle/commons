@@ -26,7 +26,6 @@ import org.beangle.commons.entity.Entity
  * [/p>
  *
  * @author chaostone
- * @version $Id: $
  */
 trait Dao[T <: Entity[ID], ID] {
 

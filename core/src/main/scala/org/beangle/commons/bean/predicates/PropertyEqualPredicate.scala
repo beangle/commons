@@ -27,7 +27,6 @@ import org.beangle.commons.lang.functor.Predicate
  * Property Equals Predicate
  *
  * @author chaostone
- * @version $Id: $
  */
 class PropertyEqualPredicate[T](name: String, value: Any) extends Predicate[T] {
 

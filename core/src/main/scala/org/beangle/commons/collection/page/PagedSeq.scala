@@ -36,7 +36,6 @@ import PagedSeq._
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends Page[E]() {
 

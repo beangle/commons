@@ -25,7 +25,6 @@ import java.util.EventObject
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 @SerialVersionUID(6311495014194589511L)
 abstract class Event(source: Any) extends EventObject(source) {

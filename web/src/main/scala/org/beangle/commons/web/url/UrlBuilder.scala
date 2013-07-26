@@ -22,7 +22,6 @@ import org.beangle.commons.lang.Objects
 import org.beangle.commons.lang.Strings
 /**
  * @author chaostone
- * @version $Id: UrlBuilder.java Nov 12; 2010 5:42:10 PM chaostone $
  */
 class UrlBuilder(cxtPath: String) {
 

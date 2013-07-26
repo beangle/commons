@@ -21,12 +21,9 @@ package org.beangle.commons.text.seq
 import scala.collection.mutable
 
 /**
- * <p>
  * MultiLevelSeqGenerator class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class MultiLevelSeqGenerator {
 

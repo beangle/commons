@@ -67,7 +67,6 @@ import Page._
  * 分页对象
  *
  * @author chaostone
- * @version $Id: $
  */
 trait Page[E] extends Seq[E] {
 

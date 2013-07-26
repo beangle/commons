@@ -24,7 +24,6 @@ import java.util.Collection
  * 有效整型判断谓词
  *
  * @author chaostone
- * @version $Id: $
  */
 class InRange(val floor: Int, val upper: Int) extends Predicate[Number] {
 
@@ -39,12 +38,9 @@ class InRange(val floor: Int, val upper: Int) extends Predicate[Number] {
 }
 
 /**
- * <p>
- * NotZeroNumber class.
- * </p>
+ * NotZero.
  *
  * @author chaostone
- * @version $Id: $
  */
 object NotZero extends Predicate[Number] {
 
@@ -53,12 +49,9 @@ object NotZero extends Predicate[Number] {
 }
 
 /**
- * <p>
  * NotEmptyString class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 object NotEmpty extends Predicate[String] {
 
@@ -67,12 +60,9 @@ object NotEmpty extends Predicate[String] {
 }
 
 /**
- * <p>
  * SingleWord class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 object SingleWord extends Predicate[String] {
 
@@ -80,12 +70,9 @@ object SingleWord extends Predicate[String] {
 }
 
 /**
- * <p>
  * InStr class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class InStr(val str: String) extends Predicate[String] {
 
@@ -93,12 +80,9 @@ class InStr(val str: String) extends Predicate[String] {
 }
 
 /**
- * <p>
- * ContainsPredicate class.
- * </p>
+ * Contains.
  *
  * @author chaostone
- * @version $Id: $
  */
 class Contains[T](val objs: Collection[_ <: T]) extends Predicate[T]() {
 
@@ -106,12 +90,9 @@ class Contains[T](val objs: Collection[_ <: T]) extends Predicate[T]() {
 }
 
 /**
- * <p>
  * Max1Element class.
- * </p>
- *
+ * 
  * @author chaostone
- * @version $Id: $
  * @since 4.0.0
  */
 class Max1Element extends Predicate[Collection[_]] {

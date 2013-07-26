@@ -28,7 +28,6 @@ import org.beangle.commons.entity.TemporalAt
  * 具体时间采用时间时间格式便于比对。
  *
  * @author chaostone
- * @version $Id: $
  */
 trait TemporalAtBean extends TemporalAt {
 

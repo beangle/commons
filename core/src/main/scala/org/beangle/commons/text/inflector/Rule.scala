@@ -19,12 +19,9 @@
 package org.beangle.commons.text.inflector
 
 /**
- * <p>
  * Rule interface.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 trait Rule {
 

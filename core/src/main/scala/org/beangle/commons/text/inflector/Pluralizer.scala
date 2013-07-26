@@ -22,14 +22,11 @@ package org.beangle.commons.text.inflector
  * <code>Pluralizer</code> converts singular word forms to their plural forms.
  *
  * @author chaostone
- * @version $Id: $
  */
 trait Pluralizer {
 
   /**
-   * <p>
    * pluralize.
-   * </p>
    *
    * @param word a {@link java.lang.String} object.
    * @return a {@link java.lang.String} object.

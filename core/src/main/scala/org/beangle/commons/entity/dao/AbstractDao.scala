@@ -47,14 +47,14 @@ abstract class AbstractDao[T <: Entity[ID], ID](val entityClass: Class[T], val g
   /**
    * save or update entities
    */
-  def saveOrUpdate(entities:Seq[T]) {
+  def saveOrUpdate(entities: Seq[T]) {
     generalDao.saveOrUpdate(entities)
   }
 
   /**
    * remove entities.
    */
-  def remove(entities:Seq[T]) {
+  def remove(entities: Seq[T]) {
     generalDao.saveOrUpdate(entities)
   }
 

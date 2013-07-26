@@ -29,12 +29,9 @@ object EntityType {
   }
 }
 /**
- * <p>
  * EntityType class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class EntityType(val entityName: String, val entityClass: Class[_], val idName: String, val idType: Type) extends AbstractType {
 

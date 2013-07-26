@@ -27,6 +27,5 @@ import scala.annotation.StaticAnnotation
  * 以及日志数据需要分开标记，以便独立处理。
  *
  * @author chaostone
- * @version $Id: FlashEntity.scala Jul 1, 2011 8:39:49 AM chaostone $
  */
 class FlashEntity extends StaticAnnotation

@@ -43,20 +43,15 @@ object RuleBasedPluralizer {
 }
 
 /**
- * <p>
  * RuleBasedPluralizer class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class RuleBasedPluralizer(var rules: List[Rule], var locale: Locale, var fallbackPluralizer: Pluralizer)
     extends Pluralizer {
 
   /**
-   * <p>
    * Constructs a pluralizer with an empty list of rules. Use the setters to configure.
-   * </p>
    */
   def this() {
     this(List.empty, Locale.getDefault, null)

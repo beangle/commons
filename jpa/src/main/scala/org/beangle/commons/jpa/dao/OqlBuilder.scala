@@ -95,7 +95,6 @@ object OqlBuilder {
  * 实体类查询 Object Query Language Builder
  *
  * @author chaostone
- * @version $Id: $
  */
 class OqlBuilder[T] private () extends AbstractQueryBuilder[T] {
 

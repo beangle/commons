@@ -33,7 +33,6 @@ object PropertyConfig {
  * 系统属性
  *
  * @author chaostone
- * @version $Id: $
  */
 trait PropertyConfig {
 

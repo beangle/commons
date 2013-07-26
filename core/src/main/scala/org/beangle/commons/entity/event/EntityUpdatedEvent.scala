@@ -24,7 +24,6 @@ import org.beangle.commons.entity.Entity
  * 实体更新事件
  *
  * @author chaostone
- * @version $Id: EntityUpdatedEvent.scala Mar 3, 2012 9:05:03 PM chaostone $
  */
 class EntityUpdatedEvent[T <: Entity[_]](clazz: Class[T], source: List[T]) extends AbstractEntityEvent[T](clazz, source) {
 }

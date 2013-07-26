@@ -26,7 +26,6 @@ import org.beangle.commons.collection.page.PageLimit
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 trait QueryBuilder[T] {
 
