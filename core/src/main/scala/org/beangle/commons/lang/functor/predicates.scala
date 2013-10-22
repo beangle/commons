@@ -91,7 +91,7 @@ class Contains[T](val objs: Collection[_ <: T]) extends Predicate[T]() {
 
 /**
  * Max1Element class.
- * 
+ *
  * @author chaostone
  * @since 4.0.0
  */

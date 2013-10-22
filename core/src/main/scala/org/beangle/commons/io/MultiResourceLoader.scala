@@ -25,36 +25,41 @@ import org.beangle.commons.logging.Logging
 import scala.collection.mutable.ListBuffer
 
 /**
- * Load resource by class loader.
+ * Load resource by multiple resource loader.
  *
  * @author chaostone
- * @since 3.3.0
+ * @since 4.0.1
  */
-class ClassResourceLoader(loaders: List[ClassLoader]) extends ResourceLoader with Logging {
+class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader with Logging {
 
-  def this(loaderArray: ClassLoader*) {
+  def this(loaderArray: ResourceLoader*) {
     this(loaderArray.toList)
   }
 
-  override def getResource(resourceName: String): Option[URL] = {
-    for (loader <- loaders) {
-      val url = loader.getResource(resourceName)
-      if (null != url) return Some(url)
+  override def load(resourceName: String): Option[URL] = {
+    var url: Option[URL] = None
+    for (loader <- loaders if null == url) {
+      val url = loader.load(resourceName)
     }
-    None
+    url
   }
 
-  def getResources(resourceName: String): List[URL] = {
-    var em: Enumeration[URL] = null
-    for (loader <- loaders if (null != em && em.hasMoreElements)) {
+  def loadAll(resourceName: String): List[URL] = {
+    var list: List[URL] = List()
+    for (loader <- loaders if list.isEmpty) {
       try {
-        em = loader.getResources(resourceName)
+        list = loader.loadAll(resourceName)
       } catch {
         case e: IOException => logger.error("cannot getResources " + resourceName, e)
       }
     }
-    val urls = new ListBuffer[URL]
-    while (null != em && em.hasMoreElements()) urls += em.nextElement()
+    list
+  }
+
+  def load(names: Seq[String]): List[URL] = {
+    val urls = new collection.mutable.ListBuffer[URL]
+    for (name <- names)
+      urls ++= load(name)
     urls.toList
   }
 }

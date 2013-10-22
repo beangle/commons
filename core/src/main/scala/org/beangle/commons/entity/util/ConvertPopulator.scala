@@ -68,16 +68,7 @@ class ConvertPopulator(val conversion: Conversion = DefaultConversion.Instance) 
         }
         if (null == property) {
           property = propertyType.newInstance();
-          try {
-            setProperty(propObj.asInstanceOf[AnyRef], nested, property);
-          } catch {
-            case e: Exception =>
-              // Try fix jdk error for couldn't find correct setter when object's Set required type is
-              // diffent with Get's return type declared in interface.
-              val setter = Reflections.getSetter(propObj.getClass(), nested);
-              if (null != setter) setter.invoke(propObj, property.asInstanceOf[AnyRef]);
-              else throw e;
-          }
+          setProperty(propObj.asInstanceOf[AnyRef], nested, property);
         }
         index += 1
         propObj = property

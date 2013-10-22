@@ -29,19 +29,19 @@ import org.beangle.commons.jdbc.dialect.Dialect
  */
 class Table(var name: String) extends Comparable[Table] with Cloneable {
   var schema: String = null
-  protected[meta] var pk: PrimaryKey = null
-  protected[meta] var comment: String = null
-  protected[meta] val cols = new ListBuffer[Column]
-  protected[meta] val uniqueKeys = new ListBuffer[UniqueKey]
-  protected[meta] val foreignKeys = new ListBuffer[ForeignKey]
-  protected[meta] val indexes = new ListBuffer[Index]
+  var primaryKey: PrimaryKey = null
+  var comment: String = null
+  val columns = new ListBuffer[Column]
+  val uniqueKeys = new ListBuffer[UniqueKey]
+  val foreignKeys = new ListBuffer[ForeignKey]
+  val indexes = new ListBuffer[Index]
 
   def this(schema: String, name: String) {
     this(name)
     this.schema = schema
   }
 
-  def columnNames: List[String] = cols.result.map(_.name)
+  def columnNames: List[String] = columns.result.map(_.name)
 
   def identifier = Table.qualify(schema, name)
 
@@ -68,7 +68,7 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
     sb += '('
     sb ++= columnNames.mkString(",")
     sb ++= ") values("
-    sb ++= ("?," * cols.size)
+    sb ++= ("?," * columns.size)
     sb.setCharAt(sb.length() - 1, ')')
     sb.mkString
   }
@@ -82,8 +82,8 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
   def createSql(dialect: Dialect, newSchema: String): String = {
     val grammar = dialect.tableGrammar
     val buf = new StringBuilder(grammar.createString).append(' ').append(identifier(newSchema)).append(" (")
-    val iter: Iterator[Column] = cols.iterator
-    val l = cols.toList
+    val iter: Iterator[Column] = columns.iterator
+    val l = columns.toList
     while (iter.hasNext) {
       val col: Column = iter.next()
       buf.append(col.name).append(' ')
@@ -116,13 +116,12 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
       if (iter.hasNext) buf.append(", ")
 
     }
-    if (hasPrimaryKey && pk.enabled) {
-      buf.append(", ").append(pk.sqlConstraintString)
+    if (hasPrimaryKey && primaryKey.enabled) {
+      buf.append(", ").append(primaryKey.sqlConstraintString)
     }
     buf.append(')')
-    if (null != comment && !comment.isEmpty()) {
-      buf.append(grammar.getComment(comment))
-    }
+    if (null != comment && !comment.isEmpty()) buf.append(grammar.getComment(comment))
+    
     buf.toString()
   }
 
@@ -141,10 +140,13 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
 
   override def clone(): Table = {
     val tb: Table = new Table(schema, name)
-    tb.setComment(comment)
-    for (col <- cols)
+    tb.comment = comment
+    for (col <- columns)
       tb.addColumn(col.clone())
-    if (null != pk) tb.primaryKey = pk.clone()
+    if (null != primaryKey) {
+      tb.primaryKey = primaryKey.clone()
+      tb.primaryKey.table=tb
+    }
 
     for (fk <- foreignKeys)
       tb.addForeignKey(fk.clone())
@@ -160,10 +162,10 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
   def lowerCase() {
     this.schema = schema.toLowerCase()
     this.name = name.toLowerCase()
-    for (col <- cols)
+    for (col <- columns)
       col.lowerCase
 
-    if (null != pk) pk.lowerCase
+    if (null != primaryKey) primaryKey.lowerCase
 
     for (fk <- foreignKeys)
       fk.lowerCase;
@@ -177,21 +179,12 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
 
   def compareTo(o: Table): Int = this.identifier.compareTo(o.identifier)
 
-  private def hasPrimaryKey = null != pk
-
-  def columns = cols
-
-  def primaryKey = pk
-
-  def primaryKey_=(primaryKey: PrimaryKey) {
-    this.pk = primaryKey
-    if (null != primaryKey) primaryKey.table = this
-  }
+  private def hasPrimaryKey = null != primaryKey
 
   override def toString = Table.qualify(schema, name)
 
   def getColumn(columnName: String): Column = {
-    for (col <- cols)
+    for (col <- columns)
       if (col.name == columnName) return col;
     return null;
   }
@@ -212,15 +205,13 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
   }
 
   def addColumn(column: Column): Boolean = {
-    if (!cols.exists(_.name == column.name)) {
-      cols += column.clone();
+    if (!columns.exists(_.name == column.name)) {
+      columns += column.clone();
       true
     } else false
   }
 
   def addIndex(index: Index) = indexes += index
-
-  def getForeignKeys = foreignKeys
 
   def getIndexes = indexes
 
@@ -228,11 +219,6 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
     if (null == indexName) null
     else indexes.find(f => f.name.equals(indexName)).orNull
   }
-
-  def getComment = comment
-
-  def setComment(comment: String) = this.comment = comment
-
 }
 
 object Table {

@@ -57,7 +57,7 @@ object DataSourceUtil extends Logging {
 
   private def build(properties: collection.Map[String, String]): DataSource = {
     new PoolingDataSourceFactory(properties("driverClassName"), properties("url"),
-      properties("username"), properties("password")).getObject
+      properties("user"), properties("password"),null).getObject
   }
 
   def getDataSourceNames(): List[String] = {

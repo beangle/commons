@@ -30,53 +30,6 @@ import org.beangle.commons.lang.Objects
 
 object Reflections {
 
-  /**
-   * Return the Java Class representing the property type of the specified
-   * property, or <code>null</code> if there is no such property for the
-   * specified bean.
-   * this method using Introspector.getBeanInfo not lying on readmethod.
-   * For generic super class read method's return type is more general.
-   */
-  def getPropertyType(clazz: Class[_], property: String): Class[_] = {
-    var beanInfo: BeanInfo = null
-    try {
-      beanInfo = Introspector.getBeanInfo(clazz)
-    } catch {
-      case e: IntrospectionException => return null
-    }
-    val descriptors = beanInfo.getPropertyDescriptors
-    if (null == descriptors) return null
-    for (pd <- descriptors if pd.getName == property) return pd.getPropertyType
-    null
-  }
-
-  /**
-   * Return setter method.
-   *
-   * @param clazz
-   * @param property
-   * @return null when not found.
-   */
-  def getSetter(clazz: Class[_], property: String): Method = {
-    val setName = "set" + Strings.capitalize(property)
-    for (m <- clazz.getMethods if m.getName == setName) {
-      if (!m.isBridge() && Modifier.isPublic(m.getModifiers) && !Modifier.isStatic(m.getModifiers) &&
-        m.getParameterTypes.length == 1) {
-        return m
-      } else {
-        return null
-      }
-    }
-    null
-  }
-
-  /**
-   * Return list of setters
-   *
-   * @param clazz
-   */
-  def getSetters(clazz: Class[_]): Map[String, MethodInfo] = ClassInfo.load(clazz).writers
-
   def newInstance[T](clazz: Class[T]): T = {
     try {
       return clazz.newInstance()

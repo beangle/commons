@@ -23,13 +23,19 @@ import javax.sql.DataSource
 import org.apache.commons.dbcp._
 import org.apache.commons.pool.impl.GenericObjectPool
 import org.slf4j._
+import java.util.Properties
 
-class PoolingDataSourceFactory(url: String, val username: String, password: String) {
+class PoolingDataSourceFactory(url: String, username: String, password: String,props:Properties) {
 
   private val logger: Logger = LoggerFactory.getLogger(classOf[PoolingDataSourceFactory])
 
-  def this(newDriverClassName: String, url: String, username: String, password: String) = {
-    this(url, username, password)
+  val properties = if(null==props) new Properties() else new Properties(props)
+
+  if(null!=username) properties.put("user",username)
+  if(null!=password) properties.put("password",password)
+  
+  def this(newDriverClassName: String, url: String, username: String, password: String,props:Properties) = {
+    this(url, username, password,props)
     registeDriver(newDriverClassName)
   }
 
@@ -50,7 +56,7 @@ class PoolingDataSourceFactory(url: String, val username: String, password: Stri
     val config = new GenericObjectPool.Config()
     config.maxActive = 16
     val connectionPool = new GenericObjectPool(null, config)
-    val connectionFactory: ConnectionFactory = new DriverManagerConnectionFactory(url, username, password)
+    val connectionFactory: ConnectionFactory = new DriverManagerConnectionFactory(url, properties)
     new PoolableConnectionFactory(connectionFactory, connectionPool, null, null, false, true)
     new PoolingDataSource(connectionPool)
   }

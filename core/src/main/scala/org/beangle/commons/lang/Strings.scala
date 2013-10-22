@@ -686,7 +686,7 @@ object Strings {
    * @return an array of {@link java.lang.String} objects.
    */
   def split(target: String): Array[String] = {
-    split2(target, Array(',', ';', '\r', '\n', ' '))
+    split(target, Array(',', ';', '\r', '\n', ' '))
   }
 
   /**
@@ -731,17 +731,13 @@ object Strings {
   }
 
   /**
-   * <p>
-   * split.
-   * </p>
+   * split with separators
    *
-   * @param target
-   *          a {@link java.lang.String} object.
-   * @param separatorChars
-   *          an array of char.
+   * @param target   a {@link java.lang.String} object.
+   * @param separatorChars  an array of char.
    * @return an array of {@link java.lang.String} objects.
    */
-  def split2(target: String, separatorChars: Array[Char]): Array[String] = {
+  def split(target: String, separatorChars: Array[Char]): Array[String] = {
     if (null == target) return new Array[String](0)
 
     val sb = target.toCharArray
@@ -773,9 +769,7 @@ object Strings {
    * </pre>
    */
   def split(str: String, separatorChars: String): Array[String] = {
-    if (str == null) {
-      return null
-    }
+    if (str == null) return null
     val len = str.length
     if (len == 0) return new Array[String](0)
     val list = new mutable.ListBuffer[String]
@@ -834,8 +828,8 @@ object Strings {
    * @param ids a {@link java.lang.String} object.
    * @return an array of {@link java.lang.Integer} objects.
    */
-  def splitToInteger(ids: String): Array[Integer] = {
-    if (isEmpty(ids)) new Array[Integer](0) else transformToInteger(split(ids, ','))
+  def splitToInt(ids: String): Array[Integer] = {
+    if (isEmpty(ids)) new Array[Integer](0) else transformToInt(split(ids, ','))
   }
 
   /**
@@ -940,14 +934,14 @@ object Strings {
 
   /**
    * <p>
-   * transformToInteger.
+   * transformToInt.
    * </p>
    *
    * @param ids
    *          an array of {@link java.lang.String} objects.
    * @return an array of {@link java.lang.Integer} objects.
    */
-  def transformToInteger(ids: Array[String]): Array[Integer] = {
+  def transformToInt(ids: Array[String]): Array[Integer] = {
     val idsOfInteger = new Array[Integer](ids.length)
     for (i <- 0 until ids.length) {
       idsOfInteger(i) = new java.lang.Integer(ids(i))

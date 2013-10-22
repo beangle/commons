@@ -34,7 +34,7 @@ class Database(meta: DatabaseMetaData, val dialect: Dialect, val catalog: String
   val sequences = new mutable.HashSet[Sequence]
 
   def loadTables(extras: Boolean): mutable.HashMap[String, Table] = {
-    val loader: MetadataLoader = new MetadataLoader(dialect, meta)
+    val loader = new MetadataLoader(dialect, meta)
     val loadTables: Set[Table] = loader.loadTables(catalog, schema, extras)
     for (table <- loadTables) {
       tables.put(table.identifier, table)
@@ -43,8 +43,7 @@ class Database(meta: DatabaseMetaData, val dialect: Dialect, val catalog: String
   }
 
   def loadSequences(): mutable.HashSet[Sequence] = {
-    val loader: MetadataLoader = new MetadataLoader(dialect, meta)
-    sequences ++= loader.loadSequences(meta.getConnection(), schema)
+    sequences ++= new MetadataLoader(dialect, meta).loadSequences(meta.getConnection(), schema)
     sequences
   }
 

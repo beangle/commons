@@ -33,7 +33,7 @@ object DefaultEntityContext {
 }
 
 /**
- * DefaultEntityContext 
+ * DefaultEntityContext
  *
  * @author chaostone
  */

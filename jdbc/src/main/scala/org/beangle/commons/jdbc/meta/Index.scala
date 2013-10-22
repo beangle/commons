@@ -1,3 +1,4 @@
+
 /*
  * Beangle, Agile Java/Scala Development Scaffold and Toolkit
  *
@@ -29,13 +30,11 @@ class Index(var name: String) extends Cloneable {
 
   val columns = new ListBuffer[Column];
 
-  def lowerCase = this.name = name.toLowerCase()
+  var unique:Boolean=false
 
-  def getName = name
+  def lowerCase() = this.name = name.toLowerCase()
 
   def addColumn(column: Column) = if (column != null) columns += column
-
-  def getColumns = columns
 
   override def toString = "IndexMatadata(" + name + ')'
 

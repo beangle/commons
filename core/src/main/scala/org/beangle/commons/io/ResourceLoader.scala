@@ -28,7 +28,10 @@ import java.net.URL
  */
 trait ResourceLoader {
 
-  def getResource(resourceName: String): Option[URL]
+  def load(resourceName: String): Option[URL]
 
-  def getResources(resourceName: String): List[URL]
+  def loadAll(resourceName: String): List[URL]
+
+  def load(names: Seq[String]): List[URL]
+
 }

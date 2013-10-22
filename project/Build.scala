@@ -47,7 +47,6 @@ object Dependencies {
   val scalatestVer = "2.0.M5b"
 
   val slf4j = "org.slf4j" % "slf4j-api" % slf4jVer
-  val asm = "asm" % "asm" % "3.3"
   val scalatest = "org.scalatest" % "scalatest_2.10" % scalatestVer % "test"
   val mockito = "org.mockito" % "mockito-core" % mockitoVer % "test"
 
@@ -81,7 +80,7 @@ object BeangleBuild extends Build {
   lazy val commons_core = Project(
     "beangle-commons-core",
     file("core"),
-    settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(asm)) ++ Seq(resolvers += m2repo))
+    settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps) ++ Seq(resolvers += m2repo))
 
   lazy val commons_web = Project(
     "beangle-commons-web",
