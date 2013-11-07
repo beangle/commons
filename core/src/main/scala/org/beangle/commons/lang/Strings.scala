@@ -349,7 +349,7 @@ object Strings {
    * @param delimiter a {@link java.lang.String} object.
    * @return a {@link java.lang.String} object.
    */
-  def join(seq: Iterable[String], delimiter: String): String = {
+  def join(seq: Iterable[_], delimiter: String): String = {
     if (null == seq) {
       ""
     } else {

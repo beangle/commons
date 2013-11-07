@@ -80,7 +80,6 @@ class MetadataLoader(initDialect: Dialect, initMeta: DatabaseMetaData) extends L
                 val col= new Column(rs.getString("COLUMN_NAME"), rs.getInt("DATA_TYPE"))
                 col.position = rs.getInt("ORDINAL_POSITION")
                 col.size = rs.getInt("COLUMN_SIZE")
-                if (col.typeCode == Types.VARCHAR) col.size = 255
                 col.scale = rs.getShort("DECIMAL_DIGITS")
                 col.nullable = "yes".equalsIgnoreCase(rs.getString("IS_NULLABLE"))
                 col.typeName = new StringTokenizer(rs.getString("TYPE_NAME"), "() ").nextToken()
@@ -172,10 +171,12 @@ class MetadataLoader(initDialect: Dialect, initMeta: DatabaseMetaData) extends L
         if (index != null) {
           var info = table.getIndex(index)
           if (info == null) {
-            info = new Index(rs.getString("INDEX_NAME"))
+            info = new Index(rs.getString("INDEX_NAME"),table)
             table.addIndex(info)
           }
           info.unique=(rs.getBoolean("NON_UNIQUE")==false)
+          val ascOrDesc = rs.getString("ASC_OR_DESC")
+          if(null!=ascOrDesc) info.ascOrDesc=Some("A"==ascOrDesc)
           info.addColumn(table.getColumn(rs.getString("COLUMN_NAME")))
         }
       }

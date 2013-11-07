@@ -37,8 +37,10 @@ class TableGrammarBean extends TableGrammar {
     if (null == this.tableComment) "" else Strings.replace(this.tableComment, "{}", comment)
 
   def getColumnComment(comment: String) = {
+    var newcomment = Strings.replace(comment,"'","")
+    newcomment = Strings.replace(comment,"\"","")
     if (null == this.columnComent) ""
-    else Strings.replace(this.columnComent, "{}", comment)
+    else Strings.replace(this.columnComent, "{}", newcomment)
   }
 
   def dropCascade(table: String) = Strings.replace(dropSql, "{}", table)

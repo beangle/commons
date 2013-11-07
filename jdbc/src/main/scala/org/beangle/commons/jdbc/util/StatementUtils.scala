@@ -31,7 +31,7 @@ import org.beangle.commons.logging.Logging
 
 object StatementUtils extends Logging {
 
-  def setValue(ps: PreparedStatement, index: Int, value: Object, sqlType: Int) = {
+  def setValue(ps: PreparedStatement, index: Int, value: Any, sqlType: Int) = {
     if (null == value) {
       ps.setNull(index, sqlType);
     } else {

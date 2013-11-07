@@ -60,11 +60,9 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
     uk
   }
 
-  def insertSql: String = insertSql(schema)
-
-  def insertSql(newSchema: String): String = {
+  def insertSql: String = {
     val sb = new StringBuilder("insert into ")
-    sb ++= identifier(newSchema)
+    sb ++= identifier(schema)
     sb += '('
     sb ++= columnNames.mkString(",")
     sb ++= ") values("
@@ -73,15 +71,13 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
     sb.mkString
   }
 
-  def createSql(dialect: Dialect): String = createSql(dialect, schema)
-
   /**
    * @param dialect
    * @return
    */
-  def createSql(dialect: Dialect, newSchema: String): String = {
+  def createSql(dialect: Dialect): String = {
     val grammar = dialect.tableGrammar
-    val buf = new StringBuilder(grammar.createString).append(' ').append(identifier(newSchema)).append(" (")
+    val buf = new StringBuilder(grammar.createString).append(' ').append(identifier(schema)).append(" (")
     val iter: Iterator[Column] = columns.iterator
     val l = columns.toList
     while (iter.hasNext) {
@@ -110,7 +106,7 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
       if (col.hasCheckConstraint && grammar.supportsColumnCheck) {
         buf.append(" check (").append(col.checkConstraint).append(")")
       }
-      val columnComment = col.comment
+      var columnComment = col.comment
       if (columnComment != null) buf.append(grammar.getColumnComment(columnComment))
 
       if (iter.hasNext) buf.append(", ")
@@ -125,16 +121,14 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
     buf.toString()
   }
 
-  def querySql: String = querySql(schema)
-
-  def querySql(newSchema: String): String = {
+  def querySql: String = {
     val sb: StringBuilder = new StringBuilder()
     sb.append("select ")
     for (columnName <- this.columnNames) {
       sb.append(columnName).append(',')
     }
     sb.deleteCharAt(sb.length() - 1)
-    sb.append(" from ").append(identifier(newSchema))
+    sb.append(" from ").append(identifier(schema))
     sb.toString()
   }
 
@@ -194,12 +188,12 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
     else foreignKeys.find(f => f.name.equals(keyName)).orNull
   }
 
-  def addForeignKey(key: ForeignKey) = {
+  def addForeignKey(key: ForeignKey) {
     key.table = this
     foreignKeys += key
   }
 
-  def addUniqueKey(key: UniqueKey) = {
+  def addUniqueKey(key: UniqueKey) {
     key.table = this
     this.uniqueKeys += key
   }
@@ -211,7 +205,10 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
     } else false
   }
 
-  def addIndex(index: Index) = indexes += index
+  def addIndex(index: Index) {
+    index.table=this
+    indexes += index
+  }
 
   def getIndexes = indexes
 

@@ -20,17 +20,19 @@
 package org.beangle.commons.jdbc.meta
 
 import scala.collection.mutable.ListBuffer
-
+import org.beangle.commons.jdbc.dialect.Dialect
 /**
- * JDBC index metadata
- *
- * @author chaostone
- */
-class Index(var name: String) extends Cloneable {
+  * JDBC index metadata
+  *
+  * @author chaostone
+  */
+class Index(var name: String,var table:Table ) extends Cloneable {
 
   val columns = new ListBuffer[Column];
 
   var unique:Boolean=false
+
+  var ascOrDesc:Option[Boolean]=None
 
   def lowerCase() = this.name = name.toLowerCase()
 
@@ -48,5 +50,24 @@ class Index(var name: String) extends Cloneable {
     cloned.columns ++= newColumns
     return cloned
   }
+
+  def createSql(dialect:Dialect ) :String ={
+    val buf = new StringBuilder( "create" )
+      .append( if(unique) " unique" else "" )
+      .append( " index " )
+      .append( name )
+      .append( " on " )
+      .append(table.identifier )
+      .append( " (" );
+    val iter = columns.iterator
+    while ( iter.hasNext ) {
+      buf.append( iter.next.name );
+      if ( iter.hasNext ) buf.append( ", " );
+    }
+    buf.append( ")" );
+    buf.toString()
+  }
+
+  def dropSql(dialect:Dialect ) :String =  "drop index " +table.identifier + "." +name;
 
 }
