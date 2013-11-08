@@ -90,7 +90,6 @@ class JdbcExecutor(val dataSource: DataSource) {
     try {
       stmt = conn.prepareStatement(sql)
       fillStatement(stmt, params, null)
-      stmt.addBatch()
       rows = stmt.executeUpdate()
     } catch {
       case e: SQLException => rethrow(e, sql, params)

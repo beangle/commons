@@ -16,25 +16,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.jdbc.dialect.vendors
+package org.beangle.commons.jdbc.dialect
 
 import java.sql.Types._
 
-import org.beangle.commons.jdbc.dialect._
-
 class H2Dialect extends AbstractDialect("[1.3,)") {
 
-  protected override def buildSequenceGrammar = {
-    val ss: SequenceGrammar = new SequenceGrammar()
-    ss.querySequenceSql = "select sequence_name,current_value,increment,cache from information_schema.sequences where sequence_schema=':schema'"
-    ss.nextValSql = "call next value for :name"
-    ss.selectNextValSql = "next value for :name"
-    ss.createSql = "create sequence :name start with :start increment by :increment cache :cache"
-    ss.dropSql = "drop sequence if exists :name"
-    ss
-  }
-
-  protected override def registerType = {
+  protected override def registerType() = {
     registerType(CHAR, "char($l)")
     registerType(VARCHAR, "varchar($l)")
     registerType(LONGVARCHAR, "longvarchar")
@@ -61,10 +49,19 @@ class H2Dialect extends AbstractDialect("[1.3,)") {
     registerType(BLOB, "longvarbinary")
     registerType(CLOB, "longvarchar")
   }
+  override def sequenceGrammar = {
+    val ss = new SequenceGrammar()
+    ss.querySequenceSql = "select sequence_name,current_value,increment,cache from information_schema.sequences where sequence_schema=':schema'"
+    ss.nextValSql = "call next value for :name"
+    ss.selectNextValSql = "next value for :name"
+    ss.createSql = "create sequence :name start with :start increment by :increment cache :cache"
+    ss.dropSql = "drop sequence if exists :name"
+    ss
+  }
 
-  protected override def buildLimitGrammar: LimitGrammarBean = new LimitGrammarBean("{} limit ?", "{} limit ? offset ?", true, false, false)
+  override def limitGrammar = new LimitGrammarBean("{} limit ?", "{} limit ? offset ?", true, false, false)
 
-  protected override def buildTableGrammar: TableGrammarBean = {
+  override def tableGrammar = {
     val bean = new TableGrammarBean()
     bean.columnComent = " comment '{}'"
     bean

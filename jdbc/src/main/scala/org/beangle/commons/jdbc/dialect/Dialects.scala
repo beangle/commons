@@ -19,7 +19,6 @@
 package org.beangle.commons.jdbc.dialect
 
 import java.lang.reflect.Constructor
-import org.beangle.commons.jdbc.dialect.vendors._
 import org.beangle.commons.lang.Strings
 
 object Dialects {
@@ -65,7 +64,9 @@ object Dialects {
   register(classOf[MySQLDialect])
   register(classOf[OracleDialect])
   register(classOf[PostgreSQLDialect])
+  register(classOf[SQLServerDialect])
   register(classOf[SQLServer2005Dialect])
+  register(classOf[SQLServer2008Dialect])
 }
 
 abstract class Dialect {

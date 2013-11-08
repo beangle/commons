@@ -16,53 +16,31 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.jdbc.dialect.vendors
+package org.beangle.commons.jdbc.dialect
 
 import java.sql.Types._
 
-import org.beangle.commons.jdbc.dialect.AbstractDialect;
+class SQLServer2005Dialect(version:String) extends SQLServerDialect(version) {
 
-import org.beangle.commons.jdbc.dialect.LimitGrammarBean;
-
-class SQLServer2005Dialect extends AbstractDialect("[2005,2008)") {
-
-  private val SELECT: String = "select"
-  private val FROM: String = "from"
-  private val DISTINCT: String = "distinct"
-
-  protected override def buildSequenceGrammar = null
-
-  protected override def registerType = {
-    registerType(CHAR, "char($l)")
-    registerType(VARCHAR, "varchar($l)")
-    registerType(LONGVARCHAR, "text")
-
-    registerType(BIT, "tinyint")
-    registerType(BOOLEAN, "tinyint")
-    registerType(BIGINT, "numeric(19,0)")
-    registerType(SMALLINT, "smallint")
-    registerType(TINYINT, "tinyint")
-    registerType(INTEGER, "int")
-    registerType(FLOAT, "float")
-    registerType(DECIMAL, "double precision")
-    registerType(DOUBLE, "double precision")
-    registerType(NUMERIC, "numeric($p,$s)")
-
-    registerType(DATE, "datetime")
-    registerType(TIME, "datetime")
-    registerType(TIMESTAMP, "datetime")
-
-    registerType(BINARY, "binary")
-    registerType(VARBINARY, "varbinary($l)")
-    registerType(LONGVARBINARY, "varbinary($l)")
-    registerType(BLOB, "image")
-    registerType(CLOB, "text")
+  def this(){
+    this("[2005,2008)")
   }
 
-  protected override def buildLimitGrammar = {
-    class SqlServer2005LimitGrammar(pattern: String, offsetPattern: String, bindInReverseOrder: Boolean,
-      bindFirst: Boolean, useMax: Boolean) extends LimitGrammarBean(pattern: String, offsetPattern: String, bindInReverseOrder: Boolean,
-      bindFirst: Boolean, useMax: Boolean) {
+  protected override def registerType() = {
+    super.registerType()
+    registerType(VARCHAR, 8000, "varchar($l)")
+    registerType(VARCHAR, "varchar(MAX)")
+
+    registerType(BIGINT, "bigint")
+
+    registerType(VARBINARY, "varbinary(MAX)")
+    registerType(LONGVARBINARY, "varbinary(MAX)")
+    registerType(BLOB, "varbinary(MAX)")
+    registerType(CLOB, "varchar(MAX)")
+  }
+
+  override def limitGrammar :LimitGrammar= {
+    class SqlServerLimitGrammar extends LimitGrammarBean(null,null,false,false,true) {
       override def limit(querySqlString: String, hasOffset: Boolean) = {
         val sb: StringBuilder = new StringBuilder(querySqlString.trim().toLowerCase())
 
@@ -87,7 +65,7 @@ class SQLServer2005Dialect extends AbstractDialect("[2005,2008)") {
         sb.toString()
       }
     }
-    new SqlServer2005LimitGrammar(null, null, false, false, true);
+    new SqlServerLimitGrammar
   }
 
   protected def replaceDistinctWithGroupBy(sql: StringBuilder) = {

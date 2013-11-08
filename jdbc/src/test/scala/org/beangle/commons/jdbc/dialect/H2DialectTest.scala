@@ -21,7 +21,7 @@ package org.beangle.commons.jdbc.dialect
 import javax.sql.DataSource
 import org.beangle.commons.jdbc.util.PoolingDataSourceFactory
 import org.beangle.commons.jdbc.meta.Database
-import org.beangle.commons.jdbc.dialect.vendors.H2Dialect
+import org.beangle.commons.jdbc.dialect.H2Dialect
 
 class H2DialectTest extends DialectTestCase {
 

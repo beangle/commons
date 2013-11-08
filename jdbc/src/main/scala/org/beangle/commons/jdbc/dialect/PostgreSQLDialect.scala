@@ -16,28 +16,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.jdbc.dialect.vendors
+package org.beangle.commons.jdbc.dialect
 
 import java.sql.Types._
 
-import org.beangle.commons.jdbc.dialect.AbstractDialect;
-
-import org.beangle.commons.jdbc.dialect.LimitGrammarBean;
-import org.beangle.commons.jdbc.dialect.SequenceGrammar;
-
-import org.beangle.commons.jdbc.dialect.TableGrammarBean;
-
 class PostgreSQLDialect extends AbstractDialect("[8.4)") {
 
-  protected override def buildSequenceGrammar = {
-    val ss: SequenceGrammar = new SequenceGrammar()
-    ss.querySequenceSql = "select relname as sequence_name from pg_class where relkind='S'"
-    ss.nextValSql = "select nextval (':name')"
-    ss.selectNextValSql = "nextval (':name')"
-    ss
-  }
-
-  protected override def registerType = {
+  protected override def registerType() = {
     registerType(CHAR, "char($l)")
     registerType(VARCHAR, "varchar($l)")
     registerType(LONGVARCHAR, "text")
@@ -69,12 +54,18 @@ class PostgreSQLDialect extends AbstractDialect("[8.4)") {
     registerType(BLOB, "oid")
   }
 
-  protected override def buildLimitGrammar = {
-    new LimitGrammarBean("{} limit ?", "{} limit ? offset ?", true, false, false)
+  override def sequenceGrammar = {
+    val ss = new SequenceGrammar()
+    ss.querySequenceSql = "select relname as sequence_name from pg_class where relkind='S'"
+    ss.nextValSql = "select nextval (':name')"
+    ss.selectNextValSql = "nextval (':name')"
+    ss
   }
 
-  protected override def buildTableGrammar = {
-    val bean: TableGrammarBean = new TableGrammarBean()
+  override def limitGrammar = new LimitGrammarBean("{} limit ?", "{} limit ? offset ?", true, false, false)
+
+  override def tableGrammar = {
+    val bean = new TableGrammarBean()
     bean.dropSql = "drop table {} cascade"
     bean
   }

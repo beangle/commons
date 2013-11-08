@@ -19,7 +19,7 @@
 package org.beangle.commons.jdbc.dialect
 
 import java.sql.Types
-import org.beangle.commons.jdbc.dialect.vendors.PostgreSQLDialect
+import org.beangle.commons.jdbc.dialect.PostgreSQLDialect
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 

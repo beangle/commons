@@ -21,7 +21,7 @@ package org.beangle.commons.jdbc.meta
 import scala.collection.JavaConversions._
 import javax.sql.DataSource
 import org.beangle.commons.jdbc.dialect.Dialect
-import org.beangle.commons.jdbc.dialect.vendors.H2Dialect
+import org.beangle.commons.jdbc.dialect.H2Dialect
 import org.beangle.commons.jdbc.util.PoolingDataSourceFactory
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers

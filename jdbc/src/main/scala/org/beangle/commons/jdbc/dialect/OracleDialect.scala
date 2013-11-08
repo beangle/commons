@@ -16,26 +16,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.jdbc.dialect.vendors
+package org.beangle.commons.jdbc.dialect
 
 import java.sql.Types._
-
-import org.beangle.commons.jdbc.dialect._;
 
 class OracleDialect() extends AbstractDialect("[10.1)") {
 
   registerKeywords(List("resource", "level"));
 
-  protected override def buildSequenceGrammar = {
-    val ss: SequenceGrammar = new SequenceGrammar();
-    ss.querySequenceSql = "select sequence_name,last_number,increment_by,cache_size from all_sequences where sequence_owner=':schema'"
-    ss.createSql = "create sequence :name increment by :increment start with :start cache :cache"
-    ss.nextValSql = "select :name.nextval from dual"
-    ss.selectNextValSql = ":name.nextval"
-    ss
-  }
-
-  protected override def registerType = {
+  protected override def registerType() = {
     registerType(CHAR, "char($l)");
     registerType(VARCHAR, "varchar2($l)")
     registerType(VARCHAR, 4000, "varchar2($l)");
@@ -69,10 +58,8 @@ class OracleDialect() extends AbstractDialect("[10.1)") {
     registerType(CLOB, "clob");
   }
 
-  protected override def buildLimitGrammar: LimitGrammar = {
-    class OracleLimitGrammar(pattern: String, offsetPattern: String, bindInReverseOrder: Boolean,
-      bindFirst: Boolean, useMax: Boolean) extends LimitGrammarBean(pattern: String, offsetPattern: String, bindInReverseOrder: Boolean,
-      bindFirst: Boolean, useMax: Boolean) {
+  override def limitGrammar: LimitGrammar = {
+    class OracleLimitGrammar extends LimitGrammarBean(null,null,true,false,true) {
       override def limit(sqlStr: String, hasOffset: Boolean) = {
         var sql = sqlStr.trim();
         var isForUpdate = false;
@@ -100,7 +87,18 @@ class OracleDialect() extends AbstractDialect("[10.1)") {
       }
     }
 
-    new OracleLimitGrammar(null, null, true, false, true)
+    new OracleLimitGrammar
   }
+
+  override def sequenceGrammar = {
+    val ss = new SequenceGrammar();
+    ss.querySequenceSql = "select sequence_name,last_number,increment_by,cache_size from all_sequences where sequence_owner=':schema'"
+    ss.createSql = "create sequence :name increment by :increment start with :start cache :cache"
+    ss.nextValSql = "select :name.nextval from dual"
+    ss.selectNextValSql = ":name.nextval"
+    ss
+  }
+
+  override def defaultSchema = "$user"
 
 }

@@ -42,7 +42,7 @@ import java.sql.Types.{
   CLOB
 }
 
-import org.beangle.commons.jdbc.dialect.vendors.{
+import org.beangle.commons.jdbc.dialect.{
   HSQL2Dialect,
   H2Dialect,
   MySQLDialect,

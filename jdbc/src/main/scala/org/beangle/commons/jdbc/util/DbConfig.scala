@@ -36,8 +36,9 @@ class DbConfig(val dialect: Dialect) extends Initializing{
 
   def init() {
     if (Strings.isEmpty(schema)){
-      schema = user;
-      if(driver.endsWith("OracleDriver")) schema=user.toUpperCase()
+      schema=dialect.defaultSchema
+      if(schema=="$user") schema=user
     }
+    if(driver.endsWith("OracleDriver")) schema=schema.toUpperCase()
   }
 }
