@@ -25,10 +25,19 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Timestamp
-import java.sql.Types
+import java.sql.Types._
+import java.sql.Blob
+import java.sql.Clob
+import java.sql.Date
+import java.sql.PreparedStatement
+import java.sql.Timestamp
+import java.io.StringReader
+import java.io.InputStream
+import java.math.BigDecimal
 
 import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.Strings
+import org.beangle.commons.logging.Logging
 
 import javax.sql.DataSource
 
@@ -42,7 +51,7 @@ object JdbcExecutor {
   }
 }
 
-class JdbcExecutor(val dataSource: DataSource) {
+class JdbcExecutor(val dataSource: DataSource) extends Logging{
 
   var pmdKnownBroken: Boolean = false
 
@@ -55,7 +64,7 @@ class JdbcExecutor(val dataSource: DataSource) {
     while (rs.next()) {
       rows += (for (i <- 0 until cols) yield {
         var v = rs.getObject(i + 1)
-        if (null != v && meta.getColumnType(i + 1) == Types.TIMESTAMP && !v.isInstanceOf[Timestamp]) {
+        if (null != v && meta.getColumnType(i + 1) == TIMESTAMP && !v.isInstanceOf[Timestamp]) {
           if (null != JdbcExecutor.oracleTimestampMethod)
             v = JdbcExecutor.oracleTimestampMethod.invoke(v)
           else throw new Exception("Cannot translate " + v.getClass + "timestamp to java.sql.Timestamp")
@@ -72,7 +81,7 @@ class JdbcExecutor(val dataSource: DataSource) {
     var rs: ResultSet = null
     try {
       stmt = conn.prepareStatement(sql)
-      fillStatement(stmt, params, null)
+      setParams(stmt, params, null)
       convertToSeq(stmt.executeQuery())
     } catch {
       case e: SQLException => rethrow(e, sql, params); List.empty
@@ -89,7 +98,7 @@ class JdbcExecutor(val dataSource: DataSource) {
     var rows = 0
     try {
       stmt = conn.prepareStatement(sql)
-      fillStatement(stmt, params, null)
+      setParams(stmt, params, null)
       rows = stmt.executeUpdate()
     } catch {
       case e: SQLException => rethrow(e, sql, params)
@@ -111,7 +120,7 @@ class JdbcExecutor(val dataSource: DataSource) {
       stmt = conn.prepareStatement(sql)
       for (param <- datas) {
         curParam = param
-        fillStatement(stmt, param, types)
+        setParams(stmt, param, types)
         stmt.addBatch()
       }
       rows ++= stmt.executeBatch()
@@ -124,42 +133,84 @@ class JdbcExecutor(val dataSource: DataSource) {
     rows.toList
   }
 
-  def fillStatement(stmt: PreparedStatement, params: Seq[Any], types: Seq[Int]) {
+  def setParams(stmt: PreparedStatement, params: Seq[Any], types: Seq[Int]) {
     // check the parameter count, if we can
-    var pmd: ParameterMetaData = null
+    val paramsCount = if (params == null) 0 else params.length
     var stmtCount = 0
-    if (null != types) stmtCount = types.length
-    if (!pmdKnownBroken) {
-      pmd = stmt.getParameterMetaData()
-      stmtCount = pmd.getParameterCount()
-      val paramsCount = if (params == null) 0 else params.length
-      if (stmtCount > paramsCount) {
-        throw new SQLException("Wrong number of parameters: expected "
-          + stmtCount + ", was given " + paramsCount)
+    var sqltypes:Array[Int]=null
+
+    if (null != types && !types.isEmpty ){
+      stmtCount = types.length
+      sqltypes = types.toArray
+    } else {
+      stmtCount = if (!pmdKnownBroken) stmt.getParameterMetaData().getParameterCount else params.length
+      sqltypes=new Array[Int](stmtCount)
+      for(i <- 0 until stmtCount) sqltypes(i)=NULL
+
+      if(!pmdKnownBroken){
+        var pmd = stmt.getParameterMetaData()
+        try {
+          for(i <- 0 until stmtCount) sqltypes(i)=pmd.getParameterType(i + 1)
+        } catch {
+          case e: SQLException =>  pmdKnownBroken = true
+        }
       }
     }
+
+    if (stmtCount > paramsCount)
+      throw new SQLException("Wrong number of parameters: expected " + stmtCount + ", was given " + paramsCount)
+
     var i = 0
     while (i < stmtCount) {
-      if (params(i) != null) {
-        //if (null != types && !types.isEmpty)
-        //  StatementUtils.setValue(stmt, i + 1, params(i).asInstanceOf[Object], types(i));
-        //else
-        stmt.setObject(i + 1, params(i))
-      } else {
-        // VARCHAR works with many drivers regardless
-        // of the actual column type. Oddly, NULL and
-        // OTHER don't work with Oracle's drivers.
-        var sqlType = Types.VARCHAR
-        if (!pmdKnownBroken) {
-          try {
-            sqlType = pmd.getParameterType(i + 1)
-          } catch {
-            case e: SQLException =>
-              pmdKnownBroken = true
+      val index=i+1
+      if (null==params(i)) {
+        stmt.setNull(index,  if(sqltypes(i)==NULL) VARCHAR else sqltypes(i))
+      }else{
+        val value=params(i)
+        try {
+          sqltypes(i) match {
+            case CHAR | VARCHAR =>
+              stmt.setString(index, value.asInstanceOf[String]);
+            case LONGVARCHAR =>
+              stmt.setCharacterStream(index, new StringReader(value.asInstanceOf[String]));
+
+            case BOOLEAN | BIT =>
+              stmt.setBoolean(index, value.asInstanceOf[Boolean]);
+            case TINYINT | SMALLINT | INTEGER =>
+              stmt.setInt(index, value.asInstanceOf[Int]);
+            case BIGINT =>
+              stmt.setLong(index, value.asInstanceOf[Long]);
+
+            case FLOAT | DOUBLE =>
+              if (value.isInstanceOf[BigDecimal]) {
+                stmt.setBigDecimal(index, value.asInstanceOf[BigDecimal]);
+              } else {
+                stmt.setDouble(index, value.asInstanceOf[Double]);
+              }
+
+            case NUMERIC | DECIMAL =>
+              stmt.setBigDecimal(index, value.asInstanceOf[BigDecimal]);
+
+            case DATE =>
+              stmt.setDate(index, value.asInstanceOf[Date]);
+            case TIMESTAMP =>
+              stmt.setTimestamp(index, value.asInstanceOf[Timestamp]);
+
+            case BINARY | VARBINARY | LONGVARBINARY =>
+              stmt.setBinaryStream(index, value.asInstanceOf[InputStream]);
+
+            case CLOB =>
+              stmt.setAsciiStream(index,value.asInstanceOf[Clob].getAsciiStream)
+            case BLOB =>
+              stmt.setBinaryStream(index, value.asInstanceOf[Blob].getBinaryStream);
+            case _ =>
+              stmt.setObject(index,value)
           }
+        } catch {
+          case e: Exception => logger.error("set value error", e);
         }
-        stmt.setNull(i + 1, sqlType)
       }
+      
       i += 1
     }
   }
