@@ -49,14 +49,14 @@ class DB2Dialect extends AbstractDialect("[8.0]") {
     registerType(Types.TIME, "time")
     registerType(Types.TIMESTAMP, "timestamp")
     registerType(Types.NUMERIC, "numeric($p,$s)")
+
+    registerType(Types.BINARY, "varchar($l) for bit data")
+    registerType(Types.VARBINARY, "varchar($l) for bit data")
+    registerType(Types.LONGVARCHAR, "long varchar")
+    registerType(Types.LONGVARBINARY, "long varchar for bit data")
+
     registerType(Types.BLOB, "blob($l)")
     registerType(Types.CLOB, "clob($l)")
-
-    registerType(Types.VARBINARY, "varchar($l) for bit data")
-    // FIXME correct definition needed!
-    registerType(Types.LONGVARCHAR, "varchar($l)")
-    registerType(Types.BINARY, "raw")
-    registerType(Types.LONGVARBINARY, "raw")
   }
 
   /**
