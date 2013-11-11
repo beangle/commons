@@ -56,6 +56,7 @@ class JdbcExecutor(val dataSource: DataSource) extends Logging{
   var pmdKnownBroken: Boolean = false
 
   def queryForInt(sql: String): Int = query(sql).head.head.asInstanceOf[Number].intValue
+  def queryForLong(sql: String): Long = query(sql).head.head.asInstanceOf[Number].longValue
 
   private def convertToSeq(rs: ResultSet): Seq[Seq[_]] = {
     val rows = new collection.mutable.ListBuffer[Seq[_]]

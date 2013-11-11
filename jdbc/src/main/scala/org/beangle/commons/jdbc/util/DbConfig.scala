@@ -21,9 +21,26 @@ package org.beangle.commons.jdbc.util
 import org.beangle.commons.jdbc.dialect.Dialect
 import org.beangle.commons.bean.Initializing
 import org.beangle.commons.lang.Strings
+import org.beangle.commons.lang.ClassLoaders
 import java.util.Properties
 
+object DbConfig{
 
+  def build(xml: scala.xml.Node):DbConfig ={
+    val dbconf = new DbConfig(ClassLoaders.loadClass((xml \\ "dialect").text.trim).newInstance().asInstanceOf[Dialect])
+    dbconf.url = (xml \\ "url").text.trim
+    dbconf.user = (xml \\ "user").text.trim
+    dbconf.driver = (xml \\ "driver").text.trim
+    dbconf.password = (xml \\ "password").text.trim
+    dbconf.schema = (xml \\ "schema").text.trim
+    dbconf.catalog = (xml \\ "catalog").text.trim
+    (xml \\ "db" \\ "props" \\ "prop").foreach { ele =>
+      dbconf.props.put((ele \ "@name").text, (ele \ "@value").text);
+    }
+    dbconf.init()
+    dbconf
+  }
+}
 
 class DbConfig(val dialect: Dialect) extends Initializing{
   var url: String = _
