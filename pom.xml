@@ -8,7 +8,7 @@
   <groupId>org.beangle.commons</groupId>
   <artifactId>beangle-commons-parent</artifactId>
   <packaging>pom</packaging>
-  <version>4.0.1-SNAPSHOT</version>
+  <version>4.0.1</version>
   <name>Beangle Commons Parent</name>
   
   <modules>
@@ -68,11 +68,6 @@
       <dependency>
         <groupId>org.beangle.commons</groupId>
         <artifactId>beangle-commons-web</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.beangle.commons</groupId>
-        <artifactId>beangle-commons-transfer</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
