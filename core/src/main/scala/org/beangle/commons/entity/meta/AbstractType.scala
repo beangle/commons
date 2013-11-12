@@ -19,12 +19,9 @@
 package org.beangle.commons.entity.meta
 
 /**
- * <p>
  * Abstract AbstractType class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 abstract class AbstractType extends Type {
   /**

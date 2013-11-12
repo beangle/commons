@@ -22,6 +22,5 @@ package org.beangle.commons.bean.orderings
  * 根据local对两个非空字符串进行比较。
  *
  * @author chaostone
- * @version $Id: $
  */
 trait StringOrdering extends Ordering[String]

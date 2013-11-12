@@ -19,13 +19,13 @@
 package org.beangle.commons.conversion.impl
 
 import org.beangle.commons.conversion.converter._
-import DefaultConversion._
 
 object DefaultConversion {
 
   val Instance = new DefaultConversion()
 }
 
+import DefaultConversion._
 /**
  * Default Conversion implementation.
  * <p>

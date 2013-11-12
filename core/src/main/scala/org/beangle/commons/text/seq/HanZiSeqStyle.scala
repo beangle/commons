@@ -42,7 +42,6 @@ object HanZiSeqStyle {
  * 汉字序列产生器
  *
  * @author chaostone,zhufengbin
- * @version $Id: $
  */
 class HanZiSeqStyle extends SeqNumStyle {
 

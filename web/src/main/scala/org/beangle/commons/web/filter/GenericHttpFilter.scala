@@ -32,7 +32,6 @@ import org.beangle.commons.logging.Logging
 import scala.collection.mutable
 /**
  * @author chaostone
- * @version $Id: GenericHttpFilter.java Nov 20, 2010 7:12:16 PM chaostone $
  */
 abstract class GenericHttpFilter extends Filter with Initializing with Logging {
 

@@ -165,7 +165,6 @@ object BeanConfig {
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class BeanConfig(val module: String) {
 

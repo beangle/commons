@@ -23,12 +23,9 @@ import org.beangle.commons.lang.Numbers
 import org.beangle.commons.lang.Strings
 
 /**
- * <p>
  * SeqPattern class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class SeqPattern(val seqNumStyle: SeqNumStyle, val pattern: String) {
 

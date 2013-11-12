@@ -20,7 +20,7 @@ package org.beangle.commons.jdbc.meta
 
 import java.sql.Types
 
-import org.beangle.commons.jdbc.dialect.vendors.OracleDialect
+import org.beangle.commons.jdbc.dialect.OracleDialect
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FlatSpec

@@ -21,12 +21,9 @@ package org.beangle.commons.inject
 import java.net.URL
 
 /**
- * <p>
  * ConfigResource class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class Resources {
 

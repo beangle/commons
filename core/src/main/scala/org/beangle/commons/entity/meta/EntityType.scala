@@ -20,21 +20,18 @@ package org.beangle.commons.entity.meta
 
 import org.beangle.commons.entity.Entity
 import org.beangle.commons.lang.Assert
-import org.beangle.commons.lang.reflect.Reflections
+import org.beangle.commons.bean.PropertyUtils
 
 object EntityType {
   def extractIdType(entityClass: Class[_], idName: String): Type = {
-    val clazz = Reflections.getPropertyType(entityClass, idName)
+    val clazz = PropertyUtils.getPropertyType(entityClass, idName)
     if (null != clazz) new IdentifierType(clazz) else null
   }
 }
 /**
- * <p>
  * EntityType class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class EntityType(val entityName: String, val entityClass: Class[_], val idName: String, val idType: Type) extends AbstractType {
 
@@ -60,7 +57,7 @@ class EntityType(val entityName: String, val entityClass: Class[_], val idName: 
   override def getPropertyType(property: String): Type = {
     val t = propertyTypes.get(property).orNull
     if (null == t) {
-      val propertyType = Reflections.getPropertyType(entityClass, property)
+      val propertyType = PropertyUtils.getPropertyType(entityClass, property)
       if (null != propertyType) new IdentifierType(propertyType) else null
     } else t
   }

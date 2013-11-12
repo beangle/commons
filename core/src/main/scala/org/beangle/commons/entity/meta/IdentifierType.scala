@@ -22,7 +22,6 @@ package org.beangle.commons.entity.meta
  * IdentifierType class.
  *
  * @author chaostone
- * @version $Id: $
  */
 class IdentifierType(val clazz: Class[_]) extends AbstractType {
   /**

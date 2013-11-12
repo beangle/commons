@@ -24,7 +24,6 @@ import scala.collection.mutable.ListBuffer
  * csv document object.
  *
  * @author chaostone
- * @version $Id: $
  */
 class Csv(val format: CsvFormat = new CsvFormat.Builder().build()) {
 

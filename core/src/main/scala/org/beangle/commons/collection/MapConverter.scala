@@ -26,12 +26,9 @@ import scala.reflect.ClassTag
 import org.beangle.commons.lang.Objects
 import scala.collection.Map
 /**
- * <p>
  * MapConverter class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class MapConverter(val conversion: DefaultConversion = DefaultConversion.Instance) {
 

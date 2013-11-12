@@ -25,7 +25,6 @@ import java.util.Date
  * </p>
  *
  * @author chaostone
- * @version $Id: Dates.java Jul 26, 2011 4:22:37 PM chaostone $
  */
 object Dates {
 

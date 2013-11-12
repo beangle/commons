@@ -38,7 +38,6 @@ object Condition {
  * <p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class Condition(val content: String, initParams: Any*) {
 

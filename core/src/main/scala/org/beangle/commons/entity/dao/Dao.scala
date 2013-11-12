@@ -26,7 +26,6 @@ import org.beangle.commons.entity.Entity
  * [/p>
  *
  * @author chaostone
- * @version $Id: $
  */
 trait Dao[T <: Entity[ID], ID] {
 
@@ -43,7 +42,7 @@ trait Dao[T <: Entity[ID], ID] {
   /**
    * search T by id.
    */
-  def find(first: ID, ids: ID*): List[T]
+  def find(first: ID, ids: ID*): Seq[T]
 
   /**
    * save or update entities
@@ -53,12 +52,12 @@ trait Dao[T <: Entity[ID], ID] {
   /**
    * save or update entities
    */
-  def saveOrUpdate(entities: collection.Seq[T]);
+  def saveOrUpdate(entities: Seq[T]);
 
   /**
    * remove entities.
    */
-  def remove(entities: collection.Seq[T]);
+  def remove(entities: Seq[T]);
 
   /**
    * remove entities.

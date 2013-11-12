@@ -16,12 +16,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.jdbc.dialect.vendors
+package org.beangle.commons.jdbc.dialect
 
 import java.sql.Types._
-import org.beangle.commons.jdbc.dialect.AbstractDialect
-import org.beangle.commons.jdbc.dialect.LimitGrammarBean
-import org.beangle.commons.jdbc.dialect.TableGrammarBean;
 import org.beangle.commons.lang.Strings
 
 class MySQLDialect extends AbstractDialect("[5.0,)") {
@@ -29,9 +26,7 @@ class MySQLDialect extends AbstractDialect("[5.0,)") {
   registerKeywords(List("index", "explain"))
   caseSensitive = true;
 
-  protected override def buildSequenceGrammar = null
-
-  protected override def registerType = {
+  protected override def registerType() = {
     registerType(CHAR, "char($l)")
     registerType(VARCHAR, 255, "varchar($l)")
     registerType(VARCHAR, 65535, "varchar($l)")
@@ -69,9 +64,7 @@ class MySQLDialect extends AbstractDialect("[5.0,)") {
     registerType(CLOB, "longtext")
   }
 
-  protected override def buildLimitGrammar = {
-    new LimitGrammarBean("{} limit ?", "{} limit ?, ?", false, false, false)
-  }
+  override def limitGrammar = new LimitGrammarBean("{} limit ?", "{} limit ?, ?", false, false, false)
 
   override def getAddForeignKeyConstraintString(constraintName: String, foreignKey: Array[String],
     referencedTable: String, primaryKey: Array[String], referencesPrimaryKey: Boolean) = {
@@ -82,11 +75,12 @@ class MySQLDialect extends AbstractDialect("[5.0,)") {
       .append(Strings.join(primaryKey, ", ")).append(')').toString()
   }
 
-  protected override def buildTableGrammar = {
-    val bean: TableGrammarBean = new TableGrammarBean()
+  override def tableGrammar = {
+    val bean = new TableGrammarBean()
     bean.columnComent = " comment '{}'"
     bean.tableComment = " comment '{}'"
     bean
   }
 
+  override def sequenceGrammar = null
 }

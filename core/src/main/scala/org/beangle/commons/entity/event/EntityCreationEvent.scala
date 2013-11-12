@@ -24,7 +24,6 @@ import org.beangle.commons.entity.Entity
  * 实体创建事件
  *
  * @author chaostone
- * @version $Id: EntityCreationEvent.scala Mar 3, 2012 9:05:40 PM chaostone $
  */
 class EntityCreationEvent[T <: Entity[_]](clazz: Class[T], source: List[T]) extends AbstractEntityEvent[T](clazz, source) {
 }

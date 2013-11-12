@@ -57,8 +57,12 @@ class MetadataLoader(initDialect: Dialect, initMeta: DatabaseMetaData) extends L
 
         rs = meta.getTables(newCatalog, newSchema, null, TYPES)
         while (rs.next()) {
-          val table = new Table(rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"));
-          tables.put(table.identifier, table)
+          val tableName = rs.getString("TABLE_NAME")
+          if (!tableName.startsWith("BIN$")) {
+            val table = new Table(rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"));
+            table.comment = rs.getString("REMARKS")
+            tables.put(table.identifier, table)
+          }
         }
         rs.close()
         logger.info("Load {} tables ", tables.size)
@@ -66,10 +70,24 @@ class MetadataLoader(initDialect: Dialect, initMeta: DatabaseMetaData) extends L
         // Loading columns
         rs = meta.getColumns(newCatalog, newSchema, "%", "%")
         var cols = 0
+        import java.util.StringTokenizer
         while (rs.next()) {
           val tableOpt = tables.get(Table.qualify(rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME")))
           val colName = rs.getString("COLUMN_NAME")
-          tableOpt foreach { table => if (null != colName) table.addColumn(new Column(rs)) }
+          if (null != colName) {
+            tableOpt match {
+              case Some(table) =>
+                val col = new Column(rs.getString("COLUMN_NAME"), rs.getInt("DATA_TYPE"))
+                col.position = rs.getInt("ORDINAL_POSITION")
+                col.size = rs.getInt("COLUMN_SIZE")
+                col.scale = rs.getShort("DECIMAL_DIGITS")
+                col.nullable = "yes".equalsIgnoreCase(rs.getString("IS_NULLABLE"))
+                col.typeName = new StringTokenizer(rs.getString("TYPE_NAME"), "() ").nextToken()
+                col.comment = rs.getString("REMARKS")
+                table.addColumn(col)
+              case _ =>
+            }
+          }
           cols += 1
         }
         rs.close()
@@ -80,14 +98,16 @@ class MetadataLoader(initDialect: Dialect, initMeta: DatabaseMetaData) extends L
         if (tables.size == origTabCount) logger.info("Load {} columns", cols)
         else logger.info("Load {} columns and evict empty {} tables.", cols, origTabCount - tables.size)
 
-        logger.info("Loading primary key,foreign key and index.")
-        for (tableName <- tables.keySet.toList.sortWith(_ < _)) {
-          logger.info("Loading {}.", tableName)
-          tables.get(tableName).foreach(table => {
-            loadPrimaryKeys(table)
-            loadTableForeignKeys(table)
-            loadTableIndexes(table)
-          })
+        if (extras) {
+          logger.info("Loading primary key,foreign key and index.")
+          for (tableName <- tables.keySet.toList.sortWith(_ < _)) {
+            logger.info("Loading {}.", tableName)
+            tables.get(tableName).foreach(table => {
+              loadPrimaryKeys(table)
+              loadTableForeignKeys(table)
+              loadTableIndexes(table)
+            })
+          }
         }
       } finally {
         if (rs != null) rs.close()
@@ -125,7 +145,7 @@ class MetadataLoader(initDialect: Dialect, initMeta: DatabaseMetaData) extends L
       while (rs.next()) {
         val fk = rs.getString("FK_NAME")
         var info = table.getForeignKey(fk)
-        if (null != fk && null != info) {
+        if (null != fk && null == info) {
           info = new ForeignKey(rs.getString("FK_NAME"), table.getColumn(rs.getString("FKCOLUMN_NAME")))
           info.addReferencedColumn(new Column(rs.getString("PKCOLUMN_NAME"), Types.BIGINT))
           val referencedTable = tables.getOrElse(Table.qualify(rs.getString("PKTABLE_SCHEM"),
@@ -144,16 +164,19 @@ class MetadataLoader(initDialect: Dialect, initMeta: DatabaseMetaData) extends L
     var rs: ResultSet = null
     try {
       val s = System.currentTimeMillis()
-      rs = meta.getIndexInfo(null, table.schema, table.name, false, false)
+      rs = meta.getIndexInfo(null, table.schema, table.name, false, true)
       logger.debug("Load {}'s index in {}.", table.name, System.currentTimeMillis() - s)
-      while (rs.next() && (rs.getShort("TYPE") == DatabaseMetaData.tableIndexStatistic)) {
+      while (rs.next()) { // && (rs.getShort("TYPE") == DatabaseMetaData.tableIndexStatistic)) {
         val index = rs.getString("INDEX_NAME")
         if (index != null) {
           var info = table.getIndex(index)
           if (info == null) {
-            info = new Index(rs.getString("INDEX_NAME"))
+            info = new Index(rs.getString("INDEX_NAME"), table)
             table.addIndex(info)
           }
+          info.unique = (rs.getBoolean("NON_UNIQUE") == false)
+          val ascOrDesc = rs.getString("ASC_OR_DESC")
+          if (null != ascOrDesc) info.ascOrDesc = Some("A" == ascOrDesc)
           info.addColumn(table.getColumn(rs.getString("COLUMN_NAME")))
         }
       }

@@ -36,7 +36,6 @@ object CsvParser {
  * just implements splitting a single line into fields.
  *
  * @author chaostone
- * @version $Id: $
  */
 class CsvParser(var format: CsvFormat) {
 

@@ -34,12 +34,9 @@ object SeqNumStyle {
 }
 
 /**
- * <p>
  * SeqNumStyle interface.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 trait SeqNumStyle {
 

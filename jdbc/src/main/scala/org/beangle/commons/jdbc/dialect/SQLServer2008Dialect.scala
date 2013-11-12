@@ -16,8 +16,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.jdbc.dialect.vendors
+package org.beangle.commons.jdbc.dialect
 
-class DerbyDialect extends DB2Dialect {
+import java.sql.Types._
 
+class SQLServer2008Dialect(version: String) extends SQLServer2005Dialect(version) {
+
+  def this() {
+    this("[2008,2012]")
+  }
+
+  protected override def registerType() = {
+    super.registerType()
+    registerType(DATE, "date");
+    registerType(TIME, "time");
+    registerType(TIMESTAMP, "datetime2");
+  }
 }

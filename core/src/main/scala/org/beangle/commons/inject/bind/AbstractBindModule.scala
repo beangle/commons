@@ -32,7 +32,6 @@ import scala.collection.mutable.ListBuffer
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 abstract class AbstractBindModule extends BindModule {
 

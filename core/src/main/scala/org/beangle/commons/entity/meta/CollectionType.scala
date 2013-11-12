@@ -21,12 +21,9 @@ package org.beangle.commons.entity.meta
 import java.lang.reflect.Array
 
 /**
- * <p>
  * CollectionType class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class CollectionType(val elementType: Type) extends AbstractType {
 

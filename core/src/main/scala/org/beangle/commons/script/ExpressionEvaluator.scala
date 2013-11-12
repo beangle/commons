@@ -22,7 +22,6 @@ package org.beangle.commons.script
  * 表达式执行器
  *
  * @author chaostone
- * @version $Id: ExpressionEvaluator.java Mar 5, 2012 12:13:41 AM chaostone $
  * @since 2012-03-05
  */
 trait ExpressionEvaluator {

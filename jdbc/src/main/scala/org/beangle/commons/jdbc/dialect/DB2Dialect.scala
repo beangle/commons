@@ -16,18 +16,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.jdbc.dialect.vendors
+package org.beangle.commons.jdbc.dialect
 
 import java.sql.Types
 
-import org.beangle.commons.jdbc.dialect.AbstractDialect
-import org.beangle.commons.jdbc.dialect.LimitGrammarBean
-import org.beangle.commons.jdbc.dialect.SequenceGrammar
-
 class DB2Dialect extends AbstractDialect("[8.0]") {
 
-  protected override def buildSequenceGrammar = {
-    val ss: SequenceGrammar = new SequenceGrammar()
+  override def sequenceGrammar = {
+    val ss = new SequenceGrammar()
     ss.querySequenceSql = "select name as sequence_name,start-1 as current_value,increment,cache from sysibm.syssequences where schema=':schema'"
     ss.nextValSql = "values nextval for :name"
     ss.dropSql = "drop sequence :name restrict"
@@ -35,7 +31,7 @@ class DB2Dialect extends AbstractDialect("[8.0]") {
     ss
   }
 
-  protected override def registerType = {
+  protected override def registerType() = {
     registerType(Types.BOOLEAN, "smallint")
     registerType(Types.BIT, "smallint")
     registerType(Types.DECIMAL, "bigint")
@@ -53,14 +49,14 @@ class DB2Dialect extends AbstractDialect("[8.0]") {
     registerType(Types.TIME, "time")
     registerType(Types.TIMESTAMP, "timestamp")
     registerType(Types.NUMERIC, "numeric($p,$s)")
+
+    registerType(Types.BINARY, "varchar($l) for bit data")
+    registerType(Types.VARBINARY, "varchar($l) for bit data")
+    registerType(Types.LONGVARCHAR, "long varchar")
+    registerType(Types.LONGVARBINARY, "long varchar for bit data")
+
     registerType(Types.BLOB, "blob($l)")
     registerType(Types.CLOB, "clob($l)")
-
-    registerType(Types.VARBINARY, "varchar($l) for bit data")
-    // FIXME correct definition needed!
-    registerType(Types.LONGVARCHAR, "varchar($l)")
-    registerType(Types.BINARY, "raw")
-    registerType(Types.LONGVARBINARY, "raw")
   }
 
   /**
@@ -79,10 +75,8 @@ class DB2Dialect extends AbstractDialect("[8.0]") {
 
   private def hasDistinct(sql: String) = sql.toLowerCase().indexOf("select distinct") >= 0
 
-  protected override def buildLimitGrammar = {
-    class DB2LimitGrammar(pattern: String, offsetPattern: String, bindInReverseOrder: Boolean,
-      bindFirst: Boolean, useMax: Boolean) extends LimitGrammarBean(pattern: String, offsetPattern: String, bindInReverseOrder: Boolean,
-      bindFirst: Boolean, useMax: Boolean) {
+  override def limitGrammar = {
+    class DB2LimitGrammar extends LimitGrammarBean(null, null, false, false, true) {
       override def limit(sql: String, hasOffset: Boolean) = {
         val startOfSelect = sql.toLowerCase().indexOf("select")
         val pagingSelect: StringBuilder = new StringBuilder(sql.length() + 100)
@@ -115,8 +109,8 @@ class DB2Dialect extends AbstractDialect("[8.0]") {
         pagingSelect.toString()
       }
     }
-    new DB2LimitGrammar(null, null, false, false, true)
+    new DB2LimitGrammar
   }
 
-  override def defaultSchema(): String = null
+  override def defaultSchema: String = null
 }

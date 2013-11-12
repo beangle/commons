@@ -27,7 +27,6 @@ import org.beangle.commons.lang.Strings
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class QueryBean[T] extends LimitQuery[T] {
 

@@ -29,7 +29,6 @@ import scala.collection.mutable
  * 系统配置
  *
  * @author chaostone
- * @version $Id: $
  */
 class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
 

@@ -16,28 +16,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.jdbc.dialect.vendors
+package org.beangle.commons.jdbc.dialect
 
 import java.sql.Types._
 
-import org.beangle.commons.jdbc.dialect.AbstractDialect;
-import org.beangle.commons.jdbc.dialect.LimitGrammarBean;
-import org.beangle.commons.jdbc.dialect.SequenceGrammar;
-import org.beangle.commons.jdbc.dialect.TableGrammarBean;
-
 class HSQL2Dialect extends AbstractDialect("[2.0.0,)") {
 
-  protected override def buildSequenceGrammar = {
-    val ss: SequenceGrammar = new SequenceGrammar()
-    ss.querySequenceSql = "select sequence_name,next_value,increment from information_schema.sequences where sequence_schema=':schema'"
-    ss.nextValSql = "call next value for :name"
-    ss.selectNextValSql = "next value for :name"
-    ss.createSql = "create sequence :name start with :start increment by :increment"
-    ss.dropSql = "drop sequence if exists :name"
-    ss
-  }
-
-  protected override def registerType = {
+  protected override def registerType() = {
     registerType(CHAR, "char($l)")
     registerType(VARCHAR, "varchar($l)")
     registerType(LONGVARCHAR, "longvarchar")
@@ -67,12 +52,20 @@ class HSQL2Dialect extends AbstractDialect("[2.0.0,)") {
     registerType(CLOB, "longvarchar")
   }
 
-  protected override def buildLimitGrammar = {
-    new LimitGrammarBean("{} limit ?", "{}  offset ? limit ?", false, false, false)
+  override def sequenceGrammar = {
+    val ss = new SequenceGrammar()
+    ss.querySequenceSql = "select sequence_name,next_value,increment from information_schema.sequences where sequence_schema=':schema'"
+    ss.nextValSql = "call next value for :name"
+    ss.selectNextValSql = "next value for :name"
+    ss.createSql = "create sequence :name start with :start increment by :increment"
+    ss.dropSql = "drop sequence if exists :name"
+    ss
   }
 
-  protected override def buildTableGrammar = {
-    val bean: TableGrammarBean = new TableGrammarBean()
+  override def limitGrammar = new LimitGrammarBean("{} limit ?", "{}  offset ? limit ?", false, false, false)
+
+  override def tableGrammar = {
+    val bean = new TableGrammarBean()
     bean.columnComent = " comment '{}'"
     bean
   }

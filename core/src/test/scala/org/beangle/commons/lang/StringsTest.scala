@@ -83,8 +83,8 @@ class StringsTest extends FunSpec with ShouldMatchers {
       split("a.b.c.", '.') should equal(Array("a", "b", "c"))
       split(".a..b.c", '.') should equal(Array("a", "b", "c"))
       split("a:b:c", '.') should equal(Array("a:b:c"))
-      split("", null) should equal(Array())
-      split("abc def", null) should equal(Array("abc", "def"))
+      split("", null.asInstanceOf[String]) should equal(Array())
+      split("abc def", null.asInstanceOf[String]) should equal(Array("abc", "def"))
       split("abc def", " ") should equal(Array("abc", "def"))
       split("ab:cd:ef", ":") should equal(Array("ab", "cd", "ef"))
     }

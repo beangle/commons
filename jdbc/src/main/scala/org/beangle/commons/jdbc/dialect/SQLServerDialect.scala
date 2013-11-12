@@ -18,24 +18,29 @@
  */
 package org.beangle.commons.jdbc.dialect
 
-import org.beangle.commons.lang.Strings
+import java.sql.Types._
 
-class LimitGrammarBean(pattern: String, offsetPattern: String, bindInReverseOrder: Boolean,
-    bindFirst: Boolean, useMax: Boolean) extends LimitGrammar {
+class SQLServerDialect(version: String) extends AbstractTransactSQLDialect(version) {
 
-  def limit(query: String, hasOffset: Boolean) =
-    if (hasOffset) Strings.replace(offsetPattern, "{}", query) else Strings.replace(pattern, "{}", query)
+  def this() {
+    this("(,2000]")
+  }
 
-  /**
-   * ANSI SQL defines the LIMIT clause to be in the form LIMIT offset, limit.
-   * Does this dialect require us to bind the parameters in reverse order?
-   *
-   * @return true if the correct order is limit, offset
-   */
-  def isBindInReverseOrder = bindInReverseOrder
+  protected override def registerType() = {
+    super.registerType()
+    registerType(LONGVARCHAR, "text")
 
-  def isBindFirst = bindFirst
+    registerType(BIT, "bit")
 
-  def isUseMax = useMax
+    registerType(DATE, "datetime")
+    registerType(TIME, "datetime")
+    registerType(TIMESTAMP, "datetime")
 
+    registerType(VARBINARY, "image")
+    registerType(VARBINARY, 8000, "varbinary($l)")
+    registerType(LONGVARBINARY, "image")
+  }
+
+  override def limitGrammar: LimitGrammar = null
+  override def sequenceGrammar: SequenceGrammar = null
 }

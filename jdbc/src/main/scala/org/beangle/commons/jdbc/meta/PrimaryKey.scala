@@ -25,7 +25,7 @@ class PrimaryKey(name: String, column: Column) extends Constraint(name) {
   addColumn(column)
 
   override def addColumn(column: Column) {
-    if (column != null) cols += column
+    if (column != null) columns += column
     if (column.nullable) enabled = false;
   }
 

@@ -23,13 +23,12 @@ import org.beangle.commons.lang.functor.Transformer
 
 /**
  * bean属性提取器<br>
- * CollectionUtils.transform(collections,new PropertyTransformer('myAttr'))
+ * CollectUtils.transform(collections,new PropertyTransformer('myAttr'))
  *
  * @author chaostone
- * @version $Id: $
  */
-class PropertyTransformer[I, R](property: String) extends Transformer[I, R]() {
+class PropertyTransformer[R](property: String) extends Transformer[Any, R]() {
 
-  def apply(arg0: I): R = PropertyUtils.getProperty(arg0, property)
+  def apply(arg0: Any): R = PropertyUtils.getProperty(arg0, property)
 
 }

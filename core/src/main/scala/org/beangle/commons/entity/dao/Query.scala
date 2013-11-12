@@ -19,14 +19,15 @@
 package org.beangle.commons.entity.dao
 
 object Query {
-  case class Lang(val lang: String)
+  case class Lang(val name: String)
+  val hql = new Lang("hql")
+  val sql = new Lang("sql")
 }
 import Query._
 /**
  * 数据查询接口
  *
  * @author chaostone
- * @version $Id: $
  */
 trait Query[T] {
 

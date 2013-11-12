@@ -23,7 +23,6 @@ import org.beangle.commons.entity.Enabled
  * 能够启用和禁用的实体
  *
  * @author chaostone
- * @version $Id: Jun 25, 2011 5:05:07 PM chaostone $
  */
 trait EnabledBean extends Enabled {
 

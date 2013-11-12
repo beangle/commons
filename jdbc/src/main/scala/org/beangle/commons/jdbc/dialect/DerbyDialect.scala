@@ -18,17 +18,6 @@
  */
 package org.beangle.commons.jdbc.dialect
 
-/**
- * sequence grammar
- * @author chaostone
- *
- */
-class SequenceGrammar {
-
-  var createSql: String = "create sequence :name start with :start increment by :increment"
-  var dropSql: String = "drop sequence :name"
-  var nextValSql: String = null
-  var selectNextValSql: String = null
-  var querySequenceSql: String = null
+class DerbyDialect extends DB2Dialect {
 
 }

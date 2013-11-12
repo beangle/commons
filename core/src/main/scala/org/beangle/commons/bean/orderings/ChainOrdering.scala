@@ -22,7 +22,6 @@ package org.beangle.commons.bean.orderings
  * 组合比较器
  *
  * @author chaostone
- * @version $Id: $
  */
 class ChainOrdering[T](comparators: List[Ordering[T]]) extends Ordering[T] {
 

@@ -36,9 +36,7 @@ class ForeignKey(name: String, column: Column) extends Constraint(name) {
 
   def this(name: String) = this(name, null)
 
-  def getAlterSql(dialect: Dialect): String = getAlterSql(dialect, table.schema)
-
-  def getAlterSql(dialect: Dialect, newSchema: String) = {
+  def getAlterSql(dialect: Dialect): String = {
     assert(null != name)
     assert(null != table)
     assert(null != referencedTable, "referencedTable must be set")
@@ -63,8 +61,8 @@ class ForeignKey(name: String, column: Column) extends Constraint(name) {
       i += 1
     }
 
-    val result = "alter table " + table.identifier(newSchema) + dialect.getAddForeignKeyConstraintString(name, cols,
-      referencedTable.identifier(newSchema), refcols, isReferenceToPrimaryKey)
+    val result = "alter table " + table.identifier + dialect.getAddForeignKeyConstraintString(name, cols,
+      referencedTable.identifier(table.schema), refcols, isReferenceToPrimaryKey)
 
     if (cascadeDelete && dialect.supportsCascadeDelete) result + " on delete cascade" else result
   }

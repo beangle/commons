@@ -41,7 +41,6 @@ import scala.collection.mutable
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class DefaultEventMulticaster extends EventMulticaster {
 

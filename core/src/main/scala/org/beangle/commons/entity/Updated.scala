@@ -44,7 +44,6 @@ import java.util.Date
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 trait Updated {
 

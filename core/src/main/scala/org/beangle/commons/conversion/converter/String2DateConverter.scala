@@ -25,13 +25,10 @@ import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.Numbers
 
 /**
- * <p>
- * DateConverter class.
- * </p>
+ * DateConverter
  *
  * @author chaostone
  * @since 3.2.0
- * @version $Id: $
  */
 class String2DateConverter extends StringConverterFactory[String, Date] {
 

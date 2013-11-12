@@ -19,7 +19,7 @@
 package org.beangle.commons.jdbc.meta
 
 import java.sql.Types
-import org.beangle.commons.jdbc.dialect.vendors.H2Dialect
+import org.beangle.commons.jdbc.dialect.H2Dialect
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner

@@ -39,7 +39,6 @@ object SqlBuilder {
  * sql查询
  *
  * @author chaostone
- * @version $Id: $
  */
 class SqlBuilder extends AbstractQueryBuilder[Array[Any]] {
 

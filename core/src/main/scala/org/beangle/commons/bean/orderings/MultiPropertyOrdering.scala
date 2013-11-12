@@ -25,7 +25,6 @@ import org.beangle.commons.lang.Strings
  * 多个属性的比较
  *
  * @author chaostone
- * @version $Id: $
  */
 class MultiPropertyOrdering(propertyStr: String) extends Ordering[Any] {
 

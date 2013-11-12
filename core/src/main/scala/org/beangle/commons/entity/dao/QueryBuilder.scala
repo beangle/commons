@@ -26,7 +26,6 @@ import org.beangle.commons.collection.page.PageLimit
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 trait QueryBuilder[T] {
 
@@ -48,5 +47,5 @@ trait QueryBuilder[T] {
   /**
    * params.
    */
-  def params(newParams: Map[String, Any]): this.type
+  def params(newParams: collection.Map[String, Any]): this.type
 }

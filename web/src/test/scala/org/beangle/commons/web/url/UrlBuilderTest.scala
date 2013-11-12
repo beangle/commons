@@ -23,7 +23,7 @@ import org.scalatest.matchers.ShouldMatchers
 
 /**
  * @author chaostone
- * @version $Id: UrlBuilderTest.java Nov 13, 2010 9:39:00 AM chaostone $
+ * @version
  */
 class UrlBuilderTest extends FunSpec with ShouldMatchers {
 

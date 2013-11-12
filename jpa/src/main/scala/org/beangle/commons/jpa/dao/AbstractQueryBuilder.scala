@@ -30,12 +30,9 @@ object AbstractQueryBuilder {
   val RightOuterJoin = " right outer join "
 }
 /**
- * <p>
  * Abstract AbstractQueryBuilder class.
- * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 abstract class AbstractQueryBuilder[T] extends QueryBuilder[T] {
 
@@ -179,8 +176,8 @@ abstract class AbstractQueryBuilder[T] extends QueryBuilder[T] {
     this
   }
 
-  def params(newparams: Map[String, Any]): this.type = {
-    this.paramMap = newparams
+  def params(newparams: collection.Map[String, Any]): this.type = {
+    this.paramMap = newparams.toMap
     this
   }
 

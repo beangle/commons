@@ -24,7 +24,6 @@ package org.beangle.commons.event
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 trait EventListener[E <: Event] extends java.util.EventListener {
 

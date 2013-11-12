@@ -28,7 +28,6 @@ import org.beangle.commons.collection.page.SinglePage
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 class QueryPage[T](query: LimitQuery[T], val generalDao: GeneralDao) extends AbstractQueryPage[T](query) {
 

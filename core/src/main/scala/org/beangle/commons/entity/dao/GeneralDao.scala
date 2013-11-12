@@ -41,7 +41,7 @@ trait GeneralDao {
   /**
    * search T by id.
    */
-  def find[T, ID](clazz: Class[T], first: ID, ids: ID*): List[T]
+  def find[T, ID](clazz: Class[T], first: ID, ids: ID*): Seq[T]
 
   /**
    * save or update entities
@@ -51,12 +51,12 @@ trait GeneralDao {
   /**
    * save or update entities
    */
-  def saveOrUpdate[T](entities: collection.Seq[T])
+  def saveOrUpdate[T](entities: Seq[T])
 
   /**
    * remove entities.
    */
-  def remove[T](entities: collection.Seq[T])
+  def remove[T](entities: Seq[T])
 
   /**
    * remove entities.
@@ -68,7 +68,7 @@ trait GeneralDao {
    */
   def remove[T, ID](clazz: Class[T], id: ID, ids: ID*)
 
-  def search[T](query: Query[T]): List[T]
+  def search[T](query: Query[T]): Seq[T]
 
   /**
    * 在同一个session保存、删除

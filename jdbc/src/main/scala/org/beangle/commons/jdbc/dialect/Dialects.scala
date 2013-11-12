@@ -19,7 +19,6 @@
 package org.beangle.commons.jdbc.dialect
 
 import java.lang.reflect.Constructor
-import org.beangle.commons.jdbc.dialect.vendors._
 import org.beangle.commons.lang.Strings
 
 object Dialects {
@@ -65,7 +64,45 @@ object Dialects {
   register(classOf[MySQLDialect])
   register(classOf[OracleDialect])
   register(classOf[PostgreSQLDialect])
+  register(classOf[SQLServerDialect])
   register(classOf[SQLServer2005Dialect])
+  register(classOf[SQLServer2008Dialect])
+
+  private def printPad(name: String) { print(Strings.rightPad(name, 17, ' ')) }
+
+  def printTypeMatrix() {
+    import java.sql.Types._
+    val types = Array(BOOLEAN, BIT, CHAR, INTEGER, SMALLINT, TINYINT, BIGINT,
+      FLOAT, DOUBLE, DECIMAL, NUMERIC, DATE, TIME, TIMESTAMP, VARCHAR, LONGVARCHAR,
+      BINARY, VARBINARY, LONGVARBINARY, BLOB, CLOB)
+
+    val typeNames = Array("BOOLEAN", "BIT", "CHAR", "INTEGER", "SMALLINT", "TINYINT", "BIGINT",
+      "FLOAT", "DOUBLE", "DECIMAL", "NUMERIC", "DATE", "TIME", "TIMESTAMP", "VARCHAR", "LONGVARCHAR",
+      "BINARY", "VARBINARY", "LONGVARBINARY", "BLOB", "CLOB")
+
+    val dialects = Array(new OracleDialect, new H2Dialect, new MySQLDialect, new PostgreSQLDialect,
+      new SQLServer2005Dialect, new DB2Dialect)
+
+    printPad("Type/Dialect")
+    for (dialect <- dialects) {
+      printPad(Strings.replace(dialect.getClass.getSimpleName, "Dialect", ""))
+    }
+
+    println()
+    for (i <- 0 until types.length) {
+      printPad(typeNames(i))
+      for (dialect <- dialects) {
+        var typeName = "error"
+        try {
+          typeName = dialect.typeNames.get(types(i))
+        } catch {
+          case e: Exception =>
+        }
+        printPad(typeName)
+      }
+      println("")
+    }
+  }
 }
 
 abstract class Dialect {

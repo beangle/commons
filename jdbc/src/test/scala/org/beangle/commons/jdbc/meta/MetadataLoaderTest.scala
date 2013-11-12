@@ -21,7 +21,7 @@ package org.beangle.commons.jdbc.meta
 import scala.collection.JavaConversions._
 import javax.sql.DataSource
 import org.beangle.commons.jdbc.dialect.Dialect
-import org.beangle.commons.jdbc.dialect.vendors.H2Dialect
+import org.beangle.commons.jdbc.dialect.H2Dialect
 import org.beangle.commons.jdbc.util.PoolingDataSourceFactory
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
@@ -30,7 +30,7 @@ class MetadataLoaderTest extends FlatSpec with ShouldMatchers {
 
   "test h2 metadata loader " should "ok" in {
     val datasource: DataSource = new PoolingDataSourceFactory("org.h2.Driver",
-      "jdbc:h2:/tmp/beangle;AUTO_SERVER=TRUE", "sa", "").getObject
+      "jdbc:h2:/tmp/beangle;AUTO_SERVER=TRUE", "sa", new java.util.Properties()).getObject
     val dialect = new H2Dialect
     val database = new Database(datasource.getConnection().getMetaData(), dialect, null, "PUBLIC")
     database.loadTables(true)
@@ -39,7 +39,7 @@ class MetadataLoaderTest extends FlatSpec with ShouldMatchers {
     for (table <- tables.values()) {
       val createSql = table.createSql(dialect)
       (null != createSql) should be(true)
-      for (fk1 <- table.getForeignKeys) {
+      for (fk1 <- table.foreignKeys) {
         (null != fk1.getAlterSql(dialect)) should be(true)
       }
     }

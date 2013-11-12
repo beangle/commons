@@ -24,7 +24,6 @@ package org.beangle.commons.bean
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 trait Disposable {
 

@@ -24,7 +24,6 @@ package org.beangle.commons.inject.bind
  * </p>
  *
  * @author chaostone
- * @version $Id: $
  */
 trait BindModule {
 

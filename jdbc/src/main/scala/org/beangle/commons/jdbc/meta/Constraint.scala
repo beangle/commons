@@ -27,17 +27,15 @@ import collection.mutable.ListBuffer
  */
 class Constraint(var name: String) extends Comparable[Constraint] with Cloneable {
 
-  protected[meta] val cols = new ListBuffer[Column];
+  val columns = new ListBuffer[Column]
 
-  var enabled: Boolean = true;
+  var enabled: Boolean = true
 
   var table: Table = null
 
   def lowerCase() { if (null != name) this.name = name.toLowerCase }
 
-  def addColumn(column: Column) { if (column != null) cols += column }
-
-  def columns: List[Column] = cols.toList
+  def addColumn(column: Column) { if (column != null) columns += column }
 
   override def compareTo(o: Constraint) = { if (null == name) 0 else name.compareTo(o.name) }
 
@@ -45,11 +43,11 @@ class Constraint(var name: String) extends Comparable[Constraint] with Cloneable
     var cloned: this.type = null
     cloned = super.clone().asInstanceOf[this.type]
     var newColumns = new ListBuffer[Column];
-    for (column <- cols) {
+    for (column <- columns) {
       newColumns += column.clone();
     }
-    cloned.cols.clear();
-    cloned.cols ++= newColumns
+    cloned.columns.clear();
+    cloned.columns ++= newColumns
     return cloned;
   }
 
