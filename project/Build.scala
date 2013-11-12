@@ -3,7 +3,7 @@ import Keys._
 
 object BuildSettings {
   val buildOrganization = "org.beangle.commons"
-  val buildVersion = "4.0.1"
+  val buildVersion = "4.0.2-SNAPSHOT"
   val buildScalaVersion = "2.10.2"
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
