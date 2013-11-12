@@ -59,7 +59,7 @@ class OracleDialect() extends AbstractDialect("[10.1)") {
   }
 
   override def limitGrammar: LimitGrammar = {
-    class OracleLimitGrammar extends LimitGrammarBean(null,null,true,false,true) {
+    class OracleLimitGrammar extends LimitGrammarBean(null, null, true, false, true) {
       override def limit(sqlStr: String, hasOffset: Boolean) = {
         var sql = sqlStr.trim();
         var isForUpdate = false;

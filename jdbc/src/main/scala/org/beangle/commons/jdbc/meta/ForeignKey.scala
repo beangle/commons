@@ -36,7 +36,7 @@ class ForeignKey(name: String, column: Column) extends Constraint(name) {
 
   def this(name: String) = this(name, null)
 
-  def getAlterSql(dialect: Dialect):String = {
+  def getAlterSql(dialect: Dialect): String = {
     assert(null != name)
     assert(null != table)
     assert(null != referencedTable, "referencedTable must be set")

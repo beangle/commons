@@ -32,9 +32,9 @@ import javax.servlet.http.HttpServletResponse
 import org.beangle.commons.codec.net.BCoder
 import org.beangle.commons.http.mime.MimeTypeProvider
 import org.beangle.commons.lang.ClassLoaders
-
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
+import javax.servlet.WriteListener
 
 class DefaultStreamDownloaderTest extends FunSpec with ShouldMatchers {
 
@@ -49,6 +49,9 @@ class DefaultStreamDownloaderTest extends FunSpec with ShouldMatchers {
         def write(b: Int) {
           outputStream.write(b)
         }
+        def isReady() = false
+
+        def setWriteListener(writeListener: WriteListener) {}
       })
       val testDoc = ClassLoaders.getResource("download.txt", getClass)
       streamDownloader.download(request, response, testDoc, null)

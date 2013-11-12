@@ -20,9 +20,9 @@ package org.beangle.commons.jdbc.dialect
 
 import java.sql.Types._
 
-class SQLServer2005Dialect(version:String) extends SQLServerDialect(version) {
+class SQLServer2005Dialect(version: String) extends SQLServerDialect(version) {
 
-  def this(){
+  def this() {
     this("[2005,2008)")
   }
 
@@ -39,8 +39,8 @@ class SQLServer2005Dialect(version:String) extends SQLServerDialect(version) {
     registerType(CLOB, "varchar(MAX)")
   }
 
-  override def limitGrammar :LimitGrammar= {
-    class SqlServerLimitGrammar extends LimitGrammarBean(null,null,false,false,true) {
+  override def limitGrammar: LimitGrammar = {
+    class SqlServerLimitGrammar extends LimitGrammarBean(null, null, false, false, true) {
       override def limit(querySqlString: String, hasOffset: Boolean) = {
         val sb: StringBuilder = new StringBuilder(querySqlString.trim().toLowerCase())
 

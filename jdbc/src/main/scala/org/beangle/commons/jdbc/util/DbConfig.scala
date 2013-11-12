@@ -24,9 +24,9 @@ import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.ClassLoaders
 import java.util.Properties
 
-object DbConfig{
+object DbConfig {
 
-  def build(xml: scala.xml.Node):DbConfig ={
+  def build(xml: scala.xml.Node): DbConfig = {
     val dbconf = new DbConfig(ClassLoaders.loadClass((xml \\ "dialect").text.trim).newInstance().asInstanceOf[Dialect])
     dbconf.url = (xml \\ "url").text.trim
     dbconf.user = (xml \\ "user").text.trim
@@ -42,20 +42,20 @@ object DbConfig{
   }
 }
 
-class DbConfig(val dialect: Dialect) extends Initializing{
+class DbConfig(val dialect: Dialect) extends Initializing {
   var url: String = _
   var user: String = _
   var password: String = _
   var driver: String = _
   var props: Properties = new Properties
   var schema: String = _
-  var catalog:String=_
+  var catalog: String = _
 
   def init() {
-    if (Strings.isEmpty(schema)){
-      schema=dialect.defaultSchema
-      if(schema=="$user") schema=user
+    if (Strings.isEmpty(schema)) {
+      schema = dialect.defaultSchema
+      if (schema == "$user") schema = user
     }
-    if(driver.endsWith("OracleDriver")) schema=schema.toUpperCase()
+    if (driver.endsWith("OracleDriver")) schema = schema.toUpperCase()
   }
 }

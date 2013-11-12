@@ -39,7 +39,6 @@ trait TableGrammar {
   def supportsColumnCheck: Boolean
 }
 
-
 class TableGrammarBean extends TableGrammar {
 
   var nullColumnString: String = ""
@@ -59,8 +58,8 @@ class TableGrammarBean extends TableGrammar {
   def getColumnComment(comment: String) = {
     if (null == this.columnComent) ""
     else {
-      var newcomment = Strings.replace(comment,"'","")
-      newcomment = Strings.replace(newcomment,"\"","")
+      var newcomment = Strings.replace(comment, "'", "")
+      newcomment = Strings.replace(newcomment, "\"", "")
       Strings.replace(this.columnComent, "{}", newcomment)
     }
   }
@@ -93,7 +92,6 @@ class LimitGrammarBean(pattern: String, offsetPattern: String, val bindInReverse
   def limit(query: String, hasOffset: Boolean) =
     if (hasOffset) Strings.replace(offsetPattern, "{}", query) else Strings.replace(pattern, "{}", query)
 }
-
 
 /**
  * sequence grammar

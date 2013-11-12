@@ -82,5 +82,5 @@ class MySQLDialect extends AbstractDialect("[5.0,)") {
     bean
   }
 
-  override def sequenceGrammar=null
+  override def sequenceGrammar = null
 }

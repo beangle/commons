@@ -47,13 +47,13 @@ abstract class AbstractDialect(versions: String) extends Dialect {
 
   override def defaultSchema: String = null
 
-  override def tableGrammar =  new TableGrammarBean()
+  override def tableGrammar = new TableGrammarBean()
 
   override def isCaseSensitive = caseSensitive
 
   def setCaseSensitive(newCaseSensitive: Boolean) = caseSensitive = newCaseSensitive
 
-  protected def registerType(){}
+  protected def registerType() {}
 
   protected def registerKeywords(words: List[String]) = {
     for (word <- words) {

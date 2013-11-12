@@ -20,13 +20,13 @@ package org.beangle.commons.jdbc.dialect
 
 import java.sql.Types._
 
-abstract class AbstractTransactSQLDialect(version:String) extends AbstractDialect(version) {
+abstract class AbstractTransactSQLDialect(version: String) extends AbstractDialect(version) {
 
   val SELECT: String = "select"
   val FROM: String = "from"
   val DISTINCT: String = "distinct"
 
-  override def sequenceGrammar:SequenceGrammar = null
+  override def sequenceGrammar: SequenceGrammar = null
 
   protected override def registerType = {
     registerType(CHAR, "char($l)")

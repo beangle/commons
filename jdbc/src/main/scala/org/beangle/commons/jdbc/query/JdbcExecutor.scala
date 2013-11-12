@@ -51,7 +51,7 @@ object JdbcExecutor {
   }
 }
 
-class JdbcExecutor(val dataSource: DataSource) extends Logging{
+class JdbcExecutor(val dataSource: DataSource) extends Logging {
 
   var pmdKnownBroken: Boolean = false
 
@@ -104,7 +104,7 @@ class JdbcExecutor(val dataSource: DataSource) extends Logging{
     } catch {
       case e: SQLException => rethrow(e, sql, params)
     } finally {
-      if(null!=stmt)stmt.close()
+      if (null != stmt) stmt.close()
       conn.close()
     }
     rows
@@ -138,22 +138,22 @@ class JdbcExecutor(val dataSource: DataSource) extends Logging{
     // check the parameter count, if we can
     val paramsCount = if (params == null) 0 else params.length
     var stmtCount = 0
-    var sqltypes:Array[Int]=null
+    var sqltypes: Array[Int] = null
 
-    if (null != types && !types.isEmpty ){
+    if (null != types && !types.isEmpty) {
       stmtCount = types.length
       sqltypes = types.toArray
     } else {
       stmtCount = if (!pmdKnownBroken) stmt.getParameterMetaData().getParameterCount else params.length
-      sqltypes=new Array[Int](stmtCount)
-      for(i <- 0 until stmtCount) sqltypes(i)=NULL
+      sqltypes = new Array[Int](stmtCount)
+      for (i <- 0 until stmtCount) sqltypes(i) = NULL
 
-      if(!pmdKnownBroken){
+      if (!pmdKnownBroken) {
         var pmd = stmt.getParameterMetaData()
         try {
-          for(i <- 0 until stmtCount) sqltypes(i)=pmd.getParameterType(i + 1)
+          for (i <- 0 until stmtCount) sqltypes(i) = pmd.getParameterType(i + 1)
         } catch {
-          case e: SQLException =>  pmdKnownBroken = true
+          case e: SQLException => pmdKnownBroken = true
         }
       }
     }
@@ -163,11 +163,11 @@ class JdbcExecutor(val dataSource: DataSource) extends Logging{
 
     var i = 0
     while (i < stmtCount) {
-      val index=i+1
-      if (null==params(i)) {
-        stmt.setNull(index,  if(sqltypes(i)==NULL) VARCHAR else sqltypes(i))
-      }else{
-        val value=params(i)
+      val index = i + 1
+      if (null == params(i)) {
+        stmt.setNull(index, if (sqltypes(i) == NULL) VARCHAR else sqltypes(i))
+      } else {
+        val value = params(i)
         try {
           sqltypes(i) match {
             case CHAR | VARCHAR =>
@@ -201,17 +201,17 @@ class JdbcExecutor(val dataSource: DataSource) extends Logging{
               stmt.setBinaryStream(index, value.asInstanceOf[InputStream]);
 
             case CLOB =>
-              stmt.setAsciiStream(index,value.asInstanceOf[Clob].getAsciiStream)
+              stmt.setAsciiStream(index, value.asInstanceOf[Clob].getAsciiStream)
             case BLOB =>
               stmt.setBinaryStream(index, value.asInstanceOf[Blob].getBinaryStream);
             case _ =>
-              stmt.setObject(index,value)
+              stmt.setObject(index, value)
           }
         } catch {
           case e: Exception => logger.error("set value error", e);
         }
       }
-      
+
       i += 1
     }
   }

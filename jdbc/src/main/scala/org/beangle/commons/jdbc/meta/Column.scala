@@ -50,8 +50,8 @@ class Column(var name: String, var typeCode: Int) extends Comparable[Column] wit
 
   def hasCheckConstraint = checkConstraint != null
 
-  def getSqlType(dialect: Dialect) = if(typeCode==Types.OTHER) typeName else dialect.typeNames.get(typeCode, size, size, scale)
-  
+  def getSqlType(dialect: Dialect) = if (typeCode == Types.OTHER) typeName else dialect.typeNames.get(typeCode, size, size, scale)
+
   override def toString = "Column(" + name + ')'
 
   override def compareTo(other: Column) = position - other.position

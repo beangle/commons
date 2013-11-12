@@ -25,17 +25,17 @@ import org.apache.commons.pool.impl.GenericObjectPool
 import org.slf4j._
 import java.util.Properties
 
-class PoolingDataSourceFactory(url: String, username: String, password: String,props:Properties) {
+class PoolingDataSourceFactory(url: String, username: String, password: String, props: Properties) {
 
   private val logger: Logger = LoggerFactory.getLogger(classOf[PoolingDataSourceFactory])
 
-  val properties = if(null==props) new Properties() else new Properties(props)
+  val properties = if (null == props) new Properties() else new Properties(props)
 
-  if(null!=username) properties.put("user",username)
-  if(null!=password) properties.put("password",password)
-  
-  def this(newDriverClassName: String, url: String, username: String, password: String,props:Properties) = {
-    this(url, username, password,props)
+  if (null != username) properties.put("user", username)
+  if (null != password) properties.put("password", password)
+
+  def this(newDriverClassName: String, url: String, username: String, password: String, props: Properties) = {
+    this(url, username, password, props)
     registeDriver(newDriverClassName)
   }
 

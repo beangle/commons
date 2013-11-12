@@ -20,9 +20,9 @@ package org.beangle.commons.jdbc.dialect
 
 import java.sql.Types._
 
-class SQLServerDialect(version:String) extends AbstractTransactSQLDialect(version) {
+class SQLServerDialect(version: String) extends AbstractTransactSQLDialect(version) {
 
-  def this(){
+  def this() {
     this("(,2000]")
   }
 
@@ -37,10 +37,10 @@ class SQLServerDialect(version:String) extends AbstractTransactSQLDialect(versio
     registerType(TIMESTAMP, "datetime")
 
     registerType(VARBINARY, "image")
-    registerType(VARBINARY, 8000,"varbinary($l)")
+    registerType(VARBINARY, 8000, "varbinary($l)")
     registerType(LONGVARBINARY, "image")
   }
 
-  override def limitGrammar:LimitGrammar = null
-  override def sequenceGrammar:SequenceGrammar = null
+  override def limitGrammar: LimitGrammar = null
+  override def sequenceGrammar: SequenceGrammar = null
 }

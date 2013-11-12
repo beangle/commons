@@ -117,7 +117,7 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
     }
     buf.append(')')
     if (null != comment && !comment.isEmpty()) buf.append(grammar.getComment(comment))
-    
+
     buf.toString()
   }
 
@@ -139,7 +139,7 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
       tb.addColumn(col.clone())
     if (null != primaryKey) {
       tb.primaryKey = primaryKey.clone()
-      tb.primaryKey.table=tb
+      tb.primaryKey.table = tb
     }
 
     for (fk <- foreignKeys)
@@ -206,7 +206,7 @@ class Table(var name: String) extends Comparable[Table] with Cloneable {
   }
 
   def addIndex(index: Index) {
-    index.table=this
+    index.table = this
     indexes += index
   }
 

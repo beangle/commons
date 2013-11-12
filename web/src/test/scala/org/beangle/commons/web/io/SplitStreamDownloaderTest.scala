@@ -18,22 +18,22 @@
  */
 package org.beangle.commons.web.io
 
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.OutputStream
+
+import org.beangle.commons.http.mime.MimeTypeProvider
+import org.beangle.commons.lang.ClassLoaders
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.when
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.IOException
-import java.io.OutputStream
-import java.net.URL
-import javax.servlet.ServletOutputStream
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
-import org.beangle.commons.http.mime.MimeTypeProvider
-import org.beangle.commons.lang.ClassLoaders
-
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
+
+import javax.servlet.ServletOutputStream
+import javax.servlet.WriteListener
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 class SplitStreamDownloaderTest extends FunSpec with ShouldMatchers {
 
@@ -48,6 +48,9 @@ class SplitStreamDownloaderTest extends FunSpec with ShouldMatchers {
         def write(b: Int) {
           outputStream.write(b)
         }
+        def isReady() = false
+
+        def setWriteListener(writeListener: WriteListener) {}
       })
       val testDoc = ClassLoaders.getResource("download.txt", getClass)
       streamDownloader.download(request, response, testDoc, null)
@@ -62,6 +65,9 @@ class SplitStreamDownloaderTest extends FunSpec with ShouldMatchers {
         def write(b: Int) {
           outputStream.write(b)
         }
+        def isReady() = false
+
+        def setWriteListener(writeListener: WriteListener) {}
       })
       when(request.getHeader("Range")).thenReturn("bytes=5-12")
       streamDownloader.download(request, response, testDoc, null)

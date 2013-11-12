@@ -76,7 +76,7 @@ class DB2Dialect extends AbstractDialect("[8.0]") {
   private def hasDistinct(sql: String) = sql.toLowerCase().indexOf("select distinct") >= 0
 
   override def limitGrammar = {
-    class DB2LimitGrammar extends LimitGrammarBean(null,null,false,false,true) {
+    class DB2LimitGrammar extends LimitGrammarBean(null, null, false, false, true) {
       override def limit(sql: String, hasOffset: Boolean) = {
         val startOfSelect = sql.toLowerCase().indexOf("select")
         val pagingSelect: StringBuilder = new StringBuilder(sql.length() + 100)

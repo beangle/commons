@@ -20,16 +20,16 @@ package org.beangle.commons.jdbc.dialect
 
 import java.sql.Types._
 
-class SQLServer2008Dialect(version:String) extends SQLServer2005Dialect(version) {
+class SQLServer2008Dialect(version: String) extends SQLServer2005Dialect(version) {
 
-  def this(){
+  def this() {
     this("[2008,2012]")
   }
 
   protected override def registerType() = {
     super.registerType()
-    registerType(DATE, "date" );
-    registerType(TIME, "time" );
-    registerType(TIMESTAMP, "datetime2" );
+    registerType(DATE, "date");
+    registerType(TIME, "time");
+    registerType(TIMESTAMP, "datetime2");
   }
 }
