@@ -33,10 +33,10 @@ import org.beangle.commons.codec.net.BCoder
 import org.beangle.commons.http.mime.MimeTypeProvider
 import org.beangle.commons.lang.ClassLoaders
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import javax.servlet.WriteListener
 
-class DefaultStreamDownloaderTest extends FunSpec with ShouldMatchers {
+class DefaultStreamDownloaderTest extends FunSpec with Matchers {
 
   val streamDownloader: StreamDownloader = new DefaultStreamDownloader(new MimeTypeProvider())
 

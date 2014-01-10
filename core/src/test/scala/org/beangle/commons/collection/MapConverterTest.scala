@@ -21,9 +21,9 @@ package org.beangle.commons.collection
 import java.sql.Date
 import java.util.Calendar
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class MapConverterTest extends FunSpec with ShouldMatchers {
+class MapConverterTest extends FunSpec with Matchers {
 
   val datas = Map[String, Any](("empty1" -> ""), ("empty2" -> null), ("empty3" -> Array("")))
 

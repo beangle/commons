@@ -22,9 +22,9 @@ import java.lang.Boolean
 //remove if not needed
 import scala.collection.JavaConversions._
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class DefaultMailNotifierTest extends FunSpec with ShouldMatchers {
+class DefaultMailNotifierTest extends FunSpec with Matchers {
 
   private var online: Boolean = false;
 

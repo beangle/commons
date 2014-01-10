@@ -26,9 +26,9 @@ import java.io.IOException
 import java.io.StringWriter
 import org.beangle.commons.lang.SystemInfo
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class CsvWriterTest extends FunSpec with ShouldMatchers {
+class CsvWriterTest extends FunSpec with Matchers {
 
   private def invokeWriter(args: Array[String]): String = {
     val sw = new StringWriter()

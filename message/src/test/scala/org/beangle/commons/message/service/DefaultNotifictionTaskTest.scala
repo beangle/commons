@@ -28,9 +28,9 @@ import org.beangle.commons.lang.Throwables
 //remove if not needed
 import scala.collection.JavaConversions._
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class DefaultNotifictionTaskTest extends FunSpec with ShouldMatchers {
+class DefaultNotifictionTaskTest extends FunSpec with Matchers {
   private var greenMail = new GreenMail(ServerSetupTest.ALL)
   greenMail.start()
   greenMail.setUser("test1@localhost", "user1", "password")

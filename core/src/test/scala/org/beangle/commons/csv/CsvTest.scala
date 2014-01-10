@@ -19,9 +19,9 @@
 package org.beangle.commons.csv
 
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class CsvTest extends FunSpec with ShouldMatchers {
+class CsvTest extends FunSpec with Matchers {
 
   describe("CsvFormat") {
     it("Format") {

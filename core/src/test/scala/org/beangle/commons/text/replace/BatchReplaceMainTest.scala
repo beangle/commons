@@ -23,9 +23,9 @@ import java.util.regex.Pattern
 import org.beangle.commons.logging.Logging
 
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class BatchReplaceMainTest extends FunSpec with ShouldMatchers with Logging {
+class BatchReplaceMainTest extends FunSpec with Matchers with Logging {
   describe("BatchReplace") {
     it("Test batch replace expression") {
       val clause = "<#include \"/template/head.ftl\"/>"

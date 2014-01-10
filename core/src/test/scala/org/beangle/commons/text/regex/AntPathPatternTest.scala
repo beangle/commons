@@ -19,10 +19,10 @@
 package org.beangle.commons.text.regex
 
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.beangle.commons.text.regex.AntPathPattern._
 
-class AntPathPatternTest extends FunSpec with ShouldMatchers {
+class AntPathPatternTest extends FunSpec with Matchers {
 
   describe("AntPathPattern") {
     it("Match ant pattern expression") {

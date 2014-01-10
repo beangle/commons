@@ -22,9 +22,9 @@ import javax.servlet.http.HttpServletRequest
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.when
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class RequestUtilsTest extends FunSpec with ShouldMatchers {
+class RequestUtilsTest extends FunSpec with Matchers {
 
   describe("RequestUtils") {
     it("testGetServletPath") {

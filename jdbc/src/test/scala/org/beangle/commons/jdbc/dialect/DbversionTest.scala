@@ -19,9 +19,9 @@
 package org.beangle.commons.jdbc.dialect
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class DbversionTest extends FlatSpec with ShouldMatchers {
+class DbversionTest extends FlatSpec with Matchers {
 
   "version [1.0,2.0] " should "contain both boundary" in {
     val version = new Dbversion("[1.0,2.0]");

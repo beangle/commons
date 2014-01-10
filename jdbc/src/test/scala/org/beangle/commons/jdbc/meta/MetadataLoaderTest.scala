@@ -24,9 +24,9 @@ import org.beangle.commons.jdbc.dialect.Dialect
 import org.beangle.commons.jdbc.dialect.H2Dialect
 import org.beangle.commons.jdbc.util.PoolingDataSourceFactory
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class MetadataLoaderTest extends FlatSpec with ShouldMatchers {
+class MetadataLoaderTest extends FlatSpec with Matchers {
 
   "test h2 metadata loader " should "ok" in {
     val datasource: DataSource = new PoolingDataSourceFactory("org.h2.Driver",

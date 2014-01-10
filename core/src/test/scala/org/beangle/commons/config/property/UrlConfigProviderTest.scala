@@ -21,9 +21,9 @@ package org.beangle.commons.config.property
 import org.beangle.commons.inject.Resources
 import org.beangle.commons.lang.ClassLoaders
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class UrlConfigProviderTest extends FunSpec with ShouldMatchers {
+class UrlConfigProviderTest extends FunSpec with Matchers {
 
   describe("UrlConfigProvider") {
     it("Get Property") {

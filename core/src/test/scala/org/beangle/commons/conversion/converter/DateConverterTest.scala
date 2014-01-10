@@ -19,14 +19,14 @@
 package org.beangle.commons.conversion.converter
 
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
 import java.util.Calendar
 import java.util.Date
 import java.util.GregorianCalendar
 import org.beangle.commons.conversion.Converter
 
-class DateConverterTest extends FunSpec with ShouldMatchers {
+class DateConverterTest extends FunSpec with Matchers {
 
   private def converToDate(dateStr: String,
     year: Int,

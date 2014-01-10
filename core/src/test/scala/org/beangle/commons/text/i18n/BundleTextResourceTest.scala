@@ -23,9 +23,9 @@ import org.beangle.commons.text.i18n.impl.DefaultTextBundleRegistry
 import org.beangle.commons.text.i18n.impl.DefaultTextFormater
 import org.beangle.commons.text.i18n.impl.DefaultTextResource
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class BundleTextResourceTest extends FunSpec with ShouldMatchers {
+class BundleTextResourceTest extends FunSpec with Matchers {
 
   describe("TextBundle") {
     it("Get text from bundle") {

@@ -22,10 +22,10 @@ import java.sql.Types
 
 import org.beangle.commons.jdbc.dialect.OracleDialect
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.scalatest.FlatSpec
 
-class ForeignKeyTest extends FlatSpec with ShouldMatchers {
+class ForeignKeyTest extends FlatSpec with Matchers {
 
   "alter closuse " should "corret" in {
     val table = new Table("sys_table")

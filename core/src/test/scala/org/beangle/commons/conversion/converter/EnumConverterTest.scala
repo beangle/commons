@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.conversion.converter
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import java.lang.reflect.InvocationTargetException
 import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.testbean.TestEnum
@@ -26,7 +26,7 @@ import org.beangle.commons.lang.testbean.TestEnum
  * @author chaostone
  * @since 3.0.0
  */
-class EnumConverterTest extends FunSpec with ShouldMatchers {
+class EnumConverterTest extends FunSpec with Matchers {
 
   describe("EnumConverter") {
     it("Convert Enum") {

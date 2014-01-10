@@ -22,9 +22,9 @@ import java.util.List
 import javax.mail.internet.InternetAddress
 import scala.collection.JavaConversions._
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class MimeUtilsTest extends FunSpec with ShouldMatchers {
+class MimeUtilsTest extends FunSpec with Matchers {
 
   describe("MimeUtils") {
     it("testParseAddress") {

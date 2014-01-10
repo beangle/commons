@@ -18,9 +18,9 @@
  */
 package org.beangle.commons.text.seq
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class HanZiSeqStyleTest extends FunSpec with ShouldMatchers {
+class HanZiSeqStyleTest extends FunSpec with Matchers {
 
   describe("HanZiSeqStyle") {
     it("Build HanZi Sequence") {

@@ -19,11 +19,11 @@
 package org.beangle.commons.conversion.converter
 
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.beangle.commons.conversion.Conversion
 import org.beangle.commons.conversion.impl.DefaultConversion
 
-class DefaultConverterTest extends FunSpec with ShouldMatchers {
+class DefaultConverterTest extends FunSpec with Matchers {
 
   describe("DefaultConversion") {
     it("Convert null") {

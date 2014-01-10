@@ -19,9 +19,9 @@
 package org.beangle.commons.lang.time
 
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class StopwatchTest extends FunSpec with ShouldMatchers {
+class StopwatchTest extends FunSpec with Matchers {
   describe("Stopwatch") {
     it("Format nanos to string") {
       Stopwatch.format(2323, 4) should equal("2.323 μs")

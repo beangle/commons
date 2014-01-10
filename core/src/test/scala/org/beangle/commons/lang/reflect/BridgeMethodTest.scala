@@ -20,9 +20,9 @@ package org.beangle.commons.lang.reflect
 
 import java.lang.reflect.Method
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class BridgeMethodTest extends FunSpec with ShouldMatchers {
+class BridgeMethodTest extends FunSpec with Matchers {
 
   describe("Reflection class bridge method") {
     it("Find bridge methods") {

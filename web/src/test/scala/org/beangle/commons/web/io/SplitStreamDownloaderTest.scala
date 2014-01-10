@@ -28,14 +28,14 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.when
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
 import javax.servlet.ServletOutputStream
 import javax.servlet.WriteListener
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class SplitStreamDownloaderTest extends FunSpec with ShouldMatchers {
+class SplitStreamDownloaderTest extends FunSpec with Matchers {
 
   val streamDownloader: StreamDownloader = new SplitStreamDownloader(new MimeTypeProvider())
 

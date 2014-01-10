@@ -18,11 +18,11 @@
  */
 package org.beangle.commons.collection.page
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 /**
  * @author zhouqi
  */
-class PageAdapterTest extends FunSpec with ShouldMatchers {
+class PageAdapterTest extends FunSpec with Matchers {
 
   describe("PagedSeq") {
     it("Move next or previous") {

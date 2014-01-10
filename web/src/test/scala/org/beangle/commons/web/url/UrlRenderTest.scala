@@ -19,9 +19,9 @@
 package org.beangle.commons.web.url
 
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class UrlRenderTest extends FunSpec with ShouldMatchers {
+class UrlRenderTest extends FunSpec with Matchers {
 
   describe("UrlRender") {
     it("testRender") {

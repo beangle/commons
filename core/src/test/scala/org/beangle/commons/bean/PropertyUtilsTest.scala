@@ -20,9 +20,9 @@ package org.beangle.commons.bean
 
 import org.beangle.commons.lang.testbean.TestBean
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class PropertyUtilsTest extends FunSpec with ShouldMatchers {
+class PropertyUtilsTest extends FunSpec with Matchers {
 
   describe("PropertyUtils") {
     it("Get or Set property") {

@@ -20,9 +20,9 @@ package org.beangle.commons.lang
 
 import org.beangle.commons.lang.Strings._
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class StringsTest extends FunSpec with ShouldMatchers {
+class StringsTest extends FunSpec with Matchers {
 
   describe("Strings") {
     it("Count target string") {

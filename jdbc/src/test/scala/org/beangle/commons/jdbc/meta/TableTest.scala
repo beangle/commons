@@ -21,10 +21,10 @@ package org.beangle.commons.jdbc.meta
 import java.sql.Types
 import org.beangle.commons.jdbc.dialect.H2Dialect
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.scalatest.junit.JUnitRunner
 
-class TableTest extends FlatSpec with ShouldMatchers {
+class TableTest extends FlatSpec with Matchers {
 
   "create sql" should "like this" in {
     val table = new Table("test", "user")

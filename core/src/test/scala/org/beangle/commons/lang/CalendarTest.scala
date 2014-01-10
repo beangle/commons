@@ -19,7 +19,7 @@
 package org.beangle.commons.lang
 
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
 import java.util.Calendar
 import java.util.Date
@@ -28,7 +28,7 @@ import java.util.Date
  * @author chaostone
  */
 
-class CalendarTest extends FunSpec with ShouldMatchers {
+class CalendarTest extends FunSpec with Matchers {
 
   describe("Dates") {
     it("Roll minutes") {

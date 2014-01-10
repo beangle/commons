@@ -18,9 +18,9 @@
  */
 package org.beangle.commons.text.seq
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class MultiLevelSeqGeneratorTest extends FunSpec with ShouldMatchers {
+class MultiLevelSeqGeneratorTest extends FunSpec with Matchers {
 
   describe("MultiLevelSeqGenerator") {
     it("Generate multi level sequence") {

@@ -20,9 +20,9 @@ package org.beangle.commons.jdbc.dialect
 
 import java.sql.Types
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class PostgreSQLDialectTest extends FlatSpec with ShouldMatchers {
+class PostgreSQLDialectTest extends FlatSpec with Matchers {
 
   "big number (size >=65535) in postgresql " should " trip to less 1000 size" in {
     val dialect = new PostgreSQLDialect();

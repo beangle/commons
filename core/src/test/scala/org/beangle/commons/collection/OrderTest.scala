@@ -19,9 +19,9 @@
 package org.beangle.commons.collection
 
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class OrderTest extends FunSpec with ShouldMatchers {
+class OrderTest extends FunSpec with Matchers {
 
   describe("Order") {
     it("ToString1") {

@@ -19,9 +19,9 @@
 package org.beangle.commons.lang
 
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class BitStringsTest extends FunSpec with ShouldMatchers {
+class BitStringsTest extends FunSpec with Matchers {
 
   describe("BitStrings") {
     it("Calculate binary value of bit string") {

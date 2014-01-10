@@ -19,13 +19,13 @@
 package org.beangle.commons.web.url
 
 import org.scalatest.FunSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
 /**
  * @author chaostone
  * @version
  */
-class UrlBuilderTest extends FunSpec with ShouldMatchers {
+class UrlBuilderTest extends FunSpec with Matchers {
 
   describe("UrlBuilder") {
     it("build full url") {
