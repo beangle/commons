@@ -2,8 +2,8 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.beangle</groupId>
-    <artifactId>beangle-scala-parent</artifactId>
-    <version>11-SNAPSHOT</version>
+    <artifactId>beangle-scala</artifactId>
+    <version>11</version>
   </parent>
   <groupId>org.beangle.commons</groupId>
   <artifactId>beangle-commons-parent</artifactId>
@@ -14,9 +14,6 @@
   <modules>
     <module>core</module>
     <module>web</module>
-    <module>jpa</module>
-    <module>jdbc</module>
-    <module>message</module>
   </modules>
 
   <description>
