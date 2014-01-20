@@ -83,8 +83,7 @@ object BeangleBuild extends Build {
     settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(servletapi, validation, mockito))
       ++ Seq(resolvers += m2repo)) dependsOn (commons_core)
 
-
-/*  lazy val commons_notification = Project(
+  /*  lazy val commons_notification = Project(
     "beangle-commons-notification",
     file("notification"),
     settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(javamail, greenmail))
