@@ -23,7 +23,10 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.when
 import org.scalatest.FunSpec
 import org.scalatest.Matchers
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class RequestUtilsTest extends FunSpec with Matchers {
 
   describe("RequestUtils") {

@@ -20,7 +20,10 @@ package org.beangle.commons.lang.time
 
 import org.scalatest.FunSpec
 import org.scalatest.Matchers
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class StopwatchTest extends FunSpec with Matchers {
   describe("Stopwatch") {
     it("Format nanos to string") {

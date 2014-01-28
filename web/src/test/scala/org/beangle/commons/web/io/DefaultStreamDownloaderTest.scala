@@ -35,7 +35,10 @@ import org.beangle.commons.lang.ClassLoaders
 import org.scalatest.FunSpec
 import org.scalatest.Matchers
 import javax.servlet.WriteListener
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class DefaultStreamDownloaderTest extends FunSpec with Matchers {
 
   val streamDownloader: StreamDownloader = new DefaultStreamDownloader(new MimeTypeProvider())

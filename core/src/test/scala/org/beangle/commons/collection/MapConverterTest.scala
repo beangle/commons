@@ -22,7 +22,10 @@ import java.sql.Date
 import java.util.Calendar
 import org.scalatest.FunSpec
 import org.scalatest.Matchers
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class MapConverterTest extends FunSpec with Matchers {
 
   val datas = Map[String, Any](("empty1" -> ""), ("empty2" -> null), ("empty3" -> Array("")))

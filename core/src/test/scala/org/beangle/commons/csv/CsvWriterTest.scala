@@ -27,7 +27,10 @@ import java.io.StringWriter
 import org.beangle.commons.lang.SystemInfo
 import org.scalatest.FunSpec
 import org.scalatest.Matchers
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class CsvWriterTest extends FunSpec with Matchers {
 
   private def invokeWriter(args: Array[String]): String = {

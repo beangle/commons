@@ -51,6 +51,8 @@ object BeanConfig {
 
     var targetClass: Class[_] = _
 
+    var constructorArgs: Seq[_] = _
+
     def isAbstract(): Boolean = abstractFlag
 
     def getProperties(): Map[String, Any] = properties.toMap
@@ -125,6 +127,10 @@ object BeanConfig {
       this
     }
 
+    def constructor(args: Any*): DefinitionBinder = {
+      for (definition <- beans) definition.constructorArgs = args;
+      this
+    }
     /**
      * Assign init method
      *

@@ -21,8 +21,11 @@ package org.beangle.commons.bean
 import org.beangle.commons.lang.testbean.TestBean
 import org.scalatest.FunSpec
 import org.scalatest.Matchers
+import org.scalatest.junit.JUnitRunner
+import org.junit.runner.RunWith
 
-class PropertyUtilsTest extends FunSpec with Matchers {
+@RunWith(classOf[JUnitRunner])
+class PropertyUtilsSpec extends FunSpec with Matchers {
 
   describe("PropertyUtils") {
     it("Get or Set property") {

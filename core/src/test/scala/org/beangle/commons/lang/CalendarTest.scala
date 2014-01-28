@@ -23,11 +23,13 @@ import org.scalatest.Matchers
 
 import java.util.Calendar
 import java.util.Date
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
 /**
  * @author chaostone
  */
-
+@RunWith(classOf[JUnitRunner])
 class CalendarTest extends FunSpec with Matchers {
 
   describe("Dates") {

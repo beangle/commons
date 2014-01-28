@@ -22,7 +22,10 @@ import org.scalatest.FunSpec
 import org.scalatest.Matchers
 import org.beangle.commons.conversion.Conversion
 import org.beangle.commons.conversion.impl.DefaultConversion
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class DefaultConverterTest extends FunSpec with Matchers {
 
   describe("DefaultConversion") {

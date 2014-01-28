@@ -24,7 +24,10 @@ import org.beangle.commons.logging.Logging
 
 import org.scalatest.FunSpec
 import org.scalatest.Matchers
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class BatchReplaceMainTest extends FunSpec with Matchers with Logging {
   describe("BatchReplace") {
     it("Test batch replace expression") {

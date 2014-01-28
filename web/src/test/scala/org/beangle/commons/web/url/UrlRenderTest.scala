@@ -20,7 +20,10 @@ package org.beangle.commons.web.url
 
 import org.scalatest.FunSpec
 import org.scalatest.Matchers
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class UrlRenderTest extends FunSpec with Matchers {
 
   describe("UrlRender") {

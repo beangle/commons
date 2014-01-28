@@ -21,7 +21,10 @@ package org.beangle.commons.lang
 import org.beangle.commons.lang.Strings._
 import org.scalatest.FunSpec
 import org.scalatest.Matchers
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class StringsTest extends FunSpec with Matchers {
 
   describe("Strings") {

@@ -25,7 +25,10 @@ import java.util.Calendar
 import java.util.Date
 import java.util.GregorianCalendar
 import org.beangle.commons.conversion.Converter
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class DateConverterTest extends FunSpec with Matchers {
 
   private def converToDate(dateStr: String,

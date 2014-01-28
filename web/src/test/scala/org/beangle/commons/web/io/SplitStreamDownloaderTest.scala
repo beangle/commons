@@ -34,7 +34,10 @@ import javax.servlet.ServletOutputStream
 import javax.servlet.WriteListener
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class SplitStreamDownloaderTest extends FunSpec with Matchers {
 
   val streamDownloader: StreamDownloader = new SplitStreamDownloader(new MimeTypeProvider())

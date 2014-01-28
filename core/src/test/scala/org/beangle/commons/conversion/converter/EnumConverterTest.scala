@@ -22,10 +22,14 @@ import org.scalatest.Matchers
 import java.lang.reflect.InvocationTargetException
 import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.testbean.TestEnum
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
+
 /**
  * @author chaostone
  * @since 3.0.0
  */
+@RunWith(classOf[JUnitRunner])
 class EnumConverterTest extends FunSpec with Matchers {
 
   describe("EnumConverter") {

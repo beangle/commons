@@ -21,7 +21,10 @@ import org.scalatest.FunSpec
 import org.scalatest.Matchers
 
 import org.beangle.commons.conversion.impl.DefaultConversion
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class ConversionTest extends FunSpec with Matchers {
 
   val con = new DefaultConversion();

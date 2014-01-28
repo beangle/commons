@@ -19,9 +19,13 @@
 package org.beangle.commons.collection.page
 import org.scalatest.FunSpec
 import org.scalatest.Matchers
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
+
 /**
  * @author zhouqi
  */
+@RunWith(classOf[JUnitRunner])
 class PageAdapterTest extends FunSpec with Matchers {
 
   describe("PagedSeq") {

@@ -19,7 +19,10 @@
 package org.beangle.commons.text.seq
 import org.scalatest.FunSpec
 import org.scalatest.Matchers
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class MultiLevelSeqGeneratorTest extends FunSpec with Matchers {
 
   describe("MultiLevelSeqGenerator") {

@@ -20,8 +20,6 @@ package org.beangle.commons.http
 
 import org.beangle.commons.http.mime.MimeTypeProvider
 import org.beangle.commons.inject.bind.AbstractBindModule
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * @author chaostone

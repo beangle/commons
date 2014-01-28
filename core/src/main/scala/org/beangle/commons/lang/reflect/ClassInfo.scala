@@ -138,12 +138,12 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
   /**
    * property read method indexes
    */
-  val readers = findReaders(methodinfos)
+  val readers: Map[String, MethodInfo] = findReaders(methodinfos)
 
   /**
    * property write method indexes
    */
-  val writers = findWriters(methodinfos)
+  val writers: Map[String, MethodInfo] = findWriters(methodinfos)
 
   private def findReaders(methodinfos: Seq[MethodInfo]): Map[String, MethodInfo] = {
     val readermap = new mutable.HashMap[String, MethodInfo]

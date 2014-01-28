@@ -21,7 +21,10 @@ package org.beangle.commons.csv
 import java.io.StringReader
 import org.scalatest.FunSpec
 import org.scalatest.Matchers
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class CsvReaderTest extends FunSpec with Matchers {
 
   var reader: CsvReader = buildReader
