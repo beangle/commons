@@ -58,6 +58,7 @@ class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[C
 
   def matches(args: Any*): Boolean = {
     if (parameterTypes.length != args.length) return false
+    
     for (i <- 0 until args.length if null != args(i) && !parameterTypes(i).isInstance(args(i))) return false
     true
   }

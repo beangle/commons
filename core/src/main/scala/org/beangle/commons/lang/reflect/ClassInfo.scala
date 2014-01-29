@@ -18,18 +18,12 @@
  */
 package org.beangle.commons.lang.reflect
 
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
-import java.lang.reflect.ParameterizedType
-import java.lang.reflect.Type
-import java.lang.reflect.TypeVariable
-import java.util.Arrays
-import java.util.Collection
-import java.util.Collections
+import java.lang.reflect.{Method, Modifier, ParameterizedType, TypeVariable}
 
-import scala.language.existentials
-import scala.collection.JavaConversions._
 import scala.collection.mutable
+import scala.language.existentials
+
+import org.beangle.commons.lang.Range.range
 
 object ClassInfo {
 
@@ -64,20 +58,21 @@ object ClassInfo {
     var nextParamTypes: collection.Map[String, Class[_]] = null
     while (null != nextClass && classOf[AnyRef] != nextClass) {
       val declaredMethods = nextClass.getDeclaredMethods
-      var i = 0
-      while (i < declaredMethods.length) {
+      range(0, declaredMethods.length) foreach { i =>
         val method = declaredMethods(i)
-        i += 1
         if (goodMethod(method)) {
           val types = method.getGenericParameterTypes
           val paramsTypes = new Array[Class[_]](types.length)
-          for (j <- 0 until types.length) {
+          range(0, types.length) foreach { j =>
             val t = types(j)
             paramsTypes(j) =
               if (t.isInstanceOf[ParameterizedType])
                 t.asInstanceOf[ParameterizedType].getRawType.asInstanceOf[Class[_]]
-              else if (t.isInstanceOf[TypeVariable[_]]) nextParamTypes.get(t.asInstanceOf[TypeVariable[_]].getName).get
-              else t.asInstanceOf[Class[_]]
+              else if (t.isInstanceOf[TypeVariable[_]]) {
+                if (null == nextParamTypes) classOf[AnyRef]
+                else
+                  nextParamTypes.get(t.asInstanceOf[TypeVariable[_]].getName).getOrElse(classOf[AnyRef])
+              } else t.asInstanceOf[Class[_]]
           }
           if (!methods.add(new MethodInfo(index, method, paramsTypes))) index -= 1
           index += 1
@@ -89,7 +84,7 @@ object ClassInfo {
         val tmp = new mutable.HashMap[String, Class[_]]
         val ps = nextType.asInstanceOf[ParameterizedType].getActualTypeArguments
         val tvs = nextClass.getTypeParameters
-        for (k <- 0 until ps.length) {
+        range(0, ps.length) foreach { k =>
           if (ps(k).isInstanceOf[Class[_]]) {
             tmp.put(tvs(k).getName, ps(k).asInstanceOf[Class[_]])
           } else if (ps(k).isInstanceOf[TypeVariable[_]]) {
