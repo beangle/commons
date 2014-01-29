@@ -66,9 +66,12 @@ class DelegatingFilterProxy extends GenericHttpFilter with ContainerHook {
   }
 
   protected def initDelegate(container: Container): Filter = {
-    val delegate = container.getBean[Filter](targetBeanName)
-    delegate.get.init(filterConfig)
-    delegate.get
+    container.getBean[Filter](targetBeanName) match {
+      case Some(filter) => {
+        filter.init(filterConfig); filter
+      }
+      case None => throw new RuntimeException("Cannot find " + targetBeanName + " in context.")
+    }
   }
 
   def setDelegate(delegate: Filter) {

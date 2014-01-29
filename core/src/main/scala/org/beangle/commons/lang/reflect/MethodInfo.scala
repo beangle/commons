@@ -30,21 +30,21 @@ import org.beangle.commons.lang.Objects
  * @since 3.2.0
  */
 class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[Class[_]])
-    extends Ordered[MethodInfo]() {
+  extends Ordered[MethodInfo]() {
 
   /**
    * Return this method is property read method (0) or write method(1) or none(-1).
    */
   def property(): Option[Pair[Boolean, String]] = {
     val name = method.getName
-    if (parameterTypes.length == 0 && null != method.getReturnType) {
+    if (0 == parameterTypes.length && method.getReturnType != classOf[Unit]) {
       val propertyName = if (name.startsWith("get") && name.length > 3 && isUpperCase(name.charAt(3)))
         uncapitalize(substringAfter(name, "get"))
       else if (name.startsWith("is") && name.length > 2 && isUpperCase(name.charAt(2)))
         uncapitalize(substringAfter(name, "is"))
       else name
       Some((true, propertyName))
-    } else if (parameterTypes.length == 1) {
+    } else if (1 == parameterTypes.length) {
       val propertyName = if (name.startsWith("set") && name.length > 3 && isUpperCase(name.charAt(3)))
         uncapitalize(substringAfter(name, "set"))
       else if (name.endsWith("_$eq")) substringBefore(name, "_$eq")
@@ -58,7 +58,7 @@ class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[C
 
   def matches(args: Any*): Boolean = {
     if (parameterTypes.length != args.length) return false
-    
+
     for (i <- 0 until args.length if null != args(i) && !parameterTypes(i).isInstance(args(i))) return false
     true
   }

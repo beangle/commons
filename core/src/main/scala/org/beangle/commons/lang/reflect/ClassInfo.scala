@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.lang.reflect
 
-import java.lang.reflect.{Method, Modifier, ParameterizedType, TypeVariable}
+import java.lang.reflect.{ Method, Modifier, ParameterizedType, TypeVariable }
 
 import scala.collection.mutable
 import scala.language.existentials
@@ -72,7 +72,10 @@ object ClassInfo {
                 if (null == nextParamTypes) classOf[AnyRef]
                 else
                   nextParamTypes.get(t.asInstanceOf[TypeVariable[_]].getName).getOrElse(classOf[AnyRef])
-              } else t.asInstanceOf[Class[_]]
+              } else {
+                if (t.isInstanceOf[Class[_]]) t.asInstanceOf[Class[_]]
+                else classOf[AnyRef]
+              }
           }
           if (!methods.add(new MethodInfo(index, method, paramsTypes))) index -= 1
           index += 1

@@ -55,8 +55,6 @@ object BeanConfig {
 
     def isAbstract(): Boolean = abstractFlag
 
-    def getProperties(): Map[String, Any] = properties.toMap
-
     def property(property: String, value: AnyRef): Definition = {
       properties.put(property, value)
       this
