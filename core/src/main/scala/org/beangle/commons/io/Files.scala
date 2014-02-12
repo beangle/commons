@@ -51,10 +51,38 @@ object Files {
   }
 
   /**
+   * Writes a String to a file creating the file if it does not exist.
+   */
+  def writeStringToFile(file: File, data: String, charset: Charset = null) {
+    var out: OutputStream = null
+    try {
+      out = openOutputStream(file, false)
+      IOs.write(data, out, charset)
+      out.close()
+    } finally {
+      IOs.close(out)
+    }
+  }
+
+  private def openOutputStream(file: File, append: Boolean): FileOutputStream = {
+    if (file.exists()) {
+      if (file.isDirectory) throw new IOException("File '" + file + "' exists but is a directory")
+      if (!file.canWrite) throw new IOException("File '" + file + "' cannot be written to")
+    } else {
+      val parent = file.getParentFile
+      if (parent != null) {
+        if (!parent.mkdirs() && !parent.isDirectory())
+          throw new IOException("Directory '" + parent + "' could not be created");
+      }
+    }
+    new FileOutputStream(file, append)
+  }
+
+  /**
    * Reads the contents of a file line by line to a List of Strings.
    * The file is always closed.
    */
-  def readLines(file: File, charset: Charset): List[String] = {
+  def readLines(file: File, charset: Charset = null): List[String] = {
     var in: InputStream = null
     try {
       in = new FileInputStream(file)

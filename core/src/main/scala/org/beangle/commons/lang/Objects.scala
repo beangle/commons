@@ -22,6 +22,7 @@ import scala.collection.mutable.ListBuffer
 
 object Objects {
 
+  @inline
   def default[T](clazz: Class[T]): T = Primitives.default(clazz)
   /**
    * <p>
@@ -44,6 +45,7 @@ object Objects {
    * @return {@code true} if the values of both objects are the same
    * @since 3.0
    */
+  @inline
   def equals(a: Any, b: Any): Boolean = (a == b)
 
   /**

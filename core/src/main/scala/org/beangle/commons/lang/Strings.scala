@@ -287,7 +287,8 @@ object Strings {
   /**
    * Returns true is cs is null or cs.length equals 0.
    */
-  def isEmpty(cs: CharSequence): Boolean = cs == null || cs.length == 0
+  @inline
+  def isEmpty(cs: CharSequence): Boolean = (cs eq null) || 0 == cs.length
 
   /**
    * <p>

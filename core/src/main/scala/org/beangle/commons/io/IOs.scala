@@ -20,6 +20,7 @@ package org.beangle.commons.io
 
 import java.io._
 import scala.collection.mutable
+import java.nio.charset.Charset
 
 object IOs {
 
@@ -47,6 +48,15 @@ object IOs {
       n = input.read(buffer)
     }
     count
+  }
+
+  def write(data: String, output: OutputStream, charset: Charset = null) {
+    if (data != null) {
+      if (charset == null)
+        output.write(data.getBytes())
+      else
+        output.write(data.getBytes(charset))
+    }
   }
 
   /**

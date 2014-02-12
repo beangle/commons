@@ -96,6 +96,8 @@ object SystemInfo {
 
     val home = properties("user.home")
 
+    val dir = properties("user.dir")
+
     val language = properties("user.language")
 
     val country = properties.get("user.country") match {
