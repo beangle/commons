@@ -34,7 +34,7 @@ object Consoles {
     anwser
   }
 
-  def shell(prompt: String, exits: Set[String], p: String => Unit) {
+  def shell(prompt: => String, exits: Set[String], p: String => Unit) {
     val scanner = new Scanner(System.in)
     var content: String = null
     var exit = false
@@ -66,9 +66,12 @@ object Consoles {
       print(promptMsg)
       content = scanner.nextLine()
       if (Strings.isEmpty(content)) content = defaultStr
-    } while (Strings.isEmpty(content))
+    } while (null == content)
     content
   }
 
   def readPassword(): String = new String(System.console().readPassword())
+
+  def readPassword(fmt: String, args: Any*): String = Console.readLine(fmt, args:_*)
+
 }
