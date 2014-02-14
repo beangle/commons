@@ -56,7 +56,7 @@ object Files {
   def writeStringToFile(file: File, data: String, charset: Charset = null) {
     var out: OutputStream = null
     try {
-      out = openOutputStream(file, false)
+      out = openOutputStream(file)
       IOs.write(data, out, charset)
       out.close()
     } finally {
@@ -64,7 +64,13 @@ object Files {
     }
   }
 
-  private def openOutputStream(file: File, append: Boolean): FileOutputStream = {
+  def touch(file: File) {
+    if (!file.exists()) IOs.close(openOutputStream(file))
+    val success = file.setLastModified(System.currentTimeMillis());
+    if (!success) throw new IOException("Unable to set the last modification time for " + file)
+  }
+
+  def openOutputStream(file: File, append: Boolean = false): FileOutputStream = {
     if (file.exists()) {
       if (file.isDirectory) throw new IOException("File '" + file + "' exists but is a directory")
       if (!file.canWrite) throw new IOException("File '" + file + "' cannot be written to")
