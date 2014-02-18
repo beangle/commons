@@ -124,14 +124,11 @@ object Strings {
    * contains("abc", 'z') = false
    * </pre>
    *
-   * @param seq
-   *          the CharSequence to check, may be null
-   * @param searchChar
-   *          the character to find
+   * @param seq   the CharSequence to check, may be null
+   * @param searchChar the character to find
    * @return true if the CharSequence contains the search character,
    *         false if not or {@code null} string input
    * @since 2.0
-   * @since 3.0 Changed signature from contains(String, int) to contains(CharSequence, int)
    */
   def contains(seq: CharSequence, searchChar: Int): Boolean = {
     if (isEmpty(seq)) return false
@@ -141,10 +138,8 @@ object Strings {
   /**
    * count char in host string
    *
-   * @param host
-   *          a {@link java.lang.String} object.
-   * @param charactor
-   *          a char.
+   * @param host {@link java.lang.String} object.
+   * @param charactor a char.
    * @return a int.
    */
   def count(host: String, charactor: Char): Int = {

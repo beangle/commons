@@ -22,22 +22,31 @@ import java.io._
 import java.nio.channels.FileChannel
 import java.nio.charset.Charset
 import org.beangle.commons.lang.Assert
+import org.beangle.commons.lang.Charsets.UTF_8
 
 object Files {
 
   val CopyBufferSize = 1024 * 1024 * 30
 
-  /**
-   * Reads the contents of a file into a String using the default encoding for the VM.
-   * The file is always closed.
-   */
-  def readFileToString(file: File): String = readFileToString(file, null)
+  val / = File.separator
+
+  private def fileName(name: String): String = {
+    import org.beangle.commons.lang.Strings.replace
+    if (/ == "\\") replace(name, "/", "\\") else replace(name, "\\", "/")
+  }
+
+  @inline
+  def forName(name: String): File = new File(fileName(name))
+
+  def stringWriter(file: File, charset: Charset = UTF_8): Writer = {
+    new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), charset))
+  }
 
   /**
    * Reads the contents of a file into a String.
    * The file is always closed.
    */
-  def readFileToString(file: File, charset: Charset): String = {
+  def readFileToString(file: File, charset: Charset = UTF_8): String = {
     var in: InputStream = null
     try {
       in = new FileInputStream(file)
@@ -53,7 +62,7 @@ object Files {
   /**
    * Writes a String to a file creating the file if it does not exist.
    */
-  def writeStringToFile(file: File, data: String, charset: Charset = null) {
+  def writeStringToFile(file: File, data: String, charset: Charset = UTF_8) {
     var out: OutputStream = null
     try {
       out = openOutputStream(file)
@@ -88,7 +97,7 @@ object Files {
    * Reads the contents of a file line by line to a List of Strings.
    * The file is always closed.
    */
-  def readLines(file: File, charset: Charset = null): List[String] = {
+  def readLines(file: File, charset: Charset = UTF_8): List[String] = {
     var in: InputStream = null
     try {
       in = new FileInputStream(file)
@@ -103,8 +112,6 @@ object Files {
     }
   }
 
-  def readLines(file: File): List[String] = readLines(file, null)
-
   /**
    * Copies a file to a new location preserving the file date.
    * <p>
@@ -118,11 +125,8 @@ object Files {
    *
    * @param srcFile an existing file to copy, must not be <code>null</code>
    * @param destFile the new file, must not be <code>null</code>
-   * @throws NullPointerException if source or destination is <code>null</code>
-   * @throws IOException if source or destination is invalid
-   * @throws IOException if an IO error occurs during copying
-   * @see #copyFileToDirectory(File, File)
    */
+  @throws[IOException]("if source or destination is invalid or an IO error occurs during copying")
   def copyFile(srcFile: File, destFile: File) {
     null != srcFile
     null != destFile

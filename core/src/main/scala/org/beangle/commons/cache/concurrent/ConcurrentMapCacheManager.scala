@@ -18,13 +18,13 @@
  */
 package org.beangle.commons.cache.concurrent
 
-import org.beangle.commons.cache.Cache
-import org.beangle.commons.cache.CacheManager
+import org.beangle.commons.cache.{Cache, CacheManager}
 
 /**
  * Concurrent Map Cache Manager.
  *
  * @author chaostone
+ * @version 1.0
  * @since 3.2.0
  */
 class ConcurrentMapCacheManager extends CacheManager {
