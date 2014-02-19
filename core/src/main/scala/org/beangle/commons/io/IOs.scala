@@ -24,9 +24,9 @@ import java.nio.charset.Charset
 
 object IOs {
 
-  private val DefaultBufferSize = 1024 * 4
+  private val defaultBufferSize = 1024 * 4
 
-  private val Eof = -1
+  private val eof = -1
 
   /**
    * Copy bytes from a <code>InputStream</code> to an <code>OutputStream</code>.
@@ -39,10 +39,10 @@ object IOs {
    * @since 3.1
    */
   def copy(input: InputStream, output: OutputStream): Long = {
-    val buffer = new Array[Byte](DefaultBufferSize)
+    val buffer = new Array[Byte](defaultBufferSize)
     var count = 0
     var n = input.read(buffer)
-    while (Eof != n) {
+    while (eof != n) {
       output.write(buffer, 0, n)
       count += n
       n = input.read(buffer)
@@ -70,10 +70,10 @@ object IOs {
    * @since 3.1
    */
   def copy(input: Reader, output: Writer): Long = {
-    val buffer = new Array[Char](DefaultBufferSize)
+    val buffer = new Array[Char](defaultBufferSize)
     var count = 0
     var n = input.read(buffer)
-    while (Eof != n) {
+    while (eof != n) {
       output.write(buffer, 0, n)
       count += n
       n = input.read(buffer)

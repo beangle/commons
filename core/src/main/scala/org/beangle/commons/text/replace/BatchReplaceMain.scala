@@ -83,7 +83,7 @@ object BatchReplaceMain extends Logging {
       val replacers = profiles.get(Strings.substringAfterLast(fileName, ".")).orNull
       if (null == replacers) return
       logger.info("processing {}", fileName)
-      var filecontent = Files.readFileToString(file, charset)
+      var filecontent = Files.readString(file, charset)
       filecontent = Replacer.process(filecontent, replacers)
       writeToFile(filecontent, fileName, charset)
     } else {

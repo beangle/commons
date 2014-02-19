@@ -92,7 +92,7 @@ class StringBuilderWriter(val builder: StringBuilder) extends Writer with Serial
    * Write a portion of a character array to the {@link StringBuilder}.
    */
   override def write(value: Array[Char], offset: Int, length: Int) {
-    if (value != null) builder.append(value, offset, length)
+    if (value != null) builder.appendAll(value, offset, length)
   }
 
   /**

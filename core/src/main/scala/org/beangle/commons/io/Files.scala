@@ -26,7 +26,7 @@ import org.beangle.commons.lang.Charsets.UTF_8
 
 object Files {
 
-  val CopyBufferSize = 1024 * 1024 * 30
+  private val copyBufferSize = 1024 * 1024 * 30
 
   val / = File.separator
 
@@ -46,13 +46,12 @@ object Files {
    * Reads the contents of a file into a String.
    * The file is always closed.
    */
-  def readFileToString(file: File, charset: Charset = UTF_8): String = {
+  def readString(file: File, charset: Charset = UTF_8): String = {
     var in: InputStream = null
     try {
       in = new FileInputStream(file)
       val sw = new StringBuilderWriter(16)
-      if (null == charset) IOs.copy(new InputStreamReader(in), sw) else IOs.copy(new InputStreamReader(in,
-        charset.name()), sw)
+      IOs.copy(new InputStreamReader(in, charset), sw)
       sw.toString
     } finally {
       IOs.close(in)
@@ -62,10 +61,10 @@ object Files {
   /**
    * Writes a String to a file creating the file if it does not exist.
    */
-  def writeStringToFile(file: File, data: String, charset: Charset = UTF_8) {
+  def writeString(file: File, data: String, charset: Charset = UTF_8) {
     var out: OutputStream = null
     try {
-      out = openOutputStream(file)
+      out = writeOpen(file)
       IOs.write(data, out, charset)
       out.close()
     } finally {
@@ -74,12 +73,12 @@ object Files {
   }
 
   def touch(file: File) {
-    if (!file.exists()) IOs.close(openOutputStream(file))
+    if (!file.exists()) IOs.close(writeOpen(file))
     val success = file.setLastModified(System.currentTimeMillis());
     if (!success) throw new IOException("Unable to set the last modification time for " + file)
   }
 
-  def openOutputStream(file: File, append: Boolean = false): FileOutputStream = {
+  def writeOpen(file: File, append: Boolean = false): FileOutputStream = {
     if (file.exists()) {
       if (file.isDirectory) throw new IOException("File '" + file + "' exists but is a directory")
       if (!file.canWrite) throw new IOException("File '" + file + "' cannot be written to")
@@ -104,7 +103,7 @@ object Files {
       if (null == charset) {
         IOs.readLines(new InputStreamReader(in))
       } else {
-        val reader = new InputStreamReader(in, charset.name())
+        val reader = new InputStreamReader(in, charset)
         IOs.readLines(reader)
       }
     } finally {
@@ -127,7 +126,7 @@ object Files {
    * @param destFile the new file, must not be <code>null</code>
    */
   @throws[IOException]("if source or destination is invalid or an IO error occurs during copying")
-  def copyFile(srcFile: File, destFile: File) {
+  def copy(srcFile: File, destFile: File) {
     null != srcFile
     null != destFile
     if (srcFile.exists() == false) {
@@ -152,10 +151,10 @@ object Files {
       }
       if (!destFile.canWrite()) throw new IOException("Destination '" + destFile + "' exists but is read-only")
     }
-    doCopyFile(srcFile, destFile, true)
+    doCopy(srcFile, destFile, true)
   }
 
-  private def doCopyFile(srcFile: File, destFile: File, preserveFileDate: Boolean) {
+  private def doCopy(srcFile: File, destFile: File, preserveFileDate: Boolean) {
     var fis: FileInputStream = null
     var fos: FileOutputStream = null
     var input: FileChannel = null
@@ -169,7 +168,7 @@ object Files {
       var pos = 0L
       var count = 0L
       while (pos < size) {
-        count = if (size - pos > CopyBufferSize) CopyBufferSize else size - pos
+        count = if (size - pos > copyBufferSize) copyBufferSize else size - pos
         pos += output.transferFrom(input, pos, count)
       }
     } finally {
