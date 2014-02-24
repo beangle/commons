@@ -40,8 +40,12 @@ object Consoles {
     var exit = false
     do {
       print(prompt)
-      content = Strings.trim(scanner.nextLine())
-      exit = exits.contains(content)
+      if (scanner.hasNextLine) {
+        content = Strings.trim(scanner.nextLine())
+        exit = exits.contains(content)
+      } else {
+        exit = true
+      }
       if (!exit) p(content)
     } while (!exit)
   }
@@ -50,11 +54,17 @@ object Consoles {
     val scanner = new Scanner(System.in)
     var content: String = null
     val promptMsg = msg + (if (null != defaultStr) "(default " + defaultStr + ")" else "")
+    var exit = false
     do {
       print(promptMsg)
-      content = scanner.nextLine()
-      if (Strings.isEmpty(content)) content = defaultStr
-    } while (Strings.isEmpty(content) || Strings.isNotEmpty(content) && !f(content))
+      if (scanner.hasNextLine) {
+        content = scanner.nextLine()
+        if (Strings.isEmpty(content)) content = defaultStr
+        exit = Strings.isNotEmpty(content) && f(content)
+      } else {
+        exit = true
+      }
+    } while (!exit)
     content
   }
 
@@ -62,16 +72,22 @@ object Consoles {
     val scanner = new Scanner(System.in)
     var content: String = null
     val promptMsg = msg + (if (null != defaultStr) "(default " + defaultStr + ")" else "")
+    var exit = false
     do {
       print(promptMsg)
-      content = scanner.nextLine()
-      if (Strings.isEmpty(content)) content = defaultStr
-    } while (null == content)
+      if (scanner.hasNextLine) {
+        content = scanner.nextLine()
+        if (Strings.isEmpty(content)) content = defaultStr
+        exit = (null != content)
+      } else {
+        exit = true
+      }
+    } while (!exit)
     content
   }
 
   def readPassword(): String = new String(System.console().readPassword())
 
-  def readPassword(fmt: String, args: Any*): String = Console.readLine(fmt, args:_*)
+  def readPassword(fmt: String, args: Any*): String = Console.readLine(fmt, args: _*)
 
 }
