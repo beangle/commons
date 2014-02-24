@@ -18,10 +18,12 @@
  */
 package org.beangle.commons.io
 
-import java.io._
-import scala.collection.mutable
+import java.io.{ BufferedReader, Closeable, IOException, InputStream, InputStreamReader, OutputStream, Reader, Writer }
 import java.nio.charset.Charset
 
+import scala.collection.mutable
+
+import org.beangle.commons.lang.Charsets.UTF_8
 object IOs {
 
   private val defaultBufferSize = 1024 * 4
@@ -102,7 +104,17 @@ object IOs {
     list.toList
   }
 
-  def readLines(input: InputStream): List[String] = readLines(new InputStreamReader(input))
+  def readString(input: InputStream, charset: Charset = UTF_8): String = {
+    try {
+      val sw = new StringBuilderWriter(16)
+      IOs.copy(new InputStreamReader(input, charset), sw)
+      sw.toString
+    } finally {
+      IOs.close(input)
+    }
+  }
+  
+  def readLines(input: InputStream, charset: Charset = UTF_8): List[String] = readLines(new InputStreamReader(input, charset))
 
   def close(closeable: Closeable) {
     try {
