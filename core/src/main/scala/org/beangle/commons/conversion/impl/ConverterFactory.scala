@@ -62,7 +62,7 @@ abstract class ConverterFactory[S, R] extends GenericConverter {
     }
   }
 
-  override def convert(input: Any, sourceType: Class[_], targetType: Class[_]): Any = {
+  override def convert(input: Any, targetType: Class[_]): Any = {
     getConverter(targetType.asInstanceOf[Class[R]]) match {
       case Some(converter) => converter.apply(input.asInstanceOf[S])
       case _ => Objects.default(targetType)

@@ -29,8 +29,8 @@ import org.beangle.commons.conversion.impl.ConverterFactory
  */
 class StringConverterFactory[S, R] extends ConverterFactory[S, R] {
 
-  override def convert(input: Any, sourceType: Class[_], targetType: Class[_]): Any = {
+  override def convert(input: Any, targetType: Class[_]): Any = {
     if (Strings.isEmpty(input.asInstanceOf[String])) return null
-    super.convert(input, sourceType, targetType)
+    super.convert(input, targetType)
   }
 }

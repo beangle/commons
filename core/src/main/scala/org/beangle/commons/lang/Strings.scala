@@ -336,7 +336,8 @@ object Strings {
   /**
    * Return true if cs not null and cs has length.
    */
-  def isNotEmpty(cs: CharSequence): Boolean = !isEmpty(cs)
+  @inline
+  def isNotEmpty(cs: CharSequence): Boolean = !(cs eq null) && cs.length > 0
 
   /**
    * join.
@@ -378,8 +379,10 @@ object Strings {
    * @return a {@link java.lang.String} object.
    */
   def join(seq: Array[String], delimiter: String): String = {
-    if (null == seq || seq.length < 1) {
-      ""
+    if (null == seq) ""
+    val seqLen = seq.length
+    if (seqLen == 1) {
+      seq(0)
     } else {
       val aim = new StringBuilder()
       for (i <- 0 until seq.length) {
@@ -824,8 +827,8 @@ object Strings {
    * @param ids a {@link java.lang.String} object.
    * @return an array of {@link java.lang.Integer} objects.
    */
-  def splitToInt(ids: String): Array[Integer] = {
-    if (isEmpty(ids)) new Array[Integer](0) else transformToInt(split(ids, ','))
+  def splitToInt(ids: String): Array[Int] = {
+    if (isEmpty(ids)) new Array[Int](0) else transformToInt(split(ids, ','))
   }
 
   /**
@@ -937,10 +940,10 @@ object Strings {
    *          an array of {@link java.lang.String} objects.
    * @return an array of {@link java.lang.Integer} objects.
    */
-  def transformToInt(ids: Array[String]): Array[Integer] = {
-    val idsOfInteger = new Array[Integer](ids.length)
+  def transformToInt(ids: Array[String]): Array[Int] = {
+    val idsOfInteger = new Array[Int](ids.length)
     for (i <- 0 until ids.length) {
-      idsOfInteger(i) = new java.lang.Integer(ids(i))
+      idsOfInteger(i) = Numbers.toInt(ids(i))
     }
     idsOfInteger
   }

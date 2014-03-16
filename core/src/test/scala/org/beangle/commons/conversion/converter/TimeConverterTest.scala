@@ -16,22 +16,27 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.conversion.impl
+package org.beangle.commons.conversion.converter
 
+import org.scalatest.FunSpec
+import org.scalatest.Matchers
+import java.util.Calendar
+import java.util.Date
+import java.util.GregorianCalendar
 import org.beangle.commons.conversion.Converter
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
+import java.sql.Time
 
-/**
- * Adapte a Converter to GenericConverter
- *
- * @author chaostone
- * @since 3.2.0
- */
-class ConverterAdapter(iconverter: Converter[_, _], typeinfo: Pair[Class[_], Class[_]])
-    extends GenericConverter() {
+@RunWith(classOf[JUnitRunner])
+class TimeConverterTest extends FunSpec with Matchers {
 
-  val converter = iconverter.asInstanceOf[Converter[Any, Any]]
-
-  override def convert(input: Any, targetType: Class[_]): Any = converter.apply(input)
-
-  override def getTypeinfo(): Pair[Class[_], Class[_]] = typeinfo
+  describe("TimeConverter") {
+    it("Convert String to time") {
+      String2TimeConverter("1234") should equal(Time.valueOf("12:34:00"))
+      String2TimeConverter("123400") should equal(Time.valueOf("12:34:00"))
+      String2TimeConverter("12:34") should equal(Time.valueOf("12:34:00"))
+      String2TimeConverter("12:34:00") should equal(Time.valueOf("12:34:00"))
+    }
+  }
 }

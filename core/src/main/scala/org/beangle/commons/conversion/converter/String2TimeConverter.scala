@@ -16,22 +16,40 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.conversion.impl
+package org.beangle.commons.conversion.converter
 
+import org.beangle.commons.lang.Strings
 import org.beangle.commons.conversion.Converter
+import java.sql.Time
 
 /**
- * Adapte a Converter to GenericConverter
+ * Convert String to Time.
+ * <p>
+ * Convert HH:mm:ss to java.sql.Time<br>
+ * Convert HH:mm to java.sql.Time<br>
  *
  * @author chaostone
- * @since 3.2.0
+ * @since 4.0.3
  */
-class ConverterAdapter(iconverter: Converter[_, _], typeinfo: Pair[Class[_], Class[_]])
-    extends GenericConverter() {
+object String2TimeConverter extends Converter[String, Time] {
 
-  val converter = iconverter.asInstanceOf[Converter[Any, Any]]
-
-  override def convert(input: Any, targetType: Class[_]): Any = converter.apply(input)
-
-  override def getTypeinfo(): Pair[Class[_], Class[_]] = typeinfo
+  override def apply(input: String): Time = {
+    if (Strings.isEmpty(input)) null
+    try {
+      Time.valueOf(normalize(input))
+    } catch {
+      case e: Exception => null
+    }
+  }
+  
+  private def normalize(timeStr: String): String = {
+    if (timeStr.length >= 8) timeStr
+    else {
+      val buf = new StringBuilder(timeStr)
+      if (buf.length <= 5) buf.append("00")
+      if (buf.charAt(2) != ':') buf.insert(2, ':')
+      if (buf.charAt(5) != ':') buf.insert(5, ':')
+      buf.toString
+    }
+  }
 }

@@ -30,5 +30,5 @@ trait GenericConverter {
 
   def getTypeinfo(): Pair[Class[_], Class[_]]
 
-  def convert(input: Any, sourceType: Class[_], targetType: Class[_]): Any
+  def convert(input: Any,targetType: Class[_]): Any
 }
