@@ -18,9 +18,8 @@
  */
 package org.beangle.commons.web.url
 
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
 import org.junit.runner.RunWith
+import org.scalatest.{FunSpec, Matchers}
 import org.scalatest.junit.JUnitRunner
 
 /**

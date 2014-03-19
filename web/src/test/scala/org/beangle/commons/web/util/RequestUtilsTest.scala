@@ -18,12 +18,10 @@
  */
 package org.beangle.commons.web.util
 
-import javax.servlet.http.HttpServletRequest
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.when
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
 import org.junit.runner.RunWith
+import org.mockito.Mockito.{mock, when}
+import org.scalatest.{FunSpec, Matchers}
+import javax.servlet.http.HttpServletRequest
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
