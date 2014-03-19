@@ -78,7 +78,7 @@ object Strings {
    *          a {@link java.lang.String} object.
    * @return a {@link java.lang.String} object.
    */
-  def concat(seq: String*): String = join(seq, null)
+  def concat(seq: Any*): String = join(seq, null)
 
   /**
    * <p>
