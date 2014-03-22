@@ -46,9 +46,9 @@ class BootstrapInitializer extends ServletContainerInitializer {
     }
 
     if (initializers.isEmpty) {
-      servletContext.log("No Beangle StartupInitializer types detected on classpath")
+      servletContext.log("No Beangle Initializer types detected on classpath")
     } else {
-      servletContext.log("Beangle StartupInitializer detected on classpath: " + initializers);
+      servletContext.log("Beangle Initializer detected on classpath: " + initializers);
       for (initializer <- initializers) initializer.onStartup(servletContext)
     }
   }

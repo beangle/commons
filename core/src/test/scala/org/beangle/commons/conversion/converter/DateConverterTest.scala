@@ -21,9 +21,7 @@ package org.beangle.commons.conversion.converter
 import org.scalatest.FunSpec
 import org.scalatest.Matchers
 
-import java.util.Calendar
-import java.util.Date
-import java.util.GregorianCalendar
+import java.{util => ju}
 import org.beangle.commons.conversion.Converter
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -35,13 +33,13 @@ class DateConverterTest extends FunSpec with Matchers {
     year: Int,
     month: Int,
     day: Int) {
-    val c = new String2DateConverter().getConverter(classOf[Date]).orNull
+    val c = new String2DateConverter().getConverter(classOf[ju.Date]).orNull
     val date = c.apply(dateStr)
-    val calendar = new GregorianCalendar()
+    val calendar = new ju.GregorianCalendar()
     calendar.setTime(date)
-    calendar.get(Calendar.YEAR) should be(year)
-    calendar.get(Calendar.MONTH) should be(month)
-    calendar.get(Calendar.DAY_OF_MONTH) should be(day)
+    calendar.get(ju.Calendar.YEAR) should be(year)
+    calendar.get(ju.Calendar.MONTH) should be(month)
+    calendar.get(ju.Calendar.DAY_OF_MONTH) should be(day)
   }
 
   describe("DateConverter") {

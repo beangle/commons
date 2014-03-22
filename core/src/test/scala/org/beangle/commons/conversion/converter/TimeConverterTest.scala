@@ -18,15 +18,10 @@
  */
 package org.beangle.commons.conversion.converter
 
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
-import java.util.Calendar
-import java.util.Date
-import java.util.GregorianCalendar
-import org.beangle.commons.conversion.Converter
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import java.sql.Time
+import org.junit.runner.RunWith
+import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class TimeConverterTest extends FunSpec with Matchers {

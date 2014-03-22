@@ -18,8 +18,8 @@
  */
 package org.beangle.commons.conversion.converter
 
-import java.util.Date
-import java.util.Calendar
+import java.{ util => ju }
+import java.util.Calendar.{ YEAR, MONTH, DAY_OF_MONTH, HOUR_OF_DAY, MINUTE, SECOND }
 import org.beangle.commons.conversion.Converter
 import org.beangle.commons.lang.Strings.{ substring, transformToInt, split, isEmpty, contains, isNotBlank }
 import org.beangle.commons.lang.Numbers.toInt
@@ -30,15 +30,15 @@ import org.beangle.commons.lang.Numbers.toInt
  * @author chaostone
  * @since 3.2.0
  */
-class String2DateConverter extends StringConverterFactory[String, Date] {
+class String2DateConverter extends StringConverterFactory[String, ju.Date] {
 
-  register(classOf[Date], new DateConverter())
+  register(classOf[ju.Date], new DateConverter())
 
   register(classOf[java.sql.Date], new SqlDateConverter())
 
-  private class DateConverter extends Converter[String, Date] {
+  private class DateConverter extends Converter[String, ju.Date] {
 
-    override def apply(value: String): Date = {
+    override def apply(value: String): ju.Date = {
       if (isEmpty(value.asInstanceOf[String])) {
         return null
       }
@@ -61,15 +61,15 @@ class String2DateConverter extends StringConverterFactory[String, Date] {
 
       if (badformat) null
       else {
-        val gc = Calendar.getInstance
-        gc.set(Calendar.YEAR, dateElems(0))
-        gc.set(Calendar.MONTH, dateElems(1) - 1)
-        gc.set(Calendar.DAY_OF_MONTH, dateElems(2))
+        val gc = ju.Calendar.getInstance
+        gc.set(YEAR, dateElems(0))
+        gc.set(MONTH, dateElems(1) - 1)
+        gc.set(DAY_OF_MONTH, dateElems(2))
         if (times.length > 1 && isNotBlank(times(1))) {
           val timeElems = split(times(1), ":")
-          if (timeElems.length > 0) gc.set(Calendar.HOUR_OF_DAY, toInt(timeElems(0)))
-          if (timeElems.length > 1) gc.set(Calendar.MINUTE, toInt(timeElems(1)))
-          if (timeElems.length > 2) gc.set(Calendar.SECOND, toInt(timeElems(2)))
+          if (timeElems.length > 0) gc.set(HOUR_OF_DAY, toInt(timeElems(0)))
+          if (timeElems.length > 1) gc.set(MINUTE, toInt(timeElems(1)))
+          if (timeElems.length > 2) gc.set(SECOND, toInt(timeElems(2)))
         }
         gc.getTime
       }

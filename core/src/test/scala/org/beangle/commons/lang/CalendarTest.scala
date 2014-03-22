@@ -18,12 +18,9 @@
  */
 package org.beangle.commons.lang
 
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
-
 import java.util.Calendar
-import java.util.Date
 import org.junit.runner.RunWith
+import org.scalatest.{FunSpec, Matchers}
 import org.scalatest.junit.JUnitRunner
 
 /**

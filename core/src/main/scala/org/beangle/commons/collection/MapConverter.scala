@@ -18,13 +18,14 @@
  */
 package org.beangle.commons.collection
 
-import java.util.Date
+import java.{util => ju}
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.conversion.Conversion
 import org.beangle.commons.conversion.impl.DefaultConversion
 import scala.reflect.ClassTag
 import org.beangle.commons.lang.Objects
 import scala.collection.Map
+import java.sql.Date
 /**
  * MapConverter class.
  *
@@ -123,12 +124,12 @@ class MapConverter(val conversion: DefaultConversion = DefaultConversion.Instanc
   /**
    * getDate.
    */
-  def getDate(data: Map[String, Any], name: String): Option[java.sql.Date] = get(data, name, classOf[java.sql.Date])
+  def getDate(data: Map[String, Any], name: String): Option[Date] = get(data, name, classOf[Date])
 
   /**
    * getDateTime.
    */
-  def getDateTime(data: Map[String, Any], name: String): Option[Date] = get(data, name, classOf[Date])
+  def getDateTime(data: Map[String, Any], name: String): Option[ju.Date] = get(data, name, classOf[ju.Date])
 
   /**
    * getFloat.
