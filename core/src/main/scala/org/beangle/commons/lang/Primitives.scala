@@ -4,16 +4,16 @@
  * Copyright (c) 2005-2014, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Beangle is distributed in the hope that it will be useful.
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.lang
@@ -29,11 +29,11 @@ object Primitives {
   /**
    * Primitive types to their corresponding wrapper types.
    */
-  private val primitiveToWrappers: Map[Class[_], Class[_]] = Map((classOf[Boolean] -> classOf[java.lang.Boolean]),
-    (classOf[Byte] -> classOf[java.lang.Byte]), (classOf[Char] -> classOf[java.lang.Character]),
-    (classOf[Int] -> classOf[java.lang.Integer]), (classOf[Short] -> classOf[java.lang.Short]),
-    (classOf[Long] -> classOf[java.lang.Long]), (classOf[Float] -> classOf[java.lang.Float]),
-    (classOf[Double] -> classOf[java.lang.Double]))
+  private val primitiveToWrappers: Map[Class[_], Class[_]] = Map((classOf[Boolean], classOf[java.lang.Boolean]),
+    (classOf[Byte], classOf[java.lang.Byte]), (classOf[Char], classOf[java.lang.Character]),
+    (classOf[Int], classOf[java.lang.Integer]), (classOf[Short], classOf[java.lang.Short]),
+    (classOf[Long], classOf[java.lang.Long]), (classOf[Float], classOf[java.lang.Float]),
+    (classOf[Double], classOf[java.lang.Double]))
 
   /**
    * Wrapper types to their corresponding primitive types.

@@ -4,16 +4,16 @@
  * Copyright (c) 2005-2014, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Beangle is distributed in the hope that it will be useful.
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.conversion.impl
@@ -143,14 +143,14 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
       if (null == converter) Array.newInstance(targetClazz.getComponentType, 0).asInstanceOf[T] else {
         val length = Array.getLength(source)
         val result = Array.newInstance(targetClazz.getComponentType, length).asInstanceOf[T]
-        for (i <- 0 until length) Array.set(result, i, converter.convert(Array.get(source, i), sourceObjType,
+        for (i <- 0 until length) Array.set(result, i, converter.convert(Array.get(source, i),
           targetObjType))
         result
       }
     } else {
       val converter = findConverter(sourceType, targetClazz)
       if (null == converter) return Objects.default(targetType)
-      val rs = converter.convert(source, sourceType, targetClazz).asInstanceOf[T]
+      val rs = converter.convert(source, targetClazz).asInstanceOf[T]
       if (null == rs && targetType.isPrimitive) Objects.default(targetType) else rs
     }
   }

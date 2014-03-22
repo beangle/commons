@@ -4,16 +4,16 @@
  * Copyright (c) 2005-2014, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Beangle is distributed in the hope that it will be useful.
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.text.inflector.en
@@ -40,11 +40,11 @@ object EnNounPluralizer {
 
   private val PREPOSITIONS = Array("about", "above", "across", "after", "among", "around", "at", "athwart", "before", "behind", "below", "beneath", "beside", "besides", "between", "betwixt", "beyond", "but", "by", "during", "except", "for", "from", "in", "into", "near", "of", "off", "on", "onto", "out", "over", "since", "till", "to", "under", "until", "unto", "upon", "with")
 
-  private val NOMINATIVE_PRONOUNS = Map(("i" -> "we"), ("myself" -> "ourselves"), ("you" -> "you"), ("yourself" -> "yourselves"), ("she" -> "they"), ("herself" -> "themselves"), ("he" -> "they"), ("himself" -> "themselves"), ("it" -> "they"), ("itself" -> "themselves"), ("they" -> "they"), ("themself" -> "themselves"), ("mine" -> "ours"), ("yours" -> "yours"), ("hers" -> "theirs"), ("his" -> "theirs"), ("its" -> "theirs"), ("theirs" -> "theirs"))
+  private val NOMINATIVE_PRONOUNS = Map(("i", "we"), ("myself", "ourselves"), ("you", "you"), ("yourself", "yourselves"), ("she", "they"), ("herself", "themselves"), ("he", "they"), ("himself", "themselves"), ("it", "they"), ("itself", "themselves"), ("they", "they"), ("themself", "themselves"), ("mine", "ours"), ("yours", "yours"), ("hers", "theirs"), ("his", "theirs"), ("its", "theirs"), ("theirs", "theirs"))
 
-  private val ACCUSATIVE_PRONOUNS = Map(("me" -> "us"), ("myself" -> "ourselves"), ("you" -> "you"), ("yourself" -> "yourselves"), ("her" -> "them"), ("herself" -> "themselves"), ("him" -> "them"), ("himself" -> "themselves"), ("it" -> "them"), ("itself" -> "themselves"), ("them" -> "them"), ("themself" -> "themselves"))
+  private val ACCUSATIVE_PRONOUNS = Map(("me", "us"), ("myself", "ourselves"), ("you", "you"), ("yourself", "yourselves"), ("her", "them"), ("herself", "themselves"), ("him", "them"), ("himself", "themselves"), ("it", "them"), ("itself", "themselves"), ("them", "them"), ("themself", "themselves"))
 
-  private val IRREGULAR_NOUNS = Map(("child" -> "children"), ("brother" -> "brothers"), ("loaf" -> "loaves"), ("hoof" -> "hoofs"), ("beef" -> "beefs"), ("money" -> "monies"), ("mongoose" -> "mongooses"), ("ox" -> "oxen"), ("cow" -> "cows"), ("soliloquy" -> "soliloquies"), ("graffito" -> "graffiti"), ("prima donna" -> "prima donnas"), ("octopus" -> "octopuses"), ("genie" -> "genies"), ("ganglion" -> "ganglions"), ("trilby" -> "trilbys"), ("turf" -> "turfs"), ("numen" -> "numina"), ("atman" -> "atmas"), ("occiput" -> "occiputs"), ("corpus" -> "corpuses"), ("opus" -> "opuses"), ("genus" -> "genera"), ("mythos" -> "mythoi"), ("penis" -> "penises"), ("testis" -> "testes"), ("atlas" -> "atlases"))
+  private val IRREGULAR_NOUNS = Map(("child", "children"), ("brother", "brothers"), ("loaf", "loaves"), ("hoof", "hoofs"), ("beef", "beefs"), ("money", "monies"), ("mongoose", "mongooses"), ("ox", "oxen"), ("cow", "cows"), ("soliloquy", "soliloquies"), ("graffito", "graffiti"), ("prima donna", "prima donnas"), ("octopus", "octopuses"), ("genie", "genies"), ("ganglion", "ganglions"), ("trilby", "trilbys"), ("turf", "turfs"), ("numen", "numina"), ("atman", "atmas"), ("occiput", "occiputs"), ("corpus", "corpuses"), ("opus", "opuses"), ("genus", "genera"), ("mythos", "mythoi"), ("penis", "penises"), ("testis", "testes"), ("atlas", "atlases"))
 
   private val CATEGORY_UNINFLECTED_NOUNS = Array(".*fish", "tuna", "salmon", "mackerel", "trout", "bream", "sea[- ]bass", "carp", "cod", "flounder", "whiting", ".*deer", ".*sheep", "Portuguese", "Amoyese", "Borghese", "Congoese", "Faroese", "Foochowese", "Genevese", "Genoese", "Gilbertese", "Hottentotese", "Kiplingese", "Kongoese", "Lucchese", "Maltese", "Nankingese", "Niasese", "Pekingese", "Piedmontese", "Pistoiese", "Sarawakese", "Shavese", "Vermontese", "Wenchowese", "Yengeese", ".*[nrlm]ese", ".*pox", "graffiti", "djinn", "breeches", "britches", "clippers", "gallows", "hijinks", "headquarters", "pliers", "scissors", "testes", "herpes", "pincers", "shears", "proceedings", "trousers", "cantus", "coitus", "nexus", "contretemps", "corps", "debris", ".*ois", "siemens", ".*measles", "mumps", "diabetes", "jackanapes", "series", "species", "rabies", "chassis", "innings", "news", "mews")
 

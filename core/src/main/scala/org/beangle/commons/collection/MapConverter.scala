@@ -4,27 +4,28 @@
  * Copyright (c) 2005-2014, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Beangle is distributed in the hope that it will be useful.
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.collection
 
-import java.util.Date
+import java.{util => ju}
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.conversion.Conversion
 import org.beangle.commons.conversion.impl.DefaultConversion
 import scala.reflect.ClassTag
 import org.beangle.commons.lang.Objects
 import scala.collection.Map
+import java.sql.Date
 /**
  * MapConverter class.
  *
@@ -123,12 +124,12 @@ class MapConverter(val conversion: DefaultConversion = DefaultConversion.Instanc
   /**
    * getDate.
    */
-  def getDate(data: Map[String, Any], name: String): Option[java.sql.Date] = get(data, name, classOf[java.sql.Date])
+  def getDate(data: Map[String, Any], name: String): Option[Date] = get(data, name, classOf[Date])
 
   /**
    * getDateTime.
    */
-  def getDateTime(data: Map[String, Any], name: String): Option[Date] = get(data, name, classOf[Date])
+  def getDateTime(data: Map[String, Any], name: String): Option[ju.Date] = get(data, name, classOf[ju.Date])
 
   /**
    * getFloat.
