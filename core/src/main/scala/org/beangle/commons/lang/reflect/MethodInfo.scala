@@ -1,19 +1,19 @@
 /*
- * Beangle, Agile Java/Scala Development Scaffold and Toolkit
+ * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2013, Beangle Software.
+ * Copyright (c) 2005-2014, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Beangle is distributed in the hope that it will be useful.
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
+ * You should have received a copy of the GNU General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.lang.reflect
@@ -30,21 +30,21 @@ import org.beangle.commons.lang.Objects
  * @since 3.2.0
  */
 class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[Class[_]])
-    extends Ordered[MethodInfo]() {
+  extends Ordered[MethodInfo]() {
 
   /**
    * Return this method is property read method (0) or write method(1) or none(-1).
    */
   def property(): Option[Pair[Boolean, String]] = {
     val name = method.getName
-    if (parameterTypes.length == 0 && null != method.getReturnType) {
+    if (0 == parameterTypes.length && method.getReturnType != classOf[Unit]) {
       val propertyName = if (name.startsWith("get") && name.length > 3 && isUpperCase(name.charAt(3)))
         uncapitalize(substringAfter(name, "get"))
       else if (name.startsWith("is") && name.length > 2 && isUpperCase(name.charAt(2)))
         uncapitalize(substringAfter(name, "is"))
       else name
       Some((true, propertyName))
-    } else if (parameterTypes.length == 1) {
+    } else if (1 == parameterTypes.length) {
       val propertyName = if (name.startsWith("set") && name.length > 3 && isUpperCase(name.charAt(3)))
         uncapitalize(substringAfter(name, "set"))
       else if (name.endsWith("_$eq")) substringBefore(name, "_$eq")
@@ -58,6 +58,7 @@ class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[C
 
   def matches(args: Any*): Boolean = {
     if (parameterTypes.length != args.length) return false
+
     for (i <- 0 until args.length if null != args(i) && !parameterTypes(i).isInstance(args(i))) return false
     true
   }

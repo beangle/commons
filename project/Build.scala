@@ -3,8 +3,8 @@ import Keys._
 
 object BuildSettings {
   val buildOrganization = "org.beangle.commons"
-  val buildVersion = "4.0.1"
-  val buildScalaVersion = "2.10.2"
+  val buildVersion = "4.0.2-SNAPSHOT"
+  val buildScalaVersion = "2.10.3"
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
     organization := buildOrganization,
@@ -53,11 +53,6 @@ object Dependencies {
   val logbackClassic = "ch.qos.logback" % "logback-classic" % logbackVer % "test"
   val logbackCore = "ch.qos.logback" % "logback-core" % logbackVer % "test"
 
-  val h2 = "com.h2database" % "h2" % h2Ver
-  val dbcp = "commons-dbcp" % "commons-dbcp" % "1.3"
-  val jpa = "org.hibernate.javax.persistence" % "hibernate-jpa-2.0-api" % "1.0.1.Final"
-  val validation = "javax.validation" % "validation-api" % "1.0.0.GA"
-
   val servletapi = "javax.servlet" % "servlet-api" % "2.4"
   val javamail = "javax.mail" % "mail" % "1.4"
   val greenmail = "com.icegreen" % "greenmail" % "1.3.1b"
@@ -75,7 +70,7 @@ object BeangleBuild extends Build {
 
   val commonDeps = Seq(slf4j, logbackClassic, logbackCore, scalatest)
 
-  lazy val commons = Project("beangle-commons", file("."), settings = buildSettings) aggregate (commons_core, commons_web, commons_jpa, commons_jdbc, commons_message)
+  lazy val commons = Project("beangle-commons", file("."), settings = buildSettings) aggregate (commons_core, commons_web, commons_jpa, commons_jdbc, commons_notification)
 
   lazy val commons_core = Project(
     "beangle-commons-core",
@@ -88,22 +83,10 @@ object BeangleBuild extends Build {
     settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(servletapi, validation, mockito))
       ++ Seq(resolvers += m2repo)) dependsOn (commons_core)
 
-  lazy val commons_jpa = Project(
-    "beangle-commons-jpa",
-    file("jpa"),
-    settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(validation, jpa))
-      ++ Seq(resolvers += m2repo)) dependsOn (commons_core)
-
-  lazy val commons_jdbc = Project(
-    "beangle-commons-jdbc",
-    file("jdbc"),
-    settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(h2, dbcp))
-      ++ Seq(resolvers += m2repo)) dependsOn (commons_core)
-
-  lazy val commons_message = Project(
-    "beangle-commons-message",
-    file("message"),
+  /*  lazy val commons_notification = Project(
+    "beangle-commons-notification",
+    file("notification"),
     settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(javamail, greenmail))
       ++ Seq(resolvers += m2repo)) dependsOn (commons_core)
-
+ */
 }

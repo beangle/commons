@@ -1,19 +1,19 @@
 /*
- * Beangle, Agile Java/Scala Development Scaffold and Toolkit
+ * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2013, Beangle Software.
+ * Copyright (c) 2005-2014, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Beangle is distributed in the hope that it will be useful.
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
+ * You should have received a copy of the GNU General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.lang
@@ -124,14 +124,11 @@ object Strings {
    * contains("abc", 'z') = false
    * </pre>
    *
-   * @param seq
-   *          the CharSequence to check, may be null
-   * @param searchChar
-   *          the character to find
+   * @param seq   the CharSequence to check, may be null
+   * @param searchChar the character to find
    * @return true if the CharSequence contains the search character,
    *         false if not or {@code null} string input
    * @since 2.0
-   * @since 3.0 Changed signature from contains(String, int) to contains(CharSequence, int)
    */
   def contains(seq: CharSequence, searchChar: Int): Boolean = {
     if (isEmpty(seq)) return false
@@ -141,10 +138,8 @@ object Strings {
   /**
    * count char in host string
    *
-   * @param host
-   *          a {@link java.lang.String} object.
-   * @param charactor
-   *          a char.
+   * @param host {@link java.lang.String} object.
+   * @param charactor a char.
    * @return a int.
    */
   def count(host: String, charactor: Char): Int = {
@@ -287,7 +282,8 @@ object Strings {
   /**
    * Returns true is cs is null or cs.length equals 0.
    */
-  def isEmpty(cs: CharSequence): Boolean = cs == null || cs.length == 0
+  @inline
+  def isEmpty(cs: CharSequence): Boolean = (cs eq null) || 0 == cs.length
 
   /**
    * <p>

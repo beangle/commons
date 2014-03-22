@@ -2,21 +2,18 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.beangle</groupId>
-    <artifactId>beangle-scala-parent</artifactId>
-    <version>10</version>
+    <artifactId>beangle-scala</artifactId>
+    <version>12</version>
   </parent>
   <groupId>org.beangle.commons</groupId>
   <artifactId>beangle-commons-parent</artifactId>
   <packaging>pom</packaging>
-  <version>4.0.1</version>
+  <version>4.0.2</version>
   <name>Beangle Commons Parent</name>
   
   <modules>
     <module>core</module>
     <module>web</module>
-    <module>jpa</module>
-    <module>jdbc</module>
-    <module>message</module>
   </modules>
 
   <description>

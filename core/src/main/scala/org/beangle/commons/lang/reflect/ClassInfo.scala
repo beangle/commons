@@ -1,35 +1,29 @@
 /*
- * Beangle, Agile Java/Scala Development Scaffold and Toolkit
+ * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2013, Beangle Software.
+ * Copyright (c) 2005-2014, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Beangle is distributed in the hope that it will be useful.
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
+ * You should have received a copy of the GNU General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.lang.reflect
 
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
-import java.lang.reflect.ParameterizedType
-import java.lang.reflect.Type
-import java.lang.reflect.TypeVariable
-import java.util.Arrays
-import java.util.Collection
-import java.util.Collections
+import java.lang.reflect.{ Method, Modifier, ParameterizedType, TypeVariable }
 
-import scala.language.existentials
-import scala.collection.JavaConversions._
 import scala.collection.mutable
+import scala.language.existentials
+
+import org.beangle.commons.lang.Range.range
 
 object ClassInfo {
 
@@ -64,20 +58,24 @@ object ClassInfo {
     var nextParamTypes: collection.Map[String, Class[_]] = null
     while (null != nextClass && classOf[AnyRef] != nextClass) {
       val declaredMethods = nextClass.getDeclaredMethods
-      var i = 0
-      while (i < declaredMethods.length) {
+      range(0, declaredMethods.length) foreach { i =>
         val method = declaredMethods(i)
-        i += 1
         if (goodMethod(method)) {
           val types = method.getGenericParameterTypes
           val paramsTypes = new Array[Class[_]](types.length)
-          for (j <- 0 until types.length) {
+          range(0, types.length) foreach { j =>
             val t = types(j)
             paramsTypes(j) =
               if (t.isInstanceOf[ParameterizedType])
                 t.asInstanceOf[ParameterizedType].getRawType.asInstanceOf[Class[_]]
-              else if (t.isInstanceOf[TypeVariable[_]]) nextParamTypes.get(t.asInstanceOf[TypeVariable[_]].getName).get
-              else t.asInstanceOf[Class[_]]
+              else if (t.isInstanceOf[TypeVariable[_]]) {
+                if (null == nextParamTypes) classOf[AnyRef]
+                else
+                  nextParamTypes.get(t.asInstanceOf[TypeVariable[_]].getName).getOrElse(classOf[AnyRef])
+              } else {
+                if (t.isInstanceOf[Class[_]]) t.asInstanceOf[Class[_]]
+                else classOf[AnyRef]
+              }
           }
           if (!methods.add(new MethodInfo(index, method, paramsTypes))) index -= 1
           index += 1
@@ -89,7 +87,7 @@ object ClassInfo {
         val tmp = new mutable.HashMap[String, Class[_]]
         val ps = nextType.asInstanceOf[ParameterizedType].getActualTypeArguments
         val tvs = nextClass.getTypeParameters
-        for (k <- 0 until ps.length) {
+        range(0, ps.length) foreach { k =>
           if (ps(k).isInstanceOf[Class[_]]) {
             tmp.put(tvs(k).getName, ps(k).asInstanceOf[Class[_]])
           } else if (ps(k).isInstanceOf[TypeVariable[_]]) {
@@ -138,12 +136,12 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
   /**
    * property read method indexes
    */
-  val readers = findReaders(methodinfos)
+  val readers: Map[String, MethodInfo] = findReaders(methodinfos)
 
   /**
    * property write method indexes
    */
-  val writers = findWriters(methodinfos)
+  val writers: Map[String, MethodInfo] = findWriters(methodinfos)
 
   private def findReaders(methodinfos: Seq[MethodInfo]): Map[String, MethodInfo] = {
     val readermap = new mutable.HashMap[String, MethodInfo]

@@ -1,19 +1,19 @@
 /*
- * Beangle, Agile Java/Scala Development Scaffold and Toolkit
+ * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2013, Beangle Software.
+ * Copyright (c) 2005-2014, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Beangle is distributed in the hope that it will be useful.
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
+ * You should have received a copy of the GNU General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.io
@@ -22,28 +22,36 @@ import java.io._
 import java.nio.channels.FileChannel
 import java.nio.charset.Charset
 import org.beangle.commons.lang.Assert
+import org.beangle.commons.lang.Charsets.UTF_8
 
 object Files {
 
-  val CopyBufferSize = 1024 * 1024 * 30
+  private val copyBufferSize = 1024 * 1024 * 30
 
-  /**
-   * Reads the contents of a file into a String using the default encoding for the VM.
-   * The file is always closed.
-   */
-  def readFileToString(file: File): String = readFileToString(file, null)
+  val / = File.separator
+
+  private def fileName(name: String): String = {
+    import org.beangle.commons.lang.Strings.replace
+    if (/ == "\\") replace(name, "/", "\\") else replace(name, "\\", "/")
+  }
+
+  @inline
+  def forName(name: String): File = new File(fileName(name))
+
+  def stringWriter(file: File, charset: Charset = UTF_8): Writer = {
+    new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), charset))
+  }
 
   /**
    * Reads the contents of a file into a String.
    * The file is always closed.
    */
-  def readFileToString(file: File, charset: Charset): String = {
+  def readString(file: File, charset: Charset = UTF_8): String = {
     var in: InputStream = null
     try {
       in = new FileInputStream(file)
       val sw = new StringBuilderWriter(16)
-      if (null == charset) IOs.copy(new InputStreamReader(in), sw) else IOs.copy(new InputStreamReader(in,
-        charset.name()), sw)
+      IOs.copy(new InputStreamReader(in, charset), sw)
       sw.toString
     } finally {
       IOs.close(in)
@@ -51,25 +59,57 @@ object Files {
   }
 
   /**
+   * Writes a String to a file creating the file if it does not exist.
+   */
+  def writeString(file: File, data: String, charset: Charset = UTF_8) {
+    var out: OutputStream = null
+    try {
+      out = writeOpen(file)
+      IOs.write(data, out, charset)
+      out.close()
+    } finally {
+      IOs.close(out)
+    }
+  }
+
+  def touch(file: File) {
+    if (!file.exists()) IOs.close(writeOpen(file))
+    val success = file.setLastModified(System.currentTimeMillis());
+    if (!success) throw new IOException("Unable to set the last modification time for " + file)
+  }
+
+  def writeOpen(file: File, append: Boolean = false): FileOutputStream = {
+    if (file.exists()) {
+      if (file.isDirectory) throw new IOException("File '" + file + "' exists but is a directory")
+      if (!file.canWrite) throw new IOException("File '" + file + "' cannot be written to")
+    } else {
+      val parent = file.getParentFile
+      if (parent != null) {
+        if (!parent.mkdirs() && !parent.isDirectory())
+          throw new IOException("Directory '" + parent + "' could not be created");
+      }
+    }
+    new FileOutputStream(file, append)
+  }
+
+  /**
    * Reads the contents of a file line by line to a List of Strings.
    * The file is always closed.
    */
-  def readLines(file: File, charset: Charset): List[String] = {
+  def readLines(file: File, charset: Charset = UTF_8): List[String] = {
     var in: InputStream = null
     try {
       in = new FileInputStream(file)
       if (null == charset) {
         IOs.readLines(new InputStreamReader(in))
       } else {
-        val reader = new InputStreamReader(in, charset.name())
+        val reader = new InputStreamReader(in, charset)
         IOs.readLines(reader)
       }
     } finally {
       IOs.close(in)
     }
   }
-
-  def readLines(file: File): List[String] = readLines(file, null)
 
   /**
    * Copies a file to a new location preserving the file date.
@@ -84,12 +124,9 @@ object Files {
    *
    * @param srcFile an existing file to copy, must not be <code>null</code>
    * @param destFile the new file, must not be <code>null</code>
-   * @throws NullPointerException if source or destination is <code>null</code>
-   * @throws IOException if source or destination is invalid
-   * @throws IOException if an IO error occurs during copying
-   * @see #copyFileToDirectory(File, File)
    */
-  def copyFile(srcFile: File, destFile: File) {
+  @throws[IOException]("if source or destination is invalid or an IO error occurs during copying")
+  def copy(srcFile: File, destFile: File) {
     null != srcFile
     null != destFile
     if (srcFile.exists() == false) {
@@ -114,10 +151,10 @@ object Files {
       }
       if (!destFile.canWrite()) throw new IOException("Destination '" + destFile + "' exists but is read-only")
     }
-    doCopyFile(srcFile, destFile, true)
+    doCopy(srcFile, destFile, true)
   }
 
-  private def doCopyFile(srcFile: File, destFile: File, preserveFileDate: Boolean) {
+  private def doCopy(srcFile: File, destFile: File, preserveFileDate: Boolean) {
     var fis: FileInputStream = null
     var fos: FileOutputStream = null
     var input: FileChannel = null
@@ -131,7 +168,7 @@ object Files {
       var pos = 0L
       var count = 0L
       while (pos < size) {
-        count = if (size - pos > CopyBufferSize) CopyBufferSize else size - pos
+        count = if (size - pos > copyBufferSize) copyBufferSize else size - pos
         pos += output.transferFrom(input, pos, count)
       }
     } finally {
