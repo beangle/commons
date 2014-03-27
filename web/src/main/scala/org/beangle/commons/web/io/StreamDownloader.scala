@@ -34,19 +34,9 @@ trait StreamDownloader {
 
   def download(req: HttpServletRequest, res: HttpServletResponse, file: File): Unit
 
-  def download(req: HttpServletRequest,
-    res: HttpServletResponse,
-    url: URL,
-    display: String): Unit
+  def download(req: HttpServletRequest, res: HttpServletResponse, url: URL, display: String): Unit
 
-  def download(req: HttpServletRequest,
-    res: HttpServletResponse,
-    file: File,
-    display: String): Unit
+  def download(req: HttpServletRequest, res: HttpServletResponse, file: File, display: String): Unit
 
-  def download(req: HttpServletRequest,
-    res: HttpServletResponse,
-    inStream: InputStream,
-    name: String,
-    display: String): Unit
+  def download(req: HttpServletRequest, res: HttpServletResponse, inStream: InputStream, name: String, display: String): Unit
 }

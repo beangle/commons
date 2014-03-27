@@ -3,7 +3,7 @@ import Keys._
 
 object BuildSettings {
   val buildOrganization = "org.beangle.commons"
-  val buildVersion = "4.0.2-SNAPSHOT"
+  val buildVersion = "4.0.4-SNAPSHOT"
   val buildScalaVersion = "2.10.3"
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
@@ -11,7 +11,7 @@ object BuildSettings {
     version := buildVersion,
     scalaVersion := buildScalaVersion,
     shellPrompt := ShellPrompt.buildShellPrompt,
-    scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-target:jvm-1.6"),
+    scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-target:jvm-1.6","-optimise","-Yinline-warnings"),
     crossPaths := false)
 }
 
@@ -40,22 +40,20 @@ object ShellPrompt {
 }
 
 object Dependencies {
-  val h2Ver = "1.3.172"
   val slf4jVer = "1.6.6"
   val mockitoVer = "1.9.5"
   val logbackVer = "1.0.7"
-  val scalatestVer = "2.0.M5b"
+  val scalatestVer = "2.1.RC1"
 
   val slf4j = "org.slf4j" % "slf4j-api" % slf4jVer
   val scalatest = "org.scalatest" % "scalatest_2.10" % scalatestVer % "test"
   val mockito = "org.mockito" % "mockito-core" % mockitoVer % "test"
-
+  val junit = "junit" % "junit" % "4.11" % "test"
   val logbackClassic = "ch.qos.logback" % "logback-classic" % logbackVer % "test"
   val logbackCore = "ch.qos.logback" % "logback-core" % logbackVer % "test"
 
-  val servletapi = "javax.servlet" % "servlet-api" % "2.4"
-  val javamail = "javax.mail" % "mail" % "1.4"
-  val greenmail = "com.icegreen" % "greenmail" % "1.3.1b"
+  val validation = "javax.validation" % "validation-api" % "1.0.0.GA"
+  val servletapi = "javax.servlet" % "javax.servlet-api" % "3.1.0"
 }
 
 object Resolvers {
@@ -68,9 +66,9 @@ object BeangleBuild extends Build {
   import BuildSettings._
   import Resolvers._
 
-  val commonDeps = Seq(slf4j, logbackClassic, logbackCore, scalatest)
+  val commonDeps = Seq(slf4j, logbackClassic, logbackCore, scalatest, junit)
 
-  lazy val commons = Project("beangle-commons", file("."), settings = buildSettings) aggregate (commons_core, commons_web, commons_jpa, commons_jdbc, commons_notification)
+  lazy val commons = Project("beangle-commons", file("."), settings = buildSettings) aggregate (commons_core, commons_web)
 
   lazy val commons_core = Project(
     "beangle-commons-core",
@@ -82,11 +80,4 @@ object BeangleBuild extends Build {
     file("web"),
     settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(servletapi, validation, mockito))
       ++ Seq(resolvers += m2repo)) dependsOn (commons_core)
-
-  /*  lazy val commons_notification = Project(
-    "beangle-commons-notification",
-    file("notification"),
-    settings = buildSettings ++ Seq(libraryDependencies ++= commonDeps ++ Seq(javamail, greenmail))
-      ++ Seq(resolvers += m2repo)) dependsOn (commons_core)
- */
 }

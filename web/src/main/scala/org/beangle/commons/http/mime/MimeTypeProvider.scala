@@ -27,7 +27,7 @@ import org.beangle.commons.io.IOs
 
 class MimeTypeProvider extends Logging {
 
-  private var contentTypes: Map[String, String] = _
+  private var contentTypes: Map[String, String] = Map.empty
 
   var resources: Resources = _
 
