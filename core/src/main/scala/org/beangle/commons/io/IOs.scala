@@ -142,7 +142,7 @@ object IOs extends Logging {
     else {
       val texts = new collection.mutable.HashMap[String, String]
       val reader = new LineNumberReader(new InputStreamReader(input, charset))
-      var line: String = reader.readLine()
+      var line: String = reader.readLine
       while (null != line) {
         val index = line.indexOf('=')
         if (index > 0) texts.put(line.substring(0, index).trim(), line.substring(index + 1).trim())
