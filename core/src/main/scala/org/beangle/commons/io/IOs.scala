@@ -18,13 +18,16 @@
  */
 package org.beangle.commons.io
 
-import java.io.{ BufferedReader, Closeable, IOException, InputStream, InputStreamReader, OutputStream, Reader, Writer }
+import java.io.{ BufferedReader, Closeable, IOException, InputStream, InputStreamReader, LineNumberReader, OutputStream, Reader, Writer }
+import java.net.URL
 import java.nio.charset.Charset
-
-import scala.collection.mutable
+import java.{ util => ju }
 
 import org.beangle.commons.lang.Charsets.UTF_8
-object IOs {
+import org.beangle.commons.lang.time.Stopwatch
+import org.beangle.commons.logging.Logging
+
+object IOs extends Logging {
 
   private val defaultBufferSize = 1024 * 4
 
@@ -95,7 +98,7 @@ object IOs {
    */
   def readLines(input: Reader): List[String] = {
     val reader = toBufferedReader(input)
-    val list = new mutable.ListBuffer[String]
+    val list = new collection.mutable.ListBuffer[String]
     var line = reader.readLine()
     while (line != null) {
       list += line
@@ -107,22 +110,90 @@ object IOs {
   def readString(input: InputStream, charset: Charset = UTF_8): String = {
     try {
       val sw = new StringBuilderWriter(16)
-      IOs.copy(new InputStreamReader(input, charset), sw)
+      copy(new InputStreamReader(input, charset), sw)
       sw.toString
     } finally {
-      IOs.close(input)
+      close(input)
     }
   }
-  
+
+  /**
+   * Read key value properties
+   */
+  def readProperties(url: URL): Map[String, String] = {
+    if (null == url) Map.empty
+    else {
+      try {
+        readProperties(url.openStream())
+      } catch {
+        case e: Exception => {
+          logger.error("load " + url + " error", e)
+          Map.empty
+        }
+      }
+    }
+  }
+
+  /**
+   * Read key value properties
+   */
+  def readProperties(input: InputStream, charset: Charset = UTF_8): Map[String, String] = {
+    if (null == input) Map.empty
+    else {
+      val texts = new collection.mutable.HashMap[String, String]
+      val reader = new LineNumberReader(new InputStreamReader(input, charset))
+      var line: String = reader.readLine()
+      while (null != line) {
+        val index = line.indexOf('=')
+        if (index > 0) texts.put(line.substring(0, index).trim(), line.substring(index + 1).trim())
+        line = reader.readLine()
+      }
+      close(input)
+      texts.toMap
+    }
+  }
+  /**
+   * Read Java key value properties by url
+   */
+  def readJavaProperties(url: URL): Map[String, String] = {
+    if (null == url) Map.empty
+    else {
+      try {
+        readJavaProperties(url.openStream())
+      } catch {
+        case e: Exception => {
+          logger.error("load " + url + " error", e)
+          Map.empty
+        }
+      }
+    }
+  }
+  /**
+   * Read java key value properties
+   */
+  def readJavaProperties(input: InputStream): Map[String, String] = {
+    if (null == input) Map.empty
+    else {
+      val properties = new ju.Properties()
+      properties.load(input)
+      close(input)
+      collection.JavaConversions.propertiesAsScalaMap(properties).toMap
+    }
+  }
+
   def readLines(input: InputStream, charset: Charset = UTF_8): List[String] = readLines(new InputStreamReader(input, charset))
 
-  def close(closeable: Closeable) {
-    try {
-      if (closeable != null) {
-        closeable.close()
+  /**
+   * Close many objects quitely.
+   * TODO Support AutoCloseable when beangle based on jdk 1.7
+   */
+  def close(objs: Closeable*) {
+    objs foreach { obj =>
+      try {
+        if (obj != null) obj.close()
+      } catch {
+        case ioe: IOException =>
       }
-    } catch {
-      case ioe: IOException =>
     }
   }
 

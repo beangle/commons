@@ -18,14 +18,13 @@
  */
 package org.beangle.commons.config.property
 
-import java.util.Properties
 import PropertyConfig._
 
 object PropertyConfig {
 
   trait Provider {
 
-    def getConfig(): Properties
+    def getConfig(): collection.Map[String, Any]
   }
 }
 
@@ -57,9 +56,8 @@ trait PropertyConfig {
    * add.
    * </p>
    *
-   * @param properties a {@link java.util.Properties} object.
    */
-  def add(properties: Properties): Unit
+  def add(properties: collection.Map[String, Any]): Unit
 
   /**
    * names.

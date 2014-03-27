@@ -18,10 +18,10 @@
  */
 package org.beangle.commons.config.property
 
-import java.io.InputStream
 import java.net.URL
-import java.util.Properties
+
 import org.beangle.commons.inject.Resources
+import org.beangle.commons.io.IOs
 import org.beangle.commons.logging.Logging
 
 /**
@@ -36,22 +36,16 @@ class UrlPropertyConfigProvider extends PropertyConfig.Provider with Logging {
   var resources: Resources = _
 
   /**
-   * <p>
    * getConfig.
-   * </p>
-   *
-   * @return a {@link java.util.Properties} object.
    */
-  def getConfig(): Properties = {
+  def getConfig(): collection.Map[String, Any] = {
     try {
-      val properties = new Properties()
-      if (null != resources.global) populateConfigItems(properties, resources.global)
+      val properties = new collection.mutable.HashMap[String, Any]
+      properties ++= IOs.readJavaProperties(resources.global)
       if (null != resources.locals) {
-        for (url <- resources.locals) {
-          populateConfigItems(properties, url)
-        }
+        for (url <- resources.locals) properties ++= IOs.readJavaProperties(url)
       }
-      if (null != resources.user) populateConfigItems(properties, resources.user)
+      properties ++= IOs.readJavaProperties(resources.user)
       properties
     } catch {
       case e: Exception => {
@@ -60,16 +54,4 @@ class UrlPropertyConfigProvider extends PropertyConfig.Provider with Logging {
       }
     }
   }
-
-  private def populateConfigItems(properties: Properties, url: URL) {
-    logger.debug("loading {}", url)
-    try {
-      val is = url.openStream()
-      properties.load(is)
-      is.close()
-    } catch {
-      case e: Exception => logger.error("populate config error", e)
-    }
-  }
-
 }
