@@ -16,23 +16,25 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.conversion.converter
+package org.beangle.commons.lang
 
-import java.sql.Time
 import org.junit.runner.RunWith
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.{ FunSpec, Matchers }
 import org.scalatest.junit.JUnitRunner
+import java.sql.Date
+import java.sql.Time
+import java.text.SimpleDateFormat
 
 @RunWith(classOf[JUnitRunner])
-class TimeConverterTest extends FunSpec with Matchers {
+class DatesTest extends FunSpec with Matchers {
 
-  describe("TimeConverter") {
-    it("Convert String to time") {
-      String2TimeConverter("1234") should equal(Time.valueOf("12:34:00"))
-      String2TimeConverter("123400") should equal(Time.valueOf("12:34:00"))
-      String2TimeConverter("090619") should equal(Time.valueOf("09:06:19"))
-      String2TimeConverter("12:34") should equal(Time.valueOf("12:34:00"))
-      String2TimeConverter("12:34:00") should equal(Time.valueOf("12:34:00"))
+  describe("Dates") {
+    it("join") {
+      val date = Date.valueOf("2014-09-09")
+      val time = Time.valueOf("09:09:10")
+      val datetime = Dates.join(date, time)
+      val format = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+      format.format(datetime) should equal("2014-09-09 09-09-10")
     }
   }
 }
