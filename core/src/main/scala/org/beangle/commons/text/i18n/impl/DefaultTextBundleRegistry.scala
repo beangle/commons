@@ -18,20 +18,16 @@
  */
 package org.beangle.commons.text.i18n.impl
 
-import java.io.IOException
-import java.io.InputStream
-import java.io.InputStreamReader
-import java.io.LineNumberReader
 import java.util.Locale
-import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
 
-import org.beangle.commons.lang.ClassLoaders
+import scala.collection.JavaConversions.collectionAsScalaIterable
+
+import org.beangle.commons.io.IOs
+import org.beangle.commons.lang.{ Arrays, ClassLoaders }
 import org.beangle.commons.lang.time.Stopwatch
-import org.beangle.commons.lang.Arrays
 import org.beangle.commons.logging.Logging
-import org.beangle.commons.text.i18n.spi.TextBundle
-import org.beangle.commons.text.i18n.spi.TextBundleRegistry
+import org.beangle.commons.text.i18n.spi.{ TextBundle, TextBundleRegistry }
 /**
  * @since 3.0.0
  */
@@ -69,26 +65,9 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
   }
 
   protected def loadNewBundle(bundleName: String, locale: Locale): Option[TextBundle] = {
-    val watch = new Stopwatch(true)
-    val texts = new collection.mutable.HashMap[String, String]
     val resource = toDefaultResourceName(bundleName, locale)
-    try {
-      val is = ClassLoaders.getResourceAsStream(resource, getClass)
-      if (null == is) return None
-      val reader = new LineNumberReader(new InputStreamReader(is, "UTF-8"))
-      var line: String = reader.readLine()
-      while (null != line) {
-        val index = line.indexOf('=')
-        if (index > 0) texts.put(line.substring(0, index).trim(), line.substring(index + 1).trim())
-        line = reader.readLine()
-      }
-      is.close()
-    } catch {
-      case e: IOException => return None
-    } finally {
-    }
-    logger.info("Load bundle {} in {}", bundleName, watch)
-    Some(new DefaultTextBundle(locale, resource, texts.toMap))
+    val properties = IOs.readProperties(ClassLoaders.getResource(resource, getClass))
+    Some(new DefaultTextBundle(locale, resource, properties))
   }
 
   /**
@@ -99,18 +78,9 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
    * @return None or bundle corresponding bindleName.locale.properties
    */
   protected def loadJavaBundle(bundleName: String, locale: Locale): Option[TextBundle] = {
-    val properties = new Properties()
     val resource = toJavaResourceName(bundleName, locale)
-    try {
-      val is = ClassLoaders.getResourceAsStream(resource, getClass)
-      if (null == is) return None
-      properties.load(is)
-      is.close()
-    } catch {
-      case e: IOException => return None
-    } finally {
-    }
-    Some(new DefaultTextBundle(locale, resource, properties))
+    val properties = IOs.readJavaProperties(ClassLoaders.getResource(resource, getClass))
+    if (properties.isEmpty) None else Some(new DefaultTextBundle(locale, resource, properties))
   }
 
   /**
@@ -178,7 +148,7 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
   import collection.JavaConversions._
   def getBundles(locale: Locale): List[TextBundle] = {
     caches.get(locale) match {
-      case Some(map) => map.values.toList;
+      case Some(map) => map.values.toList
       case None => List.empty
     }
   }

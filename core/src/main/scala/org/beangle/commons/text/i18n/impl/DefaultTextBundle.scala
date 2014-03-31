@@ -18,7 +18,6 @@
  */
 package org.beangle.commons.text.i18n.impl
 
-import java.util.Properties
 import org.beangle.commons.text.i18n.spi.TextBundle
 import java.util.Locale
 
@@ -27,10 +26,6 @@ import java.util.Locale
  * @since 3.0.0
  */
 class DefaultTextBundle(locale: Locale, resource: String, texts: Map[String, String]) extends TextBundle() {
-
-  def this(locale: Locale, resource: String, properties: Properties) {
-    this(locale, resource, collection.JavaConversions.propertiesAsScalaMap(properties).toMap)
-  }
 
   def getText(key: String): Option[String] = texts.get(key)
 

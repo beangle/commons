@@ -16,27 +16,25 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.web.io
+package org.beangle.commons.lang
 
-import java.io.File
-import java.io.InputStream
-import java.net.URL
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import org.junit.runner.RunWith
+import org.scalatest.{ FunSpec, Matchers }
+import org.scalatest.junit.JUnitRunner
+import java.sql.Date
+import java.sql.Time
+import java.text.SimpleDateFormat
 
-/**
- * Stream Downloader
- *
- * @author chaostone
- * @since 2.1
- */
-trait StreamDownloader {
+@RunWith(classOf[JUnitRunner])
+class DatesTest extends FunSpec with Matchers {
 
-  def download(req: HttpServletRequest, res: HttpServletResponse, file: File): Unit
-
-  def download(req: HttpServletRequest, res: HttpServletResponse, url: URL, display: String): Unit
-
-  def download(req: HttpServletRequest, res: HttpServletResponse, file: File, display: String): Unit
-
-  def download(req: HttpServletRequest, res: HttpServletResponse, inStream: InputStream, name: String, display: String): Unit
+  describe("Dates") {
+    it("join") {
+      val date = Date.valueOf("2014-09-09")
+      val time = Time.valueOf("09:09:10")
+      val datetime = Dates.join(date, time)
+      val format = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+      format.format(datetime) should equal("2014-09-09 09-09-10")
+    }
+  }
 }

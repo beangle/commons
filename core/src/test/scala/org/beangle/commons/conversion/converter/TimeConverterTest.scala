@@ -30,6 +30,7 @@ class TimeConverterTest extends FunSpec with Matchers {
     it("Convert String to time") {
       String2TimeConverter("1234") should equal(Time.valueOf("12:34:00"))
       String2TimeConverter("123400") should equal(Time.valueOf("12:34:00"))
+      String2TimeConverter("090619") should equal(Time.valueOf("09:06:19"))
       String2TimeConverter("12:34") should equal(Time.valueOf("12:34:00"))
       String2TimeConverter("12:34:00") should equal(Time.valueOf("12:34:00"))
     }

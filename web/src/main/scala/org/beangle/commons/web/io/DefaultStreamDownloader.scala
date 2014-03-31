@@ -53,10 +53,7 @@ class DefaultStreamDownloader(protected var mimeTypeProvider: MimeTypeProvider) 
     download(request, response, file, file.getName)
   }
 
-  def download(request: HttpServletRequest,
-    response: HttpServletResponse,
-    url: URL,
-    display: String) {
+  def download(request: HttpServletRequest, response: HttpServletResponse, url: URL, display: String) {
     try {
       download(request, response, url.openStream(), url.getFile, display)
     } catch {
@@ -64,15 +61,13 @@ class DefaultStreamDownloader(protected var mimeTypeProvider: MimeTypeProvider) 
     }
   }
 
-  def download(request: HttpServletRequest,
-    response: HttpServletResponse,
-    file: File,
-    display: String) {
-    file.exists()
-    try {
-      download(request, response, new FileInputStream(file), file.getAbsolutePath, display)
-    } catch {
-      case e: Exception => logger.warn("download file error=" + display, e)
+  def download(request: HttpServletRequest, response: HttpServletResponse, file: File, display: String) {
+    if (file.exists()) {
+      try {
+        download(request, response, new FileInputStream(file), file.getAbsolutePath, display)
+      } catch {
+        case e: Exception => logger.warn("download file error=" + display, e)
+      }
     }
   }
 
@@ -88,11 +83,7 @@ class DefaultStreamDownloader(protected var mimeTypeProvider: MimeTypeProvider) 
     response.setHeader("Location", encodeName)
   }
 
-  def download(request: HttpServletRequest,
-    response: HttpServletResponse,
-    inStream: InputStream,
-    name: String,
-    display: String) {
+  def download(request: HttpServletRequest, response: HttpServletResponse, inStream: InputStream, name: String, display: String) {
     val attach_name = getAttachName(name, display)
     try {
       response.reset()

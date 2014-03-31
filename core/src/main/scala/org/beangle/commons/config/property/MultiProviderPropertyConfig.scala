@@ -83,11 +83,8 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
     }
   }
 
-  def add(newer: java.util.Properties) {
-    import scala.collection.JavaConversions._
-    for (key <- newer.keySet) {
-      this.properties.put(key.toString, newer.get(key))
-    }
+  def add(newer: collection.Map[String, Any]) {
+    this.properties ++= newer
   }
 
   def addListener(listener: PropertyConfigListener) {

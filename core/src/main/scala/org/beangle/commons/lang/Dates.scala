@@ -67,11 +67,14 @@ object Dates {
   }
 
   def join(date: Date, time: Time): ju.Date = {
-    val cal = getInstance()
+    val cal = getInstance
+    val timeCal = getInstance
     cal.setTime(date)
-    cal.set(HOUR_OF_DAY, time.getHours)
-    cal.set(MINUTE, time.getMinutes)
-    cal.set(SECOND, 0)
+    timeCal.setTime(time)
+
+    cal.set(HOUR_OF_DAY, timeCal.get(HOUR_OF_DAY))
+    cal.set(MINUTE, timeCal.get(MINUTE))
+    cal.set(SECOND, timeCal.get(SECOND))
     cal.set(MILLISECOND, 0)
     cal.getTime()
   }

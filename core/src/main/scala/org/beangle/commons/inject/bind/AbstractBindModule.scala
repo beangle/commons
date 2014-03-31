@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.inject.bind
 
-import java.util.Properties
+import java.{ util => ju }
 import org.beangle.commons.inject.Scope
 import org.beangle.commons.inject.bind.BeanConfig.Definition
 import org.beangle.commons.inject.bind.BeanConfig.DefinitionBinder
@@ -159,12 +159,11 @@ abstract class AbstractBindModule extends BindModule {
     items.toMap
   }
 
-  protected def props(keyValuePairs: String*): Properties = {
-    val properties = new Properties()
+  protected def props(keyValuePairs: String*): ju.Properties = {
+    val properties = new ju.Properties
     for (pair <- keyValuePairs) {
       val index = pair.indexOf('=')
-      index > 0
-      properties.put(pair.substring(0, index), pair.substring(index + 1))
+      if (index > 0) properties.put(pair.substring(0, index), pair.substring(index + 1))
     }
     properties
   }

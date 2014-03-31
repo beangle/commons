@@ -18,56 +18,35 @@
  */
 package org.beangle.commons.http.mime
 
-import java.io.IOException
-import java.io.InputStream
+import java.io.{ IOException, InputStream }
 import java.net.URL
-import java.util.Properties
 import org.beangle.commons.inject.Resources
 import org.beangle.commons.lang.time.Stopwatch
 import org.beangle.commons.logging.Logging
+import org.beangle.commons.io.IOs
 
 class MimeTypeProvider extends Logging {
 
-  private val contentTypes = new Properties()
+  private var contentTypes: Map[String, String] = Map.empty
 
   var resources: Resources = _
 
-  def getMimeType(ext: String, defaultValue: String): String = {
-    contentTypes.getProperty(ext, defaultValue)
-  }
+  def getMimeType(ext: String, defaultValue: String): String = contentTypes.get(ext).getOrElse(defaultValue)
 
-  def getMimeType(ext: String): String = contentTypes.getProperty(ext)
-
-  /**
-   * META-INF/mimetypes.properties
-   *
-   * @param url
-   */
-  private def loadMimeType(url: URL) {
-    try {
-      val watch = new Stopwatch(true)
-      val im = url.openStream()
-      contentTypes.load(im)
-      logger.info("Load {} content types in {}", contentTypes.size, watch)
-      im.close()
-    } catch {
-      case e: IOException => logger.error("load " + url + " error", e)
-    }
-  }
+  def getMimeType(ext: String): String = contentTypes(ext)
 
   def getResources() = resources
 
   def setResources(resources: Resources) {
     this.resources = resources
-    if (null == resources) return
-    if (null != resources.global) {
-      loadMimeType(resources.global)
-    }
-    if (null != resources.locals) {
-      for (path <- resources.locals) {
-        loadMimeType(path)
+    val buf = new collection.mutable.HashMap[String, String]
+    if (null != resources) {
+      buf ++= IOs.readJavaProperties(resources.global)
+      if (null != resources.locals) {
+        for (path <- resources.locals) buf ++= IOs.readJavaProperties(path)
       }
+      buf ++= IOs.readJavaProperties(resources.user)
     }
-    if (null != resources.user) loadMimeType(resources.user)
+    contentTypes = buf.toMap
   }
 }
