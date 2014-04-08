@@ -96,9 +96,4 @@ object Base64 {
   for (i <- 48 to 57) codes(i) = ((52 + i) - 48).toByte
   for (i <- 65 to 90) codes(i) = (i - 65).toByte
   for (i <- 97 to 122) codes(i) = ((26 + i) - 97).toByte
-
-  def main(args: Array[String]) {
-    println(new BCoder().encode("汉字123"))
-    println(Base64.encode("汉字123".getBytes("UTF-8")))
-  }
 }
