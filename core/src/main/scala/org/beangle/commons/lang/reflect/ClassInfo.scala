@@ -23,7 +23,6 @@ import java.lang.reflect.{ Method, Modifier, ParameterizedType, TypeVariable }
 import scala.collection.mutable
 import scala.language.existentials
 
-import org.beangle.commons.lang.Range.range
 
 object ClassInfo {
 
@@ -58,12 +57,12 @@ object ClassInfo {
     var nextParamTypes: collection.Map[String, Class[_]] = null
     while (null != nextClass && classOf[AnyRef] != nextClass) {
       val declaredMethods = nextClass.getDeclaredMethods
-      range(0, declaredMethods.length) foreach { i =>
+      (0 until declaredMethods.length) foreach { i =>
         val method = declaredMethods(i)
         if (goodMethod(method)) {
           val types = method.getGenericParameterTypes
           val paramsTypes = new Array[Class[_]](types.length)
-          range(0, types.length) foreach { j =>
+          (0 until types.length) foreach { j =>
             val t = types(j)
             paramsTypes(j) =
               if (t.isInstanceOf[ParameterizedType])
@@ -87,7 +86,7 @@ object ClassInfo {
         val tmp = new mutable.HashMap[String, Class[_]]
         val ps = nextType.asInstanceOf[ParameterizedType].getActualTypeArguments
         val tvs = nextClass.getTypeParameters
-        range(0, ps.length) foreach { k =>
+        (0 until ps.length) foreach { k =>
           if (ps(k).isInstanceOf[Class[_]]) {
             tmp.put(tvs(k).getName, ps(k).asInstanceOf[Class[_]])
           } else if (ps(k).isInstanceOf[TypeVariable[_]]) {

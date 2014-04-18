@@ -18,6 +18,7 @@
  */
 package org.beangle.commons.lang
 
+import java.{ lang => jl }
 /**
  * Wrap or Unwrap primitive
  *
@@ -29,11 +30,11 @@ object Primitives {
   /**
    * Primitive types to their corresponding wrapper types.
    */
-  private val primitiveToWrappers: Map[Class[_], Class[_]] = Map((classOf[Boolean], classOf[java.lang.Boolean]),
-    (classOf[Byte], classOf[java.lang.Byte]), (classOf[Char], classOf[java.lang.Character]),
-    (classOf[Int], classOf[java.lang.Integer]), (classOf[Short], classOf[java.lang.Short]),
-    (classOf[Long], classOf[java.lang.Long]), (classOf[Float], classOf[java.lang.Float]),
-    (classOf[Double], classOf[java.lang.Double]))
+  private val primitiveToWrappers: Map[Class[_], Class[_]] = Map((classOf[Boolean], classOf[jl.Boolean]),
+    (classOf[Byte], classOf[jl.Byte]), (classOf[Char], classOf[jl.Character]),
+    (classOf[Int], classOf[jl.Integer]), (classOf[Short], classOf[jl.Short]),
+    (classOf[Long], classOf[jl.Long]), (classOf[Float], classOf[jl.Float]),
+    (classOf[Double], classOf[jl.Double]))
 
   /**
    * Wrapper types to their corresponding primitive types.

@@ -20,45 +20,60 @@ package org.beangle.commons.codec.binary
 
 import java.io.UnsupportedEncodingException
 import org.beangle.commons.codec.net.BCoder
+import org.beangle.commons.codec.Encoder
+import org.beangle.commons.codec.Decoder
 
 object Base64 {
+  def encode(data: Array[Byte]) = Base64Encoder.encode(data)
+  def decode(data: String) = Base64Decoder.decode(data)
+  def decode(data: Array[Char]) = Base64Decoder.decode(data)
+}
 
-  def encode(data: Array[Byte]): Array[Char] = {
+object Base64Encoder extends Encoder[Array[Byte], String] {
+
+  private val Alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".toCharArray()
+
+  def encode(data: Array[Byte]): String = {
     val out = new Array[Char](((data.length + 2) / 3) * 4)
     var i = 0
     var index = 0
     while (i < data.length) {
       var quad = false
       var trip = false
-      var `val` = 0xff & data(i)
-      `val` <<= 8
+      var value = 0xff & data(i)
+      value <<= 8
       if (i + 1 < data.length) {
-        `val` |= 0xff & data(i + 1)
+        value |= 0xff & data(i + 1)
         trip = true
       }
-      `val` <<= 8
+      value <<= 8
       if (i + 2 < data.length) {
-        `val` |= 0xff & data(i + 2)
+        value |= 0xff & data(i + 2)
         quad = true
       }
-      out(index + 3) = alphabet(if (quad) `val` & 0x3f else 64)
-      `val` >>= 6
-      out(index + 2) = alphabet(if (trip) `val` & 0x3f else 64)
-      `val` >>= 6
-      out(index + 1) = alphabet(`val` & 0x3f)
-      `val` >>= 6
-      out(index + 0) = alphabet(`val` & 0x3f)
+      out(index + 3) = Alphabets(if (quad) value & 0x3f else 64)
+      value >>= 6
+      out(index + 2) = Alphabets(if (trip) value & 0x3f else 64)
+      value >>= 6
+      out(index + 1) = Alphabets(value & 0x3f)
+      value >>= 6
+      out(index + 0) = Alphabets(value & 0x3f)
       i += 3
       index += 4
     }
-    out
+    new String(out)
   }
+}
+
+object Base64Decoder extends Decoder[String, Array[Byte]] {
+
+  private val Codes = buildCodes()
 
   def decode(pArray: String): Array[Byte] = decode(pArray.toCharArray())
 
   def decode(data: Array[Char]): Array[Byte] = {
     var tempLen = data.length
-    for (ix <- 0 until data.length if data(ix) > '\377' || codes(data(ix)) < 0) tempLen -= 1
+    for (ix <- 0 until data.length if data(ix) > '\377' || Codes(data(ix)) < 0) tempLen -= 1
     var len = (tempLen / 4) * 3
     if (tempLen % 4 == 3) len += 2
     if (tempLen % 4 == 2) len += 1
@@ -66,8 +81,8 @@ object Base64 {
     var shift = 0
     var accum = 0
     var index = 0
-    for (ix <- 0 until data.length) {
-      val value = if (data(ix) <= '\377') (codes(data(ix))).toInt else -1
+    (0 until data.length) foreach { ix =>
+      val value = if (data(ix) <= '\377') (Codes(data(ix))).toInt else -1
       if (value >= 0) {
         accum <<= 6
         shift += 6
@@ -85,20 +100,14 @@ object Base64 {
     else out
   }
 
-  private var alphabet: Array[Char] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
-    .toCharArray()
-
-  private var codes = new Array[Byte](256)
-
-  for (i <- 0 until 256) codes(i) = -1
-  codes(43) = 62
-  codes(47) = 63
-  for (i <- 48 to 57) codes(i) = ((52 + i) - 48).toByte
-  for (i <- 65 to 90) codes(i) = (i - 65).toByte
-  for (i <- 97 to 122) codes(i) = ((26 + i) - 97).toByte
-
-  def main(args: Array[String]) {
-    println(new BCoder().encode("汉字123"))
-    println(Base64.encode("汉字123".getBytes("UTF-8")))
+  private def buildCodes(): Array[Byte] = {
+    val codes = new Array[Byte](256)
+    (0 until 256) foreach { i => codes(i) = -1 }
+    codes(43) = 62
+    codes(47) = 63
+    (48 to 57) foreach (i => codes(i) = ((52 + i) - 48).toByte)
+    (65 to 90) foreach (i => codes(i) = (i - 65).toByte)
+    (97 to 122) foreach (i => codes(i) = ((26 + i) - 97).toByte)
+    codes
   }
 }

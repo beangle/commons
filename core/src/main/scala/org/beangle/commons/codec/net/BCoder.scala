@@ -22,6 +22,8 @@ import java.nio.charset.Charset
 import org.beangle.commons.codec.binary.Base64
 import org.beangle.commons.lang.Charsets
 import BCoder._
+import org.beangle.commons.codec.Encoder
+import org.beangle.commons.codec.Decoder
 
 object BCoder {
 
@@ -57,14 +59,7 @@ object BCoder {
  * @author chaostone
  * @since 3.2.0
  */
-class BCoder(val charset: Charset) {
-
-  /**
-   * Default constructor.
-   */
-  def this() {
-    this(Charsets.UTF_8)
-  }
+class BCoder(val charset: Charset = Charsets.UTF_8) extends Encoder[String, String] with Decoder[String, String] {
 
   protected def getEncoding(): String = "B"
 
@@ -75,18 +70,18 @@ class BCoder(val charset: Charset) {
    * @return Base64 string
    */
   def encode(value: String): String = {
-    if (value == null) {
-      return null
+    if (value == null) null
+    else {
+      val buffer = new StringBuilder()
+      buffer.append(Prefix)
+      buffer.append(charset)
+      buffer.append(Sep)
+      buffer.append(getEncoding)
+      buffer.append(Sep)
+      buffer.append(new String(Base64.encode(value.getBytes(charset))))
+      buffer.append(Postfix)
+      buffer.toString
     }
-    val buffer = new StringBuilder()
-    buffer.append(Prefix)
-    buffer.append(charset)
-    buffer.append(Sep)
-    buffer.append(getEncoding)
-    buffer.append(Sep)
-    buffer.append(new String(Base64.encode(value.getBytes(charset))))
-    buffer.append(Postfix)
-    buffer.toString
   }
 
   /**
@@ -115,6 +110,6 @@ class BCoder(val charset: Charset) {
     if (!getEncoding.equalsIgnoreCase(encoding)) throw new IllegalArgumentException("This codec cannot decode " + encoding + " encoded content")
     from = to + 1
     to = text.indexOf(Sep, from)
-    new String(Base64.decode(text.substring(from, to).toCharArray()), Charset.forName(charset))
+    new String(Base64.decode(text.substring(from, to).toCharArray()), charset)
   }
 }

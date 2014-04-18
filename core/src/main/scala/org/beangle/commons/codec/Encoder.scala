@@ -16,32 +16,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang
+package org.beangle.commons.codec
 
-final object Range {
-  def range(start: Int, end: Int): IntRange = new IntRange(start, end)
-  def range(start: Int, end: Int, step: Int): IntStepRange = new IntStepRange(start, end, step)
+trait Encoder[S, T] {
+  def encode(s: S): T
 }
 
-final class IntStepRange(final val start: Int, val end: Int, val step: Int) {
-  @inline def foreach[@specialized(Unit) U](f: Int => U) {
-    var i = start
-    val term = end
-    val s = step
-    while (i < term) {
-      f(i)
-      i += s
-    }
-  }
-}
-
-final class IntRange(val start: Int, val end: Int) {
-  @inline def foreach[@specialized(Unit) U](f: Int => U) {
-    var s = start
-    val e = end
-    while (s < e) {
-      f(s)
-      s += 1
-    }
-  }
+trait Decoder[S, T] {
+  def decode(s: S): T
 }
