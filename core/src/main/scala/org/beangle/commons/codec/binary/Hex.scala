@@ -1,0 +1,72 @@
+package org.beangle.commons.codec.binary
+
+import org.beangle.commons.codec._
+object Hex {
+  val LowerDigits = Array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f')
+  val UpperDigits = Array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')
+}
+
+object HexEncoder extends Encoder[Array[Byte], String] {
+  import Hex._
+
+  /**
+   * Converts an array of bytes into an array of characters representing the hexadecimal values of each byte in order
+   *
+   * @param data   a byte[] to convert to Hex characters
+   * @param toLowerCase
+   * @return A Array[Char] containing hexadecimal characters
+   */
+  def encodeHex(data: Array[Byte], toLowerCase: Boolean = true): String = {
+    val digits = if (toLowerCase) LowerDigits else UpperDigits
+    val l = data.length
+    val out = new Array[Char](l << 1)
+    var i, j = 0
+    // two characters form the hex value.
+    while (i < l) {
+      out(j) = digits((0xF0 & data(i)) >>> 4)
+      j += 1
+      out(j) = digits(0x0F & data(i))
+      j += 1
+      i += 1
+    }
+    new String(out)
+  }
+
+  def encode(data: Array[Byte]): String = encodeHex(data, true)
+}
+
+object HexDecoder extends Decoder[String, Array[Byte]] {
+
+  /**
+   * Converts a hexadecimal character to an integer.
+   */
+  private def toDigit(ch: Char, index: Int): Int = {
+    val digit = Character.digit(ch, 16)
+    if (digit == -1) throw new RuntimeException("Illegal hexadecimal character " + ch + " at index " + index)
+    digit
+  }
+
+  /**
+   * Converts an array of character bytes representing hexadecimal values into an array of bytes of those same values.
+   * The returned array will be half the length of the passed array, as it takes two characters to represent any given
+   * byte. An exception is thrown if the passed char array has an odd number of elements.
+   */
+  def decode(data: String): Array[Byte] = {
+    val d = data.toCharArray()
+    val len = d.length
+    if ((len & 0x01) != 0) throw new RuntimeException("Odd number of characters.")
+    val out = new Array[Byte](len >> 1)
+    // two characters form the hex value.
+    var i, j = 0
+    while (j < len) {
+      var f = toDigit(d(j), j) << 4
+      j += 1
+      f = f | toDigit(d(j), j)
+      j += 1
+      out(i) = (f & 0xFF).asInstanceOf[Byte]
+      i += 1
+    }
+    out
+  }
+}
+
