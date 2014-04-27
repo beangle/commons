@@ -87,11 +87,12 @@ abstract class GenericHttpFilter extends Filter with Initializing with Logging {
    * @see #initFilterBean
    */
   def init(filterConfig: FilterConfig) {
-    logger.debug("Initializing filter '{}'", filterConfig.getFilterName)
+    val filterName = filterConfig.getFilterName
+    debug(s"Initializing filter $filterName")
     this.filterConfig = filterConfig
     initParams(filterConfig)
     initFilterBean()
-    logger.debug("Filter '{}' configured successfully", filterConfig.getFilterName)
+    debug(s"Filter '$filterName' configured successfully")
   }
 
   protected def initParams(config: FilterConfig) {

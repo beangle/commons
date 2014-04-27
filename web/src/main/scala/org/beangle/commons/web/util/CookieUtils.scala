@@ -81,7 +81,7 @@ object CookieUtils extends Logging {
     value: String,
     path: String,
     age: Int) {
-    logger.debug("add cookie[name:{},value={},path={}]", Array(name, value, path))
+    debug(s"add cookie[name:$name,value=$value,path=$path]")
     var cookie: Cookie = null
     cookie = new Cookie(name, URLEncoder.encode(value, "utf-8"))
     cookie.setSecure(false)

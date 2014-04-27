@@ -18,24 +18,21 @@
  */
 package org.beangle.commons.web.io
 
-import org.beangle.commons.web.util.RequestUtils.encodeAttachName
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.net.URL
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+
 import org.beangle.commons.bean.Initializing
 import org.beangle.commons.http.mime.MimeTypeProvider
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Assert
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.logging.Logging
-import org.beangle.commons.bean.Initializing
-import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.Strings
-import org.beangle.commons.bean.Initializing
-import org.beangle.commons.io.IOs
+import org.beangle.commons.web.util.RequestUtils.encodeAttachName
+
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 /**
  * Default Stream Downloader
@@ -43,7 +40,8 @@ import org.beangle.commons.io.IOs
  * @author chaostone
  * @since 2.4
  */
-class DefaultStreamDownloader(protected var mimeTypeProvider: MimeTypeProvider) extends Initializing with StreamDownloader with Logging {
+class DefaultStreamDownloader(protected var mimeTypeProvider: MimeTypeProvider) extends Initializing
+with StreamDownloader with Logging {
 
   def init() {
     Assert.notNull(mimeTypeProvider, "mimeTypeProvider must be set");
@@ -57,7 +55,7 @@ class DefaultStreamDownloader(protected var mimeTypeProvider: MimeTypeProvider) 
     try {
       download(request, response, url.openStream(), url.getFile, display)
     } catch {
-      case e: Exception => logger.warn("download file error=" + display, e)
+      case e: Exception => warn(s"download file error=$display", e)
     }
   }
 
@@ -66,7 +64,7 @@ class DefaultStreamDownloader(protected var mimeTypeProvider: MimeTypeProvider) 
       try {
         download(request, response, new FileInputStream(file), file.getAbsolutePath, display)
       } catch {
-        case e: Exception => logger.warn("download file error=" + display, e)
+        case e: Exception => warn(s"download file error=$display", e)
       }
     }
   }
@@ -76,7 +74,7 @@ class DefaultStreamDownloader(protected var mimeTypeProvider: MimeTypeProvider) 
     if (null == contentType) {
       contentType = mimeTypeProvider.getMimeType(Strings.substringAfterLast(attach, "."), "application/x-msdownload")
       response.setContentType(contentType)
-      logger.debug("set content type {} for {}", contentType, attach)
+      debug(s"set content type $contentType for $attach")
     }
     val encodeName = encodeAttachName(request, attach)
     response.setHeader("Content-Disposition", "attachment; filename=" + encodeName)
@@ -90,7 +88,7 @@ class DefaultStreamDownloader(protected var mimeTypeProvider: MimeTypeProvider) 
       addContent(request, response, attach_name)
       IOs.copy(inStream, response.getOutputStream)
     } catch {
-      case e: Exception => logger.warn("download file error " + attach_name, e)
+      case e: Exception => warn(s"download file error $attach_name", e)
     } finally {
       IOs.close(inStream)
     }

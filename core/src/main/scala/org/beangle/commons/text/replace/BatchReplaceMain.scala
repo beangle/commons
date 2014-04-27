@@ -36,17 +36,17 @@ object BatchReplaceMain extends Logging {
    */
   def main(args: Array[String]) {
     if (args.length < 2) {
-      logger.info("using BatchReplaceMain dir patternfile encoding")
+      info("using BatchReplaceMain dir patternfile encoding")
       return
     }
     val dir = args(0)
     if (!new File(dir).exists()) {
-      logger.error("{} not a valid file or directory", dir)
+      error(dir + " not a valid file or directory")
       return
     }
     val properties = args(1)
     if (!new File(properties).exists()) {
-      logger.info("{} not valid file or directory", properties)
+      info(properties + " not valid file or directory")
     }
     var charset: Charset = null
     if (args.length >= 3) {
@@ -82,7 +82,7 @@ object BatchReplaceMain extends Logging {
     if (file.isFile && !file.isHidden) {
       val replacers = profiles.get(Strings.substringAfterLast(fileName, ".")).orNull
       if (null == replacers) return
-      logger.info("processing {}", fileName)
+      info("processing " + fileName)
       var filecontent = Files.readString(file, charset)
       filecontent = Replacer.process(filecontent, replacers)
       writeToFile(filecontent, fileName, charset)

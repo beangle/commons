@@ -3,8 +3,8 @@ import Keys._
 
 object BuildSettings {
   val buildOrganization = "org.beangle.commons"
-  val buildVersion = "4.0.4-SNAPSHOT"
-  val buildScalaVersion = "2.10.3"
+  val buildVersion = "4.1.0-SNAPSHOT"
+  val buildScalaVersion = "2.11.0"
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
     organization := buildOrganization,
@@ -40,13 +40,13 @@ object ShellPrompt {
 }
 
 object Dependencies {
-  val slf4jVer = "1.6.6"
+  val slf4jVer = "1.7.7"
   val mockitoVer = "1.9.5"
-  val logbackVer = "1.0.7"
-  val scalatestVer = "2.1.RC1"
+  val logbackVer = "1.1.2"
+  val scalatestVer = "2.1.3"
 
   val slf4j = "org.slf4j" % "slf4j-api" % slf4jVer
-  val scalatest = "org.scalatest" % "scalatest_2.10" % scalatestVer % "test"
+  val scalatest = "org.scalatest" % "scalatest_2.11" % scalatestVer % "test"
   val mockito = "org.mockito" % "mockito-core" % mockitoVer % "test"
   val junit = "junit" % "junit" % "4.11" % "test"
   val logbackClassic = "ch.qos.logback" % "logback-classic" % logbackVer % "test"

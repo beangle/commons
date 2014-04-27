@@ -77,7 +77,7 @@ abstract class AbstractBindModule extends BindModule {
    * @param key
    * @param value
    */
-  protected def entry(key: Any, value: Any): Pair[_, _] = Pair.apply(key, value)
+  protected def entry(key: Any, value: Any): Tuple2[_, _] = Tuple2(key, value)
 
   /**
    * Generate a inner bean definition
@@ -150,7 +150,7 @@ abstract class AbstractBindModule extends BindModule {
     new ReferenceValue(targetBean)
   }
 
-  protected def map(entries: Pair[_, _]*): Map[_, _] = {
+  protected def map(entries: Tuple2[_, _]*): Map[_, _] = {
     val items = new collection.mutable.HashMap[Any, Any]
     for ((k, v) <- entries) {
       if (v.isInstanceOf[Class[_]]) items.put(k, buildInnerReference(v.asInstanceOf[Class[_]]))

@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.bean
 
-import java.lang.reflect.Array
+import java.lang.reflect.{ Array => Jarray }
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.Throwables
 import org.beangle.commons.lang.reflect.ClassInfo
@@ -67,19 +67,19 @@ object PropertyUtils extends Logging {
     var result: Any = bean
     var name = propertyName
     while (resolver.hasNested(name)) {
-      val next = resolver.next(name);
+      val next = resolver.next(name)
       result =
         if (bean.isInstanceOf[Map[_, _]]) getPropertyOfMapBean(result.asInstanceOf[Map[Any, _]], next)
         else if (resolver.isMapped(next)) getMappedProperty(result, next)
         else if (resolver.isIndexed(next)) getIndexedProperty(result, next)
         else getSimpleProperty(result, next)
 
-      if (result == null) throw new RuntimeException("Null property value for '" + name + "' on bean class '" + bean.getClass + "'");
+      if (result == null) throw new RuntimeException("Null property value for '" + name + "' on bean class '" + bean.getClass + "'")
       name = resolver.remove(name)
     }
 
     if (result.isInstanceOf[mutable.Map[_, _]]) {
-      setPropertyOfMapBean(result.asInstanceOf[mutable.Map[Any, Any]], name, value);
+      setPropertyOfMapBean(result.asInstanceOf[mutable.Map[Any, Any]], name, value)
     } else if (resolver.isMapped(name)) {
       setMappedProperty(result, name, value)
     } else if (resolver.isIndexed(name)) {
@@ -102,7 +102,7 @@ object PropertyUtils extends Logging {
     ClassInfo.get(bean.getClass).getReader(name) match {
       case Some(info) => info.method.invoke(bean).asInstanceOf[T]
       case _ =>
-        logger.warn("Cannot find get" + Strings.capitalize(name) + " in " + bean.getClass)
+        warn("Cannot find get" + Strings.capitalize(name) + " in " + bean.getClass)
         null.asInstanceOf[T]
     }
   }
@@ -130,7 +130,7 @@ object PropertyUtils extends Logging {
     }
     val value = getSimpleProperty[AnyRef](bean, resolver.getProperty(name))
     if (null == value) return null
-    if (value.getClass.isArray) Array.get(value, index) else value.asInstanceOf[Seq[_]](index)
+    if (value.getClass.isArray) Jarray.get(value, index) else value.asInstanceOf[Seq[_]](index)
   }
 
   private def copySimpleProperty(bean: Any, name: String, value: Any, conversion: Conversion): Any = {
@@ -142,7 +142,7 @@ object PropertyUtils extends Logging {
         converted
       }
       case _ => {
-        logger.warn("Cannot find {} set method in ", name, bean.getClass)
+        warn(s"Cannot find $name set method in ${bean.getClass.getName}")
         null
       }
     }
@@ -151,7 +151,7 @@ object PropertyUtils extends Logging {
   private def copyIndexedProperty(bean: Any, name: String, value: Any, conversion: Conversion): Any = {
     var index = -1
     try {
-      index = resolver.getIndex(name);
+      index = resolver.getIndex(name)
     } catch {
       case e: IllegalArgumentException =>
         throw new IllegalArgumentException("Invalid indexed property '" + name + "' on bean class '" + bean.getClass + "'")
@@ -160,13 +160,13 @@ object PropertyUtils extends Logging {
       + "' on bean class '" + bean.getClass + "'")
 
     // Isolate the name
-    val resolvedName = resolver.getProperty(name);
+    val resolvedName = resolver.getProperty(name)
     var rs = if (resolvedName != null && resolvedName.length() >= 0) getSimpleProperty(bean, resolvedName) else bean
 
-    var converted = value;
+    var converted = value
     if (rs.getClass.isArray) {
-      if (null != conversion) converted = conversion.convert(value, rs.getClass().getComponentType());
-      Array.set(rs, index, value);
+      if (null != conversion) converted = conversion.convert(value, rs.getClass().getComponentType())
+      Jarray.set(rs, index, value)
     } else if (rs.isInstanceOf[mutable.Seq[_]]) {
       rs.asInstanceOf[mutable.Seq[Any]].update(index, value)
     }
@@ -177,7 +177,7 @@ object PropertyUtils extends Logging {
     // Identify the key of the requested individual property
     var key: String = null
     try {
-      key = resolver.getKey(name);
+      key = resolver.getKey(name)
     } catch {
       case e: IllegalArgumentException =>
         throw new IllegalArgumentException("Invalid mapped property '" + name + "' on bean class '" + bean.getClass() + "'")
@@ -186,7 +186,7 @@ object PropertyUtils extends Logging {
       + "' on bean class '" + bean.getClass() + "'")
 
     // Isolate the name
-    val resolvedName = resolver.getProperty(name);
+    val resolvedName = resolver.getProperty(name)
     val rs = if (resolvedName != null && resolvedName.length() >= 0) getSimpleProperty(bean, resolvedName) else bean
     if (rs.isInstanceOf[mutable.Map[_, _]]) rs.asInstanceOf[mutable.Map[Any, Any]].put(key, value)
   }

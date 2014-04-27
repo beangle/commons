@@ -127,7 +127,7 @@ object IOs extends Logging {
         readProperties(url.openStream())
       } catch {
         case e: Exception => {
-          logger.error("load " + url + " error", e)
+          error("load " + url + " error", e)
           Map.empty
         }
       }
@@ -162,7 +162,7 @@ object IOs extends Logging {
         readJavaProperties(url.openStream())
       } catch {
         case e: Exception => {
-          logger.error("load " + url + " error", e)
+          error("load " + url + " error", e)
           Map.empty
         }
       }

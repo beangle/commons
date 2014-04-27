@@ -73,7 +73,7 @@ object Oss extends Enumeration {
 
   class Category(val name: String, versions: String*) extends Val {
 
-    private val versionPairs = new mutable.ListBuffer[Pair[Pattern, String]]
+    private val versionPairs = new mutable.ListBuffer[Tuple2[Pattern, String]]
 
     for (version <- versions) {
       var matcheTarget = version
@@ -82,7 +82,7 @@ object Oss extends Enumeration {
         matcheTarget = "(?i)" + Strings.substringBefore(version, "->")
         versionNum = Strings.substringAfter(version, "->")
       }
-      versionPairs += Pair(Pattern.compile(matcheTarget), versionNum)
+      versionPairs += Tuple2(Pattern.compile(matcheTarget), versionNum)
     }
 
     def matches(agentString: String): String = {

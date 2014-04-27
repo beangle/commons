@@ -50,7 +50,7 @@ class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader 
       try {
         list = loader.loadAll(resourceName)
       } catch {
-        case e: IOException => logger.error("cannot getResources " + resourceName, e)
+        case e: IOException => error("cannot getResources " + resourceName, e)
       }
     }
     list

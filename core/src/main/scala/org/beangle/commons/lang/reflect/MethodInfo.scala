@@ -35,7 +35,7 @@ class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[C
   /**
    * Return this method is property read method (0) or write method(1) or none(-1).
    */
-  def property(): Option[Pair[Boolean, String]] = {
+  def property(): Option[Tuple2[Boolean, String]] = {
     val name = method.getName
     if (0 == parameterTypes.length && method.getReturnType != classOf[Unit]) {
       val propertyName = if (name.startsWith("get") && name.length > 3 && isUpperCase(name.charAt(3)))

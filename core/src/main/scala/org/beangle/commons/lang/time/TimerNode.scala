@@ -41,8 +41,6 @@ class TimerNode(val resource: String, var startTime: Long) extends Serializable 
     this.totalTime
   }
 
-  def getResource(): String = resource
-
   /**
    * Get a formatted string representing all the methods that took longer than a specified time.
    */

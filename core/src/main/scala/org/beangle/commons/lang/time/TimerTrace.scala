@@ -93,7 +93,7 @@ object TimerTrace extends Logging {
    * @param currentTimer profiling timer bean
    */
   private def printTimes(currentTimer: TimerNode) {
-    if (logger.isInfoEnabled) logger.info(currentTimer.getPrintable)
+    info(currentTimer.getPrintable)
   }
 
   /**

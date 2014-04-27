@@ -104,15 +104,14 @@ class SplitStreamDownloader(mimeTypeProvider: MimeTypeProvider) extends DefaultS
       }
     } catch {
       case e: IOException =>
-      case e: Exception => logger.warn("download file error " + attach, e)
+      case e: Exception => warn(s"download file error $attach" , e)
     } finally {
       IOs.close(input)
-      if (logger.isDebugEnabled) {
+      if (isDebugEnabled) {
         var percent = if (length == 0) "100%" else (((start - begin) * 1.0 / length) * 10000).toInt / 100.0f + "%"
         val time = watch.elapsedMillis
         var rate = if (start - begin > 0) (((start - begin) * 1.0 / time * 1000) / 1024).toInt else 0
-        logger.debug("{}({}-{}/{}) download {}[{}] in {} ms with {} KB/s", List(attach, begin, stop,
-          length, start - begin, percent, time, rate).toArray)
+        debug(s"$attach($begin-$stop/$length) download ${start - begin}[$percent] in $time ms with $rate KB/s")
       }
     }
   }

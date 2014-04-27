@@ -67,7 +67,7 @@ class RegexRequestMatcher(pattern: Pattern, httpMethod: String) extends RequestM
       if (query != null) sb.append(query)
       url = sb.toString
     }
-    logger.debug("Checking match of request : '{}'; against '{}'", url, pattern)
+    debug(s"Checking match of request : '$url'; against '$pattern'")
     pattern.matcher(url).matches()
   }
 }

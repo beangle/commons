@@ -26,12 +26,12 @@ import org.beangle.commons.conversion.Converter
  * @author chaostone
  * @since 3.2.0
  */
-class ConverterAdapter(iconverter: Converter[_, _], typeinfo: Pair[Class[_], Class[_]])
+class ConverterAdapter(iconverter: Converter[_, _], typeinfo: Tuple2[Class[_], Class[_]])
     extends GenericConverter() {
 
   val converter = iconverter.asInstanceOf[Converter[Any, Any]]
 
   override def convert(input: Any, targetType: Class[_]): Any = converter.apply(input)
 
-  override def getTypeinfo(): Pair[Class[_], Class[_]] = typeinfo
+  override def getTypeinfo(): Tuple2[Class[_], Class[_]] = typeinfo
 }

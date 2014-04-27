@@ -51,11 +51,10 @@ abstract class ConverterFactory[S, R] extends GenericConverter {
     null
   }
 
-  override def getTypeinfo(): Pair[Class[_], Class[_]] = {
+  override def getTypeinfo(): Tuple2[Class[_], Class[_]] = {
     val superType = getClass.getGenericSuperclass
     if ((superType.isInstanceOf[ParameterizedType])) {
       val ptype = superType.asInstanceOf[ParameterizedType]
-      //Pair.of[Class[_], Class[_]]
       (classof(ptype.getActualTypeArguments()(0)), classof(ptype.getActualTypeArguments()(1)))
     } else {
       throw new RuntimeException("Cannot identify type of " + getClass)

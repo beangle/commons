@@ -40,7 +40,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
 
   val converters = new mutable.HashMap[Class[_], Map[Class[_], GenericConverter]]
 
-  val cache = new concurrent.TrieMap[Pair[Class[_], Class[_]], GenericConverter]
+  val cache = new concurrent.TrieMap[Tuple2[Class[_], Class[_]], GenericConverter]
 
   protected def addConverter(converter: GenericConverter) {
     val key = converter.getTypeinfo
@@ -54,7 +54,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
   }
 
   override def addConverter(converter: Converter[_, _]) {
-    var key: Pair[Class[_], Class[_]] = null
+    var key: Tuple2[Class[_], Class[_]] = null
     val defaultKey = (classOf[Any], classOf[Any])
     for (m <- converter.getClass.getMethods if m.getName == "apply" && Modifier.isPublic(m.getModifiers) && !m.isBridge()) {
       key = (m.getParameterTypes()(0), m.getReturnType)
@@ -104,7 +104,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
     if (null == converter) {
       converter = NoneConverter
     } else {
-      cache.put(key.asInstanceOf[Pair[Class[_], Class[_]]], converter)
+      cache.put(key.asInstanceOf[Tuple2[Class[_], Class[_]]], converter)
     }
     converter
   }

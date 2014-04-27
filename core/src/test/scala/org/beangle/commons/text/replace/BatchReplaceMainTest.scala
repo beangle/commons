@@ -34,14 +34,15 @@ class BatchReplaceMainTest extends FunSpec with Matchers with Logging {
       val clause = "<#include \"/template/head.ftl\"/>"
       val pattern = Pattern.compile("<#(.*)/>")
       val m = pattern.matcher(clause)
-      logger.debug(m.find() + "")
-      logger.debug(m.groupCount() + "")
-      logger.debug(Pattern.matches("<#(.*)/>", clause) + "")
-      logger.debug(m.group(1))
+      val rs = m.find()
+      debug(rs + "")
+      debug(m.groupCount() + "")
+      debug(Pattern.matches("<#(.*)/>", clause) + "")
+      debug(m.group(1))
       val sb = new StringBuffer()
       m.appendReplacement(sb, "[#$1/]")
-      logger.debug(sb.toString)
-      logger.debug(Pattern.matches("template", clause) + "")
+      debug(sb.toString)
+      debug(Pattern.matches("template", clause) + "")
       val p = Pattern.compile("(cat)")
       val m1 = p.matcher("one cat two cats in the yard")
       val sb1 = new StringBuffer()
@@ -49,13 +50,13 @@ class BatchReplaceMainTest extends FunSpec with Matchers with Logging {
         m1.appendReplacement(sb1, "dog")
       }
       m1.appendTail(sb1)
-      logger.debug(sb1.toString)
-      logger.debug("one cat two cats in the yard".replaceAll("cat", "dog"))
-      logger.debug(clause.replaceAll("<#(.*)/>", "[#$1/]"))
+      debug(sb1.toString)
+      debug("one cat two cats in the yard".replaceAll("cat", "dog"))
+      debug(clause.replaceAll("<#(.*)/>", "[#$1/]"))
       val test = "aaa    \nbbaad\n"
       val replacer = new Replacer("( +?)\\n", "\n")
-      logger.debug(test)
-      logger.debug(replacer.process(test))
+      debug(test)
+      debug(replacer.process(test))
     }
   }
 }

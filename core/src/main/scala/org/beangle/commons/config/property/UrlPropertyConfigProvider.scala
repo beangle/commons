@@ -49,7 +49,7 @@ class UrlPropertyConfigProvider extends PropertyConfig.Provider with Logging {
       properties
     } catch {
       case e: Exception => {
-        logger.error("Exception", e)
+        error("Exception", e)
         throw new RuntimeException(e)
       }
     }

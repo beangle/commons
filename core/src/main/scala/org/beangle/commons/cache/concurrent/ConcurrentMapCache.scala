@@ -25,7 +25,7 @@ import org.beangle.commons.cache.Cache
  * Cache based Concurrent Map.
  *
  * @author chaostone
- * @since3.2.0
+ * @since 3.2.0
  */
 class ConcurrentMapCache[K, V](var name: String) extends Cache[K, V]() {
 

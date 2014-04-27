@@ -41,7 +41,7 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
 
   def addDefaults(bundleNames: String*) {
     defaultBundleNames ++= bundleNames
-    logger.info("Add {} global message bundles.", Arrays.toString(bundleNames: _*))
+    info("Add " + Arrays.toString(bundleNames: _*) + " global message bundles")
   }
 
   def load(locale: Locale, bundleName: String): TextBundle = {
