@@ -36,10 +36,10 @@ class BundleTextResourceTest extends FunSpec with Matchers {
       val registry = new DefaultTextBundleRegistry()
       val bundle = registry.load(locale, "message")
       val bundle2 = registry.load(locale, "message2")
-      bundle.getText("hello.world") should equal(Some("你好"))
+      bundle.get("hello.world") should equal(Some("你好"))
       val tr = new DefaultTextResource(locale, registry, new DefaultTextFormater())
-      tr.getText("hello.world") should equal(Some("你好"))
-      tr.getText("china") should equal(Some("中国"))
+      tr("hello.world") should equal(Some("你好"))
+      tr("china") should equal(Some("中国"))
     }
   }
 }

@@ -25,13 +25,9 @@ import java.util.Locale
  * @author chaostone
  * @since 3.0.0
  */
-class DefaultTextBundle(locale: Locale, resource: String, texts: Map[String, String]) extends TextBundle() {
+class DefaultTextBundle(val locale: Locale, val resource: String, texts: Map[String, String]) extends TextBundle {
 
-  def getText(key: String): Option[String] = texts.get(key)
-
-  def getLocale(): Locale = locale
-
-  def getResource(): String = resource
+  def get(key: String): Option[String] = texts.get(key)
 
   override def toString(): String = resource
 }

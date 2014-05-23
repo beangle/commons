@@ -157,7 +157,7 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
   def getDefaultText(key: String, locale: Locale): String = {
     var msg: String = null
     for (defaultBundleName <- defaultBundleNames) {
-      load(locale, defaultBundleName).getText(key).foreach(x => return x)
+      load(locale, defaultBundleName).get(key).foreach(x => return x)
     }
     null
   }

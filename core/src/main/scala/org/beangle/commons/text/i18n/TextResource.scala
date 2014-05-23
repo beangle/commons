@@ -37,7 +37,7 @@ trait TextResource {
    * @return the message as found in the resource bundle, or null if none is
    *         found.
    */
-  def getText(key: String): Option[String]
+  def apply(key: String): Option[String]
 
   /**
    * Gets a message based on a key using the supplied obj, as defined in
@@ -54,10 +54,10 @@ trait TextResource {
    * @return the message as found in the resource bundle, or defaultValue if
    *         none is found
    */
-  def getText(key: String, defaultValue: String, obj: AnyRef*): String
+  def apply(key: String, defaultValue: String, obj: AnyRef*): String
 
   /**
    * @return locale
    */
-  def getLocale(): Locale
+  def locale: Locale
 }

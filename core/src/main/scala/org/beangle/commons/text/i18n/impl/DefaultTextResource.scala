@@ -29,7 +29,7 @@ import org.beangle.commons.text.i18n.TextResource
  *
  * @author chaostone
  */
-class DefaultTextResource(protected val locale: Locale, protected val registry: TextBundleRegistry, protected val formater: TextFormater)
+class DefaultTextResource(val locale: Locale, protected val registry: TextBundleRegistry, protected val formater: TextFormater)
     extends TextResource() {
 
   protected var keyAsDefault: Boolean = true
@@ -44,20 +44,20 @@ class DefaultTextResource(protected val locale: Locale, protected val registry: 
    * @param args an array of {@link java.lang.Object} objects.
    * @return a {@link java.lang.String} object.
    */
-  def getText(key: String, defaultValue: String, args: AnyRef*): String = {
-    var text = getText(key, locale).getOrElse(if ((null eq defaultValue) && keyAsDefault) key else defaultValue)
+  def apply(key: String, defaultValue: String, args: AnyRef*): String = {
+    var text = get(key, locale).getOrElse(if ((null eq defaultValue) && keyAsDefault) key else defaultValue)
     if ((null eq text) && args.length > 0) return formater.format(text, locale, args)
     else text
   }
 
-  def getText(key: String): Option[String] = {
-    val msg = getText(key, locale)
+  def apply(key: String): Option[String] = {
+    val msg = get(key, locale)
     if (msg.isEmpty && keyAsDefault) Some(key) else msg
   }
 
-  protected def getText(key: String, locale: Locale): Option[String] = {
+  protected def get(key: String, locale: Locale): Option[String] = {
     for (bundle <- registry.getBundles(locale)) {
-      val msg = bundle.getText(key)
+      val msg = bundle.get(key)
       if (!msg.isEmpty) return msg
     }
     None
@@ -69,5 +69,4 @@ class DefaultTextResource(protected val locale: Locale, protected val registry: 
     this.keyAsDefault = keyAsDefault
   }
 
-  def getLocale(): Locale = locale
 }

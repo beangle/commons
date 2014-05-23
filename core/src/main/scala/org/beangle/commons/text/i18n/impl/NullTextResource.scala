@@ -28,9 +28,9 @@ import org.beangle.commons.text.i18n.TextResource
  */
 class NullTextResource extends TextResource {
 
-  def getText(key: String): Option[String] = Some(key)
+  def apply(key: String): Option[String] = Some(key)
 
-  def getText(key: String, defaultValue: String, obj: AnyRef*): String = key
+  def apply(key: String, defaultValue: String, obj: AnyRef*): String = key
 
-  def getLocale(): Locale = null
+  def locale: Locale = null
 }

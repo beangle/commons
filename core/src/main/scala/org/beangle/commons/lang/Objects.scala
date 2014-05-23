@@ -254,7 +254,7 @@ object Objects {
 
     var rs: Boolean = true
 
-    def add(lhs: AnyRef, rhs: AnyRef): EqualsBuilder = {
+    def add(lhs: Any, rhs: Any): EqualsBuilder = {
       if (!rs) return this
       rs &= Objects.equals(lhs, rhs)
       this

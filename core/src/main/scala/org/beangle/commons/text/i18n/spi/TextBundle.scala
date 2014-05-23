@@ -34,19 +34,19 @@ trait TextBundle {
    * @param key the resource bundle key that is to be searched for
    * @return null if none is found.
    */
-  def getText(key: String): Option[String]
+  def get(key: String): Option[String]
 
   /**
    * Returns the locale of this resource bundle.
    *
    * @return the locale of this resource bundle
    */
-  def getLocale(): Locale
+  def locale: Locale
 
   /**
    * Get the bundle resource path
    *
    * @return bundle resource path
    */
-  def getResource(): String
+  def resource: String
 }
