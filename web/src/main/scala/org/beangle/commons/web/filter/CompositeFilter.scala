@@ -39,7 +39,7 @@ abstract class GenericCompositeFilter extends GenericHttpFilter {
     }
   }
 
-  override final def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
+  override def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
     new VirtualFilterChain(chain, getFilters(request)).doFilter(request, response)
   }
 
@@ -48,31 +48,27 @@ abstract class GenericCompositeFilter extends GenericHttpFilter {
 }
 
 object MatchedCompositeFilter {
-  def build(filters: List[Filter]): Map[RequestMatcher, List[Filter]] = Map((new AntPathRequestMatcher("/**"), filters))
+  def build(filters: List[Filter]): Map[String, List[Filter]] = Map(("/**", filters))
   def build(urlMap: Map[String, List[Filter]]): Map[RequestMatcher, List[Filter]] = {
     val builded = new collection.mutable.HashMap[RequestMatcher, List[Filter]]
-    urlMap.foreach { e =>
-      builded.put(new AntPathRequestMatcher(e._1), e._2)
-    }
+    urlMap.foreach(e => builded.put(new AntPathRequestMatcher(e._1, null), e._2))
     builded.toMap
   }
 }
 
 import MatchedCompositeFilter.build
-class MatchedCompositeFilter(val chainMap: Map[RequestMatcher, List[Filter]]) extends GenericCompositeFilter {
+class MatchedCompositeFilter(urlMap: Map[String, List[Filter]]) extends GenericCompositeFilter {
+
+  val chainMap: Map[RequestMatcher, List[Filter]] = build(urlMap)
 
   def this(filters: List[Filter]) {
     this(build(filters))
   }
 
-  def this(urlMap: Map[String, List[Filter]]) {
-    this(build(urlMap))
-  }
   /**
    * Returns the first filter chain matching the supplied URL.
    */
-  protected override def getFilters(res: ServletRequest): List[Filter] = {
-
+  override def getFilters(res: ServletRequest): List[Filter] = {
     val request = res.asInstanceOf[HttpServletRequest]
     chainMap.find(v => v._1.matches(request)) match {
       case Some(v) => v._2
