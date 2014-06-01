@@ -33,7 +33,7 @@ abstract class OncePerRequestFilter extends GenericHttpFilter {
 
   private var filteredAttributeName: String = _
 
-  def firstEnter(request: ServletRequest): Boolean = {
+  def isFirstEnter(request: ServletRequest): Boolean = {
     if (null != request.getAttribute(filteredAttributeName)) false else {
       request.setAttribute(filteredAttributeName, true)
       true
