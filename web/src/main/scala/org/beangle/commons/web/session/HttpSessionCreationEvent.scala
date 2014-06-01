@@ -31,5 +31,5 @@ import scala.collection.JavaConversions._
 @SerialVersionUID(-193751632892690046L)
 class HttpSessionCreationEvent(source: AnyRef) extends Event(source) {
 
-  def getSession(): HttpSession = source.asInstanceOf[HttpSession]
+  def session: HttpSession = source.asInstanceOf[HttpSession]
 }

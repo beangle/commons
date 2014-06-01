@@ -27,7 +27,7 @@ import java.util.EventObject
  * @author chaostone
  */
 @SerialVersionUID(6311495014194589511L)
-abstract class Event(source: Any) extends EventObject(source) {
+abstract class Event(src: Any) extends EventObject(src) {
 
   /**
    * System time when the event happened

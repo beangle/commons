@@ -80,7 +80,7 @@ class MemAccessMonitor extends AccessMonitor with EventListener[HttpSessionDestr
   }
 
   def onEvent(event: HttpSessionDestroyedEvent) {
-    requests.remove(event.getSession.getId)
+    requests.remove(event.session.getId)
   }
 
   def supportsEventType(eventType: Class[_ <: Event]): Boolean = {
