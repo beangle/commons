@@ -29,22 +29,24 @@ class UrlRenderTest extends FunSpec with Matchers {
   describe("UrlRender") {
     it("testRender") {
       val render = new UrlRender(".html")
-      val uri = "/demo/security/user!list.html"
-      render.render(uri, "user") should be equals ("/demo/security/user.html")
-      render.render(uri, "user!search") should be equals ("/demo/security/user!search.html")
-      render.render(uri, "!save") should be equals ("/demo/security/user!save.html")
-      render.render(uri, "user!search?id=1") should be equals ("/demo/security/user!search.html?id=1")
-      render.render(uri, "/database/query!history?id=1") should be equals ("/demo/database/query!history.html?id=1")
+      val context = "/demo"
+      val uri = "/security/user!list.html"
+      assert(render.render(context, uri, "user") == "/demo/security/user.html")
+      assert(render.render(context, uri, "user!search") == "/demo/security/user!search.html")
+      assert(render.render(context, uri, "!save") == "/demo/security/user!save.html")
+      assert(render.render(context, uri, "user!search?id=1") == "/demo/security/user!search.html?id=1")
+      assert(render.render(context, uri, "/database/query!history?id=1") == "/demo/database/query!history.html?id=1")
     }
 
     it("testRenderEmptyContext") {
       val render = new UrlRender()
       val uri = "/user!list"
-      render.render(uri, "user") should be equals ("/user")
-      render.render(uri, "user!search") should be equals ("/user!search")
-      render.render(uri, "!save") should be equals ("/user!save")
-      render.render(uri, "user!search?id=1") should be equals ("/user!search?id=1")
-      render.render(uri, "/database/query!history?id=1") should be equals ("/database/query!history?id=1")
+      assert(render.render("",uri, "user") == "/user")
+      assert(render.render("",uri, "user!search") == "/user!search")
+      assert(render.render("",uri, "!save") == "/user!save")
+      assert(render.render("",uri, "user!search?id=1") == "/user!search?id=1")
+      assert(render.render("","/user/info?id=1", "/database/query!history?id=1") == "/database/query!history?id=1")
+      assert(render.render("",uri, "/database/query!history?id=1") == "/database/query!history?id=1")
     }
   }
 }
