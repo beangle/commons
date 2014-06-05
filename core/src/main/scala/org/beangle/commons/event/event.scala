@@ -18,35 +18,43 @@
  */
 package org.beangle.commons.event
 
+import java.util.EventObject
 /**
  * <p>
- * EventListener interface.
+ * Abstract Event class.
  * </p>
  *
  * @author chaostone
  */
-trait EventListener[E <: Event] extends java.util.EventListener {
+@SerialVersionUID(6311495014194589511L)
+abstract class Event(src: Any) extends EventObject(src) {
 
   /**
-   * Handle an application event.
-   *
-   * @param event the event to respond to
+   * System time when the event happened
    */
-  def onEvent(event: E): Unit
+  val timestamp = System.currentTimeMillis()
 
   /**
-   * Determine whether this listener actually supports the given event type.
-   *
-   * @param eventType a {@link java.lang.Class} object.
-   * @return a boolean.
+   * event subject
    */
-  def supportsEventType(eventType: Class[_ <: Event]): Boolean
+  var subject: String = _
 
   /**
-   * Determine whether this listener actually supports the given source type.
-   *
-   * @param sourceType a {@link java.lang.Class} object.
-   * @return a boolean.
+   * event details
    */
-  def supportsSourceType(sourceType: Class[_]): Boolean
+  var detail: String = _
+
+  /**
+   * resource where the event happened
+   */
+  var resource: String = _
 }
+
+/**
+ * BusinessEvent
+ *
+ * @author chaostone
+ * @since 3.0.0
+ */
+@SerialVersionUID(5403398010560394996L)
+class BusinessEvent(source: AnyRef) extends Event(source)

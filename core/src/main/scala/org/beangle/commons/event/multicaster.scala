@@ -17,6 +17,57 @@
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.event
+/**
+ * EventListener interface.
+ *
+ * @author chaostone
+ */
+trait EventListener[E <: Event] extends java.util.EventListener {
+
+  /**
+   * Handle an application event.
+   */
+  def onEvent(event: E): Unit
+
+  /**
+   * Determine whether this listener actually supports the given event type.
+   */
+  def supportsEventType(eventType: Class[_ <: Event]): Boolean
+
+  /**
+   * Determine whether this listener actually supports the given source type.
+   */
+  def supportsSourceType(sourceType: Class[_]): Boolean
+}
+
+/**
+ * EventMulticaster interface.
+ */
+trait EventMulticaster {
+
+  /**
+   * Add a listener to be notified of all events.
+   */
+  def addListener(listener: EventListener[_]): Unit
+
+  /**
+   * Remove a listener from the notification list.
+   */
+  def removeListener(listener: EventListener[_]): Unit
+
+  /**
+   * Remove all listeners registered with this multicaster.
+   * <p>
+   * After a remove call, the multicaster will perform no action on event notification until new
+   * listeners are being registered.
+   */
+  def removeAllListeners(): Unit
+
+  /**
+   * multicast.
+   */
+  def multicast(e: Event): Unit
+}
 
 object DefaultEventMulticaster {
 
@@ -36,11 +87,7 @@ object DefaultEventMulticaster {
 import DefaultEventMulticaster._
 import scala.collection.mutable
 /**
- * <p>
  * DefaultEventMulticaster class.
- * </p>
- *
- * @author chaostone
  */
 class DefaultEventMulticaster extends EventMulticaster {
 
@@ -64,9 +111,7 @@ class DefaultEventMulticaster extends EventMulticaster {
   }
 
   /**
-   * <p>
    * removeAllListeners.
-   * </p>
    */
   def removeAllListeners() {
     listeners = Nil
@@ -95,3 +140,16 @@ class DefaultEventMulticaster extends EventMulticaster {
     adapted
   }
 }
+
+/**
+ * EventPublisher interface.
+ */
+trait EventPublisher {
+
+  var multicaster: EventMulticaster = _
+  /**
+   * publishEvent.
+   */
+  def publish(event: Event): Unit = multicaster.multicast(event)
+}
+
