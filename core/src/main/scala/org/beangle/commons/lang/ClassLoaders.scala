@@ -65,13 +65,15 @@ object ClassLoaders {
    * @param resourceName The name of the resource to load
    * @param callingClass The Class object of the calling object
    */
-  def getResource(resourceName: String, callingClass: Class[_]): URL = {
+  def getResource(resourceName: String, callingClass: Class[_] = this.getClass): URL = {
     var url = Thread.currentThread().getContextClassLoader.getResource(resourceName)
     if (url != null) return url
     url = this.getClass.getClassLoader.getResource(resourceName)
     if (url != null) return url
-    val cl = callingClass.getClassLoader
-    if (cl != null) url = cl.getResource(resourceName)
+    if (callingClass != this.getClass()) {
+      val cl = callingClass.getClassLoader
+      if (cl != null) url = cl.getResource(resourceName)
+    }
     url
   }
 
@@ -89,13 +91,13 @@ object ClassLoaders {
    * @param callingClass
    * @return List of resources url or empty list.
    */
-  def getResources(resourceName: String, callingClass: Class[_]): List[URL] = {
+  def getResources(resourceName: String, callingClass: Class[_] = this.getClass): List[URL] = {
     var em: Enumeration[URL] = null
     try {
       em = Thread.currentThread().getContextClassLoader.getResources(resourceName)
       if (!em.hasMoreElements()) {
         em = this.getClass.getClassLoader.getResources(resourceName)
-        if (!em.hasMoreElements()) {
+        if (!em.hasMoreElements() && callingClass != this.getClass) {
           val cl = callingClass.getClassLoader
           if (cl != null) em = cl.getResources(resourceName)
         }
@@ -115,7 +117,7 @@ object ClassLoaders {
    * @param resourceName The name of the resource to load
    * @param callingClass The Class object of the calling object
    */
-  def getResourceAsStream(resourceName: String, callingClass: Class[_]): InputStream = {
+  def getResourceAsStream(resourceName: String, callingClass: Class[_] = this.getClass): InputStream = {
     val url = getResource(resourceName, callingClass)
     try {
       if ((url != null)) url.openStream() else null
