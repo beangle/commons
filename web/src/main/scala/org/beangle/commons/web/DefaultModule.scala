@@ -21,6 +21,7 @@ package org.beangle.commons.web
 import org.beangle.commons.inject.bind.AbstractBindModule
 import org.beangle.commons.web.resource.impl.PathResolverImpl
 import org.beangle.commons.web.resource.ResourceProcessor
+import org.beangle.commons.io.ResourceLoader
 
 /**
  * @author chaostone
@@ -28,7 +29,6 @@ import org.beangle.commons.web.resource.ResourceProcessor
 class DefaultModule extends AbstractBindModule {
 
   protected override def doBinding() {
-    bind(classOf[PathResolverImpl])
-    bind(classOf[ResourceProcessor])
+    bind(classOf[PathResolverImpl], classOf[ResourceLoader], classOf[ResourceProcessor])
   }
 }
