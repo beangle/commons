@@ -30,23 +30,16 @@ trait TextBundle {
 
   /**
    * Gets a message based on a message key, or null if no message is found.
-   *
-   * @param key the resource bundle key that is to be searched for
-   * @return null if none is found.
    */
   def get(key: String): Option[String]
 
   /**
    * Returns the locale of this resource bundle.
-   *
-   * @return the locale of this resource bundle
    */
   def locale: Locale
 
   /**
    * Get the bundle resource path
-   *
-   * @return bundle resource path
    */
   def resource: String
 }

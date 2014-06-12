@@ -30,39 +30,21 @@ trait TextBundleRegistry {
 
   /**
    * Load and cache bundle
-   *
-   * @param locale
-   * @param bundleName
    */
   def load(locale: Locale, bundleName: String): TextBundle
 
   /**
    * List locale bundles
-   *
-   * @return empty list when not found
    */
   def getBundles(locale: Locale): List[TextBundle]
 
   /**
    * Load and cache default bundles
-   *
-   * @param bundleNames
    */
   def addDefaults(bundleNames: String*): Unit
 
   /**
    * Get default locale message
-   *
-   * @param key
-   * @param locale
-   * @return null when not found
    */
   def getDefaultText(key: String, locale: Locale): String
-
-  /**
-   * Whether cache bundles
-   *
-   * @param reloadBundles
-   */
-  def setReloadBundles(reloadBundles: Boolean): Unit
 }
