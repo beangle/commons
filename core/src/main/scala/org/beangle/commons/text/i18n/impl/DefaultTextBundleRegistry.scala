@@ -156,10 +156,12 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
   //FIXME
   def getDefaultText(key: String, locale: Locale): String = {
     var msg: String = null
-    for (defaultBundleName <- defaultBundleNames) {
-      load(locale, defaultBundleName).get(key).foreach(x => return x)
+    defaultBundleNames find { bundleName =>
+      val bundle = load(locale, bundleName)
+      msg = bundle.get(key).orNull
+      null != msg
     }
-    null
+    msg
   }
 
   def setReloadBundles(reloadBundles: Boolean) {

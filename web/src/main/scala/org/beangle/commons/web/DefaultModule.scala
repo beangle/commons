@@ -29,6 +29,6 @@ import org.beangle.commons.io.ResourceLoader
 class DefaultModule extends AbstractBindModule {
 
   protected override def doBinding() {
-    bind(classOf[PathResolverImpl], classOf[ResourceLoader], classOf[ResourceProcessor])
+    
   }
 }
