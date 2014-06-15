@@ -57,7 +57,7 @@ class DelegatingFilterProxy extends GenericHttpFilter with ContainerHook {
 
   protected override def initFilterBean() {
     if (null == targetBeanName) targetBeanName = getFilterName
-    val wac = Containers.getRoot
+    val wac = Containers.root
     if (wac != null) delegate = initDelegate(wac) else Containers.addHook(this)
   }
 
