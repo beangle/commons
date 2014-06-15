@@ -19,20 +19,13 @@
 package org.beangle.commons.inject.bind
 
 /**
- * <p>
  * BindModule interface.
- * </p>
- *
  * @author chaostone
  */
 trait BindModule {
 
   /**
-   * <p>
-   * getConfig.
-   * </p>
-   *
-   * @return a {@link org.beangle.commons.inject.bind.BeanConfig} object.
+   * binding process and return BeanConfig.
    */
-  def getConfig(): BeanConfig
+  def binding(): BeanConfig
 }

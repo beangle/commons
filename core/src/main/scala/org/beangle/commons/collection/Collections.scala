@@ -26,21 +26,14 @@ import scala.collection.mutable
 object Collections {
 
   def findFirstMatch[T](source: Iterable[T], candidates: Iterable[T]): Option[T] = {
-    var finded = new mutable.ListBuffer[T]
-    if (isNotEmpty(source) && isNotEmpty(candidates)) {
+    val finded = if (isNotEmpty(source) && isNotEmpty(candidates)) {
       source match {
-        case set: Set[T] =>
-          for (candidate <- candidates if finded.isEmpty) {
-            if (set.contains(candidate)) finded += candidate
-          }
-        case seq: Seq[T] =>
-          for (candidate <- candidates if finded.isEmpty) {
-            if (seq.contains(candidate)) finded += candidate
-          }
-        case _ =>
+        case set: Set[T] => candidates.find(c => set.contains(c))
+        case seq: Seq[T] => candidates.find(c => seq.contains(c))
+        case _ => None
       }
-    }
-    if (finded.isEmpty) None else Some(finded.head)
+    } else None
+    finded
   }
 
   /**
@@ -64,20 +57,11 @@ object Collections {
 
   /**
    * convertToMap.
-   *
    */
   def convertToMap(coll: Seq[AnyRef], keyProperty: String): Map[_, _] = {
-    val map = new mutable.HashMap[Any, Any]
-    for (obj <- coll) {
-      var key: Any = null
-      try {
-        key = PropertyUtils.getProperty[Object](obj, keyProperty)
-      } catch {
-        case e: Exception => Throwables.propagate(e)
-      }
-      map.put(key, obj)
-    }
-    map.toMap
+    coll.map { obj =>
+      (PropertyUtils.getProperty[Object](obj, keyProperty), obj)
+    }.toMap
   }
 
   /**
@@ -85,7 +69,7 @@ object Collections {
    */
   def convertToMap(coll: Seq[AnyRef], keyProperty: String, valueProperty: String): Map[_, _] = {
     val map = new mutable.HashMap[Any, Any]
-    for (obj <- coll) {
+    coll foreach { obj =>
       val key = PropertyUtils.getProperty[AnyRef](obj, keyProperty)
       val value = PropertyUtils.getProperty[AnyRef](obj, valueProperty)
       if (null != key) map.put(key, value)
@@ -102,6 +86,7 @@ object Collections {
    * @return true if empty or null
    * @since 3.1
    */
+  @inline
   def isEmpty(coll: Iterable[_]): Boolean = (coll == null || coll.isEmpty)
 
   /**
@@ -113,6 +98,7 @@ object Collections {
    * @return true if non-null and non-empty
    * @since 3.1
    */
+  @inline
   def isNotEmpty(coll: Iterable[_]): Boolean = null != coll && !coll.isEmpty
 
   def union[T](first: List[T], second: List[T]): List[T] = {
@@ -139,12 +125,7 @@ object Collections {
     count.toMap
   }
 
-  private def getFreq[T](obj: T, freqMap: Map[T, Int]): Int = {
-    freqMap.get(obj) match {
-      case Some(count) => count
-      case _ => 0
-    }
-  }
+  private def getFreq[T](obj: T, freqMap: Map[T, Int]): Int = freqMap.get(obj).getOrElse(0)
 
   def intersection[T](first: List[T], second: List[T]): List[T] = {
     val list = new mutable.ListBuffer[T]

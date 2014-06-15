@@ -73,7 +73,9 @@ object Base64Decoder extends Decoder[String, Array[Byte]] {
 
   def decode(data: Array[Char]): Array[Byte] = {
     var tempLen = data.length
-    for (ix <- 0 until data.length if data(ix) > '\u00ff' || Codes(data(ix)) < 0) tempLen -= 1
+    Range(0, data.length) foreach { ix =>
+      if (data(ix) > '\u00ff' || Codes(data(ix)) < 0) tempLen -= 1
+    }
     var len = (tempLen / 4) * 3
     if (tempLen % 4 == 3) len += 2
     if (tempLen % 4 == 2) len += 1
@@ -94,9 +96,7 @@ object Base64Decoder extends Decoder[String, Array[Byte]] {
         }
       }
     }
-    if (index != out.length) throw new Error("Miscalculated data length (wrote " + index + " instead of " +
-      out.length +
-      ")")
+    if (index != out.length) throw new Error(s"Miscalculated data length (wrote $index instead of ${out.length})")
     else out
   }
 
