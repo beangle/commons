@@ -20,5 +20,5 @@ package org.beangle.commons.inject
 
 trait ContainerAware {
 
-  def container_=(container: Container): Unit
+  def setContainer(container: Container): Unit
 }
