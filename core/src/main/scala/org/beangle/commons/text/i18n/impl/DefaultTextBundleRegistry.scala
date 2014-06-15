@@ -37,7 +37,7 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
 
   protected val defaultBundleNames = new collection.mutable.ListBuffer[String]
 
-  protected var reloadBundles: Boolean = false
+  var reloadable: Boolean = false
 
   def addDefaults(bundleNames: String*) {
     defaultBundleNames ++= bundleNames
@@ -45,7 +45,7 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
   }
 
   def load(locale: Locale, bundleName: String): TextBundle = {
-    if (reloadBundles) caches.clear()
+    if (reloadable) caches.clear()
     val localeBundles = caches.get(locale).getOrElse {
       caches.synchronized {
         val newBundles = new ConcurrentHashMap[String, TextBundle]
