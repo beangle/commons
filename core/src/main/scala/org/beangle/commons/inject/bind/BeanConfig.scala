@@ -25,7 +25,7 @@ import org.beangle.commons.inject.Scope
 
 object BeanConfig {
 
-  class ReferenceValue(val ref: String)
+  case class ReferenceValue(ref: String)
 
   /**
    * Bean Definition
@@ -67,26 +67,26 @@ object BeanConfig {
 
     bind(classes: _*)
 
-    def shortName(): DefinitionBinder = shortName(true)
+    def shortName(): this.type = shortName(true)
 
-    def shortName(b: Boolean): DefinitionBinder = {
+    def shortName(b: Boolean): this.type = {
       for (definition <- beans) definition.beanName = getBeanName(definition.clazz, b)
       this
     }
 
-    def lazyInit(): DefinitionBinder = lazyInit(true)
+    def lazyInit(): this.type = lazyInit(true)
 
-    def lazyInit(lazyInit: Boolean): DefinitionBinder = {
+    def lazyInit(lazyInit: Boolean): this.type = {
       for (definition <- beans) definition.lazyInit = lazyInit
       this
     }
 
-    def parent(parent: String): DefinitionBinder = {
+    def parent(parent: String): this.type = {
       for (definition <- beans) definition.parent = parent
       this
     }
 
-    def proxy(property: String, clazz: Class[_]): DefinitionBinder = {
+    def proxy(property: String, clazz: Class[_]): this.type = {
       val targetBean = config.innerBeanName(clazz)
       config.add(new Definition(targetBean, clazz, Scope.Singleton.toString))
       for (definition <- beans) {
@@ -96,7 +96,7 @@ object BeanConfig {
       this
     }
 
-    def proxy(property: String, target: Definition): DefinitionBinder = {
+    def proxy(property: String, target: Definition): this.type = {
       config.add(target)
       for (definition <- beans) {
         definition.targetClass = target.clazz
@@ -105,34 +105,34 @@ object BeanConfig {
       this
     }
 
-    def primary(): DefinitionBinder = {
+    def primary(): this.type = {
       for (definition <- beans) definition.primary = true
       this
     }
 
-    def setAbstract(): DefinitionBinder = {
+    def setAbstract(): this.type = {
       for (definition <- beans) definition.abstractFlag = true
       this
     }
 
-    def in(scope: Scope.Val): DefinitionBinder = {
+    def in(scope: Scope.Val): this.type = {
       for (definition <- beans) definition.scope = scope.toString
       this
     }
 
-    def property(property: String, value: AnyRef): DefinitionBinder = {
+    def property(property: String, value: AnyRef): this.type = {
       for (definition <- beans) definition.properties.put(property, value)
       this
     }
 
-    def constructor(args: Any*): DefinitionBinder = {
+    def constructor(args: Any*): this.type = {
       for (definition <- beans) definition.constructorArgs = args;
       this
     }
     /**
      * Assign init method
      */
-    def init(method: String): DefinitionBinder = {
+    def init(method: String): this.type = {
       for (definition <- beans) definition.initMethod = method
       this
     }
