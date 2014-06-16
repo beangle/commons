@@ -29,11 +29,11 @@ class MimeTypeProvider extends Logging {
 
   private var contentTypes: Map[String, String] = Map.empty
 
-  var resources: Resources = _
+  private var resources: Resources = _
 
   def getMimeType(ext: String, defaultValue: String): String = contentTypes.get(ext).getOrElse(defaultValue)
 
-  def getMimeType(ext: String): String = contentTypes(ext)
+  def getMimeType(ext: String): Option[String] = contentTypes.get(ext)
 
   def getResources() = resources
 
@@ -43,7 +43,7 @@ class MimeTypeProvider extends Logging {
     if (null != resources) {
       buf ++= IOs.readJavaProperties(resources.global)
       if (null != resources.locals) {
-        for (path <- resources.locals) buf ++= IOs.readJavaProperties(path)
+        resources.locals foreach { path => buf ++= IOs.readJavaProperties(path) }
       }
       buf ++= IOs.readJavaProperties(resources.user)
     }

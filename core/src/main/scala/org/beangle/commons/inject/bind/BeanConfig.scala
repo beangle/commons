@@ -131,8 +131,6 @@ object BeanConfig {
     }
     /**
      * Assign init method
-     *
-     * @param method
      */
     def init(method: String): DefinitionBinder = {
       for (definition <- beans) definition.initMethod = method
@@ -164,9 +162,7 @@ object BeanConfig {
 }
 
 /**
- * <p>
  * BeanConfig class.
- * </p>
  *
  * @author chaostone
  */
@@ -181,34 +177,19 @@ class BeanConfig(val module: String) {
   }
 
   /**
-   * <p>
    * bind.
-   * </p>
-   *
-   * @param beanName a {@link java.lang.String} object.
-   * @param clazz a {@link java.lang.Class} object.
-   * @return a {@link org.beangle.commons.inject.bind.BeanConfig.DefinitionBinder} object.
    */
   def bind(beanName: String, clazz: Class[_]): DefinitionBinder = {
     new DefinitionBinder(this).bind(beanName, clazz)
   }
 
   /**
-   * <p>
    * bind.
-   * </p>
-   *
-   * @param classes a {@link java.lang.Class} object.
-   * @return a {@link org.beangle.commons.inject.bind.BeanConfig.DefinitionBinder} object.
    */
   def bind(classes: Class[_]*): DefinitionBinder = new DefinitionBinder(this, classes: _*)
 
   /**
-   * <p>
    * add.
-   * </p>
-   *
-   * @param def a {@link org.beangle.commons.inject.bind.BeanConfig.Definition} object.
    */
   protected[bind] def add(definition: Definition) {
     definitionBuffer += definition
