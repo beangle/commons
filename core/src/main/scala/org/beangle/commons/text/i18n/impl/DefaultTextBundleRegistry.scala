@@ -37,7 +37,7 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
 
   protected val defaultBundleNames = new collection.mutable.ListBuffer[String]
 
-  protected var reloadBundles: Boolean = false
+  var reloadable: Boolean = false
 
   def addDefaults(bundleNames: String*) {
     defaultBundleNames ++= bundleNames
@@ -45,21 +45,19 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
   }
 
   def load(locale: Locale, bundleName: String): TextBundle = {
-    if (reloadBundles) caches.clear()
-    var localeBundles = caches.get(locale)
-    if (localeBundles.isEmpty) {
+    if (reloadable) caches.clear()
+    val localeBundles = caches.get(locale).getOrElse {
       caches.synchronized {
-        localeBundles = caches.get(locale)
         val newBundles = new ConcurrentHashMap[String, TextBundle]
         caches.put(locale, newBundles)
-        localeBundles = Some(newBundles)
+        newBundles
       }
     }
-    var bundle = localeBundles.get.get(bundleName)
+    var bundle = localeBundles.get(bundleName)
     if (null == bundle) {
       bundle = loadJavaBundle(bundleName, locale).getOrElse(
         loadNewBundle(bundleName, locale).getOrElse(new DefaultTextBundle(locale, bundleName, Map.empty[String, String])))
-      localeBundles.get.put(bundleName, bundle)
+      localeBundles.put(bundleName, bundle)
     }
     bundle
   }
@@ -72,10 +70,6 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
 
   /**
    * Load java properties bundle with iso-8859-1
-   *
-   * @param bundleName
-   * @param locale
-   * @return None or bundle corresponding bindleName.locale.properties
    */
   protected def loadJavaBundle(bundleName: String, locale: Locale): Option[TextBundle] = {
     val resource = toJavaResourceName(bundleName, locale)
@@ -85,10 +79,6 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
 
   /**
    * java properties bundle name
-   *
-   * @param bundleName
-   * @param locale
-   * @return convented properties ended file path.
    */
   protected def toJavaResourceName(bundleName: String, locale: Locale): String = {
     var fullName = bundleName
@@ -102,10 +92,6 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
 
   /**
    * Generater resource name like bundleName.zh_CN
-   *
-   * @param bundleName
-   * @param locale
-   * @return resource name end with locale
    */
   protected def toDefaultResourceName(bundleName: String, locale: Locale): String = {
     val fullName = bundleName
@@ -119,14 +105,9 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
 
   /**
    * Convert locale to string with language_country[_variant]
-   *
-   * @param locale
-   * @return locale string
    */
   protected def toLocaleStr(locale: Locale): String = {
-    if (locale == Locale.ROOT) {
-      return ""
-    }
+    if (locale == Locale.ROOT) return ""
     val language = locale.getLanguage
     val country = locale.getCountry
     val variant = locale.getVariant
@@ -135,8 +116,7 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
     }
     val sb = new StringBuilder()
     if (variant != "") {
-      sb.append(language).append('_').append(country).append('_')
-        .append(variant)
+      sb.append(language).append('_').append(country).append('_').append(variant)
     } else if (country != "") {
       sb.append(language).append('_').append(country)
     } else {
@@ -153,7 +133,6 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
     }
   }
 
-  //FIXME
   def getDefaultText(key: String, locale: Locale): String = {
     var msg: String = null
     defaultBundleNames find { bundleName =>
@@ -162,9 +141,5 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
       null != msg
     }
     msg
-  }
-
-  def setReloadBundles(reloadBundles: Boolean) {
-    this.reloadBundles = reloadBundles
   }
 }

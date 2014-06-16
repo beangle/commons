@@ -28,25 +28,13 @@ object Containers {
 
   val subContainers = new mutable.HashMap[Long, Container]
 
-  def getRoot(): Container = root
-
-  def setRoot(root: Container) {
-    Containers.root = root
-  }
-
   def getHooks(): List[ContainerHook] = hooks
 
-  def addHook(hook: ContainerHook) {
-    hooks = hook :: hooks
-  }
+  def addHook(hook: ContainerHook): Unit = hooks = hook :: hooks
 
-  def register(id: Long, container: Container) {
-    subContainers.put(id, container)
-  }
+  def register(id: Long, container: Container): Unit = subContainers.put(id, container)
 
-  def remove(id: Long) {
-    subContainers.remove(id)
-  }
+  def remove(id: Long): Unit = subContainers.remove(id)
 
   def get(id: Long): Container = subContainers(id)
 }

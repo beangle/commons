@@ -48,7 +48,7 @@ class HttpSessionEventPublisher extends HttpSessionListener {
    * @param event HttpSessionEvent passed in by the container
    */
   def sessionCreated(event: HttpSessionEvent) {
-    if (null == em) em = Containers.getRoot.getBean(classOf[EventMulticaster]).get
+    if (null == em) em = Containers.root.getBean(classOf[EventMulticaster]).get
     em.multicast(new HttpSessionCreationEvent(event.getSession))
   }
 

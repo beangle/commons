@@ -19,18 +19,12 @@
 package org.beangle.commons.inject.bind
 
 import java.{ util => ju }
+
 import org.beangle.commons.inject.Scope
-import org.beangle.commons.inject.bind.BeanConfig.Definition
-import org.beangle.commons.inject.bind.BeanConfig.DefinitionBinder
-import org.beangle.commons.inject.bind.BeanConfig.ReferenceValue
-import org.beangle.commons.lang.Assert
-import scala.collection.mutable.ListBuffer
+import org.beangle.commons.inject.bind.BeanConfig.{ Definition, DefinitionBinder, ReferenceValue }
 
 /**
- * <p>
  * Abstract AbstractBindModule class.
- * </p>
- *
  * @author chaostone
  */
 abstract class AbstractBindModule extends BindModule {
@@ -38,13 +32,9 @@ abstract class AbstractBindModule extends BindModule {
   protected var config: BeanConfig = _
 
   /**
-   * <p>
    * Getter for the field <code>config</code>.
-   * </p>
-   *
-   * @return a {@link org.beangle.commons.inject.bind.BeanConfig} object.
    */
-  def getConfig(): BeanConfig = {
+  override def binding(): BeanConfig = {
     if (null == config) {
       config = new BeanConfig(getClass.getName)
       doBinding()
@@ -53,19 +43,12 @@ abstract class AbstractBindModule extends BindModule {
   }
 
   /**
-   * <p>
-   * bind.
-   * </p>
-   *
-   * @param classes a {@link java.lang.Class} object.
-   * @return a {@link org.beangle.commons.inject.bind.BeanConfig.DefinitionBinder} object.
+   * bind class.
    */
   protected def bind(classes: Class[_]*): DefinitionBinder = config.bind(classes: _*)
 
   /**
    * Returns a reference definition based on Name;
-   *
-   * @param name
    */
   protected def ref(name: String): ReferenceValue = new ReferenceValue(name)
 
@@ -73,16 +56,11 @@ abstract class AbstractBindModule extends BindModule {
 
   /**
    * Return new map entry
-   *
-   * @param key
-   * @param value
    */
   protected def entry(key: Any, value: Any): Tuple2[_, _] = Tuple2(key, value)
 
   /**
    * Generate a inner bean definition
-   *
-   * @param clazz
    */
   protected def bean(clazz: Class[_]): Definition = {
     val definition = new Definition(clazz.getName, clazz, Scope.Singleton.toString)
@@ -92,76 +70,52 @@ abstract class AbstractBindModule extends BindModule {
 
   /**
    * Generate a list property
-   * <p>
+   *
    * List singleton bean references with list(A.class,B.class) or list(ref("someBeanId"),C.class).<br>
    * List simple values with list("strValue1","strValue2")
-   *
-   * @param datas
    */
   protected def list(datas: AnyRef*): List[_] = {
-    val items = new ListBuffer[Any]
-    for (obj <- datas) {
-      if (obj.isInstanceOf[Class[_]]) {
-        items += buildInnerReference(obj.asInstanceOf[Class[_]])
-      } else {
-        items += obj
+    datas.map { obj =>
+      obj match {
+        case clazz: Class[_] => buildInnerReference(clazz)
+        case _ => obj
       }
-    }
-    items.toList
+    }.toList
   }
 
   /**
    * Generate a list reference property
-   * <p>
-   *
-   * @param classes
    */
-  protected def listref(classes: Class[_]*): List[_] = {
-    val items = new ListBuffer[Any]
-    for (clazz <- classes) {
-      items += new ReferenceValue(clazz.getName)
-    }
-    items.toList
-  }
+  protected def listref(classes: Class[_]*): List[_] = classes.map(clazz => new ReferenceValue(clazz.getName)).toList
 
   /**
    * Generate a set property
-   * <p>
+   *
    * List singleton bean references with set(A.class,B.class) or set(ref("someBeanId"),C.class).<br>
    * List simple values with set("strValue1","strValue2")
-   *
-   * @param datas
    */
   protected def set(datas: AnyRef*): Set[_] = {
-    val items = new collection.mutable.HashSet[Any]
-    for (obj <- datas) {
-      if (obj.isInstanceOf[Class[_]]) {
-        items += buildInnerReference(obj.asInstanceOf[Class[_]])
-      } else {
-        items += obj
+    datas.map { obj =>
+      obj match {
+        case clazz: Class[_] => buildInnerReference(clazz)
+        case _ => obj
       }
-    }
-    items.toSet
-  }
-
-  private def buildInnerReference(clazz: Class[_]): ReferenceValue = {
-    val targetBean = config.innerBeanName(clazz)
-    config.add(new Definition(targetBean, clazz, Scope.Singleton.toString))
-    new ReferenceValue(targetBean)
+    }.toSet
   }
 
   protected def map(entries: Tuple2[_, _]*): Map[_, _] = {
-    val items = new collection.mutable.HashMap[Any, Any]
-    for ((k, v) <- entries) {
-      if (v.isInstanceOf[Class[_]]) items.put(k, buildInnerReference(v.asInstanceOf[Class[_]]))
-      else items.put(k, v)
-    }
-    items.toMap
+    entries.map {
+      case (k, v) =>
+        v match {
+          case clazz: Class[_] => (k, buildInnerReference(clazz))
+          case _ => (k, v)
+        }
+    }.toMap
   }
 
   protected def props(keyValuePairs: String*): ju.Properties = {
     val properties = new ju.Properties
-    for (pair <- keyValuePairs) {
+    keyValuePairs foreach { pair =>
       val index = pair.indexOf('=')
       if (index > 0) properties.put(pair.substring(0, index), pair.substring(index + 1))
     }
@@ -169,38 +123,29 @@ abstract class AbstractBindModule extends BindModule {
   }
 
   /**
-   * <p>
    * bind.
-   * </p>
-   *
-   * @param beanName a {@link java.lang.String} object.
-   * @param clazz a {@link java.lang.Class} object.
-   * @return a {@link org.beangle.commons.inject.bind.BeanConfig.DefinitionBinder} object.
    */
   protected def bind(beanName: String, clazz: Class[_]): DefinitionBinder = config.bind(beanName, clazz)
 
   /**
-   * <p>
    * doBinding.
-   * </p>
    */
   protected def doBinding(): Unit
 
-  /**
-   * <p>
-   * getObjectType.
-   * </p>
-   *
-   * @return a {@link java.lang.Class} object.
-   */
-  def getObjectType(): Class[_] = classOf[BeanConfig]
+  //  /**
+  //   * getObjectType.
+  //   */
+  //  def getObjectType(): Class[_] = classOf[BeanConfig]
+  //
+  //  /**
+  //   * isSingleton.
+  //   */
+  //  def isSingleton(): Boolean = true
 
-  /**
-   * <p>
-   * isSingleton.
-   * </p>
-   *
-   * @return a boolean.
-   */
-  def isSingleton(): Boolean = true
+  private def buildInnerReference(clazz: Class[_]): ReferenceValue = {
+    val targetBean = config.innerBeanName(clazz)
+    config.add(new Definition(targetBean, clazz, Scope.Singleton.toString))
+    new ReferenceValue(targetBean)
+  }
+
 }
