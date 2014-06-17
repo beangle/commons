@@ -18,6 +18,3 @@
  */
 package org.beangle.commons.http.agent
 
-//remove if not needed
-import scala.collection.JavaConversions._
-

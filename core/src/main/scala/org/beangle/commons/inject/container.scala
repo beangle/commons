@@ -56,3 +56,37 @@ trait Container {
    */
   def keys(): Set[_]
 }
+
+
+object Containers {
+
+  var root: Container = _
+
+  var hooks: List[ContainerHook] = Nil
+
+  val subContainers = new collection.mutable.HashMap[Long, Container]
+
+  def getHooks(): List[ContainerHook] = hooks
+
+  def addHook(hook: ContainerHook): Unit = hooks = hook :: hooks
+
+  def register(id: Long, container: Container): Unit = subContainers.put(id, container)
+
+  def remove(id: Long): Unit = subContainers.remove(id)
+
+  def get(id: Long): Container = subContainers(id)
+}
+
+
+trait ContainerAware {
+
+  def container: Container
+  
+  def container_=(container: Container): Unit
+}
+
+trait ContainerHook {
+
+  def notify(context: Container): Unit
+}
+

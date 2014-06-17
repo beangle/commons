@@ -4,12 +4,9 @@ import org.beangle.commons.io.ResourceLoader
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class ResourceProcessor {
-  var loader: ResourceLoader = _
+class ResourceProcessor(private val loader: ResourceLoader, private val resolver: PathResolver) {
 
-  var resolver: PathResolver = _
-
-  var filters: List[ResourceFilter] = _
+  var filters: List[ResourceFilter] = List.empty
 
   def process(uri: String, request: HttpServletRequest, response: HttpServletResponse) {
     val names = resolver.resolve(uri)

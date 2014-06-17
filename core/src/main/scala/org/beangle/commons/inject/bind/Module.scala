@@ -18,34 +18,41 @@
  */
 package org.beangle.commons.inject.bind
 
-import java.{ util => ju }
+import java.{util => ju}
 
 import org.beangle.commons.inject.Scope
-import org.beangle.commons.inject.bind.BeanConfig.{ Definition, DefinitionBinder, ReferenceValue }
+import org.beangle.commons.inject.bind.Binder.{Definition, DefinitionBinder, ReferenceValue}
+
+/**
+ * Module interface.
+ */
+trait Module {
+
+  /**
+   * binding process
+   */
+  def configure(binder: Binder): Unit
+}
 
 /**
  * Abstract AbstractBindModule class.
- * @author chaostone
  */
-abstract class AbstractBindModule extends BindModule {
+abstract class AbstractBindModule extends Module {
 
-  protected var config: BeanConfig = _
+  protected var binder: Binder = _
 
   /**
    * Getter for the field <code>config</code>.
    */
-  override def binding(): BeanConfig = {
-    if (null == config) {
-      config = new BeanConfig(getClass.getName)
-      doBinding()
-    }
-    config
+  override def configure(binder: Binder): Unit = {
+    this.binder = binder
+    binding()
   }
 
   /**
    * bind class.
    */
-  protected def bind(classes: Class[_]*): DefinitionBinder = config.bind(classes: _*)
+  protected def bind(classes: Class[_]*): DefinitionBinder = binder.bind(classes: _*)
 
   /**
    * Returns a reference definition based on Name;
@@ -125,27 +132,18 @@ abstract class AbstractBindModule extends BindModule {
   /**
    * bind.
    */
-  protected def bind(beanName: String, clazz: Class[_]): DefinitionBinder = config.bind(beanName, clazz)
-
-  /**
-   * doBinding.
-   */
-  protected def doBinding(): Unit
-
-  //  /**
-  //   * getObjectType.
-  //   */
-  //  def getObjectType(): Class[_] = classOf[BeanConfig]
-  //
-  //  /**
-  //   * isSingleton.
-  //   */
-  //  def isSingleton(): Boolean = true
-
-  private def buildInnerReference(clazz: Class[_]): ReferenceValue = {
-    val targetBean = config.innerBeanName(clazz)
-    config.add(new Definition(targetBean, clazz, Scope.Singleton.toString))
-    new ReferenceValue(targetBean)
+  protected def bind(beanName: String, clazz: Class[_]): DefinitionBinder = {
+    binder.bind(beanName, clazz)
   }
 
+  /**
+   * binding.
+   */
+  protected def binding(): Unit
+
+  private def buildInnerReference(clazz: Class[_]): ReferenceValue = {
+    val targetBean = binder.innerBeanName(clazz)
+    binder.add(new Definition(targetBean, clazz, Scope.Singleton.toString))
+    new ReferenceValue(targetBean)
+  }
 }

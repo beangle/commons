@@ -22,7 +22,5 @@ trait Factory[T] {
 
   def getObject: T
 
-  def getObjectType: Class[T]
-
   def singleton: Boolean
 }

@@ -26,7 +26,7 @@ import org.beangle.commons.inject.bind.AbstractBindModule
  */
 class DefaultModule extends AbstractBindModule {
 
-  protected override def doBinding() {
+  protected override def binding(): Unit = {
     bind(classOf[MimeTypeProvider]).property("resources", "classpath:org/beangle/commons/http/mime/mimetypes.properties;classpath*:META-INF/mimetypes.properties;")
   }
 }

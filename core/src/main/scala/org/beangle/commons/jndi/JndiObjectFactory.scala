@@ -19,10 +19,9 @@
 package org.beangle.commons.jndi
 
 import java.{ util => ju }
-
 import org.beangle.commons.bean.Factory
-
 import javax.naming.{ InitialContext, NameNotFoundException }
+import javax.sql.DataSource
 
 object JndiObjectFactory {
   /** JNDI prefix used in a J2EE container */
@@ -31,7 +30,7 @@ object JndiObjectFactory {
 /**
  * JNDI Object Factory
  */
-class JndiObjectFactory extends Factory[AnyRef] {
+class JndiObjectFactory[T] extends Factory[T] {
 
   var jndiName: String = _
 
@@ -39,20 +38,15 @@ class JndiObjectFactory extends Factory[AnyRef] {
 
   var environment: ju.Properties = _
 
-  var expectedType: Class[AnyRef] = classOf[AnyRef]
-
-  def getObject: AnyRef = {
+  def getObject: T = {
     val ctx = new InitialContext
     val located = ctx.lookup(convertJndiName(jndiName))
     if (null == located)
-      throw new NameNotFoundException(
-        "JNDI object with [" + jndiName + "] not found: JNDI implementation returned null");
-    located
+      throw new NameNotFoundException(s"JNDI object with [$jndiName] not found: JNDI implementation returned null")
+    located.asInstanceOf[T]
   }
 
   def singleton = true
-
-  def getObjectType = expectedType
 
   /**
    * Convert the given JNDI name into the actual JNDI name to use.
@@ -63,5 +57,9 @@ class JndiObjectFactory extends Factory[AnyRef] {
     if (resourceRef && !jndiName.startsWith(containerPrefix) && jndiName.indexOf(':') == -1) containerPrefix + jndiName
     else jndiName
   }
+
+}
+
+class JndiDataSourceFactory extends JndiObjectFactory[DataSource] {
 
 }

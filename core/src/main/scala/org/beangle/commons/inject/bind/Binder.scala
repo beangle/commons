@@ -19,19 +19,16 @@
 package org.beangle.commons.inject.bind
 
 import org.beangle.commons.lang.Strings
-import BeanConfig._
+import Binder._
 import scala.collection.mutable.ListBuffer
 import org.beangle.commons.inject.Scope
 
-object BeanConfig {
+object Binder {
 
   case class ReferenceValue(ref: String)
 
   /**
    * Bean Definition
-   *
-   * @author chaostone
-   * @since 3.0.0
    */
   class Definition(var beanName: String, val clazz: Class[_], scopeName: String) {
 
@@ -61,9 +58,10 @@ object BeanConfig {
     }
   }
 
-  class DefinitionBinder(var config: BeanConfig, classes: Class[_]*) {
+  //FIXME
+  class DefinitionBinder(val config: Binder, classes: Class[_]*) {
 
-    private var beans = new ListBuffer[Definition]
+    private val beans = new ListBuffer[Definition]
 
     bind(classes: _*)
 
@@ -74,7 +72,9 @@ object BeanConfig {
       this
     }
 
-    def lazyInit(): this.type = lazyInit(true)
+    def lazyInit(): this.type = {
+      lazyInit(true)
+    }
 
     def lazyInit(lazyInit: Boolean): this.type = {
       for (definition <- beans) definition.lazyInit = lazyInit
@@ -162,15 +162,15 @@ object BeanConfig {
 }
 
 /**
- * BeanConfig class.
+ * Binder class.
  *
  * @author chaostone
  */
-class BeanConfig(val module: String) {
+class Binder(val module: String) {
 
   val definitionBuffer = new ListBuffer[Definition]
 
-  def definitions(): List[Definition] = definitionBuffer.toList
+  def definitions: List[Definition] = definitionBuffer.toList
 
   def innerBeanName(clazz: Class[_]): String = {
     clazz.getName + "#" + Math.abs(module.hashCode) + definitions.size
@@ -186,8 +186,9 @@ class BeanConfig(val module: String) {
   /**
    * bind.
    */
-  def bind(classes: Class[_]*): DefinitionBinder = new DefinitionBinder(this, classes: _*)
-
+  def bind(classes: Class[_]*): DefinitionBinder = {
+    new DefinitionBinder(this, classes: _*)
+  }
   /**
    * add.
    */
