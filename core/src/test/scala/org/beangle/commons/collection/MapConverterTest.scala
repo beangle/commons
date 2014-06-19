@@ -44,12 +44,7 @@ class MapConverterTest extends FunSpec with Matchers {
       calendar.get(Calendar.YEAR) should be(year)
       calendar.get(Calendar.MONTH) should be(month - 1)
       calendar.get(Calendar.DAY_OF_MONTH) should be(day)
-      dateDatas = this.datas + ("birthday" -> Array(birthday))
       converter.get(dateDatas, "birthday", classOf[Date]) should equal(Some(birthday))
-    }
-
-    it("Get from Array") {
-      converter.get(datas + ("name" -> Array("me")), "name") should equal(Some("me"))
     }
 
     it("Get Null") {
@@ -58,6 +53,7 @@ class MapConverterTest extends FunSpec with Matchers {
       converter.getLong(datas, "empty1") should be(Some(0))
       converter.getLong(datas, "empty2") should be(None)
       converter.getLong(datas, "empty3") should be(Some(0))
+      converter.getLong(datas, "empty4") should be(None)
     }
   }
 }
