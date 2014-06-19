@@ -19,7 +19,7 @@
 package org.beangle.commons.collection
 
 import java.sql.Date
-import java.util.Date
+import java.{ util => ju }
 
 import scala.collection.Map
 import scala.reflect.ClassTag
