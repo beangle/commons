@@ -35,13 +35,16 @@ object Browser {
    * @return Browser
    */
   def parse(agentString: String): Browser = {
-    if (Strings.isEmpty(agentString)) {
-      return Browser.Unknown
-    }
-    for (engine <- Engines.values) {
-      val egineName = engine.name
-      if (agentString.contains(egineName)) {
-        for (category <- engine.categories) {
+    if (Strings.isEmpty(agentString)) return Browser.Unknown
+
+    val engineItor = Engines.values.iterator
+    while (engineItor.hasNext) {
+      val engine = engineItor.next()
+      val engineName = engine.name
+      if (agentString.contains(engineName)) {
+        val categoryItor = engine.categories.iterator
+        while (categoryItor.hasNext) {
+          val category = categoryItor.next()
           val version = category.matches(agentString)
           if (version != null) {
             val key = category.name + "/" + version
@@ -55,7 +58,10 @@ object Browser {
         }
       }
     }
-    for (category <- Browsers.values) {
+
+    val categoryItor = Browsers.values.iterator
+    while (categoryItor.hasNext) {
+      val category = categoryItor.next()
       val version = category.matches(agentString)
       if (version != null) {
         val key = category.name + "/" + version

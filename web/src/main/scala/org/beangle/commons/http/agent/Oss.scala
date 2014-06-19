@@ -86,7 +86,9 @@ object Oss extends Enumeration {
     }
 
     def matches(agentString: String): String = {
-      for (entry <- versionPairs) {
+      val entryItor = versionPairs.iterator
+      while (entryItor.hasNext) {
+        val entry = entryItor.next()
         val m = entry._1.matcher(agentString)
         if (m.find()) {
           val sb = new StringBuffer()
