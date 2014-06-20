@@ -26,6 +26,8 @@ import org.beangle.commons.inject.Scope
 object Binder {
 
   case class ReferenceValue(ref: String)
+  case class Inject(clazz: Class[_])
+  object InjectPlaceHolder
 
   /**
    * Bean Definition
@@ -129,6 +131,7 @@ object Binder {
       for (definition <- beans) definition.constructorArgs = args;
       this
     }
+
     /**
      * Assign init method
      */

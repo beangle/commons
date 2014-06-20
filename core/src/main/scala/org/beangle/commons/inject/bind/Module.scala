@@ -18,10 +18,10 @@
  */
 package org.beangle.commons.inject.bind
 
-import java.{util => ju}
+import java.{ util => ju }
 
 import org.beangle.commons.inject.Scope
-import org.beangle.commons.inject.bind.Binder.{Definition, DefinitionBinder, ReferenceValue}
+import org.beangle.commons.inject.bind.Binder.{ Definition, DefinitionBinder, ReferenceValue, Inject, InjectPlaceHolder }
 
 /**
  * Module interface.
@@ -75,6 +75,11 @@ abstract class AbstractBindModule extends Module {
     definition
   }
 
+  def inject(clazz: Class[_]): Inject = {
+    Inject(clazz)
+  }
+
+  def ? = InjectPlaceHolder
   /**
    * Generate a list property
    *
