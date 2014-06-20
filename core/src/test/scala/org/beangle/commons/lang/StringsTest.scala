@@ -112,13 +112,3 @@ class StringsTest extends FunSpec with Matchers {
     }
   }
 }
-
-
-class A { def callFoo = foo;  private   def foo = "bar of A" }
-class B extends A {   private  def foo = "bar of B"}
-object C{
-  def main(args:Array[String]){
-	  println((new A()).callFoo)
-	  println((new B()).callFoo)
-  }
-}

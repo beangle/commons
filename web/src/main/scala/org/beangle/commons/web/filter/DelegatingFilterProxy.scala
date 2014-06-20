@@ -70,7 +70,7 @@ class DelegatingFilterProxy extends GenericHttpFilter with ContainerHook {
       case Some(filter) => {
         filter.init(filterConfig); filter
       }
-      case None => throw new RuntimeException("Cannot find " + targetBeanName + " in context.")
+      case None => throw new RuntimeException(s"Cannot find $targetBeanName in context.")
     }
   }
 
