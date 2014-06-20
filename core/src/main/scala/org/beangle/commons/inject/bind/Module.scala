@@ -70,9 +70,9 @@ abstract class AbstractBindModule extends Module {
    * Generate a inner bean definition
    */
   protected def bean(clazz: Class[_]): Definition = {
-    val definition = new Definition(clazz.getName, clazz, Scope.Singleton.toString)
-    definition.beanName = clazz.getName + "#" + Math.abs(System.identityHashCode(definition))
-    definition
+    val defn = new Definition(clazz.getName, clazz, Scope.Singleton.toString)
+    defn.beanName = clazz.getName + "#" + Math.abs(System.identityHashCode(defn))
+    defn
   }
 
   def inject(clazz: Class[_]): Inject = {

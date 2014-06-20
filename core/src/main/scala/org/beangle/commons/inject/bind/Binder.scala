@@ -60,7 +60,6 @@ object Binder {
     }
   }
 
-  //FIXME
   class DefinitionBinder(val config: Binder, classes: Class[_]*) {
 
     private val beans = new ListBuffer[Definition]
