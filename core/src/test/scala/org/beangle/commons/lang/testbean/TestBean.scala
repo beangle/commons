@@ -46,10 +46,18 @@ class Dog extends Animal {
 
   def getAge(): java.lang.Integer = 0
 }
- 
-class NumIdBean[ID] {
+
+trait Entity[ID] {
+  def id: ID
+}
+
+class NumIdBean[ID] extends Entity[ID] {
 
   var id: ID = _
+}
+
+class StringIdBean extends Entity[String] {
+  var id: String = _
 }
 
 class Book extends NumIdBean[java.lang.Long] {
@@ -57,5 +65,6 @@ class Book extends NumIdBean[java.lang.Long] {
 }
 
 class BookPrimitiveId extends NumIdBean[Long] {
-
 }
+
+class BookStore extends StringIdBean
