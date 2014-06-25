@@ -23,7 +23,6 @@ import java.lang.reflect.{ Method, Modifier, ParameterizedType, TypeVariable }
 import scala.collection.mutable
 import scala.language.existentials
 
-
 object ClassInfo {
 
   /**
@@ -54,7 +53,7 @@ object ClassInfo {
     val methods = new mutable.HashSet[MethodInfo]
     var nextClass = clazz
     var index = 0
-    var nextParamTypes: collection.Map[String, Class[_]] = null
+    var nextParamTypes: collection.Map[String, Class[_]] = Map.empty
     while (null != nextClass && classOf[AnyRef] != nextClass) {
       val declaredMethods = nextClass.getDeclaredMethods
       (0 until declaredMethods.length) foreach { i =>
@@ -64,17 +63,12 @@ object ClassInfo {
           val paramsTypes = new Array[Class[_]](types.length)
           (0 until types.length) foreach { j =>
             val t = types(j)
-            paramsTypes(j) =
-              if (t.isInstanceOf[ParameterizedType])
-                t.asInstanceOf[ParameterizedType].getRawType.asInstanceOf[Class[_]]
-              else if (t.isInstanceOf[TypeVariable[_]]) {
-                if (null == nextParamTypes) classOf[AnyRef]
-                else
-                  nextParamTypes.get(t.asInstanceOf[TypeVariable[_]].getName).getOrElse(classOf[AnyRef])
-              } else {
-                if (t.isInstanceOf[Class[_]]) t.asInstanceOf[Class[_]]
-                else classOf[AnyRef]
-              }
+            paramsTypes(j) = t match {
+              case pt: ParameterizedType => pt.getRawType.asInstanceOf[Class[_]]
+              case tv: TypeVariable[_] => nextParamTypes.get(tv.getName).getOrElse(classOf[AnyRef])
+              case c: Class[_] => c
+              case _ => classOf[AnyRef]
+            }
           }
           if (!methods.add(new MethodInfo(index, method, paramsTypes))) index -= 1
           index += 1
@@ -82,20 +76,19 @@ object ClassInfo {
       }
       val nextType = nextClass.getGenericSuperclass
       nextClass = nextClass.getSuperclass
-      if (nextType.isInstanceOf[ParameterizedType]) {
-        val tmp = new mutable.HashMap[String, Class[_]]
-        val ps = nextType.asInstanceOf[ParameterizedType].getActualTypeArguments
-        val tvs = nextClass.getTypeParameters
-        (0 until ps.length) foreach { k =>
-          if (ps(k).isInstanceOf[Class[_]]) {
-            tmp.put(tvs(k).getName, ps(k).asInstanceOf[Class[_]])
-          } else if (ps(k).isInstanceOf[TypeVariable[_]]) {
-            tmp.put(tvs(k).getName, nextParamTypes.get(ps(k).asInstanceOf[TypeVariable[_]].getName).get)
+      nextParamTypes = nextType match {
+        case ptSuper: ParameterizedType =>
+          val tmp = new mutable.HashMap[String, Class[_]]
+          val ps = ptSuper.getActualTypeArguments
+          val tvs = nextClass.getTypeParameters
+          (0 until ps.length) foreach { k =>
+            ps(k) match {
+              case c: Class[_] => tmp.put(tvs(k).getName, c)
+              case tv: TypeVariable[_] => tmp.put(tvs(k).getName, nextParamTypes(tv.getName))
+            }
           }
-        }
-        nextParamTypes = tmp
-      } else {
-        nextParamTypes = Map.empty
+          tmp
+        case _ => Map.empty
       }
     }
     new ClassInfo(methods.toSeq)
@@ -185,8 +178,14 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
   def getPropertyType(property: String): Option[Class[_]] = {
     writers.get(property) match {
       case Some(method) => Some(method.parameterTypes(0))
-      case _ => None
+      case _ => {
+        readers.get(property) match {
+          case Some(method) => Some(method.method.getReturnType)
+          case _ => None
+        }
+      }
     }
+
   }
 
   /**

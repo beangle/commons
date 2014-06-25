@@ -29,8 +29,7 @@ import org.beangle.commons.lang.Objects
  * @author chaostone
  * @since 3.2.0
  */
-class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[Class[_]])
-  extends Ordered[MethodInfo]() {
+class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[Class[_]]) extends Ordered[MethodInfo] {
 
   /**
    * Return this method is property read method (0) or write method(1) or none(-1).
@@ -58,9 +57,9 @@ class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[C
 
   def matches(args: Any*): Boolean = {
     if (parameterTypes.length != args.length) return false
-
-    for (i <- 0 until args.length if null != args(i) && !parameterTypes(i).isInstance(args(i))) return false
-    true
+    (0 until args.length).find { i =>
+      null != args(i) && !parameterTypes(i).isInstance(args(i))
+    }.isEmpty
   }
 
   override def toString(): String = {
@@ -72,11 +71,8 @@ class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[C
       sb.append("()")
     } else {
       sb.append('(')
-      for (t <- parameterTypes) {
-        sb.append(t.getSimpleName).append(",")
-      }
-      sb.deleteCharAt(sb.length - 1)
-      sb.append(')')
+      for (t <- parameterTypes) sb.append(t.getSimpleName).append(",")
+      sb.deleteCharAt(sb.length - 1).append(')')
     }
     sb.toString
   }

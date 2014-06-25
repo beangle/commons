@@ -28,12 +28,6 @@ class TestBean {
 
   var testEnum: TestEnum.Val = _
 
-  /*  def getTestEnum(): TestEnum.Val = testEnum
-
-  def setTestEnum(testEnum: TestEnum.Val) {
-    this.testEnum = testEnum
-  }
- */
   def methodWithManyArguments(i: Int,
     f: Float,
     I: java.lang.Integer,
@@ -41,4 +35,23 @@ class TestBean {
     c: TestBean,
     c1: TestBean,
     c2: TestBean): String = "test"
+}
+
+trait Animal {
+
+  def getAge(): Number
+}
+
+class Dog extends Animal {
+
+  def getAge(): java.lang.Integer = 0
+}
+ 
+class NumIdBean[ID] {
+
+  var id: ID = _
+}
+
+class Book extends NumIdBean[Long] {
+
 }
