@@ -53,7 +53,7 @@ object ClassInfo {
     val methods = new mutable.HashSet[MethodInfo]
     var nextClass = clazz
     var index = 0
-    var nextParamTypes: collection.Map[String, Class[_]] = Map.empty
+    var paramTypes: collection.Map[String, Class[_]] = Map.empty
     while (null != nextClass && classOf[AnyRef] != nextClass) {
       val declaredMethods = nextClass.getDeclaredMethods
       (0 until declaredMethods.length) foreach { i =>
@@ -61,22 +61,14 @@ object ClassInfo {
         if (goodMethod(method)) {
           val types = method.getGenericParameterTypes
           val paramsTypes = new Array[Class[_]](types.length)
-          (0 until types.length) foreach { j =>
-            val t = types(j)
-            paramsTypes(j) = t match {
-              case pt: ParameterizedType => pt.getRawType.asInstanceOf[Class[_]]
-              case tv: TypeVariable[_] => nextParamTypes.get(tv.getName).getOrElse(classOf[AnyRef])
-              case c: Class[_] => c
-              case _ => classOf[AnyRef]
-            }
-          }
-          if (!methods.add(new MethodInfo(index, method, paramsTypes))) index -= 1
+          (0 until types.length) foreach { j => paramsTypes(j) = extract(types(j), paramTypes) }
+          if (!methods.add(new MethodInfo(index, method, paramsTypes, extract(method.getGenericReturnType, paramTypes)))) index -= 1
           index += 1
         }
       }
       val nextType = nextClass.getGenericSuperclass
       nextClass = nextClass.getSuperclass
-      nextParamTypes = nextType match {
+      paramTypes = nextType match {
         case ptSuper: ParameterizedType =>
           val tmp = new mutable.HashMap[String, Class[_]]
           val ps = ptSuper.getActualTypeArguments
@@ -84,7 +76,7 @@ object ClassInfo {
           (0 until ps.length) foreach { k =>
             ps(k) match {
               case c: Class[_] => tmp.put(tvs(k).getName, c)
-              case tv: TypeVariable[_] => tmp.put(tvs(k).getName, nextParamTypes(tv.getName))
+              case tv: TypeVariable[_] => tmp.put(tvs(k).getName, paramTypes(tv.getName))
             }
           }
           tmp
@@ -94,6 +86,14 @@ object ClassInfo {
     new ClassInfo(methods.toSeq)
   }
 
+  private def extract(t: java.lang.reflect.Type, types: collection.Map[String, Class[_]]): Class[_] = {
+    t match {
+      case pt: ParameterizedType => pt.getRawType.asInstanceOf[Class[_]]
+      case tv: TypeVariable[_] => types.get(tv.getName).getOrElse(classOf[AnyRef])
+      case c: Class[_] => c
+      case _ => classOf[AnyRef]
+    }
+  }
   /**
    * Get ClassInfo from cache or load it by type.
    * It search from cache, when failure build it and put it into cache.
@@ -176,16 +176,7 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
    * Return property type,return null when not found.
    */
   def getPropertyType(property: String): Option[Class[_]] = {
-    writers.get(property) match {
-      case Some(method) => Some(method.parameterTypes(0))
-      case _ => {
-        readers.get(property) match {
-          case Some(method) => Some(method.method.getReturnType)
-          case _ => None
-        }
-      }
-    }
-
+    readers.get(property).map(m => m.returnType)
   }
 
   /**
@@ -225,10 +216,7 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
    * Return public metheds according to given name
    */
   def getMethods(name: String): Seq[MethodInfo] = {
-    methods.get(name) match {
-      case Some(ms) => ms
-      case _ => Seq.empty
-    }
+    methods.get(name).getOrElse(Seq.empty)
   }
 
   /**

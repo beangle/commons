@@ -52,6 +52,10 @@ class NumIdBean[ID] {
   var id: ID = _
 }
 
-class Book extends NumIdBean[Long] {
+class Book extends NumIdBean[java.lang.Long] {
+
+}
+
+class BookPrimitiveId extends NumIdBean[Long] {
 
 }
