@@ -68,3 +68,9 @@ class BookPrimitiveId extends NumIdBean[Long] {
 }
 
 class BookStore extends StringIdBean
+
+class AbstractEntity[ID](val id: ID)
+
+class NumberIdBean[T <:Number](id : T) extends AbstractEntity[T](id)
+
+class Author(id:Integer) extends NumberIdBean[Integer](id)
