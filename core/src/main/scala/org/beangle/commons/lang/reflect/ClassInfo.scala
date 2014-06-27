@@ -21,7 +21,7 @@ package org.beangle.commons.lang.reflect
 import java.lang.reflect.{ Method, Modifier, ParameterizedType, TypeVariable }
 
 import scala.collection.mutable
-import scala.language.existentials
+import org.beangle.commons.lang.Objects
 
 object ClassInfo {
 
@@ -111,11 +111,9 @@ object ClassInfo {
   }
 }
 
+
 /**
  * Class meta information.It contains method signature,property names
- *
- * @author chaostone
- * @since 3.2.0
  */
 class ClassInfo(methodinfos: Seq[MethodInfo]) {
 
@@ -124,76 +122,7 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
    * unqiue method indexes,without any override
    */
   private val methodIndexs = methods.mapValues(ms => if (ms.size == 1) ms.head.index else -1).filter(e => e._2 > -1)
-
-  /**
-   * property read method indexes
-   */
-  val readers: Map[String, MethodInfo] = findReaders(methodinfos)
-
-  /**
-   * property write method indexes
-   */
-  val writers: Map[String, MethodInfo] = findWriters(methodinfos)
-
-  private def findReaders(methodinfos: Seq[MethodInfo]): Map[String, MethodInfo] = {
-    val readermap = new mutable.HashMap[String, MethodInfo]
-    for (info <- methodinfos) {
-      val property = info.property
-      if (property.isDefined && property.get._1) {
-        val old = readermap.put(property.get._2, info)
-        if (old.isDefined && info.method.getReturnType.isAssignableFrom(old.get.method.getReturnType))
-          readermap += property.get._2 -> info
-      }
-    }
-    Map.empty ++ readermap
-  }
-
-  private def findWriters(methodinfos: Seq[MethodInfo]): Map[String, MethodInfo] = {
-    val writermap = new mutable.HashMap[String, MethodInfo]
-    for (info <- methodinfos) {
-      val property = info.property
-      if (property.isDefined && !property.get._1) writermap += property.get._2 -> info
-    }
-    Map.empty ++ writermap
-  }
-
-  /**
-   * Return property read index,return -1 when not found.
-   */
-  def getReadIndex(property: String): Int = {
-    readers.get(property) match {
-      case Some(method) => method.index
-      case _ => -1
-    }
-  }
-
-  /**
-   * Return property read index,return -1 when not found.
-   */
-  def getReader(property: String): Option[MethodInfo] = readers.get(property)
-
-  /**
-   * Return property type,return null when not found.
-   */
-  def getPropertyType(property: String): Option[Class[_]] = {
-    readers.get(property).map(m => m.returnType)
-  }
-
-  /**
-   * Return property write index,return -1 if not found.
-   */
-  def getWriteIndex(property: String): Int = {
-    writers.get(property) match {
-      case Some(method) => method.index
-      case _ => -1
-    }
-  }
-
-  /**
-   * Return property write method,return null if not found.
-   */
-  def getWriter(property: String): Option[MethodInfo] = writers.get(property)
-
+  
   /**
    * Return method index,return -1 if not found.
    */
@@ -228,5 +157,50 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
     methodInfos.sorted.toList
   }
 
-  def getWritableProperties(): Set[String] = writers.keySet
+}
+
+/**
+ * Method name and return type and parameters type
+ */
+class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[Class[_]],val returnType:Class[_]) extends Ordered[MethodInfo] {
+
+  override def compare(o: MethodInfo): Int = this.index - o.index
+
+  def matches(args: Any*): Boolean = {
+    if (parameterTypes.length != args.length) return false
+    (0 until args.length).find { i =>
+      null != args(i) && !parameterTypes(i).isInstance(args(i))
+    }.isEmpty
+  }
+
+  override def toString(): String = {
+    val returnType = method.getReturnType
+    val sb = new StringBuilder()
+    sb.append(if ((null == returnType)) "void" else returnType.getSimpleName)
+    sb.append(' ').append(method.getName)
+    if (parameterTypes.length == 0) {
+      sb.append("()")
+    } else {
+      sb.append('(')
+      for (t <- parameterTypes) sb.append(t.getSimpleName).append(",")
+      sb.deleteCharAt(sb.length - 1).append(')')
+    }
+    sb.toString
+  }
+
+  override def hashCode(): Int = {
+    var hash = 0
+    for (t <- parameterTypes) hash += t.hashCode
+    hash + method.getName.hashCode
+  }
+
+  override def equals(obj: Any): Boolean = obj match {
+    case obj: MethodInfo => {
+      val other = obj
+      Objects.equalsBuilder().add(method.getName, other.method.getName)
+        .add(parameterTypes, other.parameterTypes)
+        .isEquals
+    }
+    case _ => false
+  }
 }

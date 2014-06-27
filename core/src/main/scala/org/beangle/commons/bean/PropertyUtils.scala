@@ -21,7 +21,7 @@ package org.beangle.commons.bean
 import java.lang.reflect.{ Array => Jarray }
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.Throwables
-import org.beangle.commons.lang.reflect.ClassInfo
+import org.beangle.commons.lang.reflect.BeanManifest
 import org.beangle.commons.lang.reflect.MethodInfo
 import org.beangle.commons.conversion.Conversion
 import org.beangle.commons.conversion.impl.DefaultConversion
@@ -33,12 +33,7 @@ object PropertyUtils extends Logging {
 
   private val resolver = new PropertyNameResolver()
 
-  /**
-   * @throws NoSuchMethodException
-   * @param bean
-   * @param name
-   * @param value
-   */
+  @throws(classOf[NoSuchMethodException])
   def setProperty(bean: AnyRef, name: String, value: Any) {
     copyProperty(bean, name, value, null)
   }
@@ -92,14 +87,14 @@ object PropertyUtils extends Logging {
 
   def copyProperty(bean: AnyRef, name: String, value: AnyRef): Any = copyProperty(bean, name, value, DefaultConversion.Instance)
 
-  def isWriteable(bean: AnyRef, name: String): Boolean = ClassInfo.get(bean.getClass).getWriter(name).isDefined
+  def isWriteable(bean: AnyRef, name: String): Boolean = BeanManifest.get(bean.getClass).getSetter(name).isDefined
 
-  def getPropertyType(clazz: Class[_], name: String): Class[_] = ClassInfo.get(clazz).getPropertyType(name).orNull
+  def getPropertyType(clazz: Class[_], name: String): Class[_] = BeanManifest.get(clazz).getPropertyType(name).orNull
 
-  def getWritableProperties(clazz: Class[_]): Set[String] = ClassInfo.get(clazz).getWritableProperties
+  def getWritableProperties(clazz: Class[_]): Set[String] = BeanManifest.get(clazz).getWritableProperties
 
   def getSimpleProperty[T](bean: Any, name: String): T = {
-    ClassInfo.get(bean.getClass).getReader(name) match {
+    BeanManifest.get(bean.getClass).getGetter(name) match {
       case Some(info) => info.method.invoke(bean).asInstanceOf[T]
       case _ =>
         warn("Cannot find get" + Strings.capitalize(name) + " in " + bean.getClass)
@@ -134,10 +129,10 @@ object PropertyUtils extends Logging {
   }
 
   private def copySimpleProperty(bean: Any, name: String, value: Any, conversion: Conversion): Any = {
-    val classInfo = ClassInfo.get(bean.getClass)
-    val info = classInfo.getWriter(name) match {
+    val manifest = BeanManifest.get(bean.getClass)
+    val info = manifest.getSetter(name) match {
       case Some(info) => {
-        val converted = if (null == conversion) value else conversion.convert(value, classInfo.getPropertyType(name).get)
+        val converted = if (null == conversion) value else conversion.convert(value, manifest.getPropertyType(name).get)
         info.method.invoke(bean, converted.asInstanceOf[Object])
         converted
       }
