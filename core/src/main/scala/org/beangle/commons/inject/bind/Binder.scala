@@ -28,6 +28,7 @@ object Binder {
   case class ReferenceValue(ref: String)
   case class Inject(clazz: Class[_])
   object InjectPlaceHolder
+  case class PropertyPlaceHolder(name: String)
 
   /**
    * Bean Definition
@@ -66,18 +67,12 @@ object Binder {
 
     bind(classes: _*)
 
-    def shortName(): this.type = shortName(true)
-
-    def shortName(b: Boolean): this.type = {
+    def shortName(b: Boolean = true): this.type = {
       for (definition <- beans) definition.beanName = getBeanName(definition.clazz, b)
       this
     }
 
-    def lazyInit(): this.type = {
-      lazyInit(true)
-    }
-
-    def lazyInit(lazyInit: Boolean): this.type = {
+    def lazyInit(lazyInit: Boolean = true): this.type = {
       for (definition <- beans) definition.lazyInit = lazyInit
       this
     }
@@ -131,9 +126,6 @@ object Binder {
       this
     }
 
-    /**
-     * Assign init method
-     */
     def init(method: String): this.type = {
       for (definition <- beans) definition.initMethod = method
       this
