@@ -27,6 +27,9 @@ import java.lang.reflect.Modifier
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.Throwables
 import org.beangle.commons.lang.Objects
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.TypeVariable
+import java.lang.reflect.Type
 
 object Reflections {
 
@@ -38,4 +41,52 @@ object Reflections {
     }
     Objects.default(clazz)
   }
+
+  /**
+   * Find parameter types of given class's interface or superclass
+   */
+  def getGenericParamType(clazz: Class[_], expected: Class[_]): collection.Map[String, Class[_]] = {
+    if (!expected.isAssignableFrom(clazz)) return Map.empty
+    if (expected.isInterface) {
+      getInterfaceParamType(clazz, expected)
+    } else {
+      getSuperClassParamType(clazz.getSuperclass(), clazz.getGenericSuperclass(), expected)
+    }
+  }
+
+  private def getInterfaceParamType(clazz: Class[_], expected: Class[_],
+    paramTypes: collection.Map[String, Class[_]] = Map.empty): collection.Map[String, Class[_]] = {
+    val interfaces = clazz.getInterfaces
+    val idx = (0 until interfaces.length) find { i => expected.isAssignableFrom(interfaces(i)) }
+    idx match {
+      case Some(i) => getSuperClassParamType(interfaces(i), clazz.getGenericInterfaces()(i), expected, paramTypes)
+      case _ => {
+        val superClass = clazz.getSuperclass()
+        getInterfaceParamType(superClass, expected, getSuperClassParamType(superClass, clazz.getGenericSuperclass(), superClass, paramTypes))
+      }
+    }
+  }
+
+  private def getSuperClassParamType(clazz: Class[_], tp: Type, expected: Class[_],
+    paramTypes: collection.Map[String, Class[_]] = Map.empty): collection.Map[String, Class[_]] = {
+    if (classOf[AnyRef] == clazz) return paramTypes
+
+    val newParamTypes: collection.Map[String, Class[_]] = tp match {
+      case ptSuper: ParameterizedType =>
+        val tmp = new collection.mutable.HashMap[String, Class[_]]
+        val ps = ptSuper.getActualTypeArguments
+        val tvs = clazz.getTypeParameters
+        (0 until ps.length) foreach { k =>
+          ps(k) match {
+            case c: Class[_] => tmp.put(tvs(k).getName, c)
+            case tv: TypeVariable[_] => tmp.put(tvs(k).getName, paramTypes(tv.getName))
+          }
+        }
+        tmp
+      case _ => Map.empty
+    }
+    if (clazz == expected) newParamTypes
+    else getSuperClassParamType(clazz.getSuperclass(), clazz.getGenericSuperclass(), expected, newParamTypes)
+  }
+
 }

@@ -149,7 +149,7 @@ abstract class AbstractBindModule extends Module {
   protected def binding(): Unit
 
   private def buildInnerReference(clazz: Class[_]): ReferenceValue = {
-    val targetBean = binder.innerBeanName(clazz)
+    val targetBean = binder.innerName(clazz)
     binder.add(new Definition(targetBean, clazz, Scope.Singleton.toString))
     new ReferenceValue(targetBean)
   }

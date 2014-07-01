@@ -59,6 +59,11 @@ object Binder {
       properties.put(property, value)
       this
     }
+
+    def constructor(args: Any*): this.type = {
+      this.constructorArgs = args
+      this
+    }
   }
 
   class DefinitionBinder(val config: Binder, classes: Class[_]*) {
@@ -83,7 +88,7 @@ object Binder {
     }
 
     def proxy(property: String, clazz: Class[_]): this.type = {
-      val targetBean = config.innerBeanName(clazz)
+      val targetBean = config.innerName(clazz)
       config.add(new Definition(targetBean, clazz, Scope.Singleton.toString))
       for (definition <- beans) {
         definition.targetClass = clazz
@@ -122,7 +127,7 @@ object Binder {
     }
 
     def constructor(args: Any*): this.type = {
-      for (definition <- beans) definition.constructorArgs = args;
+      for (definition <- beans) definition.constructorArgs = args
       this
     }
 
@@ -152,6 +157,8 @@ object Binder {
       if (shortName) className = Strings.uncapitalize(Strings.substringAfterLast(className, "."))
       className
     }
+
+    def head: Definition = beans.head
   }
 }
 
@@ -166,7 +173,7 @@ class Binder(val module: String) {
 
   def definitions: List[Definition] = definitionBuffer.toList
 
-  def innerBeanName(clazz: Class[_]): String = {
+  def innerName(clazz: Class[_]): String = {
     clazz.getName + "#" + Math.abs(module.hashCode) + definitions.size
   }
 

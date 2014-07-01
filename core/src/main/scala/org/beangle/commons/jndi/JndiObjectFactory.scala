@@ -30,11 +30,9 @@ object JndiObjectFactory {
 /**
  * JNDI Object Factory
  */
-class JndiObjectFactory[T] extends Factory[T] {
+class JndiObjectFactory[T](val jndiName: String) extends Factory[T] {
 
-  var jndiName: String = _
-
-  var resourceRef = false
+  var resourceRef = true
 
   var environment: ju.Properties = _
 
@@ -60,6 +58,6 @@ class JndiObjectFactory[T] extends Factory[T] {
 
 }
 
-class JndiDataSourceFactory extends JndiObjectFactory[DataSource] {
+class JndiDataSourceFactory(jndiName: String) extends JndiObjectFactory[DataSource](jndiName) {
 
 }
