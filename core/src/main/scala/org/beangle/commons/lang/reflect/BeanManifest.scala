@@ -18,11 +18,13 @@
  */
 package org.beangle.commons.lang.reflect
 
-import java.lang.reflect.{ Method, Modifier, ParameterizedType, TypeVariable }
+import java.lang.Character.isUpperCase
+import java.lang.reflect.{Method, Modifier, ParameterizedType, TypeVariable}
 
 import scala.collection.mutable
-import org.beangle.commons.lang.Strings._
-import java.lang.Character.isUpperCase
+import scala.language.existentials
+
+import org.beangle.commons.lang.Strings.{substringAfter, substringBefore, uncapitalize}
 
 case class Getter(val method: Method, val returnType: Class[_])
 

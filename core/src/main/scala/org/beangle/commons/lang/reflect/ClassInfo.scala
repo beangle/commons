@@ -21,6 +21,8 @@ package org.beangle.commons.lang.reflect
 import java.lang.reflect.{ Method, Modifier, ParameterizedType, TypeVariable }
 
 import scala.collection.mutable
+import scala.language.existentials
+
 import org.beangle.commons.lang.Objects
 
 object ClassInfo {
@@ -111,7 +113,6 @@ object ClassInfo {
   }
 }
 
-
 /**
  * Class meta information.It contains method signature,property names
  */
@@ -122,7 +123,7 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
    * unqiue method indexes,without any override
    */
   private val methodIndexs = methods.mapValues(ms => if (ms.size == 1) ms.head.index else -1).filter(e => e._2 > -1)
-  
+
   /**
    * Return method index,return -1 if not found.
    */
@@ -162,7 +163,7 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
 /**
  * Method name and return type and parameters type
  */
-class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[Class[_]],val returnType:Class[_]) extends Ordered[MethodInfo] {
+class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[Class[_]], val returnType: Class[_]) extends Ordered[MethodInfo] {
 
   override def compare(o: MethodInfo): Int = this.index - o.index
 

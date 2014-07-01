@@ -75,7 +75,7 @@ abstract class AbstractBindModule extends Module {
     defn
   }
 
-  def inject(clazz: Class[_]): Inject = {
+  def inject[T](clazz: Class[T]): Inject[T] = {
     Inject(clazz)
   }
 
