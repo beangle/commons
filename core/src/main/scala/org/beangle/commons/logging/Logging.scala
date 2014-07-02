@@ -30,7 +30,7 @@ trait Logging {
 
   private val logger: Logger = LoggerFactory getLogger getClass
 
-  final def isDebugEnabled: Boolean = logger.isDebugEnabled
+  final def debugEnabled: Boolean = logger.isDebugEnabled
 
   @elidable(FINEST)
   final def trace(msg: => String): Unit = if (logger.isTraceEnabled) logger.trace(msg)

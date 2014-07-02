@@ -107,7 +107,7 @@ class SplitStreamDownloader(mimeTypeProvider: MimeTypeProvider) extends DefaultS
       case e: Exception => warn(s"download file error $attach" , e)
     } finally {
       IOs.close(input)
-      if (isDebugEnabled) {
+      if (debugEnabled) {
         var percent = if (length == 0) "100%" else (((start - begin) * 1.0 / length) * 10000).toInt / 100.0f + "%"
         val time = watch.elapsedMillis
         var rate = if (start - begin > 0) (((start - begin) * 1.0 / time * 1000) / 1024).toInt else 0
