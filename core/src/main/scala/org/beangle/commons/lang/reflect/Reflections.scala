@@ -18,18 +18,11 @@
  */
 package org.beangle.commons.lang.reflect
 
-import java.beans.BeanInfo
-import java.beans.IntrospectionException
-import java.beans.Introspector
-import java.beans.PropertyDescriptor
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
-import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.Throwables
-import org.beangle.commons.lang.Objects
-import java.lang.reflect.ParameterizedType
-import java.lang.reflect.TypeVariable
-import java.lang.reflect.Type
+import java.lang.reflect.{ParameterizedType, Type, TypeVariable}
+
+import scala.language.existentials
+
+import org.beangle.commons.lang.{Objects, Throwables}
 
 object Reflections {
 
@@ -61,7 +54,7 @@ object Reflections {
     idx match {
       case Some(i) => getSuperClassParamType(interfaces(i), clazz.getGenericInterfaces()(i), expected, paramTypes)
       case _ => {
-        val superClass = clazz.getSuperclass()
+        val superClass = clazz.getSuperclass
         getInterfaceParamType(superClass, expected, getSuperClassParamType(superClass, clazz.getGenericSuperclass(), superClass, paramTypes))
       }
     }
