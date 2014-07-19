@@ -26,34 +26,16 @@ package org.beangle.commons.inject
  */
 trait Container {
 
-  /**
-   * Return true if contains
-   */
   def contains(key: Any): Boolean
 
-  /**
-   * Return type of the given key.
-   */
   def getType(key: Any): Option[Class[_]]
 
-  /**
-   * Return an instance
-   */
   def getBean[T](key: Any): Option[T]
 
-  /**
-   * Gets an instance of the given dependency
-   */
   def getBean[T](clazz: Class[T]): Option[T]
 
-  /**
-   * Return beans of the given type
-   */
   def getBeans[T](clazz: Class[T]): Map[_, T]
 
-  /**
-   * Return bean keys
-   */
   def keys(): Set[_]
 }
 
@@ -88,5 +70,10 @@ trait ContainerAware {
 trait ContainerHook {
 
   def notify(context: Container): Unit
+}
+
+trait PropertySource {
+
+  def properties: collection.Map[String, String]
 }
 

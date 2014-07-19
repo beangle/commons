@@ -13,8 +13,8 @@ class StaticResourceServlet extends HttpServlet {
 
   private var processor: ResourceProcessor = _
 
-  override def init(config: ServletConfig) = {
-    processor = Containers.root.getBean(classOf[ResourceProcessor]).get;
+  override def init(config: ServletConfig): Unit = {
+    processor = Containers.root.getBean(classOf[ResourceProcessor]).get
   }
 
   @throws(classOf[Exception])
@@ -22,8 +22,8 @@ class StaticResourceServlet extends HttpServlet {
     val contextPath = request.getContextPath()
     val uri =
       if (!(contextPath.equals("") || contextPath.equals("/"))) {
-        Strings.substringAfter(request.getRequestURI(), contextPath)
-      } else request.getRequestURI()
+        Strings.substringAfter(request.getRequestURI, contextPath)
+      } else request.getRequestURI
     processor.process(uri.substring("/static".length), request, response)
   }
 }

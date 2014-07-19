@@ -11,14 +11,14 @@ import java.io.IOException
 import java.net.JarURLConnection
 import java.util.Calendar
 
-class HeaderFilter extends ResourceFilter{
-/**
+class HeaderFilter extends ResourceFilter {
+  /**
    * Static resource expire 7 days by default
    */
-  protected var expireDays = 7
+  var expireDays = 7
 
-  override def filter(context:ProcessContext, request:HttpServletRequest , response:HttpServletResponse,
-      chain:ProcessChain){
+  override def filter(context: ProcessContext, request: HttpServletRequest, response: HttpServletResponse,
+    chain: ProcessChain) {
     // Get max last modified time stamp.
     var maxLastModified = -1
     for (res <- context.resources) {
@@ -50,7 +50,7 @@ class HeaderFilter extends ResourceFilter{
    * Return url's last modified date time.
    * saves some opening and closing
    */
-  private def lastModified(url:URL):Long = {
+  private def lastModified(url: URL): Long = {
     if (url.getProtocol().equals("file")) {
       return new File(url.getFile()).lastModified()
     } else {
@@ -61,8 +61,8 @@ class HeaderFilter extends ResourceFilter{
           if (jarURL.getProtocol().equals("file")) { return new File(jarURL.getFile()).lastModified() }
         }
       } catch {
-        case e:IOException => 
-        return -1
+        case e: IOException =>
+          return -1
       }
       return -1
     }
