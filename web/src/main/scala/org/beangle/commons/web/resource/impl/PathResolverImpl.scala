@@ -13,8 +13,10 @@ class PathResolverImpl extends PathResolver {
     var pathDir: String = null
     for (name <- names) {
       var iname = name
-      if (iname.startsWith("/")) pathDir = Strings.substringBeforeLast(name, "/")
-      else iname = pathDir + "/" + iname
+      if (iname.startsWith("/")) {
+        pathDir = Strings.substringBeforeLast(name, "/").substring(1)
+        iname = iname.substring(1)
+      } else iname = pathDir + "/" + iname
       if (!iname.endsWith(lastPostfix)) iname = iname + lastPostfix
       rs += iname
     }

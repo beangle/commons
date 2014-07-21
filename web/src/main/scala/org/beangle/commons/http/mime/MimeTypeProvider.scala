@@ -24,21 +24,10 @@ import org.beangle.commons.inject.Resources
 import org.beangle.commons.lang.time.Stopwatch
 import org.beangle.commons.logging.Logging
 import org.beangle.commons.io.IOs
+import org.beangle.commons.lang.ClassLoaders
 
-class MimeTypeProvider extends Logging {
-
-  private var contentTypes: Map[String, String] = Map.empty
-
-  private var resources: Resources = _
-
-  def getMimeType(ext: String, defaultValue: String): String = contentTypes.get(ext).getOrElse(defaultValue)
-
-  def getMimeType(ext: String): Option[String] = contentTypes.get(ext)
-
-  def getResources() = resources
-
-  def setResources(resources: Resources) {
-    this.resources = resources
+object MimeTypes {
+  def buildMimeTypes(resources: Resources): Map[String, String] = {
     val buf = new collection.mutable.HashMap[String, String]
     if (null != resources) {
       buf ++= IOs.readJavaProperties(resources.global)
@@ -47,6 +36,23 @@ class MimeTypeProvider extends Logging {
       }
       buf ++= IOs.readJavaProperties(resources.user)
     }
-    contentTypes = buf.toMap
+    buf.toMap
   }
+
+  def mimeTypeResources: Resources = {
+    import ClassLoaders.{ getResource, getResources }
+    new Resources(getResource("org/beangle/commons/http/mime/mimetypes.properties", getClass),
+      getResources("META-INF/mimetypes.properties", getClass), null)
+  }
+}
+
+object MimeTypeProvider extends Logging {
+
+  import MimeTypes._
+  private val contentTypes: Map[String, String] = buildMimeTypes(mimeTypeResources)
+
+  def getMimeType(ext: String, defaultValue: String): String = contentTypes.get(ext).getOrElse(defaultValue)
+
+  def getMimeType(ext: String): Option[String] = contentTypes.get(ext)
+
 }

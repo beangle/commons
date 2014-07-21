@@ -41,7 +41,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class DefaultStreamDownloaderTest extends FunSpec with Matchers {
 
-  val streamDownloader: StreamDownloader = new DefaultStreamDownloader(new MimeTypeProvider())
+  val streamDownloader: StreamDownloader = new DefaultStreamDownloader
 
   describe("DefaultStreamDownloader") {
     it("download") {

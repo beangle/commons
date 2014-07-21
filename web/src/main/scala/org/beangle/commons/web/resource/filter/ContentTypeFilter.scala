@@ -6,10 +6,10 @@ import org.beangle.commons.web.resource.{ ProcessChain, ProcessContext, Resource
 
 import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 
-class ContentTypeFilter(private val provider: MimeTypeProvider) extends ResourceFilter {
+class ContentTypeFilter extends ResourceFilter {
 
   override def filter(context: ProcessContext, req: HttpServletRequest, res: HttpServletResponse, chain: ProcessChain) {
-    provider.getMimeType(substringAfterLast(context.uri, ".")) foreach { ct => res.setContentType(ct) }
+    MimeTypeProvider.getMimeType(substringAfterLast(context.uri, ".")) foreach { ct => res.setContentType(ct) }
     chain.process(context, req, res)
   }
 }

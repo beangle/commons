@@ -40,12 +40,7 @@ import javax.servlet.http.HttpServletResponse
  * @author chaostone
  * @since 2.4
  */
-class DefaultStreamDownloader(protected var mimeTypeProvider: MimeTypeProvider) extends Initializing
-with StreamDownloader with Logging {
-
-  def init() {
-    Assert.notNull(mimeTypeProvider, "mimeTypeProvider must be set");
-  }
+class DefaultStreamDownloader extends StreamDownloader with Logging {
 
   def download(request: HttpServletRequest, response: HttpServletResponse, file: File) {
     download(request, response, file, file.getName)
@@ -72,7 +67,7 @@ with StreamDownloader with Logging {
   protected def addContent(request: HttpServletRequest, response: HttpServletResponse, attach: String) {
     var contentType = response.getContentType
     if (null == contentType) {
-      contentType = mimeTypeProvider.getMimeType(Strings.substringAfterLast(attach, "."), "application/x-msdownload")
+      contentType = MimeTypeProvider.getMimeType(Strings.substringAfterLast(attach, "."), "application/x-msdownload")
       response.setContentType(contentType)
       debug(s"set content type $contentType for $attach")
     }
@@ -92,10 +87,6 @@ with StreamDownloader with Logging {
     } finally {
       IOs.close(inStream)
     }
-  }
-
-  def setMimeTypeProvider(mimeTypeProvider: MimeTypeProvider) {
-    this.mimeTypeProvider = mimeTypeProvider
   }
 
   def getAttachName(name: String, display: String): String = {

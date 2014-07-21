@@ -55,7 +55,7 @@ import org.beangle.commons.lang.time.Stopwatch
  * @author chaostone
  * @since 2.4
  */
-class SplitStreamDownloader(mimeTypeProvider: MimeTypeProvider) extends DefaultStreamDownloader(mimeTypeProvider) {
+class SplitStreamDownloader extends DefaultStreamDownloader {
 
   override def download(request: HttpServletRequest,
     response: HttpServletResponse,

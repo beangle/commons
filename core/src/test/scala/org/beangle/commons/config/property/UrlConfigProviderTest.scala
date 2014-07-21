@@ -32,9 +32,7 @@ class UrlConfigProviderTest extends FunSpec with Matchers {
     it("Get Property") {
       val config = new MultiProviderPropertyConfig
       val provider = new UrlPropertyConfigProvider
-      val resources = new Resources
-      resources.global = ClassLoaders.getResource("system-default.properties", getClass)
-      resources.user = ClassLoaders.getResource("system.properties", getClass)
+      val resources = new Resources(ClassLoaders.getResource("system-default.properties", getClass), null, ClassLoaders.getResource("system.properties", getClass))
       provider.resources = resources
       val properties = provider.getConfig
       config.add(properties)
