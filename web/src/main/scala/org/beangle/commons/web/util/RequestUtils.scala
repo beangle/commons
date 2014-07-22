@@ -53,7 +53,7 @@ object RequestUtils extends Logging {
 
   /**
    * Return the true servlet path.
-   * When servletPath provided by container is empty,It will return requestURI'
+   * When servletPath provided by container is empty,It will return requestURI-contextpath'
    * <p>
    * 查找当前调用的action对应的.do<br>
    * 例如http://localhost/myapp/dd.do 返回/dd.do<br>

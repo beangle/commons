@@ -38,6 +38,7 @@ class MapConverter(val conversion: DefaultConversion = DefaultConversion.Instanc
    */
   def convert[T](value: Any, clazz: Class[T]): T = {
     if (null == value) return Objects.default(clazz)
+    if (clazz.isAssignableFrom(value.getClass)) return value.asInstanceOf[T]
     if (value.isInstanceOf[String] && Strings.isEmpty(value.asInstanceOf[String])) return Objects.default(clazz)
     conversion.convert(value, clazz)
   }

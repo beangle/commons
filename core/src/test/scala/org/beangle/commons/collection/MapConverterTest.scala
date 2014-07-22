@@ -33,6 +33,10 @@ class MapConverterTest extends FunSpec with Matchers {
   var converter: MapConverter = new MapConverter()
 
   describe("MapConverter") {
+    it("Convert Origin Type") {
+      converter.convert("", classOf[String]) should be("")
+    }
+
     it("Convert Date") {
       val year = 2010
       val month = 9
