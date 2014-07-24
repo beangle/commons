@@ -2,10 +2,10 @@ package org.beangle.commons.io
 
 import java.io.File
 import java.lang.reflect.Method
-import java.net.{JarURLConnection, URL}
+import java.net.{ JarURLConnection, URL }
 import java.util.jar.JarFile
 
-import org.beangle.commons.lang.{ClassLoaders, Strings}
+import org.beangle.commons.lang.{ ClassLoaders, Strings }
 import org.beangle.commons.logging.Logging
 import org.beangle.commons.text.regex.AntPathPattern
 import org.beangle.commons.text.regex.AntPathPattern.isPattern
@@ -13,11 +13,11 @@ import org.beangle.commons.text.regex.AntPathPattern.isPattern
 trait ResourceResolver {
 
   val ClasspathAllUrlPrefix = "classpath*:"
-    
+  val ClasspathUrlPrefix = "classpath:"
   def getResources(locationPattern: String): List[URL]
 }
 
-class ResourcePatternResolver(val loader: ResourceLoader) extends ResourceResolver with Logging {
+class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResourceLoader) extends ResourceResolver with Logging {
 
   private val equinoxResolveMethod: Method = {
     try {
@@ -27,15 +27,15 @@ class ResourcePatternResolver(val loader: ResourceLoader) extends ResourceResolv
       case _: Throwable => null
     }
   }
-
   /**
    * Find all resources that match the given location pattern via the
    * Ant-style PathMatcher. Supports resources in jar files and zip files
    * and in the file system.
    */
   override def getResources(locationPattern: String): List[URL] = {
-    if (locationPattern.startsWith(ClasspathAllUrlPrefix)) {
-      if (isPattern(locationPattern.substring(ClasspathAllUrlPrefix.length))) {
+    if (locationPattern.startsWith(ClasspathAllUrlPrefix) || locationPattern.startsWith(ClasspathUrlPrefix)) {
+      val location = Strings.substringAfter(locationPattern, ":")
+      if (isPattern(location)) {
         val rootDirPath = determineRootDir(locationPattern)
         val subPattern = new AntPathPattern(locationPattern.substring(rootDirPath.length))
         val rootDirResources = getResources(rootDirPath)
@@ -50,7 +50,6 @@ class ResourcePatternResolver(val loader: ResourceLoader) extends ResourceResolv
         }
         result.toList
       } else {
-        val location = locationPattern.substring(ClasspathAllUrlPrefix.length)
         val path = if (location.startsWith("/")) location.substring(1) else location
         ClassLoaders.getResources(path, getClass)
       }
