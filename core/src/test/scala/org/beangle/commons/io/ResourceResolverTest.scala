@@ -9,10 +9,10 @@ class ResourceResolverTest extends FunSpec with Matchers {
   describe("ResourceResolver") {
     it("getResources") {
       val resolver = new ResourcePatternResolver
-      val rs = resolver.getResources("classpath*:META-INF/**/pom.properties")
+      val rs = resolver.getResources("META-INF/**/pom.properties")
       assert(!rs.isEmpty)
       
-      val rs1 = resolver.getResources("classpath:META-INF/maven/org.slf4j/slf4j-api/pom.properties")
+      val rs1 = resolver.getResources("META-INF/maven/org.slf4j/slf4j-api/pom.properties")
       assert(!rs1.isEmpty)
     }
   }

@@ -33,28 +33,26 @@ class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResource
    * and in the file system.
    */
   override def getResources(locationPattern: String): List[URL] = {
-    if (locationPattern.startsWith(ClasspathAllUrlPrefix) || locationPattern.startsWith(ClasspathUrlPrefix)) {
-      val location = Strings.substringAfter(locationPattern, ":")
-      if (isPattern(location)) {
-        val rootDirPath = determineRootDir(locationPattern)
-        val subPattern = new AntPathPattern(locationPattern.substring(rootDirPath.length))
-        val rootDirResources = getResources(rootDirPath)
-        val result = new collection.mutable.LinkedHashSet[URL]
-        for (rootDir <- rootDirResources) {
-          val rootUrl = resolve(rootDir)
-          if (Jars.isJarURL(rootUrl)) {
-            result ++= doFindJarResources(rootUrl, subPattern)
-          } else {
-            result ++= doFindFileResources(rootUrl, subPattern)
-          }
+    val location =
+      if (locationPattern.startsWith(ClasspathAllUrlPrefix) || locationPattern.startsWith(ClasspathUrlPrefix)) Strings.substringAfter(locationPattern, ":")
+      else locationPattern
+    if (isPattern(location)) {
+      val rootDirPath = determineRootDir(locationPattern)
+      val subPattern = new AntPathPattern(locationPattern.substring(rootDirPath.length))
+      val rootDirResources = getResources(rootDirPath)
+      val result = new collection.mutable.LinkedHashSet[URL]
+      for (rootDir <- rootDirResources) {
+        val rootUrl = resolve(rootDir)
+        if (Jars.isJarURL(rootUrl)) {
+          result ++= doFindJarResources(rootUrl, subPattern)
+        } else {
+          result ++= doFindFileResources(rootUrl, subPattern)
         }
-        result.toList
-      } else {
-        val path = if (location.startsWith("/")) location.substring(1) else location
-        ClassLoaders.getResources(path, getClass)
       }
+      result.toList
     } else {
-      loader.load(locationPattern).toList
+      val path = if (location.startsWith("/")) location.substring(1) else location
+      ClassLoaders.getResources(path, getClass)
     }
   }
 
