@@ -61,7 +61,7 @@ class MapConverter(val conversion: DefaultConversion = DefaultConversion.Instanc
       case Some(value) =>
         if (null == value) None
         else {
-          val rs = convert(value, clazz)
+          val rs = if (value.getClass.isArray && !clazz.isArray) convert(value.asInstanceOf[Array[_]](0), clazz) else convert(value, clazz)
           if (null == rs) None else Some(rs)
         }
       case _ => None

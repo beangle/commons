@@ -43,8 +43,19 @@ object Arrays {
    * @param array the array to test
    * @return {@code true} if the array is empty or {@code null}
    */
-  def isEmpty(array: Array[Any]): Boolean = array == null || array.length == 0
+  def isEmpty(array: Array[_ <: Any]): Boolean = array == null || array.length == 0
 
+  def isBlank(array: Array[_ <: Any]): Boolean = {
+    val length = if (null == array) 0 else array.length
+    if (0 == length) return true
+    var i = 0
+    var finded = false
+    while (i < length && !finded) {
+      finded = (array(i) != null)
+      i += 1
+    }
+    !finded
+  }
   /**
    * <p>
    * Produces a new array containing the elements between the start and end indices.
