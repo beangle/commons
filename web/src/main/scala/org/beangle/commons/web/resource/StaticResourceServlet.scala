@@ -6,7 +6,6 @@ import org.beangle.commons.lang.Strings
 import org.beangle.commons.web.resource.impl.PathResolverImpl
 import javax.servlet.ServletConfig
 import javax.servlet.http.{ HttpServlet, HttpServletRequest, HttpServletResponse }
-import org.beangle.commons.web.resource.filter.ContentTypeFilter
 import org.beangle.commons.web.resource.filter.HeaderFilter
 
 class StaticResourceServlet extends HttpServlet {
@@ -32,7 +31,7 @@ class StaticResourceServlet extends HttpServlet {
       case Some(p) => p
       case None =>
         val p = new ResourceProcessor(new ClasspathResourceLoader, new PathResolverImpl())
-        p.filters = List(new HeaderFilter, new ContentTypeFilter())
+        p.filters = List(new HeaderFilter)
         p
     }
   }

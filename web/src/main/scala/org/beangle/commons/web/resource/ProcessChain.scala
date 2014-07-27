@@ -14,20 +14,6 @@ class ProcessChain(filters: Iterator[ResourceFilter]) {
   def process(context: ProcessContext, request: HttpServletRequest, response: HttpServletResponse) {
     if (filters.hasNext) {
       filters.next().filter(context, request, response, this)
-    } else {
-      var i = 0
-      while (i < context.resources.size) {
-        val res = context.resources(i)
-        if (null == res.data) {
-          val is = res.url.openStream()
-          val buffer = new ByteArrayOutputStream()
-          IOs.copy(is, buffer)
-          is.close()
-          res.data = buffer.toByteArray()
-        }
-        i = i + 1
-      }
     }
-
   }
 }

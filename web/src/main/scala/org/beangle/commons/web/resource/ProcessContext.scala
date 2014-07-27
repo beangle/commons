@@ -15,5 +15,4 @@ class ProcessContext(val uri: String, paths: List[String], urls: List[URL]) {
 }
 
 class Resource(val path: String, val url: URL) {
-  var data: Array[Byte] = _
 }

@@ -1,8 +1,10 @@
 package org.beangle.commons.web.resource
 
+import org.beangle.commons.http.mime.MimeTypeProvider
 import org.beangle.commons.io.ResourceLoader
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import org.beangle.commons.lang.Strings.substringAfterLast
+import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
+import org.beangle.commons.io.IOs
 
 class ResourceProcessor(private val loader: ResourceLoader, private val resolver: PathResolver) {
 
@@ -15,16 +17,26 @@ class ResourceProcessor(private val loader: ResourceLoader, private val resolver
       response.sendError(HttpServletResponse.SC_NOT_FOUND)
     } else {
       val pc = new ProcessContext(uri, names, resources)
+      response.setContentType(getContentType(pc.uri, request))
+
       val chain = new ProcessChain(filters.iterator)
       chain.process(pc, request, response)
       if (response.getStatus() == HttpServletResponse.SC_OK) {
-        val isText = null != response.getContentType() && response.getContentType().startsWith("text/")
+        val isText = response.getContentType.startsWith("text/")
+        val os = response.getOutputStream
         for (res <- pc.resources) {
-          response.getOutputStream().write(res.data)
-          if (isText) response.getOutputStream().write('\n')
+          val is = res.url.openStream()
+          IOs.copy(is, os)
+          is.close()
+          if (isText) os.write('\n')
         }
       }
     }
+  }
+
+  protected def getContentType(uri: String, request: HttpServletRequest): String = {
+    val contentType = MimeTypeProvider.getMimeType(substringAfterLast(uri, ".")).orNull
+    if (null == contentType) request.getServletContext().getMimeType(uri) else contentType
   }
 
 }

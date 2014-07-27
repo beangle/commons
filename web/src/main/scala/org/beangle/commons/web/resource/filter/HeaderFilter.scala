@@ -52,19 +52,19 @@ class HeaderFilter extends ResourceFilter {
    */
   private def lastModified(url: URL): Long = {
     if (url.getProtocol().equals("file")) {
-      return new File(url.getFile()).lastModified()
+      return new File(url.getFile()).lastModified
     } else {
       try {
         val conn = url.openConnection()
-        if (conn.isInstanceOf[JarURLConnection]) {
-          val jarURL = conn.asInstanceOf[JarURLConnection].getJarFileURL()
-          if (jarURL.getProtocol().equals("file")) { return new File(jarURL.getFile()).lastModified() }
+        conn match {
+          case jarConn: JarURLConnection =>
+            val jarURL = jarConn.getJarFileURL();
+            if (jarURL.getProtocol().equals("file")) new File(jarURL.getFile()).lastModified() else -1
+          case _ => -1
         }
       } catch {
-        case e: IOException =>
-          return -1
+        case e: IOException => -1
       }
-      return -1
     }
   }
 
