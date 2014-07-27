@@ -26,7 +26,7 @@ import org.beangle.commons.inject.Scope
 object Binder {
 
   case class ReferenceValue(ref: String)
-  case class Inject[T](clazz: Class[T])
+  case class Injection[T](clazz: Class[T])
   object InjectPlaceHolder
   case class PropertyPlaceHolder(name: String)
 

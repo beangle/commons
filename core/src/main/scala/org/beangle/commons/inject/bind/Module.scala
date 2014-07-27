@@ -21,7 +21,7 @@ package org.beangle.commons.inject.bind
 import java.{ util => ju }
 
 import org.beangle.commons.inject.Scope
-import org.beangle.commons.inject.bind.Binder.{ Definition, DefinitionBinder, ReferenceValue, Inject, InjectPlaceHolder, PropertyPlaceHolder }
+import org.beangle.commons.inject.bind.Binder.{ Definition, DefinitionBinder, ReferenceValue, Injection, InjectPlaceHolder, PropertyPlaceHolder }
 
 /**
  * Module interface.
@@ -75,8 +75,8 @@ abstract class AbstractBindModule extends Module {
     defn
   }
 
-  def inject[T](clazz: Class[T]): Inject[T] = {
-    Inject(clazz)
+  def inject[T](clazz: Class[T]): Injection[T] = {
+    Injection(clazz)
   }
 
   def ? = InjectPlaceHolder

@@ -18,16 +18,10 @@
  */
 package org.beangle.commons.web.filter
 
-import java.io.IOException
-import javax.servlet.Filter
-import javax.servlet.FilterChain
-import javax.servlet.ServletException
-import javax.servlet.ServletRequest
-import javax.servlet.ServletResponse
-import org.beangle.commons.inject.Container
-import org.beangle.commons.inject.ContainerHook
-import org.beangle.commons.inject.Containers
+import org.beangle.commons.inject.{ Container, ContainerRefreshedHook, Containers }
 import org.beangle.commons.lang.Throwables
+
+import javax.servlet.{ Filter, FilterChain, ServletException, ServletRequest, ServletResponse }
 
 /**
  * Proxy for a standard Servlet 2.3 Filter, delegating to a managed
@@ -37,7 +31,7 @@ import org.beangle.commons.lang.Throwables
  *
  * @author chaostone
  */
-class DelegatingFilterProxy extends GenericHttpFilter with ContainerHook {
+class DelegatingFilterProxy extends GenericHttpFilter with ContainerRefreshedHook {
 
   private var delegate: Filter = _
 

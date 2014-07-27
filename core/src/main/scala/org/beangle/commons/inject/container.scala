@@ -44,13 +44,11 @@ object Containers {
 
   var root: Container = _
 
-  var hooks: List[ContainerHook] = Nil
+  var hooks: List[ContainerRefreshedHook] = Nil
 
   val subContainers = new collection.mutable.HashMap[Long, Container]
 
-  def getHooks(): List[ContainerHook] = hooks
-
-  def addHook(hook: ContainerHook): Unit = hooks = hook :: hooks
+  def addHook(hook: ContainerRefreshedHook): Unit = hooks = hook :: hooks
 
   def register(id: Long, container: Container): Unit = subContainers.put(id, container)
 
@@ -67,7 +65,7 @@ trait ContainerAware {
   def container_=(container: Container): Unit
 }
 
-trait ContainerHook {
+trait ContainerRefreshedHook {
 
   def notify(context: Container): Unit
 }

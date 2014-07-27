@@ -19,7 +19,7 @@ class StaticResourceServlet extends HttpServlet {
 
   @throws(classOf[Exception])
   override protected def service(request: HttpServletRequest, response: HttpServletResponse) {
-    val contextPath = request.getContextPath()
+    val contextPath = request.getContextPath
     val uri =
       if (!(contextPath.equals("") || contextPath.equals("/"))) {
         Strings.substringAfter(request.getRequestURI, contextPath)

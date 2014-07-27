@@ -18,14 +18,14 @@
  */
 package org.beangle.commons.web.servlet
 
-import org.beangle.commons.inject.{ Container, ContainerHook, Containers }
+import org.beangle.commons.inject.{ Container, ContainerRefreshedHook, Containers }
 import org.beangle.commons.lang.Throwables
 import javax.servlet.ServletException
 import javax.servlet.http.{ HttpServlet, HttpServletRequest, HttpServletResponse }
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 
-class DelegatingServletProxy extends HttpServlet with ContainerHook {
+class DelegatingServletProxy extends HttpServlet with ContainerRefreshedHook {
 
   private var delegate: HttpServlet = _
 
