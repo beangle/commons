@@ -121,7 +121,7 @@ object Binder {
       this
     }
 
-    def property(property: String, value: AnyRef): this.type = {
+    def property(property: String, value: Any): this.type = {
       for (definition <- beans) definition.properties.put(property, value)
       this
     }

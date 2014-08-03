@@ -30,4 +30,4 @@ import scala.annotation.StaticAnnotation
  * @author chaostone
  * @since 3.0.2
  */
-class Beta extends StaticAnnotation
+class beta extends StaticAnnotation

@@ -28,6 +28,10 @@ import org.beangle.commons.lang.Objects
 object ClassInfo {
 
   /**
+   * Java Object's method
+   */
+  val reservedMethodNames = Set("hashCode", "equals", "toString", "wait", "notify", "notifyAll", "getClass")
+  /**
    * class info cache
    */
   var cache = new mutable.HashMap[Class[_], ClassInfo]
@@ -40,11 +44,7 @@ object ClassInfo {
   private def goodMethod(method: Method): Boolean = {
     val modifiers = method.getModifiers
     if (Modifier.isStatic(modifiers) || Modifier.isPrivate(modifiers)) return false
-    if (method.isBridge) return false
-    val methodName = method.getName
-    if (method.getParameterTypes.length == 0 &&
-      (methodName == "hashCode" || methodName == "toString")) return false
-    if (method.getParameterTypes.length == 1 & methodName == "equals") return false
+    if (method.isBridge || reservedMethodNames.contains(method.getName)) return false
     true
   }
 
@@ -118,7 +118,7 @@ object ClassInfo {
  */
 class ClassInfo(methodinfos: Seq[MethodInfo]) {
 
-  private val methods = methodinfos.groupBy(info => info.method.getName)
+  private val methods: Map[String, Seq[MethodInfo]] = methodinfos.groupBy(info => info.method.getName)
   /**
    * unqiue method indexes,without any override
    */
@@ -197,9 +197,8 @@ class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[C
 
   override def equals(obj: Any): Boolean = obj match {
     case obj: MethodInfo => {
-      val other = obj
-      Objects.equalsBuilder().add(method.getName, other.method.getName)
-        .add(parameterTypes, other.parameterTypes)
+      Objects.equalsBuilder().add(method.getName, obj.method.getName)
+        .add(parameterTypes, obj.parameterTypes)
         .isEquals
     }
     case _ => false

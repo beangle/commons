@@ -39,29 +39,27 @@ trait Container {
   def keys(): Set[_]
 }
 
-
 object Containers {
 
   var root: Container = _
 
   var hooks: List[ContainerRefreshedHook] = Nil
 
-  val subContainers = new collection.mutable.HashMap[Long, Container]
+  private val children = new collection.mutable.HashMap[Any, Container]
 
   def addHook(hook: ContainerRefreshedHook): Unit = hooks = hook :: hooks
 
-  def register(id: Long, container: Container): Unit = subContainers.put(id, container)
+  def register(id: Any, container: Container): Unit = children.put(id, container)
 
-  def remove(id: Long): Unit = subContainers.remove(id)
+  def remove(id: Any): Unit = children.remove(id)
 
-  def get(id: Long): Container = subContainers(id)
+  def get(id: Any): Container = children(id)
 }
-
 
 trait ContainerAware {
 
   def container: Container
-  
+
   def container_=(container: Container): Unit
 }
 

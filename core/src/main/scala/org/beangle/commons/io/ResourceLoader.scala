@@ -74,7 +74,6 @@ class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader 
   }
 }
 
-
 /**
  * Load resource by class loader.
  */
@@ -96,8 +95,7 @@ class ClasspathResourceLoader(val prefixes: List[String] = List("")) extends Res
     for (prefix <- prefixes; if (null == url)) {
       url = ClassLoaders.getResource(prefix + name, getClass());
     }
-    if (null == url) None
-    else Some(url)
+    if (null == url) None else Some(url)
   }
 
   def load(names: Seq[String]): List[URL] = {

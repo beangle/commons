@@ -256,13 +256,11 @@ object Objects {
 
     def add(lhs: Any, rhs: Any): EqualsBuilder = {
       if (!rs) return this
-      rs &= Objects.equals(lhs, rhs)
-      this
-    }
-
-    def add(lhs: Array[Any], rhs: Array[Any]): EqualsBuilder = {
-      if (!rs) return this
-      rs &= Objects.==(lhs, rhs)
+      if (lhs.getClass.isArray && rhs.getClass.isArray) {
+        rs &= Objects.equals(lhs.asInstanceOf[Array[Any]], rhs.asInstanceOf[Array[Any]])
+      } else {
+        rs &= Objects.equals(lhs, rhs)
+      }
       this
     }
 
