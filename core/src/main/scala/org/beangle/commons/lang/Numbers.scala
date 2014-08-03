@@ -18,36 +18,11 @@
  */
 package org.beangle.commons.lang
 
-object Numbers {
+import java.{ lang => jl, math => jm }
 
-  /**
-   * <p>
-   * Convert a <code>String</code> to an <code>int</code>, returning <code>zero</code> if the
-   * conversion fails.
-   * </p>
-   * <p>
-   * If the string is <code>null</code>, <code>zero</code> is returned.
-   * </p>
-   *
-   * <pre>
-   * toInt(null) = 0
-   * toInt("")   = 0
-   * toInt("1")  = 1
-   * </pre>
-   *
-   * @param str the string to convert, may be null
-   * @return the int represented by the string, or <code>zero</code> if
-   *         conversion fails
-   * @since 3.0
-   */
-  def toInt(str: String): Int = {
-    if (str == null) return 0
-    try {
-      Integer.valueOf(str)
-    } catch {
-      case nfe: NumberFormatException => 0
-    }
-  }
+import org.beangle.commons.lang.Strings.isEmpty
+
+object Numbers {
 
   /**
    * <p>
@@ -69,8 +44,54 @@ object Numbers {
    * @return the int represented by the string, or the default if conversion fails
    * @since 3.0
    */
-  def toInt(str: String, defaultValue: Int): Int = {
-    if (str == null) return defaultValue
+  def toInt(str: String, defaultValue: Int = 0): Int = {
+    if (isEmpty(str)) return defaultValue
+    try {
+      Integer.parseInt(str)
+    } catch {
+      case nfe: NumberFormatException => defaultValue
+    }
+  }
+
+  def toShort(str: String, defaultValue: Short = 0): Short = {
+    if (isEmpty(str)) return defaultValue
+    try {
+      jl.Short.parseShort(str)
+    } catch {
+      case nfe: NumberFormatException => defaultValue
+    }
+  }
+
+  def toLong(str: String, defaultValue: Long = 0l): Long = {
+    if (isEmpty(str)) return defaultValue
+    try {
+      jl.Long.parseLong(str)
+    } catch {
+      case nfe: NumberFormatException => defaultValue
+    }
+  }
+
+  def toFloat(str: String, defaultValue: Float = 0.0f): Float = {
+    if (isEmpty(str)) return defaultValue
+    try {
+      jl.Float.parseFloat(str)
+    } catch {
+      case nfe: NumberFormatException => defaultValue
+    }
+  }
+
+  def toDouble(str: String, defaultValue: Double = 0.0d): Double = {
+    if (isEmpty(str)) return defaultValue
+    try {
+      jl.Double.parseDouble(str)
+    } catch {
+      case nfe: NumberFormatException => defaultValue
+    }
+  }
+
+  // convert string to number object
+  def convert2Int(str: String, defaultValue: jl.Integer = null): jl.Integer = {
+    if (isEmpty(str)) return defaultValue
     try {
       Integer.valueOf(str)
     } catch {
@@ -78,41 +99,60 @@ object Numbers {
     }
   }
 
-  def toShort(str: String): Short = {
-    if (str == null) return 0
+  def convert2Short(str: String, defaultValue: jl.Short = null): jl.Short = {
+    if (isEmpty(str)) return defaultValue
     try {
-      java.lang.Short.valueOf(str)
+      jl.Short.valueOf(str)
     } catch {
-      case nfe: NumberFormatException => 0
+      case nfe: NumberFormatException => defaultValue
     }
   }
 
-  def toLong(str: String): Long = {
-    if (str == null) return 0l
+  def convert2Long(str: String, defaultValue: jl.Long = null): jl.Long = {
+    if (isEmpty(str)) return defaultValue
     try {
-      java.lang.Long.valueOf(str)
+      jl.Long.valueOf(str)
     } catch {
-      case nfe: NumberFormatException => 0l
+      case nfe: NumberFormatException => defaultValue
     }
   }
 
-  def toFloat(str: String): Float = {
-    if (str == null) return 0.0f;
+  def convert2Float(str: String, defaultValue: jl.Float = null): jl.Float = {
+    if (isEmpty(str)) return defaultValue
     try {
-      java.lang.Float.valueOf(str)
+      jl.Float.valueOf(str)
     } catch {
-      case nfe: NumberFormatException => 0.0f
+      case nfe: NumberFormatException => defaultValue
     }
   }
 
-  def toDouble(str: String): Double = {
-    if (str == null) return 0.0d
+  def convert2Double(str: String, defaultValue: jl.Double = null): jl.Double = {
+    if (isEmpty(str)) return defaultValue
     try {
-      java.lang.Double.valueOf(str)
+      jl.Double.valueOf(str)
     } catch {
-      case nfe: NumberFormatException => 0.0d
+      case nfe: NumberFormatException => defaultValue
     }
   }
+
+  def convert2BigInt(str: String, defaultValue: jm.BigInteger = null): jm.BigInteger = {
+    if (isEmpty(str)) return defaultValue
+    try {
+      new jm.BigInteger(str)
+    } catch {
+      case nfe: NumberFormatException => defaultValue
+    }
+  }
+
+  def convert2BigDecimal(str: String, defaultValue: jm.BigDecimal = null): jm.BigDecimal = {
+    if (isEmpty(str)) return defaultValue
+    try {
+      new jm.BigDecimal(str)
+    } catch {
+      case nfe: NumberFormatException => defaultValue
+    }
+  }
+
   /**
    * <p>
    * Checks whether the <code>String</code> contains only digit characters.
@@ -125,11 +165,7 @@ object Numbers {
    * @return <code>true</code> if str contains only Unicode numeric
    */
   def isDigits(str: String): Boolean = {
-    if (Strings.isEmpty(str)) return false
-
-    for (i <- 0 until str.length if !Character.isDigit(str.charAt(i))) {
-      return false
-    }
-    true
+    if (isEmpty(str)) return false
+    !(0 until str.length).exists(i => !Character.isDigit(str.charAt(i)))
   }
 }

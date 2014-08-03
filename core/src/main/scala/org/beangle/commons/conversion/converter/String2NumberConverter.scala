@@ -18,12 +18,10 @@
  */
 package org.beangle.commons.conversion.converter
 
-import java.math.BigDecimal
-import java.math.BigInteger
-
 import org.beangle.commons.lang.Numbers
 import org.beangle.commons.conversion.Converter
-
+import java.{ lang => jl }
+import java.{ math => jm }
 /**
  * Convert string to number.
  *
@@ -32,59 +30,61 @@ import org.beangle.commons.conversion.Converter
  */
 class String2NumberConverter extends StringConverterFactory[String, Number] {
 
-  register(classOf[java.lang.Short], new ShortConverter())
+  register(classOf[jl.Short], new ShortConverter())
 
-  register(classOf[java.lang.Integer], new IntConverter())
+  register(classOf[jl.Integer], new IntConverter())
 
-  register(classOf[java.lang.Long], new LongConverter())
+  register(classOf[jl.Long], new LongConverter())
 
-  register(classOf[java.lang.Float], new FloatConverter())
+  register(classOf[jl.Float], new FloatConverter())
 
-  register(classOf[java.lang.Double], new DoubleConverter())
+  register(classOf[jl.Double], new DoubleConverter())
 
-  register(classOf[BigInteger], new BigIntegerConverter())
+  register(classOf[jm.BigInteger], new BigIntegerConverter())
 
-  register(classOf[BigDecimal], new BigDecimalConverter())
+  register(classOf[jm.BigDecimal], new BigDecimalConverter())
 
-  private class ShortConverter extends Converter[String, java.lang.Short] {
-    override def apply(string: String) = Numbers.toShort(string)
-  }
-
-  private class IntConverter extends Converter[String, Integer] {
-    override def apply(string: String) = Numbers.toInt(string)
-  }
-
-  private class LongConverter extends Converter[String, java.lang.Long] {
-    override def apply(string: String) = Numbers.toLong(string)
-  }
-
-  private class FloatConverter extends Converter[String, java.lang.Float] {
-    override def apply(string: String) = Numbers.toFloat(string)
-  }
-
-  private class DoubleConverter extends Converter[String, java.lang.Double] {
-    override def apply(string: String) = Numbers.toDouble(string)
-  }
-
-  private class BigIntegerConverter extends Converter[String, BigInteger] {
-
-    override def apply(string: String): BigInteger = {
-      try {
-        new BigInteger(string)
-      } catch {
-        case e: NumberFormatException => null
-      }
+  private class ShortConverter extends Converter[String, jl.Short] {
+    override def apply(str: String): jl.Short = {
+      Numbers.convert2Short(str, null)
     }
   }
 
-  private class BigDecimalConverter extends Converter[String, BigDecimal] {
+  private class IntConverter extends Converter[String, Integer] {
+    override def apply(str: String): jl.Integer = {
+      Numbers.convert2Int(str, null)
+    }
+  }
 
-    override def apply(string: String): BigDecimal = {
-      try {
-        new BigDecimal(string)
-      } catch {
-        case e: NumberFormatException => null
-      }
+  private class LongConverter extends Converter[String, jl.Long] {
+    override def apply(str: String): jl.Long = {
+      Numbers.convert2Long(str, null)
+    }
+  }
+
+  private class FloatConverter extends Converter[String, jl.Float] {
+    override def apply(str: String): jl.Float = {
+      Numbers.convert2Float(str, null)
+    }
+  }
+
+  private class DoubleConverter extends Converter[String, jl.Double] {
+    override def apply(str: String): jl.Double = {
+      Numbers.convert2Double(str, null)
+    }
+  }
+
+  private class BigIntegerConverter extends Converter[String, jm.BigInteger] {
+
+    override def apply(str: String): jm.BigInteger = {
+      Numbers.convert2BigInt(str, null)
+    }
+  }
+
+  private class BigDecimalConverter extends Converter[String, jm.BigDecimal] {
+
+    override def apply(str: String): jm.BigDecimal = {
+      Numbers.convert2BigDecimal(str, null)
     }
   }
 
