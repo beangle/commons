@@ -64,7 +64,7 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
 
   protected def loadNewBundle(bundleName: String, locale: Locale): Option[TextBundle] = {
     val resource = toDefaultResourceName(bundleName, locale)
-    val properties = IOs.readProperties(ClassLoaders.getResource(resource, getClass))
+    val properties = IOs.readProperties(ClassLoaders.getResource(resource))
     Some(new DefaultTextBundle(locale, resource, properties))
   }
 
@@ -73,7 +73,7 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
    */
   protected def loadJavaBundle(bundleName: String, locale: Locale): Option[TextBundle] = {
     val resource = toJavaResourceName(bundleName, locale)
-    val properties = IOs.readJavaProperties(ClassLoaders.getResource(resource, getClass))
+    val properties = IOs.readJavaProperties(ClassLoaders.getResource(resource))
     if (properties.isEmpty) None else Some(new DefaultTextBundle(locale, resource, properties))
   }
 

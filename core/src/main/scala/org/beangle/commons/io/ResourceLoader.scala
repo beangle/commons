@@ -86,14 +86,14 @@ class ClasspathResourceLoader(val prefixes: List[String] = List("")) extends Res
   def loadAll(resourceName: String): List[URL] = {
     val urls = new collection.mutable.ListBuffer[URL]
     for (prefix <- prefixes)
-      urls ++= ClassLoaders.getResources(prefix + resourceName, getClass())
+      urls ++= ClassLoaders.getResources(prefix + resourceName)
     urls.toList
   }
 
   def load(name: String): Option[URL] = {
     var url: URL = null
     for (prefix <- prefixes; if (null == url)) {
-      url = ClassLoaders.getResource(prefix + name, getClass());
+      url = ClassLoaders.getResource(prefix + name)
     }
     if (null == url) None else Some(url)
   }

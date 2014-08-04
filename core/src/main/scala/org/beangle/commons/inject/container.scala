@@ -45,7 +45,7 @@ object Containers {
 
   var hooks: List[ContainerRefreshedHook] = Nil
 
-  private val children = new collection.mutable.HashMap[Any, Container]
+  val children = new collection.mutable.HashMap[Any, Container]
 
   def addHook(hook: ContainerRefreshedHook): Unit = hooks = hook :: hooks
 

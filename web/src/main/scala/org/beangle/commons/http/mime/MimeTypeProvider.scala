@@ -41,8 +41,8 @@ object MimeTypes {
 
   def mimeTypeResources: Resources = {
     import ClassLoaders.{ getResource, getResources }
-    new Resources(getResource("org/beangle/commons/http/mime/mimetypes.properties", getClass),
-      getResources("META-INF/mimetypes.properties", getClass), null)
+    new Resources(getResource("org/beangle/commons/http/mime/mimetypes.properties"),
+      getResources("META-INF/mimetypes.properties"), null)
   }
 }
 

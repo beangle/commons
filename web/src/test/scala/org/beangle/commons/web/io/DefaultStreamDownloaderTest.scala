@@ -56,7 +56,7 @@ class DefaultStreamDownloaderTest extends FunSpec with Matchers {
 
         def setWriteListener(writeListener: WriteListener) {}
       })
-      val testDoc = ClassLoaders.getResource("download.txt", getClass)
+      val testDoc = ClassLoaders.getResource("download.txt")
       streamDownloader.download(request, response, testDoc, null)
     }
 

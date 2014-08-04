@@ -18,106 +18,87 @@
  */
 package org.beangle.commons.lang
 
-import java.io.IOException
-import java.io.InputStream
+import java.io.{ IOException, InputStream }
 import java.net.URL
 import java.util.Enumeration
+
 import scala.collection.mutable
 /**
  * ClassLoaders
  */
 object ClassLoaders {
-
   /**
    * Return the default ClassLoader to use: typically the thread context
-   * ClassLoader, if available; the ClassLoader that loaded the ClassUtils
+   * ClassLoader, if available; the ClassLoader that loaded the ClassLoaders
    * class will be used as fallback.
-   * <p>
-   * Call this method if you intend to use the thread context ClassLoader in a scenario where you
-   * absolutely need a non-null ClassLoader reference: for example, for class path resource loading
-   * (but not necessarily for <code>Class.forName</code>, which accepts a <code>null</code>
-   * ClassLoader reference as well).
    *
    * @return the default ClassLoader (never <code>null</code>)
-   * @see java.lang.Thread#getContextClassLoader()
    */
-  def getDefaultClassLoader(): ClassLoader = {
-    var cl: ClassLoader = null
-    try {
-      cl = Thread.currentThread().getContextClassLoader
+  def defaultClassLoader: ClassLoader = {
+    var cl = try {
+      Thread.currentThread().getContextClassLoader
     } catch {
-      case ex: Throwable =>
+      case ex: Throwable => null
     }
-    if (cl == null) cl = this.getClass().getClassLoader
+    if (cl == null) {
+      cl = getClass.getClassLoader
+      if (null == cl) cl = ClassLoader.getSystemClassLoader()
+    }
     cl
   }
 
   /**
-   * Load a given resource(Cannot start with slash /).
-   * <p/>
-   * This method will try to load the resource using the following methods (in order):
-   * <ul>
-   * <li>From {@link Thread#getContextClassLoader() Thread.currentThread().getContextClassLoader()}
-   * <li>From {@link Class#getClassLoader() ClassLoaders.class.getClassLoader()}
-   * <li>From the {@link Class#getClassLoader() callingClass.getClassLoader() }
-   * </ul>
-   *
-   * @param resourceName The name of the resource to load
-   * @param callingClass The Class object of the calling object
+   * Find class loader sequence
    */
-  def getResource(resourceName: String, callingClass: Class[_] = this.getClass): URL = {
-    var url = Thread.currentThread().getContextClassLoader.getResource(resourceName)
-    if (url != null) return url
-    url = this.getClass.getClassLoader.getResource(resourceName)
-    if (url != null) return url
-    if (callingClass != this.getClass()) {
-      val cl = callingClass.getClassLoader
-      if (cl != null) url = cl.getResource(resourceName)
+  private def loaders(callingClass: Class[_] = null): Seq[ClassLoader] = {
+    val me = getClass.getClassLoader
+    val threadCl = Thread.currentThread().getContextClassLoader
+    val callCl = if (null == callingClass) null else callingClass.getClassLoader
+    if (null == callCl) {
+      if (me == threadCl) List(threadCl) else List(threadCl, me)
+    } else {
+      if (me == threadCl) {
+        if (callCl == me) List(threadCl) else List(threadCl, callCl)
+      } else {
+        if (callCl == me) {
+          List(threadCl, me)
+        } else {
+          if (callCl == threadCl) List(threadCl, me) else List(threadCl, me, callCl)
+        }
+      }
     }
+  }
+  /**
+   * Load a given resource(Cannot start with slash /).
+   */
+  def getResource(resourceName: String, callingClass: Class[_] = null): URL = {
+    var url: URL = null
+    val iter = loaders(callingClass).iterator
+    while (null == url && iter.hasNext)
+      url = iter.next().getResource(resourceName)
     url
   }
 
   /**
    * Load list of resource(Cannot start with slash /).
-   * <p/>
-   * This method will try to load the resource using the following methods (in order):
-   * <ul>
-   * <li>From {@link Thread#getContextClassLoader() Thread.currentThread().getContextClassLoader()}
-   * <li>From {@link Class#getClassLoader() ClassLoaders.class.getClassLoader()}
-   * <li>From the {@link Class#getClassLoader() callingClass.getClassLoader() }
-   * </ul>
-   *
-   * @param resourceName
-   * @param callingClass
    * @return List of resources url or empty list.
    */
-  def getResources(resourceName: String, callingClass: Class[_] = this.getClass): List[URL] = {
+  def getResources(resourceName: String, callingClass: Class[_] = null): List[URL] = {
     var em: Enumeration[URL] = null
-    try {
-      em = Thread.currentThread().getContextClassLoader.getResources(resourceName)
-      if (!em.hasMoreElements()) {
-        em = this.getClass.getClassLoader.getResources(resourceName)
-        if (!em.hasMoreElements() && callingClass != this.getClass) {
-          val cl = callingClass.getClassLoader
-          if (cl != null) em = cl.getResources(resourceName)
-        }
-      }
-    } catch {
-      case e: IOException => e.printStackTrace()
-    }
+    val iter = loaders(callingClass).iterator
+    while ((null == em || !em.hasMoreElements) && iter.hasNext)
+      em = iter.next().getResources(resourceName)
+
     val urls = new mutable.ListBuffer[URL]
-    while (null != em && em.hasMoreElements()) urls += em.nextElement
+    while (null != em && em.hasMoreElements) urls += em.nextElement
     urls.toList
   }
 
   /**
    * This is a convenience method to load a resource as a stream.
    * The algorithm used to find the resource is given in getResource()
-   *
-   * @param resourceName The name of the resource to load
-   * @param callingClass The Class object of the calling object
    */
-  def getResourceAsStream(resourceName: String, callingClass: Class[_] = this.getClass): InputStream = {
+  def getResourceAsStream(resourceName: String, callingClass: Class[_] = null): InputStream = {
     val url = getResource(resourceName, callingClass)
     try {
       if ((url != null)) url.openStream() else null
@@ -126,5 +107,8 @@ object ClassLoaders {
     }
   }
 
-  def loadClass(className: String): Class[_] = Class.forName(className)
+  def loadClass(className: String, classLoader: ClassLoader = null): Class[_] = {
+    val loader = if (classLoader == null) defaultClassLoader else classLoader
+    loader.loadClass(className)
+  }
 }

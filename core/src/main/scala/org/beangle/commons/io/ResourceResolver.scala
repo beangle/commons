@@ -52,7 +52,7 @@ class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResource
       result.toList
     } else {
       val path = if (location.startsWith("/")) location.substring(1) else location
-      ClassLoaders.getResources(path, getClass)
+      ClassLoaders.getResources(path)
     }
   }
 
