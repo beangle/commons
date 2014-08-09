@@ -118,7 +118,7 @@ object ClassInfo {
  */
 class ClassInfo(methodinfos: Seq[MethodInfo]) {
 
-  private val methods: Map[String, Seq[MethodInfo]] = methodinfos.groupBy(info => info.method.getName)
+  val methods: Map[String, Seq[MethodInfo]] = methodinfos.groupBy(info => info.method.getName)
   /**
    * unqiue method indexes,without any override
    */
