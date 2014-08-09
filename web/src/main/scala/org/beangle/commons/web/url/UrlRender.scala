@@ -84,8 +84,8 @@ class UrlRender(var initSuffix: String = null) {
       val namespace = referer.substring(0, lastslash)
       sb.append(namespace)
       if (uri.startsWith("!")) {
-        var dot = referer.lastIndexOf("!", lastslash)
-        if (-1 == dot) dot = referer.lastIndexOf(".", lastslash)
+        var dot = referer.indexOf("!", lastslash)
+        if (-1 == dot) dot = referer.indexOf(".", lastslash)
 
         dot = if ((-1 == dot)) referer.length else dot
         val action = referer.substring(lastslash, dot)
