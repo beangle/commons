@@ -18,6 +18,4 @@
  */
 package org.beangle.commons.web
 
-//remove if not needed
-import scala.collection.JavaConversions._
 

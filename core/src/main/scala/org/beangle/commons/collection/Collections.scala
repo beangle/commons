@@ -18,12 +18,26 @@
  */
 package org.beangle.commons.collection
 
-import org.beangle.commons.bean.PropertyUtils
-import org.beangle.commons.lang.Throwables
-import org.beangle.commons.lang.functor.Predicate
+import java.{ util => ju }
+
 import scala.collection.mutable
 
+import org.beangle.commons.bean.PropertyUtils
+import org.beangle.commons.lang.functor.Predicate
+
 object Collections {
+
+  /**
+   * Null-safe check if the specified collection is empty.
+   */
+  @inline
+  def isEmpty(coll: Iterable[_]): Boolean = (coll == null || coll.isEmpty)
+
+  /**
+   * Null-safe check if the specified collection is not empty.
+   */
+  @inline
+  def isNotEmpty(coll: Iterable[_]): Boolean = null != coll && !coll.isEmpty
 
   def findFirstMatch[T](source: Iterable[T], candidates: Iterable[T]): Option[T] = {
     val finded = if (isNotEmpty(source) && isNotEmpty(candidates)) {
@@ -76,30 +90,6 @@ object Collections {
     }
     map.toMap
   }
-
-  /**
-   * Null-safe check if the specified collection is empty.
-   * <p>
-   * Null returns true.
-   *
-   * @param coll the collection to check, may be null
-   * @return true if empty or null
-   * @since 3.1
-   */
-  @inline
-  def isEmpty(coll: Iterable[_]): Boolean = (coll == null || coll.isEmpty)
-
-  /**
-   * Null-safe check if the specified collection is not empty.
-   * <p>
-   * Null returns false.
-   *
-   * @param coll the collection to check, may be null
-   * @return true if non-null and non-empty
-   * @since 3.1
-   */
-  @inline
-  def isNotEmpty(coll: Iterable[_]): Boolean = null != coll && !coll.isEmpty
 
   def union[T](first: List[T], second: List[T]): List[T] = {
     val mapa = getCardinalityMap(first)
@@ -155,5 +145,13 @@ object Collections {
     val rs = new mutable.HashSet[T]
     for (t <- datas if predicate.apply(t)) rs.add(t)
     rs.toSet
+  }
+
+  def putAll[K, V,V2 <: V](target: mutable.HashMap[K, V], origin: ju.Map[K, V2]): Unit = {
+    val itor = origin.entrySet.iterator
+    while (itor.hasNext) {
+      val entry = itor.next()
+      target.put(entry.getKey, entry.getValue)
+    }
   }
 }
