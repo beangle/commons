@@ -44,7 +44,7 @@ class DefaultTextResource(val locale: Locale, protected val registry: TextBundle
    * @param args an array of {@link java.lang.Object} objects.
    * @return a {@link java.lang.String} object.
    */
-  def apply(key: String, defaultValue: String, args: AnyRef*): String = {
+  def apply(key: String, defaultValue: String, args: Any*): String = {
     var text = get(key, locale).getOrElse(if ((null eq defaultValue) && keyAsDefault) key else defaultValue)
     if ((null eq text) && args.length > 0) return formater.format(text, locale, args)
     else text

@@ -30,7 +30,7 @@ class NullTextResource extends TextResource {
 
   def apply(key: String): Option[String] = Some(key)
 
-  def apply(key: String, defaultValue: String, obj: AnyRef*): String = key
+  def apply(key: String, defaultValue: String, obj: Any*): String = key
 
   def locale: Locale = null
 }

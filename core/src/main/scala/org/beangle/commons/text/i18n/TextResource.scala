@@ -54,7 +54,7 @@ trait TextResource {
    * @return the message as found in the resource bundle, or defaultValue if
    *         none is found
    */
-  def apply(key: String, defaultValue: String, obj: AnyRef*): String
+  def apply(key: String, defaultValue: String, obj: Any*): String
 
   /**
    * @return locale

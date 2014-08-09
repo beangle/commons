@@ -28,5 +28,5 @@ import java.util.Locale
  */
 trait TextFormater {
 
-  def format(text: String, locale: Locale, args: AnyRef*): String
+  def format(text: String, locale: Locale, args: Any*): String
 }

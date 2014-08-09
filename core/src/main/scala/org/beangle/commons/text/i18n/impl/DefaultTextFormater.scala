@@ -32,7 +32,7 @@ class DefaultTextFormater extends TextFormater {
 
   protected val caches = new collection.mutable.HashMap[Locale, ConcurrentHashMap[String, MessageFormat]]
 
-  def format(text: String, locale: Locale, args: AnyRef*): String = {
+  def format(text: String, locale: Locale, args: Any*): String = {
     var localeCache = caches.get(locale).orNull
     //double check
     if (null eq localeCache) {
