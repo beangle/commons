@@ -43,7 +43,6 @@ class DefaultTextFormater extends TextFormater {
           caches.put(locale, localeCache)
         }
       }
-
     }
     var format = localeCache.get(text)
     if (null == format) {

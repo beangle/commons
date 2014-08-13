@@ -29,24 +29,16 @@ import org.beangle.commons.text.i18n.TextResource
  *
  * @author chaostone
  */
-class DefaultTextResource(val locale: Locale, protected val registry: TextBundleRegistry, protected val formater: TextFormater)
-    extends TextResource() {
+class DefaultTextResource(val locale: Locale, protected val registry: TextBundleRegistry, protected val formater: TextFormater) extends TextResource {
 
   protected var keyAsDefault: Boolean = true
 
   /**
-   * <p>
    * getText.
-   * </p>
-   *
-   * @param key a {@link java.lang.String} object.
-   * @param defaultValue a {@link java.lang.String} object.
-   * @param args an array of {@link java.lang.Object} objects.
-   * @return a {@link java.lang.String} object.
    */
   def apply(key: String, defaultValue: String, args: Any*): String = {
-    var text = get(key, locale).getOrElse(if ((null eq defaultValue) && keyAsDefault) key else defaultValue)
-    if ((null eq text) && args.length > 0) return formater.format(text, locale, args)
+    val text = get(key, locale).getOrElse(if ((null eq defaultValue) && keyAsDefault) key else defaultValue)
+    if ((null != text) && args.length > 0) formater.format(text, locale, args: _*)
     else text
   }
 
@@ -56,11 +48,12 @@ class DefaultTextResource(val locale: Locale, protected val registry: TextBundle
   }
 
   protected def get(key: String, locale: Locale): Option[String] = {
-    for (bundle <- registry.getBundles(locale)) {
-      val msg = bundle.get(key)
-      if (!msg.isEmpty) return msg
+    var msg: Option[String] = None
+    registry.getBundles(locale) find { bundle =>
+      msg = bundle.get(key)
+      msg != None
     }
-    None
+    msg
   }
 
   def isKeyAsDefault(): Boolean = keyAsDefault
