@@ -51,7 +51,8 @@ class BootstrapListener extends ServletContextListener {
     if (initializers.isEmpty) {
       servletContext.log("No Beangle Initializer types detected on classpath")
     } else {
-      servletContext.log(s"Beangle Initializer detected on classpath: $initializers")
+      val initializerNames = initializers.map(c => c.getClass.getName).mkString(",")
+      servletContext.log(s"Beangle Initializer detected on classpath: initializerNames")
       for (initializer <- initializers) {
         initializer.boss = this
         initializer.onStartup(servletContext)
