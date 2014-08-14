@@ -133,12 +133,12 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
     }
   }
 
-  def getDefaultText(key: String, locale: Locale): String = {
-    var msg: String = null
+  def getDefaultText(key: String, locale: Locale): Option[String] = {
+    var msg: Option[String] = None
     defaultBundleNames find { bundleName =>
       val bundle = load(locale, bundleName)
-      msg = bundle.get(key).orNull
-      null != msg
+      msg = bundle.get(key)
+      None != msg
     }
     msg
   }

@@ -31,18 +31,16 @@ import scala.collection.JavaConversions._
  */
 abstract class OncePerRequestFilter extends GenericHttpFilter {
 
-  private var filteredAttributeName: String = _
+  var attributeName: String = _
 
   def isFirstEnter(request: ServletRequest): Boolean = {
-    if (null != request.getAttribute(filteredAttributeName)) false else {
-      request.setAttribute(filteredAttributeName, true)
+    if (null != request.getAttribute(attributeName)) false else {
+      request.setAttribute(attributeName, true)
       true
     }
   }
 
-  protected override def initFilterBean() {
-    var name = getFilterName
-    if (name == null) name = getClass.getName
-    filteredAttributeName = name + ".FILTED"
+  override def init() {
+    if (null == attributeName) attributeName = getClass.getName + this.hashCode() + ".FILTED"
   }
 }

@@ -35,7 +35,7 @@ class DelegatingFilterProxy extends GenericHttpFilter with ContainerRefreshedHoo
 
   private var delegate: Filter = _
 
-  protected var targetBeanName: String = _
+  var beanName: String = _
 
   def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
     delegate.doFilter(request, response, chain)
@@ -43,32 +43,31 @@ class DelegatingFilterProxy extends GenericHttpFilter with ContainerRefreshedHoo
 
   def notify(container: Container) {
     try {
-      setDelegate(initDelegate(container))
+      this.delegate = initDelegate(container)
     } catch {
       case e: ServletException => Throwables.propagate(e)
     }
   }
 
-  protected override def initFilterBean() {
-    if (null == targetBeanName) targetBeanName = getFilterName
+  override def init() {
+    if (null == beanName) beanName = filterName
     val wac = Containers.root
     if (wac != null) delegate = initDelegate(wac) else Containers.addHook(this)
   }
+
+  protected def initDelegate(container: Container): Filter = {
+    container.getBean[Filter](beanName) match {
+      case Some(filter) => {
+        filter.init(filterConfig); filter
+      }
+      case None => throw new RuntimeException(s"Cannot find $beanName in context.")
+    }
+  }
+
+  override def requiredProperties: Set[String] = Set("beanName")
 
   override def destroy() {
     if (delegate != null) delegate.destroy()
   }
 
-  protected def initDelegate(container: Container): Filter = {
-    container.getBean[Filter](targetBeanName) match {
-      case Some(filter) => {
-        filter.init(filterConfig); filter
-      }
-      case None => throw new RuntimeException(s"Cannot find $targetBeanName in context.")
-    }
-  }
-
-  def setDelegate(delegate: Filter) {
-    this.delegate = delegate
-  }
 }

@@ -46,7 +46,7 @@ trait TextBundleRegistry {
   /**
    * Get default locale message
    */
-  def getDefaultText(key: String, locale: Locale): String
+  def getDefaultText(key: String, locale: Locale): Option[String]
 
   def reloadable: Boolean
   
