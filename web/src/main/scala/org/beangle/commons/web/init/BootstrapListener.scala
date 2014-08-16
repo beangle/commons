@@ -39,7 +39,7 @@ class BootstrapListener extends ServletContextListener {
   override def contextInitialized(sce: ServletContextEvent) {
     val servletContext = sce.getServletContext
     val initializers = new ju.LinkedList[Initializer]
-    ClassLoaders.getResources("META-INF/beangle/webmodule.properties") foreach { url =>
+    ClassLoaders.getResources("META-INF/beangle/web-module.properties") foreach { url =>
       IOs.readJavaProperties(url) get ("initializer") match {
         case Some(clazz) => {
           initializers.add(ClassLoaders.loadClass(clazz).newInstance.asInstanceOf[Initializer])
