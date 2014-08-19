@@ -16,22 +16,30 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.text.i18n.spi
+package org.beangle.commons.text.i18n
 
 import java.util.Locale
-import org.beangle.commons.text.i18n.TextResource
+
 /**
- * TextResource provider
+ * TextBundle
  *
  * @author chaostone
- * @since 3.0.2
+ * @since 3.0.0
  */
-trait TextResourceProvider {
+trait TextBundle {
 
   /**
-   * Return text resource;
-   *
-   * @param locale default could be null.
+   * Gets a message based on a message key, or null if no message is found.
    */
-  def getTextResource(locale: Locale): TextResource
+  def get(key: String): Option[String]
+
+  /**
+   * Returns the locale of this resource bundle.
+   */
+  def locale: Locale
+
+  /**
+   * Get the bundle resource path
+   */
+  def resource: String
 }

@@ -16,31 +16,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.functor
+package org.beangle.commons.text.i18n
 
-import org.beangle.commons.lang.Objects
+import java.util.Locale
 
 /**
- * Unary Function Object
+ * NullTextResource class.
  *
- * @param <I> input type
- * @param <R> returned output type
  * @author chaostone
- * @since 3.2.0
  */
-trait UnaryFunction[I, +R] {
+class NullTextResource extends TextResource {
 
-  /**
-   * Returns the result of applying this function to {@code input}. This method is <i>generally
-   * expected</i>, but not absolutely required, to have the following properties:
-   * <ul>
-   * <li>Its execution does not cause any observable side effects.
-   * <li>The computation is <i>consistent with equals</i>; that is, {@link Objects#equal
-   * Objects.equal}{@code (a, b)} implies that {@code Objects.equal(function.apply(a),
-   * function.apply(b))}.
-   * </ul>
-   *
-   * @throws NullPointerException if {@code input} is null
-   */
-  def apply(input: I): R
+  def apply(key: String): Option[String] = Some(key)
+
+  def apply(key: String, defaultValue: String, obj: Any*): String = key
+
+  def locale: Locale = null
 }

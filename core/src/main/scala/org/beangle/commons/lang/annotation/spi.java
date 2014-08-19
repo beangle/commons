@@ -16,30 +16,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.text.i18n.spi
+package org.beangle.commons.lang.annotation;
 
-import java.util.Locale
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * TextBundle
- *
+ * Service Provider Interface API
+ * 
  * @author chaostone
- * @since 3.0.0
  */
-trait TextBundle {
+@Target({ ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface spi {
 
-  /**
-   * Gets a message based on a message key, or null if no message is found.
-   */
-  def get(key: String): Option[String]
-
-  /**
-   * Returns the locale of this resource bundle.
-   */
-  def locale: Locale
-
-  /**
-   * Get the bundle resource path
-   */
-  def resource: String
 }

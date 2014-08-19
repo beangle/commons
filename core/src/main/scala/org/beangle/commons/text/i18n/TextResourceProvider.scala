@@ -16,14 +16,23 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.functor
+package org.beangle.commons.text.i18n
 
+import java.util.Locale
+import org.beangle.commons.lang.annotation.spi
 /**
- * Transform object to another
+ * TextResource provider
  *
  * @author chaostone
- * @since 3.2.0
- * @param <I>
- * @param <R>
+ * @since 3.0.2
  */
-trait Transformer[I, R] extends UnaryFunction[I, R]
+@spi
+trait TextResourceProvider {
+
+  /**
+   * Return text resource;
+   *
+   * @param locale default could be null.
+   */
+  def getTextResource(locale: Locale): TextResource
+}

@@ -16,21 +16,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.text.i18n.impl
+package org.beangle.commons.text.i18n
 
 import java.util.Locale
-import org.beangle.commons.text.i18n.TextResource
 
 /**
- * NullTextResource class.
+ * Text formater
  *
  * @author chaostone
+ * @since 3.0.0
  */
-class NullTextResource extends TextResource {
+trait TextFormater {
 
-  def apply(key: String): Option[String] = Some(key)
-
-  def apply(key: String, defaultValue: String, obj: Any*): String = key
-
-  def locale: Locale = null
+  def format(text: String, locale: Locale, args: Any*): String
 }

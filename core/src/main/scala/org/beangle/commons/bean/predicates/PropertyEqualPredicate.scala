@@ -29,15 +29,9 @@ import org.beangle.commons.lang.functor.Predicate
  * @author chaostone
  */
 class PropertyEqualPredicate[T](name: String, value: Any) extends Predicate[T] {
-
-  /**
-   * <p>
-   * evaluate.
-   * </p>
-   *
-   * @param arg0 a {@link java.lang.Object} object.
-   * @return a boolean.
-   */
-  def apply(arg0: T): Boolean = (value == PropertyUtils.getProperty[Any](arg0, name))
+  
+  def apply(arg0: T): Boolean = {
+    (value == PropertyUtils.getProperty[Any](arg0, name))
+  }
 
 }

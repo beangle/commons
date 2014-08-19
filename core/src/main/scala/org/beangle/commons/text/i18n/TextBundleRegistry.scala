@@ -16,19 +16,39 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.bean.transformers
+package org.beangle.commons.text.i18n
 
-import org.beangle.commons.bean.PropertyUtils
-import org.beangle.commons.lang.functor.Transformer
+import java.util.Locale
 
 /**
- * bean属性提取器<br>
- * CollectUtils.transform(collections,new PropertyTransformer('myAttr'))
+ * TextBundleRegistry
  *
  * @author chaostone
+ * @since 3.0.0
  */
-class PropertyTransformer[R](property: String) extends Transformer[Any, R]() {
+trait TextBundleRegistry {
 
-  def apply(arg0: Any): R = PropertyUtils.getProperty(arg0, property)
+  /**
+   * Load and cache bundle
+   */
+  def load(locale: Locale, bundleName: String): TextBundle
 
+  /**
+   * List locale bundles
+   */
+  def getBundles(locale: Locale): List[TextBundle]
+
+  /**
+   * Load and cache default bundles
+   */
+  def addDefaults(bundleNames: String*): Unit
+
+  /**
+   * Get default locale message
+   */
+  def getDefaultText(key: String, locale: Locale): Option[String]
+
+  def reloadable: Boolean
+  
+  def reloadable_=(value: Boolean): Unit
 }

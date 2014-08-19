@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.text.i18n.impl
+package org.beangle.commons.text.i18n
 
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
@@ -27,7 +27,6 @@ import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.{ Arrays, ClassLoaders }
 import org.beangle.commons.lang.time.Stopwatch
 import org.beangle.commons.logging.Logging
-import org.beangle.commons.text.i18n.spi.{ TextBundle, TextBundleRegistry }
 /**
  * @since 3.0.0
  */

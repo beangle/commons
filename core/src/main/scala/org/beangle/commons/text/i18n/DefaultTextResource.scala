@@ -16,13 +16,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.text.i18n.impl
+package org.beangle.commons.text.i18n
 
 import java.util.Locale
-import org.beangle.commons.text.i18n.spi.TextBundle
-import org.beangle.commons.text.i18n.spi.TextBundleRegistry
-import org.beangle.commons.text.i18n.spi.TextFormater
-import org.beangle.commons.text.i18n.TextResource
 
 /**
  * Abstract BundleTextResource class.

@@ -19,9 +19,6 @@
 package org.beangle.commons.text.i18n
 
 import java.util.Locale
-import org.beangle.commons.text.i18n.impl.DefaultTextBundleRegistry
-import org.beangle.commons.text.i18n.impl.DefaultTextFormater
-import org.beangle.commons.text.i18n.impl.DefaultTextResource
 import org.scalatest.FunSpec
 import org.scalatest.Matchers
 import org.junit.runner.RunWith

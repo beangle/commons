@@ -16,17 +16,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.text.i18n.spi
+package org.beangle.commons.text.i18n
 
 import java.util.Locale
 
 /**
- * Text formater
- *
  * @author chaostone
  * @since 3.0.0
  */
-trait TextFormater {
+class DefaultTextBundle(val locale: Locale, val resource: String, texts: Map[String, String]) extends TextBundle {
 
-  def format(text: String, locale: Locale, args: Any*): String
+  def get(key: String): Option[String] = texts.get(key)
+
+  override def toString(): String = resource
 }
