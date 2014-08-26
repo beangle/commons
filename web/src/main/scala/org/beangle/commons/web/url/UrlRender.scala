@@ -23,9 +23,7 @@ import java.net.URLEncoder
 import org.beangle.commons.lang.Assert
 import org.beangle.commons.lang.Strings
 
-class UrlRender(var initSuffix: String = null) {
-
-  val suffix = if (null != initSuffix && initSuffix.charAt(0) != '.') "." + initSuffix else initSuffix
+class UrlRender {
 
   var escapeAmp: Boolean = _
 
@@ -63,7 +61,9 @@ class UrlRender(var initSuffix: String = null) {
     sb.toString
   }
 
-  def render(context: String, referer: String, uri: String): String = renderUri(context, referer, uri).toString
+  def render(context: String, referer: String, uri: String): String = {
+    renderUri(context, referer, uri).toString
+  }
 
   private def renderUri(context: String, referer: String, uriStr: String): StringBuilder = {
     val sb = new StringBuilder()
@@ -80,24 +80,21 @@ class UrlRender(var initSuffix: String = null) {
     if (uri.startsWith("/")) {
       sb ++= uri.substring(0, questIndex)
     } else {
-      val lastslash = referer.lastIndexOf("/")
+      val lastslash = referer.lastIndexOf("/") + 1
       val namespace = referer.substring(0, lastslash)
       sb.append(namespace)
       if (uri.startsWith("!")) {
         var dot = referer.indexOf("!", lastslash)
         if (-1 == dot) dot = referer.indexOf(".", lastslash)
-
-        dot = if ((-1 == dot)) referer.length else dot
+        if (-1 == dot) dot = referer.length
         val action = referer.substring(lastslash, dot)
         sb ++= action
         sb ++= uri
       } else {
-        sb.append('/').append(uri)
+        sb.append(uri)
       }
     }
-    if (null != suffix) sb.append(suffix)
     if (null != queryStr) sb.append('?').append(queryStr)
-
     sb
   }
 }

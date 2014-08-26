@@ -30,6 +30,8 @@ trait Container {
 
   def getType(key: Any): Option[Class[_]]
 
+  def getDefinition(key: Any): Any
+
   def getBean[T](key: Any): Option[T]
 
   def getBean[T](clazz: Class[T]): Option[T]
@@ -47,7 +49,9 @@ object Containers {
 
   val children = new collection.mutable.HashMap[Any, Container]
 
-  def addHook(hook: ContainerRefreshedHook): Unit = hooks = hook :: hooks
+  def addHook(hook: ContainerRefreshedHook): Unit = {
+    hooks = hook :: hooks
+  }
 
   def register(id: Any, container: Container): Unit = children.put(id, container)
 

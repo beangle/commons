@@ -22,6 +22,7 @@ import org.beangle.commons.lang.Strings
 import Binder._
 import scala.collection.mutable.ListBuffer
 import org.beangle.commons.inject.Scope
+import org.beangle.commons.lang.annotation.description
 
 object Binder {
 
@@ -41,17 +42,19 @@ object Binder {
 
     var properties = new collection.mutable.HashMap[String, Any]
 
-    var lazyInit: Boolean = true
+    var lazyInit: Boolean = _
 
-    var abstractFlag: Boolean = false
+    var abstractFlag: Boolean = _
 
-    var primary: Boolean = false
+    var primary: Boolean = _
 
     var parent: String = _
 
     var targetClass: Class[_] = _
 
     var constructorArgs: Seq[_] = _
+
+    var description: String = _
 
     def isAbstract(): Boolean = abstractFlag
 
@@ -139,6 +142,8 @@ object Binder {
     def bind(classes: Class[_]*): this.type = {
       for (clazz <- classes) {
         val definition = new Definition(getBeanName(clazz, false), clazz, Scope.Singleton.toString)
+        val an = clazz.getAnnotation(classOf[description])
+        if (null != an) definition.description = an.value()
         config.add(definition)
         beans += definition
       }
@@ -147,6 +152,8 @@ object Binder {
 
     def bind(name: String, clazz: Class[_]): this.type = {
       val definition = new Definition(name, clazz, Scope.Singleton.toString)
+      val an = clazz.getAnnotation(classOf[description])
+      if (null != an) definition.description = an.value()
       config.add(definition)
       beans += definition
       this
