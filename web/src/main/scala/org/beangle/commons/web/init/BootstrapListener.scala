@@ -26,13 +26,14 @@ import scala.collection.JavaConversions.asScalaBuffer
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.Strings.{ split, substringAfter, substringBefore }
+import org.beangle.commons.logging.Logging
 
 import javax.servlet.{ ServletContextEvent, ServletContextListener, ServletException }
 import javax.servlet.DispatcherType.REQUEST
 /**
  * Web BootstrapListener
  */
-class BootstrapListener extends ServletContextListener {
+class BootstrapListener extends ServletContextListener with Logging {
 
   val others = new collection.mutable.ListBuffer[ServletContextListener]
 
@@ -51,10 +52,9 @@ class BootstrapListener extends ServletContextListener {
     if (initializers.isEmpty) {
       servletContext.log("No Beangle Initializer types detected on classpath")
     } else {
-      val initializerNames = initializers.map(c => c.getClass.getName).mkString(",")
-      servletContext.log(s"Beangle Initializer detected on classpath: initializerNames")
       for (initializer <- initializers) {
         initializer.boss = this
+        info(s"${initializer.getClass.getName} registering ...")
         initializer.onStartup(servletContext)
       }
 
