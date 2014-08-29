@@ -24,12 +24,13 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.collection.JavaConversions.collectionAsScalaIterable
 
 import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.{ Arrays, ClassLoaders }
-import org.beangle.commons.lang.time.Stopwatch
+import org.beangle.commons.lang.{Arrays, ClassLoaders}
+import org.beangle.commons.lang.annotation.description
 import org.beangle.commons.logging.Logging
 /**
  * @since 3.0.0
  */
+@description("缺省TextBundle注册表")
 class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
 
   protected val caches = new collection.mutable.HashMap[Locale, ConcurrentHashMap[String, TextBundle]]

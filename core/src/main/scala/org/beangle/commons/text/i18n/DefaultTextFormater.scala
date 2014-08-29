@@ -21,12 +21,15 @@ package org.beangle.commons.text.i18n
 import java.text.MessageFormat
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
+
+import org.beangle.commons.lang.annotation.description
 /**
  * DefaultTextFormater with cache
  *
  * @author chaostone
  * @since 3.0.0
  */
+@description("缺省Text格式化")
 class DefaultTextFormater extends TextFormater {
 
   protected val caches = new collection.mutable.HashMap[Locale, ConcurrentHashMap[String, MessageFormat]]
