@@ -81,7 +81,7 @@ abstract class AbstractBindModule extends Module {
 
   def ? = InjectPlaceHolder
 
-  def $(s: String) = PropertyPlaceHolder(s)
+  def $(s: String, defaultValue: String = null) = PropertyPlaceHolder(s, defaultValue)
   /**
    * Generate a list property
    *

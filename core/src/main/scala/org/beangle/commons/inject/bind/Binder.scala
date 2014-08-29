@@ -29,7 +29,7 @@ object Binder {
   case class ReferenceValue(ref: String)
   case class Injection[T](clazz: Class[T])
   object InjectPlaceHolder
-  case class PropertyPlaceHolder(name: String)
+  case class PropertyPlaceHolder(name: String, defaultValue: String)
 
   /**
    * Bean Definition
