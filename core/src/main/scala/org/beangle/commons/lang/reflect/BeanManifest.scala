@@ -19,12 +19,12 @@
 package org.beangle.commons.lang.reflect
 
 import java.lang.Character.isUpperCase
-import java.lang.reflect.{Method, Modifier, ParameterizedType, TypeVariable}
+import java.lang.reflect.{ Method, Modifier, ParameterizedType, TypeVariable }
 
 import scala.collection.mutable
 import scala.language.existentials
 
-import org.beangle.commons.lang.Strings.{substringAfter, substringBefore, uncapitalize}
+import org.beangle.commons.lang.Strings.{ substringAfter, substringBefore, uncapitalize }
 
 case class Getter(val method: Method, val returnType: Class[_])
 
@@ -141,12 +141,13 @@ object BeanManifest {
       else name
       Some((true, propertyName))
     } else if (1 == parameterTypes.length) {
-      val propertyName = if (name.startsWith("set") && name.length > 3 && isUpperCase(name.charAt(3)))
-        uncapitalize(substringAfter(name, "set"))
-      else if (name.endsWith("_$eq")) substringBefore(name, "_$eq")
-      else null
-      if (null == propertyName) None else Some((false, propertyName))
+      val propertyName =
+        if (name.startsWith("set") && name.length > 3 && isUpperCase(name.charAt(3)))
+          uncapitalize(substringAfter(name, "set"))
+        else if (name.endsWith("_$eq")) substringBefore(name, "_$eq")
+        else null
 
+      if (null != propertyName && !propertyName.contains("$")) Some((false, propertyName)) else None
     } else None
   }
 }

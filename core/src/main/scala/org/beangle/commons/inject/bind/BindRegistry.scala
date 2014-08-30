@@ -36,10 +36,12 @@ trait BindRegistry {
   def getBeanType(beanName: String): Class[_]
 
   /**
-   * register.
+   * register bean definition
+   * @param name beanName
+   * @param clazz can be null if definition is abstract
    *
    */
-  def register(clazz: Class[_], name: String, args: Any*): Unit
+  def register(name: String, clazz: Class[_], args: Any*): Unit
 
   /**
    * contains.

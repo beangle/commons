@@ -43,6 +43,7 @@ trait Container {
 
 object Containers {
 
+  //FIXME rename to ROOT and move children to root
   var root: Container = _
 
   var hooks: List[ContainerRefreshedHook] = Nil

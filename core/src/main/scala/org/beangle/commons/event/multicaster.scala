@@ -17,6 +17,12 @@
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.event
+
+import scala.collection.mutable
+
+import org.beangle.commons.inject.Container
+import org.beangle.commons.lang.annotation.description
+
 /**
  * EventListener interface.
  *
@@ -83,13 +89,12 @@ object DefaultEventMulticaster {
     }
   }
 }
-
-import DefaultEventMulticaster._
-import scala.collection.mutable
 /**
  * DefaultEventMulticaster class.
  */
 class DefaultEventMulticaster extends EventMulticaster {
+
+  import DefaultEventMulticaster._
 
   protected var listeners: List[EventListener[Event]] = Nil
 
@@ -147,9 +152,18 @@ class DefaultEventMulticaster extends EventMulticaster {
 trait EventPublisher {
 
   var multicaster: EventMulticaster = _
-  /**
-   * publishEvent.
-   */
+
   def publish(event: Event): Unit = multicaster.multicast(event)
 }
 
+@description("依据名称查找监听者的事件广播器")
+class BeanNamesEventMulticaster(container: Container, listenerNames: Seq[String]) extends DefaultEventMulticaster {
+
+  override def initListeners() {
+    if (listeners.isEmpty) {
+      listenerNames foreach { beanName =>
+        if (container.contains(beanName)) addListener(container.getBean[EventListener[_]](beanName).get)
+      }
+    }
+  }
+}

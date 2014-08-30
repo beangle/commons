@@ -181,7 +181,7 @@ class Binder(val module: String) {
   def definitions: List[Definition] = definitionBuffer.toList
 
   def innerName(clazz: Class[_]): String = {
-    clazz.getName + "#" + Math.abs(module.hashCode) + definitions.size
+    clazz.getSimpleName + "#" + Math.abs(module.hashCode) + definitions.size
   }
 
   /**
