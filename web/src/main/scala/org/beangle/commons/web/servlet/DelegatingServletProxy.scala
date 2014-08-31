@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.web.servlet
 
-import org.beangle.commons.inject.{ Container, ContainerRefreshedHook, Containers }
+import org.beangle.commons.inject.{ Container, ContainerRefreshedHook }
 import org.beangle.commons.lang.Throwables
 import javax.servlet.ServletException
 import javax.servlet.http.{ HttpServlet, HttpServletRequest, HttpServletResponse }
@@ -33,8 +33,8 @@ class DelegatingServletProxy extends HttpServlet with ContainerRefreshedHook {
 
   override def init() {
     if (null == targetBeanName) targetBeanName = getServletName()
-    val wac = Containers.root
-    if (wac == null) Containers.addHook(this)
+    val wac = Container.ROOT
+    if (wac == null) Container.addHook(this)
     else delegate = initDelegate(wac)
   }
 

@@ -92,7 +92,10 @@ object Binder {
 
     def proxy(property: String, clazz: Class[_]): this.type = {
       val targetBean = config.innerName(clazz)
-      config.add(new Definition(targetBean, clazz, Scope.Singleton.toString))
+      val targetDefinition = new Definition(targetBean, clazz, Scope.Singleton.toString)
+      val an = clazz.getAnnotation(classOf[description])
+      if (null != an) targetDefinition.description = an.value()
+      config.add(targetDefinition)
       for (definition <- beans) {
         definition.targetClass = clazz
         definition.properties.put(property, new ReferenceValue(targetBean))

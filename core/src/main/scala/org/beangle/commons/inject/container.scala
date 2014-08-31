@@ -39,26 +39,20 @@ trait Container {
   def getBeans[T](clazz: Class[T]): Map[_, T]
 
   def keys(): Set[_]
-}
-
-object Containers {
-
-  //FIXME rename to ROOT and move children to root
-  var root: Container = _
-
-  var hooks: List[ContainerRefreshedHook] = Nil
 
   val children = new collection.mutable.HashMap[Any, Container]
+}
+
+object Container {
+
+  var ROOT: Container = _
+
+  var hooks: List[ContainerRefreshedHook] = Nil
 
   def addHook(hook: ContainerRefreshedHook): Unit = {
     hooks = hook :: hooks
   }
 
-  def register(id: Any, container: Container): Unit = children.put(id, container)
-
-  def remove(id: Any): Unit = children.remove(id)
-
-  def get(id: Any): Container = children(id)
 }
 
 trait ContainerAware {

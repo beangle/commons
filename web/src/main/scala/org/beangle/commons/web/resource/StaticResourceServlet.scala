@@ -1,12 +1,13 @@
 package org.beangle.commons.web.resource
 
-import org.beangle.commons.inject.Containers
+import org.beangle.commons.inject.Container
 import org.beangle.commons.io.ClasspathResourceLoader
 import org.beangle.commons.lang.Strings
+import org.beangle.commons.web.resource.filter.HeaderFilter
 import org.beangle.commons.web.resource.impl.PathResolverImpl
+
 import javax.servlet.ServletConfig
 import javax.servlet.http.{ HttpServlet, HttpServletRequest, HttpServletResponse }
-import org.beangle.commons.web.resource.filter.HeaderFilter
 
 class StaticResourceServlet extends HttpServlet {
 
@@ -27,7 +28,7 @@ class StaticResourceServlet extends HttpServlet {
   }
 
   protected def buildProcessor(): ResourceProcessor = {
-    Containers.root.getBean(classOf[ResourceProcessor]) match {
+    Container.ROOT.getBean(classOf[ResourceProcessor]) match {
       case Some(p) => p
       case None =>
         val p = new ResourceProcessor(new ClasspathResourceLoader, new PathResolverImpl())

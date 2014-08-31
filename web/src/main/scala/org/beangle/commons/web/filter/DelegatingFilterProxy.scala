@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.web.filter
 
-import org.beangle.commons.inject.{ Container, ContainerRefreshedHook, Containers }
+import org.beangle.commons.inject.{ Container, ContainerRefreshedHook }
 import org.beangle.commons.lang.Throwables
 
 import javax.servlet.{ Filter, FilterChain, ServletException, ServletRequest, ServletResponse }
@@ -51,8 +51,8 @@ class DelegatingFilterProxy extends GenericHttpFilter with ContainerRefreshedHoo
 
   override def init() {
     if (null == beanName) beanName = filterName
-    val wac = Containers.root
-    if (wac != null) delegate = initDelegate(wac) else Containers.addHook(this)
+    val wac = Container.ROOT
+    if (wac != null) delegate = initDelegate(wac) else Container.addHook(this)
   }
 
   protected def initDelegate(container: Container): Filter = {
