@@ -33,17 +33,17 @@ class DefaultTextResource(val locale: Locale, protected val registry: TextBundle
    * getText.
    */
   def apply(key: String, defaultValue: String, args: Any*): String = {
-    val text = get(key, locale).getOrElse(if ((null eq defaultValue) && keyAsDefault) key else defaultValue)
+    val text = get(key).getOrElse(if ((null eq defaultValue) && keyAsDefault) key else defaultValue)
     if ((null != text) && args.length > 0) formater.format(text, locale, args: _*)
     else text
   }
 
   def apply(key: String): Option[String] = {
-    val msg = get(key, locale)
+    val msg = get(key)
     if (msg.isEmpty && keyAsDefault) Some(key) else msg
   }
 
-  protected def get(key: String, locale: Locale): Option[String] = {
+  protected def get(key: String): Option[String] = {
     var msg: Option[String] = None
     registry.getBundles(locale) find { bundle =>
       msg = bundle.get(key)
