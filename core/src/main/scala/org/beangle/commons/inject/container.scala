@@ -40,7 +40,8 @@ trait Container {
 
   def keys(): Set[_]
 
-  val children = new collection.mutable.HashMap[Any, Container]
+  def parent: Container
+
 }
 
 object Container {
@@ -53,6 +54,7 @@ object Container {
     hooks = hook :: hooks
   }
 
+  val containers = new collection.mutable.HashSet[Container]
 }
 
 trait ContainerAware {
