@@ -36,7 +36,7 @@ trait Container {
 
   def getBean[T](clazz: Class[T]): Option[T]
 
-  def getBeans[T](clazz: Class[T]): Map[_, T]
+  def getBeans[T](clazz: Class[T]): Map[Any, T]
 
   def keys(): Set[_]
 
