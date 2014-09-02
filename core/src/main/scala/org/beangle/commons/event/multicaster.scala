@@ -19,9 +19,9 @@
 package org.beangle.commons.event
 
 import scala.collection.mutable
-
 import org.beangle.commons.inject.Container
 import org.beangle.commons.lang.annotation.description
+import org.beangle.commons.bean.Initializing
 
 /**
  * EventListener interface.
@@ -123,11 +123,7 @@ class DefaultEventMulticaster extends EventMulticaster {
     listenerCache = Map.empty
   }
 
-  protected def initListeners() {
-  }
-
   private def getListeners(e: Event): List[EventListener[Event]] = {
-    initListeners()
     val key = new ListenerCacheKey(e.getClass, e.getSource.getClass)
     var adapted = listenerCache.get(key).orNull
     if (null == adapted) {
@@ -157,13 +153,13 @@ trait EventPublisher {
 }
 
 @description("依据名称查找监听者的事件广播器")
-class BeanNamesEventMulticaster(container: Container, listenerNames: Seq[String]) extends DefaultEventMulticaster {
+class BeanNamesEventMulticaster(listenerNames: Seq[String]) extends DefaultEventMulticaster with Initializing {
 
-  override def initListeners() {
-    if (listeners.isEmpty) {
-      listenerNames foreach { beanName =>
-        if (container.contains(beanName)) addListener(container.getBean[EventListener[_]](beanName).get)
-      }
+  var container: Container = _
+
+  override def init() {
+    listenerNames foreach { beanName =>
+      if (container.contains(beanName)) addListener(container.getBean[EventListener[_]](beanName).get)
     }
   }
 }
