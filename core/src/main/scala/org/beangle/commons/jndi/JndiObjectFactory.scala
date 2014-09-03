@@ -37,15 +37,13 @@ class JndiObjectFactory[T](val jndiName: String) extends Factory[T] {
 
   var environment: ju.Properties = _
 
-  def getObject: T = {
+  override def result: T = {
     val ctx = new InitialContext
     val located = ctx.lookup(convertJndiName(jndiName))
     if (null == located)
       throw new NameNotFoundException(s"JNDI object with [$jndiName] not found: JNDI implementation returned null")
     located.asInstanceOf[T]
   }
-
-  def singleton = true
 
   /**
    * Convert the given JNDI name into the actual JNDI name to use.
