@@ -22,6 +22,7 @@ import java.{ util => ju }
 import org.beangle.commons.bean.Factory
 import javax.naming.{ InitialContext, NameNotFoundException }
 import javax.sql.DataSource
+import org.beangle.commons.lang.annotation.description
 
 object JndiObjectFactory {
   /** JNDI prefix used in a J2EE container */
@@ -58,6 +59,7 @@ class JndiObjectFactory[T](val jndiName: String) extends Factory[T] {
 
 }
 
+@description("JNDI提供的数据源工厂")
 class JndiDataSourceFactory(jndiName: String) extends JndiObjectFactory[DataSource](jndiName) {
 
 }

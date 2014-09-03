@@ -66,7 +66,7 @@ trait ContainerAware {
 
 trait ContainerRefreshedHook {
 
-  def notify(context: Container): Unit
+  def notify(container: Container): Unit
 }
 
 trait PropertySource {

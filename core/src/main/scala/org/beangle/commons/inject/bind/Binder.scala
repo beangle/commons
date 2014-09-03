@@ -80,6 +80,18 @@ object Binder {
       this
     }
 
+    def description(descs: String*): this.type = {
+      require(descs.size == 1 || descs.size == beans.size)
+      if (descs.size == 1) for (definition <- beans) definition.description = descs.head
+      else {
+        val beanIter = beans.iterator
+        val descIter = descs.iterator
+        while (beanIter.hasNext) {
+          beanIter.next.description = descIter.next
+        }
+      }
+      this
+    }
     def lazyInit(lazyInit: Boolean = true): this.type = {
       for (definition <- beans) definition.lazyInit = lazyInit
       this
