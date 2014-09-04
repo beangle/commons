@@ -111,9 +111,7 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
     val language = locale.getLanguage
     val country = locale.getCountry
     val variant = locale.getVariant
-    if (language == "" && country == "" && variant == "") {
-      return ""
-    }
+    if (language == "" && country == "" && variant == "")  return ""
     val sb = new StringBuilder()
     if (variant != "") {
       sb.append(language).append('_').append(country).append('_').append(variant)
