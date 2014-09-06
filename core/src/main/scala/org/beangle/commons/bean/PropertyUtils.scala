@@ -38,7 +38,7 @@ object PropertyUtils extends Logging {
     copyProperty(bean, name, value, null)
   }
 
-  def getProperty[T](inputBean: Any, propertyName: String): T = {
+  def getProperty[T <: Any](inputBean: Any, propertyName: String): T = {
     var result = inputBean
     var name = propertyName
     while (resolver.hasNested(name)) {
