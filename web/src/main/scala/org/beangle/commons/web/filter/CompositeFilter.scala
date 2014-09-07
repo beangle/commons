@@ -56,13 +56,12 @@ object MatchedCompositeFilter {
   }
 }
 
-import MatchedCompositeFilter.build
 class MatchedCompositeFilter(urlMap: Map[String, List[Filter]]) extends GenericCompositeFilter {
 
-  val chainMap: Map[RequestMatcher, List[Filter]] = build(urlMap)
+  val chainMap: Map[RequestMatcher, List[Filter]] = MatchedCompositeFilter.build(urlMap)
 
   def this(filters: List[Filter]) {
-    this(build(filters))
+    this(MatchedCompositeFilter.build(filters))
   }
 
   /**

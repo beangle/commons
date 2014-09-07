@@ -1,4 +1,4 @@
-package org.beangle.commons.lang.mutable
+package org.beangle.commons.lang.primitive
 
 class MutableInt(var value: Int=0) {
 
