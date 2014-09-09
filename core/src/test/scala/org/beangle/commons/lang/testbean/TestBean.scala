@@ -18,6 +18,8 @@
  */
 package org.beangle.commons.lang.testbean
 
+import org.beangle.commons.lang.annotation.description
+
 class TestBean {
 
   var id: java.lang.Integer = _
@@ -35,6 +37,25 @@ class TestBean {
     c: TestBean,
     c1: TestBean,
     c2: TestBean): String = "test"
+
+  @description("method1")
+  def method1(a: Long): Unit = {
+
+  }
+}
+
+class TestChildBean extends TestBean {
+  def method2(a: Long): Unit = {
+
+  }
+}
+class TestChild2Bean extends TestChildBean {
+  override def method1(a: Long): Unit = {
+
+  }
+  override def method2(a: Long): Unit = {
+
+  }
 }
 
 trait Animal {
@@ -71,6 +92,6 @@ class BookStore extends StringIdBean
 
 class AbstractEntity[ID](val id: ID)
 
-class NumberIdBean[T <:Number](id : T) extends AbstractEntity[T](id)
+class NumberIdBean[T <: Number](id: T) extends AbstractEntity[T](id)
 
-class Author(id:Integer) extends NumberIdBean[Integer](id)
+class Author(id: Integer) extends NumberIdBean[Integer](id)

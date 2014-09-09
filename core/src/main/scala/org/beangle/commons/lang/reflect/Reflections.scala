@@ -18,11 +18,12 @@
  */
 package org.beangle.commons.lang.reflect
 
-import java.lang.reflect.{ParameterizedType, Type, TypeVariable}
+import java.lang.annotation.Annotation
+import java.lang.reflect.{ Method, ParameterizedType, Type, TypeVariable }
 
 import scala.language.existentials
 
-import org.beangle.commons.lang.{Objects, Throwables}
+import org.beangle.commons.lang.{ Objects, Throwables }
 
 object Reflections {
 
@@ -82,4 +83,20 @@ object Reflections {
     else getSuperClassParamType(clazz.getSuperclass(), clazz.getGenericSuperclass(), expected, newParamTypes)
   }
 
+  /**
+   * Find annotation in method declare class hierarchy
+   */
+  def getAnnotation[T <: Annotation](method: Method, clazz: Class[T]): T = {
+    val ann = method.getAnnotation(clazz)
+    if (null == ann) {
+      val delaringClass = method.getDeclaringClass
+      if (delaringClass == classOf[Object]) return null.asInstanceOf[T];
+      val superClass = delaringClass.getSuperclass
+      try {
+        getAnnotation(superClass.getMethod(method.getName(), method.getParameterTypes(): _*), clazz)
+      } catch {
+        case e: NoSuchMethodException => null.asInstanceOf[T]
+      }
+    } else ann
+  }
 }
