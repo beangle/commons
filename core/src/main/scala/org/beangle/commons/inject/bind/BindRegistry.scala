@@ -23,7 +23,7 @@ package org.beangle.commons.inject.bind
  *
  * @author chaostone
  */
-trait BindRegistry {
+trait BindRegistry[T] {
 
   /**
    * getBeanNames.
@@ -38,10 +38,18 @@ trait BindRegistry {
   /**
    * register bean definition
    * @param name beanName
+   * @param clazz cannot  be null
+   *
+   */
+  def register(name: String, clazz: Class[_]): Unit
+
+  /**
+   * register bean definition
+   * @param name beanName
    * @param clazz can be null if definition is abstract
    *
    */
-  def register(name: String, clazz: Class[_], args: Any*): Unit
+  def register(name: String, clazz: Class[_], definition: T): Unit
 
   /**
    * contains.
@@ -59,4 +67,9 @@ trait BindRegistry {
    *
    */
   def isPrimary(name: String): Boolean
+
+  /**
+   * Update primary
+   */
+  def setPrimary(name: String, isPrimary: Boolean, definition: T): Unit
 }
