@@ -18,8 +18,13 @@
  */
 package org.beangle.commons.web.filter
 
+import java.util.regex.Pattern
+
+import org.beangle.commons.logging.Logging
+import org.beangle.commons.text.regex.AntPathPattern
+import org.beangle.commons.web.util.RequestUtils
+
 import javax.servlet.http.HttpServletRequest
-import org.beangle.commons.lang.Strings
 
 /**
  * Simple strategy to match an <tt>HttpServletRequest</tt>.
@@ -38,8 +43,6 @@ trait RequestMatcher {
    */
   def matches(request: HttpServletRequest): Boolean
 }
-
-import org.beangle.commons.text.regex.AntPathPattern
 
 /**
  * Matcher which compares a pre-defined ant-style pattern against the URL (
@@ -65,7 +68,7 @@ class AntPathRequestMatcher(val pattern: AntPathPattern, val method: String) ext
   def matches(request: HttpServletRequest): Boolean = {
     if (method != null && method != request.getMethod) false
     else {
-      var url = request.getServletPath
+      var url = RequestUtils.getServletPath(request)
       if (null != request.getPathInfo) url += request.getPathInfo
       pattern.matches(url)
     }
@@ -80,9 +83,6 @@ class AntPathRequestMatcher(val pattern: AntPathPattern, val method: String) ext
 
   override def toString(): String = if (null == method) s"Ant [pattern='$pattern']" else s"Ant [pattern='$pattern',method=method]"
 }
-
-import java.util.regex.Pattern
-import org.beangle.commons.logging.Logging
 
 /**
  * Uses a regular expression to decide whether a supplied the URL of a supplied
@@ -111,7 +111,7 @@ class RegexRequestMatcher(pattern: Pattern, method: String) extends RequestMatch
   def matches(request: HttpServletRequest): Boolean = {
     if (method != null && method != request.getMethod) false
     else {
-      var url = request.getServletPath
+      var url = RequestUtils.getServletPath(request)
       val pathInfo = request.getPathInfo
       val query = request.getQueryString
       if (pathInfo != null || query != null) {
