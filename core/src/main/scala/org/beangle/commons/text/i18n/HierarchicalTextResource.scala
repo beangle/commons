@@ -18,7 +18,9 @@
  */
 package org.beangle.commons.text.i18n
 
-import java.{ util => ju }
+import java.{util => ju}
+
+import scala.language.existentials
 
 import org.beangle.commons.lang.Strings.substringBeforeLast
 import org.beangle.commons.logging.Logging

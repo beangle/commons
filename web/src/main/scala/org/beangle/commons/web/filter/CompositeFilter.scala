@@ -23,24 +23,8 @@ import javax.servlet.http.HttpServletRequest
 
 abstract class GenericCompositeFilter extends GenericHttpFilter {
 
-  /**
-   * A <code>FilterChain</code> that records whether or not
-   * {@link FilterChain#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse)} is
-   * called.
-   */
-  protected class VirtualFilterChain(val originalChain: FilterChain, additionalFilters: List[_ <: Filter])
-    extends FilterChain {
-
-    private val iter: Iterator[_ <: Filter] = additionalFilters.iterator
-
-    def doFilter(request: ServletRequest, response: ServletResponse) {
-      if (iter.hasNext) iter.next.doFilter(request, response, this)
-      else originalChain.doFilter(request, response)
-    }
-  }
-
   override def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
-    new VirtualFilterChain(chain, getFilters(request)).doFilter(request, response)
+    new VirtualFilterChain(chain, getFilters(request).iterator).doFilter(request, response)
   }
 
   def getFilters(request: ServletRequest): List[_ <: Filter]
