@@ -64,18 +64,6 @@ class DefaultStreamDownloader extends StreamDownloader with Logging {
     }
   }
 
-  protected def addContent(request: HttpServletRequest, response: HttpServletResponse, attach: String) {
-    var contentType = response.getContentType
-    if (null == contentType) {
-      contentType = MimeTypeProvider.getMimeType(Strings.substringAfterLast(attach, "."), "application/x-msdownload")
-      response.setContentType(contentType)
-      debug(s"set content type $contentType for $attach")
-    }
-    val encodeName = encodeAttachName(request, attach)
-    response.setHeader("Content-Disposition", "attachment; filename=" + encodeName)
-    response.setHeader("Location", encodeName)
-  }
-
   def download(request: HttpServletRequest, response: HttpServletResponse, inStream: InputStream, name: String, display: String) {
     val attach_name = getAttachName(name, display)
     try {
@@ -89,35 +77,32 @@ class DefaultStreamDownloader extends StreamDownloader with Logging {
     }
   }
 
-  def getAttachName(name: String, display: String): String = {
+  protected def getAttachName(name: String, display: String): String = {
     var attch_name = ""
     val ext = Strings.substringAfterLast(name, ".")
     if (Strings.isBlank(display)) {
-      attch_name = getFileName(name)
+      attch_name = name
+      var iPos = attch_name.lastIndexOf("\\")
+      if (iPos > -1) attch_name = attch_name.substring(iPos + 1)
+      iPos = attch_name.lastIndexOf("/")
+      if (iPos > -1) attch_name = attch_name.substring(iPos + 1)
     } else {
       attch_name = display
-      if (!attch_name.endsWith("." + ext)) {
-        attch_name += "." + ext
-      }
+      if (!attch_name.endsWith("." + ext)) attch_name += "." + ext
     }
     attch_name
   }
 
-  /**
-   * Returns the file name by path.
-   *
-   * @param file_name
-   */
-  protected def getFileName(fileName: String): String = {
-    if (fileName == null) return ""
-    var file_name = fileName.trim()
-    var iPos = 0
-    iPos = file_name.lastIndexOf("\\")
-    if (iPos > -1) file_name = file_name.substring(iPos + 1)
-    iPos = file_name.lastIndexOf("/")
-    if (iPos > -1) file_name = file_name.substring(iPos + 1)
-    iPos = file_name.lastIndexOf(File.separator)
-    if (iPos > -1) file_name = file_name.substring(iPos + 1)
-    file_name
+  protected def addContent(request: HttpServletRequest, response: HttpServletResponse, attach: String) {
+    var contentType = response.getContentType
+    if (null == contentType) {
+      contentType = MimeTypeProvider.getMimeType(Strings.substringAfterLast(attach, "."), "application/x-msdownload")
+      response.setContentType(contentType)
+      debug(s"set content type $contentType for $attach")
+    }
+    val encodeName = encodeAttachName(request, attach)
+    response.setHeader("Content-Disposition", "attachment; filename=" + encodeName)
+    response.setHeader("Location", encodeName)
   }
+
 }
