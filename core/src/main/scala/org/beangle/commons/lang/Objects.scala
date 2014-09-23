@@ -57,10 +57,8 @@ object Objects {
     if (a eq b) return true
     if ((null == a) || (null == b)) return false
     if (a.length != b.length) return false
-    for (i <- 0 until a.length if Objects.!=(a(i), b(i))) return false
-    true
+    !Range(0, a.length).exists(i => a(i) != b(i))
   }
-
   /**
    * <p>
    * Gets the {@code toString} of an {@code Object} returning an empty string ("") if {@code null}
