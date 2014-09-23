@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.collection.JavaConversions.collectionAsScalaIterable
 
 import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.{Arrays, ClassLoaders}
+import org.beangle.commons.lang.{ Arrays, ClassLoaders }
 import org.beangle.commons.lang.annotation.description
 import org.beangle.commons.logging.Logging
 /**
@@ -45,21 +45,25 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
   }
 
   def load(locale: Locale, bundleName: String): TextBundle = {
-    if (reloadable) caches.clear()
-    val localeBundles = caches.get(locale).getOrElse {
-      caches.synchronized {
-        val newBundles = new ConcurrentHashMap[String, TextBundle]
-        caches.put(locale, newBundles)
-        newBundles
-      }
-    }
-    var bundle = localeBundles.get(bundleName)
-    if (null == bundle) {
-      bundle = loadJavaBundle(bundleName, locale).getOrElse(
+    if (reloadable) {
+      loadJavaBundle(bundleName, locale).getOrElse(
         loadNewBundle(bundleName, locale).getOrElse(new DefaultTextBundle(locale, bundleName, Map.empty[String, String])))
-      localeBundles.put(bundleName, bundle)
+    } else {
+      val localeBundles = caches.get(locale).getOrElse {
+        caches.synchronized {
+          val newBundles = new ConcurrentHashMap[String, TextBundle]
+          caches.put(locale, newBundles)
+          newBundles
+        }
+      }
+      var bundle = localeBundles.get(bundleName)
+      if (null == bundle) {
+        bundle = loadJavaBundle(bundleName, locale).getOrElse(
+          loadNewBundle(bundleName, locale).getOrElse(new DefaultTextBundle(locale, bundleName, Map.empty[String, String])))
+        localeBundles.put(bundleName, bundle)
+      }
+      bundle
     }
-    bundle
   }
 
   protected def loadNewBundle(bundleName: String, locale: Locale): Option[TextBundle] = {
@@ -111,7 +115,7 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
     val language = locale.getLanguage
     val country = locale.getCountry
     val variant = locale.getVariant
-    if (language == "" && country == "" && variant == "")  return ""
+    if (language == "" && country == "" && variant == "") return ""
     val sb = new StringBuilder()
     if (variant != "") {
       sb.append(language).append('_').append(country).append('_').append(variant)
