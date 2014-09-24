@@ -83,20 +83,33 @@ object Reflections {
     else getSuperClassParamType(clazz.getSuperclass(), clazz.getGenericSuperclass(), expected, newParamTypes)
   }
 
-  /**
-   * Find annotation in method declare class hierarchy
-   */
-  def getAnnotation[T <: Annotation](method: Method, clazz: Class[T]): T = {
+  def isAnnotationPresent[T <: Annotation](method: Method, clazz: Class[T]): Boolean = {
     val ann = method.getAnnotation(clazz)
     if (null == ann) {
       val delaringClass = method.getDeclaringClass
-      if (delaringClass == classOf[Object]) return null.asInstanceOf[T];
+      if (delaringClass == classOf[Object]) return false
+      val superClass = delaringClass.getSuperclass
+      try {
+        isAnnotationPresent(superClass.getMethod(method.getName(), method.getParameterTypes(): _*), clazz)
+      } catch {
+        case e: NoSuchMethodException => false
+      }
+    } else true
+  }
+  /**
+   * Find annotation in method declare class hierarchy
+   */
+  def getAnnotation[T <: Annotation](method: Method, clazz: Class[T]): Tuple2[T, Method] = {
+    val ann = method.getAnnotation(clazz)
+    if (null == ann) {
+      val delaringClass = method.getDeclaringClass
+      if (delaringClass == classOf[Object]) return null.asInstanceOf[Tuple2[T, Method]]
       val superClass = delaringClass.getSuperclass
       try {
         getAnnotation(superClass.getMethod(method.getName(), method.getParameterTypes(): _*), clazz)
       } catch {
-        case e: NoSuchMethodException => null.asInstanceOf[T]
+        case e: NoSuchMethodException => null.asInstanceOf[Tuple2[T, Method]]
       }
-    } else ann
+    } else (ann, method)
   }
 }
