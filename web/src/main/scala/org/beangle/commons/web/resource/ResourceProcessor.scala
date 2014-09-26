@@ -1,6 +1,6 @@
 package org.beangle.commons.web.resource
 
-import org.beangle.commons.http.mime.MimeTypeProvider
+import org.beangle.commons.media.MimeTypeProvider
 import org.beangle.commons.io.ResourceLoader
 import org.beangle.commons.lang.Strings.substringAfterLast
 import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
@@ -36,7 +36,7 @@ class ResourceProcessor(private val loader: ResourceLoader, private val resolver
 
   protected def getContentType(uri: String, request: HttpServletRequest): String = {
     val contentType = MimeTypeProvider.getMimeType(substringAfterLast(uri, ".")).orNull
-    if (null == contentType) request.getServletContext().getMimeType(uri) else contentType
+    if (null == contentType) request.getServletContext().getMimeType(uri) else contentType.toString
   }
 
 }

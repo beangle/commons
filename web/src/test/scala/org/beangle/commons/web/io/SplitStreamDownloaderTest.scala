@@ -18,24 +18,16 @@
  */
 package org.beangle.commons.web.io
 
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.OutputStream
+import java.io.{ByteArrayOutputStream, File, OutputStream}
 
-import org.beangle.commons.http.mime.MimeTypeProvider
 import org.beangle.commons.lang.ClassLoaders
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.when
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
-
-import javax.servlet.ServletOutputStream
-import javax.servlet.WriteListener
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 import org.junit.runner.RunWith
+import org.mockito.Mockito.{mock, verify, when}
+import org.scalatest.{FunSpec, Matchers}
 import org.scalatest.junit.JUnitRunner
+
+import javax.servlet.{ServletOutputStream, WriteListener}
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 @RunWith(classOf[JUnitRunner])
 class SplitStreamDownloaderTest extends FunSpec with Matchers {

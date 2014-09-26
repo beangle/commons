@@ -18,15 +18,13 @@
  */
 package org.beangle.commons.web.io
 
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
-import org.beangle.commons.http.mime.MimeTypeProvider
+import java.io.{ IOException, InputStream }
+
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.time.Stopwatch
+
+import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 
 /**
  * SplitStreamDownloader
@@ -104,7 +102,7 @@ class SplitStreamDownloader extends DefaultStreamDownloader {
       }
     } catch {
       case e: IOException =>
-      case e: Exception => warn(s"download file error $attach" , e)
+      case e: Exception => warn(s"download file error $attach", e)
     } finally {
       IOs.close(input)
       if (debugEnabled) {

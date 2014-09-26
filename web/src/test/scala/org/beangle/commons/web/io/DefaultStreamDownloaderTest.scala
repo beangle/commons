@@ -18,25 +18,18 @@
  */
 package org.beangle.commons.web.io
 
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.when
-import java.io.ByteArrayOutputStream
-import java.io.IOException
-import java.io.OutputStream
-import java.net.URL
-import java.net.URLDecoder
-import java.net.URLEncoder
-import javax.servlet.ServletOutputStream
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import java.io.{ ByteArrayOutputStream, OutputStream }
+import java.net.{ URLDecoder, URLEncoder }
+
 import org.beangle.commons.codec.net.BCoder
-import org.beangle.commons.http.mime.MimeTypeProvider
 import org.beangle.commons.lang.ClassLoaders
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
-import javax.servlet.WriteListener
 import org.junit.runner.RunWith
+import org.mockito.Mockito.{ mock, when }
+import org.scalatest.{ FunSpec, Matchers }
 import org.scalatest.junit.JUnitRunner
+
+import javax.servlet.{ ServletOutputStream, WriteListener }
+import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 
 @RunWith(classOf[JUnitRunner])
 class DefaultStreamDownloaderTest extends FunSpec with Matchers {

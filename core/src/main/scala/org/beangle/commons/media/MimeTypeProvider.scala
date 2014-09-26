@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.http.mime
+package org.beangle.commons.media
 
 import java.io.{ IOException, InputStream }
 import java.net.URL
@@ -27,21 +27,27 @@ import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.ClassLoaders
 
 object MimeTypes {
-  def buildMimeTypes(resources: Resources): Map[String, String] = {
-    val buf = new collection.mutable.HashMap[String, String]
+  
+  def buildMimeTypes(resources: Resources): Map[String, MimeType] = {
+    val buf = new collection.mutable.HashMap[String, MimeType]
     if (null != resources) {
-      buf ++= IOs.readJavaProperties(resources.global)
-      if (null != resources.locals) {
-        resources.locals foreach { path => buf ++= IOs.readJavaProperties(path) }
-      }
-      buf ++= IOs.readJavaProperties(resources.user)
+      buf ++= parse(IOs.readJavaProperties(resources.global))
+      if (null != resources.locals) resources.locals foreach { path => buf ++= parse(IOs.readJavaProperties(path)) }
+      buf ++= parse(IOs.readJavaProperties(resources.user))
     }
     buf.toMap
   }
 
+  private def parse(mimetypes: Map[String, String]): Map[String, MimeType] = {
+    mimetypes.map {
+      case (ext, mimetype) =>
+        (ext, MimeType(mimetype))
+    }
+  }
+
   def mimeTypeResources: Resources = {
     import ClassLoaders.{ getResource, getResources }
-    new Resources(getResource("org/beangle/commons/http/mime/mimetypes.properties"),
+    new Resources(getResource("org/beangle/commons/mime/mimetypes.properties"),
       getResources("META-INF/mimetypes.properties"), null)
   }
 }
@@ -49,10 +55,10 @@ object MimeTypes {
 object MimeTypeProvider extends Logging {
 
   import MimeTypes._
-  private val contentTypes: Map[String, String] = buildMimeTypes(mimeTypeResources)
+  private val contentTypes: Map[String, MimeType] = buildMimeTypes(mimeTypeResources)
 
-  def getMimeType(ext: String, defaultValue: String): String = contentTypes.get(ext).getOrElse(defaultValue)
+  def getMimeType(ext: String, defaultValue: MimeType): MimeType = contentTypes.get(ext).getOrElse(defaultValue)
 
-  def getMimeType(ext: String): Option[String] = contentTypes.get(ext)
+  def getMimeType(ext: String): Option[MimeType] = contentTypes.get(ext)
 
 }
