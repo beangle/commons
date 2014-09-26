@@ -95,7 +95,7 @@ class DefaultStreamDownloader extends StreamDownloader with Logging {
   protected def addContent(request: HttpServletRequest, response: HttpServletResponse, attach: String) {
     var contentType = response.getContentType
     if (null == contentType) {
-      contentType = MimeTypeProvider.getMimeType(Strings.substringAfterLast(attach, "."), MimeType("application/x-msdownload")).toString
+      contentType = MimeTypeProvider.getMimeType(Strings.substringAfterLast(attach, "."), MimeType.ApplicationOctetStream).toString
       response.setContentType(contentType)
       debug(s"set content type $contentType for $attach")
     }
