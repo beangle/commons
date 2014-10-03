@@ -1,10 +1,10 @@
 package org.beangle.commons.web.resource
 
-import org.beangle.commons.media.MimeTypeProvider
-import org.beangle.commons.io.ResourceLoader
+import org.beangle.commons.activation.MimeTypeProvider
+import org.beangle.commons.io.{ IOs, ResourceLoader }
 import org.beangle.commons.lang.Strings.substringAfterLast
+
 import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
-import org.beangle.commons.io.IOs
 
 class ResourceProcessor(private val loader: ResourceLoader, private val resolver: PathResolver) {
 

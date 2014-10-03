@@ -45,8 +45,11 @@ class BeanManifest(val getters: Map[String, Getter], val setters: Map[String, Se
 
 object BeanManifest {
 
-  var cache = new mutable.WeakHashMap[Class[_], BeanManifest]
-
+  private val cache = new mutable.WeakHashMap[Class[_], BeanManifest]
+  /**
+   * Support scala case class
+   */
+  private val ignores = Set("hashCode", "toString", "productArity", "productPrefix", "productIterator")
   /**
    * Get BeanManifest from cache or load it by type.
    * It search from cache, when failure build it and put it into cache.
@@ -73,7 +76,6 @@ object BeanManifest {
     val setters = new mutable.HashMap[String, Setter]
     var nextClass = clazz
     var paramTypes: collection.Map[String, Class[_]] = Map.empty
-
     while (null != nextClass && classOf[AnyRef] != nextClass) {
       val declaredMethods = nextClass.getDeclaredMethods
       (0 until declaredMethods.length) foreach { i =>
@@ -99,10 +101,12 @@ object BeanManifest {
           val ps = ptSuper.getActualTypeArguments
           val tvs = nextClass.getTypeParameters
           (0 until ps.length) foreach { k =>
-            ps(k) match {
-              case c: Class[_] => tmp.put(tvs(k).getName, c)
-              case tv: TypeVariable[_] => tmp.put(tvs(k).getName, paramTypes(tv.getName))
-            }
+            tmp.put(tvs(k).getName,
+              ps(k) match {
+                case c: Class[_] => c
+                case tv: TypeVariable[_] => paramTypes(tv.getName)
+                case pt: ParameterizedType => pt.getRawType.asInstanceOf[Class[_]]
+              })
           }
           tmp
         case _ => Map.empty
@@ -128,11 +132,9 @@ object BeanManifest {
     if (Modifier.isStatic(modifiers) || Modifier.isPrivate(modifiers) || method.isBridge) return None
 
     val name = method.getName
+    if (name.contains("$") || ignores.contains(name)) return None
+
     val parameterTypes = method.getParameterTypes
-
-    if (parameterTypes.length == 0 && (name == "hashCode" || name == "toString")) return None
-    if (name.length == 1 & name == "equals") return None
-
     if (0 == parameterTypes.length && method.getReturnType != classOf[Unit]) {
       val propertyName = if (name.startsWith("get") && name.length > 3 && isUpperCase(name.charAt(3)))
         uncapitalize(substringAfter(name, "get"))

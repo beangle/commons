@@ -1,0 +1,6 @@
+   
+#microsofe office
+  type = application/msword                  exts = doc , xxx 
+type=application/rtf                     exts = rtf
+type=application/vnd.ms-excel            exts=  xls
+type =  application/msaccess                exts= mdb

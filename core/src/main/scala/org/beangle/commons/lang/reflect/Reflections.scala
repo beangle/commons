@@ -71,10 +71,12 @@ object Reflections {
         val ps = ptSuper.getActualTypeArguments
         val tvs = clazz.getTypeParameters
         (0 until ps.length) foreach { k =>
-          ps(k) match {
-            case c: Class[_] => tmp.put(tvs(k).getName, c)
-            case tv: TypeVariable[_] => tmp.put(tvs(k).getName, paramTypes(tv.getName))
-          }
+          tmp.put(tvs(k).getName,
+            ps(k) match {
+              case c: Class[_] => c
+              case tv: TypeVariable[_] => paramTypes(tv.getName)
+              case pt: ParameterizedType => pt.getRawType().asInstanceOf[Class[_]]
+            })
         }
         tmp
       case _ => Map.empty

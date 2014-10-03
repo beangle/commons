@@ -1,0 +1,74 @@
+# open office
+type=application/vnd.oasis.opendocument.database       exts=odb
+type=application/vnd.oasis.opendocument.chart          exts=odc
+type=application/vnd.oasis.opendocument.formula       exts=odf
+type=application/vnd.oasis.opendocument.graphics      exts=odg
+type=application/vnd.oasis.opendocument.image         exts=odi
+type=application/vnd.oasis.opendocument.text-master   exts=odm
+type=application/vnd.oasis.opendocument.presentation  exts=odp
+type=application/vnd.oasis.opendocument.spreadsheet   exts=ods
+type=application/vnd.oasis.opendocument.text          exts=odt
+type=application/vnd.oasis.opendocument.text-template exts=ott
+type=application/vnd.oasis.opendocument.text-web      exts=oth
+type=application/vnd.oasis.opendocument.graphics-template     exts=otg
+type=application/vnd.oasis.opendocument.presentation-template exts=otp
+type=application/vnd.oasis.opendocument.spreadsheet-template  exts=ots
+
+#microsofe office
+type=application/msword                  exts=doc
+type=application/rtf                     exts=rtf
+type=application/vnd.ms-excel            exts=xls
+type=application/msaccess                exts=mdb
+type=application/vnd.ms-powerpoint       exts=ppt
+type=application/vnd.openxmlformats-officedocument.wordprocessingml.document   exts=docx
+type=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet         exts=xlsx
+type=application/vnd.openxmlformats-officedocument.presentationml.presentation exts=pptx
+
+#misc
+type=application/x-rar          exts=rar
+type=application/zip            exts=zip
+type=application/xml            exts=xml
+type=application/x-java         exts=class
+type=application/x-java-archive exts=jar,war
+type=application/pdf            exts=pdf
+type=application/rtf            exts=rtf
+type=application/x-sh           exts=sh
+type=application/json           exts=json
+type=application/x-cut          exts=dbf
+type=application/x-ms-wmz       exts=dll
+type=magnus-internal/cgi        exts=cgi,exe,bat
+type=application/x-tar          exts=tar
+type=application/octet-stream   exts=bin
+
+# text file formats
+type=text/x-component   exts=htc
+type=text/javascript    exts=js
+type=text/plain         exts=txt,ftl,properties
+type=text/html          exts=html,htm,shtml
+type=text/css           exts=css
+type=text/x-java        exts=java
+type=text/x-jsp         exts=jsp
+type=text/csv           exts=csv
+type=text/x-sql         exts=sql
+type=text/vcard         exts=vcard,vcf
+
+#images
+type=image/gif          exts=gif
+type=image/jpeg         exts=jpeg,jpg,jpe,jfif,pjpeg,pjp
+type=image/png          exts=png
+type=image/x-icon       exts=ico
+
+#videos
+type=application/vnd.rn-realmedia      exts=rm
+type=application/vnd.rn-realmedia-vbr  exts=rmvb
+type=video/mpeg4                       exts=mp4
+type=video/ogg                         exts=ogv
+type=video/webm                        exts=webm
+type=video/x-flv                       exts=flv
+type=video/x-ms-wmv                    exts=wmv,wmx
+type=video/quicktime                   exts=qt
+
+#audios
+type=audio/mid                         exts=midi
+type=audio/ogg                         exts=oga,ogg
+type=audio/x-ms-wax                    exts=wma

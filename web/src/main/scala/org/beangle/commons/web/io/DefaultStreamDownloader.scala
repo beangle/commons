@@ -18,20 +18,16 @@
  */
 package org.beangle.commons.web.io
 
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
+import java.io.{ File, FileInputStream, InputStream }
 import java.net.URL
-import org.beangle.commons.bean.Initializing
-import org.beangle.commons.media.MimeTypeProvider
+
+import org.beangle.commons.activation.{ MimeTypeProvider, MimeTypes }
 import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.Assert
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.logging.Logging
 import org.beangle.commons.web.util.RequestUtils.encodeAttachName
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
-import org.beangle.commons.media.MimeType
+
+import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 
 /**
  * Default Stream Downloader
@@ -95,7 +91,7 @@ class DefaultStreamDownloader extends StreamDownloader with Logging {
   protected def addContent(request: HttpServletRequest, response: HttpServletResponse, attach: String) {
     var contentType = response.getContentType
     if (null == contentType) {
-      contentType = MimeTypeProvider.getMimeType(Strings.substringAfterLast(attach, "."), MimeType.ApplicationOctetStream).toString
+      contentType = MimeTypeProvider.getMimeType(Strings.substringAfterLast(attach, "."), MimeTypes.ApplicationOctetStream).toString
       response.setContentType(contentType)
       debug(s"set content type $contentType for $attach")
     }

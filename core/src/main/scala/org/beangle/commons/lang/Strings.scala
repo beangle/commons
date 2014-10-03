@@ -386,7 +386,7 @@ object Strings {
     } else {
       val aim = new StringBuilder()
       for (i <- 0 until seq.length) {
-        if (null != delimiter && aim.length > 0) aim.append(delimiter)
+        if (null != delimiter && i > 0) aim.append(delimiter)
         aim.append(seq(i))
       }
       aim.toString
@@ -712,20 +712,18 @@ object Strings {
     val list = new mutable.ListBuffer[String]
     var i = 0
     var start = 0
-    var matched = false
+    val length = str.length
+    val chars = new Array[Char](length)
+    str.getChars(0, length, chars, 0)
     while (i < len) {
-      if (str.charAt(i) == separatorChar) {
-        if (matched) {
-          list += str.substring(start, i)
-          matched = false
-        }
+      if (chars(i) == separatorChar) {
+        //ignore continue seperator
+        if (start < i) list += new String(chars, start, i - start)
         start = i + 1
-      } else {
-        matched = true
       }
       i += 1
     }
-    if (matched) list += str.substring(start, i)
+    if (start < i) list += new String(chars, start, i - start)
     list.toArray
   }
 
