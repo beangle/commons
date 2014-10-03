@@ -65,13 +65,13 @@ object MimeTypes {
     if (null != resources) {
       buf ++= readMimeTypes(resources.global)
       if (null != resources.locals) resources.locals foreach { path => buf ++= readMimeTypes(path) }
-      buf ++= parse(IOs.readJavaProperties(resources.user))
+      buf ++= readMimeTypes(resources.user)
     }
     buf.toMap
   }
 
   private def readMimeTypes(url: URL): Map[String, MimeType] = {
-    if (null == url) Map.empty
+    if (null == url) return Map.empty
     val buf = new collection.mutable.HashMap[String, MimeType]
     IOs.readLines(url.openStream()) foreach { line =>
       if (Strings.isNotBlank(line) && !line.startsWith("#")) {
@@ -84,11 +84,16 @@ object MimeTypes {
     buf.toMap
   }
 
-  private def parse(mimetypes: Map[String, String]): Map[String, MimeType] = {
-    mimetypes.map {
-      case (ext, mimetype) =>
-        (ext, MimeTypes(mimetype))
+  def parse(str: String): Seq[MimeType] = {
+    if (null == str) return Seq.empty
+
+    val mimeTypes = new collection.mutable.ListBuffer[MimeType]
+    str.split(",\\s*") foreach { token =>
+      val commaIndex = token.indexOf(";")
+      val mimetype = if (commaIndex > -1) token.substring(0, commaIndex).trim else token.trim
+      mimeTypes += new MimeType(mimetype)
     }
+    mimeTypes.toList
   }
 
   def mimeTypeResources: Resources = {

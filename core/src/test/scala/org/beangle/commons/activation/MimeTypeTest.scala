@@ -16,8 +16,12 @@ class MimeTypeTest extends FunSpec with Matchers {
       assert(map.size == 5)
       assert(None != map.get("xxx"))
     }
+    it("parse") {
+      val mimeTypes = MimeTypes.parse("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+      assert(4 == mimeTypes.size)
+    }
   }
-  
+
   describe("MimeTypeProvider") {
     it("load resource") {
       val xlsx = MimeTypeProvider.getMimeType("xlsx")
