@@ -132,7 +132,7 @@ object BeanManifest {
     if (Modifier.isStatic(modifiers) || Modifier.isPrivate(modifiers) || method.isBridge) return None
 
     val name = method.getName
-    if (name.contains("$") || ignores.contains(name)) return None
+    if (name.contains("$") && !name.contains("_$eq") || ignores.contains(name)) return None
 
     val parameterTypes = method.getParameterTypes
     if (0 == parameterTypes.length && method.getReturnType != classOf[Unit]) {
