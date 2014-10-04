@@ -31,5 +31,5 @@ import scala.collection.JavaConversions._
 @SerialVersionUID(-1750639486944677890L)
 class HttpSessionDestroyedEvent(source: AnyRef) extends Event(source) {
 
-  def getSession(): HttpSession = source.asInstanceOf[HttpSession]
+  def session: HttpSession = source.asInstanceOf[HttpSession]
 }

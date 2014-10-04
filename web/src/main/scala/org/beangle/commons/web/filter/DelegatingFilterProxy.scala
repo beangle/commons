@@ -18,16 +18,10 @@
  */
 package org.beangle.commons.web.filter
 
-import java.io.IOException
-import javax.servlet.Filter
-import javax.servlet.FilterChain
-import javax.servlet.ServletException
-import javax.servlet.ServletRequest
-import javax.servlet.ServletResponse
-import org.beangle.commons.inject.Container
-import org.beangle.commons.inject.ContainerHook
-import org.beangle.commons.inject.Containers
+import org.beangle.commons.inject.{ Container, ContainerRefreshedHook }
 import org.beangle.commons.lang.Throwables
+
+import javax.servlet.{ Filter, FilterChain, ServletException, ServletRequest, ServletResponse }
 
 /**
  * Proxy for a standard Servlet 2.3 Filter, delegating to a managed
@@ -37,11 +31,11 @@ import org.beangle.commons.lang.Throwables
  *
  * @author chaostone
  */
-class DelegatingFilterProxy extends GenericHttpFilter with ContainerHook {
+class DelegatingFilterProxy extends GenericHttpFilter with ContainerRefreshedHook {
 
   private var delegate: Filter = _
 
-  protected var targetBeanName: String = _
+  var beanName: String = _
 
   def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
     delegate.doFilter(request, response, chain)
@@ -49,32 +43,31 @@ class DelegatingFilterProxy extends GenericHttpFilter with ContainerHook {
 
   def notify(container: Container) {
     try {
-      setDelegate(initDelegate(container))
+      this.delegate = initDelegate(container)
     } catch {
       case e: ServletException => Throwables.propagate(e)
     }
   }
 
-  protected override def initFilterBean() {
-    if (null == targetBeanName) targetBeanName = getFilterName
-    val wac = Containers.getRoot
-    if (wac != null) delegate = initDelegate(wac) else Containers.addHook(this)
+  override def init() {
+    if (null == beanName) beanName = filterName
+    val wac = Container.ROOT
+    if (wac != null) delegate = initDelegate(wac) else Container.addHook(this)
   }
+
+  protected def initDelegate(container: Container): Filter = {
+    container.getBean[Filter](beanName) match {
+      case Some(filter) => {
+        filter.init(filterConfig); filter
+      }
+      case None => throw new RuntimeException(s"Cannot find $beanName in context.")
+    }
+  }
+
+  override def requiredProperties: Set[String] = Set("beanName")
 
   override def destroy() {
     if (delegate != null) delegate.destroy()
   }
 
-  protected def initDelegate(container: Container): Filter = {
-    container.getBean[Filter](targetBeanName) match {
-      case Some(filter) => {
-        filter.init(filterConfig); filter
-      }
-      case None => throw new RuntimeException("Cannot find " + targetBeanName + " in context.")
-    }
-  }
-
-  def setDelegate(delegate: Filter) {
-    this.delegate = delegate
-  }
 }

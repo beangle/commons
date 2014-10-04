@@ -20,9 +20,7 @@ package org.beangle.commons.bean
 
 trait Factory[T] {
 
-  def getObject: T
+  def result: T
 
-  def getObjectType: Class[T]
-
-  def singleton: Boolean
+  def singleton: Boolean = true
 }

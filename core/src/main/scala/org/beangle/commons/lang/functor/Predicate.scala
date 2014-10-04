@@ -24,4 +24,4 @@ package org.beangle.commons.lang.functor
  * @author chaostone
  * @since 3.2.0
  */
-trait Predicate[T] extends UnaryFunction[T, Boolean]
+trait Predicate[T] extends Function1[T, Boolean]

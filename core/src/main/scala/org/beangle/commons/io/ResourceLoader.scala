@@ -19,6 +19,10 @@
 package org.beangle.commons.io
 
 import java.net.URL
+import java.io.IOException
+import org.beangle.commons.logging.Logging
+import org.beangle.commons.lang.ClassLoaders
+import org.beangle.commons.lang.Strings
 
 /**
  * Resource loader
@@ -33,5 +37,74 @@ trait ResourceLoader {
   def loadAll(resourceName: String): List[URL]
 
   def load(names: Seq[String]): List[URL]
+
+}
+
+class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader with Logging {
+
+  def this(loaderArray: ResourceLoader*) {
+    this(loaderArray.toList)
+  }
+
+  override def load(resourceName: String): Option[URL] = {
+    var url: Option[URL] = None
+    for (loader <- loaders if null == url) {
+      val url = loader.load(resourceName)
+    }
+    url
+  }
+
+  def loadAll(resourceName: String): List[URL] = {
+    var list: List[URL] = List()
+    for (loader <- loaders if list.isEmpty) {
+      try {
+        list = loader.loadAll(resourceName)
+      } catch {
+        case e: IOException => error("cannot getResources " + resourceName, e)
+      }
+    }
+    list
+  }
+
+  def load(names: Seq[String]): List[URL] = {
+    val urls = new collection.mutable.ListBuffer[URL]
+    for (name <- names)
+      urls ++= load(name)
+    urls.toList
+  }
+}
+
+/**
+ * Load resource by class loader.
+ */
+class ClasspathResourceLoader(val prefixes: List[String] = List("")) extends ResourceLoader with Logging {
+
+  def this(prefixStr: String) {
+    this(if (Strings.isEmpty(prefixStr)) List("") else Strings.split(prefixStr, " ").toList)
+  }
+
+  def loadAll(resourceName: String): List[URL] = {
+    val urls = new collection.mutable.ListBuffer[URL]
+    for (prefix <- prefixes)
+      urls ++= ClassLoaders.getResources(prefix + resourceName)
+    urls.toList
+  }
+
+  def load(name: String): Option[URL] = {
+    var url: URL = null
+    for (prefix <- prefixes; if (null == url)) {
+      url = ClassLoaders.getResource(prefix + name)
+    }
+    if (null == url) None else Some(url)
+  }
+
+  def load(names: Seq[String]): List[URL] = {
+    val urls = new collection.mutable.ListBuffer[URL]
+    for (name <- names) {
+      val url = load(name)
+      if (!url.isEmpty) urls += url.get
+    }
+    urls.toList
+  }
 
 }

@@ -19,17 +19,21 @@
 package org.beangle.commons.lang.reflect
 
 import java.lang.reflect.{ Method, Modifier, ParameterizedType, TypeVariable }
-
 import scala.collection.mutable
 import scala.language.existentials
-
+import org.beangle.commons.lang.Objects
+import org.beangle.commons.collection.IdentityCache
 
 object ClassInfo {
 
   /**
+   * Java Object's method
+   */
+  val reservedMethodNames = Set("hashCode", "equals", "toString", "wait", "notify", "notifyAll", "getClass")
+  /**
    * class info cache
    */
-  var cache = new mutable.HashMap[Class[_], ClassInfo]
+  var cache = new IdentityCache[Class[_], ClassInfo]
 
   /**
    * Return true when Method is public and not static and not volatile.
@@ -39,11 +43,7 @@ object ClassInfo {
   private def goodMethod(method: Method): Boolean = {
     val modifiers = method.getModifiers
     if (Modifier.isStatic(modifiers) || Modifier.isPrivate(modifiers)) return false
-    if (method.isBridge) return false
-    val methodName = method.getName
-    if (method.getParameterTypes.length == 0 &&
-      (methodName == "hashCode" || methodName == "toString")) return false
-    if (method.getParameterTypes.length == 1 & methodName == "equals") return false
+    if (method.isBridge || reservedMethodNames.contains(method.getName)) return false
     true
   }
 
@@ -54,7 +54,7 @@ object ClassInfo {
     val methods = new mutable.HashSet[MethodInfo]
     var nextClass = clazz
     var index = 0
-    var nextParamTypes: collection.Map[String, Class[_]] = null
+    var paramTypes: collection.Map[String, Class[_]] = Map.empty
     while (null != nextClass && classOf[AnyRef] != nextClass) {
       val declaredMethods = nextClass.getDeclaredMethods
       (0 until declaredMethods.length) foreach { i =>
@@ -62,147 +62,65 @@ object ClassInfo {
         if (goodMethod(method)) {
           val types = method.getGenericParameterTypes
           val paramsTypes = new Array[Class[_]](types.length)
-          (0 until types.length) foreach { j =>
-            val t = types(j)
-            paramsTypes(j) =
-              if (t.isInstanceOf[ParameterizedType])
-                t.asInstanceOf[ParameterizedType].getRawType.asInstanceOf[Class[_]]
-              else if (t.isInstanceOf[TypeVariable[_]]) {
-                if (null == nextParamTypes) classOf[AnyRef]
-                else
-                  nextParamTypes.get(t.asInstanceOf[TypeVariable[_]].getName).getOrElse(classOf[AnyRef])
-              } else {
-                if (t.isInstanceOf[Class[_]]) t.asInstanceOf[Class[_]]
-                else classOf[AnyRef]
-              }
-          }
-          if (!methods.add(new MethodInfo(index, method, paramsTypes))) index -= 1
+          (0 until types.length) foreach { j => paramsTypes(j) = extract(types(j), paramTypes) }
+          if (!methods.add(new MethodInfo(index, method, paramsTypes, extract(method.getGenericReturnType, paramTypes)))) index -= 1
           index += 1
         }
       }
       val nextType = nextClass.getGenericSuperclass
       nextClass = nextClass.getSuperclass
-      if (nextType.isInstanceOf[ParameterizedType]) {
-        val tmp = new mutable.HashMap[String, Class[_]]
-        val ps = nextType.asInstanceOf[ParameterizedType].getActualTypeArguments
-        val tvs = nextClass.getTypeParameters
-        (0 until ps.length) foreach { k =>
-          if (ps(k).isInstanceOf[Class[_]]) {
-            tmp.put(tvs(k).getName, ps(k).asInstanceOf[Class[_]])
-          } else if (ps(k).isInstanceOf[TypeVariable[_]]) {
-            tmp.put(tvs(k).getName, nextParamTypes.get(ps(k).asInstanceOf[TypeVariable[_]].getName).get)
+      paramTypes = nextType match {
+        case ptSuper: ParameterizedType =>
+          val tmp = new mutable.HashMap[String, Class[_]]
+          val ps = ptSuper.getActualTypeArguments
+          val tvs = nextClass.getTypeParameters
+          (0 until ps.length) foreach { k =>
+            tmp.put(tvs(k).getName,
+              ps(k) match {
+                case c: Class[_] => c
+                case tv: TypeVariable[_] => paramTypes(tv.getName)
+                case pt: ParameterizedType => pt.getRawType.asInstanceOf[Class[_]]
+              })
           }
-        }
-        nextParamTypes = tmp
-      } else {
-        nextParamTypes = Map.empty
+          tmp
+        case _ => Map.empty
       }
     }
     new ClassInfo(methods.toSeq)
   }
 
+  private def extract(t: java.lang.reflect.Type, types: collection.Map[String, Class[_]]): Class[_] = {
+    t match {
+      case pt: ParameterizedType => pt.getRawType.asInstanceOf[Class[_]]
+      case tv: TypeVariable[_] => types.get(tv.getName).getOrElse(classOf[AnyRef])
+      case c: Class[_] => c
+      case _ => classOf[AnyRef]
+    }
+  }
   /**
    * Get ClassInfo from cache or load it by type.
    * It search from cache, when failure build it and put it into cache.
    */
   def get(clazz: Class[_]): ClassInfo = {
     var exist = cache.get(clazz)
-    if (exist.isDefined) return exist.get
-    cache.synchronized {
-      exist = cache.get(clazz)
-      if (exist.isDefined) return exist.get
-      val newClassInfo = load(clazz)
-      cache.put(clazz, newClassInfo)
-      newClassInfo
+    if (null == exist) {
+      val exist = load(clazz)
+      cache.put(clazz, exist)
     }
+    exist
   }
 }
 
 /**
  * Class meta information.It contains method signature,property names
- *
- * @author chaostone
- * @since 3.2.0
  */
 class ClassInfo(methodinfos: Seq[MethodInfo]) {
 
-  private val methods = methodinfos.groupBy(info => info.method.getName)
+  val methods: Map[String, Seq[MethodInfo]] = methodinfos.groupBy(info => info.method.getName)
   /**
    * unqiue method indexes,without any override
    */
   private val methodIndexs = methods.mapValues(ms => if (ms.size == 1) ms.head.index else -1).filter(e => e._2 > -1)
-
-  /**
-   * property read method indexes
-   */
-  val readers: Map[String, MethodInfo] = findReaders(methodinfos)
-
-  /**
-   * property write method indexes
-   */
-  val writers: Map[String, MethodInfo] = findWriters(methodinfos)
-
-  private def findReaders(methodinfos: Seq[MethodInfo]): Map[String, MethodInfo] = {
-    val readermap = new mutable.HashMap[String, MethodInfo]
-    for (info <- methodinfos) {
-      val property = info.property
-      if (property.isDefined && property.get._1) {
-        val old = readermap.put(property.get._2, info)
-        if (old.isDefined && info.method.getReturnType.isAssignableFrom(old.get.method.getReturnType))
-          readermap += property.get._2 -> info
-      }
-    }
-    Map.empty ++ readermap
-  }
-
-  private def findWriters(methodinfos: Seq[MethodInfo]): Map[String, MethodInfo] = {
-    val writermap = new mutable.HashMap[String, MethodInfo]
-    for (info <- methodinfos) {
-      val property = info.property
-      if (property.isDefined && !property.get._1) writermap += property.get._2 -> info
-    }
-    Map.empty ++ writermap
-  }
-
-  /**
-   * Return property read index,return -1 when not found.
-   */
-  def getReadIndex(property: String): Int = {
-    readers.get(property) match {
-      case Some(method) => method.index
-      case _ => -1
-    }
-  }
-
-  /**
-   * Return property read index,return -1 when not found.
-   */
-  def getReader(property: String): Option[MethodInfo] = readers.get(property)
-
-  /**
-   * Return property type,return null when not found.
-   */
-  def getPropertyType(property: String): Option[Class[_]] = {
-    writers.get(property) match {
-      case Some(method) => Some(method.parameterTypes(0))
-      case _ => None
-    }
-  }
-
-  /**
-   * Return property write index,return -1 if not found.
-   */
-  def getWriteIndex(property: String): Int = {
-    writers.get(property) match {
-      case Some(method) => method.index
-      case _ => -1
-    }
-  }
-
-  /**
-   * Return property write method,return null if not found.
-   */
-  def getWriter(property: String): Option[MethodInfo] = writers.get(property)
 
   /**
    * Return method index,return -1 if not found.
@@ -226,10 +144,7 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
    * Return public metheds according to given name
    */
   def getMethods(name: String): Seq[MethodInfo] = {
-    methods.get(name) match {
-      case Some(ms) => ms
-      case _ => Seq.empty
-    }
+    methods.get(name).getOrElse(Seq.empty)
   }
 
   /**
@@ -241,5 +156,49 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
     methodInfos.sorted.toList
   }
 
-  def getWritableProperties(): Set[String] = writers.keySet
+}
+
+/**
+ * Method name and return type and parameters type
+ */
+class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[Class[_]], val returnType: Class[_]) extends Ordered[MethodInfo] {
+
+  override def compare(o: MethodInfo): Int = this.index - o.index
+
+  def matches(args: Any*): Boolean = {
+    if (parameterTypes.length != args.length) return false
+    (0 until args.length).find { i =>
+      null != args(i) && !parameterTypes(i).isInstance(args(i))
+    }.isEmpty
+  }
+
+  override def toString(): String = {
+    val returnType = method.getReturnType
+    val sb = new StringBuilder()
+    sb.append(if ((null == returnType)) "void" else returnType.getSimpleName)
+    sb.append(' ').append(method.getName)
+    if (parameterTypes.length == 0) {
+      sb.append("()")
+    } else {
+      sb.append('(')
+      for (t <- parameterTypes) sb.append(t.getSimpleName).append(",")
+      sb.deleteCharAt(sb.length - 1).append(')')
+    }
+    sb.toString
+  }
+
+  override def hashCode(): Int = {
+    var hash = 0
+    for (t <- parameterTypes) hash += t.hashCode
+    hash + method.getName.hashCode
+  }
+
+  override def equals(obj: Any): Boolean = obj match {
+    case obj: MethodInfo => {
+      Objects.equalsBuilder().add(method.getName, obj.method.getName)
+        .add(parameterTypes, obj.parameterTypes)
+        .isEquals
+    }
+    case _ => false
+  }
 }

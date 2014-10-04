@@ -25,17 +25,8 @@ import java.net.URL
  *
  * @author chaostone
  */
-class Resources {
+class Resources(val global: URL, val locals: List[URL], val user: URL) {
 
-  var global: URL = _
-
-  var locals: List[URL] = _
-
-  var user: URL = _
-
-  /**
-   * All Paths.
-   */
   def paths: List[URL] = {
     val all = new collection.mutable.ListBuffer[URL]
     if (null != global) all += global
@@ -44,9 +35,6 @@ class Resources {
     all.toList
   }
 
-  /**
-   * Return true is empty
-   */
   def isEmpty: Boolean = {
     null == global && null == user && (null == locals || locals.isEmpty)
   }

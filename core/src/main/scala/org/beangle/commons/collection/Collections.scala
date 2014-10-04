@@ -18,29 +18,36 @@
  */
 package org.beangle.commons.collection
 
-import org.beangle.commons.bean.PropertyUtils
-import org.beangle.commons.lang.Throwables
-import org.beangle.commons.lang.functor.Predicate
+import java.{ util => ju }
+
 import scala.collection.mutable
+
+import org.beangle.commons.bean.PropertyUtils
+import org.beangle.commons.lang.functor.Predicate
 
 object Collections {
 
+  /**
+   * Null-safe check if the specified collection is empty.
+   */
+  @inline
+  def isEmpty(coll: Iterable[_]): Boolean = (coll == null || coll.isEmpty)
+
+  /**
+   * Null-safe check if the specified collection is not empty.
+   */
+  @inline
+  def isNotEmpty(coll: Iterable[_]): Boolean = null != coll && !coll.isEmpty
+
   def findFirstMatch[T](source: Iterable[T], candidates: Iterable[T]): Option[T] = {
-    var finded = new mutable.ListBuffer[T]
-    if (isNotEmpty(source) && isNotEmpty(candidates)) {
+    val finded = if (isNotEmpty(source) && isNotEmpty(candidates)) {
       source match {
-        case set: Set[T] =>
-          for (candidate <- candidates if finded.isEmpty) {
-            if (set.contains(candidate)) finded += candidate
-          }
-        case seq: Seq[T] =>
-          for (candidate <- candidates if finded.isEmpty) {
-            if (seq.contains(candidate)) finded += candidate
-          }
-        case _ =>
+        case set: Set[T] => candidates.find(c => set.contains(c))
+        case seq: Seq[T] => candidates.find(c => seq.contains(c))
+        case _ => None
       }
-    }
-    if (finded.isEmpty) None else Some(finded.head)
+    } else None
+    finded
   }
 
   /**
@@ -64,20 +71,11 @@ object Collections {
 
   /**
    * convertToMap.
-   *
    */
   def convertToMap(coll: Seq[AnyRef], keyProperty: String): Map[_, _] = {
-    val map = new mutable.HashMap[Any, Any]
-    for (obj <- coll) {
-      var key: Any = null
-      try {
-        key = PropertyUtils.getProperty[Object](obj, keyProperty)
-      } catch {
-        case e: Exception => Throwables.propagate(e)
-      }
-      map.put(key, obj)
-    }
-    map.toMap
+    coll.map { obj =>
+      (PropertyUtils.getProperty[Object](obj, keyProperty), obj)
+    }.toMap
   }
 
   /**
@@ -85,35 +83,13 @@ object Collections {
    */
   def convertToMap(coll: Seq[AnyRef], keyProperty: String, valueProperty: String): Map[_, _] = {
     val map = new mutable.HashMap[Any, Any]
-    for (obj <- coll) {
+    coll foreach { obj =>
       val key = PropertyUtils.getProperty[AnyRef](obj, keyProperty)
       val value = PropertyUtils.getProperty[AnyRef](obj, valueProperty)
       if (null != key) map.put(key, value)
     }
     map.toMap
   }
-
-  /**
-   * Null-safe check if the specified collection is empty.
-   * <p>
-   * Null returns true.
-   *
-   * @param coll the collection to check, may be null
-   * @return true if empty or null
-   * @since 3.1
-   */
-  def isEmpty(coll: Iterable[_]): Boolean = (coll == null || coll.isEmpty)
-
-  /**
-   * Null-safe check if the specified collection is not empty.
-   * <p>
-   * Null returns false.
-   *
-   * @param coll the collection to check, may be null
-   * @return true if non-null and non-empty
-   * @since 3.1
-   */
-  def isNotEmpty(coll: Iterable[_]): Boolean = null != coll && !coll.isEmpty
 
   def union[T](first: List[T], second: List[T]): List[T] = {
     val mapa = getCardinalityMap(first)
@@ -139,12 +115,7 @@ object Collections {
     count.toMap
   }
 
-  private def getFreq[T](obj: T, freqMap: Map[T, Int]): Int = {
-    freqMap.get(obj) match {
-      case Some(count) => count
-      case _ => 0
-    }
-  }
+  private def getFreq[T](obj: T, freqMap: Map[T, Int]): Int = freqMap.get(obj).getOrElse(0)
 
   def intersection[T](first: List[T], second: List[T]): List[T] = {
     val list = new mutable.ListBuffer[T]
@@ -174,5 +145,13 @@ object Collections {
     val rs = new mutable.HashSet[T]
     for (t <- datas if predicate.apply(t)) rs.add(t)
     rs.toSet
+  }
+
+  def putAll[K, V,V2 <: V](target: mutable.HashMap[K, V], origin: ju.Map[K, V2]): Unit = {
+    val itor = origin.entrySet.iterator
+    while (itor.hasNext) {
+      val entry = itor.next()
+      target.put(entry.getKey, entry.getValue)
+    }
   }
 }

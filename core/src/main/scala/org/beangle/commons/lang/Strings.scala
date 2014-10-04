@@ -386,7 +386,7 @@ object Strings {
     } else {
       val aim = new StringBuilder()
       for (i <- 0 until seq.length) {
-        if (null != delimiter && aim.length > 0) aim.append(delimiter)
+        if (null != delimiter && i > 0) aim.append(delimiter)
         aim.append(seq(i))
       }
       aim.toString
@@ -712,20 +712,18 @@ object Strings {
     val list = new mutable.ListBuffer[String]
     var i = 0
     var start = 0
-    var matched = false
+    val length = str.length
+    val chars = new Array[Char](length)
+    str.getChars(0, length, chars, 0)
     while (i < len) {
-      if (str.charAt(i) == separatorChar) {
-        if (matched) {
-          list += str.substring(start, i)
-          matched = false
-        }
+      if (chars(i) == separatorChar) {
+        //ignore continue seperator
+        if (start < i) list += new String(chars, start, i - start)
         start = i + 1
-      } else {
-        matched = true
       }
       i += 1
     }
-    if (matched) list += str.substring(start, i)
+    if (start < i) list += new String(chars, start, i - start)
     list.toArray
   }
 
@@ -1238,7 +1236,38 @@ object Strings {
    * @since 3.0
    */
   def trim(str: String): String = if (str == null) null else str.trim()
-
+  /**
+   * <p>Strips any of a set of characters from the end of a String.</p>
+   *
+   * <p>A <code>null</code> input String returns <code>null</code>.
+   * An empty string ("") input returns the empty string.</p>
+   *
+   * <p>If the stripChars String is <code>null</code>, whitespace is
+   * stripped as defined by {@link Character#isWhitespace(char)}.</p>
+   *
+   * <pre>
+   * stripEnd(null, *)          = null
+   * stripEnd("", *)            = ""
+   * stripEnd("abc", "")        = "abc"
+   * stripEnd(*, null)    = *
+   * stripEnd("  abcyx", "xyz") = "  abc"
+   * </pre>
+   *
+   * @param str  the String to remove characters from, may be null
+   * @param stripChars  the characters to remove, null treated as whitespace
+   * @return the stripped String, <code>null</code> if null String input
+   */
+  def stripEnd(str: String, stripChars: String): String = {
+    if (str == null || str.length == 0 || null == stripChars || stripChars.length == 0) {
+      str
+    } else {
+      var end = str.length
+      while ((end != 0) && (stripChars.indexOf(str.charAt(end - 1)) != -1)) {
+        end -= 1
+      }
+      str.substring(0, end)
+    }
+  }
   /**
    * <p>
    * Uncapitalizes a String changing the first letter to title case as per

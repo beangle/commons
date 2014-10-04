@@ -20,8 +20,10 @@ package org.beangle.commons.web.init
 
 import javax.servlet.ServletContext
 import javax.servlet.ServletException
+import javax.servlet.ServletContextListener
 
 trait Initializer {
+  var boss: BootstrapListener = _
   /**
    * Configure the given {@link ServletContext} with any servlets, filters, listeners
    * context-params and attributes necessary for initializing this web application.
@@ -30,4 +32,8 @@ trait Initializer {
    */
   @throws(classOf[ServletException])
   def onStartup(servletContext: ServletContext)
+
+  final def addListener(other: ServletContextListener) {
+    boss.addListener(other)
+  }
 }

@@ -26,17 +26,12 @@ package org.beangle.commons.bean.orderings
 class ChainOrdering[T](comparators: List[Ordering[T]]) extends Ordering[T] {
 
   /**
-   * <p>
    * compare.
-   * </p>
-   *
-   * @param first a T object.
-   * @param second a T object.
    * @return 0 is equals,-1 first &lt; second ,1 first &gt; second
    */
   def compare(first: T, second: T): Int = {
     var rs = 0
-    for (com <- comparators if rs != 0) rs = com.compare(first, second)
+    comparators find { com => rs = com.compare(first, second); rs != 0 }
     rs
   }
 }

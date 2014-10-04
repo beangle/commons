@@ -18,15 +18,12 @@
  */
 package org.beangle.commons.lang.reflect
 
-import java.beans.BeanInfo
-import java.beans.IntrospectionException
-import java.beans.Introspector
-import java.beans.PropertyDescriptor
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
-import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.Throwables
-import org.beangle.commons.lang.Objects
+import java.lang.annotation.Annotation
+import java.lang.reflect.{ Method, ParameterizedType, Type, TypeVariable }
+
+import scala.language.existentials
+
+import org.beangle.commons.lang.{ Objects, Throwables }
 
 object Reflections {
 
@@ -37,5 +34,84 @@ object Reflections {
       case e: Exception => Throwables.propagate(e)
     }
     Objects.default(clazz)
+  }
+
+  /**
+   * Find parameter types of given class's interface or superclass
+   */
+  def getGenericParamType(clazz: Class[_], expected: Class[_]): collection.Map[String, Class[_]] = {
+    if (!expected.isAssignableFrom(clazz)) return Map.empty
+    if (expected.isInterface) {
+      getInterfaceParamType(clazz, expected)
+    } else {
+      getSuperClassParamType(clazz.getSuperclass(), clazz.getGenericSuperclass(), expected)
+    }
+  }
+
+  private def getInterfaceParamType(clazz: Class[_], expected: Class[_],
+    paramTypes: collection.Map[String, Class[_]] = Map.empty): collection.Map[String, Class[_]] = {
+    val interfaces = clazz.getInterfaces
+    val idx = (0 until interfaces.length) find { i => expected.isAssignableFrom(interfaces(i)) }
+    idx match {
+      case Some(i) => getSuperClassParamType(interfaces(i), clazz.getGenericInterfaces()(i), expected, paramTypes)
+      case _ => {
+        val superClass = clazz.getSuperclass
+        getInterfaceParamType(superClass, expected, getSuperClassParamType(superClass, clazz.getGenericSuperclass(), superClass, paramTypes))
+      }
+    }
+  }
+
+  private def getSuperClassParamType(clazz: Class[_], tp: Type, expected: Class[_],
+    paramTypes: collection.Map[String, Class[_]] = Map.empty): collection.Map[String, Class[_]] = {
+    if (classOf[AnyRef] == clazz) return paramTypes
+
+    val newParamTypes: collection.Map[String, Class[_]] = tp match {
+      case ptSuper: ParameterizedType =>
+        val tmp = new collection.mutable.HashMap[String, Class[_]]
+        val ps = ptSuper.getActualTypeArguments
+        val tvs = clazz.getTypeParameters
+        (0 until ps.length) foreach { k =>
+          tmp.put(tvs(k).getName,
+            ps(k) match {
+              case c: Class[_] => c
+              case tv: TypeVariable[_] => paramTypes(tv.getName)
+              case pt: ParameterizedType => pt.getRawType().asInstanceOf[Class[_]]
+            })
+        }
+        tmp
+      case _ => Map.empty
+    }
+    if (clazz == expected) newParamTypes
+    else getSuperClassParamType(clazz.getSuperclass(), clazz.getGenericSuperclass(), expected, newParamTypes)
+  }
+
+  def isAnnotationPresent[T <: Annotation](method: Method, clazz: Class[T]): Boolean = {
+    val ann = method.getAnnotation(clazz)
+    if (null == ann) {
+      val delaringClass = method.getDeclaringClass
+      if (delaringClass == classOf[Object]) return false
+      val superClass = delaringClass.getSuperclass
+      try {
+        isAnnotationPresent(superClass.getMethod(method.getName(), method.getParameterTypes(): _*), clazz)
+      } catch {
+        case e: NoSuchMethodException => false
+      }
+    } else true
+  }
+  /**
+   * Find annotation in method declare class hierarchy
+   */
+  def getAnnotation[T <: Annotation](method: Method, clazz: Class[T]): Tuple2[T, Method] = {
+    val ann = method.getAnnotation(clazz)
+    if (null == ann) {
+      val delaringClass = method.getDeclaringClass
+      if (delaringClass == classOf[Object]) return null.asInstanceOf[Tuple2[T, Method]]
+      val superClass = delaringClass.getSuperclass
+      try {
+        getAnnotation(superClass.getMethod(method.getName(), method.getParameterTypes(): _*), clazz)
+      } catch {
+        case e: NoSuchMethodException => null.asInstanceOf[Tuple2[T, Method]]
+      }
+    } else (ann, method)
   }
 }

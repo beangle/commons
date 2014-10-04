@@ -18,8 +18,16 @@
  */
 package org.beangle.commons.web.url
 
-import org.beangle.commons.lang.Objects
-import org.beangle.commons.lang.Strings
+import javax.servlet.http.HttpServletRequest
+
+object UrlBuilder {
+  def url(req: HttpServletRequest): String = {
+    val builder = new UrlBuilder(req.getContextPath())
+    builder.setScheme(req.getScheme).setServerName(req.getServerName).setPort(req.getServerPort)
+      .setQueryString(req.getQueryString)
+    builder.buildUrl()
+  }
+}
 /**
  * @author chaostone
  */
@@ -31,7 +39,7 @@ class UrlBuilder(cxtPath: String) {
 
   var port: Int = _
 
-  var contextPath: String = if (Strings.isEmpty(cxtPath)) "/" else cxtPath.trim()
+  var contextPath: String = if (cxtPath == "/") "" else cxtPath
 
   var servletPath: String = _
 
@@ -48,7 +56,7 @@ class UrlBuilder(cxtPath: String) {
     var uri = servletPath
     if (uri == null && null != requestURI) {
       uri = requestURI
-      if (contextPath != "/") uri = uri.substring(contextPath.length)
+      if (contextPath != "") uri = uri.substring(contextPath.length)
     }
     if ((null == uri)) "" else uri
   }
@@ -80,7 +88,7 @@ class UrlBuilder(cxtPath: String) {
         sb.append(':').append(port)
       }
     }
-    if (Objects.!=(contextPath, "/")) sb.append(contextPath)
+    sb.append(contextPath)
     sb.append(buildRequestUrl())
     sb.toString
   }
@@ -102,8 +110,6 @@ class UrlBuilder(cxtPath: String) {
 
   /**
    * ContextPath should start with / but not ended with /
-   *
-   * @param contextPath
    */
   def setContextPath(contextPath: String): this.type = {
     this.contextPath = contextPath
@@ -112,8 +118,6 @@ class UrlBuilder(cxtPath: String) {
 
   /**
    * Set servletPath ,start with /
-   *
-   * @param servletPath
    */
   def setServletPath(servletPath: String): this.type = {
     this.servletPath = servletPath
@@ -122,8 +126,6 @@ class UrlBuilder(cxtPath: String) {
 
   /**
    * Set requestURI ,it should start with /
-   *
-   * @param requestURI
    */
   def setRequestURI(requestURI: String): this.type = {
     this.requestURI = requestURI

@@ -18,13 +18,10 @@
  */
 package org.beangle.commons.web.session
 
-import javax.servlet.http.HttpSessionEvent
-import javax.servlet.http.HttpSessionListener
 import org.beangle.commons.event.EventMulticaster
-import org.beangle.commons.inject.Containers
-import org.beangle.commons.lang.Assert
-//remove if not needed
-import scala.collection.JavaConversions._
+import org.beangle.commons.inject.Container
+
+import javax.servlet.http.{HttpSessionEvent, HttpSessionListener}
 
 /**
  * Declared in web.xml as
@@ -42,7 +39,7 @@ import scala.collection.JavaConversions._
  */
 class HttpSessionEventPublisher extends HttpSessionListener {
 
-  protected var eventMulticaster: EventMulticaster = _
+  protected var em: EventMulticaster = _
 
   /**
    * Handles the HttpSessionEvent by publishing a {@link HttpSessionCreationEvent} to the
@@ -51,12 +48,8 @@ class HttpSessionEventPublisher extends HttpSessionListener {
    * @param event HttpSessionEvent passed in by the container
    */
   def sessionCreated(event: HttpSessionEvent) {
-    if (null == eventMulticaster) {
-      eventMulticaster = Containers.getRoot.getBean(classOf[EventMulticaster])
-        .get
-      eventMulticaster
-    }
-    eventMulticaster.multicast(new HttpSessionCreationEvent(event.getSession))
+    if (null == em) em = Container.ROOT.getBean(classOf[EventMulticaster]).get
+    em.multicast(new HttpSessionCreationEvent(event.getSession))
   }
 
   /**
@@ -66,8 +59,6 @@ class HttpSessionEventPublisher extends HttpSessionListener {
    * @param event The HttpSessionEvent pass in by the container
    */
   def sessionDestroyed(event: HttpSessionEvent) {
-    if (null != eventMulticaster) {
-      eventMulticaster.multicast(new HttpSessionDestroyedEvent(event.getSession))
-    }
+    if (null != em) em.multicast(new HttpSessionDestroyedEvent(event.getSession))
   }
 }

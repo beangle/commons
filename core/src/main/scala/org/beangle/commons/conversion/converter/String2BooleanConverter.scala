@@ -20,7 +20,7 @@ package org.beangle.commons.conversion.converter
 
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.conversion.Converter
-
+import java.{ lang => jl }
 /**
  * Convert String to Boolean.
  * <p>
@@ -30,12 +30,12 @@ import org.beangle.commons.conversion.Converter
  * @author chaostone
  * @since 3.2.0
  */
-object String2BooleanConverter extends Converter[String, Boolean] {
+object String2BooleanConverter extends Converter[String, jl.Boolean] {
 
   private val trues = Set("true", "on", "Y", "1", "yes")
 
-  override def apply(input: String): Boolean = {
-    if (Strings.isEmpty(input)) return false
-    if (trues.contains(input.toLowerCase())) true else false
+  override def apply(input: String): jl.Boolean = {
+    if (Strings.isEmpty(input)) false
+    else trues.contains(input.toLowerCase())
   }
 }

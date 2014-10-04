@@ -18,7 +18,6 @@
  */
 package org.beangle.commons.conversion
 
-import org.beangle.commons.lang.functor.UnaryFunction
 /**
  * Convert source to target
  *
@@ -26,4 +25,4 @@ import org.beangle.commons.lang.functor.UnaryFunction
  * @param <S> source
  * @param <T> target
  */
-trait Converter[S, +T] extends UnaryFunction[S, T]
+trait Converter[S, +T] extends Function1[S, T]

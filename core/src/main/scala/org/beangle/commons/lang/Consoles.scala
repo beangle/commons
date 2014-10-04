@@ -88,6 +88,6 @@ object Consoles {
 
   def readPassword(): String = new String(System.console().readPassword())
 
-  def readPassword(fmt: String, args: Any*): String = Console.readLine(fmt, args: _*)
+  def readPassword(fmt: String, args: Any*): String = io.StdIn.readLine(fmt, args: _*)
 
 }

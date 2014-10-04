@@ -53,7 +53,7 @@ object RequestUtils extends Logging {
 
   /**
    * Return the true servlet path.
-   * When servletPath provided by container is empty,It will return requestURI'
+   * When servletPath provided by container is empty,It will return requestURI-contextpath'
    * <p>
    * 查找当前调用的action对应的.do<br>
    * 例如http://localhost/myapp/dd.do 返回/dd.do<br>
@@ -94,7 +94,7 @@ object RequestUtils extends Logging {
       newName = if (null != agent && -1 != agent.indexOf("MSIE")) URLEncoder.encode(attach_name, "UTF-8") else new BCoder().encode(attach_name)
     } catch {
       case e: Exception => {
-        logger.error("cannot encode " + attach_name, e)
+        error("cannot encode " + attach_name, e)
         return attach_name
       }
     }
@@ -110,7 +110,7 @@ object RequestUtils extends Logging {
     val head = request.getHeader("USER-AGENT")
     val agent = new Useragent(getIpAddr(request), Browser.parse(head), Os.parse(head))
     if (agent.os == Oss.Unknown || agent.browser == Browsers.Unknown) {
-      logger.info("Cannot parser user agent:{}", request.getHeader("USER-AGENT"))
+      info("Cannot parser user agent:" + request.getHeader("USER-AGENT"))
     }
     agent
   }

@@ -23,16 +23,14 @@ import java.net.URLEncoder
 import org.beangle.commons.lang.Assert
 import org.beangle.commons.lang.Strings
 
-class UrlRender(var initSuffix: String = null) {
-
-  val suffix = if (null != initSuffix && initSuffix.charAt(0) != '.') "." + initSuffix else initSuffix
+class UrlRender {
 
   var escapeAmp: Boolean = _
 
-  def render(referer: String, uri: String, params: Map[String, String]): String = {
+  def render(context: String, referer: String, uri: String, params: Map[String, String]): String = {
     var separator = "&"
     if (escapeAmp) separator = "&amp;"
-    val sb = renderUri(referer, uri)
+    val sb = renderUri(context, referer, uri)
     sb.append(separator)
     for ((key, value) <- params) {
       try {
@@ -45,12 +43,11 @@ class UrlRender(var initSuffix: String = null) {
     sb.toString
   }
 
-  def render(referer: String, uri: String, params: String*): String = {
+  def render(context: String, referer: String, uri: String, params: String*): String = {
     var separator = "&"
-    if (escapeAmp) {
-      separator = "&amp;"
-    }
-    val sb = renderUri(referer, uri)
+    if (escapeAmp) separator = "&amp;"
+
+    val sb = renderUri(context, referer, uri)
     sb.append(separator)
     for (param <- params) {
       try {
@@ -64,9 +61,11 @@ class UrlRender(var initSuffix: String = null) {
     sb.toString
   }
 
-  def render(referer: String, uri: String): String = renderUri(referer, uri).toString
+  def render(context: String, referer: String, uri: String): String = {
+    renderUri(context, referer, uri).toString
+  }
 
-  private def renderUri(referer: String, uriStr: String): StringBuilder = {
+  private def renderUri(context: String, referer: String, uriStr: String): StringBuilder = {
     val sb = new StringBuilder()
     if (Strings.isEmpty(uriStr)) {
       sb ++= referer
@@ -77,32 +76,25 @@ class UrlRender(var initSuffix: String = null) {
     val uri = if (-1 == questIndex) uriStr else uriStr.substring(0, questIndex)
     if (-1 == questIndex) questIndex = uriStr.length
 
+    sb ++= context
     if (uri.startsWith("/")) {
-      val rirstslash = referer.indexOf("/", 1)
-      val context = if ((-1 == rirstslash)) "" else referer.substring(0, rirstslash)
-      sb ++= context
       sb ++= uri.substring(0, questIndex)
     } else {
-      val lastslash = referer.lastIndexOf("/")
+      val lastslash = referer.lastIndexOf("/") + 1
       val namespace = referer.substring(0, lastslash)
       sb.append(namespace)
       if (uri.startsWith("!")) {
         var dot = referer.indexOf("!", lastslash)
-        if (-1 == dot) {
-          dot = referer.indexOf(".", lastslash)
-        }
-        dot = if ((-1 == dot)) referer.length else dot
+        if (-1 == dot) dot = referer.indexOf(".", lastslash)
+        if (-1 == dot) dot = referer.length
         val action = referer.substring(lastslash, dot)
         sb ++= action
         sb ++= uri
       } else {
-        sb.append('/').append(uri)
+        sb.append(uri)
       }
     }
-    if (null != suffix) sb.append(suffix)
-    if (null != queryStr) {
-      sb.append('?').append(queryStr)
-    }
+    if (null != queryStr) sb.append('?').append(queryStr)
     sb
   }
 }

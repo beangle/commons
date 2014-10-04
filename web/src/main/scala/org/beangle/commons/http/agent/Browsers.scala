@@ -109,8 +109,8 @@ object Browsers extends Enumeration {
 
     engine.addCategory(this)
 
-    private def build(versions: Seq[String]): List[Pair[Pattern, String]] = {
-      val pairs = new collection.mutable.ListBuffer[Pair[Pattern, String]]
+    private def build(versions: Seq[String]): List[Tuple2[Pattern, String]] = {
+      val pairs = new collection.mutable.ListBuffer[Tuple2[Pattern, String]]
       for (version <- versions) {
         var matcheTarget = version
         var versionNum = ""
@@ -118,7 +118,7 @@ object Browsers extends Enumeration {
           matcheTarget = "(?i)" + Strings.substringBefore(version, "->")
           versionNum = Strings.substringAfter(version, "->")
         }
-        pairs += Pair(Pattern.compile(matcheTarget), versionNum)
+        pairs += Tuple2(Pattern.compile(matcheTarget), versionNum)
       }
       pairs.toList
     }

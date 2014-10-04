@@ -57,10 +57,8 @@ object Objects {
     if (a eq b) return true
     if ((null == a) || (null == b)) return false
     if (a.length != b.length) return false
-    for (i <- 0 until a.length if Objects.!=(a(i), b(i))) return false
-    true
+    !Range(0, a.length).exists(i => a(i) != b(i))
   }
-
   /**
    * <p>
    * Gets the {@code toString} of an {@code Object} returning an empty string ("") if {@code null}
@@ -254,15 +252,13 @@ object Objects {
 
     var rs: Boolean = true
 
-    def add(lhs: AnyRef, rhs: AnyRef): EqualsBuilder = {
+    def add(lhs: Any, rhs: Any): EqualsBuilder = {
       if (!rs) return this
-      rs &= Objects.equals(lhs, rhs)
-      this
-    }
-
-    def add(lhs: Array[Any], rhs: Array[Any]): EqualsBuilder = {
-      if (!rs) return this
-      rs &= Objects.==(lhs, rhs)
+      if (lhs.getClass.isArray && rhs.getClass.isArray) {
+        rs &= Objects.equals(lhs.asInstanceOf[Array[Any]], rhs.asInstanceOf[Array[Any]])
+      } else {
+        rs &= Objects.equals(lhs, rhs)
+      }
       this
     }
 

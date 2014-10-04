@@ -3,12 +3,12 @@
   <parent>
     <groupId>org.beangle</groupId>
     <artifactId>beangle-scala</artifactId>
-    <version>13</version>
+    <version>17</version>
   </parent>
   <groupId>org.beangle.commons</groupId>
   <artifactId>beangle-commons-parent</artifactId>
   <packaging>pom</packaging>
-  <version>4.0.5</version>
+  <version>4.1.0</version>
   <name>Beangle Commons Parent</name>
   
   <modules>
@@ -35,8 +35,7 @@
   </scm>
 
   <properties>
-    <testng.version>6.5.2</testng.version>
-    <javax.validation.version>1.0.0.GA</javax.validation.version>
+    <javax.validation.version>1.1.0.Final</javax.validation.version>
   </properties>
 
   <dependencyManagement>

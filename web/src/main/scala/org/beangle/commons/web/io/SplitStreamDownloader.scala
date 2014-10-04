@@ -18,15 +18,13 @@
  */
 package org.beangle.commons.web.io
 
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
-import org.beangle.commons.http.mime.MimeTypeProvider
+import java.io.{ IOException, InputStream }
+
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.time.Stopwatch
+
+import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 
 /**
  * SplitStreamDownloader
@@ -55,7 +53,7 @@ import org.beangle.commons.lang.time.Stopwatch
  * @author chaostone
  * @since 2.4
  */
-class SplitStreamDownloader(mimeTypeProvider: MimeTypeProvider) extends DefaultStreamDownloader(mimeTypeProvider) {
+class SplitStreamDownloader extends DefaultStreamDownloader {
 
   override def download(request: HttpServletRequest,
     response: HttpServletResponse,
@@ -104,15 +102,14 @@ class SplitStreamDownloader(mimeTypeProvider: MimeTypeProvider) extends DefaultS
       }
     } catch {
       case e: IOException =>
-      case e: Exception => logger.warn("download file error " + attach, e)
+      case e: Exception => warn(s"download file error $attach", e)
     } finally {
       IOs.close(input)
-      if (logger.isDebugEnabled) {
+      if (debugEnabled) {
         var percent = if (length == 0) "100%" else (((start - begin) * 1.0 / length) * 10000).toInt / 100.0f + "%"
         val time = watch.elapsedMillis
         var rate = if (start - begin > 0) (((start - begin) * 1.0 / time * 1000) / 1024).toInt else 0
-        logger.debug("{}({}-{}/{}) download {}[{}] in {} ms with {} KB/s", List(attach, begin, stop,
-          length, start - begin, percent, time, rate).toArray)
+        debug(s"$attach($begin-$stop/$length) download ${start - begin}[$percent] in $time ms with $rate KB/s")
       }
     }
   }

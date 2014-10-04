@@ -36,10 +36,20 @@ trait BindRegistry {
   def getBeanType(beanName: String): Class[_]
 
   /**
-   * register.
+   * register bean definition
+   * @param name beanName
+   * @param clazz cannot  be null
    *
    */
-  def register(clazz: Class[_], name: String, args: Any*): Unit
+  def register(name: String, clazz: Class[_]): Unit
+
+  /**
+   * register bean definition
+   * @param name beanName
+   * @param clazz can be null if definition is abstract
+   *
+   */
+  def register[T](name: String, clazz: Class[_], definition: T): Unit
 
   /**
    * contains.
@@ -57,4 +67,9 @@ trait BindRegistry {
    *
    */
   def isPrimary(name: String): Boolean
+
+  /**
+   * Update primary
+   */
+  def setPrimary[T](name: String, isPrimary: Boolean, definition: T): Unit
 }

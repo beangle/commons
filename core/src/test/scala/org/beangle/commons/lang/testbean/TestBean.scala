@@ -18,6 +18,8 @@
  */
 package org.beangle.commons.lang.testbean
 
+import org.beangle.commons.lang.annotation.description
+
 class TestBean {
 
   var id: java.lang.Integer = _
@@ -28,12 +30,6 @@ class TestBean {
 
   var testEnum: TestEnum.Val = _
 
-  /*  def getTestEnum(): TestEnum.Val = testEnum
-
-  def setTestEnum(testEnum: TestEnum.Val) {
-    this.testEnum = testEnum
-  }
- */
   def methodWithManyArguments(i: Int,
     f: Float,
     I: java.lang.Integer,
@@ -41,4 +37,61 @@ class TestBean {
     c: TestBean,
     c1: TestBean,
     c2: TestBean): String = "test"
+
+  @description("method1")
+  def method1(a: Long): Unit = {
+
+  }
 }
+
+class TestChildBean extends TestBean {
+  def method2(a: Long): Unit = {
+
+  }
+}
+class TestChild2Bean extends TestChildBean {
+  override def method1(a: Long): Unit = {
+
+  }
+  override def method2(a: Long): Unit = {
+
+  }
+}
+
+trait Animal {
+
+  def getAge(): Number
+}
+
+class Dog extends Animal {
+
+  def getAge(): java.lang.Integer = 0
+}
+
+trait Entity[ID] {
+  def id: ID
+}
+
+class NumIdBean[ID] extends Entity[ID] {
+
+  var id: ID = _
+}
+
+class StringIdBean extends Entity[String] {
+  var id: String = _
+}
+
+class Book extends NumIdBean[java.lang.Long] {
+
+}
+
+class BookPrimitiveId extends NumIdBean[Long] {
+}
+
+class BookStore extends StringIdBean
+
+class AbstractEntity[ID](val id: ID)
+
+class NumberIdBean[T <: Number](id: T) extends AbstractEntity[T](id)
+
+class Author(id: Integer) extends NumberIdBean[Integer](id)

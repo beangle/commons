@@ -28,11 +28,15 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class MapConverterTest extends FunSpec with Matchers {
 
-  val datas = Map[String, Any](("empty1", ""), ("empty2", null), ("empty3", Array("")))
+  val datas = Map[String, Any](("empty1", ""), ("empty2", null), ("empty3", Array("")),("number2", Array("2")))
 
   var converter: MapConverter = new MapConverter()
 
   describe("MapConverter") {
+    it("Convert Origin Type") {
+      converter.convert("", classOf[String]) should be("")
+    }
+
     it("Convert Date") {
       val year = 2010
       val month = 9
@@ -44,12 +48,7 @@ class MapConverterTest extends FunSpec with Matchers {
       calendar.get(Calendar.YEAR) should be(year)
       calendar.get(Calendar.MONTH) should be(month - 1)
       calendar.get(Calendar.DAY_OF_MONTH) should be(day)
-      dateDatas = this.datas + ("birthday" -> Array(birthday))
       converter.get(dateDatas, "birthday", classOf[Date]) should equal(Some(birthday))
-    }
-
-    it("Get from Array") {
-      converter.get(datas + ("name" -> Array("me")), "name") should equal(Some("me"))
     }
 
     it("Get Null") {
@@ -58,6 +57,8 @@ class MapConverterTest extends FunSpec with Matchers {
       converter.getLong(datas, "empty1") should be(Some(0))
       converter.getLong(datas, "empty2") should be(None)
       converter.getLong(datas, "empty3") should be(Some(0))
+      converter.getLong(datas, "number2") should be(Some(2))
+      converter.getLong(datas, "empty4") should be(None)
     }
   }
 }

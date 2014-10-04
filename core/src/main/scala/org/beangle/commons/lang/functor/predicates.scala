@@ -37,64 +37,35 @@ class InRange(val floor: Int, val upper: Int) extends Predicate[Number] {
   }
 }
 
-/**
- * NotZero.
- *
- * @author chaostone
- */
 object NotZero extends Predicate[Number] {
 
-  def apply(value: Number): Boolean = 0 != value.asInstanceOf[Number].intValue()
+  def apply(value: Number): Boolean = {
+    0 != value.asInstanceOf[Number].intValue
+  }
 
 }
 
-/**
- * NotEmptyString class.
- *
- * @author chaostone
- */
 object NotEmpty extends Predicate[String] {
 
   def apply(value: String): Boolean = (null != value) && (value.isInstanceOf[String]) && isNotEmpty(value.asInstanceOf[String])
 
 }
 
-/**
- * SingleWord class.
- *
- * @author chaostone
- */
 object SingleWord extends Predicate[String] {
 
   def apply(str: String): Boolean = str.indexOf(DELIMITER) == -1
 }
 
-/**
- * InStr class.
- *
- * @author chaostone
- */
 class InStr(val str: String) extends Predicate[String] {
 
   def apply(arg0: String): Boolean = -1 != str.indexOf(arg0.toString)
 }
 
-/**
- * Contains.
- *
- * @author chaostone
- */
 class Contains[T](val objs: Collection[_ <: T]) extends Predicate[T]() {
 
   def apply(arg0: T): Boolean = objs.contains(arg0)
 }
 
-/**
- * Max1Element class.
- *
- * @author chaostone
- * @since 4.0.0
- */
 class Max1Element extends Predicate[Collection[_]] {
 
   def apply(col: Collection[_]): Boolean = col.size < 2

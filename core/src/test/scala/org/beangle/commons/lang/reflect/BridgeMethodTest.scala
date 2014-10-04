@@ -23,6 +23,7 @@ import org.scalatest.FunSpec
 import org.scalatest.Matchers
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import org.beangle.commons.lang.testbean.Dog
 
 @RunWith(classOf[JUnitRunner])
 class BridgeMethodTest extends FunSpec with Matchers {
@@ -37,14 +38,4 @@ class BridgeMethodTest extends FunSpec with Matchers {
       }
     }
   }
-}
-
-trait Animal {
-
-  def getAge(): Number
-}
-
-class Dog extends Animal {
-
-  def getAge(): java.lang.Integer = 0
 }

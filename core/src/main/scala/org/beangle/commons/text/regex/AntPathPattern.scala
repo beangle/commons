@@ -28,6 +28,14 @@ object AntPathPattern {
   def matches(pattern: String, path: String): Boolean = {
     new AntPathPattern(pattern).matches(path)
   }
+
+  def matchStart(pattern: String, path: String): Boolean = {
+    new AntPathPattern(pattern).matchStart(path)
+  }
+
+  def isPattern(path: String): Boolean = {
+    (path.indexOf('*') != -1 || path.indexOf('?') != -1)
+  }
 }
 
 /**
@@ -59,27 +67,27 @@ object AntPathPattern {
  * @author chaostone
  * @since 3.1.0
  */
-class AntPathPattern(val antstring: String) {
+class AntPathPattern(val text: String) {
 
-  val pattern: Pattern = Pattern.compile(preprocess(antstring))
+  val pattern: Pattern = Pattern.compile(preprocess(text))
 
   /**
    * translate ant string to regex string
    */
   private def preprocess(ant: String): String = {
     val sb = new StringBuilder()
-    val length = antstring.length
+    val length = text.length
     var i = 0
     while (i < length) {
-      val c = antstring.charAt(i)
+      val c = text.charAt(i)
       var substr = String.valueOf(c)
       if (c == '.') substr = "\\." else if (c == '?') substr = "." else if (c == '*') {
         if (i + 1 < length) {
-          val next1 = antstring.charAt(i + 1)
+          val next1 = text.charAt(i + 1)
           if (next1 == '*') {
             i += 1
             var next2 = '\n'
-            if (i + 1 < length) next2 = antstring.charAt(i + 1)
+            if (i + 1 < length) next2 = text.charAt(i + 1)
             if (next2 == '/') {
               i += 1
               substr = "(.*/)*"
@@ -97,16 +105,24 @@ class AntPathPattern(val antstring: String) {
     sb.toString
   }
 
-  override def hashCode(): Int = antstring.hashCode
+  override def hashCode(): Int = text.hashCode
 
   override def equals(obj: Any): Boolean = obj match {
-    case obj: AntPathPattern => Objects.==(antstring, obj.antstring)
+    case obj: AntPathPattern => text == obj.text
     case _ => false
   }
 
-  def matches(path: String): Boolean = pattern.matcher(path).matches()
+  def matches(path: String): Boolean = {
+    pattern.matcher(path).matches()
+  }
+
+  def matchStart(path: String): Boolean = {
+    val m = pattern.matcher(path)
+    m.matches()
+    m.hitEnd()
+  }
 
   override def toString(): String = {
-    Strings.concat("ant:[", antstring, "] regex:[", pattern.toString, "]")
+    Strings.concat("ant:[", text, "] regex:[", pattern.toString, "]")
   }
 }

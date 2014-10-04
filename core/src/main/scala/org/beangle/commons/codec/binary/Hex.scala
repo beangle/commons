@@ -19,11 +19,21 @@
 package org.beangle.commons.codec.binary
 
 import org.beangle.commons.codec._
+/**
+ * Hex encode and decode method
+ */
 object Hex {
   val LowerDigits = Array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f')
   val UpperDigits = Array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')
+
+  def encode(data: Array[Byte], toLowerCase: Boolean = true): String = HexEncoder.encodeHex(data, toLowerCase)
+
+  def decode(data: String): Array[Byte] = HexDecoder.decode(data)
 }
 
+/**
+ * Hex decoder
+ */
 object HexEncoder extends Encoder[Array[Byte], String] {
   import Hex._
 
@@ -34,7 +44,7 @@ object HexEncoder extends Encoder[Array[Byte], String] {
    * @param toLowerCase
    * @return A Array[Char] containing hexadecimal characters
    */
-  def encodeHex(data: Array[Byte], toLowerCase: Boolean = true): String = {
+  def encodeHex(data: Array[Byte], toLowerCase: Boolean): String = {
     val digits = if (toLowerCase) LowerDigits else UpperDigits
     val l = data.length
     val out = new Array[Char](l << 1)
@@ -53,6 +63,9 @@ object HexEncoder extends Encoder[Array[Byte], String] {
   def encode(data: Array[Byte]): String = encodeHex(data, true)
 }
 
+/**
+ * Hex Decoder
+ */
 object HexDecoder extends Decoder[String, Array[Byte]] {
 
   /**

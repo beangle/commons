@@ -18,9 +18,13 @@
  */
 package org.beangle.commons.web.filter
 
+import java.util.regex.Pattern
+
+import org.beangle.commons.logging.Logging
+import org.beangle.commons.text.regex.AntPathPattern
+import org.beangle.commons.web.util.RequestUtils
+
 import javax.servlet.http.HttpServletRequest
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * Simple strategy to match an <tt>HttpServletRequest</tt>.
@@ -38,4 +42,86 @@ trait RequestMatcher {
    * @return true if the request matches, false otherwise
    */
   def matches(request: HttpServletRequest): Boolean
+}
+
+/**
+ * Matcher which compares a pre-defined ant-style pattern against the URL (
+ * {@code servletPath + pathInfo}) of an {@code HttpServletRequest}. The query
+ * string of the URL is ignored and matching is case-insensitive.
+ *
+ * @see AntPathMatcher
+ */
+class AntPathRequestMatcher(val pattern: AntPathPattern, val method: String) extends RequestMatcher {
+
+  /**
+   * Creates a matcher with the specific pattern which will match all HTTP
+   * methods.
+   */
+  def this(patternStr: String, method: String = null) {
+    this(new AntPathPattern(patternStr), method)
+  }
+
+  /**
+   * Returns true if the configured pattern (and HTTP-Method) match those of
+   * the supplied request.
+   */
+  def matches(request: HttpServletRequest): Boolean = {
+    if (method != null && method != request.getMethod) false
+    else {
+      var url = RequestUtils.getServletPath(request)
+      if (null != request.getPathInfo) url += request.getPathInfo
+      pattern.matches(url)
+    }
+  }
+
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case other: AntPathRequestMatcher => this.pattern == other.pattern && this.method == other.method
+      case _ => false
+    }
+  }
+
+  override def toString(): String = if (null == method) s"Ant [pattern='$pattern']" else s"Ant [pattern='$pattern',method=method]"
+}
+
+/**
+ * Uses a regular expression to decide whether a supplied the URL of a supplied
+ * {@code HttpServletRequest}. Can also be configured to match a specific HTTP
+ * method. The match is performed against the {@code servletPath + pathInfo + queryString} of the
+ * request and is
+ * case-sensitive by default. Case-insensitive matching can be used by using the
+ * constructor which takes the {@code caseInsentitive} argument.
+ *
+ * @author chaostone
+ */
+class RegexRequestMatcher(pattern: Pattern, method: String) extends RequestMatcher with Logging {
+
+  /**
+   * Creates a case-sensitive {@code Pattern} instance to match against the
+   * request.
+   */
+  def this(patternStr: String, method: String, caseInsensitive: Boolean) {
+    this(if (caseInsensitive) Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE) else Pattern.compile(patternStr), method)
+  }
+
+  /**
+   * Performs the match of the request URL ( {@code servletPath + pathInfo + queryString}) against
+   * the compiled pattern.
+   */
+  def matches(request: HttpServletRequest): Boolean = {
+    if (method != null && method != request.getMethod) false
+    else {
+      var url = RequestUtils.getServletPath(request)
+      val pathInfo = request.getPathInfo
+      val query = request.getQueryString
+      if (pathInfo != null || query != null) {
+        val sb = new StringBuilder(url)
+        if (pathInfo != null) sb.append(pathInfo)
+        if (query != null) sb.append(query)
+        url = sb.toString
+      }
+      debug(s"Checking match of request : '$url'; against '$pattern'")
+      pattern.matcher(url).matches()
+    }
+  }
 }

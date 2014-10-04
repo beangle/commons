@@ -19,7 +19,7 @@
 package org.beangle.commons.conversion.converter
 
 import java.{ util => ju }
-import java.util.Calendar.{ YEAR, MONTH, DAY_OF_MONTH, HOUR_OF_DAY, MINUTE, SECOND }
+import java.util.Calendar.{ YEAR, MONTH, DAY_OF_MONTH, HOUR_OF_DAY, MINUTE, SECOND, MILLISECOND }
 import org.beangle.commons.conversion.Converter
 import org.beangle.commons.lang.Strings.{ substring, transformToInt, split, isEmpty, contains, isNotBlank }
 import org.beangle.commons.lang.Numbers.toInt
@@ -65,6 +65,7 @@ class String2DateConverter extends StringConverterFactory[String, ju.Date] {
         gc.set(YEAR, dateElems(0))
         gc.set(MONTH, dateElems(1) - 1)
         gc.set(DAY_OF_MONTH, dateElems(2))
+        gc.set(MILLISECOND, 0)
         if (times.length > 1 && isNotBlank(times(1))) {
           val timeElems = split(times(1), ":")
           if (timeElems.length > 0) gc.set(HOUR_OF_DAY, toInt(timeElems(0)))

@@ -27,23 +27,14 @@ import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 import org.beangle.commons.lang.Strings
 
-class CharacterEncodingFilter extends Filter {
+class CharacterEncodingFilter extends GenericHttpFilter {
 
-  protected var encoding: String = "utf-8"
+  var encoding: String = "utf-8"
+  var forceEncoding = false
 
   def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
     request.setCharacterEncoding(encoding)
+    if (forceEncoding) response.setCharacterEncoding(encoding)
     chain.doFilter(request, response)
-  }
-
-  def init(filterConfig: FilterConfig) {
-    val initEncoding = filterConfig.getInitParameter("encoding")
-    if (Strings.isNotBlank(initEncoding)) {
-      this.encoding = initEncoding
-    }
-  }
-
-  def destroy() {
-    encoding = null
   }
 }

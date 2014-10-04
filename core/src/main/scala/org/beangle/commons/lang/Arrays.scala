@@ -43,8 +43,19 @@ object Arrays {
    * @param array the array to test
    * @return {@code true} if the array is empty or {@code null}
    */
-  def isEmpty(array: Array[Any]): Boolean = array == null || array.length == 0
+  def isEmpty(array: Array[_ <: Any]): Boolean = array == null || array.length == 0
 
+  def isBlank(array: Array[_ <: Any]): Boolean = {
+    val length = if (null == array) 0 else array.length
+    if (0 == length) return true
+    var i = 0
+    var finded = false
+    while (i < length && !finded) {
+      finded = (array(i) != null)
+      i += 1
+    }
+    !finded
+  }
   /**
    * <p>
    * Produces a new array containing the elements between the start and end indices.
@@ -85,6 +96,15 @@ object Arrays {
     subarray
   }
 
+  def concat[T: ClassTag](arrays: Array[T]*): Array[T] = {
+    val result = new Array[T](arrays.foldLeft(0)((sum, a) => sum + a.length))
+    var start = 0
+    arrays.foreach { a =>
+      System.arraycopy(a, 0, result, start, a.length)
+      start += a.length
+    }
+    result
+  }
   def toString(a: Any*): String = {
     if (a eq null) return "null";
     val iMax = a.length - 1;

@@ -18,24 +18,16 @@
  */
 package org.beangle.commons.web.io
 
-import org.beangle.commons.web.util.RequestUtils.encodeAttachName
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
+import java.io.{ File, FileInputStream, InputStream }
 import java.net.URL
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
-import org.beangle.commons.bean.Initializing
-import org.beangle.commons.http.mime.MimeTypeProvider
+
+import org.beangle.commons.activation.{ MimeTypeProvider, MimeTypes }
 import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.Assert
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.logging.Logging
-import org.beangle.commons.bean.Initializing
-import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.Strings
-import org.beangle.commons.bean.Initializing
-import org.beangle.commons.io.IOs
+import org.beangle.commons.web.util.RequestUtils.encodeAttachName
+
+import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 
 /**
  * Default Stream Downloader
@@ -43,11 +35,7 @@ import org.beangle.commons.io.IOs
  * @author chaostone
  * @since 2.4
  */
-class DefaultStreamDownloader(protected var mimeTypeProvider: MimeTypeProvider) extends Initializing with StreamDownloader with Logging {
-
-  def init() {
-    Assert.notNull(mimeTypeProvider, "mimeTypeProvider must be set");
-  }
+class DefaultStreamDownloader extends StreamDownloader with Logging {
 
   def download(request: HttpServletRequest, response: HttpServletResponse, file: File) {
     download(request, response, file, file.getName)
@@ -57,7 +45,7 @@ class DefaultStreamDownloader(protected var mimeTypeProvider: MimeTypeProvider) 
     try {
       download(request, response, url.openStream(), url.getFile, display)
     } catch {
-      case e: Exception => logger.warn("download file error=" + display, e)
+      case e: Exception => warn(s"download file error=$display", e)
     }
   }
 
@@ -66,21 +54,9 @@ class DefaultStreamDownloader(protected var mimeTypeProvider: MimeTypeProvider) 
       try {
         download(request, response, new FileInputStream(file), file.getAbsolutePath, display)
       } catch {
-        case e: Exception => logger.warn("download file error=" + display, e)
+        case e: Exception => warn(s"download file error=$display", e)
       }
     }
-  }
-
-  protected def addContent(request: HttpServletRequest, response: HttpServletResponse, attach: String) {
-    var contentType = response.getContentType
-    if (null == contentType) {
-      contentType = mimeTypeProvider.getMimeType(Strings.substringAfterLast(attach, "."), "application/x-msdownload")
-      response.setContentType(contentType)
-      logger.debug("set content type {} for {}", contentType, attach)
-    }
-    val encodeName = encodeAttachName(request, attach)
-    response.setHeader("Content-Disposition", "attachment; filename=" + encodeName)
-    response.setHeader("Location", encodeName)
   }
 
   def download(request: HttpServletRequest, response: HttpServletResponse, inStream: InputStream, name: String, display: String) {
@@ -90,45 +66,38 @@ class DefaultStreamDownloader(protected var mimeTypeProvider: MimeTypeProvider) 
       addContent(request, response, attach_name)
       IOs.copy(inStream, response.getOutputStream)
     } catch {
-      case e: Exception => logger.warn("download file error " + attach_name, e)
+      case e: Exception => warn(s"download file error $attach_name", e)
     } finally {
       IOs.close(inStream)
     }
   }
 
-  def setMimeTypeProvider(mimeTypeProvider: MimeTypeProvider) {
-    this.mimeTypeProvider = mimeTypeProvider
-  }
-
-  def getAttachName(name: String, display: String): String = {
+  protected def getAttachName(name: String, display: String): String = {
     var attch_name = ""
     val ext = Strings.substringAfterLast(name, ".")
     if (Strings.isBlank(display)) {
-      attch_name = getFileName(name)
+      attch_name = name
+      var iPos = attch_name.lastIndexOf("\\")
+      if (iPos > -1) attch_name = attch_name.substring(iPos + 1)
+      iPos = attch_name.lastIndexOf("/")
+      if (iPos > -1) attch_name = attch_name.substring(iPos + 1)
     } else {
       attch_name = display
-      if (!attch_name.endsWith("." + ext)) {
-        attch_name += "." + ext
-      }
+      if (!attch_name.endsWith("." + ext)) attch_name += "." + ext
     }
     attch_name
   }
 
-  /**
-   * Returns the file name by path.
-   *
-   * @param file_name
-   */
-  protected def getFileName(fileName: String): String = {
-    if (fileName == null) return ""
-    var file_name = fileName.trim()
-    var iPos = 0
-    iPos = file_name.lastIndexOf("\\")
-    if (iPos > -1) file_name = file_name.substring(iPos + 1)
-    iPos = file_name.lastIndexOf("/")
-    if (iPos > -1) file_name = file_name.substring(iPos + 1)
-    iPos = file_name.lastIndexOf(File.separator)
-    if (iPos > -1) file_name = file_name.substring(iPos + 1)
-    file_name
+  protected def addContent(request: HttpServletRequest, response: HttpServletResponse, attach: String) {
+    var contentType = response.getContentType
+    if (null == contentType) {
+      contentType = MimeTypeProvider.getMimeType(Strings.substringAfterLast(attach, "."), MimeTypes.ApplicationOctetStream).toString
+      response.setContentType(contentType)
+      debug(s"set content type $contentType for $attach")
+    }
+    val encodeName = encodeAttachName(request, attach)
+    response.setHeader("Content-Disposition", "attachment; filename=" + encodeName)
+    response.setHeader("Location", encodeName)
   }
+
 }

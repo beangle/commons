@@ -35,10 +35,11 @@ object Os {
    * @return Os
    */
   def parse(agentString: String): Os = {
-    if (Strings.isEmpty(agentString)) {
-      return Os.UNKNOWN
-    }
-    for (category <- Oss.values) {
+    if (Strings.isEmpty(agentString)) return Os.UNKNOWN
+
+    val categoryItor = Oss.values.iterator
+    while (categoryItor.hasNext) {
+      val category = categoryItor.next()
       val version = category.matches(agentString)
       if (version != null) {
         val key = category.name + "/" + version

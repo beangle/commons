@@ -89,12 +89,6 @@ object IOs extends Logging {
   /**
    * Get the contents of a <code>Reader</code> as a list of Strings,
    * one entry per line.
-   * <p>
-   *
-   * @param input the <code>Reader</code> to read from, not null
-   * @return the list of Strings, never null
-   * @throws IOException if an I/O error occurs
-   * @since 1.1
    */
   def readLines(input: Reader): List[String] = {
     val reader = toBufferedReader(input)
@@ -127,7 +121,7 @@ object IOs extends Logging {
         readProperties(url.openStream())
       } catch {
         case e: Exception => {
-          logger.error("load " + url + " error", e)
+          error("load " + url + " error", e)
           Map.empty
         }
       }
@@ -162,7 +156,7 @@ object IOs extends Logging {
         readJavaProperties(url.openStream())
       } catch {
         case e: Exception => {
-          logger.error("load " + url + " error", e)
+          error("load " + url + " error", e)
           Map.empty
         }
       }
