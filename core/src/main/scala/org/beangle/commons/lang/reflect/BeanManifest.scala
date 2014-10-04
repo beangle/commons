@@ -20,11 +20,10 @@ package org.beangle.commons.lang.reflect
 
 import java.lang.Character.isUpperCase
 import java.lang.reflect.{ Method, Modifier, ParameterizedType, TypeVariable }
-
 import scala.collection.mutable
 import scala.language.existentials
-
 import org.beangle.commons.lang.Strings.{ substringAfter, substringBefore, uncapitalize }
+import org.beangle.commons.collection.IdentityCache
 
 case class Getter(val method: Method, val returnType: Class[_])
 
@@ -45,7 +44,7 @@ class BeanManifest(val getters: Map[String, Getter], val setters: Map[String, Se
 
 object BeanManifest {
 
-  private val cache = new mutable.WeakHashMap[Class[_], BeanManifest]
+  private val cache = new IdentityCache[Class[_], BeanManifest]
   /**
    * Support scala case class
    */
@@ -55,15 +54,10 @@ object BeanManifest {
    * It search from cache, when failure build it and put it into cache.
    */
   def get(clazz: Class[_]): BeanManifest = {
-    var exist = cache.get(clazz).getOrElse(null)
+    var exist = cache.get(clazz)
     if (null == exist) {
-      cache.synchronized {
-        exist = cache.get(clazz).getOrElse(null)
-        if (null == exist) {
-          exist = load(clazz)
-          cache.put(clazz, exist)
-        }
-      }
+      exist = load(clazz)
+      cache.put(clazz, exist)
     }
     exist
   }

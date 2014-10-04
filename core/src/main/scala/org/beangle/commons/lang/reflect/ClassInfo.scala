@@ -19,11 +19,10 @@
 package org.beangle.commons.lang.reflect
 
 import java.lang.reflect.{ Method, Modifier, ParameterizedType, TypeVariable }
-
 import scala.collection.mutable
 import scala.language.existentials
-
 import org.beangle.commons.lang.Objects
+import org.beangle.commons.collection.IdentityCache
 
 object ClassInfo {
 
@@ -34,7 +33,7 @@ object ClassInfo {
   /**
    * class info cache
    */
-  var cache = new mutable.HashMap[Class[_], ClassInfo]
+  var cache = new IdentityCache[Class[_], ClassInfo]
 
   /**
    * Return true when Method is public and not static and not volatile.
@@ -104,14 +103,11 @@ object ClassInfo {
    */
   def get(clazz: Class[_]): ClassInfo = {
     var exist = cache.get(clazz)
-    if (exist.isDefined) return exist.get
-    cache.synchronized {
-      exist = cache.get(clazz)
-      if (exist.isDefined) return exist.get
-      val newClassInfo = load(clazz)
-      cache.put(clazz, newClassInfo)
-      newClassInfo
+    if (null == exist) {
+      val exist = load(clazz)
+      cache.put(clazz, exist)
     }
+    exist
   }
 }
 

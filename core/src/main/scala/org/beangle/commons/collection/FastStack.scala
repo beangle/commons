@@ -2,6 +2,9 @@ package org.beangle.commons.collection
 
 import scala.reflect.ClassTag
 
+/**
+ * Array based Stack
+ */
 final class FastStack[T: ClassTag](initialCapacity: Int = 16) {
 
   private var stack: Array[T] = new Array[T](initialCapacity)
@@ -63,6 +66,7 @@ final class FastStack[T: ClassTag](initialCapacity: Int = 16) {
     result.append(']')
     result.toString
   }
+
   private def resizeStack(newCapacity: Int): Unit = {
     val newStack = new Array[T](newCapacity)
     System.arraycopy(stack, 0, newStack, 0, Math.min(pointer, newCapacity))
