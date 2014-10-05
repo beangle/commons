@@ -104,7 +104,7 @@ object ClassInfo {
   def get(clazz: Class[_]): ClassInfo = {
     var exist = cache.get(clazz)
     if (null == exist) {
-      val exist = load(clazz)
+      exist = load(clazz)
       cache.put(clazz, exist)
     }
     exist
