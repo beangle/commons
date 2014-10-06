@@ -1,7 +1,7 @@
 package org.beangle.commons.lang.time
 
 /**
- * 参考国家标准GBT 7408-2005
+ * 国家标准GBT 7408-2005
  */
 object WeekDay extends Enumeration(1) {
   type WeekDay = Value
