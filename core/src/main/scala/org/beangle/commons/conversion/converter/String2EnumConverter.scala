@@ -19,6 +19,8 @@
 package org.beangle.commons.conversion.converter
 
 import org.beangle.commons.conversion.Converter
+import org.beangle.commons.lang.Numbers
+import org.beangle.commons.lang.ClassLoaders
 
 /**
  * Convert String to Enumeration.
@@ -29,11 +31,11 @@ import org.beangle.commons.conversion.Converter
 class String2EnumConverter extends StringConverterFactory[String, Enum[_]] {
 
   private class EnumConverter[T <: Enum[_]](val enumType: Class[_]) extends Converter[String, T] {
-    def enumValueOf[T <: Enum[T]](cls: Class[_], str: String): T =
+    def enumValueOf[T <: Enum[T]](cls: Class[_], str: String): T = {
       Enum.valueOf(cls.asInstanceOf[Class[T]], str)
+    }
 
     override def apply(input: String): T = enumValueOf(enumType, input)
-
   }
 
   override def getConverter[T <: Enum[_]](targetType: Class[T]): Option[Converter[String, T]] = {
@@ -47,4 +49,31 @@ class String2EnumConverter extends StringConverterFactory[String, Enum[_]] {
     }
   }
 
+}
+
+object String2ScalaEnumConverter extends StringConverterFactory[String, Enumeration#Value] {
+
+  private class EnumConverter[T <: Enumeration#Value](enum: Enumeration) extends Converter[String, T] {
+    override def apply(input: String): T = {
+      val result =
+        if (Numbers.isDigits(input)) enum.apply(Numbers.toInt(input))
+        else enum.withName(input)
+      result.asInstanceOf[T]
+    }
+  }
+
+  override def getConverter[T <: Enumeration#Value](targetType: Class[T]): Option[Converter[String, T]] = {
+    val converter = super.getConverter(targetType)
+    if (converter.isEmpty) {
+      val targetTypeName = targetType.getName()
+      val dollaIdx = targetTypeName.indexOf('$')
+      if (-1 == dollaIdx) throw new RuntimeException("Only support enum which value extends super.Val")
+      val enum = ClassLoaders.loadClass(targetTypeName.substring(0, dollaIdx + 1)).getDeclaredField("MODULE$").get(null).asInstanceOf[Enumeration]
+      val enumconverter = new EnumConverter(enum)
+      register(targetType, enumconverter)
+      Some(enumconverter)
+    } else {
+      converter
+    }
+  }
 }

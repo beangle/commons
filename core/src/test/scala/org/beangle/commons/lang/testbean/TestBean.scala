@@ -28,7 +28,7 @@ class TestBean {
 
   var intValue: Int = _
 
-  var testEnum: TestEnum.Val = _
+  var testEnum: TestEnum.TestVal = _
 
   def methodWithManyArguments(i: Int,
     f: Float,

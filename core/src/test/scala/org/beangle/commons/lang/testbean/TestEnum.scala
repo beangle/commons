@@ -20,14 +20,14 @@ package org.beangle.commons.lang.testbean
 
 object TestEnum extends Enumeration {
 
-  val Public = new Val()
+  val Public = new TestVal()
 
-  val Protected = new Val()
+  val Protected = new TestVal()
 
-  val Private = new Val()
+  val Private = new TestVal()
 
-  class Val extends super.Val
+  class TestVal extends super.Val
 
   import scala.language.implicitConversions
-  implicit def convertValue(v: Value): Val = v.asInstanceOf[Val]
+  implicit def convertValue(v: Value): TestVal = v.asInstanceOf[TestVal]
 }

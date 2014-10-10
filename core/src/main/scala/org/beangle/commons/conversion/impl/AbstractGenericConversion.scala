@@ -56,13 +56,11 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
       if (null == converter) Array.newInstance(targetClazz.getComponentType, 0).asInstanceOf[T] else {
         val length = Array.getLength(source)
         val result = Array.newInstance(targetClazz.getComponentType, length).asInstanceOf[T]
-        for (i <- 0 until length) Array.set(result, i, converter.convert(Array.get(source, i),
-          targetObjType))
+        for (i <- 0 until length) Array.set(result, i, converter.convert(Array.get(source, i), targetObjType))
         result
       }
     } else {
       val converter = findConverter(sourceType, targetClazz)
-      if (null == converter) return Objects.default(targetType)
       val rs = converter.convert(source, targetClazz).asInstanceOf[T]
       if (null == rs && targetType.isPrimitive) Objects.default(targetType) else rs
     }

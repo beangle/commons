@@ -42,10 +42,12 @@ class DefaultConversion extends AbstractGenericConversion {
   addConverter(new String2NumberConverter())
 
   addConverter(new String2DateConverter())
-  
+
   addConverter(String2TimeConverter)
-  
+
   addConverter(new String2EnumConverter())
+
+  addConverter(String2ScalaEnumConverter)
 
   addConverter(String2LocaleConverter)
 

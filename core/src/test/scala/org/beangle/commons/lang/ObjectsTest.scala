@@ -29,6 +29,8 @@ class ObjectsTest extends FunSpec with Matchers {
   describe("Objects") {
     it("Equals object and array") {
       Objects.equals(null, null) should be(true)
+      // so strange
+      Objects.equals(Array(2), Array(2)) should be(false)
     }
   }
 }

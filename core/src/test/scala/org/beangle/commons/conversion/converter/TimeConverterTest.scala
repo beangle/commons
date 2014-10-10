@@ -20,8 +20,9 @@ package org.beangle.commons.conversion.converter
 
 import java.sql.Time
 import org.junit.runner.RunWith
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.{ FunSpec, Matchers }
 import org.scalatest.junit.JUnitRunner
+import org.beangle.commons.lang.time.HourMinute
 
 @RunWith(classOf[JUnitRunner])
 class TimeConverterTest extends FunSpec with Matchers {
@@ -33,6 +34,8 @@ class TimeConverterTest extends FunSpec with Matchers {
       String2TimeConverter("090619") should equal(Time.valueOf("09:06:19"))
       String2TimeConverter("12:34") should equal(Time.valueOf("12:34:00"))
       String2TimeConverter("12:34:00") should equal(Time.valueOf("12:34:00"))
+
+      String2HourMinuteConverter("12:34") should equal(HourMinute(1234.toShort))
     }
   }
 }
