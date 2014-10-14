@@ -147,6 +147,40 @@ object IOs extends Logging {
     }
   }
   /**
+   * Read key value properties
+   * Group by Uppercased key,and default group
+   */
+  def readBundles(input: InputStream, charset: Charset = UTF_8): Map[String, Map[String, String]] = {
+    if (null == input) Map.empty
+    else {
+      val defaults = ""
+      val texts = new collection.mutable.HashMap[String, collection.mutable.HashMap[String, String]]
+      val reader = new LineNumberReader(new InputStreamReader(input, charset))
+      var line: String = reader.readLine
+      while (null != line) {
+        val index = line.indexOf('=')
+        if (index > 0 && index != line.length - 1) {
+          val key = line.substring(0, index).trim()
+          val value = line.substring(index + 1).trim()
+          if (Character.isUpperCase(key.charAt(0))) {
+            val dotIdx = key.indexOf('.')
+            if (-1 == dotIdx) {
+              texts.getOrElseUpdate(defaults, new collection.mutable.HashMap[String, String]).put(key, value)
+            } else {
+              texts.getOrElseUpdate(key.substring(0, dotIdx), new collection.mutable.HashMap[String, String]).put(key.substring(dotIdx + 1), value)
+            }
+          } else {
+            texts.getOrElseUpdate(defaults, new collection.mutable.HashMap[String, String]).put(key, value)
+          }
+        }
+        line = reader.readLine()
+      }
+      close(input)
+      val results = texts.map { case (name, values) => (name, values.toMap) }
+      results.toMap
+    }
+  }
+  /**
    * Read Java key value properties by url
    */
   def readJavaProperties(url: URL): Map[String, String] = {

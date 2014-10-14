@@ -45,31 +45,31 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
   }
 
   def load(locale: Locale, bundleName: String): TextBundle = {
-    if (reloadable) {
-      loadJavaBundle(bundleName, locale).getOrElse(
-        loadNewBundle(bundleName, locale).getOrElse(new DefaultTextBundle(locale, bundleName, Map.empty[String, String])))
-    } else {
-      val localeBundles = caches.get(locale).getOrElse {
-        caches.synchronized {
-          val newBundles = new ConcurrentHashMap[String, TextBundle]
-          caches.put(locale, newBundles)
-          newBundles
-        }
+    val localeBundles = caches.getOrElseUpdate(locale, new ConcurrentHashMap[String, TextBundle])
+    var bundle = localeBundles.get(bundleName)
+    if (null == bundle) {
+      loadJavaBundle(bundleName, locale) match {
+        case Some(b) => bundle = b
+        case None =>
+          loadNewBundle(bundleName, locale) foreach {
+            case (name, nested) =>
+              if (name.length == 0) bundle = nested
+              else localeBundles.put(bundleName + "." + name, nested)
+          }
       }
-      var bundle = localeBundles.get(bundleName)
-      if (null == bundle) {
-        bundle = loadJavaBundle(bundleName, locale).getOrElse(
-          loadNewBundle(bundleName, locale).getOrElse(new DefaultTextBundle(locale, bundleName, Map.empty[String, String])))
-        localeBundles.put(bundleName, bundle)
-      }
-      bundle
+      localeBundles.put(bundleName, bundle)
     }
+    if (reloadable) caches.clear
+    bundle
   }
 
-  protected def loadNewBundle(bundleName: String, locale: Locale): Option[TextBundle] = {
+  protected def loadNewBundle(bundleName: String, locale: Locale): Map[String, TextBundle] = {
     val resource = toDefaultResourceName(bundleName, locale)
-    val properties = IOs.readProperties(ClassLoaders.getResource(resource))
-    Some(new DefaultTextBundle(locale, resource, properties))
+    val bundles = IOs.readBundles(ClassLoaders.getResource(resource).openStream).map {
+      case (name, values) =>
+        (name, new DefaultTextBundle(locale, resource, values))
+    }
+    bundles.toMap
   }
 
   /**
