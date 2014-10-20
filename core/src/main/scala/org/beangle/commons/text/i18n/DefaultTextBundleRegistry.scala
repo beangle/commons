@@ -18,13 +18,15 @@
  */
 package org.beangle.commons.text.i18n
 
+import java.io.{ InputStream, InputStreamReader, LineNumberReader }
+import java.nio.charset.Charset
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
 import scala.collection.JavaConversions.collectionAsScalaIterable
 
 import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.{ Arrays, ClassLoaders }
+import org.beangle.commons.lang.{ Arrays, Charsets, ClassLoaders, Strings }
 import org.beangle.commons.lang.annotation.description
 import org.beangle.commons.logging.Logging
 /**
@@ -53,8 +55,8 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
         case None =>
           loadNewBundle(bundleName, locale) foreach {
             case (name, nested) =>
-              if (name.length == 0) bundle = nested
-              else localeBundles.put(bundleName + "." + name, nested)
+              if (name == bundleName) bundle = nested
+              else localeBundles.put(name, nested)
           }
       }
       localeBundles.put(bundleName, bundle)
@@ -65,11 +67,18 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
 
   protected def loadNewBundle(bundleName: String, locale: Locale): Map[String, TextBundle] = {
     val resource = toDefaultResourceName(bundleName, locale)
-    val bundles = IOs.readBundles(ClassLoaders.getResource(resource).openStream).map {
-      case (name, values) =>
-        (name, new DefaultTextBundle(locale, resource, values))
+    val url = ClassLoaders.getResource(resource)
+    if (null == url) {
+      Map(bundleName -> new DefaultTextBundle(locale, resource, Map.empty))
+    } else {
+      val prefix = Strings.substringBeforeLast(bundleName, ".") + "."
+      val bundles = readBundles(url.openStream).map {
+        case (name, values) =>
+          if (name.length == 0) (bundleName, new DefaultTextBundle(locale, resource, values))
+          else (prefix + name, new DefaultTextBundle(locale, resource, values))
+      }
+      bundles.toMap
     }
-    bundles.toMap
   }
 
   /**
@@ -143,5 +152,39 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
       None != msg
     }
     msg
+  }
+  /**
+   * Read key value properties
+   * Group by Uppercased key,and default group
+   */
+  protected[i18n] def readBundles(input: InputStream, charset: Charset = Charsets.UTF_8): Map[String, Map[String, String]] = {
+    if (null == input) Map.empty
+    else {
+      val defaults = ""
+      val texts = new collection.mutable.HashMap[String, collection.mutable.HashMap[String, String]]
+      val reader = new LineNumberReader(new InputStreamReader(input, charset))
+      var line: String = reader.readLine
+      while (null != line) {
+        val index = line.indexOf('=')
+        if (index > 0 && index != line.length - 1) {
+          val key = line.substring(0, index).trim()
+          val value = line.substring(index + 1).trim()
+          if (Character.isUpperCase(key.charAt(0))) {
+            val dotIdx = key.indexOf('.')
+            if (-1 == dotIdx) {
+              texts.getOrElseUpdate(defaults, new collection.mutable.HashMap[String, String]).put(key, value)
+            } else {
+              texts.getOrElseUpdate(key.substring(0, dotIdx), new collection.mutable.HashMap[String, String]).put(key.substring(dotIdx + 1), value)
+            }
+          } else {
+            texts.getOrElseUpdate(defaults, new collection.mutable.HashMap[String, String]).put(key, value)
+          }
+        }
+        line = reader.readLine()
+      }
+      if (!texts.contains(defaults)) texts.put(defaults, collection.mutable.HashMap.empty)
+      val results = texts.map { case (name, values) => (name, values.toMap) }
+      results.toMap
+    }
   }
 }
