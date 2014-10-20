@@ -24,6 +24,7 @@ import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.testbean.TestEnum
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import org.beangle.commons.lang.time.WeekDays._
 
 /**
  * @author chaostone
@@ -34,7 +35,8 @@ class EnumConverterTest extends FunSpec with Matchers {
 
   describe("EnumConverter") {
     it("Convert Enum") {
-      DefaultConversion.Instance.convert("Private", classOf[TestEnum.Val])
+      assert(null != DefaultConversion.Instance.convert("Private", classOf[TestEnum.TestVal]))
+      assert(null != DefaultConversion.Instance.convert("Sun", classOf[WeekDay]))
     }
   }
 }

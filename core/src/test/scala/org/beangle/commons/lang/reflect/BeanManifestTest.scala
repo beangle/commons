@@ -12,8 +12,12 @@ class BeanManifestTest extends FunSpec with Matchers {
     it("find real template parameter") {
       assert(BeanManifest.get(classOf[Book]).getPropertyType("id") == Some(classOf[java.lang.Long]))
       assert(BeanManifest.get(classOf[BookPrimitiveId]).getPropertyType("id") == Some(classOf[java.lang.Object]))
-      assert(BeanManifest.get(classOf[BookStore]).getPropertyType("id") == Some(classOf[String]))     
+      assert(BeanManifest.get(classOf[BookStore]).getPropertyType("id") == Some(classOf[String]))
       assert(BeanManifest.get(classOf[Author]).getPropertyType("id") == Some(classOf[Integer]))
+    }
+
+    it("ignore normal read property") {
+      assert(BeanManifest.get(classOf[Book]).getGetter("empty") == None)
     }
   }
 }

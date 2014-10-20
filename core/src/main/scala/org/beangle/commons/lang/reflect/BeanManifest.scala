@@ -70,8 +70,10 @@ object BeanManifest {
     val setters = new mutable.HashMap[String, Setter]
     var nextClass = clazz
     var paramTypes: collection.Map[String, Class[_]] = Map.empty
+    val fields = new mutable.HashSet[String]
     while (null != nextClass && classOf[AnyRef] != nextClass) {
       val declaredMethods = nextClass.getDeclaredMethods
+      nextClass.getDeclaredFields() foreach { f => fields += f.getName }
       (0 until declaredMethods.length) foreach { i =>
         val method = declaredMethods(i)
         findAccessor(method) match {
@@ -106,7 +108,11 @@ object BeanManifest {
         case _ => Map.empty
       }
     }
-    new BeanManifest(getters.toMap, setters.toMap)
+    val filterGetters = getters.filter {
+      case (name, getter) =>
+        setters.contains(name) || fields.contains(name)
+    }
+    new BeanManifest(filterGetters.toMap, setters.toMap)
   }
 
   private def extract(t: java.lang.reflect.Type, types: collection.Map[String, Class[_]]): Class[_] = {
@@ -123,18 +129,17 @@ object BeanManifest {
    */
   private def findAccessor(method: Method): Option[Tuple2[Boolean, String]] = {
     val modifiers = method.getModifiers
-    if (Modifier.isStatic(modifiers) || Modifier.isPrivate(modifiers) || method.isBridge) return None
+    if (Modifier.isStatic(modifiers) || !Modifier.isPublic(modifiers) || method.isBridge) return None
 
     val name = method.getName
     if (name.contains("$") && !name.contains("_$eq") || ignores.contains(name)) return None
 
     val parameterTypes = method.getParameterTypes
     if (0 == parameterTypes.length && method.getReturnType != classOf[Unit]) {
-      val propertyName = if (name.startsWith("get") && name.length > 3 && isUpperCase(name.charAt(3)))
-        uncapitalize(substringAfter(name, "get"))
-      else if (name.startsWith("is") && name.length > 2 && isUpperCase(name.charAt(2)))
-        uncapitalize(substringAfter(name, "is"))
-      else name
+      val propertyName =
+        if (name.startsWith("get") && name.length > 3 && isUpperCase(name.charAt(3))) uncapitalize(substringAfter(name, "get"))
+        else if (name.startsWith("is") && name.length > 2 && isUpperCase(name.charAt(2))) uncapitalize(substringAfter(name, "is"))
+        else name
       Some((true, propertyName))
     } else if (1 == parameterTypes.length) {
       val propertyName =

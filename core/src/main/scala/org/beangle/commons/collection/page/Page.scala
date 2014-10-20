@@ -20,14 +20,8 @@ package org.beangle.commons.collection.page
 
 object Page {
 
-  /**
-   * Constant <code>DefaultPageNo=1</code>
-   */
   val DefaultPageNo = 1
 
-  /**
-   * Constant <code>DefaultPageSize=20</code>
-   */
   val DefaultPageSize = 20
 
   def empty[T](): Page[T] = EmptyPage.asInstanceOf[Page[T]]
@@ -70,71 +64,23 @@ import Page._
  */
 trait Page[E] extends Seq[E] {
 
-  /**
-   * 最大页码
-   *
-   * @return a int.
-   */
   def maxPageNo: Int
 
-  /**
-   * 当前页码
-   *
-   * @return a int.
-   */
   def pageNo: Int
-  /**
-   * 每页大小
-   *
-   * @return a int.
-   */
+  
   def pageSize: Int
 
-  /**
-   * 数据总量
-   *
-   * @return a int.
-   */
   def total: Int
 
-  /**
-   * 下一页
-   *
-   * @return a {@link org.beangle.commons.collection.page.Page} object.
-   */
   def next(): Page[E]
 
-  /**
-   * 是否还有下一页
-   *
-   * @return a boolean.
-   */
   def hasNext: Boolean
 
-  /**
-   * 上一页
-   *
-   * @return a {@link org.beangle.commons.collection.page.Page} object.
-   */
   def previous(): Page[E]
-
-  /**
-   * 是否还有上一页
-   *
-   * @return a boolean.
-   */
+  
   def hasPrevious: Boolean
 
-  /**
-   * 调转到指定页
-   *
-   * @param pageNo a int.
-   * @return a {@link org.beangle.commons.collection.page.Page} object.
-   */
   def moveTo(pageNo: Int): Page[E]
 
-  /**
-   * getItems.
-   */
   def items: Seq[E]
 }

@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.text.i18n
 
-import java.{util => ju}
+import java.{ util => ju }
 
 import scala.language.existentials
 
@@ -90,7 +90,7 @@ class HierarchicalTextResource(clazz: Class[_], locale: ju.Locale, registry: Tex
 
   private def collectInterfaces(me: Class[_], interfaces: collection.mutable.Set[Class[_]]): Unit = {
     for (ifc <- me.getInterfaces()) {
-      if (!ifc.getName().startsWith("java.")) interfaces.add(ifc)
+      if (!ifc.getName.startsWith("java.") && !ifc.getName.startsWith("scala.")) interfaces.add(ifc)
       collectInterfaces(ifc, interfaces)
     }
   }

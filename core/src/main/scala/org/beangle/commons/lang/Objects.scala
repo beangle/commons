@@ -49,9 +49,9 @@ object Objects {
   def equals(a: Any, b: Any): Boolean = (a == b)
 
   /**
-   * <p>
    * Compares two object array for equality, where either one or both objects may be {@code null}.
-   * </p>
+   * Note:
+   * Don't user Any[_],fo after type erase ,it has same signature with equals(a:Any,b:Any)
    */
   def equals(a: Array[Any], b: Array[Any]): Boolean = {
     if (a eq b) return true

@@ -28,7 +28,7 @@ class TestBean {
 
   var intValue: Int = _
 
-  var testEnum: TestEnum.Val = _
+  var testEnum: TestEnum.TestVal = _
 
   def methodWithManyArguments(i: Int,
     f: Float,
@@ -83,6 +83,11 @@ class StringIdBean extends Entity[String] {
 
 class Book extends NumIdBean[java.lang.Long] {
 
+  def myId = id
+  
+  val version="3.0"
+    
+  def isEmpty=false
 }
 
 class BookPrimitiveId extends NumIdBean[Long] {
@@ -95,3 +100,4 @@ class AbstractEntity[ID](val id: ID)
 class NumberIdBean[T <: Number](id: T) extends AbstractEntity[T](id)
 
 class Author(id: Integer) extends NumberIdBean[Integer](id)
+
