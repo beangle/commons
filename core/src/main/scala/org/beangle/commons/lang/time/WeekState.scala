@@ -29,6 +29,7 @@ class WeekState(val value: Long) {
     val result = new collection.mutable.ListBuffer[Int]
     while (i >= 0) {
       if (weekstr.charAt(i) == '1') result += (weekstr.length - 1 - i)
+      i -= 1
     }
     result.toList
   }
