@@ -48,7 +48,7 @@ class MapConverter(val conversion: DefaultConversion = DefaultConversion.Instanc
    */
   def convert[T: ClassTag](datas: Array[AnyRef], clazz: Class[T]): Array[T] = {
     if (null == datas) return null
-    val newDatas = new Array[T](datas.size);
+    val newDatas = java.lang.reflect.Array.newInstance(clazz,datas.size).asInstanceOf[Array[T]]
     for (i <- 0 until datas.length) newDatas(i) = convert(datas(i), clazz)
     newDatas
   }
@@ -97,7 +97,7 @@ class MapConverter(val conversion: DefaultConversion = DefaultConversion.Instanc
   }
 
   /**
-   * 返回request中以prefix.开头的参数
+   * 返回data中以prefix.开头的参数
    *
    * @param exclusiveAttrNames 要排除的属性串
    */
