@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.beangle.commons</groupId>
     <artifactId>beangle-commons-parent</artifactId>
-    <version>4.1.4</version>
+    <version>4.1.5</version>
   </parent>
   <artifactId>beangle-commons-core</artifactId>
   <packaging>jar</packaging>
@@ -13,5 +13,4 @@
     <bundle.symbolicName>org.beangle.commons.core</bundle.symbolicName>
     <bundle.namespace>org.beangle.commons</bundle.namespace>
   </properties>
-
 </project>

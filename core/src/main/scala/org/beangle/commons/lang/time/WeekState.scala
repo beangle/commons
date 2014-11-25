@@ -7,7 +7,7 @@ object WeekState {
     new WeekState(java.lang.Long.parseLong(value, 2))
   }
 }
-class WeekState(val value: Long) {
+class WeekState(val value: Long) extends Serializable {
 
   override def toString: String = {
     java.lang.Long.toBinaryString(value)

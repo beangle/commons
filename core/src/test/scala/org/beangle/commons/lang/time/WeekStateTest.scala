@@ -32,5 +32,9 @@ class WeekStateTest extends FunSpec with Matchers {
       assert(WeekState("101100").isOccupied(2))
       assert(!WeekState("101100").isOccupied(4))
     }
+
+    it("is serializable") {
+      assert(WeekState("101100").isInstanceOf[Serializable])
+    }
   }
 }
