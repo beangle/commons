@@ -14,5 +14,8 @@ class WeekDayTest extends FunSpec with Matchers {
       assert(Mon.id == 1)
       assert(Sat.id == 6)
     }
+    it("is serializable") {
+      assert(Sun.isInstanceOf[Serializable])
+    }
   }
 }

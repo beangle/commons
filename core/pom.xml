@@ -13,5 +13,4 @@
     <bundle.symbolicName>org.beangle.commons.core</bundle.symbolicName>
     <bundle.namespace>org.beangle.commons</bundle.namespace>
   </properties>
-
 </project>
