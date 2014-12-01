@@ -36,6 +36,10 @@ object Primitives {
     (classOf[Long], classOf[jl.Long]), (classOf[Float], classOf[jl.Float]),
     (classOf[Double], classOf[jl.Double]))
 
+  private val defaults: Map[Class[_], Any] = Map((classOf[Boolean], false), (classOf[Char], '\u0000'),
+    (classOf[Byte], 0.asInstanceOf[Byte]), (classOf[Short], 0.asInstanceOf[Short]),
+    (classOf[Int], 0), (classOf[Long], 0L), (classOf[Float], 0F), (classOf[Double], 0D))
+
   /**
    * Wrapper types to their corresponding primitive types.
    */
@@ -43,8 +47,7 @@ object Primitives {
 
   def default[T](clazz: Class[T]): T = {
     if (clazz.isPrimitive) {
-      if (clazz.isAssignableFrom(classOf[Boolean])) false.asInstanceOf[T]
-      else 0.asInstanceOf[T]
+      defaults(clazz).asInstanceOf[T]
     } else null.asInstanceOf[T]
   }
   /**
