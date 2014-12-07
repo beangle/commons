@@ -36,11 +36,14 @@ class MapConverter(val conversion: DefaultConversion = DefaultConversion.Instanc
   /**
    * convert.
    */
-  def convert[T](value: Any, clazz: Class[T]): T = {
-    if (null == value) return Objects.default(clazz)
-    if (clazz.isAssignableFrom(value.getClass)) return value.asInstanceOf[T]
-    if (value.isInstanceOf[String] && Strings.isEmpty(value.asInstanceOf[String])) return Objects.default(clazz)
-    conversion.convert(value, clazz)
+  def convert[T](value: Any, clazz: Class[T]): Option[T] = {
+    if (null == value) return None
+    if (clazz.isAssignableFrom(value.getClass)) return Some(value.asInstanceOf[T])
+    value match {
+      case s: String => if (Strings.isEmpty(s)) None else Some(conversion.convert(s, clazz))
+      case a: Array[_] => if (!clazz.isArray()) convert(a(0), clazz) else Some(conversion.convert(value, clazz))
+      case o: Any => Some(conversion.convert(value, clazz))
+    }
   }
 
   /**
@@ -48,8 +51,8 @@ class MapConverter(val conversion: DefaultConversion = DefaultConversion.Instanc
    */
   def convert[T: ClassTag](datas: Array[AnyRef], clazz: Class[T]): Array[T] = {
     if (null == datas) return null
-    val newDatas = java.lang.reflect.Array.newInstance(clazz,datas.size).asInstanceOf[Array[T]]
-    for (i <- 0 until datas.length) newDatas(i) = convert(datas(i), clazz)
+    val newDatas = java.lang.reflect.Array.newInstance(clazz, datas.size).asInstanceOf[Array[T]]
+    for (i <- 0 until datas.length) newDatas(i) = convert(datas(i), clazz).getOrElse(Objects.default(clazz))
     newDatas
   }
 
@@ -58,12 +61,7 @@ class MapConverter(val conversion: DefaultConversion = DefaultConversion.Instanc
    */
   def get[T](data: Map[String, Any], name: String, clazz: Class[T]): Option[T] = {
     data.get(name) match {
-      case Some(value) =>
-        if (null == value) None
-        else {
-          val rs = if (value.getClass.isArray && !clazz.isArray) convert(value.asInstanceOf[Array[_]](0), clazz) else convert(value, clazz)
-          if (null == rs) None else Some(rs)
-        }
+      case Some(value) => convert(value, clazz)
       case _ => None
     }
   }

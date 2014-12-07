@@ -28,13 +28,13 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class MapConverterTest extends FunSpec with Matchers {
 
-  val datas = Map[String, Any](("empty1", ""), ("empty2", null), ("empty3", Array("")),("number2", Array("2")))
+  val datas = Map[String, Any](("empty1", ""), ("empty2", null), ("empty3", Array("")), ("empty4", Array(null)), ("number2", Array("2")))
 
   var converter: MapConverter = new MapConverter()
 
   describe("MapConverter") {
     it("Convert Origin Type") {
-      converter.convert("", classOf[String]) should be("")
+      converter.convert("", classOf[String]) should be(Some(""))
     }
 
     it("Convert Date") {
@@ -52,13 +52,14 @@ class MapConverterTest extends FunSpec with Matchers {
     }
 
     it("Get Null") {
-      converter.getBoolean(datas, "empty1") should be(Some(false))
+      converter.getBoolean(datas, "empty1") should be(None)
       converter.getBoolean(datas, "empty2") should be(None)
-      converter.getLong(datas, "empty1") should be(Some(0))
+      converter.getLong(datas, "empty1") should be(None)
       converter.getLong(datas, "empty2") should be(None)
-      converter.getLong(datas, "empty3") should be(Some(0))
+      converter.getLong(datas, "empty3") should be(None)
       converter.getLong(datas, "number2") should be(Some(2))
       converter.getLong(datas, "empty4") should be(None)
+      converter.getLong(datas, "emptyDoesNotExists") should be(None)
     }
   }
 }

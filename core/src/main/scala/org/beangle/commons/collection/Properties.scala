@@ -7,8 +7,14 @@ class Properties extends collection.mutable.HashMap[String, Any] {
   def this(obj: Object, attrs: String*) {
     this()
     for (attr <- attrs) {
-      val value = PropertyUtils.getProperty[Any](obj, attr)
-      if (null != value) this.put(attr, value)
+      val idx = attr.indexOf("->")
+      if (-1 == idx) {
+        val value = PropertyUtils.getProperty[Any](obj, attr)
+        if (null != value) this.put(attr, value)
+      } else {
+        val value = PropertyUtils.getProperty[Any](obj, attr.substring(0, idx))
+        if (null != value) this.put(attr.substring(idx + 2), value)
+      }
     }
   }
 
