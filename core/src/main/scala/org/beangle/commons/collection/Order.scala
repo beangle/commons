@@ -79,15 +79,15 @@ object Order {
       val orders = new ListBuffer[Order]
       val orderStrs = Strings.split(orderString, ',')
       for (i <- 0 until orderStrs.length) {
-        var order = orderStrs(i).trim()
-        if (Strings.isNotBlank(order)) {
-          order = order.toLowerCase().trim()
+        val originOrder = orderStrs(i)
+        if (Strings.isNotBlank(originOrder)) {
+          val order = originOrder.toLowerCase()
           if (order.endsWith(" desc")) {
-            orders += new Order(orderStrs(i).substring(0, order.indexOf(" desc")), false)
+            orders += new Order(orderStrs(i).substring(0, order.indexOf(" desc")).trim(), false)
           } else if (order.endsWith(" asc")) {
-            orders += new Order(orderStrs(i).substring(0, order.indexOf(" asc")), true)
+            orders += new Order(orderStrs(i).substring(0, order.indexOf(" asc")).trim(), true)
           } else {
-            orders += new Order(orderStrs(i), true)
+            orders += new Order(orderStrs(i).trim(), true)
           }
         }
       }

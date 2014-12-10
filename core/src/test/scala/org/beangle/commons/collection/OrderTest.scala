@@ -56,6 +56,10 @@ class OrderTest extends FunSpec with Matchers {
       order = sorts(2).asInstanceOf[Order]
       order.property should equal("activity.time.weekId")
       order.ascending should be(false)
+
+      val a = Order.parse("semester.schoolYear desc, semester.name  desc")
+      assert(a.size == 2)
+      assert(a(1).property == "semester.name")
     }
 
     it("ParserComplexOrder") {
