@@ -90,9 +90,7 @@ class CsvWriter(val writer: Writer, val format: CsvFormat = new CsvFormat.Builde
   }
 
   /**
-   * <p>
    * processLine.
-   * </p>
    *
    * @param nextElement a {@link java.lang.String} object.
    * @return a {@link java.lang.StringBuilder} object.
