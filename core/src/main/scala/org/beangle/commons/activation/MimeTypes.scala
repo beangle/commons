@@ -56,6 +56,8 @@ object MimeTypes {
 
   val TextXml = this("text/xml")
 
+  val TextCsv = this("text/csv")
+
   val TextJavaScript = this("text/javascript")
 
   def apply(mimeType: String): javax.activation.MimeType = {
