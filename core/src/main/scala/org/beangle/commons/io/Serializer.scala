@@ -5,7 +5,7 @@ import javax.activation.MimeType
 
 trait Serializer {
 
-  def serialize(data: AnyRef, os: OutputStream, properties: Tuple2[Class[_], List[String]]*)
+  def serialize(data: AnyRef, os: OutputStream, params: Map[String, Any])
 
   def supportMediaTypes: Seq[MimeType]
 
