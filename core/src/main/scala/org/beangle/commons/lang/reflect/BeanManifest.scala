@@ -18,14 +18,17 @@
  */
 package org.beangle.commons.lang.reflect
 
+import java.beans.Transient
 import java.lang.Character.isUpperCase
 import java.lang.reflect.{ Method, Modifier, ParameterizedType, TypeVariable }
+
 import scala.collection.mutable
 import scala.language.existentials
-import org.beangle.commons.lang.Strings.{ substringAfter, substringBefore, uncapitalize }
-import org.beangle.commons.collection.IdentityCache
 
-case class Getter(val method: Method, val returnType: Class[_])
+import org.beangle.commons.collection.IdentityCache
+import org.beangle.commons.lang.Strings.{ substringAfter, substringBefore, uncapitalize }
+
+case class Getter(val method: Method, val returnType: Class[_], val isTransient: Boolean)
 
 case class Setter(val method: Method, val parameterTypes: Array[Class[_]])
 
@@ -79,7 +82,7 @@ object BeanManifest {
         findAccessor(method) match {
           case Some(Tuple2(readable, name)) =>
             if (readable) {
-              getters.put(name, Getter(method, extract(method.getGenericReturnType, paramTypes)))
+              getters.put(name, Getter(method, extract(method.getGenericReturnType, paramTypes), method.isAnnotationPresent(classOf[Transient])))
             } else {
               val types = method.getGenericParameterTypes
               val paramsTypes = new Array[Class[_]](types.length)
@@ -111,6 +114,21 @@ object BeanManifest {
     val filterGetters = getters.filter {
       case (name, getter) =>
         setters.contains(name) || fields.contains(name)
+    }
+
+    if (Modifier.isAbstract(clazz.getModifiers) || clazz.isInterface) {
+      clazz.getMethods foreach { method =>
+        if (Modifier.isAbstract(method.getModifiers)) {
+          findAccessor(method) foreach {
+            case (readable, name) =>
+              if (readable) {
+                filterGetters.put(name, Getter(method, method.getReturnType, method.isAnnotationPresent(classOf[Transient])))
+              } else {
+                setters.put(name, Setter(method, method.getParameterTypes))
+              }
+          }
+        }
+      }
     }
     new BeanManifest(filterGetters.toMap, setters.toMap)
   }

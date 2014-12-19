@@ -19,6 +19,7 @@
 package org.beangle.commons.lang.testbean
 
 import org.beangle.commons.lang.annotation.description
+import java.beans.Transient
 
 class TestBean {
 
@@ -40,7 +41,6 @@ class TestBean {
 
   @description("method1")
   def method1(a: Long): Unit = {
-
   }
 }
 
@@ -70,30 +70,41 @@ class Dog extends Animal {
 
 trait Entity[ID] {
   def id: ID
+  /**
+   * Return true if persisted
+   */
+  @Transient
+  def persisted: Boolean = id != null
+
+  def name: String
 }
 
-class NumIdBean[ID] extends Entity[ID] {
+abstract class NumIdBean[ID] extends Entity[ID] {
 
   var id: ID = _
 }
 
-class StringIdBean extends Entity[String] {
+abstract class StringIdBean extends Entity[String] {
   var id: String = _
 }
 
 class Book extends NumIdBean[java.lang.Long] {
 
   def myId = id
-  
-  val version="3.0"
-    
-  def isEmpty=false
+
+  var name = "book"
+  val version = "3.0"
+
+  def isEmpty = false
 }
 
 class BookPrimitiveId extends NumIdBean[Long] {
+  var name = "BookPrimitiveId"
 }
 
-class BookStore extends StringIdBean
+class BookStore extends StringIdBean {
+  var name = "BookStore"
+}
 
 class AbstractEntity[ID](val id: ID)
 
