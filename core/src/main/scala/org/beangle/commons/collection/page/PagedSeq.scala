@@ -41,9 +41,9 @@ class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends Page[E]() {
 
   var page: Page[E] = _
 
-  var pageNo: Int = limit.pageNo - 1
+  var pageIndex: Int = limit.pageIndex - 1
 
-  val maxPageNo: Int = calcMaxPageNo(datas.size, limit.pageSize)
+  val totalPages: Int = calcMaxPageNo(datas.size, limit.pageSize)
 
   val pageSize: Int = limit.pageSize
 
@@ -77,40 +77,38 @@ class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends Page[E]() {
   def apply(index: Int): E = page(index)
 
   /**
-   * getTotal.
+   * totalItems.
    */
-  def total: Int = datas.size
+  def totalItems: Int = datas.size
 
   /**
    * hasNext.
    */
-  def hasNext: Boolean = pageNo < maxPageNo
+  def hasNext: Boolean = pageIndex < totalPages
 
   /**
    * hasPrevious.
    */
-  def hasPrevious: Boolean = pageNo > 1
+  def hasPrevious: Boolean = pageIndex > 1
 
   /**
    * next.
    */
-  def next(): Page[E] = moveTo(pageNo + 1)
+  def next(): Page[E] = moveTo(pageIndex + 1)
 
   /**
    * previous.
    */
-  def previous(): Page[E] = moveTo(pageNo - 1)
+  def previous(): Page[E] = moveTo(pageIndex - 1)
 
   /**
    *
    */
-  def moveTo(pageNo: Int): Page[E] = {
-    if (pageNo < 1) {
-      throw new RuntimeException("error pageNo:" + pageNo)
-    }
-    this.pageNo = pageNo
-    val toIndex = pageNo * pageSize
-    val newPage = new SinglePage[E](pageNo, pageSize, datas.size, datas.slice((pageNo - 1) * pageSize,
+  def moveTo(pageIndex: Int): Page[E] = {
+    if (pageIndex < 1) throw new RuntimeException("error pageNo:" + pageIndex)
+    this.pageIndex = pageIndex
+    val toIndex = pageIndex * pageSize
+    val newPage = new SinglePage[E](pageIndex, pageSize, datas.size, datas.slice((pageIndex - 1) * pageSize,
       if ((toIndex < datas.size)) toIndex else datas.size))
     this.page = newPage
     this

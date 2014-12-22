@@ -23,21 +23,21 @@ package org.beangle.commons.collection.page
  *
  * @author chaostone
  */
-class SinglePage[E](val pageNo: Int, val pageSize: Int, val total: Int, val items: Seq[E]) extends Page[E] {
+class SinglePage[E](val pageIndex: Int, val pageSize: Int, val totalItems: Int, val items: Seq[E]) extends Page[E] {
 
-  def maxPageNo: Int = {
-    if (total < pageSize) {
+  def totalPages: Int = {
+    if (totalItems < pageSize) {
       1
     } else {
-      val remainder = total % pageSize
-      val quotient = total / pageSize
+      val remainder = totalItems % pageSize
+      val quotient = totalItems / pageSize
       if ((0 == remainder)) quotient else (quotient + 1)
     }
   }
 
-  def hasNext: Boolean = maxPageNo > pageNo
+  def hasNext: Boolean = totalPages > pageIndex
 
-  def hasPrevious: Boolean = pageNo > 1
+  def hasPrevious: Boolean = pageIndex > 1
 
   def next(): Page[E] = this
 

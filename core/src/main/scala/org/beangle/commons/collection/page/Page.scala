@@ -28,13 +28,13 @@ object Page {
 
   private object EmptyPage extends Page[Any] {
 
-    def maxPageNo: Int = 0
+    def totalPages: Int = 0
 
-    def pageNo: Int = 0
+    def pageIndex: Int = 0
 
     def pageSize: Int = 0
 
-    def total: Int = 0
+    def totalItems: Int = 0
 
     def hasNext: Boolean = false
 
@@ -64,13 +64,13 @@ import Page._
  */
 trait Page[E] extends Seq[E] {
 
-  def maxPageNo: Int
+  def totalPages: Int
 
-  def pageNo: Int
+  def pageIndex: Int
   
   def pageSize: Int
 
-  def total: Int
+  def totalItems: Int
 
   def next(): Page[E]
 
