@@ -111,9 +111,10 @@ object BeanManifest {
         case _ => Map.empty
       }
     }
-    val filterGetters = getters.filter {
+
+    val filterGetters = getters.map {
       case (name, getter) =>
-        setters.contains(name) || fields.contains(name)
+        (name, Getter(getter.method, getter.returnType, getter.isTransient || !(setters.contains(name) || fields.contains(name))))
     }
 
     if (Modifier.isAbstract(clazz.getModifiers) || clazz.isInterface) {
@@ -130,6 +131,7 @@ object BeanManifest {
         }
       }
     }
+
     new BeanManifest(filterGetters.toMap, setters.toMap)
   }
 
