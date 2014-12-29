@@ -72,8 +72,15 @@ object RequestUtils extends Logging {
         if ('/' == context.charAt(length - 1)) context = context.substring(0, length - 1)
         servletPath = uri.substring(context.length)
         servletPath
+        val semicolonIdx = servletPath.indexOf(';')
+        if (semicolonIdx > 0) {
+          servletPath.substring(0, semicolonIdx)
+        } else { servletPath }
       } else {
-        uri
+        val semicolonIdx = uri.indexOf(';')
+        if (semicolonIdx > 0) {
+          uri.substring(0, semicolonIdx)
+        } else { uri }
       }
     }
   }

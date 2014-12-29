@@ -19,8 +19,8 @@
 package org.beangle.commons.web.util
 
 import org.junit.runner.RunWith
-import org.mockito.Mockito.{mock, when}
-import org.scalatest.{FunSpec, Matchers}
+import org.mockito.Mockito.{ mock, when }
+import org.scalatest.{ FunSpec, Matchers }
 import javax.servlet.http.HttpServletRequest
 import org.scalatest.junit.JUnitRunner
 
@@ -32,15 +32,17 @@ class RequestUtilsTest extends FunSpec with Matchers {
       var request = mock(classOf[HttpServletRequest])
       when(request.getContextPath).thenReturn("/")
       when(request.getRequestURI).thenReturn("/")
-      RequestUtils.getServletPath(request)
+      assert("" == RequestUtils.getServletPath(request))
+
       request = mock(classOf[HttpServletRequest])
       when(request.getContextPath).thenReturn("/")
-      when(request.getRequestURI).thenReturn("/demo")
-      RequestUtils.getServletPath(request)
+      when(request.getRequestURI).thenReturn("/demo;jsessoin_id=1")
+      assert("/demo" == RequestUtils.getServletPath(request))
+
       request = mock(classOf[HttpServletRequest])
       when(request.getContextPath).thenReturn("")
       when(request.getRequestURI).thenReturn("/demo")
-      RequestUtils.getServletPath(request)
+      assert("/demo" == RequestUtils.getServletPath(request))
     }
   }
 }
