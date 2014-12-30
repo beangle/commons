@@ -43,7 +43,7 @@ class SinglePage[E](val pageIndex: Int, val pageSize: Int, val totalItems: Int, 
 
   def previous(): Page[E] = this
 
-  def moveTo(pageNo: Int): Page[E] = this
+  def moveTo(pageIndex: Int): Page[E] = this
 
   def apply(index: Int): E = items(index)
 

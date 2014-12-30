@@ -48,7 +48,7 @@ object Page {
 
     def length(): Int = 0
 
-    def moveTo(pageNo: Int): Page[Any] = this
+    def moveTo(pageIndex: Int): Page[Any] = this
 
     def items: Seq[Any] = Nil
 
@@ -80,7 +80,7 @@ trait Page[E] extends Seq[E] {
   
   def hasPrevious: Boolean
 
-  def moveTo(pageNo: Int): Page[E]
+  def moveTo(pageIndex: Int): Page[E]
 
   def items: Seq[E]
 }
