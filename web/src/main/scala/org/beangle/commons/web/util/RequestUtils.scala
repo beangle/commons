@@ -25,6 +25,7 @@ import org.beangle.commons.codec.net.BCoder
 import org.beangle.commons.http.agent._
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.logging.Logging
+import javax.servlet.http.HttpServletResponse
 
 object RequestUtils extends Logging {
 
@@ -94,18 +95,18 @@ object RequestUtils extends Logging {
     realPath
   }
 
-  def encodeAttachName(request: HttpServletRequest, attach_name: String): String = {
-    val agent = request.getHeader("USER-AGENT")
-    var newName = attach_name
-    try {
-      newName = if (null != agent && -1 != agent.indexOf("MSIE")) URLEncoder.encode(attach_name, "UTF-8") else new BCoder().encode(attach_name)
-    } catch {
-      case e: Exception => {
-        error("cannot encode " + attach_name, e)
-        return attach_name
-      }
-    }
-    newName
+  /**
+   * Set Content-Disposition header
+   * @see http://tools.ietf.org/html/rfc6266
+   * @see http://tools.ietf.org/html/rfc5987
+   * @see https://blog.robotshell.org/2012/deal-with-http-header-encoding-for-file-download/
+   */
+  def setFileDownloadHeader(response: HttpServletResponse, filename: String) {
+    val encodeFileName = URLEncoder.encode(filename, "UTF-8").replaceAll("\\+", "%20");
+    val value = new StringBuilder("attachment;")
+    value ++= " filename=\"" + filename + "\";"
+    value ++= " filename*=utf-8''" + filename
+    response.setHeader("Content-Disposition", value.mkString)
   }
 
   /**

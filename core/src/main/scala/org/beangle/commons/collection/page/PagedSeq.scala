@@ -105,7 +105,7 @@ class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends Page[E]() {
    *
    */
   def moveTo(pageIndex: Int): Page[E] = {
-    if (pageIndex < 1) throw new RuntimeException("error pageNo:" + pageIndex)
+    if (pageIndex < 1) throw new RuntimeException("error pageIndex:" + pageIndex)
     this.pageIndex = pageIndex
     val toIndex = pageIndex * pageSize
     val newPage = new SinglePage[E](pageIndex, pageSize, datas.size, datas.slice((pageIndex - 1) * pageSize,

@@ -21,11 +21,14 @@ package org.beangle.commons.web.io
 import java.io.{ File, FileInputStream, InputStream }
 import java.net.URL
 
+import scala.annotation.elidable
+import scala.annotation.elidable.FINE
+
 import org.beangle.commons.activation.{ MimeTypeProvider, MimeTypes }
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.logging.Logging
-import org.beangle.commons.web.util.RequestUtils.encodeAttachName
+import org.beangle.commons.web.util.RequestUtils
 
 import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 
@@ -95,9 +98,7 @@ class DefaultStreamDownloader extends StreamDownloader with Logging {
       response.setContentType(contentType)
       debug(s"set content type $contentType for $attach")
     }
-    val encodeName = encodeAttachName(request, attach)
-    response.setHeader("Content-Disposition", "attachment; filename=" + encodeName)
-    response.setHeader("Location", encodeName)
+    RequestUtils.setFileDownloadHeader(response, attach)
   }
 
 }
