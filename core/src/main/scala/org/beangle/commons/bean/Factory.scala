@@ -18,9 +18,15 @@
  */
 package org.beangle.commons.bean
 
+import org.beangle.commons.lang.reflect.Reflections
+
 trait Factory[T] {
 
   def result: T
 
   def singleton: Boolean = true
+
+  def objectType: Class[T] = {
+    Reflections.getGenericParamType(this.getClass, classOf[Factory[_]]).values.head.asInstanceOf[Class[T]]
+  }
 }

@@ -23,6 +23,7 @@ import Binder._
 import scala.collection.mutable.ListBuffer
 import org.beangle.commons.inject.Scope
 import org.beangle.commons.lang.annotation.description
+import org.beangle.commons.bean.ScalaSingletonFactory
 
 object Binder {
 
@@ -200,12 +201,23 @@ class Binder(val module: String) {
   }
 
   /**
-   * bind.
+   * bind class with a name.
    */
   def bind(beanName: String, clazz: Class[_]): DefinitionBinder = {
     new DefinitionBinder(this).bind(beanName, clazz)
   }
 
+  /**
+   * bind object with a name.
+   */
+  def bind(beanName: String, singleton: AnyRef): Unit = {
+    val objectType= singleton.getClass
+    val definition = new Definition(beanName, classOf[ScalaSingletonFactory[_]], Scope.Singleton.toString)
+    definition.constructor(objectType)
+    val an = objectType.getAnnotation(classOf[description])
+    if (null != an) definition.description = an.value()
+    add(definition)
+  }
   /**
    * bind.
    */
