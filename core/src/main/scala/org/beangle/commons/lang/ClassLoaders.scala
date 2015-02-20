@@ -111,4 +111,8 @@ object ClassLoaders {
     val loader = if (classLoader == null) defaultClassLoader else classLoader
     loader.loadClass(className)
   }
+
+  def newInstance[T](className: String, classLoader: ClassLoader = null): T = {
+    loadClass(className, classLoader).newInstance().asInstanceOf[T]
+  }
 }
