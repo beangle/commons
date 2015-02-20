@@ -137,10 +137,17 @@ abstract class AbstractBindModule extends Module {
   }
 
   /**
-   * bind.
+   * bind class with a name.
    */
   protected def bind(beanName: String, clazz: Class[_]): DefinitionBinder = {
     binder.bind(beanName, clazz)
+  }
+
+  /**
+   * bind singleton with a name.
+   */
+  protected def bind(beanName: String, singleton: AnyRef): Unit = {
+    binder.bind(beanName, singleton)
   }
 
   /**
