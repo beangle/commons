@@ -9,13 +9,20 @@ import org.beangle.commons.lang.time.WeekDays._
 class WeekDayTest extends FunSpec with Matchers {
 
   describe("WeekDay") {
-    it("value start 0") {
-      assert(Sun.id == 7)
+    it("id starts at Mon") {
       assert(Mon.id == 1)
+      assert(Sun.id == 7)
       assert(Sat.id == 6)
     }
+
     it("is serializable") {
       assert(Sun.isInstanceOf[Serializable])
+    }
+
+    it("index starts at Sun") {
+      assert(Sun.index == 1)
+      assert(Mon.index == 2)
+      assert(Sat.index == 7)
     }
   }
 }
