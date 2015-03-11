@@ -4,7 +4,7 @@ package org.beangle.commons.collection
  * Similar to java.util.IdentityHashMap,but using chaining bucket
  * But do not support null key and null value
  */
-class IdentityCache[K <: AnyRef, V <: AnyRef](capacity: Int = 1024) {
+final class IdentityMap[K <: AnyRef, V <: AnyRef](capacity: Int = 1024) {
   assert(capacity % 2 == 0)
 
   private val table = new Array[Entry[K, V]](capacity)
@@ -20,11 +20,11 @@ class IdentityCache[K <: AnyRef, V <: AnyRef](capacity: Int = 1024) {
     null.asInstanceOf[V]
   }
 
-  final def contains(key: K): Boolean = {
+  def contains(key: K): Boolean = {
     null != get(key)
   }
 
-  final def put(key: K, value: V): Boolean = {
+  def put(key: K, value: V): Boolean = {
     val hash = System.identityHashCode(key) & mask
     val tab = table
     var entry = tab(hash)
@@ -60,7 +60,7 @@ class IdentityCache[K <: AnyRef, V <: AnyRef](capacity: Int = 1024) {
     null.asInstanceOf[V]
   }
 
-  final def size(): Int = {
+  def size(): Int = {
     var size = 0
     (0 until table.length) foreach { bucket =>
       var entry = table(bucket)
@@ -72,6 +72,42 @@ class IdentityCache[K <: AnyRef, V <: AnyRef](capacity: Int = 1024) {
     size
   }
 
-  final class Entry[K, V](val key: K, var value: V, var next: Entry[K, V])
+  def keysIterator: Iterator[K] = {
+    new KeyIterator(table)
+  }
 
+  class Entry[K, V](val key: K, var value: V, var next: Entry[K, V])
+
+  class EntryIterator[K, V](table: Array[Entry[K, V]]) {
+    var entry: Entry[K, V] = _
+    var hasNext = false
+    var index = -1
+
+    def move() {
+      if (index < table.length) {
+        if (null != entry && null != entry.next) {
+          entry = entry.next
+        } else {
+          entry = null
+          index += 1
+          while (null == entry && index < table.length) {
+            entry = table(index)
+            index += 1
+          }
+        }
+      }
+      hasNext = (entry != null)
+    }
+  }
+
+  class KeyIterator[K](table: Array[Entry[K, V]]) extends EntryIterator(table) with Iterator[K] {
+
+    move()
+
+    override def next(): K = {
+      val key = entry.key
+      move()
+      key
+    }
+  }
 }
