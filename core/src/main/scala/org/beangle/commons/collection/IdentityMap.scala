@@ -3,6 +3,7 @@ package org.beangle.commons.collection
 /**
  * Similar to java.util.IdentityHashMap,but using chaining bucket
  * But do not support null key and null value
+ * (not thread safe)
  */
 final class IdentityMap[K <: AnyRef, V <: AnyRef](capacity: Int = 1024) {
   assert(capacity % 2 == 0)
