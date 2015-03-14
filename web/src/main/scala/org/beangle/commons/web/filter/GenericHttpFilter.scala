@@ -22,13 +22,12 @@ import scala.collection.mutable
 
 import org.beangle.commons.bean.{ Initializing, PropertyUtils }
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.logging.Logging
 
 import javax.servlet.{ Filter, FilterConfig, ServletException }
 /**
  * @author chaostone
  */
-abstract class GenericHttpFilter extends Filter with Initializing with Logging {
+abstract class GenericHttpFilter extends Filter with Initializing {
 
   var filterConfig: FilterConfig = _
 
@@ -39,10 +38,8 @@ abstract class GenericHttpFilter extends Filter with Initializing with Logging {
   def init(filterConfig: FilterConfig) {
     this.filterConfig = filterConfig
     val filterName = filterConfig.getFilterName
-    debug(s"Initializing filter $filterName")
     initParams(filterConfig, requiredProperties)
     init()
-    debug(s"Filter '$filterName' configured successfully")
   }
 
   private final def initParams(config: FilterConfig, requiredProperties: Set[String]) {

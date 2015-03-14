@@ -23,10 +23,9 @@ import java.{ util => ju }
 import scala.language.existentials
 
 import org.beangle.commons.lang.Strings.substringBeforeLast
-import org.beangle.commons.logging.Logging
 
 class HierarchicalTextResource(clazz: Class[_], locale: ju.Locale, registry: TextBundleRegistry, formater: TextFormater)
-  extends DefaultTextResource(locale, registry, formater) with Logging {
+  extends DefaultTextResource(locale, registry, formater) {
 
   protected override def get(key: String): Option[String] = {
     val message = findMessage(clazz, key, new collection.mutable.HashSet[String])

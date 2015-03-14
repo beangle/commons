@@ -18,11 +18,10 @@
  */
 package org.beangle.commons.io
 
-import java.net.URL
 import java.io.IOException
-import org.beangle.commons.logging.Logging
-import org.beangle.commons.lang.ClassLoaders
-import org.beangle.commons.lang.Strings
+import java.net.URL
+
+import org.beangle.commons.lang.{ ClassLoaders, Strings }
 
 /**
  * Resource loader
@@ -40,7 +39,7 @@ trait ResourceLoader {
 
 }
 
-class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader with Logging {
+class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader {
 
   def this(loaderArray: ResourceLoader*) {
     this(loaderArray.toList)
@@ -60,7 +59,7 @@ class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader 
       try {
         list = loader.loadAll(resourceName)
       } catch {
-        case e: IOException => error("cannot getResources " + resourceName, e)
+        case e: IOException => System.err.println("cannot getResources " + resourceName, e)
       }
     }
     list
@@ -77,7 +76,7 @@ class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader 
 /**
  * Load resource by class loader.
  */
-class ClasspathResourceLoader(val prefixes: List[String] = List("")) extends ResourceLoader with Logging {
+class ClasspathResourceLoader(val prefixes: List[String] = List("")) extends ResourceLoader {
 
   def this(prefixStr: String) {
     this(if (Strings.isEmpty(prefixStr)) List("") else Strings.split(prefixStr, " ").toList)

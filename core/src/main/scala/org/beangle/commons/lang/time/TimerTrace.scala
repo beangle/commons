@@ -18,9 +18,7 @@
  */
 package org.beangle.commons.lang.time
 
-import org.beangle.commons.logging.Logging
-
-object TimerTrace extends Logging {
+object TimerTrace {
 
   protected var curStack: ThreadLocal[TimerStack] = new ThreadLocal[TimerStack]()
 
@@ -93,7 +91,7 @@ object TimerTrace extends Logging {
    * @param currentTimer profiling timer bean
    */
   private def printTimes(currentTimer: TimerNode) {
-    info(currentTimer.getPrintable)
+    println(currentTimer.getPrintable)
   }
 
   /**

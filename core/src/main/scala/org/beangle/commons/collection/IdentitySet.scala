@@ -2,6 +2,7 @@ package org.beangle.commons.collection
 
 /**
  * Set using IdentityMap(not thread safe)
+ * @since 4.2.3
  */
 class IdentitySet[A <: AnyRef] extends scala.collection.mutable.Set[A] {
   val map = new IdentityMap[A, A]

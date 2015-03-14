@@ -25,11 +25,10 @@ import org.beangle.commons.lang.reflect.BeanManifest
 import org.beangle.commons.lang.reflect.MethodInfo
 import org.beangle.commons.conversion.Conversion
 import org.beangle.commons.conversion.impl.DefaultConversion
-import org.beangle.commons.logging.Logging
 import scala.collection.Map
 import scala.collection.mutable
 
-object PropertyUtils extends Logging {
+object PropertyUtils {
 
   private val resolver = new PropertyNameResolver()
 
@@ -85,19 +84,27 @@ object PropertyUtils extends Logging {
     return value
   }
 
-  def copyProperty(bean: AnyRef, name: String, value: AnyRef): Any = copyProperty(bean, name, value, DefaultConversion.Instance)
+  def copyProperty(bean: AnyRef, name: String, value: AnyRef): Any = {
+    copyProperty(bean, name, value, DefaultConversion.Instance)
+  }
 
-  def isWriteable(bean: AnyRef, name: String): Boolean = BeanManifest.get(bean.getClass).getSetter(name).isDefined
+  def isWriteable(bean: AnyRef, name: String): Boolean = {
+    BeanManifest.get(bean.getClass).getSetter(name).isDefined
+  }
 
-  def getPropertyType(clazz: Class[_], name: String): Class[_] = BeanManifest.get(clazz).getPropertyType(name).orNull
+  def getPropertyType(clazz: Class[_], name: String): Class[_] = {
+    BeanManifest.get(clazz).getPropertyType(name).orNull
+  }
 
-  def getWritableProperties(clazz: Class[_]): Set[String] = BeanManifest.get(clazz).getWritableProperties
+  def getWritableProperties(clazz: Class[_]): Set[String] = {
+    BeanManifest.get(clazz).getWritableProperties
+  }
 
   def getSimpleProperty[T](bean: Any, name: String): T = {
     BeanManifest.get(bean.getClass).getGetter(name) match {
       case Some(info) => info.method.invoke(bean).asInstanceOf[T]
       case _ =>
-        warn("Cannot find get" + Strings.capitalize(name) + " in " + bean.getClass)
+        System.err.println("Cannot find get" + Strings.capitalize(name) + " in " + bean.getClass)
         null.asInstanceOf[T]
     }
   }
@@ -137,7 +144,7 @@ object PropertyUtils extends Logging {
         converted
       }
       case _ => {
-        warn(s"Cannot find $name set method in ${bean.getClass.getName}")
+        System.err.println(s"Cannot find $name set method in ${bean.getClass.getName}")
         null
       }
     }

@@ -3,9 +3,8 @@ package org.beangle.commons.web.multipart
 import javax.servlet.http.HttpServletRequest
 import sun.rmi.runtime.Log.LogFactory
 import javax.servlet.http.Part
-import org.beangle.commons.logging.Logging
 
-object StandardMultipartResolver extends MultipartResolver with Logging {
+object StandardMultipartResolver extends MultipartResolver {
 
   def isMultipart(request: HttpServletRequest): Boolean = {
     if (!"post".equals(request.getMethod.toLowerCase)) return false

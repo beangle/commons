@@ -20,7 +20,6 @@ package org.beangle.commons.web.filter
 
 import java.util.regex.Pattern
 
-import org.beangle.commons.logging.Logging
 import org.beangle.commons.text.regex.AntPathPattern
 import org.beangle.commons.web.util.RequestUtils
 
@@ -94,7 +93,7 @@ class AntPathRequestMatcher(val pattern: AntPathPattern, val method: String) ext
  *
  * @author chaostone
  */
-class RegexRequestMatcher(pattern: Pattern, method: String) extends RequestMatcher with Logging {
+class RegexRequestMatcher(pattern: Pattern, method: String) extends RequestMatcher {
 
   /**
    * Creates a case-sensitive {@code Pattern} instance to match against the
@@ -120,7 +119,6 @@ class RegexRequestMatcher(pattern: Pattern, method: String) extends RequestMatch
         if (query != null) sb.append(query)
         url = sb.toString
       }
-      debug(s"Checking match of request : '$url'; against '$pattern'")
       pattern.matcher(url).matches()
     }
   }

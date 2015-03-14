@@ -55,11 +55,9 @@ import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
  */
 class SplitStreamDownloader extends DefaultStreamDownloader {
 
-  override def download(request: HttpServletRequest,
-    response: HttpServletResponse,
-    input: InputStream,
-    name: String,
-    display: String) {
+  override def download(request: HttpServletRequest, response: HttpServletResponse,
+    input: InputStream, name: String, display: String) {
+
     val attach = getAttachName(name, display)
     response.reset()
     addContent(request, response, attach)
@@ -102,15 +100,9 @@ class SplitStreamDownloader extends DefaultStreamDownloader {
       }
     } catch {
       case e: IOException =>
-      case e: Exception => warn(s"download file error $attach", e)
+      case e: Exception => request.getServletContext.log(s"download file error $attach", e)
     } finally {
       IOs.close(input)
-      if (debugEnabled) {
-        var percent = if (length == 0) "100%" else (((start - begin) * 1.0 / length) * 10000).toInt / 100.0f + "%"
-        val time = watch.elapsedMillis
-        var rate = if (start - begin > 0) (((start - begin) * 1.0 / time * 1000) / 1024).toInt else 0
-        debug(s"$attach($begin-$stop/$length) download ${start - begin}[$percent] in $time ms with $rate KB/s")
-      }
     }
   }
 

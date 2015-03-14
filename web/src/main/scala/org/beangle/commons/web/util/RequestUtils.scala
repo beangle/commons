@@ -24,10 +24,9 @@ import javax.servlet.http.HttpServletRequest
 import org.beangle.commons.codec.net.BCoder
 import org.beangle.commons.http.agent._
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.logging.Logging
 import javax.servlet.http.HttpServletResponse
 
-object RequestUtils extends Logging {
+object RequestUtils {
 
   /**
    * Returns remote ip address.
@@ -117,9 +116,6 @@ object RequestUtils extends Logging {
   def getUserAgent(request: HttpServletRequest): Useragent = {
     val head = request.getHeader("USER-AGENT")
     val agent = new Useragent(getIpAddr(request), Browser.parse(head), Os.parse(head))
-    if (agent.os == Oss.Unknown || agent.browser == Browsers.Unknown) {
-      info("Cannot parser user agent:" + request.getHeader("USER-AGENT"))
-    }
     agent
   }
 }

@@ -6,7 +6,6 @@ import java.net.{ JarURLConnection, URL }
 import java.util.jar.JarFile
 
 import org.beangle.commons.lang.{ ClassLoaders, Strings }
-import org.beangle.commons.logging.Logging
 import org.beangle.commons.text.regex.AntPathPattern
 import org.beangle.commons.text.regex.AntPathPattern.isPattern
 
@@ -17,7 +16,7 @@ trait ResourceResolver {
   def getResources(locationPattern: String): List[URL]
 }
 
-class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResourceLoader) extends ResourceResolver with Logging {
+class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResourceLoader) extends ResourceResolver {
 
   private val equinoxResolveMethod: Method = {
     try {
