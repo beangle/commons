@@ -32,5 +32,8 @@ class ObjectsTest extends FunSpec with Matchers {
       // so strange
       Objects.equals(Array(2), Array(2)) should be(false)
     }
+    it("Compare object and array") {
+      Objects.compareBuilder.add(1, 2).toComparison() should be(-1)
+    }
   }
 }

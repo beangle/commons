@@ -28,16 +28,45 @@ import org.beangle.commons.conversion.impl.DefaultConversion
 import scala.collection.Map
 import scala.collection.mutable
 
+@deprecated("Using Properties","4.2.4")
 object PropertyUtils {
+
+  @throws(classOf[NoSuchMethodException])
+  def setProperty(bean: AnyRef, name: String, value: Any) {
+    Properties.set(bean, name, value)
+  }
+
+  def getProperty[T <: Any](inputBean: Any, propertyName: String): T = {
+    Properties.get(inputBean, propertyName)
+  }
+
+  def copyProperty(bean: AnyRef, propertyName: String, value: Any, conversion: Conversion): Any = {
+    Properties.copy(bean, propertyName, value, conversion)
+  }
+  def copyProperty(bean: AnyRef, name: String, value: AnyRef): Any = {
+    Properties.copy(bean, name, value, DefaultConversion.Instance)
+  }
+
+  def getPropertyType(clazz: Class[_], name: String): Class[_] = {
+    Properties.getType(clazz, name)
+  }
+
+  def getWritableProperties(clazz: Class[_]): Set[String] = {
+    Properties.writables(clazz)
+  }
+
+}
+
+object Properties {
 
   private val resolver = new PropertyNameResolver()
 
   @throws(classOf[NoSuchMethodException])
-  def setProperty(bean: AnyRef, name: String, value: Any) {
-    copyProperty(bean, name, value, null)
+  def set(bean: AnyRef, name: String, value: Any) {
+    copy(bean, name, value, null)
   }
 
-  def getProperty[T <: Any](inputBean: Any, propertyName: String): T = {
+  def get[T <: Any](inputBean: Any, propertyName: String): T = {
     var result = inputBean
     var name = propertyName
     while (resolver.hasNested(name)) {
@@ -57,7 +86,7 @@ object PropertyUtils {
     result.asInstanceOf[T]
   }
 
-  def copyProperty(bean: AnyRef, propertyName: String, value: Any, conversion: Conversion): Any = {
+  def copy(bean: AnyRef, propertyName: String, value: Any, conversion: Conversion): Any = {
     var result: Any = bean
     var name = propertyName
     while (resolver.hasNested(name)) {
@@ -84,23 +113,23 @@ object PropertyUtils {
     return value
   }
 
-  def copyProperty(bean: AnyRef, name: String, value: AnyRef): Any = {
-    copyProperty(bean, name, value, DefaultConversion.Instance)
+  def copy(bean: AnyRef, name: String, value: AnyRef): Any = {
+    copy(bean, name, value, DefaultConversion.Instance)
   }
 
   def isWriteable(bean: AnyRef, name: String): Boolean = {
     BeanManifest.get(bean.getClass).getSetter(name).isDefined
   }
 
-  def getPropertyType(clazz: Class[_], name: String): Class[_] = {
+  def getType(clazz: Class[_], name: String): Class[_] = {
     BeanManifest.get(clazz).getPropertyType(name).orNull
   }
 
-  def getWritableProperties(clazz: Class[_]): Set[String] = {
+  def writables(clazz: Class[_]): Set[String] = {
     BeanManifest.get(clazz).getWritableProperties
   }
 
-  def getSimpleProperty[T](bean: Any, name: String): T = {
+  private def getSimpleProperty[T](bean: Any, name: String): T = {
     BeanManifest.get(bean.getClass).getGetter(name) match {
       case Some(info) => info.method.invoke(bean).asInstanceOf[T]
       case _ =>

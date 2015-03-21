@@ -25,12 +25,12 @@ import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class PropertyUtilsSpec extends FunSpec with Matchers {
+class PropertiesSpec extends FunSpec with Matchers {
 
-  describe("PropertyUtils") {
+  describe("Properties") {
     it("Get or Set property") {
       val bean = new TestBean
-      PropertyUtils.setProperty(bean, "intValue", 2)
+      Properties.set(bean, "intValue", 2)
       bean.intValue should be(2)
     }
   }

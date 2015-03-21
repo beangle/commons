@@ -195,7 +195,7 @@ class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[C
 
   override def equals(obj: Any): Boolean = obj match {
     case obj: MethodInfo => {
-      Objects.equalsBuilder().add(method.getName, obj.method.getName)
+      Objects.equalsBuilder.add(method.getName, obj.method.getName)
         .add(parameterTypes, obj.parameterTypes)
         .isEquals
     }

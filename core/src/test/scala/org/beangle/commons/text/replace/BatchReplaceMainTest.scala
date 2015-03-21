@@ -53,7 +53,7 @@ class BatchReplaceMainTest extends FunSpec with Matchers {
       debug("one cat two cats in the yard".replaceAll("cat", "dog"))
       debug(clause.replaceAll("<#(.*)/>", "[#$1/]"))
       val test = "aaa    \nbbaad\n"
-      val replacer = new Replacer("( +?)\\n", "\n")
+      val replacer = new PatternReplacer("( +?)\\n", "\n")
       debug(test)
       debug(replacer.process(test))
     }

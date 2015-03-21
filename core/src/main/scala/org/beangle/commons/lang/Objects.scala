@@ -112,8 +112,9 @@ object Objects {
     Integer.toHexString(System.identityHashCode(obj))
   }
 
-  def equalsBuilder(): EqualsBuilder = new EqualsBuilder()
+  def equalsBuilder: EqualsBuilder = new EqualsBuilder()
 
+  def compareBuilder: CompareBuilder = new CompareBuilder()
   /**
    * Creates an instance of {@link ToStringBuilder}.
    * <p>
@@ -286,5 +287,60 @@ object Objects {
       this
     }
     def isEquals: Boolean = rs;
+  }
+
+  /**
+   * Compare Builder
+   * @since 4.2.4
+   */
+  class CompareBuilder {
+    var comparison: Int = _
+
+    def add(lhs: Any, rhs: Any, ordering: Ordering[Any] = null): this.type = {
+      if (comparison != 0) {
+        return this
+      }
+      if (lhs == rhs) {
+        return this
+      }
+      if (lhs == null) {
+        comparison = -1
+        return this
+      }
+      if (rhs == null) {
+        comparison = +1
+        return this
+      }
+      if (lhs.getClass.isArray) {
+        val lhsa = lhs.asInstanceOf[Array[_]]
+        val rhsa = rhs.asInstanceOf[Array[_]]
+        if (lhsa.length != rhsa.length) {
+          comparison = if (lhsa.length < rhsa.length) -1 else +1
+          return this
+        }
+        var i = 0
+        while (i < lhsa.length && comparison == 0) {
+          add(lhsa(i), rhsa(i), ordering)
+          i += 1
+        }
+        return this
+      }
+      if (null == ordering) {
+        comparison = lhs match {
+          case lhso: Ordered[_] => lhso.asInstanceOf[Ordered[Any]].compare(rhs)
+          case lhsc: Comparable[_] => lhsc.asInstanceOf[Comparable[Any]].compareTo(rhs)
+        }
+        return this
+      } else {
+        comparison = ordering.compare(lhs, rhs)
+        return this
+      }
+    }
+    def toComparison(): Int = {
+      comparison
+    }
+    def build(): Int = {
+      comparison
+    }
   }
 }

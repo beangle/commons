@@ -27,6 +27,7 @@ import java.nio.charset.Charset
 import org.beangle.commons.io.Files
 import org.beangle.commons.lang.Strings
 import scala.collection.mutable
+import org.beangle.commons.lang.ClassLoaders
 
 object BatchReplaceMain {
 
@@ -61,13 +62,14 @@ object BatchReplaceMain {
         profiles.put(line, Nil)
       } else {
         val replacedline = Strings.replace(line, "\\=", "~~~~")
-        var older = Strings.replace(Strings.substringBefore(replacedline, "="), "~~~~", "=")
-        var newer = Strings.replace(Strings.substringAfter(replacedline, "="), "~~~~", "=")
+        var older = Strings.replace(Strings.substringBefore(replacedline, "="), "~~~~", "=").trim()
+        var newer = Strings.replace(Strings.substringAfter(replacedline, "="), "~~~~", "=").trim()
         older = Strings.replace(older, "\\n", "\n")
         older = Strings.replace(older, "\\t", "\t")
         newer = Strings.replace(newer, "\\n", "\n")
         newer = Strings.replace(newer, "\\t", "\t")
-        profiles.put(profileName, new Replacer(older, newer) :: profiles(profileName))
+        val replacer:Replacer = if (older == "replacer") ClassLoaders.newInstance(newer) else new PatternReplacer(older, newer)
+        profiles.put(profileName, replacer :: profiles(profileName))
       }
     }
     replaceFile(dir, profiles.toMap, charset)

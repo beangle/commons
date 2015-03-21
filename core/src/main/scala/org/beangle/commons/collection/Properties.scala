@@ -1,6 +1,6 @@
 package org.beangle.commons.collection
 
-import org.beangle.commons.bean.PropertyUtils
+import org.beangle.commons.bean.Properties
 
 class Properties extends collection.mutable.HashMap[String, Any] {
 
@@ -9,10 +9,10 @@ class Properties extends collection.mutable.HashMap[String, Any] {
     for (attr <- attrs) {
       val idx = attr.indexOf("->")
       if (-1 == idx) {
-        val value = PropertyUtils.getProperty[Any](obj, attr)
+        val value = Properties.get[Any](obj, attr)
         if (null != value) this.put(attr, value)
       } else {
-        val value = PropertyUtils.getProperty[Any](obj, attr.substring(0, idx))
+        val value = Properties.get[Any](obj, attr.substring(0, idx))
         if (null != value) this.put(attr.substring(idx + 2), value)
       }
     }

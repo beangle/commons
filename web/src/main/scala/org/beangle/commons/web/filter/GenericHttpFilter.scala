@@ -20,7 +20,7 @@ package org.beangle.commons.web.filter
 
 import scala.collection.mutable
 
-import org.beangle.commons.bean.{ Initializing, PropertyUtils }
+import org.beangle.commons.bean.{ Initializing, Properties }
 import org.beangle.commons.lang.Strings
 
 import javax.servlet.{ Filter, FilterConfig, ServletException }
@@ -49,7 +49,7 @@ abstract class GenericHttpFilter extends Filter with Initializing {
     while (en.hasMoreElements()) {
       val property = en.nextElement().asInstanceOf[String]
       val value = config.getInitParameter(property)
-      PropertyUtils.copyProperty(this, property, value)
+      Properties.copy(this, property, value)
       missingProps.remove(property)
     }
     if (missingProps.size > 0) {
