@@ -154,4 +154,12 @@ object Collections {
       target.put(entry.getKey, entry.getValue)
     }
   }
+
+  def newBuffer[T]:collection.mutable.Buffer[T]={
+     new collection.mutable.ListBuffer[T]
+  }
+
+  def newMap[K,V]:collection.mutable.Map[K,V]={
+     new collection.mutable.HashMap[K,V]
+  }
 }
