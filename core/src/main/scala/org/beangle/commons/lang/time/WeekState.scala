@@ -9,6 +9,14 @@ object WeekState {
 }
 class WeekState(val value: Long) extends Serializable {
 
+  def |(other: WeekState): WeekState = {
+    new WeekState(this.value | other.value)
+  }
+
+  def &(other: WeekState): WeekState = {
+    new WeekState(this.value & other.value)
+  }
+
   override def toString: String = {
     java.lang.Long.toBinaryString(value)
   }

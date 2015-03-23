@@ -22,7 +22,7 @@ import java.{ util => ju }
 
 import scala.collection.mutable
 
-import org.beangle.commons.bean.Properties
+import org.beangle.commons.bean.{ Properties => BeanProperties }
 import org.beangle.commons.lang.functor.Predicate
 
 object Collections {
@@ -74,7 +74,7 @@ object Collections {
    */
   def convertToMap(coll: Seq[AnyRef], keyProperty: String): Map[_, _] = {
     coll.map { obj =>
-      (Properties.get[Object](obj, keyProperty), obj)
+      (BeanProperties.get[Object](obj, keyProperty), obj)
     }.toMap
   }
 
@@ -84,8 +84,8 @@ object Collections {
   def convertToMap(coll: Seq[AnyRef], keyProperty: String, valueProperty: String): Map[_, _] = {
     val map = new mutable.HashMap[Any, Any]
     coll foreach { obj =>
-      val key = Properties.get[AnyRef](obj, keyProperty)
-      val value = Properties.get[AnyRef](obj, valueProperty)
+      val key = BeanProperties.get[AnyRef](obj, keyProperty)
+      val value = BeanProperties.get[AnyRef](obj, valueProperty)
       if (null != key) map.put(key, value)
     }
     map.toMap
