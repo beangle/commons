@@ -20,6 +20,7 @@ package org.beangle.commons.lang.time
 
 import WeekDays._
 import org.beangle.commons.lang.Objects
+import java.{ util => ju }
 
 /**循环时间*/
 class WeekTime extends Ordered[WeekTime] with Serializable {
@@ -81,6 +82,15 @@ class YearWeekTime extends WeekTime {
     this.begin = other.begin
     this.end = other.end
     this.state = other.state
+  }
+
+  def firstDate: ju.Date = {
+    val cal = ju.Calendar.getInstance
+    cal.set(ju.Calendar.YEAR, year)
+    cal.setFirstDayOfWeek(WeekDays.Sun.index)
+    cal.set(ju.Calendar.WEEK_OF_YEAR, state.first)
+    cal.set(ju.Calendar.DAY_OF_WEEK, day.index)
+    cal.getTime
   }
 
   override def clone(): YearWeekTime = {

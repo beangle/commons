@@ -22,6 +22,7 @@ import java.lang.Character.{ isLowerCase => isLower, isUpperCase => isUpper }
 import java.lang.Character.toLowerCase
 import org.beangle.commons.collection.Collections
 import scala.collection.mutable
+import scala.reflect.ClassTag
 /**
  * Operations on {@link java.lang.String} that are {@code null} safe.
  *
@@ -40,13 +41,9 @@ object Strings {
   private val Index_not_found = -1
 
   /**
-   * <p>
    * Capitalizes a String changing the first letter to title case as per
    * {@link Character#toTitleCase(char)}. No other letters are changed.
-   * </p>
-   * <p>
    * For a word based algorithm, see returns {@code null}.
-   * </p>
    *
    * <pre>
    * capitalize(null)  = null
@@ -70,24 +67,17 @@ object Strings {
   }
 
   /**
-   * <p>
    * concat.
-   * </p>
    *
-   * @param seq
-   *          a {@link java.lang.String} object.
+   * @param seq a {@link java.lang.String} object.
    * @return a {@link java.lang.String} object.
    */
   def concat(seq: Any*): String = join(seq, null)
 
   /**
-   * <p>
    * Checks if CharSequence contains a search CharSequence, handling {@code null}. This method uses
    * {@link String#indexOf(String)} if possible.
-   * </p>
-   * <p>
    * A {@code null} CharSequence will return {@code false}.
-   * </p>
    *
    * <pre>
    * contains(null, *)     = false
@@ -109,13 +99,9 @@ object Strings {
   }
 
   /**
-   * <p>
    * Checks if CharSequence contains a search character, handling {@code null}. This method uses
    * {@link String#indexOf(int)} if possible.
-   * </p>
-   * <p>
    * A {@code null} or empty ("") CharSequence will return {@code false}.
-   * </p>
    *
    * <pre>
    * contains(null, *)    = false
@@ -176,9 +162,7 @@ object Strings {
   }
 
   /**
-   * <p>
    * Finds the first index in the {@code CharSequence} that matches the specified character.
-   * </p>
    *
    * @param cs the {@code CharSequence} to be processed, not null
    * @param searchChar the char to be searched for
@@ -195,9 +179,7 @@ object Strings {
   }
 
   /**
-   * <p>
    * insert.
-   * </p>
    *
    * @param str a {@link java.lang.String} object.
    * @param c a {@link java.lang.String} object.
@@ -225,14 +207,10 @@ object Strings {
   }
 
   /**
-   * <p>
    * intersectSeq.
-   * </p>
    *
-   * @param first
-   *          a {@link java.lang.String} object.
-   * @param second
-   *          a {@link java.lang.String} object.
+   * @param first a {@link java.lang.String} object.
+   * @param second a {@link java.lang.String} object.
    * @return a {@link java.lang.String} object.
    */
   def intersectSeq(first: String, second: String): String = intersectSeq(first, second, DELIMITER)
@@ -255,9 +233,7 @@ object Strings {
   }
 
   /**
-   * <p>
    * Checks if a CharSequence is whitespace, empty ("") or null.
-   * </p>
    *
    * <pre>
    * isBlank(null)      = true
@@ -286,9 +262,7 @@ object Strings {
   def isEmpty(cs: CharSequence): Boolean = (cs eq null) || 0 == cs.length
 
   /**
-   * <p>
    * isEqualSeq.
-   * </p>
    *
    * @param first not null
    * @param second not null
@@ -313,9 +287,7 @@ object Strings {
   }
 
   /**
-   * <p>
    * Checks if a CharSequence is not empty (""), not null and not whitespace only.
-   * </p>
    *
    * <pre>
    * isNotBlank(null)      = false
@@ -325,10 +297,8 @@ object Strings {
    * isNotBlank("  bob  ") = true
    * </pre>
    *
-   * @param cs
-   *          the CharSequence to check, may be null
-   * @return {@code true} if the CharSequence is
-   *         not empty and not null and not whitespace
+   * @param cs the CharSequence to check, may be null
+   * @return {@code true} if the CharSequence is not empty and not null and not whitespace
    * @since 3.0
    */
   def isNotBlank(cs: CharSequence): Boolean = !isBlank(cs)
@@ -360,12 +330,9 @@ object Strings {
   }
 
   /**
-   * <p>
    * join.
-   * </p>
    *
-   * @param seq
-   *          a {@link java.lang.String} object.
+   * @param seq  a {@link java.lang.String} object.
    * @return a {@link java.lang.String} object.
    */
   def join(seq: String*): String = join(seq, DELIMITER)
@@ -413,12 +380,8 @@ object Strings {
   }
 
   /**
-   * <p>
    * Left pad a String with a specified character.
-   * </p>
-   * <p>
    * Pad to a size of {@code size}.
-   * </p>
    *
    * <pre>
    * leftPad(null, *, *)     = null
@@ -444,12 +407,8 @@ object Strings {
   }
 
   /**
-   * <p>
    * Right pad a String with a specified character.
-   * </p>
-   * <p>
    * The String is padded to the size of {@code size}.
-   * </p>
    *
    * <pre>
    * rightPad(null, *, *)     = null
@@ -475,9 +434,7 @@ object Strings {
   }
 
   /**
-   * <p>
    * mergeSeq.
-   * </p>
    *
    * @param first a {@link java.lang.String} object.
    * @param second a {@link java.lang.String} object.
@@ -502,7 +459,6 @@ object Strings {
    * </pre>
    *
    * </blockquote>
-   * <p>
    *
    * @param first a {@link java.lang.String} object.
    * @param second a {@link java.lang.String} object.
@@ -524,9 +480,7 @@ object Strings {
   }
 
   /**
-   * <p>
    * removeWord.
-   * </p>
    *
    * @param host a {@link java.lang.String} object.
    * @param word a {@link java.lang.String} object.
@@ -535,9 +489,7 @@ object Strings {
   def removeWord(host: String, word: String): String = removeWord(host, word, DELIMITER)
 
   /**
-   * <p>
    * removeWord.
-   * </p>
    *
    * @param host a {@link java.lang.String} object.
    * @param word a {@link java.lang.String} object.
@@ -562,9 +514,7 @@ object Strings {
   }
 
   /**
-   * <p>
    * Returns padding using the specified delimiter repeated to a given length.
-   * </p>
    *
    * <pre>
    * repeat(0, 'e')  = ""
@@ -588,9 +538,7 @@ object Strings {
   }
 
   /**
-   * <p>
    * Repeat a String {@code repeat} times to form a new String.
-   * </p>
    *
    * <pre>
    * repeat(null, 2) = null
@@ -631,12 +579,8 @@ object Strings {
   }
 
   /**
-   * <p>
    * Replaces all occurrences of a String within another String.
-   * </p>
-   * <p>
    * A {@code null} reference passed to this method is a no-op.
-   * </p>
    *
    * <pre>
    * replace(null, *, *)        = null
@@ -676,12 +620,9 @@ object Strings {
   }
 
   /**
-   * <p>
    * split.
-   * </p>
    *
-   * @param target
-   *          a {@link java.lang.String} object.
+   * @param target a {@link java.lang.String} object.
    * @return an array of {@link java.lang.String} objects.
    */
   def split(target: String): Array[String] = {
@@ -689,12 +630,9 @@ object Strings {
   }
 
   /**
-   * <p>
    * Splits the provided text into an array, separator specified. This is an alternative to using
    * StringTokenizer.
-   * </p>
    * A {@code null} input String returns {@code null}.
-   * </p>
    *
    * <pre>
    * split(null, *)         = null
@@ -746,15 +684,10 @@ object Strings {
   }
 
   /**
-   * *
-   * <p>
    * Splits the provided text into an array, separators specified. This is an alternative to using
    * StringTokenizer.
-   * </p>
-   * <p>
    * A {@code null} input String returns {@code null}. A {@code null} separatorChars splits on
    * whitespace.
-   * </p>
    *
    * <pre>
    * split(null, *)         = null
@@ -818,47 +751,35 @@ object Strings {
   }
 
   /**
-   * <p>
    * splitToInteger.
-   * </p>
-   *
-   * @param ids a {@link java.lang.String} object.
-   * @return an array of {@link java.lang.Integer} objects.
    */
   def splitToInt(ids: String): Array[Int] = {
     if (isEmpty(ids)) new Array[Int](0) else transformToInt(split(ids, ','))
   }
+  /**
+   * splitToInteger.
+   */
+  def splitToInteger(ids: String): Array[Integer] = {
+    if (isEmpty(ids)) new Array[Integer](0) else transformToInteger(split(ids, ','))
+  }
 
   /**
-   * <p>
    * splitToLong.
-   * </p>
-   *
-   * @param ids a {@link java.lang.String} object.
-   * @return an array of {@link java.lang.Long} objects.
    */
-  def splitToLong(ids: String): Array[Long] = {
-    if (isEmpty(ids)) new Array[Long](0)
+  def splitToLong(ids: String): Array[java.lang.Long] = {
+    if (isEmpty(ids)) new Array[java.lang.Long](0)
     else transformToLong(split(ids, ','))
   }
 
   /**
-   * <p>
    * Gets a substring from the specified String avoiding exceptions.
-   * </p>
-   * <p>
    * A negative start position can be used to start/end {@code n} characters from the end of the
    * String.
-   * </p>
-   * <p>
    * The returned substring starts with the character in the {@code start} position and ends before
    * the {@code end} position. All position counting is zero-based -- i.e., to start at the
    * beginning of the string use {@code start = 0}. Negative start and end positions can be used to
    * specify offsets relative to the end of the String.
-   * </p>
-   * <p>
    * If {@code start} is not strictly to the left of {@code end}, "" is returned.
-   * </p>
    *
    * <pre>
    * substring(null, *, *)    = null
@@ -872,13 +793,10 @@ object Strings {
    * substring("abc", -4, 2)  = "ab"
    * </pre>
    *
-   * @param str
-   *          the String to get the substring from, may be null
-   * @param start
-   *          the position to start from, negative means
+   * @param str the String to get the substring from, may be null
+   * @param start the position to start from, negative means
    *          count back from the end of the String by this many characters
-   * @param end
-   *          the position to end at (exclusive), negative means
+   * @param end the position to end at (exclusive), negative means
    *          count back from the end of the String by this many characters
    * @return substring from start position to end position, {@code null} if null String input
    */
@@ -899,9 +817,7 @@ object Strings {
   }
 
   /**
-   * <p>
    * subtractSeq.
-   * </p>
    *
    * @param first a {@link java.lang.String} object.
    * @param second a {@link java.lang.String} object.
@@ -930,54 +846,51 @@ object Strings {
   }
 
   /**
-   * <p>
    * transformToInt.
-   * </p>
    *
-   * @param ids
-   *          an array of {@link java.lang.String} objects.
+   * @param ids an array of {@link java.lang.String} objects.
    * @return an array of {@link java.lang.Integer} objects.
    */
   def transformToInt(ids: Array[String]): Array[Int] = {
-    val idsOfInteger = new Array[Int](ids.length)
+    val results = new Array[Int](ids.length)
     for (i <- 0 until ids.length) {
-      idsOfInteger(i) = Numbers.toInt(ids(i))
+      results(i) = Numbers.toInt(ids(i))
+    }
+    results
+  }
+
+  def transformToInteger(ids: Array[String]): Array[Integer] = {
+    val idsOfInteger = new Array[Integer](ids.length)
+    for (i <- 0 until ids.length) {
+      idsOfInteger(i) = Integer.valueOf(ids(i))
     }
     idsOfInteger
   }
 
   /**
-   * <p>
-   * transformToLong.
-   * </p>
+   * transformToJLong.
    *
    * @param ids an array of {@link java.lang.String} objects.
    * @return an array of {@link java.lang.Long} objects.
    */
-  def transformToLong(ids: Array[String]): Array[Long] = {
+  def transformToLong(ids: Array[String]): Array[java.lang.Long] = {
     if (null == ids) return null
-    val idsOfLong = new Array[Long](ids.length)
+    val idsOfLong = new Array[java.lang.Long](ids.length)
     for (i <- 0 until ids.length)
-      idsOfLong(i) = new java.lang.Long(ids(i))
+      idsOfLong(i) = java.lang.Long.valueOf(ids(i))
     idsOfLong
   }
 
   /**
-   * <p>
    * unCamel.
-   * </p>
    */
   def unCamel(str: String): String = unCamel(str, '-', true)
 
   /**
-   * <p>
    * unCamel.
-   * </p>
    *
-   * @param str
-   *          a {@link java.lang.String} object.
-   * @param seperator
-   *          a char.
+   * @param str a {@link java.lang.String} object.
+   * @param seperator a char.
    * @return a {@link java.lang.String} object.
    */
   def unCamel(str: String, seperator: Char): String = unCamel(str, seperator, true)
@@ -985,12 +898,9 @@ object Strings {
   /**
    * 将驼峰表示法转换为下划线小写表示
    *
-   * @param str
-   *          a {@link java.lang.String} object.
-   * @param seperator
-   *          a char.
-   * @param lowercase
-   *          a boolean.
+   * @param str  a {@link java.lang.String} object.
+   * @param seperator a char.
+   * @param lowercase a boolean.
    * @return a {@link java.lang.String} object.
    */
   def unCamel(str: String, seperator: Char, lowercase: Boolean): String = {
@@ -1025,16 +935,10 @@ object Strings {
   }
 
   /**
-   * <p>
    * Gets the substring before the first occurrence of a separator. The separator is not returned.
-   * </p>
-   * <p>
    * A {@code null} string input will return {@code null}. An empty ("") string input will return
    * the empty string. A {@code null} separator will return the input string.
-   * </p>
-   * <p>
    * If nothing is found, the string input is returned.
-   * </p>
    *
    * <pre>
    * substringBefore(null, *)      = null
@@ -1063,17 +967,11 @@ object Strings {
   }
 
   /**
-   * <p>
    * Gets the substring after the first occurrence of a separator. The separator is not returned.
-   * </p>
-   * <p>
    * A {@code null} string input will return {@code null}. An empty ("") string input will return
    * the empty string. A {@code null} separator will return the empty string if the input string is
    * not {@code null}.
-   * </p>
-   * <p>
    * If nothing is found, the empty string is returned.
-   * </p>
    *
    * <pre>
    * substringAfter(null, *)      = null
@@ -1101,13 +999,9 @@ object Strings {
   }
 
   /**
-   * <p>
    * Gets the String that is nested in between two Strings. Only the first match is returned.
-   * </p>
-   * <p>
    * A {@code null} input String returns {@code null}. A {@code null} open/close returns
    * {@code null} (no match). An empty ("") open and close returns an empty string.
-   * </p>
    *
    * <pre>
    * substringBetween("wx[b]yz", "[", "]") = "b"
@@ -1139,16 +1033,10 @@ object Strings {
   }
 
   /**
-   * <p>
    * Gets the substring before the last occurrence of a separator. The separator is not returned.
-   * </p>
-   * <p>
    * A {@code null} string input will return {@code null}. An empty ("") string input will return
    * the empty string. An empty or {@code null} separator will return the input string.
-   * </p>
-   * <p>
    * If nothing is found, the string input is returned.
-   * </p>
    *
    * <pre>
    * substringBeforeLast(null, *)      = null
@@ -1175,17 +1063,11 @@ object Strings {
   }
 
   /**
-   * <p>
    * Gets the substring after the last occurrence of a separator. The separator is not returned.
-   * </p>
-   * <p>
    * A {@code null} string input will return {@code null}. An empty ("") string input will return
    * the empty string. An empty or {@code null} separator will return the empty string if the input
    * string is not {@code null}.
-   * </p>
-   * <p>
    * If nothing is found, the empty string is returned.
-   * </p>
    *
    * <pre>
    * substringAfterLast(null, *)      = null
@@ -1214,14 +1096,10 @@ object Strings {
   }
 
   /**
-   * <p>
    * Removes control characters (char &lt;= 32) from both ends of this String, handling {@code null}
    * by returning {@code null}.
-   * </p>
-   * <p>
    * The String is trimmed using {@link String#trim()}. Trim removes start and end characters &lt;=
    * 32.
-   * </p>
    *
    * <pre>
    * trim(null)          = null
@@ -1269,13 +1147,9 @@ object Strings {
     }
   }
   /**
-   * <p>
    * Uncapitalizes a String changing the first letter to title case as per
    * {@link Character#toLowerCase(char)}. No other letters are changed.
-   * </p>
-   * <p>
    * For a word based algorithm, see String returns {@code null}.
-   * </p>
    *
    * <pre>
    * uncapitalize(null)  = null
@@ -1296,18 +1170,69 @@ object Strings {
   }
 
   /**
-   * <p>
    * Returns either the passed in CharSequence, or if the CharSequence is whitespace, empty ("") or
    * {@code null}, the value of {@code defaultStr}.
-   * </p>
    *
    * @param str
    * @param defaultStr
    */
-  def defaultIfBlank[T <: CharSequence](str: T, defaultStr: T): T = if (isBlank(str)) defaultStr else str
+  def defaultIfBlank[T <: CharSequence](str: T, defaultStr: T): T = {
+    if (isBlank(str)) defaultStr else str
+  }
 
   def lowerCase(s: String): String = { if (null == s) null else s.toLowerCase() }
 
   def upperCase(s: String): String = { if (null == s) null else s.toUpperCase() }
 
+  def abbreviate(str: String, maxWidth: Int): String = {
+    abbreviate(str, 0, maxWidth);
+  }
+
+  def abbreviate(str: String, offset: Int, maxWidth: Int): String = {
+    if (str eq null) return null
+    if (maxWidth < 4) throw new IllegalArgumentException("Minimum abbreviation width is 4")
+    if (str.length <= maxWidth) return str
+    var newoffset = offset
+    if (newoffset > str.length()) newoffset = str.length
+    if (str.length() - newoffset < maxWidth - 3) newoffset = str.length() - (maxWidth - 3)
+    var abrevMarker = "..."
+    if (newoffset <= 4) return str.substring(0, maxWidth - 3) + abrevMarker
+    if (maxWidth < 7) throw new IllegalArgumentException("Minimum abbreviation width with offset is 7")
+
+    if (newoffset + maxWidth - 3 < str.length) {
+      abrevMarker + abbreviate(str.substring(newoffset), maxWidth - 3)
+    } else {
+      abrevMarker + str.substring(str.length() - (maxWidth - 3))
+    }
+  }
+  /**
+   * Removes all occurrences of a character from within the source string.
+   * A {@code null} source string will return {@code null}. An empty ("") source string will return
+   * the empty string.
+   *
+   * <pre>
+   * StringUtils.remove(null, *) = null
+   * StringUtils.remove("", *) = ""
+   * StringUtils.remove("queued", 'u') = "qeed"
+   * StringUtils.remove("queued", 'z') = "queued"
+   * </pre>
+   *
+   * @param str the source String to search, may be null
+   * @param remove the char to search for and remove, may be null
+   * @return the substring with the char removed if found, {@code null} if null String input
+   */
+  def remove(str: String, remove: Char): String = {
+    if (isEmpty(str) || str.indexOf(remove) == -1)
+      return str
+    val chars = str.toCharArray
+    var i, pos = 0
+    while (i < chars.length) {
+      if (chars(i) != remove) {
+        chars(pos) = chars(i)
+        pos += 1
+      }
+      i += 1
+    }
+    new String(chars, 0, pos);
+  }
 }

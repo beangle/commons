@@ -43,4 +43,8 @@ case class HourMinute(val value: Short) {
     while (time.length < 4) time = "0" + time
     time.substring(0, 2) + ":" + time.substring(2, 4)
   }
+
+  def -(other: HourMinute): Short = {
+    (this.value - other.value).asInstanceOf[Short]
+  }
 }

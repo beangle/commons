@@ -31,6 +31,15 @@ class WeekState(val value: Long) extends Serializable {
     Strings.count(toString, "1")
   }
 
+  def first: Int = {
+    val weekstr = toString.toCharArray()
+    var i = 0
+    while (i < weekstr.length) {
+      if (weekstr(weekstr.length - i - 1) == '1') return i;
+    }
+    return weekstr.length
+  }
+
   def weekList: List[Int] = {
     val weekstr = toString
     var i = weekstr.length - 1

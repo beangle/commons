@@ -91,7 +91,7 @@ object Collections {
     map.toMap
   }
 
-  def union[T](first: List[T], second: List[T]): List[T] = {
+  def union[T](first: Iterable[T], second: Iterable[T]): List[T] = {
     val mapa = getCardinalityMap(first)
     val mapb = getCardinalityMap(second)
     val elts = new mutable.HashSet[T]
@@ -102,7 +102,7 @@ object Collections {
     list.toList
   }
 
-  def getCardinalityMap[T](coll: List[T]): Map[T, Int] = {
+  def getCardinalityMap[T](coll: Iterable[T]): Map[T, Int] = {
     val count = new mutable.HashMap[T, Int]
     var it = coll.iterator
     while (it.hasNext) {
@@ -117,7 +117,7 @@ object Collections {
 
   private def getFreq[T](obj: T, freqMap: Map[T, Int]): Int = freqMap.get(obj).getOrElse(0)
 
-  def intersection[T](first: List[T], second: List[T]): List[T] = {
+  def intersection[T](first: Iterable[T], second: Iterable[T]): List[T] = {
     val list = new mutable.ListBuffer[T]
     val mapa = getCardinalityMap(first)
     val mapb = getCardinalityMap(second)
@@ -128,14 +128,14 @@ object Collections {
     list.toList
   }
 
-  def subtract[T](first: Seq[T], second: Seq[T]): List[T] = {
+  def subtract[T](first: Iterable[T], second: Iterable[T]): List[T] = {
     val list = new mutable.ListBuffer[T]
     list ++= first
     for (t <- second) list -= t
     list.toList
   }
 
-  def select[T](datas: List[T], predicate: Predicate[T]): List[T] = {
+  def select[T](datas: Seq[T], predicate: Predicate[T]): List[T] = {
     val rs = new mutable.ListBuffer[T]
     for (t <- datas if predicate(t)) rs += t
     rs.toList
@@ -147,7 +147,7 @@ object Collections {
     rs.toSet
   }
 
-  def putAll[K, V,V2 <: V](target: mutable.HashMap[K, V], origin: ju.Map[K, V2]): Unit = {
+  def putAll[K, V, V2 <: V](target: mutable.HashMap[K, V], origin: ju.Map[K, V2]): Unit = {
     val itor = origin.entrySet.iterator
     while (itor.hasNext) {
       val entry = itor.next()
@@ -155,11 +155,21 @@ object Collections {
     }
   }
 
-  def newBuffer[T]:collection.mutable.Buffer[T]={
-     new collection.mutable.ListBuffer[T]
+  def newBuffer[T]: collection.mutable.Buffer[T] = {
+    new collection.mutable.ListBuffer[T]
   }
 
-  def newMap[K,V]:collection.mutable.Map[K,V]={
-     new collection.mutable.HashMap[K,V]
+  def newBuffer[T](t: T*): collection.mutable.Buffer[T] = {
+    val buffer = new collection.mutable.ListBuffer[T]
+    buffer ++= t
+    buffer
+  }
+
+  def newSet[T]: collection.mutable.Set[T] = {
+    new collection.mutable.HashSet[T]
+  }
+
+  def newMap[K, V]: collection.mutable.Map[K, V] = {
+    new collection.mutable.HashMap[K, V]
   }
 }
