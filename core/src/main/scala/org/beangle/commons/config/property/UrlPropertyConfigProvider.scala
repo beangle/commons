@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2014, Beangle Software.
+ * Copyright (c) 2005-2015, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -22,7 +22,6 @@ import java.net.URL
 
 import org.beangle.commons.inject.Resources
 import org.beangle.commons.io.IOs
-import org.beangle.commons.logging.Logging
 
 /**
  * <p>
@@ -31,7 +30,7 @@ import org.beangle.commons.logging.Logging
  *
  * @author chaostone
  */
-class UrlPropertyConfigProvider extends PropertyConfig.Provider with Logging {
+class UrlPropertyConfigProvider extends PropertyConfig.Provider {
 
   var resources: Resources = _
 
@@ -49,7 +48,6 @@ class UrlPropertyConfigProvider extends PropertyConfig.Provider with Logging {
       properties
     } catch {
       case e: Exception => {
-        error("Exception", e)
         throw new RuntimeException(e)
       }
     }

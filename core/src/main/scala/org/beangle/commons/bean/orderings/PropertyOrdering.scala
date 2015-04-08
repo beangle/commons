@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2014, Beangle Software.
+ * Copyright (c) 2005-2015, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,9 +18,8 @@
  */
 package org.beangle.commons.bean.orderings
 
-import org.beangle.commons.bean.PropertyUtils
-import org.beangle.commons.lang.Numbers
-import org.beangle.commons.lang.Strings
+import org.beangle.commons.bean.Properties
+import org.beangle.commons.lang.{Numbers, Strings}
 
 /**
  * 属性比较器。<br>
@@ -72,8 +71,8 @@ class PropertyOrdering(cmpStr: String) extends Ordering[Any] {
       second = first.asInstanceOf[Array[Any]](index)
     }
     if (Strings.isNotEmpty(name)) {
-      first = PropertyUtils.getProperty[Any](first, name)
-      second = PropertyUtils.getProperty[Any](second, name)
+      first = Properties.get[Any](first, name)
+      second = Properties.get[Any](second, name)
     }
     if (first == null && null == second) return 0
 

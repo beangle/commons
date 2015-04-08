@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2014, Beangle Software.
+ * Copyright (c) 2005-2015, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -24,9 +24,8 @@ import java.net.URLEncoder
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import org.beangle.commons.logging.Logging
 
-object CookieUtils extends Logging {
+object CookieUtils {
 
   def getCookieValue(cookie: Cookie): String = {
     try {
@@ -75,13 +74,8 @@ object CookieUtils extends Logging {
    * Convenience method to set a cookie <br>
    * 刚方法自动将value进行编码存储
    */
-  def addCookie(request: HttpServletRequest,
-    response: HttpServletResponse,
-    name: String,
-    value: String,
-    path: String,
-    age: Int) {
-    debug(s"add cookie[name:$name,value=$value,path=$path]")
+  def addCookie(request: HttpServletRequest, response: HttpServletResponse,
+    name: String, value: String, path: String, age: Int) {
     var cookie: Cookie = null
     cookie = new Cookie(name, URLEncoder.encode(value, "utf-8"))
     cookie.setSecure(false)
@@ -93,11 +87,8 @@ object CookieUtils extends Logging {
   /**
    * 默认按照应用上下文进行设置
    */
-  def addCookie(request: HttpServletRequest,
-    response: HttpServletResponse,
-    name: String,
-    value: String,
-    age: Int) {
+  def addCookie(request: HttpServletRequest, response: HttpServletResponse,
+    name: String, value: String, age: Int) {
     val contextPath = if (!request.getContextPath.endsWith("/")) request.getContextPath + "/" else request.getContextPath
     addCookie(request, response, name, value, contextPath, age)
   }

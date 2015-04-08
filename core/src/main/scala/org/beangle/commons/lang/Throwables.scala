@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2014, Beangle Software.
+ * Copyright (c) 2005-2015, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -86,9 +86,14 @@ object Throwables {
    * parsing the resulting string; if you need programmatic access to the stack
    * frames, you can call {@link Throwable#getStackTrace()}.
    */
-  def getStackTrace(throwable: Throwable): String = {
+  def stackTrace(throwable: Throwable): String = {
     val sw = new StringWriter()
     throwable.printStackTrace(new PrintWriter(sw))
     sw.toString
+  }
+
+  @deprecated("Using stackTrace(e)","4.2.4")
+  def getStackTrace(throwable: Throwable): String = {
+    stackTrace(throwable)
   }
 }

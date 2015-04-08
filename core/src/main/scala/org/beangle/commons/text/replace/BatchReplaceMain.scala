@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2014, Beangle Software.
+ * Copyright (c) 2005-2015, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -26,27 +26,27 @@ import java.io.OutputStreamWriter
 import java.nio.charset.Charset
 import org.beangle.commons.io.Files
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.logging.Logging
 import scala.collection.mutable
+import org.beangle.commons.lang.ClassLoaders
 
-object BatchReplaceMain extends Logging {
+object BatchReplaceMain {
 
   /**
    * Usage:BatchReplaceMain dir patternfile encoding
    */
   def main(args: Array[String]) {
     if (args.length < 2) {
-      info("using BatchReplaceMain dir patternfile encoding")
+      println("using BatchReplaceMain dir patternfile encoding")
       return
     }
     val dir = args(0)
     if (!new File(dir).exists()) {
-      error(dir + " not a valid file or directory")
+      println(dir + " not a valid file or directory")
       return
     }
     val properties = args(1)
     if (!new File(properties).exists()) {
-      info(properties + " not valid file or directory")
+      println(properties + " not valid file or directory")
     }
     var charset: Charset = null
     if (args.length >= 3) {
@@ -62,13 +62,14 @@ object BatchReplaceMain extends Logging {
         profiles.put(line, Nil)
       } else {
         val replacedline = Strings.replace(line, "\\=", "~~~~")
-        var older = Strings.replace(Strings.substringBefore(replacedline, "="), "~~~~", "=")
-        var newer = Strings.replace(Strings.substringAfter(replacedline, "="), "~~~~", "=")
+        var older = Strings.replace(Strings.substringBefore(replacedline, "="), "~~~~", "=").trim()
+        var newer = Strings.replace(Strings.substringAfter(replacedline, "="), "~~~~", "=").trim()
         older = Strings.replace(older, "\\n", "\n")
         older = Strings.replace(older, "\\t", "\t")
         newer = Strings.replace(newer, "\\n", "\n")
         newer = Strings.replace(newer, "\\t", "\t")
-        profiles.put(profileName, new Replacer(older, newer) :: profiles(profileName))
+        val replacer:Replacer = if (older == "replacer") ClassLoaders.newInstance(newer) else new PatternReplacer(older, newer)
+        profiles.put(profileName, replacer :: profiles(profileName))
       }
     }
     replaceFile(dir, profiles.toMap, charset)
@@ -82,7 +83,7 @@ object BatchReplaceMain extends Logging {
     if (file.isFile && !file.isHidden) {
       val replacers = profiles.get(Strings.substringAfterLast(fileName, ".")).orNull
       if (null == replacers) return
-      info("processing " + fileName)
+      println("processing " + fileName)
       var filecontent = Files.readString(file, charset)
       filecontent = Replacer.process(filecontent, replacers)
       writeToFile(filecontent, fileName, charset)

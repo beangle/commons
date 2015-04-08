@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2014, Beangle Software.
+ * Copyright (c) 2005-2015, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.bean.predicates
 
-import org.beangle.commons.bean.PropertyUtils
+import org.beangle.commons.bean.Properties
 import org.beangle.commons.lang.Assert
 import org.beangle.commons.lang.Objects
 import org.beangle.commons.lang.functor.Predicate
@@ -31,7 +31,7 @@ import org.beangle.commons.lang.functor.Predicate
 class PropertyEqualPredicate[T](name: String, value: Any) extends Predicate[T] {
   
   def apply(arg0: T): Boolean = {
-    (value == PropertyUtils.getProperty[Any](arg0, name))
+    (value == Properties.get[Any](arg0, name))
   }
 
 }

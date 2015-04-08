@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2014, Beangle Software.
+ * Copyright (c) 2005-2015, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -34,35 +34,23 @@ object Replacer {
   }
 }
 
+trait Replacer {
+
+  def process(input: String): String
+}
+
 /**
  * Replace target with value on any input.
- *
- * @author chaostone
  */
-class Replacer(key: String, var value: String) {
+class PatternReplacer(key: String, var value: String) extends Replacer {
 
   var pattern: Pattern = Pattern.compile(key)
 
   var target: String = key
 
-  /**
-   * <p>
-   * process.
-   * </p>
-   *
-   * @param input a {@link java.lang.String} object.
-   * @return a {@link java.lang.String} object.
-   */
   def process(input: String): String = {
     pattern.matcher(input).replaceAll(value)
   }
 
-  /**
-   * <p>
-   * toString.
-   * </p>
-   *
-   * @return a {@link java.lang.String} object.
-   */
   override def toString(): String = target + "=" + value
 }

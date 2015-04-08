@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2014, Beangle Software.
+ * Copyright (c) 2005-2015, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -26,14 +26,13 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.collection.JavaConversions.collectionAsScalaIterable
 
 import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.{ Arrays, Charsets, ClassLoaders, Strings }
+import org.beangle.commons.lang.{ Charsets, ClassLoaders, Strings }
 import org.beangle.commons.lang.annotation.description
-import org.beangle.commons.logging.Logging
 /**
  * @since 3.0.0
  */
 @description("缺省TextBundle注册表")
-class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
+class DefaultTextBundleRegistry extends TextBundleRegistry {
 
   protected val caches = new collection.mutable.HashMap[Locale, ConcurrentHashMap[String, TextBundle]]
 
@@ -43,7 +42,6 @@ class DefaultTextBundleRegistry extends TextBundleRegistry with Logging {
 
   def addDefaults(bundleNames: String*) {
     defaultBundleNames ++= bundleNames
-    info("Add " + Arrays.toString(bundleNames: _*) + " global message bundles")
   }
 
   def load(locale: Locale, bundleName: String): TextBundle = {

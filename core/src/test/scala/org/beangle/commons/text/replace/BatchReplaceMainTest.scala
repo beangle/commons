@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2014, Beangle Software.
+ * Copyright (c) 2005-2015, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -20,7 +20,6 @@ package org.beangle.commons.text.replace
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import org.beangle.commons.logging.Logging
 
 import org.scalatest.FunSpec
 import org.scalatest.Matchers
@@ -28,7 +27,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class BatchReplaceMainTest extends FunSpec with Matchers with Logging {
+class BatchReplaceMainTest extends FunSpec with Matchers {
   describe("BatchReplace") {
     it("Test batch replace expression") {
       val clause = "<#include \"/template/head.ftl\"/>"
@@ -54,9 +53,13 @@ class BatchReplaceMainTest extends FunSpec with Matchers with Logging {
       debug("one cat two cats in the yard".replaceAll("cat", "dog"))
       debug(clause.replaceAll("<#(.*)/>", "[#$1/]"))
       val test = "aaa    \nbbaad\n"
-      val replacer = new Replacer("( +?)\\n", "\n")
+      val replacer = new PatternReplacer("( +?)\\n", "\n")
       debug(test)
       debug(replacer.process(test))
+    }
+
+    def debug(msg: String): Unit = {
+      println(msg)
     }
   }
 }

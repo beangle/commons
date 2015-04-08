@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2014, Beangle Software.
+ * Copyright (c) 2005-2015, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -20,15 +20,14 @@ package org.beangle.commons.web.filter
 
 import scala.collection.mutable
 
-import org.beangle.commons.bean.{ Initializing, PropertyUtils }
+import org.beangle.commons.bean.{ Initializing, Properties }
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.logging.Logging
 
 import javax.servlet.{ Filter, FilterConfig, ServletException }
 /**
  * @author chaostone
  */
-abstract class GenericHttpFilter extends Filter with Initializing with Logging {
+abstract class GenericHttpFilter extends Filter with Initializing {
 
   var filterConfig: FilterConfig = _
 
@@ -39,10 +38,8 @@ abstract class GenericHttpFilter extends Filter with Initializing with Logging {
   def init(filterConfig: FilterConfig) {
     this.filterConfig = filterConfig
     val filterName = filterConfig.getFilterName
-    debug(s"Initializing filter $filterName")
     initParams(filterConfig, requiredProperties)
     init()
-    debug(s"Filter '$filterName' configured successfully")
   }
 
   private final def initParams(config: FilterConfig, requiredProperties: Set[String]) {
@@ -52,7 +49,7 @@ abstract class GenericHttpFilter extends Filter with Initializing with Logging {
     while (en.hasMoreElements()) {
       val property = en.nextElement().asInstanceOf[String]
       val value = config.getInitParameter(property)
-      PropertyUtils.copyProperty(this, property, value)
+      Properties.copy(this, property, value)
       missingProps.remove(property)
     }
     if (missingProps.size > 0) {

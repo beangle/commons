@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2014, Beangle Software.
+ * Copyright (c) 2005-2015, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -20,7 +20,6 @@ package org.beangle.commons.web.access
 
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import javax.validation.constraints.NotNull
 /**
  * Access Request
  *
@@ -33,13 +32,11 @@ class AccessRequest extends Serializable {
   /**
    * 会话ID
    */
-  @NotNull
   var sessionid: String = _
 
   /**
    * 用户名
    */
-  @NotNull
   var username: String = _
 
   /**
@@ -50,7 +47,6 @@ class AccessRequest extends Serializable {
   /**
    * 资源
    */
-  @NotNull
   var uri: String = _
 
   /**
@@ -61,13 +57,11 @@ class AccessRequest extends Serializable {
   /**
    * 开始时间
    */
-  @NotNull
   var beginAt: Long = _
 
   /**
    * 结束时间
    */
-  @NotNull
   var endAt: Long = 0
 
   def this(sessionid: String, username: String, resource: String) {

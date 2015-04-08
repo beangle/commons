@@ -1,3 +1,21 @@
+/*
+ * Beangle, Agile Development Scaffold and Toolkit
+ *
+ * Copyright (c) 2005-2015, Beangle Software.
+ *
+ * Beangle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Beangle is distributed in the hope that it will be useful.
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.beangle.commons.io
 
 import java.io.File
@@ -6,7 +24,6 @@ import java.net.{ JarURLConnection, URL }
 import java.util.jar.JarFile
 
 import org.beangle.commons.lang.{ ClassLoaders, Strings }
-import org.beangle.commons.logging.Logging
 import org.beangle.commons.text.regex.AntPathPattern
 import org.beangle.commons.text.regex.AntPathPattern.isPattern
 
@@ -17,7 +34,7 @@ trait ResourceResolver {
   def getResources(locationPattern: String): List[URL]
 }
 
-class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResourceLoader) extends ResourceResolver with Logging {
+class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResourceLoader) extends ResourceResolver {
 
   private val equinoxResolveMethod: Method = {
     try {

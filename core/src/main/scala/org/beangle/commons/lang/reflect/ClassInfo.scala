@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2014, Beangle Software.
+ * Copyright (c) 2005-2015, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -195,7 +195,7 @@ class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[C
 
   override def equals(obj: Any): Boolean = obj match {
     case obj: MethodInfo => {
-      Objects.equalsBuilder().add(method.getName, obj.method.getName)
+      Objects.equalsBuilder.add(method.getName, obj.method.getName)
         .add(parameterTypes, obj.parameterTypes)
         .isEquals
     }

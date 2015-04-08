@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2014, Beangle Software.
+ * Copyright (c) 2005-2015, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -27,7 +27,6 @@ import scala.annotation.elidable.FINE
 import org.beangle.commons.activation.{ MimeTypeProvider, MimeTypes }
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.logging.Logging
 import org.beangle.commons.web.util.RequestUtils
 
 import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
@@ -38,7 +37,7 @@ import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
  * @author chaostone
  * @since 2.4
  */
-class DefaultStreamDownloader extends StreamDownloader with Logging {
+class DefaultStreamDownloader extends StreamDownloader {
 
   def download(request: HttpServletRequest, response: HttpServletResponse, file: File) {
     download(request, response, file, file.getName)
@@ -48,7 +47,7 @@ class DefaultStreamDownloader extends StreamDownloader with Logging {
     try {
       download(request, response, url.openStream(), url.getFile, display)
     } catch {
-      case e: Exception => warn(s"download file error=$display", e)
+      case e: Exception => request.getServletContext.log(s"download file error=$display", e)
     }
   }
 
@@ -57,7 +56,7 @@ class DefaultStreamDownloader extends StreamDownloader with Logging {
       try {
         download(request, response, new FileInputStream(file), file.getAbsolutePath, display)
       } catch {
-        case e: Exception => warn(s"download file error=$display", e)
+        case e: Exception => request.getServletContext.log(s"download file error=$display", e)
       }
     }
   }
@@ -69,7 +68,7 @@ class DefaultStreamDownloader extends StreamDownloader with Logging {
       addContent(request, response, attach_name)
       IOs.copy(inStream, response.getOutputStream)
     } catch {
-      case e: Exception => warn(s"download file error $attach_name", e)
+      case e: Exception => System.err.println(s"download file error $attach_name", e)
     } finally {
       IOs.close(inStream)
     }
@@ -96,7 +95,6 @@ class DefaultStreamDownloader extends StreamDownloader with Logging {
     if (null == contentType) {
       contentType = MimeTypeProvider.getMimeType(Strings.substringAfterLast(attach, "."), MimeTypes.ApplicationOctetStream).toString
       response.setContentType(contentType)
-      debug(s"set content type $contentType for $attach")
     }
     RequestUtils.setFileDownloadHeader(response, attach)
   }

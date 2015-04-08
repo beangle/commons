@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2014, Beangle Software.
+ * Copyright (c) 2005-2015, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -42,5 +42,9 @@ case class HourMinute(val value: Short) {
     if (value >= 6000) throw new RuntimeException("Invalid time " + time)
     while (time.length < 4) time = "0" + time
     time.substring(0, 2) + ":" + time.substring(2, 4)
+  }
+
+  def -(other: HourMinute): Short = {
+    (this.value - other.value).asInstanceOf[Short]
   }
 }

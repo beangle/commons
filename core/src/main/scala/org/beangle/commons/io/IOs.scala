@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2014, Beangle Software.
+ * Copyright (c) 2005-2015, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -25,9 +25,8 @@ import java.{ util => ju }
 
 import org.beangle.commons.lang.Charsets.UTF_8
 import org.beangle.commons.lang.time.Stopwatch
-import org.beangle.commons.logging.Logging
 
-object IOs extends Logging {
+object IOs {
 
   private val defaultBufferSize = 1024 * 4
 
@@ -121,7 +120,7 @@ object IOs extends Logging {
         readProperties(url.openStream())
       } catch {
         case e: Exception => {
-          error("load " + url + " error", e)
+          System.err.println("load " + url + " error", e)
           Map.empty
         }
       }
@@ -157,7 +156,7 @@ object IOs extends Logging {
         readJavaProperties(url.openStream())
       } catch {
         case e: Exception => {
-          error("load " + url + " error", e)
+          System.err.println("load " + url + " error", e)
           Map.empty
         }
       }

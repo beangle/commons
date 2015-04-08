@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2014, Beangle Software.
+ * Copyright (c) 2005-2015, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -31,6 +31,9 @@ class ObjectsTest extends FunSpec with Matchers {
       Objects.equals(null, null) should be(true)
       // so strange
       Objects.equals(Array(2), Array(2)) should be(false)
+    }
+    it("Compare object and array") {
+      Objects.compareBuilder.add(1, 2).toComparison() should be(-1)
     }
   }
 }

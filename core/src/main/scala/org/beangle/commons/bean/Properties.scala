@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2014, Beangle Software.
+ * Copyright (c) 2005-2015, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -25,20 +25,48 @@ import org.beangle.commons.lang.reflect.BeanManifest
 import org.beangle.commons.lang.reflect.MethodInfo
 import org.beangle.commons.conversion.Conversion
 import org.beangle.commons.conversion.impl.DefaultConversion
-import org.beangle.commons.logging.Logging
 import scala.collection.Map
 import scala.collection.mutable
 
-object PropertyUtils extends Logging {
+@deprecated("Using Properties","4.2.4")
+object PropertyUtils {
+
+  @throws(classOf[NoSuchMethodException])
+  def setProperty(bean: AnyRef, name: String, value: Any) {
+    Properties.set(bean, name, value)
+  }
+
+  def getProperty[T <: Any](inputBean: Any, propertyName: String): T = {
+    Properties.get(inputBean, propertyName)
+  }
+
+  def copyProperty(bean: AnyRef, propertyName: String, value: Any, conversion: Conversion): Any = {
+    Properties.copy(bean, propertyName, value, conversion)
+  }
+  def copyProperty(bean: AnyRef, name: String, value: AnyRef): Any = {
+    Properties.copy(bean, name, value, DefaultConversion.Instance)
+  }
+
+  def getPropertyType(clazz: Class[_], name: String): Class[_] = {
+    Properties.getType(clazz, name)
+  }
+
+  def getWritableProperties(clazz: Class[_]): Set[String] = {
+    Properties.writables(clazz)
+  }
+
+}
+
+object Properties {
 
   private val resolver = new PropertyNameResolver()
 
   @throws(classOf[NoSuchMethodException])
-  def setProperty(bean: AnyRef, name: String, value: Any) {
-    copyProperty(bean, name, value, null)
+  def set(bean: AnyRef, name: String, value: Any) {
+    copy(bean, name, value, null)
   }
 
-  def getProperty[T <: Any](inputBean: Any, propertyName: String): T = {
+  def get[T <: Any](inputBean: Any, propertyName: String): T = {
     var result = inputBean
     var name = propertyName
     while (resolver.hasNested(name)) {
@@ -58,7 +86,7 @@ object PropertyUtils extends Logging {
     result.asInstanceOf[T]
   }
 
-  def copyProperty(bean: AnyRef, propertyName: String, value: Any, conversion: Conversion): Any = {
+  def copy(bean: AnyRef, propertyName: String, value: Any, conversion: Conversion): Any = {
     var result: Any = bean
     var name = propertyName
     while (resolver.hasNested(name)) {
@@ -85,19 +113,27 @@ object PropertyUtils extends Logging {
     return value
   }
 
-  def copyProperty(bean: AnyRef, name: String, value: AnyRef): Any = copyProperty(bean, name, value, DefaultConversion.Instance)
+  def copy(bean: AnyRef, name: String, value: AnyRef): Any = {
+    copy(bean, name, value, DefaultConversion.Instance)
+  }
 
-  def isWriteable(bean: AnyRef, name: String): Boolean = BeanManifest.get(bean.getClass).getSetter(name).isDefined
+  def isWriteable(bean: AnyRef, name: String): Boolean = {
+    BeanManifest.get(bean.getClass).getSetter(name).isDefined
+  }
 
-  def getPropertyType(clazz: Class[_], name: String): Class[_] = BeanManifest.get(clazz).getPropertyType(name).orNull
+  def getType(clazz: Class[_], name: String): Class[_] = {
+    BeanManifest.get(clazz).getPropertyType(name).orNull
+  }
 
-  def getWritableProperties(clazz: Class[_]): Set[String] = BeanManifest.get(clazz).getWritableProperties
+  def writables(clazz: Class[_]): Set[String] = {
+    BeanManifest.get(clazz).getWritableProperties
+  }
 
-  def getSimpleProperty[T](bean: Any, name: String): T = {
+  private def getSimpleProperty[T](bean: Any, name: String): T = {
     BeanManifest.get(bean.getClass).getGetter(name) match {
       case Some(info) => info.method.invoke(bean).asInstanceOf[T]
       case _ =>
-        warn("Cannot find get" + Strings.capitalize(name) + " in " + bean.getClass)
+        System.err.println("Cannot find get" + Strings.capitalize(name) + " in " + bean.getClass)
         null.asInstanceOf[T]
     }
   }
@@ -137,7 +173,7 @@ object PropertyUtils extends Logging {
         converted
       }
       case _ => {
-        warn(s"Cannot find $name set method in ${bean.getClass.getName}")
+        System.err.println(s"Cannot find $name set method in ${bean.getClass.getName}")
         null
       }
     }

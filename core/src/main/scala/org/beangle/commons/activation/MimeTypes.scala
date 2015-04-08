@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2014, Beangle Software.
+ * Copyright (c) 2005-2015, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -21,7 +21,6 @@ package org.beangle.commons.activation
 import org.beangle.commons.inject.Resources
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.ClassLoaders.{ getResource, getResources }
-import org.beangle.commons.logging.Logging
 import javax.activation.MimeType
 import java.net.URL
 import org.beangle.commons.lang.Strings
@@ -106,7 +105,7 @@ object MimeTypes {
   }
 }
 
-object MimeTypeProvider extends Logging {
+object MimeTypeProvider {
 
   import MimeTypes._
   private val contentTypes: Map[String, MimeType] = buildMimeTypes(mimeTypeResources)
