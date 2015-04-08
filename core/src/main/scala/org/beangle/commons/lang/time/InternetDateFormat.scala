@@ -135,11 +135,9 @@ object InternetDateFormat {
     buf.append(df2.format(cal.get(Calendar.SECOND)))
 
     val ms = cal.get(Calendar.MILLISECOND)
-    if (ms != 0) {
-      buf.append(".").append(df3.format(ms));
-    }
+    buf.append(".").append(df3.format(ms))
 
-    var tzminute = (cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET)) / 60000;
+    var tzminute = (cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET)) / 60000
     if (tzminute == 0) {
       buf.append("Z")
     } else {
