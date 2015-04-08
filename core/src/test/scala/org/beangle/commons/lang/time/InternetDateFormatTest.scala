@@ -23,12 +23,15 @@ import org.scalatest.Matchers
 import org.scalatest.FunSpec
 import org.scalatest.junit.JUnitRunner
 import java.text.SimpleDateFormat
+import java.{ util => ju }
 
 @RunWith(classOf[JUnitRunner])
 class InternetDateFormatTest extends FunSpec with Matchers {
   describe("InternetDateFormat") {
     it("format") {
-      val date = new java.util.Date()
+      val cal =  ju.Calendar.getInstance
+      cal.set(ju.Calendar.MILLISECOND, 0)
+      val date= cal.getTime
       val utcString = UTCFormat.format(date)
       val format = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
       format.setTimeZone(java.util.TimeZone.getTimeZone("UTC"))
