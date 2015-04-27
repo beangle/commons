@@ -29,17 +29,17 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
   var day: WeekDay = _
 
   /** 开始时间 */
-  var begin: HourMinute = _
+  var beginAt: HourMinute = _
 
   /** 结束时间 */
-  var end: HourMinute = _
+  var endAt: HourMinute = _
 
   /** 周状态数字 */
   var state: WeekState = _
 
   override def compare(other: WeekTime): Int = {
     Objects.compareBuilder.add(this.day, other.day)
-      .add(this.begin, other.begin).add(this.end, other.end)
+      .add(this.beginAt, other.beginAt).add(this.endAt, other.endAt)
       .toComparison()
   }
   override def hashCode(): Int = {
@@ -47,8 +47,8 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
     var result = 1
     result = prime * result + (if ((state == null)) 0 else state.hashCode)
     result = prime * result + (if ((day == null)) 0 else day.hashCode)
-    result = prime * result + (if ((begin == null)) 0 else begin.hashCode)
-    result = prime * result + (if ((end == null)) 0 else end.hashCode)
+    result = prime * result + (if ((beginAt == null)) 0 else beginAt.hashCode)
+    result = prime * result + (if ((endAt == null)) 0 else endAt.hashCode)
     result
   }
 
@@ -57,7 +57,7 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
       case null => false
       case wt: WeekTime => {
         if (wt eq this) true
-        else Objects.equalsBuilder.add(this.day, wt.day).add(this.begin, wt.begin).add(this.end, wt.end).
+        else Objects.equalsBuilder.add(this.day, wt.day).add(this.beginAt, wt.beginAt).add(this.endAt, wt.endAt).
           add(this.state, wt.state).isEquals
       }
       case _ => false
@@ -71,7 +71,7 @@ class YearWeekTime extends WeekTime {
   override def compare(wt: WeekTime): Int = {
     val other = wt.asInstanceOf[YearWeekTime]
     Objects.compareBuilder.add(this.year, other.year).add(this.day, other.day)
-      .add(this.begin, other.begin).add(this.end, other.end)
+      .add(this.beginAt, other.beginAt).add(this.endAt, other.endAt)
       .toComparison()
   }
 
@@ -79,8 +79,8 @@ class YearWeekTime extends WeekTime {
     this()
     this.year = other.year
     this.day = other.day
-    this.begin = other.begin
-    this.end = other.end
+    this.beginAt = other.beginAt
+    this.endAt = other.endAt
     this.state = other.state
   }
 
@@ -109,7 +109,7 @@ class YearWeekTime extends WeekTime {
       case null => false
       case wt: YearWeekTime => {
         if (wt eq this) true
-        else Objects.equalsBuilder.add(this.day, wt.day).add(this.begin, wt.begin).add(this.end, wt.end).
+        else Objects.equalsBuilder.add(this.day, wt.day).add(this.beginAt, wt.beginAt).add(this.endAt, wt.endAt).
           add(this.state, wt.state).add(this.year, wt.year).isEquals
       }
       case _ => false
