@@ -32,10 +32,11 @@ object SystemInfo {
 
   private def sysProperties(): Map[String, String] = {
     val origin = new mutable.HashMap[String, String]
-    val enumer = System.getProperties().propertyNames
+    val props = System.getProperties
+    val enumer = props.propertyNames
     while (enumer.hasMoreElements()) {
       val name = enumer.nextElement().asInstanceOf[String]
-      origin.put(name, System.getProperties().getProperty(name))
+      origin.put(name, props.getProperty(name))
     }
     origin.toMap
   }

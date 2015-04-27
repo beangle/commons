@@ -21,10 +21,10 @@ package org.beangle.commons.lang.reflect
 import org.beangle.commons.bean.Factory
 import org.beangle.commons.jndi.JndiDataSourceFactory
 import org.beangle.commons.lang.annotation.description
-import org.beangle.commons.lang.testbean.{Book, TestChild2Bean}
+import org.beangle.commons.lang.testbean.{ Book, TestChild2Bean }
 import org.beangle.commons.lang.testbean.Entity
 import org.junit.runner.RunWith
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.{ FunSpec, Matchers }
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.junit.JUnitRunner
 import javax.sql.DataSource
@@ -49,5 +49,20 @@ class ReflectionsTest extends FunSpec with Matchers {
       assert(null != Reflections.getAnnotation(method1, classOf[description]))
       assert(null == Reflections.getAnnotation(method2, classOf[description]))
     }
+    it("getTraitParamType") {
+      val atypes = Reflections.getGenericParamType(classOf[C], classOf[A[_]])
+      assert(atypes.size == 1)
+      assert(atypes.get("T").isDefined)
+
+      val btypes = Reflections.getGenericParamType(classOf[C], classOf[B[_]])
+      assert(btypes.size == 1)
+      assert(btypes.get("T1").isDefined)
+    }
   }
 }
+
+trait A[T]
+
+trait B[T1] extends A[T1]
+
+class C extends B[Integer]

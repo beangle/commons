@@ -22,6 +22,9 @@ import javax.servlet.ServletContext
 import javax.servlet.ServletException
 import javax.servlet.ServletContextListener
 
+/**
+ * @see BootstrapListener.InitFile
+ */
 trait Initializer {
   var boss: BootstrapListener = _
   /**

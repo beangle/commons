@@ -29,17 +29,23 @@ import org.beangle.commons.lang.Strings.{ split, substringAfter, substringBefore
 
 import javax.servlet.{ ServletContextEvent, ServletContextListener, ServletException }
 import javax.servlet.DispatcherType.REQUEST
+
+object BootstrapListener {
+  val InitFile = "META-INF/beangle/web-init.properties"
+}
+
 /**
  * Web BootstrapListener
  */
 class BootstrapListener extends ServletContextListener {
 
+  import BootstrapListener._
   val others = new collection.mutable.ListBuffer[ServletContextListener]
 
   override def contextInitialized(sce: ServletContextEvent) {
     val servletContext = sce.getServletContext
     val initializers = new ju.LinkedList[Initializer]
-    ClassLoaders.getResources("META-INF/beangle/web-init.properties") foreach { url =>
+    ClassLoaders.getResources(InitFile) foreach { url =>
       IOs.readJavaProperties(url) get ("initializer") match {
         case Some(clazz) => {
           initializers.add(ClassLoaders.loadClass(clazz).newInstance.asInstanceOf[Initializer])
