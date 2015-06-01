@@ -19,6 +19,7 @@
 package org.beangle.commons.lang.time
 
 import org.beangle.commons.lang.Strings
+import org.beangle.commons.lang.annotation.beta
 
 object WeekState {
   def apply(value: String): WeekState = {
@@ -28,7 +29,8 @@ object WeekState {
 
 /**
  * week index is 1 based.
- */
+  */
+@beta
 class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
 
   def this(str: String) {

@@ -20,9 +20,11 @@ package org.beangle.commons.lang.time
 
 import org.beangle.commons.lang.time.WeekDay._
 import org.beangle.commons.lang.Objects
+import org.beangle.commons.lang.annotation.beta
 import java.{ util => ju }
 
 /**循环时间*/
+@beta
 class WeekTime extends Ordered[WeekTime] with Serializable {
 
   var startOn: java.sql.Date = _
@@ -125,4 +127,3 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
 //    }
 //  }
 }
-
