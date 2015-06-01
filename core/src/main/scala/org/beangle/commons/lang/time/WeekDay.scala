@@ -19,10 +19,12 @@
 package org.beangle.commons.lang.time
 
 import java.{ util => ju }
+import org.beangle.commons.lang.annotation.beta
 /**
  * 国家标准GBT 7408-2005
- */
-object WeekDays extends Enumeration(1) {
+  */
+@beta
+object WeekDay extends Enumeration(1) {
   class WeekDay extends super.Val {
     /**
      * Java calendar Index
@@ -51,6 +53,6 @@ object WeekDays extends Enumeration(1) {
   def of(date: ju.Date): WeekDay = {
     val cal = ju.Calendar.getInstance
     cal.setTime(date)
-    WeekDays(index2Id(cal.get(ju.Calendar.DAY_OF_WEEK))).asInstanceOf[WeekDay]
+    WeekDay(index2Id(cal.get(ju.Calendar.DAY_OF_WEEK))).asInstanceOf[WeekDay]
   }
 }

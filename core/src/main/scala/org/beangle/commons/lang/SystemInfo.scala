@@ -18,9 +18,8 @@
  */
 package org.beangle.commons.lang
 
-import java.net.InetAddress
-import java.net.NetworkInterface
-import java.net.UnknownHostException
+import java.net.{ InetAddress, NetworkInterface, UnknownHostException }
+
 import scala.collection.mutable
 /**
  * System information
@@ -32,10 +31,11 @@ object SystemInfo {
 
   private def sysProperties(): Map[String, String] = {
     val origin = new mutable.HashMap[String, String]
-    val enumer = System.getProperties().propertyNames
+    val props = System.getProperties
+    val enumer = props.propertyNames
     while (enumer.hasMoreElements()) {
       val name = enumer.nextElement().asInstanceOf[String]
-      origin.put(name, System.getProperties().getProperty(name))
+      origin.put(name, props.getProperty(name))
     }
     origin.toMap
   }
@@ -54,7 +54,10 @@ object SystemInfo {
 
   val jvmSpec = new JvmSpec(properties)
 
-  val javaRuntime = new JavaRuntime(properties)
+  val jre = new JavaRuntime(properties)
+
+  @deprecated("4.2.5", "using jre")
+  val javaRuntime = jre
 
   def tmpDir: String = System.getProperty("java.io.tmpdir")
 

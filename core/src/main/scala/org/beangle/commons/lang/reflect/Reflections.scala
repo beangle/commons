@@ -44,7 +44,7 @@ object Reflections {
     if (expected.isInterface) {
       getInterfaceParamType(clazz, expected)
     } else {
-      getSuperClassParamType(clazz.getSuperclass(), clazz.getGenericSuperclass(), expected)
+      getParamType(clazz.getSuperclass(), clazz.getGenericSuperclass(), expected)
     }
   }
 
@@ -53,15 +53,15 @@ object Reflections {
     val interfaces = clazz.getInterfaces
     val idx = (0 until interfaces.length) find { i => expected.isAssignableFrom(interfaces(i)) }
     idx match {
-      case Some(i) => getSuperClassParamType(interfaces(i), clazz.getGenericInterfaces()(i), expected, paramTypes)
+      case Some(i) => getParamType(interfaces(i), clazz.getGenericInterfaces()(i), expected, paramTypes)
       case _ => {
         val superClass = clazz.getSuperclass
-        getInterfaceParamType(superClass, expected, getSuperClassParamType(superClass, clazz.getGenericSuperclass(), superClass, paramTypes))
+        getInterfaceParamType(superClass, expected, getParamType(superClass, clazz.getGenericSuperclass, superClass, paramTypes))
       }
     }
   }
 
-  private def getSuperClassParamType(clazz: Class[_], tp: Type, expected: Class[_],
+  private def getParamType(clazz: Class[_], tp: Type, expected: Class[_],
     paramTypes: collection.Map[String, Class[_]] = Map.empty): collection.Map[String, Class[_]] = {
     if (classOf[AnyRef] == clazz) return paramTypes
 
@@ -81,8 +81,15 @@ object Reflections {
         tmp
       case _ => Map.empty
     }
-    if (clazz == expected) newParamTypes
-    else getSuperClassParamType(clazz.getSuperclass(), clazz.getGenericSuperclass(), expected, newParamTypes)
+    if (clazz == expected) {
+      newParamTypes
+    } else {
+      if (clazz.isInterface) {
+        getInterfaceParamType(clazz, expected, newParamTypes)
+      } else {
+        getParamType(clazz.getSuperclass(), clazz.getGenericSuperclass(), expected, newParamTypes)
+      }
+    }
   }
 
   def isAnnotationPresent[T <: Annotation](method: Method, clazz: Class[T]): Boolean = {

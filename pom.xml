@@ -3,14 +3,14 @@
   <parent>
     <groupId>org.beangle</groupId>
     <artifactId>beangle-scala</artifactId>
-    <version>22.1</version>
+    <version>22.2</version>
   </parent>
   <groupId>org.beangle.commons</groupId>
   <artifactId>beangle-commons-parent</artifactId>
   <packaging>pom</packaging>
-  <version>4.2.4</version>
+  <version>4.2.5</version>
   <name>Beangle Commons Parent</name>
-  
+
   <modules>
     <module>core</module>
     <module>web</module>
@@ -21,7 +21,7 @@
   </description>
 
   <url>https://github.com/beangle/commons</url>
-  
+
   <issueManagement>
     <system>github</system>
     <url>https://github.com/beangle/commons/issues</url>

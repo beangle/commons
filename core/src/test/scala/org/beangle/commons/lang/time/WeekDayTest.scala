@@ -21,7 +21,7 @@ package org.beangle.commons.lang.time
 import org.junit.runner.RunWith
 import org.scalatest.{ FunSpec, Matchers }
 import org.scalatest.junit.JUnitRunner
-import org.beangle.commons.lang.time.WeekDays._
+import org.beangle.commons.lang.time.WeekDay._
 import java.{ util => ju }
 
 @RunWith(classOf[JUnitRunner])
@@ -48,7 +48,7 @@ class WeekDayTest extends FunSpec with Matchers {
       val now = ju.Calendar.getInstance
       //2015-4-8
       now.set(2015, 3, 8)
-      assert(WeekDays.of(now.getTime) == Wed)
+      assert(WeekDay.of(now.getTime) == Wed)
     }
   }
 }

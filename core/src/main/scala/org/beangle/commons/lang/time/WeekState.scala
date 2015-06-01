@@ -19,15 +19,29 @@
 package org.beangle.commons.lang.time
 
 import org.beangle.commons.lang.Strings
+import org.beangle.commons.lang.annotation.beta
 
 object WeekState {
   def apply(value: String): WeekState = {
-    new WeekState(java.lang.Long.parseLong(value, 2))
+    new WeekState(value)
   }
 }
 
-class WeekState(val value: Long) extends Serializable {
+/**
+ * week index is 1 based.
+  */
+@beta
+class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
 
+  def this(str: String) {
+    this(if (Strings.isEmpty(str)) 0 else java.lang.Long.parseLong(str, 2))
+  }
+
+  override def compare(other: WeekState): Int = {
+    if (this.value < other.value) -1
+    else if (this.value == other.value) 0
+    else 1
+  }
   def |(other: WeekState): WeekState = {
     new WeekState(this.value | other.value)
   }
@@ -41,22 +55,35 @@ class WeekState(val value: Long) extends Serializable {
   }
 
   def span: Tuple2[Int, Int] = {
-    val str = toString
-    val length = str.length - 1
-    new Tuple2(length - str.lastIndexOf('1'), length - str.indexOf('1'))
+    if (value > 0) {
+      val str = toString
+      val length = str.length
+      (length - str.lastIndexOf('1'), length - str.indexOf('1'))
+    } else {
+      (-1, -1)
+    }
   }
 
   def weeks: Int = {
     Strings.count(toString, "1")
   }
 
-  def first: Int = {
-    val weekstr = toString.toCharArray()
-    var i = 0
-    while (i < weekstr.length) {
-      if (weekstr(weekstr.length - i - 1) == '1') return i;
+  def last: Int = {
+    if (value > 0) {
+      val str = toString
+      str.length - str.indexOf('1')
+    } else {
+      -1
     }
-    return weekstr.length
+  }
+
+  def first: Int = {
+    if (value > 0) {
+      val str = toString
+      str.length - str.lastIndexOf('1')
+    } else {
+      -1
+    }
   }
 
   def weekList: List[Int] = {
@@ -64,14 +91,14 @@ class WeekState(val value: Long) extends Serializable {
     var i = weekstr.length - 1
     val result = new collection.mutable.ListBuffer[Int]
     while (i >= 0) {
-      if (weekstr.charAt(i) == '1') result += (weekstr.length - 1 - i)
+      if (weekstr.charAt(i) == '1') result += (weekstr.length - i)
       i -= 1
     }
     result.toList
   }
 
   def isOccupied(week: Int): Boolean = {
-    (value & (1l << week)) > 0
+    (value & (1l << (week - 1))) > 0
   }
 
 }
