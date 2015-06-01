@@ -24,7 +24,7 @@ import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.testbean.TestEnum
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.beangle.commons.lang.time.WeekDays._
+import org.beangle.commons.lang.time.WeekDay._
 
 /**
  * @author chaostone

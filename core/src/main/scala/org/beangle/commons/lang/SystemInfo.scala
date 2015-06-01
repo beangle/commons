@@ -18,9 +18,8 @@
  */
 package org.beangle.commons.lang
 
-import java.net.InetAddress
-import java.net.NetworkInterface
-import java.net.UnknownHostException
+import java.net.{ InetAddress, NetworkInterface, UnknownHostException }
+
 import scala.collection.mutable
 /**
  * System information
@@ -55,7 +54,10 @@ object SystemInfo {
 
   val jvmSpec = new JvmSpec(properties)
 
-  val javaRuntime = new JavaRuntime(properties)
+  val jre = new JavaRuntime(properties)
+
+  @deprecated("4.2.5", "using jre")
+  val javaRuntime = jre
 
   def tmpDir: String = System.getProperty("java.io.tmpdir")
 

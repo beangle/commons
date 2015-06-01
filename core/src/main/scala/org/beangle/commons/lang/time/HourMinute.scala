@@ -25,11 +25,15 @@ import org.beangle.commons.lang.Numbers.toShort
  */
 object HourMinute {
   def apply(time: String): HourMinute = {
+    new HourMinute(convert(time))
+  }
+
+  def convert(time: String): Short = {
     var index = time.indexOf(':')
     require(index == 2 && time.length == 5, "illegal time,it should with 00:00 format")
     require((toShort(time.substring(0, index)) < 60 && toShort(time.substring(index + 1, index + 3)) < 60),
-      "illegal time " + time + ",it should within 60:60.")
-    HourMinute(toShort(time.substring(0, index) + time.substring(index + 1, index + 3)))
+      s"illegal time $time,it should within 60:60.")
+    toShort(time.substring(0, index) + time.substring(index + 1, index + 3))
   }
 }
 
@@ -42,6 +46,10 @@ case class HourMinute(val value: Short) {
     if (value >= 6000) throw new RuntimeException("Invalid time " + time)
     while (time.length < 4) time = "0" + time
     time.substring(0, 2) + ":" + time.substring(2, 4)
+  }
+
+  def this(time: String) {
+    this(HourMinute.convert(time))
   }
 
   def -(other: HourMinute): Short = {

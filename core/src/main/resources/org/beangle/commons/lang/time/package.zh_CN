@@ -1,0 +1,5 @@
+WeekTime.startOn=开始日期
+WeekTime.beginAt=开始时间
+WeekTime.endAt=结束时间
+WeekTime.weekday=周几
+WeekTime.weekstate=周状态

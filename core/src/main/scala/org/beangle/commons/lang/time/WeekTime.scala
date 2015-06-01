@@ -18,15 +18,17 @@
  */
 package org.beangle.commons.lang.time
 
-import WeekDays._
+import org.beangle.commons.lang.time.WeekDay._
 import org.beangle.commons.lang.Objects
 import java.{ util => ju }
 
 /**循环时间*/
 class WeekTime extends Ordered[WeekTime] with Serializable {
 
+  var startOn: java.sql.Date = _
+
   /** 星期几 */
-  var day: WeekDay = _
+  var weekday: WeekDay = _
 
   /** 开始时间 */
   var beginAt: HourMinute = _
@@ -35,18 +37,29 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
   var endAt: HourMinute = _
 
   /** 周状态数字 */
-  var state: WeekState = _
+  var weekstate: WeekState = _
+
+  def this(other: WeekTime) {
+    this()
+    this.startOn = other.startOn
+    this.weekday = other.weekday
+    this.beginAt = other.beginAt
+    this.endAt = other.endAt
+    this.weekstate = other.weekstate
+  }
 
   override def compare(other: WeekTime): Int = {
-    Objects.compareBuilder.add(this.day, other.day)
-      .add(this.beginAt, other.beginAt).add(this.endAt, other.endAt)
+    Objects.compareBuilder.add(this.startOn, other.startOn).add(this.weekday, other.weekday)
+      .add(this.beginAt, other.beginAt).add(this.endAt, other.endAt).add(this.weekstate, other.weekstate)
       .toComparison()
   }
+
   override def hashCode(): Int = {
     val prime = 31
     var result = 1
-    result = prime * result + (if ((state == null)) 0 else state.hashCode)
-    result = prime * result + (if ((day == null)) 0 else day.hashCode)
+    result = prime * result + startOn.hashCode()
+    result = prime * result + (if ((weekstate == null)) 0 else weekstate.hashCode)
+    result = prime * result + (if ((weekday == null)) 0 else weekday.hashCode)
     result = prime * result + (if ((beginAt == null)) 0 else beginAt.hashCode)
     result = prime * result + (if ((endAt == null)) 0 else endAt.hashCode)
     result
@@ -57,62 +70,59 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
       case null => false
       case wt: WeekTime => {
         if (wt eq this) true
-        else Objects.equalsBuilder.add(this.day, wt.day).add(this.beginAt, wt.beginAt).add(this.endAt, wt.endAt).
-          add(this.state, wt.state).isEquals
+        else Objects.equalsBuilder.add(this.startOn, wt.startOn).add(this.weekday, wt.weekday).add(this.beginAt, wt.beginAt).add(this.endAt, wt.endAt).
+          add(this.weekstate, wt.weekstate).isEquals
       }
       case _ => false
     }
-  }
-}
-
-class YearWeekTime extends WeekTime {
-  var year: Int = _
-
-  override def compare(wt: WeekTime): Int = {
-    val other = wt.asInstanceOf[YearWeekTime]
-    Objects.compareBuilder.add(this.year, other.year).add(this.day, other.day)
-      .add(this.beginAt, other.beginAt).add(this.endAt, other.endAt)
-      .toComparison()
-  }
-
-  def this(other: YearWeekTime) {
-    this()
-    this.year = other.year
-    this.day = other.day
-    this.beginAt = other.beginAt
-    this.endAt = other.endAt
-    this.state = other.state
   }
 
   def firstDate: ju.Date = {
     val cal = ju.Calendar.getInstance
-    cal.set(ju.Calendar.YEAR, year)
-    cal.setFirstDayOfWeek(WeekDays.Sun.index)
-    cal.set(ju.Calendar.WEEK_OF_YEAR, state.first)
-    cal.set(ju.Calendar.DAY_OF_WEEK, day.index)
+    cal.setTime(startOn)
+    while (cal.get(ju.Calendar.DAY_OF_WEEK) != weekday.index) {
+      cal.add(ju.Calendar.DAY_OF_YEAR, 1)
+    }
+    cal.add(ju.Calendar.WEEK_OF_YEAR, weekstate.first - 1)
     cal.getTime
   }
 
-  override def clone(): YearWeekTime = {
-    new YearWeekTime(this)
-  }
-
-  override def hashCode(): Int = {
-    var result = super.hashCode()
-    val prime = 31
-    result = prime * result + year
-    result
-  }
-
-  override def equals(obj: Any): Boolean = {
-    obj match {
-      case null => false
-      case wt: YearWeekTime => {
-        if (wt eq this) true
-        else Objects.equalsBuilder.add(this.day, wt.day).add(this.beginAt, wt.beginAt).add(this.endAt, wt.endAt).
-          add(this.state, wt.state).add(this.year, wt.year).isEquals
-      }
-      case _ => false
-    }
-  }
+//  def rebase(newStartOn: java.sql.Date): List[WeekTime] = {
+//    if (newStartOn.after(startOn)) {
+//      if (newStartOn.after(firstDate)) {
+//        throw new RuntimeException("Cannot rebase a date after firstDate!")
+//      } else {
+//        val nwt = new WeekTime(this)
+//        nwt.startOn = newStartOn
+//        List(nwt)
+//      }
+//    } else {
+//      val newStartCal = ju.Calendar.getInstance
+//      newStartCal.setTime(newStartOn)
+//      var days = 0
+//      while (newStartCal.before(startOn)) {
+//        newStartCal.add(ju.Calendar.DAY_OF_YEAR, 1)
+//        days += 1
+//      }
+//      val weekcnt = days / 7
+//      var newWeeks = this.toString();
+//      newWeeks += ("0" * weekcnt)
+//      if (newWeeks.length <= 64) {
+//        val nwt = new WeekTime(this)
+//        nwt.startOn = newStartOn
+//        nwt.weekstate = new WeekState(newWeeks)
+//        List(nwt)
+//      } else {
+//        val nwt1 = new WeekTime(this)
+//        nwt1.startOn = newStartOn
+//        nwt1.weekstate = new WeekState(newWeeks.substring(0, 64))
+//        val nwt2 = new WeekTime(this)
+//        newStartCal.add(ju.Calendar.WEEK_OF_YEAR, 64)
+//        nwt2.startOn = new java.sql.Date(newStartCal.getTime.getTime)
+//        nwt2.weekstate = new WeekState(newWeeks.substring(64))
+//        List(nwt1, nwt2)
+//      }
+//    }
+//  }
 }
+
