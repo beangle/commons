@@ -29,7 +29,7 @@ object WeekState {
 
 /**
  * week index is 1 based.
-  */
+ */
 @beta
 class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
 
@@ -58,7 +58,7 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     if (value > 0) {
       val str = toString
       val length = str.length
-      (length - str.lastIndexOf('1'), length - str.indexOf('1'))
+      (length - str.lastIndexOf('1') - 1, length - str.indexOf('1') - 1)
     } else {
       (-1, -1)
     }
@@ -71,7 +71,7 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
   def last: Int = {
     if (value > 0) {
       val str = toString
-      str.length - str.indexOf('1')
+      str.length - str.indexOf('1') - 1
     } else {
       -1
     }
@@ -80,7 +80,7 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
   def first: Int = {
     if (value > 0) {
       val str = toString
-      str.length - str.lastIndexOf('1')
+      str.length - str.lastIndexOf('1') - 1
     } else {
       -1
     }
@@ -91,14 +91,14 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     var i = weekstr.length - 1
     val result = new collection.mutable.ListBuffer[Int]
     while (i >= 0) {
-      if (weekstr.charAt(i) == '1') result += (weekstr.length - i)
+      if (weekstr.charAt(i) == '1') result += (weekstr.length - i - 1)
       i -= 1
     }
     result.toList
   }
 
   def isOccupied(week: Int): Boolean = {
-    (value & (1l << (week - 1))) > 0
+    (value & (1l << week)) > 0
   }
 
 }

@@ -32,12 +32,12 @@ class WeekStateTest extends FunSpec with Matchers {
     }
     it("apply string") {
       assert(WeekState("1100").value == 12)
-      assert(WeekState("110").first == 2)
-      assert(WeekState("110").last == 3)
+      assert(WeekState("1100").first == 2)
+      assert(WeekState("1100").last == 3)
     }
 
     it("get span") {
-      assert(WeekState("110").span == (2 -> 3))
+      assert(WeekState("1100").span == (2 -> 3))
     }
 
     it("get weeks") {
@@ -48,12 +48,12 @@ class WeekStateTest extends FunSpec with Matchers {
     }
 
     it("get weekList") {
-      assert(WeekState("10110").weekList == List(2, 3, 5))
+      assert(WeekState("101100").weekList == List(2, 3, 5))
     }
 
     it("is occupied") {
-      assert(WeekState("10110").isOccupied(2))
-      assert(!WeekState("10110").isOccupied(4))
+      assert(WeekState("101100").isOccupied(2))
+      assert(!WeekState("101100").isOccupied(4))
     }
 
     it("is serializable") {
