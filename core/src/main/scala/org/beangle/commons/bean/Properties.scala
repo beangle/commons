@@ -102,7 +102,7 @@ object Properties {
 
   private def getSimpleProperty[T](bean: Any, name: String): T = {
     BeanManifest.get(bean.getClass).getGetter(name) match {
-      case Some(info) => info.method.invoke(bean).asInstanceOf[T]
+      case Some(method) => method.invoke(bean).asInstanceOf[T]
       case _ =>
         System.err.println("Cannot find get" + Strings.capitalize(name) + " in " + bean.getClass)
         null.asInstanceOf[T]
@@ -138,9 +138,9 @@ object Properties {
   private def copySimpleProperty(bean: Any, name: String, value: Any, conversion: Conversion): Any = {
     val manifest = BeanManifest.get(bean.getClass)
     val info = manifest.getSetter(name) match {
-      case Some(info) => {
+      case Some(method) => {
         val converted = if (null == conversion) value else conversion.convert(value, manifest.getPropertyType(name).get)
-        info.method.invoke(bean, converted.asInstanceOf[Object])
+        method.invoke(bean, converted.asInstanceOf[Object])
         converted
       }
       case _ => {

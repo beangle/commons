@@ -20,6 +20,8 @@ package org.beangle.commons.lang.testbean
 
 import org.beangle.commons.lang.annotation.description
 import java.beans.Transient
+import org.beangle.commons.lang.Strings
+import org.beangle.commons.collection.Collections
 
 class TestBean {
 
@@ -111,4 +113,23 @@ class AbstractEntity[ID](val id: ID)
 class NumberIdBean[T <: Number](id: T) extends AbstractEntity[T](id)
 
 class Author(id: Integer) extends NumberIdBean[Integer](id)
+
+trait Hierarchical[T] {
+
+  /** index no */
+  var indexno: String = _
+
+  /** 父级菜单 */
+  var parent: T = _
+
+  var children = Collections.newBuffer[T]
+
+  def depth: Int = {
+    Strings.count(indexno, ".") + 1
+  }
+}
+
+class Department extends  NumIdBean[java.lang.Long] with Hierarchical[Department]{
+  var name = "department"
+}
 

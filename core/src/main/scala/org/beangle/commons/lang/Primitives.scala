@@ -50,6 +50,22 @@ object Primitives {
       defaults(clazz).asInstanceOf[T]
     } else null.asInstanceOf[T]
   }
+
+  def defaultLiteral[T](clazz: Class[T]): String = {
+    if (clazz.isPrimitive) {
+      val literal = String.valueOf(default(clazz))
+      if (clazz == classOf[Long]) {
+        literal + "l"
+      } else if (clazz == classOf[Double]) {
+        literal + "d"
+      } else {
+        literal
+      }
+    } else {
+      "null"
+    }
+  }
+
   /**
    * Returns {@code true} if {@code type} is one of the nine
    * primitive-wrapper types, such as {@link Integer}.
