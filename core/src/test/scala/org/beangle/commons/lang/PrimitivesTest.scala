@@ -47,5 +47,14 @@ class PrimitivesTest extends FunSpec with Matchers {
       val by = Primitives.default(classOf[Byte])
       assert(by == 0.asInstanceOf[Byte])
     }
+    it("generate default literal"){
+       assert("0F" == Primitives.defaultLiteral(classOf[Float]))
+       assert("0D" == Primitives.defaultLiteral(classOf[Double]))
+       assert("0" == Primitives.defaultLiteral(classOf[Int]))
+       assert("0L" == Primitives.defaultLiteral(classOf[Long]))
+       assert("'\u0000'" == Primitives.defaultLiteral(classOf[Char]))
+       assert("false" == Primitives.defaultLiteral(classOf[Boolean]))
+       assert("(short)0" == Primitives.defaultLiteral(classOf[Short]))
+    }
   }
 }

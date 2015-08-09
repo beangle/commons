@@ -40,30 +40,21 @@ object Primitives {
     (classOf[Byte], 0.asInstanceOf[Byte]), (classOf[Short], 0.asInstanceOf[Short]),
     (classOf[Int], 0), (classOf[Long], 0L), (classOf[Float], 0F), (classOf[Double], 0D))
 
+  private val defaultLiterals: Map[Class[_], String] = Map((classOf[Boolean], "false"), (classOf[Char], "'\u0000'"),
+    (classOf[Byte], "(byte)0"), (classOf[Short], "(short)0"),
+    (classOf[Int], "0"), (classOf[Long], "0L"), (classOf[Float], "0F"), (classOf[Double], "0D"))
+
   /**
    * Wrapper types to their corresponding primitive types.
    */
   private val wrapperToPrimitives = primitiveToWrappers.map(_.swap)
 
   def default[T](clazz: Class[T]): T = {
-    if (clazz.isPrimitive) {
-      defaults(clazz).asInstanceOf[T]
-    } else null.asInstanceOf[T]
+    if (clazz.isPrimitive) defaults(clazz).asInstanceOf[T] else null.asInstanceOf[T]
   }
 
   def defaultLiteral[T](clazz: Class[T]): String = {
-    if (clazz.isPrimitive) {
-      val literal = String.valueOf(default(clazz))
-      if (clazz == classOf[Long]) {
-        literal + "l"
-      } else if (clazz == classOf[Double]) {
-        literal + "d"
-      } else {
-        literal
-      }
-    } else {
-      "null"
-    }
+    if (clazz.isPrimitive) defaultLiterals(clazz) else "null"
   }
 
   /**
