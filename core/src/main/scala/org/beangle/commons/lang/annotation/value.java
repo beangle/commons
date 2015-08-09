@@ -16,21 +16,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.time
+package org.beangle.commons.lang.annotation;
 
-import org.junit.runner.RunWith
-import org.scalatest.{ FunSpec, Matchers }
-import org.scalatest.junit.JUnitRunner
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@RunWith(classOf[JUnitRunner])
-class HourMinuteTest extends FunSpec with Matchers {
+/**
+ * Value Type
+ * 
+ * @author chaostone
+ */
+@Target({ ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface value {
 
-  describe("HourMinute") {
-    it("is serializable") {
-      assert(HourMinute("12:34").isInstanceOf[Serializable])
-    }
-    it("distance") {
-      assert(60 == (HourMinute("13:34") - HourMinute("12:34")))
-    }
-  }
 }

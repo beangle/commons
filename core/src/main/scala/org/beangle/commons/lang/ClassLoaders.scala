@@ -27,6 +27,9 @@ import scala.collection.mutable
  * ClassLoaders
  */
 object ClassLoaders {
+  private val buildins = Map("Byte" -> classOf[Byte], "Boolean" -> classOf[Boolean], "Short" -> classOf[Short],
+    "Int" -> classOf[Int], "Long" -> classOf[Long], "Char" -> classOf[Char], "String" -> classOf[String],
+    "Float" -> classOf[Float], "Double" -> classOf[Double])
   /**
    * Return the default ClassLoader to use: typically the thread context
    * ClassLoader, if available; the ClassLoader that loaded the ClassLoaders
@@ -109,7 +112,7 @@ object ClassLoaders {
 
   def loadClass(className: String, classLoader: ClassLoader = null): Class[_] = {
     val loader = if (classLoader == null) defaultClassLoader else classLoader
-    loader.loadClass(className)
+    if (buildins.contains(className)) buildins(className) else loader.loadClass(if (className.contains(".")) className else "java.lang." + className)
   }
 
   def newInstance[T](className: String, classLoader: ClassLoader = null): T = {

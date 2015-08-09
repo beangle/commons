@@ -35,7 +35,7 @@ class TimeConverterTest extends FunSpec with Matchers {
       String2TimeConverter("12:34") should equal(Time.valueOf("12:34:00"))
       String2TimeConverter("12:34:00") should equal(Time.valueOf("12:34:00"))
 
-      String2HourMinuteConverter("12:34") should equal(HourMinute(1234.toShort))
+      String2HourMinuteConverter("12:34") should equal(new HourMinute(1234.toShort))
     }
   }
 }

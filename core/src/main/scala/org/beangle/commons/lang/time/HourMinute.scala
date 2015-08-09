@@ -17,7 +17,8 @@
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.lang.time
-import org.beangle.commons.lang.Numbers.toShort
+import org.beangle.commons.lang.Numbers.{ toShort, toInt }
+import org.beangle.commons.lang.annotation.value
 /**
  * Hour and minute of day
  * @version 4.0.5
@@ -38,9 +39,10 @@ object HourMinute {
 }
 
 /**
- * 一天中的分钟时间，格式如45:33
+ * 一天中的分钟时间，格式如23:33
  */
-case class HourMinute(val value: Short) {
+@value
+class HourMinute(val value: Short) extends Serializable {
   override def toString(): String = {
     var time = String.valueOf(value)
     if (value >= 6000) throw new RuntimeException("Invalid time " + time)
@@ -48,11 +50,21 @@ case class HourMinute(val value: Short) {
     time.substring(0, 2) + ":" + time.substring(2, 4)
   }
 
-  def this(time: String) {
-    this(HourMinute.convert(time))
+  private def minutes: Int = {
+    var time = String.valueOf(value)
+    if (value >= 6000) throw new RuntimeException("Invalid time " + time)
+    while (time.length < 4) time = "0" + time
+    toInt(time.substring(0, 2)) * 60 + toInt(time.substring(2, 4))
   }
 
   def -(other: HourMinute): Short = {
-    (this.value - other.value).asInstanceOf[Short]
+    (this.minutes - other.minutes).asInstanceOf[Short]
+  }
+
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case hm: HourMinute => hm.value == this.value
+      case _              => false
+    }
   }
 }

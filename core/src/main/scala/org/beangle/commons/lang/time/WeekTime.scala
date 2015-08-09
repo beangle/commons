@@ -18,13 +18,16 @@
  */
 package org.beangle.commons.lang.time
 
-import org.beangle.commons.lang.time.WeekDay._
+import java.{ util => ju }
+
+import org.beangle.commons.bean.component
 import org.beangle.commons.lang.Objects
 import org.beangle.commons.lang.annotation.beta
-import java.{ util => ju }
+import org.beangle.commons.lang.time.WeekDay.WeekDay
 
 /**循环时间*/
 @beta
+@component
 class WeekTime extends Ordered[WeekTime] with Serializable {
 
   var startOn: java.sql.Date = _
@@ -89,41 +92,44 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
     cal.getTime
   }
 
-//  def rebase(newStartOn: java.sql.Date): List[WeekTime] = {
-//    if (newStartOn.after(startOn)) {
-//      if (newStartOn.after(firstDate)) {
-//        throw new RuntimeException("Cannot rebase a date after firstDate!")
-//      } else {
-//        val nwt = new WeekTime(this)
-//        nwt.startOn = newStartOn
-//        List(nwt)
-//      }
-//    } else {
-//      val newStartCal = ju.Calendar.getInstance
-//      newStartCal.setTime(newStartOn)
-//      var days = 0
-//      while (newStartCal.before(startOn)) {
-//        newStartCal.add(ju.Calendar.DAY_OF_YEAR, 1)
-//        days += 1
-//      }
-//      val weekcnt = days / 7
-//      var newWeeks = this.toString();
-//      newWeeks += ("0" * weekcnt)
-//      if (newWeeks.length <= 64) {
-//        val nwt = new WeekTime(this)
-//        nwt.startOn = newStartOn
-//        nwt.weekstate = new WeekState(newWeeks)
-//        List(nwt)
-//      } else {
-//        val nwt1 = new WeekTime(this)
-//        nwt1.startOn = newStartOn
-//        nwt1.weekstate = new WeekState(newWeeks.substring(0, 64))
-//        val nwt2 = new WeekTime(this)
-//        newStartCal.add(ju.Calendar.WEEK_OF_YEAR, 64)
-//        nwt2.startOn = new java.sql.Date(newStartCal.getTime.getTime)
-//        nwt2.weekstate = new WeekState(newWeeks.substring(64))
-//        List(nwt1, nwt2)
-//      }
-//    }
-//  }
+  /**
+   * FIXME need more tests
+   */
+  def rebase(newStartOn: java.sql.Date): List[WeekTime] = {
+    if (newStartOn.after(startOn)) {
+      if (newStartOn.after(firstDate)) {
+        throw new RuntimeException("Cannot rebase a date after firstDate!")
+      } else {
+        val nwt = new WeekTime(this)
+        nwt.startOn = newStartOn
+        List(nwt)
+      }
+    } else {
+      val newStartCal = ju.Calendar.getInstance
+      newStartCal.setTime(newStartOn)
+      var days = 0
+      while (newStartCal.before(startOn)) {
+        newStartCal.add(ju.Calendar.DAY_OF_YEAR, 1)
+        days += 1
+      }
+      val weekcnt = days / 7
+      var newWeeks = this.toString();
+      newWeeks += ("0" * weekcnt)
+      if (newWeeks.length <= 64) {
+        val nwt = new WeekTime(this)
+        nwt.startOn = newStartOn
+        nwt.weekstate = new WeekState(newWeeks)
+        List(nwt)
+      } else {
+        val nwt1 = new WeekTime(this)
+        nwt1.startOn = newStartOn
+        nwt1.weekstate = new WeekState(newWeeks.substring(0, 64))
+        val nwt2 = new WeekTime(this)
+        newStartCal.add(ju.Calendar.WEEK_OF_YEAR, 64)
+        nwt2.startOn = new java.sql.Date(newStartCal.getTime.getTime)
+        nwt2.weekstate = new WeekState(newWeeks.substring(64))
+        List(nwt1, nwt2)
+      }
+    }
+  }
 }

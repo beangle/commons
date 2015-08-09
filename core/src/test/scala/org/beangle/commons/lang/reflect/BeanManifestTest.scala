@@ -19,18 +19,18 @@
 package org.beangle.commons.lang.reflect
 
 import java.lang.reflect.Modifier
-
 import org.beangle.commons.lang.testbean.{ Author, Book, BookPrimitiveId, BookStore, Entity, NumIdBean }
 import org.junit.runner.RunWith
 import org.scalatest.{ FunSpec, Matchers }
 import org.scalatest.junit.JUnitRunner
+import org.beangle.commons.lang.testbean.Department
 
 @RunWith(classOf[JUnitRunner])
 class BeanManifestTest extends FunSpec with Matchers {
   describe("BeanManifest") {
     it("find real template parameter") {
       assert(BeanManifest.get(classOf[Book]).getPropertyType("id") == Some(classOf[java.lang.Long]))
-      assert(BeanManifest.get(classOf[BookPrimitiveId]).getPropertyType("id") == Some(classOf[java.lang.Object]))
+      assert(BeanManifest.get(classOf[BookPrimitiveId]).getPropertyType("id") == Some(classOf[Long]))
       assert(BeanManifest.get(classOf[BookStore]).getPropertyType("id") == Some(classOf[String]))
       assert(BeanManifest.get(classOf[Author]).getPropertyType("id") == Some(classOf[Integer]))
     }
@@ -41,17 +41,23 @@ class BeanManifestTest extends FunSpec with Matchers {
     it("Can get iterface methods") {
       val method = classOf[NumIdBean[_]].getMethod("name")
       assert(Modifier.isAbstract(method.getModifiers))
-      assert(BeanManifest.get(classOf[NumIdBean[_]]).getters.size == 3)
+      assert(BeanManifest.get(classOf[NumIdBean[_]]).properties.size == 3)
 
-      assert(BeanManifest.get(classOf[Entity[_]]).getters.size == 3)
-      assert(BeanManifest.get(classOf[Entity[_]]).getters("persisted").isTransient)
-      assert(!BeanManifest.get(classOf[Entity[_]]).getters("id").isTransient)
+      assert(BeanManifest.get(classOf[Entity[_]]).properties.size == 3)
+      assert(BeanManifest.get(classOf[Entity[_]]).properties("persisted").isTransient)
+      assert(!BeanManifest.get(classOf[Entity[_]]).properties("id").isTransient)
     }
 
     it("Have correct virtual getter") {
-      val empty = BeanManifest.get(classOf[Book]).getGetter("empty")
+      val empty = BeanManifest.get(classOf[Book]).properties.get("empty")
       assert(empty.isDefined)
       assert(empty.get.isTransient)
+    }
+    
+    it("Have correct trait fields") {
+      val empty = BeanManifest.get(classOf[Department]).properties.get("parent")
+      assert(empty.isDefined)
+      assert(empty.get.clazz== classOf[Department])
     }
   }
 }

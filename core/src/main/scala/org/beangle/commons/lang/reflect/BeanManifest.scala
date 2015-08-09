@@ -21,28 +21,59 @@ package org.beangle.commons.lang.reflect
 import java.beans.Transient
 import java.lang.Character.isUpperCase
 import java.lang.reflect.{ Method, Modifier, ParameterizedType, TypeVariable }
-
 import scala.collection.mutable
 import scala.language.existentials
-
-import org.beangle.commons.collection.IdentityCache
+import org.beangle.commons.collection.{ Collections, IdentityCache }
 import org.beangle.commons.lang.Strings.{ substringAfter, substringBefore, uncapitalize }
+import org.beangle.commons.lang.ClassLoaders
+import org.beangle.commons.lang.Strings
 
 case class Getter(val method: Method, val returnType: Class[_], val isTransient: Boolean)
 
 case class Setter(val method: Method, val parameterTypes: Array[Class[_]])
 
-class BeanManifest(val getters: Map[String, Getter], val setters: Map[String, Setter]) {
+class PropertyDescriptor(val name: String, val clazz: Class[_], val getter: Option[Method], val setter: Option[Method], val isTransient: Boolean) {
+  def writable: Boolean = {
+    None != setter
+  }
+  def readable: Boolean = {
+    None != getter
+  }
+}
 
-  def getGetter(property: String): Option[Getter] = getters.get(property)
+class BeanManifest(val properties: Map[String, PropertyDescriptor]) {
 
-  def getPropertyType(property: String): Option[Class[_]] = {
-    getters.get(property).map(m => m.returnType)
+  def getGetter(property: String): Option[Method] = {
+    properties.get(property) match {
+      case Some(p) => p.getter
+      case None    => None
+    }
   }
 
-  def getSetter(property: String): Option[Setter] = setters.get(property)
+  def getPropertyType(property: String): Option[Class[_]] = {
+    properties.get(property) match {
+      case Some(p) => Some(p.clazz)
+      case None    => None
+    }
+  }
 
-  def getWritableProperties(): Set[String] = setters.keySet
+  def getSetter(property: String): Option[Method] = {
+    properties.get(property) match {
+      case Some(p) => p.setter
+      case None    => None
+    }
+  }
+
+  def readables: Map[String, PropertyDescriptor] = {
+    properties.filter(p => p._2.readable)
+  }
+  def writables: Map[String, PropertyDescriptor] = {
+    properties.filter(p => p._2.writable)
+  }
+
+  def getWritableProperties(): Set[String] = {
+    properties.filter(e => e._2.writable).keySet
+  }
 }
 
 object BeanManifest {
@@ -52,23 +83,28 @@ object BeanManifest {
    * Support scala case class
    */
   private val ignores = Set("hashCode", "toString", "productArity", "productPrefix", "productIterator")
+
+  import scala.reflect.runtime.{ universe => ru }
+  def get[T](clazz: Class[T])(implicit ttag: ru.TypeTag[T] = null): BeanManifest = {
+    get(clazz, if (null != ttag) ttag.tpe else null)
+  }
+
   /**
    * Get BeanManifest from cache or load it by type.
    * It search from cache, when failure build it and put it into cache.
    */
-  def get(clazz: Class[_]): BeanManifest = {
+  def get[T](clazz: Class[T], tpe: ru.Type): BeanManifest = {
     var exist = cache.get(clazz)
     if (null == exist) {
-      exist = load(clazz)
+      exist = load(clazz, tpe)
       cache.put(clazz, exist)
     }
     exist
   }
-
   /**
    * Load BeanManifest using reflections
    */
-  def load(clazz: Class[_]): BeanManifest = {
+  def load(clazz: Class[_], tpe: ru.Type = null): BeanManifest = {
     val getters = new mutable.HashMap[String, Getter]
     val setters = new mutable.HashMap[String, Setter]
     var nextClass = clazz
@@ -102,8 +138,8 @@ object BeanManifest {
           (0 until ps.length) foreach { k =>
             tmp.put(tvs(k).getName,
               ps(k) match {
-                case c: Class[_] => c
-                case tv: TypeVariable[_] => paramTypes(tv.getName)
+                case c: Class[_]           => c
+                case tv: TypeVariable[_]   => paramTypes(tv.getName)
                 case pt: ParameterizedType => pt.getRawType.asInstanceOf[Class[_]]
               })
           }
@@ -132,15 +168,30 @@ object BeanManifest {
       }
     }
 
-    new BeanManifest(filterGetters.toMap, setters.toMap)
+    val allprops = filterGetters.keySet ++ setters.keySet
+    val properties = Collections.newMap[String, PropertyDescriptor]
+    allprops foreach { p =>
+      val getter = filterGetters.get(p)
+      val setter = setters.get(p)
+      var clazz = if (None == getter) setter.get.parameterTypes(0) else getter.get.returnType
+      if (clazz == classOf[Object] && null != tpe) {
+        var typeName = tpe.member(ru.TermName(p)).typeSignatureIn(tpe).erasure.toString
+        typeName = Strings.replace(typeName, "()", "")
+        clazz = ClassLoaders.loadClass(typeName)
+      }
+      val isTrasient = if (None == getter) false else getter.get.isTransient
+      val pd = new PropertyDescriptor(p, clazz, getter.map(x => x.method), setter.map(x => x.method), isTrasient)
+      properties.put(p, pd)
+    }
+    new BeanManifest(properties.toMap)
   }
 
   private def extract(t: java.lang.reflect.Type, types: collection.Map[String, Class[_]]): Class[_] = {
     t match {
       case pt: ParameterizedType => pt.getRawType.asInstanceOf[Class[_]]
-      case tv: TypeVariable[_] => types.get(tv.getName).getOrElse(classOf[AnyRef])
-      case c: Class[_] => c
-      case _ => classOf[AnyRef]
+      case tv: TypeVariable[_]   => types.get(tv.getName).getOrElse(classOf[AnyRef])
+      case c: Class[_]           => c
+      case _                     => classOf[AnyRef]
     }
   }
 
