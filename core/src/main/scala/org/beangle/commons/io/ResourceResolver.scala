@@ -39,7 +39,7 @@ class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResource
   private val equinoxResolveMethod: Method = {
     try {
       // Detect Equinox OSGi (e.g. on WebSphere 6.1)
-      ClassLoaders.loadClass("org.eclipse.core.runtime.FileLocator").getMethod("resolve", classOf[URL])
+      ClassLoaders.load("org.eclipse.core.runtime.FileLocator").getMethod("resolve", classOf[URL])
     } catch {
       case _: Throwable => null
     }

@@ -36,7 +36,7 @@ trait Module {
 
 /**
  * Abstract AbstractBindModule class.
- * The subclass can writed in /META-INF/beangle/cdi.properties
+ * The subclass can writed in /META-INF/beangle/cdi.xml
  * using modules=com.your.class
  */
 abstract class AbstractBindModule extends Module {
