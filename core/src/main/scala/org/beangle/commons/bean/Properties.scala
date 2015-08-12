@@ -89,7 +89,7 @@ object Properties {
   }
 
   def isWriteable(bean: AnyRef, name: String): Boolean = {
-    BeanManifest.get(bean.getClass).getSetter(name).isDefined
+    BeanManifest.get(bean).getSetter(name).isDefined
   }
 
   def getType(clazz: Class[_], name: String): Class[_] = {
@@ -101,7 +101,7 @@ object Properties {
   }
 
   private def getSimpleProperty[T](bean: Any, name: String): T = {
-    BeanManifest.get(bean.getClass).getGetter(name) match {
+    BeanManifest.get(bean).getGetter(name) match {
       case Some(method) => method.invoke(bean).asInstanceOf[T]
       case _ =>
         System.err.println("Cannot find get" + Strings.capitalize(name) + " in " + bean.getClass)
@@ -136,7 +136,7 @@ object Properties {
   }
 
   private def copySimpleProperty(bean: Any, name: String, value: Any, conversion: Conversion): Any = {
-    val manifest = BeanManifest.get(bean.getClass)
+    val manifest = BeanManifest.get(bean)
     val info = manifest.getSetter(name) match {
       case Some(method) => {
         val converted = if (null == conversion) value else conversion.convert(value, manifest.getPropertyType(name).get)

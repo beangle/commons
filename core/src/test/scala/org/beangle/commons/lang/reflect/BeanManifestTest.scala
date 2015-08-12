@@ -53,11 +53,20 @@ class BeanManifestTest extends FunSpec with Matchers {
       assert(empty.isDefined)
       assert(empty.get.isTransient)
     }
-    
+
     it("Have correct trait fields") {
       val empty = BeanManifest.get(classOf[Department]).properties.get("parent")
       assert(empty.isDefined)
-      assert(empty.get.clazz== classOf[Department])
+      assert(empty.get.clazz == classOf[Department])
     }
+
+    it("not null implicit value") {
+      val clazz = classOf[Department]
+      fun(clazz)
+    }
+  }
+
+  def fun(c: Class[_]): BeanManifest = {
+    BeanManifest.get(c)
   }
 }

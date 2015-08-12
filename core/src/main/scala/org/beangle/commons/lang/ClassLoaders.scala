@@ -110,12 +110,24 @@ object ClassLoaders {
     }
   }
 
-  def loadClass(className: String, classLoader: ClassLoader = null): Class[_] = {
+  def load(className: String, classLoader: ClassLoader = null): Class[_] = {
     val loader = if (classLoader == null) defaultClassLoader else classLoader
     if (buildins.contains(className)) buildins(className) else loader.loadClass(if (className.contains(".")) className else "java.lang." + className)
   }
 
+  def get(className: String, classLoader: ClassLoader = null): Option[Class[_]] = {
+    val loader = if (classLoader == null) defaultClassLoader else classLoader
+    if (buildins.contains(className)) buildins.get(className)
+    else {
+      try {
+        Some(loader.loadClass(if (className.contains(".")) className else "java.lang." + className))
+      } catch {
+        case e: ClassNotFoundException => None
+      }
+    }
+  }
+
   def newInstance[T](className: String, classLoader: ClassLoader = null): T = {
-    loadClass(className, classLoader).newInstance().asInstanceOf[T]
+    load(className, classLoader).newInstance().asInstanceOf[T]
   }
 }

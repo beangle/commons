@@ -68,7 +68,7 @@ object String2ScalaEnumConverter extends StringConverterFactory[String, Enumerat
       val targetTypeName = targetType.getName()
       val dollaIdx = targetTypeName.indexOf('$')
       if (-1 == dollaIdx) throw new RuntimeException("Only support enum which value extends super.Val")
-      val enum = ClassLoaders.loadClass(targetTypeName.substring(0, dollaIdx + 1)).getDeclaredField("MODULE$").get(null).asInstanceOf[Enumeration]
+      val enum = ClassLoaders.load(targetTypeName.substring(0, dollaIdx + 1)).getDeclaredField("MODULE$").get(null).asInstanceOf[Enumeration]
       val enumconverter = new EnumConverter(enum)
       register(targetType, enumconverter)
       Some(enumconverter)

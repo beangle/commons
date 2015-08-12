@@ -85,8 +85,12 @@ object BeanManifest {
   private val ignores = Set("hashCode", "toString", "productArity", "productPrefix", "productIterator")
 
   import scala.reflect.runtime.{ universe => ru }
-  def get[T](clazz: Class[T])(implicit ttag: ru.TypeTag[T] = null): BeanManifest = {
-    get(clazz, if (null != ttag) ttag.tpe else null)
+  def get[T](clazz: Class[T])(implicit ttag: ru.TypeTag[T] = null, manifest: Manifest[T]): BeanManifest = {
+    get(clazz, if (null != ttag && manifest.runtimeClass != classOf[Object]) ttag.tpe else null)
+  }
+
+  def get(obj: Any): BeanManifest = {
+    get(obj.getClass(), null)
   }
 
   /**
@@ -177,7 +181,7 @@ object BeanManifest {
       if (clazz == classOf[Object] && null != tpe) {
         var typeName = tpe.member(ru.TermName(p)).typeSignatureIn(tpe).erasure.toString
         typeName = Strings.replace(typeName, "()", "")
-        clazz = ClassLoaders.loadClass(typeName)
+        clazz = ClassLoaders.load(typeName)
       }
       val isTrasient = if (None == getter) false else getter.get.isTransient
       val pd = new PropertyDescriptor(p, clazz, getter.map(x => x.method), setter.map(x => x.method), isTrasient)

@@ -47,10 +47,8 @@ class BootstrapListener extends ServletContextListener {
     val initializers = new ju.LinkedList[Initializer]
     ClassLoaders.getResources(InitFile) foreach { url =>
       IOs.readJavaProperties(url) get ("initializer") match {
-        case Some(clazz) => {
-          initializers.add(ClassLoaders.loadClass(clazz).newInstance.asInstanceOf[Initializer])
-        }
-        case None =>
+        case Some(clazz) => initializers.add(ClassLoaders.load(clazz).newInstance.asInstanceOf[Initializer])
+        case None        =>
       }
     }
 
