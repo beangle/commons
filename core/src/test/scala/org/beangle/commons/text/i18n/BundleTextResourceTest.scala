@@ -41,6 +41,7 @@ class BundleTextResourceTest extends FunSpec with Matchers {
       val tr = new DefaultTextResource(locale, registry, new DefaultTextFormater())
       tr("hello.world") should equal(Some("你好"))
       tr("china") should equal(Some("中国"))
+      tr("hello","hello","Jack") should equal("你好 Jack")
     }
     it("read Bundles") {
       val url = ClassLoaders.getResource("message2.zh_CN")
@@ -48,7 +49,7 @@ class BundleTextResourceTest extends FunSpec with Matchers {
       assert(null != bundles)
       assert(bundles.contains(""))
       val thisMap = bundles("")
-      assert(thisMap.size == 1)
+      assert(thisMap.size == 2)
       assert(bundles.contains("Country"))
       val countryMap = bundles("Country")
       assert(countryMap.size == 1)

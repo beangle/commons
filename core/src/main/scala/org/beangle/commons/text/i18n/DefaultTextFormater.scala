@@ -51,6 +51,6 @@ class DefaultTextFormater extends TextFormater {
       format = new MessageFormat(text)
       localeCache.put(text, format)
     }
-    format.format(args)
+    format.format(args.toArray)
   }
 }
