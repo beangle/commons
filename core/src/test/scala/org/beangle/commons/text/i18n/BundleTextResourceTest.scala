@@ -53,7 +53,6 @@ class BundleTextResourceTest extends FunSpec with Matchers {
       assert(bundles.contains("Country"))
       val countryMap = bundles("Country")
       assert(countryMap.size == 1)
-
     }
   }
 }
