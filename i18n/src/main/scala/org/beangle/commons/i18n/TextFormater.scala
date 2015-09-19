@@ -16,16 +16,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons
+package org.beangle.commons.i18n
 
-object BeangleVersion {
+import java.util.Locale
 
-  def name = "Beangle Scala Development Toolkit"
+/**
+ * Text formater
+ *
+ * @author chaostone
+ * @since 3.0.0
+ */
+trait TextFormater {
 
-  def version = "4.4.0"
-
-  def major = 4
-
-  def minor = 4
+  def format(text: String, locale: Locale, args: Any*): String
 }
-

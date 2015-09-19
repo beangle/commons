@@ -6,20 +6,19 @@
     <artifactId>beangle-commons-parent_2.11</artifactId>
     <version>4.4.0-SNAPSHOT</version>
   </parent>
-  <artifactId>beangle-commons-core_2.11</artifactId>
+  <artifactId>beangle-commons-i18n_2.11</artifactId>
   <packaging>jar</packaging>
-  <name>Beangle Commons Core</name>
+  <name>Beangle Commons I18n</name>
 
   <properties>
-    <bundle.symbolicName>org.beangle.commons.core</bundle.symbolicName>
-    <bundle.namespace>org.beangle.commons</bundle.namespace>
+    <bundle.symbolicName>org.beangle.commons.i18n</bundle.symbolicName>
+    <bundle.namespace>org.beangle.commons.i18n</bundle.namespace>
   </properties>
 
   <dependencies>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <optional>true</optional>
+      <groupId>org.beangle.commons</groupId>
+      <artifactId>beangle-commons-core_2.11</artifactId>
     </dependency>
   </dependencies>
 </project>

@@ -41,7 +41,7 @@ object Reflections {
     if (!manifest.runtimeClass.isAssignableFrom(moduleClass)) {
       ClassLoaders.get(name + "$") match {
         case Some(clazz) => moduleClass = clazz
-        case None        => throw new RuntimeException(name + " is not a mapping")
+        case None        => throw new RuntimeException(name + " is not a module")
       }
     }
     if (moduleClass.getConstructors.length > 0) moduleClass.newInstance().asInstanceOf[T]

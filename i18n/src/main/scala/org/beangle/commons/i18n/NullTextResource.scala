@@ -16,16 +16,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons
+package org.beangle.commons.i18n
 
-object BeangleVersion {
+import java.util.Locale
 
-  def name = "Beangle Scala Development Toolkit"
+/**
+ * NullTextResource class.
+ *
+ * @author chaostone
+ */
+class NullTextResource extends TextResource {
 
-  def version = "4.4.0"
+  def apply(key: String): Option[String] = Some(key)
 
-  def major = 4
+  def apply(key: String, defaultValue: String, obj: Any*): String = key
 
-  def minor = 4
+  def locale: Locale = null
 }
-

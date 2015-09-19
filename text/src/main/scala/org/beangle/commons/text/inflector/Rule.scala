@@ -16,16 +16,24 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons
+package org.beangle.commons.text.inflector
 
-object BeangleVersion {
+/**
+ * Rule interface.
+ *
+ * @author chaostone
+ */
+trait Rule {
 
-  def name = "Beangle Scala Development Toolkit"
+  /**
+   * Tests to see if this rule applies for the given word.
+   * @return <code>true</code> if this rule should be applied, <code>false</code> otherwise
+   */
+  def applies(word: String): Boolean
 
-  def version = "4.4.0"
-
-  def major = 4
-
-  def minor = 4
+  /**
+   * Applies this rule to the word, and transforming it into a new form.
+   * @return the transformed word
+   */
+  def apply(word: String): String
 }
-

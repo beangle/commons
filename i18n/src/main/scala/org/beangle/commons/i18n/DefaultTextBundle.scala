@@ -16,16 +16,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons
+package org.beangle.commons.i18n
 
-object BeangleVersion {
+import java.util.Locale
 
-  def name = "Beangle Scala Development Toolkit"
+/**
+ * @author chaostone
+ * @since 3.0.0
+ */
+class DefaultTextBundle(val locale: Locale, val resource: String, texts: Map[String, String]) extends TextBundle {
 
-  def version = "4.4.0"
+  def get(key: String): Option[String] = texts.get(key)
 
-  def major = 4
-
-  def minor = 4
+  override def toString(): String = resource
 }
-

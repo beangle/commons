@@ -25,7 +25,7 @@ import org.beangle.commons.collection.Collections
 
 class TestBean {
 
-  var id: java.lang.Integer = _
+  var id: Int = _
 
   var name: String = _
 
@@ -129,7 +129,7 @@ trait Hierarchical[T] {
   }
 }
 
-class Department extends  NumIdBean[java.lang.Long] with Hierarchical[Department]{
+class Department extends  NumIdBean[Long] with Hierarchical[Department]{
   var name = "department"
 }
 
