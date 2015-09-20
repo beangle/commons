@@ -16,16 +16,26 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons
+package org.beangle.commons.io
 
-object BeangleVersion {
+import org.beangle.commons.activation.MimeTypes
+import javax.activation.MimeType
+import java.io.OutputStream
 
-  def name = "Beangle Scala Development Toolkit"
+/**
+ * @author chaostone
+ */
+trait BinarySerializer extends Serializer {
 
-  def version = "4.4.0"
+  override def supportMediaTypes: Seq[MimeType] = {
+    List(MimeTypes.ApplicationOctetStream)
+  }
 
-  def major = 4
+  override def serialize(data: AnyRef, os: OutputStream, params: Map[String, Any]): Unit = {
+    os.write(serialize(data, params))
+  }
 
-  def minor = 4
+  def serialize(data: AnyRef, params: Map[String, Any]): Array[Byte]
+
+  def deserialize(bits: Array[Byte], params: Map[String, Any]): AnyRef
 }
-

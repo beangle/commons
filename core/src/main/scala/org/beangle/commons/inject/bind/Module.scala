@@ -46,7 +46,7 @@ abstract class AbstractBindModule extends Module {
   /**
    * Getter for the field <code>config</code>.
    */
-  override def configure(binder: Binder): Unit = {
+  override final def configure(binder: Binder): Unit = {
     this.binder = binder
     binding()
   }
@@ -54,47 +54,47 @@ abstract class AbstractBindModule extends Module {
   /**
    * bind class.
    */
-  protected def bind(classes: Class[_]*): DefinitionBinder = binder.bind(classes: _*)
+  protected final def bind(classes: Class[_]*): DefinitionBinder = binder.bind(classes: _*)
 
   /**
    * Returns a reference definition based on Name;
    */
-  protected def ref(name: String): ReferenceValue = new ReferenceValue(name)
+  protected final def ref(name: String): ReferenceValue = new ReferenceValue(name)
 
-  protected def ref(clazz: Class[_]): ReferenceValue = new ReferenceValue(clazz.getName)
+  protected final def ref(clazz: Class[_]): ReferenceValue = new ReferenceValue(clazz.getName)
 
   /**
    * Return new map entry
    */
-  protected def entry(key: Any, value: Any): Tuple2[_, _] = Tuple2(key, value)
+  protected final def entry(key: Any, value: Any): Tuple2[_, _] = Tuple2(key, value)
 
   /**
    * Generate a inner bean definition
    */
-  protected def bean(clazz: Class[_]): Definition = {
+  protected final def bean(clazz: Class[_]): Definition = {
     val defn = new Definition(clazz.getName, clazz, Scope.Singleton.toString)
     defn.beanName = clazz.getName + "#" + Math.abs(System.identityHashCode(defn))
     defn
   }
 
-  def inject[T](clazz: Class[T]): Injection[T] = {
+  final def inject[T](clazz: Class[T]): Injection[T] = {
     Injection(clazz)
   }
 
-  def ? = InjectPlaceHolder
+  final def ? = InjectPlaceHolder
 
-  def $(s: String, defaultValue: String = null) = PropertyPlaceHolder(s, defaultValue)
+  final def $(s: String, defaultValue: String = null) = PropertyPlaceHolder(s, defaultValue)
   /**
    * Generate a list property
    *
    * List singleton bean references with list(A.class,B.class) or list(ref("someBeanId"),C.class).<br>
    * List simple values with list("strValue1","strValue2")
    */
-  protected def list(datas: AnyRef*): List[_] = {
+  protected final def list(datas: AnyRef*): List[_] = {
     datas.map { obj =>
       obj match {
         case clazz: Class[_] => buildInnerReference(clazz)
-        case _ => obj
+        case _               => obj
       }
     }.toList
   }
@@ -102,7 +102,7 @@ abstract class AbstractBindModule extends Module {
   /**
    * Generate a list reference property
    */
-  protected def listref(classes: Class[_]*): List[_] = classes.map(clazz => new ReferenceValue(clazz.getName)).toList
+  protected final def listref(classes: Class[_]*): List[_] = classes.map(clazz => new ReferenceValue(clazz.getName)).toList
 
   /**
    * Generate a set property
@@ -110,26 +110,26 @@ abstract class AbstractBindModule extends Module {
    * List singleton bean references with set(A.class,B.class) or set(ref("someBeanId"),C.class).<br>
    * List simple values with set("strValue1","strValue2")
    */
-  protected def set(datas: AnyRef*): Set[_] = {
+  protected final def set(datas: AnyRef*): Set[_] = {
     datas.map { obj =>
       obj match {
         case clazz: Class[_] => buildInnerReference(clazz)
-        case _ => obj
+        case _               => obj
       }
     }.toSet
   }
 
-  protected def map(entries: Tuple2[_, _]*): Map[_, _] = {
+  protected final def map(entries: Tuple2[_, _]*): Map[_, _] = {
     entries.map {
       case (k, v) =>
         v match {
           case clazz: Class[_] => (k, buildInnerReference(clazz))
-          case _ => (k, v)
+          case _               => (k, v)
         }
     }.toMap
   }
 
-  protected def props(keyValuePairs: String*): ju.Properties = {
+  protected final def props(keyValuePairs: String*): ju.Properties = {
     val properties = new ju.Properties
     keyValuePairs foreach { pair =>
       val index = pair.indexOf('=')
@@ -141,14 +141,14 @@ abstract class AbstractBindModule extends Module {
   /**
    * bind class with a name.
    */
-  protected def bind(beanName: String, clazz: Class[_]): DefinitionBinder = {
+  protected final def bind(beanName: String, clazz: Class[_]): DefinitionBinder = {
     binder.bind(beanName, clazz)
   }
 
   /**
    * bind singleton with a name.
    */
-  protected def bind(beanName: String, singleton: AnyRef): Unit = {
+  protected final def bind(beanName: String, singleton: AnyRef): Unit = {
     binder.bind(beanName, singleton)
   }
 

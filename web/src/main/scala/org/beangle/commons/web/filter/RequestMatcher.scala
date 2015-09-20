@@ -20,7 +20,7 @@ package org.beangle.commons.web.filter
 
 import java.util.regex.Pattern
 
-import org.beangle.commons.text.regex.AntPathPattern
+import org.beangle.commons.regex.AntPathPattern
 import org.beangle.commons.web.util.RequestUtils
 
 import javax.servlet.http.HttpServletRequest

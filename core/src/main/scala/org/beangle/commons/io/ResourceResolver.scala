@@ -24,8 +24,8 @@ import java.net.{ JarURLConnection, URL }
 import java.util.jar.JarFile
 
 import org.beangle.commons.lang.{ ClassLoaders, Strings }
-import org.beangle.commons.text.regex.AntPathPattern
-import org.beangle.commons.text.regex.AntPathPattern.isPattern
+import org.beangle.commons.regex.AntPathPattern
+import org.beangle.commons.regex.AntPathPattern.isPattern
 
 trait ResourceResolver {
 

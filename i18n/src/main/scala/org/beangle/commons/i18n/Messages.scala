@@ -16,16 +16,24 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons
+package org.beangle.commons.i18n
 
-object BeangleVersion {
+import java.util.Locale
 
-  def name = "Beangle Scala Development Toolkit"
+object Messages {
+  def apply(locale: Locale): Messages = {
+    new Messages(locale, new DefaultTextBundleRegistry(), new DefaultTextFormater())
+  }
+}
 
-  def version = "4.4.0"
-
-  def major = 4
-
-  def minor = 4
+class Messages(locale: Locale, val registry: TextBundleRegistry, val format: TextFormater) {
+  def get(clazz: Class[_], key: String): String = {
+    if (key == "class") {
+      val bundle = registry.load(locale, clazz.getPackage.getName + ".package")
+      bundle.get(clazz.getSimpleName).orNull
+    } else {
+      new HierarchicalTextResource(clazz, locale, registry, format)(key).orNull
+    }
+  }
 }
 

@@ -20,10 +20,10 @@ package org.beangle.commons.lang.reflect
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.{ Method, ParameterizedType, Type, TypeVariable }
-
 import scala.language.existentials
-
 import org.beangle.commons.lang.{ Objects, Throwables }
+import scala.reflect.ClassTag
+import org.beangle.commons.lang.ClassLoaders
 
 object Reflections {
 
@@ -34,6 +34,18 @@ object Reflections {
       case e: Exception => Throwables.propagate(e)
     }
     Objects.default(clazz)
+  }
+
+  def getInstance[T : ClassTag](name: String)(implicit manifest:Manifest[T]): T = {
+    var moduleClass = ClassLoaders.load(name)
+    if (!manifest.runtimeClass.isAssignableFrom(moduleClass)) {
+      ClassLoaders.get(name + "$") match {
+        case Some(clazz) => moduleClass = clazz
+        case None        => throw new RuntimeException(name + " is not a module")
+      }
+    }
+    if (moduleClass.getConstructors.length > 0) moduleClass.newInstance().asInstanceOf[T]
+    else moduleClass.getDeclaredField("MODULE$").get(null).asInstanceOf[T]
   }
 
   /**
@@ -72,8 +84,8 @@ object Reflections {
         val tvs = clazz.getTypeParameters
         (0 until ps.length) foreach { k =>
           val resultType = ps(k) match {
-            case c: Class[_] => c
-            case tv: TypeVariable[_] => paramTypes.get(tv.getName).orNull
+            case c: Class[_]           => c
+            case tv: TypeVariable[_]   => paramTypes.get(tv.getName).orNull
             case pt: ParameterizedType => pt.getRawType().asInstanceOf[Class[_]]
           }
           if (null != resultType) tmp.put(tvs(k).getName, resultType)

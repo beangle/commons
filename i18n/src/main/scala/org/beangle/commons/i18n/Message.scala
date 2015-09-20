@@ -16,16 +16,26 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons
+package org.beangle.commons.i18n
 
-object BeangleVersion {
+/**
+ * Message class.
+ *
+ * @author chaostone
+ */
+class Message(val key: String, val params: List[Any]) {
 
-  def name = "Beangle Scala Development Toolkit"
+  /**
+   * Constructor for Message.
+   */
+  def this(key: String, objs: Array[Any]) {
+    this(key, objs.toList)
+  }
 
-  def version = "4.4.0"
-
-  def major = 4
-
-  def minor = 4
+  /**
+   * Constructor for Message.
+   */
+  def this(key: String) {
+    this(key, List.empty)
+  }
 }
-

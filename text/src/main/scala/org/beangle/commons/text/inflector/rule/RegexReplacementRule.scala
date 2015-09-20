@@ -16,16 +16,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons
+package org.beangle.commons.text.inflector.rule
 
-object BeangleVersion {
+import java.util.regex.Matcher
 
-  def name = "Beangle Scala Development Toolkit"
+/**
+ * RegexReplacementRule class.
+ *
+ * @author chaostone
+ */
+class RegexReplacementRule(regex: String, val replacement: String) extends AbstractRegexReplacementRule(regex) {
 
-  def version = "4.4.0"
-
-  def major = 4
-
-  def minor = 4
+  override def replace(matcher: Matcher): String = matcher.replaceFirst(replacement)
 }
-

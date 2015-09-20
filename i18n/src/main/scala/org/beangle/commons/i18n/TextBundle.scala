@@ -16,16 +16,30 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons
+package org.beangle.commons.i18n
 
-object BeangleVersion {
+import java.util.Locale
 
-  def name = "Beangle Scala Development Toolkit"
+/**
+ * TextBundle
+ *
+ * @author chaostone
+ * @since 3.0.0
+ */
+trait TextBundle {
 
-  def version = "4.4.0"
+  /**
+   * Gets a message based on a message key, or null if no message is found.
+   */
+  def get(key: String): Option[String]
 
-  def major = 4
+  /**
+   * Returns the locale of this resource bundle.
+   */
+  def locale: Locale
 
-  def minor = 4
+  /**
+   * Get the bundle resource path
+   */
+  def resource: String
 }
-

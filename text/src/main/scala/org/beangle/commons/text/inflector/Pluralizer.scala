@@ -16,16 +16,22 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons
+package org.beangle.commons.text.inflector
 
-object BeangleVersion {
+/**
+ * <code>Pluralizer</code> converts singular word forms to their plural forms.
+ *
+ * @author chaostone
+ */
+trait Pluralizer {
 
-  def name = "Beangle Scala Development Toolkit"
+  /**
+   * pluralize.
+   */
+  def pluralize(word: String): String
 
-  def version = "4.4.0"
-
-  def major = 4
-
-  def minor = 4
+  /**
+   * pluralize.
+   */
+  def pluralize(word: String, number: Int): String
 }
-

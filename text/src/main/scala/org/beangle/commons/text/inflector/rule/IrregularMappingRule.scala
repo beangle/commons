@@ -16,16 +16,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons
+package org.beangle.commons.text.inflector.rule
 
-object BeangleVersion {
+import java.util.regex.Matcher
+/**
+ * IrregularMappingRule class.
+ *
+ * @author chaostone
+ */
+class IrregularMappingRule(wordMappings: Map[String, String], regex: String)
+    extends AbstractRegexReplacementRule(regex) {
 
-  def name = "Beangle Scala Development Toolkit"
+  protected val mappings = wordMappings
 
-  def version = "4.4.0"
-
-  def major = 4
-
-  def minor = 4
+  override def replace(m: Matcher): String = mappings(m.group(0).toLowerCase())
 }
-
