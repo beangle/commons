@@ -227,7 +227,7 @@ object Strings {
     if (isEmpty(first) || isEmpty(second)) return ""
     val rs = Collections.intersection(split(first, ',').toList, split(second, ',').toList)
     val buf = new StringBuilder()
-    for (ele <- rs) buf.append(delimiter).append(ele)
+    rs foreach (ele => buf.append(delimiter).append(ele))
     if (buf.length > 0) buf.append(delimiter)
     buf.toString
   }
@@ -352,7 +352,7 @@ object Strings {
       seq(0)
     } else {
       val aim = new StringBuilder()
-      for (i <- 0 until seq.length) {
+      (0 until seq.length) foreach { i =>
         if (null != delimiter && i > 0) aim.append(delimiter)
         aim.append(seq(i))
       }
@@ -732,7 +732,7 @@ object Strings {
     if (isEmpty(numSeq)) return null
     val numArray = split(numSeq, ',')
     val numSet = new mutable.HashSet[Int]
-    for (i <- 0 until numArray.length) {
+    (0 until numArray.length) foreach { i =>
       val num = numArray(i)
       if (num.contains("-")) {
         val termFromTo = split(num, '-')
@@ -840,7 +840,7 @@ object Strings {
     val secondSeq = split(second, delimiter).toList
     val rs = Collections.subtract(firstSeq, secondSeq)
     val buf = new StringBuilder()
-    for (ele <- rs) buf.append(delimiter).append(ele)
+    rs foreach { ele => buf.append(delimiter).append(ele) }
     if (buf.length > 0) buf.append(delimiter)
     buf.toString
   }
@@ -853,7 +853,7 @@ object Strings {
    */
   def transformToInt(ids: Array[String]): Array[Int] = {
     val results = new Array[Int](ids.length)
-    for (i <- 0 until ids.length) {
+    (0 until ids.length) foreach { i =>
       results(i) = Numbers.toInt(ids(i))
     }
     results
@@ -861,7 +861,7 @@ object Strings {
 
   def transformToInteger(ids: Array[String]): Array[Integer] = {
     val idsOfInteger = new Array[Integer](ids.length)
-    for (i <- 0 until ids.length) {
+    (0 until ids.length) foreach { i =>
       idsOfInteger(i) = Integer.valueOf(ids(i))
     }
     idsOfInteger
@@ -876,8 +876,7 @@ object Strings {
   def transformToLong(ids: Array[String]): Array[java.lang.Long] = {
     if (null == ids) return null
     val idsOfLong = new Array[java.lang.Long](ids.length)
-    for (i <- 0 until ids.length)
-      idsOfLong(i) = java.lang.Long.valueOf(ids(i))
+    (0 until ids.length) foreach (i => idsOfLong(i) = java.lang.Long.valueOf(ids(i)))
     idsOfLong
   }
 

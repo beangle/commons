@@ -20,15 +20,13 @@ package org.beangle.commons.web.init
 
 import java.{ util => ju }
 import java.util.EnumSet
-
 import scala.collection.JavaConversions.asScalaBuffer
-
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.Strings.{ split, substringAfter, substringBefore }
-
 import javax.servlet.{ ServletContextEvent, ServletContextListener, ServletException }
 import javax.servlet.DispatcherType.REQUEST
+import org.beangle.commons.web.context.ServletContextHolder
 
 object BootstrapListener {
   val InitFile = "META-INF/beangle/web-init.properties"
@@ -44,6 +42,8 @@ class BootstrapListener extends ServletContextListener {
 
   override def contextInitialized(sce: ServletContextEvent) {
     val servletContext = sce.getServletContext
+    ServletContextHolder.store(servletContext)
+
     val initializers = new ju.LinkedList[Initializer]
     ClassLoaders.getResources(InitFile) foreach { url =>
       IOs.readJavaProperties(url) get ("initializer") match {

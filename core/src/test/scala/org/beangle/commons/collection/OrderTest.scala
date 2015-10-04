@@ -38,7 +38,7 @@ class OrderTest extends FunSpec with Matchers {
     it("ParserOrder") {
       val orders = Order.parse("std.code asc")
       orders.size should be(1)
-      for (order <- orders) {
+      orders foreach { order =>
         order.ascending should be(true)
         order.property should equal("std.code")
       }
