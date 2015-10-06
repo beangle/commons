@@ -18,10 +18,11 @@
  */
 package org.beangle.commons.lang.testbean
 
-import org.beangle.commons.lang.annotation.description
 import java.beans.Transient
-import org.beangle.commons.lang.Strings
+
 import org.beangle.commons.collection.Collections
+import org.beangle.commons.lang.Strings
+import org.beangle.commons.lang.annotation.description
 
 class TestBean {
 
@@ -98,6 +99,8 @@ class Book extends NumIdBean[java.lang.Long] {
   val version = "3.0"
 
   def isEmpty = false
+
+  var authors: List[Author] = _
 }
 
 class BookPrimitiveId extends NumIdBean[Long] {
@@ -114,6 +117,8 @@ class NumberIdBean[T <: Number](id: T) extends AbstractEntity[T](id)
 
 class Author(id: Integer) extends NumberIdBean[Integer](id)
 
+class BigBookStore(val department:Seq[Department],val books:Map[String,Book])
+
 trait Hierarchical[T] {
 
   /** index no */
@@ -129,7 +134,7 @@ trait Hierarchical[T] {
   }
 }
 
-class Department extends  NumIdBean[Long] with Hierarchical[Department]{
+class Department extends NumIdBean[Long] with Hierarchical[Department] {
   var name = "department"
 }
 
