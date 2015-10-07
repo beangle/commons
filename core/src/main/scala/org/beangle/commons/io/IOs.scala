@@ -51,6 +51,7 @@ object IOs {
       count += n
       n = input.read(buffer)
     }
+    close(input)
     count
   }
 
@@ -82,6 +83,7 @@ object IOs {
       count += n
       n = input.read(buffer)
     }
+    close(input)
     count
   }
 
@@ -97,6 +99,7 @@ object IOs {
       list += line
       line = reader.readLine()
     }
+    close(input)
     list.toList
   }
 
@@ -175,7 +178,9 @@ object IOs {
     }
   }
 
-  def readLines(input: InputStream, charset: Charset = UTF_8): List[String] = readLines(new InputStreamReader(input, charset))
+  def readLines(input: InputStream, charset: Charset = UTF_8): List[String] = {
+    readLines(new InputStreamReader(input, charset))
+  }
 
   /**
    * Close many objects quitely.

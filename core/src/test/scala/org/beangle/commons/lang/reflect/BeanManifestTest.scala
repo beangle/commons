@@ -24,6 +24,7 @@ import org.junit.runner.RunWith
 import org.scalatest.{ FunSpec, Matchers }
 import org.scalatest.junit.JUnitRunner
 import org.beangle.commons.lang.testbean.Department
+import org.beangle.commons.lang.testbean.BigBookStore
 
 @RunWith(classOf[JUnitRunner])
 class BeanManifestTest extends FunSpec with Matchers {
@@ -63,6 +64,24 @@ class BeanManifestTest extends FunSpec with Matchers {
     it("not null implicit value") {
       val clazz = classOf[Department]
       fun(clazz)
+    }
+    it("find list author") {
+      val t = BeanManifest.get(classOf[Book]).properties("authors")
+      val typeinfo = t.typeinfo
+      assert(typeinfo.isInstanceOf[CollectionType])
+      assert(typeinfo.asInstanceOf[CollectionType].componentType == classOf[Author])
+    }
+    it("find corrent constructor info") {
+      val t = BeanManifest.get(classOf[BigBookStore])
+      assert(!t.constructors.isEmpty)
+      val ctor = t.constructors.head
+      assert(2 == ctor.args.size)
+      assert(ctor.args.head.isInstanceOf[CollectionType])
+      assert(ctor.args.head.asInstanceOf[CollectionType].componentType == classOf[Department])
+
+      assert(ctor.args(1).isInstanceOf[MapType])
+      assert(ctor.args(1).asInstanceOf[MapType].keyType == classOf[String])
+      assert(ctor.args(1).asInstanceOf[MapType].valueType == classOf[Book])
     }
   }
 

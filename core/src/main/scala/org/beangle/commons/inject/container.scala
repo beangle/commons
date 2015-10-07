@@ -48,10 +48,10 @@ object Container {
 
   var ROOT: Container = _
 
-  var hooks: List[ContainerRefreshedHook] = Nil
+  var listeners: List[ContainerListener] = Nil
 
-  def addHook(hook: ContainerRefreshedHook): Unit = {
-    hooks = hook :: hooks
+  def addListener(listener: ContainerListener): Unit = {
+    listeners = listener :: listeners
   }
 
   val containers = new collection.mutable.HashSet[Container]
@@ -64,9 +64,19 @@ trait ContainerAware {
   def container_=(container: Container): Unit
 }
 
-trait ContainerRefreshedHook {
-
+@deprecated("using ContainerListener", "4.4.1")
+trait ContainerRefreshedHook extends ContainerListener {
   def notify(container: Container): Unit
+  override def onStarted(container: Container): Unit = {
+    notify(container)
+  }
+}
+
+trait ContainerListener {
+
+  def onStarted(container: Container): Unit = {}
+
+  def onStopped(container: Container): Unit = {}
 }
 
 trait PropertySource {

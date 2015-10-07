@@ -156,17 +156,17 @@ object Collections {
   }
 
   def newBuffer[T]: collection.mutable.Buffer[T] = {
-    new collection.mutable.ListBuffer[T]
+    new collection.mutable.ArrayBuffer[T]
   }
 
   def newBuffer[T](t: Iterable[T]): collection.mutable.Buffer[T] = {
-    val buffer = new collection.mutable.ListBuffer[T]
+    val buffer = new collection.mutable.ArrayBuffer[T]
     buffer ++= t
     buffer
   }
 
   def newBuffer[T](t: T): collection.mutable.Buffer[T] = {
-    val buffer = new collection.mutable.ListBuffer[T]
+    val buffer = new collection.mutable.ArrayBuffer[T]
     buffer += t
     buffer
   }

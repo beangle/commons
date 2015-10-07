@@ -27,21 +27,51 @@ import org.beangle.commons.collection.{ Collections, IdentityCache }
 import org.beangle.commons.lang.Strings.{ substringAfter, substringBefore, uncapitalize }
 import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.Strings
+import java.lang.reflect.Constructor
 
 case class Getter(val method: Method, val returnType: Class[_], val isTransient: Boolean)
 
 case class Setter(val method: Method, val parameterTypes: Array[Class[_]])
 
-class PropertyDescriptor(val name: String, val clazz: Class[_], val getter: Option[Method], val setter: Option[Method], val isTransient: Boolean) {
+sealed trait TypeInfo {
+  def clazz: Class[_]
+  def isElementType: Boolean = false
+  def isCollectionType: Boolean = false
+  def isMapType: Boolean = false
+  def isSetType: Boolean = false
+}
+case class ElementType(val clazz: Class[_]) extends TypeInfo {
+  override def isElementType: Boolean = true
+}
+
+case class CollectionType(val clazz: Class[_], val componentType: Class[_]) extends TypeInfo {
+  override def isSetType: Boolean = {
+    classOf[collection.Set[_]].isAssignableFrom(clazz) || classOf[java.util.Set[_]].isAssignableFrom(clazz)
+  }
+  override def isCollectionType: Boolean = true
+}
+
+case class MapType(val clazz: Class[_], val keyType: Class[_], valueType: Class[_]) extends TypeInfo {
+  override def isMapType: Boolean = true
+}
+
+class PropertyDescriptor(val name: String, val typeinfo: TypeInfo, val getter: Option[Method], val setter: Option[Method], val isTransient: Boolean) {
   def writable: Boolean = {
     None != setter
   }
+
+  def clazz: Class[_] = {
+    typeinfo.clazz
+  }
+
   def readable: Boolean = {
     None != getter
   }
 }
 
-class BeanManifest(val properties: Map[String, PropertyDescriptor]) {
+class ConstructorDescriptor(val constructor: Constructor[_], val args: Vector[TypeInfo])
+
+class BeanManifest(val properties: Map[String, PropertyDescriptor], val constructors: List[ConstructorDescriptor]) {
 
   def getGetter(property: String): Option[Method] = {
     properties.get(property) match {
@@ -172,24 +202,82 @@ object BeanManifest {
       }
     }
 
+    // organize setter and getter
     val allprops = filterGetters.keySet ++ setters.keySet
     val properties = Collections.newMap[String, PropertyDescriptor]
     allprops foreach { p =>
       val getter = filterGetters.get(p)
       val setter = setters.get(p)
       var clazz = if (None == getter) setter.get.parameterTypes(0) else getter.get.returnType
-      if (clazz == classOf[Object] && null != tpe) {
-        var typeName = tpe.member(ru.TermName(p)).typeSignatureIn(tpe).erasure.toString
-        typeName = Strings.replace(typeName, "()", "")
-        clazz = ClassLoaders.load(typeName)
-      }
+
+      val typeinfo =
+        if (clazz == classOf[Object] && null != tpe) {
+          var typeName = tpe.member(ru.TermName(p)).typeSignatureIn(tpe).erasure.toString
+          typeName = Strings.replace(typeName, "()", "")
+          clazz = ClassLoaders.load(typeName)
+          ElementType(clazz)
+        } else {
+          buildTypeInfo(clazz, if (None == getter) setter.get.method else getter.get.method)
+        }
+
       val isTrasient = if (None == getter) false else getter.get.isTransient
-      val pd = new PropertyDescriptor(p, clazz, getter.map(x => x.method), setter.map(x => x.method), isTrasient)
+      val pd = new PropertyDescriptor(p, typeinfo, getter.map(x => x.method), setter.map(x => x.method), isTrasient)
       properties.put(p, pd)
     }
-    new BeanManifest(properties.toMap)
+
+    // find constructor with arguments
+    val ctors = Collections.newBuffer[ConstructorDescriptor]
+    clazz.getConstructors() foreach { ctor =>
+      val infoes: Array[TypeInfo] = ctor.getGenericParameterTypes map { pt =>
+        pt match {
+          case c: Class[_] => ElementType(c)
+          case t: ParameterizedType =>
+            if (t.getActualTypeArguments().size == 1) {
+              CollectionType(clazz, extract(t, 0))
+            } else {
+              MapType(clazz, extract(t, 0), extract(t, 1))
+            }
+          case _ => throw new RuntimeException("cannot process " + pt)
+        }
+      }
+      ctors += new ConstructorDescriptor(ctor, infoes.toVector)
+    }
+    new BeanManifest(properties.toMap, ctors.toList)
   }
 
+  private def buildTypeInfo(clazz: Class[_], method: Method): TypeInfo = {
+    if (clazz.isArray()) {
+      CollectionType(clazz, clazz.getComponentType)
+    } else {
+      if (classOf[collection.Iterable[_]].isAssignableFrom(clazz) || classOf[java.util.Collection[_]].isAssignableFrom(clazz)) {
+        val pt =
+          if (method.getParameterTypes.length == 0) {
+            method.getGenericReturnType.asInstanceOf[ParameterizedType]
+          } else {
+            method.getGenericParameterTypes()(0).asInstanceOf[ParameterizedType]
+          }
+        if (pt.getActualTypeArguments().size == 1) {
+          CollectionType(clazz, extract(pt, 0))
+        } else {
+          MapType(clazz, extract(pt, 0), extract(pt, 1))
+        }
+      } else {
+        ElementType(clazz)
+      }
+    }
+  }
+
+  private def extract(typ: java.lang.reflect.Type, idx: Int): Class[_] = {
+    typ match {
+      case c: Class[_] => c
+      case pt: ParameterizedType =>
+        pt.getActualTypeArguments()(idx) match {
+          case c: Class[_] => c
+          case _           => classOf[AnyRef]
+        }
+      case _ => classOf[AnyRef]
+    }
+  }
   private def extract(t: java.lang.reflect.Type, types: collection.Map[String, Class[_]]): Class[_] = {
     t match {
       case pt: ParameterizedType => pt.getRawType.asInstanceOf[Class[_]]
