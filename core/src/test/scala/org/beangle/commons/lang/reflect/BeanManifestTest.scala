@@ -31,7 +31,7 @@ class BeanManifestTest extends FunSpec with Matchers {
   describe("BeanManifest") {
     it("find real template parameter") {
       assert(BeanManifest.get(classOf[Book]).getPropertyType("id") == Some(classOf[java.lang.Long]))
-      assert(BeanManifest.get(classOf[BookPrimitiveId]).getPropertyType("id") == Some(classOf[Long]))
+      assert(BeanManifest.forType(classOf[BookPrimitiveId]).getPropertyType("id") == Some(classOf[Long]))
       assert(BeanManifest.get(classOf[BookStore]).getPropertyType("id") == Some(classOf[String]))
       assert(BeanManifest.get(classOf[Author]).getPropertyType("id") == Some(classOf[Integer]))
     }
@@ -56,7 +56,7 @@ class BeanManifestTest extends FunSpec with Matchers {
     }
 
     it("Have correct trait fields") {
-      val empty = BeanManifest.get(classOf[Department]).properties.get("parent")
+      val empty = BeanManifest.forType(classOf[Department]).properties.get("parent")
       assert(empty.isDefined)
       assert(empty.get.clazz == classOf[Department])
     }
