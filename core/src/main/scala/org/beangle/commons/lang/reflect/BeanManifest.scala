@@ -202,6 +202,7 @@ object BeanManifest {
       }
     }
 
+    // organize setter and getter
     val allprops = filterGetters.keySet ++ setters.keySet
     val properties = Collections.newMap[String, PropertyDescriptor]
     allprops foreach { p =>
@@ -224,6 +225,7 @@ object BeanManifest {
       properties.put(p, pd)
     }
 
+    // find constructor with arguments
     val ctors = Collections.newBuffer[ConstructorDescriptor]
     clazz.getConstructors() foreach { ctor =>
       val infoes: Array[TypeInfo] = ctor.getGenericParameterTypes map { pt =>
