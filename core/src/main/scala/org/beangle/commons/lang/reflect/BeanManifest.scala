@@ -20,14 +20,12 @@ package org.beangle.commons.lang.reflect
 
 import java.beans.Transient
 import java.lang.Character.isUpperCase
-import java.lang.reflect.{ Method, Modifier, ParameterizedType, TypeVariable }
+import java.lang.reflect.{ Constructor, Method, Modifier, ParameterizedType, TypeVariable }
 import scala.collection.mutable
 import scala.language.existentials
 import org.beangle.commons.collection.{ Collections, IdentityCache }
+import org.beangle.commons.lang.{ ClassLoaders, Strings }
 import org.beangle.commons.lang.Strings.{ substringAfter, substringBefore, uncapitalize }
-import org.beangle.commons.lang.ClassLoaders
-import org.beangle.commons.lang.Strings
-import java.lang.reflect.Constructor
 
 case class Getter(val method: Method, val returnType: Class[_], val isTransient: Boolean)
 
@@ -115,19 +113,30 @@ object BeanManifest {
   private val ignores = Set("hashCode", "toString", "productArity", "productPrefix", "productIterator")
 
   import scala.reflect.runtime.{ universe => ru }
-  def get[T](clazz: Class[T])(implicit ttag: ru.TypeTag[T] = null, manifest: Manifest[T]): BeanManifest = {
-    get(clazz, if (null != ttag && manifest.runtimeClass != classOf[Object]) ttag.tpe else null)
+  def forType[T](clazz: Class[T])(implicit ttag: ru.TypeTag[T] = null, manifest: Manifest[T]): BeanManifest = {
+    assert(null != ttag && manifest.runtimeClass != classOf[Object])
+    get(clazz, ttag.tpe)
   }
 
   def get(obj: Any): BeanManifest = {
-    get(obj.getClass(), null)
+    get(obj.getClass, null)
   }
 
   /**
    * Get BeanManifest from cache or load it by type.
+   * It search from cache, when failure build it and put it into cache
+   * PS.
+   * DON'T using get(class,tye=null) style definition,for scala with invoke get(obj:Any) when invocation is get(someClass).
+   * So Don't using default argument and argument overload together.
+   */
+  def get(clazz: Class[_]): BeanManifest = {
+    get(clazz, null)
+  }
+  /**
+   * Get BeanManifest from cache or load it by type.
    * It search from cache, when failure build it and put it into cache.
    */
-  def get[T](clazz: Class[T], tpe: ru.Type): BeanManifest = {
+  def get(clazz: Class[_], tpe: ru.Type): BeanManifest = {
     var exist = cache.get(clazz)
     if (null == exist) {
       exist = load(clazz, tpe)

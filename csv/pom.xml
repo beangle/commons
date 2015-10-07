@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.beangle.commons</groupId>
     <artifactId>beangle-commons-parent_2.11</artifactId>
-    <version>4.4.1</version>
+    <version>4.4.2</version>
   </parent>
   <artifactId>beangle-commons-csv_2.11</artifactId>
   <packaging>jar</packaging>
