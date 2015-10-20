@@ -255,24 +255,36 @@ object BeanManifest {
   }
 
   private def buildTypeInfo(clazz: Class[_], method: Method): TypeInfo = {
+    import Reflections._
     if (clazz.isArray()) {
       CollectionType(clazz, clazz.getComponentType)
     } else {
-      if (classOf[collection.Iterable[_]].isAssignableFrom(clazz) || classOf[java.util.Collection[_]].isAssignableFrom(clazz)) {
-        val pt =
-          if (method.getParameterTypes.length == 0) {
-            method.getGenericReturnType.asInstanceOf[ParameterizedType]
-          } else {
-            method.getGenericParameterTypes()(0).asInstanceOf[ParameterizedType]
+      if (classOf[collection.Iterable[_]].isAssignableFrom(clazz) || classOf[java.util.Collection[_]].isAssignableFrom(clazz) || classOf[java.util.Map[_, _]].isAssignableFrom(clazz)) {
+        val collectionType: java.lang.reflect.Type =
+          if (method.getParameterTypes.length == 0) method.getGenericReturnType else method.getGenericParameterTypes()(0)
+
+        collectionType match {
+          case pt: ParameterizedType =>
+            if (pt.getActualTypeArguments.size == 1) CollectionType(clazz, extract(pt, 0))
+            else MapType(clazz, extract(pt, 0), extract(pt, 1))
+          case c: Class[_] => {
+            if (classOf[collection.Map[_, _]].isAssignableFrom(clazz)) {
+              val typeParams = getGenericParamType(c, classOf[collection.Map[_, _]])
+              MapType(clazz, typeParams("A"), typeParams("B"))
+            } else if (classOf[collection.Iterable[_]].isAssignableFrom(clazz)) {
+              CollectionType(clazz, getGenericParamType(c, classOf[collection.Iterable[_]]).head._2)
+            } else if (classOf[java.util.Collection[_]].isAssignableFrom(clazz)) {
+              CollectionType(clazz, getGenericParamType(c, classOf[java.util.Collection[_]]).head._2)
+            } else {
+              val typeParams = getGenericParamType(c, classOf[java.util.Map[_, _]])
+              MapType(clazz, typeParams("K"), typeParams("V"))
+            }
           }
-        if (pt.getActualTypeArguments().size == 1) {
-          CollectionType(clazz, extract(pt, 0))
-        } else {
-          MapType(clazz, extract(pt, 0), extract(pt, 1))
         }
       } else {
         ElementType(clazz)
       }
+
     }
   }
 

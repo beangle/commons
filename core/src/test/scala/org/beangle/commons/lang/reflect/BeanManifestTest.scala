@@ -82,6 +82,24 @@ class BeanManifestTest extends FunSpec with Matchers {
       assert(ctor.args(1).isInstanceOf[MapType])
       assert(ctor.args(1).asInstanceOf[MapType].keyType == classOf[String])
       assert(ctor.args(1).asInstanceOf[MapType].valueType == classOf[Book])
+
+      val p = t.properties("properties")
+      assert(p.clazz == classOf[java.util.Properties])
+      assert(p.typeinfo.isMapType)
+      assert(p.typeinfo.asInstanceOf[MapType].keyType == classOf[Object])
+      assert(p.typeinfo.asInstanceOf[MapType].valueType == classOf[Object])
+
+      val prices = t.properties("prices")
+      assert(prices.clazz == classOf[Range])
+      assert(prices.typeinfo.isCollectionType)
+      assert(prices.typeinfo.asInstanceOf[CollectionType].componentType == classOf[Object])
+
+      val p2 = t.properties("properties2")
+      assert(p2.clazz == classOf[org.beangle.commons.collection.Properties])
+      assert(p2.typeinfo.isMapType)
+      assert(p2.typeinfo.asInstanceOf[MapType].keyType == classOf[String])
+      assert(p2.typeinfo.asInstanceOf[MapType].valueType == classOf[Object])
+
     }
   }
 
