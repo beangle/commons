@@ -34,15 +34,16 @@ import org.beangle.commons.lang.Strings.{ isNotEmpty, split }
  */
 class MapConverter(val conversion: DefaultConversion = DefaultConversion.Instance) {
   /**
-   * convert.
+   * convert value to target class or array[class]
    */
   def convert[T](value: Any, clazz: Class[T]): Option[T] = {
     if (null == value) return None
     if (clazz.isAssignableFrom(value.getClass)) return Some(value.asInstanceOf[T])
     value match {
-      case s: String => if (Strings.isEmpty(s)) None else Some(conversion.convert(s, clazz))
-      case a: Array[_] => if (!clazz.isArray()) convert(a(0), clazz) else Some(conversion.convert(value, clazz))
-      case o: Any => Some(conversion.convert(value, clazz))
+      case s: String      => if (Strings.isEmpty(s)) None else Some(conversion.convert(s, clazz))
+      case a: Array[_]    => if (!clazz.isArray) convert(a(0), clazz) else Some(conversion.convert(value, clazz))
+      case i: Iterable[_] => if (!clazz.isArray) convert(i.head, clazz) else Some(conversion.convert(value.asInstanceOf[Iterable[_]].toArray, clazz))
+      case o: Any         => Some(conversion.convert(value, clazz))
     }
   }
 
@@ -62,7 +63,7 @@ class MapConverter(val conversion: DefaultConversion = DefaultConversion.Instanc
   def get[T](data: Map[String, Any], name: String, clazz: Class[T]): Option[T] = {
     data.get(name) match {
       case Some(value) => convert(value, clazz)
-      case _ => None
+      case _           => None
     }
   }
 

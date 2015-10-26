@@ -25,7 +25,7 @@ trait MultipartResolver {
 
   def isMultipart(request: HttpServletRequest): Boolean
 
-  def resolve(request: HttpServletRequest): Map[String, Array[Part]]
+  def resolve(request: HttpServletRequest): Map[String, Any]
 
   def cleanup(request: HttpServletRequest)
 }

@@ -28,7 +28,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class MapConverterTest extends FunSpec with Matchers {
 
-  val datas = Map[String, Any](("empty1", ""), ("empty2", null), ("empty3", Array("")), ("empty4", Array(null)), ("number2", Array("2")))
+  val datas = Map[String, Any](("empty1", ""), ("empty2", null), ("empty3", List("")), ("empty4", Array(null)), ("number2", List("2")))
 
   var converter: MapConverter = new MapConverter()
 

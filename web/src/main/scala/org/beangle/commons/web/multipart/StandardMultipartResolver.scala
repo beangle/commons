@@ -18,44 +18,58 @@
  */
 package org.beangle.commons.web.multipart
 
+import java.io.ByteArrayOutputStream
+
+import org.beangle.commons.io.IOs
+import org.beangle.commons.lang.Strings
+
 import javax.servlet.http.HttpServletRequest
-import sun.rmi.runtime.Log.LogFactory
 import javax.servlet.http.Part
 
+/**
+ * Standard Multipart Resolver
+ */
 object StandardMultipartResolver extends MultipartResolver {
 
   def isMultipart(request: HttpServletRequest): Boolean = {
     if (!"post".equals(request.getMethod.toLowerCase)) return false
 
     val contentType = request.getContentType
-    return (contentType != null && contentType.toLowerCase.startsWith("multipart/"))
+    (contentType != null && contentType.toLowerCase.startsWith("multipart/"))
   }
 
-  def resolve(request: HttpServletRequest): Map[String, Array[Part]] = {
+  def resolve(request: HttpServletRequest): Map[String, Any] = {
     val parts = request.getParts
     val partItor = request.getParts.iterator()
-    val files = new collection.mutable.HashMap[String, Array[Part]]
+    val params = new collection.mutable.HashMap[String, Any]
     while (partItor.hasNext()) {
       val part = partItor.next
       if (part.getSize > 0) {
-        if (part.getHeader("content-disposition").contains("filename=")) {
-          val newParts = files.get(part.getName) match {
-            case Some(arr) => Array.concat(Array(part), arr)
-            case None => Array(part)
+        val disposition = part.getHeader("content-disposition")
+        if (disposition.contains("filename=")) {
+          val newParts = params.get(part.getName) match {
+            case Some(arr) => Array.concat(Array(part), arr.asInstanceOf[Array[Part]])
+            case None      => Array(part)
           }
-          files.put(part.getName, newParts)
+          params.put(part.getName, newParts)
+        } else {
+          val paramName = Strings.substringBetween(disposition, "name=\"", "\"")
+          val b = new ByteArrayOutputStream
+          IOs.copy(part.getInputStream, b)
+          val str = new String(b.toByteArray)
+          params.put(paramName, str)
         }
+      } else {
+        params.put(part.getName, part)
       }
     }
-    files.toMap
+    params.toMap
   }
 
   override def cleanup(request: HttpServletRequest): Unit = {
     if (isMultipart(request)) {
       val partItor = request.getParts().iterator
-      while (partItor.hasNext) {
-        partItor.next.delete()
-      }
+      while (partItor.hasNext) partItor.next.delete()
     }
   }
 }
