@@ -40,7 +40,7 @@ object StandardMultipartResolver extends MultipartResolver {
 
   def resolve(request: HttpServletRequest): Map[String, Any] = {
     val parts = request.getParts
-    val partItor = request.getParts.iterator()
+    val partItor = request.getParts.iterator
     val params = new collection.mutable.HashMap[String, Any]
     while (partItor.hasNext()) {
       val part = partItor.next

@@ -43,6 +43,8 @@ object MimeTypes {
 
   val ApplicationXml = this("application/xml")
 
+  val ApplicationPdf = this("application/pdf")
+
   val ImageGif = this("image/gif");
 
   val ImageJpeg = this("image/jpeg")
