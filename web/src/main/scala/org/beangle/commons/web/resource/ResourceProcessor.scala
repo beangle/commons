@@ -40,7 +40,7 @@ class ResourceProcessor(private val loader: ResourceLoader, private val resolver
       val chain = new ProcessChain(filters.iterator)
       chain.process(pc, request, response)
       if (response.getStatus() == HttpServletResponse.SC_OK) {
-        val isText = response.getContentType.startsWith("text/")
+        val isText = (null != response.getContentType && response.getContentType.startsWith("text/"))
         val os = response.getOutputStream
         for (res <- pc.resources) {
           val is = res.url.openStream()

@@ -18,17 +18,13 @@
  */
 package org.beangle.commons.conversion.impl
 
-import java.lang.reflect.Array
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
-import org.beangle.commons.lang.Primitives
-import org.beangle.commons.conversion.Conversion
-import org.beangle.commons.conversion.Converter
-import org.beangle.commons.conversion.ConverterRegistry
-import org.beangle.commons.lang.Objects
+import java.lang.reflect.{ Array, Modifier }
+
+import scala.collection.{ concurrent, mutable }
 import scala.language.existentials
-import scala.collection.mutable
-import scala.collection.concurrent
+
+import org.beangle.commons.conversion.{ Conversion, Converter, ConverterRegistry }
+import org.beangle.commons.lang.{ Objects, Primitives }
 /**
  * Generic Conversion Super class
  * It provider converter registry and converter search machanism.
@@ -44,25 +40,30 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
   /**
    * Convert to target type.
    */
-  override def convert[T](source: Any, targetType: Class[T]): T = {
-    if (null == source) return Objects.default(targetType)
-    val sourceType = Primitives.wrap(source.getClass)
-    val targetClazz = Primitives.wrap(targetType)
-    if (targetClazz.isAssignableFrom(sourceType)) return source.asInstanceOf[T]
-    if (sourceType.isArray && targetClazz.isArray) {
-      val sourceObjType = Primitives.wrap(sourceType.getComponentType)
-      val targetObjType = Primitives.wrap(targetClazz.getComponentType)
+  override def convert[T](source: Any, target: Class[T]): T = {
+    if (null == source) return Objects.default(target)
+    val sourceClazz = Primitives.wrap(source.getClass)
+    val targetClazz = Primitives.wrap(target)
+
+    if (targetClazz.isAssignableFrom(sourceClazz)) return source.asInstanceOf[T]
+
+    if (sourceClazz.isArray && targetClazz.isArray) {
+      val sourceObjType = Primitives.wrap(sourceClazz.getComponentType)
+      val targetObjClazz = targetClazz.getComponentType
+      val targetObjType = Primitives.wrap(targetObjClazz)
       val converter = findConverter(sourceObjType, targetObjType)
-      if (null == converter) Array.newInstance(targetClazz.getComponentType, 0).asInstanceOf[T] else {
+      if (null == converter) {
+        Array.newInstance(targetObjClazz, 0).asInstanceOf[T]
+      } else {
         val length = Array.getLength(source)
-        val result = Array.newInstance(targetClazz.getComponentType, length).asInstanceOf[T]
+        val result = Array.newInstance(targetObjClazz, length).asInstanceOf[T]
         for (i <- 0 until length) Array.set(result, i, converter.convert(Array.get(source, i), targetObjType))
         result
       }
     } else {
-      val converter = findConverter(sourceType, targetClazz)
+      val converter = findConverter(sourceClazz, targetClazz)
       val rs = converter.convert(source, targetClazz).asInstanceOf[T]
-      if (null == rs && targetType.isPrimitive) Objects.default(targetType) else rs
+      if (null == rs && target.isPrimitive) Objects.default(target) else rs
     }
   }
 
@@ -77,7 +78,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
     val adapter = new ConverterAdapter(converter, key)
     converters.get(sourceType) match {
       case Some(existed) => converters += (sourceType -> (existed + (key._2 -> adapter)))
-      case _ => converters += (sourceType -> Map((key._2 -> adapter)))
+      case _             => converters += (sourceType -> Map((key._2 -> adapter)))
     }
     cache.clear()
   }

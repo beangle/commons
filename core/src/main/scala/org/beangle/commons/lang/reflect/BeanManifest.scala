@@ -38,8 +38,63 @@ sealed trait TypeInfo {
   def isMapType: Boolean = false
   def isSetType: Boolean = false
 }
+
+object TypeInfo {
+
+  def of(clazz: Class[_]): TypeInfo = {
+    of(clazz, clazz.getGenericSuperclass)
+  }
+
+  def of(clazz: Class[_], typ: java.lang.reflect.Type): TypeInfo = {
+    import Reflections._
+    if (CollectionType.isCollectionType(clazz) || classOf[java.util.Map[_, _]].isAssignableFrom(clazz)) {
+      if (clazz.isArray) {
+        CollectionType(clazz, clazz.getComponentType)
+      } else {
+        typ match {
+          case pt: ParameterizedType =>
+            if (pt.getActualTypeArguments.size == 1) CollectionType(clazz, typeAt(pt, 0))
+            else MapType(clazz, typeAt(pt, 0), typeAt(pt, 1))
+          case c: Class[_] => {
+            if (classOf[collection.Map[_, _]].isAssignableFrom(clazz)) {
+              val typeParams = getGenericParamType(c, classOf[collection.Map[_, _]])
+              MapType(clazz, typeParams("A"), typeParams("B"))
+            } else if (classOf[collection.Iterable[_]].isAssignableFrom(clazz)) {
+              CollectionType(clazz, getGenericParamType(c, classOf[collection.Iterable[_]]).head._2)
+            } else if (classOf[java.util.Collection[_]].isAssignableFrom(clazz)) {
+              CollectionType(clazz, getGenericParamType(c, classOf[java.util.Collection[_]]).head._2)
+            } else {
+              val typeParams = getGenericParamType(c, classOf[java.util.Map[_, _]])
+              MapType(clazz, typeParams("K"), typeParams("V"))
+            }
+          }
+        }
+      }
+    } else {
+      ElementType(clazz)
+    }
+  }
+
+  def typeAt(typ: java.lang.reflect.Type, idx: Int): Class[_] = {
+    typ match {
+      case c: Class[_] => c
+      case pt: ParameterizedType =>
+        pt.getActualTypeArguments()(idx) match {
+          case c: Class[_] => c
+          case _           => classOf[AnyRef]
+        }
+      case _ => classOf[AnyRef]
+    }
+  }
+}
 case class ElementType(val clazz: Class[_]) extends TypeInfo {
   override def isElementType: Boolean = true
+}
+
+object CollectionType {
+  def isCollectionType(clazz: Class[_]): Boolean = {
+    classOf[collection.Iterable[_]].isAssignableFrom(clazz) || classOf[java.util.Collection[_]].isAssignableFrom(clazz) || clazz.isArray()
+  }
 }
 
 case class CollectionType(val clazz: Class[_], val componentType: Class[_]) extends TypeInfo {
@@ -226,7 +281,7 @@ object BeanManifest {
           clazz = ClassLoaders.load(typeName)
           ElementType(clazz)
         } else {
-          buildTypeInfo(clazz, if (None == getter) setter.get.method else getter.get.method)
+          TypeInfo.of(clazz, if (None == getter) setter.get.method.getGenericParameterTypes()(0) else getter.get.method.getGenericReturnType)
         }
 
       val isTrasient = if (None == getter) false else getter.get.isTransient
@@ -236,16 +291,14 @@ object BeanManifest {
 
     // find constructor with arguments
     val ctors = Collections.newBuffer[ConstructorDescriptor]
+    import TypeInfo._
     clazz.getConstructors() foreach { ctor =>
       val infoes: Array[TypeInfo] = ctor.getGenericParameterTypes map { pt =>
         pt match {
           case c: Class[_] => ElementType(c)
           case t: ParameterizedType =>
-            if (t.getActualTypeArguments().size == 1) {
-              CollectionType(clazz, extract(t, 0))
-            } else {
-              MapType(clazz, extract(t, 0), extract(t, 1))
-            }
+            if (t.getActualTypeArguments().size == 1) CollectionType(clazz, typeAt(t, 0))
+            else MapType(clazz, typeAt(t, 0), typeAt(t, 1))
           case _ => throw new RuntimeException("cannot process " + pt)
         }
       }
@@ -254,39 +307,6 @@ object BeanManifest {
     new BeanManifest(properties.toMap, ctors.toList)
   }
 
-  private def buildTypeInfo(clazz: Class[_], method: Method): TypeInfo = {
-    if (clazz.isArray()) {
-      CollectionType(clazz, clazz.getComponentType)
-    } else {
-      if (classOf[collection.Iterable[_]].isAssignableFrom(clazz) || classOf[java.util.Collection[_]].isAssignableFrom(clazz)) {
-        val pt =
-          if (method.getParameterTypes.length == 0) {
-            method.getGenericReturnType.asInstanceOf[ParameterizedType]
-          } else {
-            method.getGenericParameterTypes()(0).asInstanceOf[ParameterizedType]
-          }
-        if (pt.getActualTypeArguments().size == 1) {
-          CollectionType(clazz, extract(pt, 0))
-        } else {
-          MapType(clazz, extract(pt, 0), extract(pt, 1))
-        }
-      } else {
-        ElementType(clazz)
-      }
-    }
-  }
-
-  private def extract(typ: java.lang.reflect.Type, idx: Int): Class[_] = {
-    typ match {
-      case c: Class[_] => c
-      case pt: ParameterizedType =>
-        pt.getActualTypeArguments()(idx) match {
-          case c: Class[_] => c
-          case _           => classOf[AnyRef]
-        }
-      case _ => classOf[AnyRef]
-    }
-  }
   private def extract(t: java.lang.reflect.Type, types: collection.Map[String, Class[_]]): Class[_] = {
     t match {
       case pt: ParameterizedType => pt.getRawType.asInstanceOf[Class[_]]
@@ -315,8 +335,7 @@ object BeanManifest {
       Some((true, propertyName))
     } else if (1 == parameterTypes.length) {
       val propertyName =
-        if (name.startsWith("set") && name.length > 3 && isUpperCase(name.charAt(3)))
-          uncapitalize(substringAfter(name, "set"))
+        if (name.startsWith("set") && name.length > 3 && isUpperCase(name.charAt(3))) uncapitalize(substringAfter(name, "set"))
         else if (name.endsWith("_$eq")) substringBefore(name, "_$eq")
         else null
 

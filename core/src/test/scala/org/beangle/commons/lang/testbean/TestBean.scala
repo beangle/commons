@@ -117,7 +117,11 @@ class NumberIdBean[T <: Number](id: T) extends AbstractEntity[T](id)
 
 class Author(id: Integer) extends NumberIdBean[Integer](id)
 
-class BigBookStore(val department:Seq[Department],val books:Map[String,Book])
+class BigBookStore(val department: Seq[Department], val books: Map[String, Book]) {
+  var properties: java.util.Properties = _
+  var prices: Range = _
+  var properties2: org.beangle.commons.collection.Properties = _
+}
 
 trait Hierarchical[T] {
 
