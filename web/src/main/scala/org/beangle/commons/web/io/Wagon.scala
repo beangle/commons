@@ -18,12 +18,12 @@
  */
 package org.beangle.commons.web.io
 
-import java.io.File
-import java.io.InputStream
+import java.io.{ File, InputStream }
 import java.net.URL
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import org.beangle.commons.activation.{ MimeTypeProvider, MimeTypes }
 import org.beangle.commons.lang.Strings
+import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
+import org.beangle.commons.web.util.RequestUtils
 
 /**
  * Stream Downloader
@@ -31,20 +31,24 @@ import org.beangle.commons.lang.Strings
  * @author chaostone
  * @since 2.1
  */
-trait StreamDownloader {
+trait Wagon {
 
-  def download(req: HttpServletRequest, res: HttpServletResponse, file: File): Unit = {
-    download(req, res, file, file.getName)
-  }
-
-  def download(req: HttpServletRequest, res: HttpServletResponse, url: URL, fileName: String): Unit
-
-  def download(req: HttpServletRequest, res: HttpServletResponse, file: File, fileName: String): Unit
-
-  def download(req: HttpServletRequest, res: HttpServletResponse, is: InputStream, fileName: String): Unit
+  def copy(file: File, req: HttpServletRequest, res: HttpServletResponse): Unit
+  def copy(url: URL, req: HttpServletRequest, res: HttpServletResponse): Unit
+  def copy(is: InputStream, req: HttpServletRequest, res: HttpServletResponse): Unit
 }
 
-object StreamDownloader {
+object Wagon {
+
+  def setContentHeader(response: HttpServletResponse, attach: String) {
+    var contentType = response.getContentType
+    if (null == contentType) {
+      contentType = MimeTypeProvider.getMimeType(Strings.substringAfterLast(attach, "."), MimeTypes.ApplicationOctetStream).toString
+      response.setContentType(contentType)
+    }
+    RequestUtils.setContentDisposition(response, attach)
+  }
+
   def rename(fileName: String, newName: String): String = {
     var attch_name = ""
     val ext = Strings.substringAfterLast(fileName, ".")

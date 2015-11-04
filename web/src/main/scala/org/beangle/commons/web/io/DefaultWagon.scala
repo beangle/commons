@@ -24,56 +24,47 @@ import java.net.URL
 import org.beangle.commons.activation.{ MimeTypeProvider, MimeTypes }
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.logging.Logging
 import org.beangle.commons.web.util.RequestUtils
 
 import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 
 /**
- * Default Stream Downloader
+ * Default DefaultWagon
  *
  * @author chaostone
- * @since 2.4
+ * @since 4.4
  */
-class DefaultStreamDownloader extends StreamDownloader with Logging {
+class DefaultWagon extends Wagon {
 
-  override def download(req: HttpServletRequest, res: HttpServletResponse, url: URL, fileName: String) {
+  override def copy(url: URL, req: HttpServletRequest, res: HttpServletResponse) {
     try {
-      download(req, res, url.openStream(), fileName)
+      copy(url.openStream, req, res)
     } catch {
-      case e: Exception => logger.error(s"download file error=$fileName", e)
+      case e: Exception => log(req, s"download file error=$url", e)
     }
   }
 
-  override def download(req: HttpServletRequest, res: HttpServletResponse, file: File, fileName: String) {
+  override def copy(file: File, req: HttpServletRequest, res: HttpServletResponse) {
     if (file.exists()) {
       try {
-        download(req, res, new FileInputStream(file), fileName)
+        copy(new FileInputStream(file), req, res)
       } catch {
-        case e: Exception => logger.error(s"download file error=$fileName", e)
+        case e: Exception => log(req, s"download file error=${file.getName}", e)
       }
     }
   }
 
-  override def download(req: HttpServletRequest, res: HttpServletResponse, is: InputStream, fileName: String) {
+  override def copy(is: InputStream, req: HttpServletRequest, res: HttpServletResponse) {
     try {
-      res.reset()
-      setContentHeader(res, fileName)
       IOs.copy(is, res.getOutputStream)
     } catch {
-      case e: Exception => logger.error(s"download file error $fileName", e)
+      case e: Exception => log(req, "download file error ", e)
     } finally {
       IOs.close(is)
     }
   }
 
-  protected def setContentHeader(response: HttpServletResponse, attach: String) {
-    var contentType = response.getContentType
-    if (null == contentType) {
-      contentType = MimeTypeProvider.getMimeType(Strings.substringAfterLast(attach, "."), MimeTypes.ApplicationOctetStream).toString
-      response.setContentType(contentType)
-    }
-    RequestUtils.setContentDisposition(response, attach)
+  protected def log(req: HttpServletRequest, msg: String, e: Throwable): Unit = {
+    req.getServletContext.log(msg, e)
   }
-
 }

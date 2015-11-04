@@ -27,7 +27,7 @@ import org.beangle.commons.lang.time.Stopwatch
 import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 
 /**
- * SplitStreamDownloader
+ * RangedWagon
  * <p>
  * Split download senario like this:
  * <li>Server first response:200</li>
@@ -53,11 +53,9 @@ import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
  * @author chaostone
  * @since 2.4
  */
-class SplitStreamDownloader extends DefaultStreamDownloader {
+class RangedWagon extends DefaultWagon {
 
-  override def download(req: HttpServletRequest, res: HttpServletResponse, input: InputStream, fileName: String) {
-    res.reset()
-    setContentHeader(res, fileName)
+  override def copy(input: InputStream, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     res.setHeader("Accept-Ranges", "bytes")
     res.setHeader("connection", "Keep-Alive")
     var length = 0
@@ -97,9 +95,6 @@ class SplitStreamDownloader extends DefaultStreamDownloader {
           step = maxStep(start, stop, size)
         }
       }
-    } catch {
-      case e: IOException =>
-      case e: Exception   => req.getServletContext.log(s"download file error $fileName", e)
     } finally {
       IOs.close(input)
     }

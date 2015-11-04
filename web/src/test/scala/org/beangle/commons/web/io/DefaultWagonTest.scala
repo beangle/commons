@@ -34,7 +34,7 @@ import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 @RunWith(classOf[JUnitRunner])
 class DefaultStreamDownloaderTest extends FunSpec with Matchers {
 
-  val streamDownloader: StreamDownloader = new DefaultStreamDownloader
+  val wagon: Wagon = new DefaultWagon
 
   describe("DefaultStreamDownloader") {
     it("download") {
@@ -50,7 +50,7 @@ class DefaultStreamDownloaderTest extends FunSpec with Matchers {
         def setWriteListener(writeListener: WriteListener) {}
       })
       val testDoc = ClassLoaders.getResource("download.txt")
-      streamDownloader.download(request, response, testDoc, null)
+      wagon.copy(testDoc, request, response)
     }
 
     it("encode/decode") {
