@@ -21,12 +21,10 @@ package org.beangle.commons.web.io
 import java.io.{ File, FileInputStream, InputStream }
 import java.net.URL
 
-import scala.annotation.elidable
-import scala.annotation.elidable.FINE
-
 import org.beangle.commons.activation.{ MimeTypeProvider, MimeTypes }
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Strings
+import org.beangle.commons.logging.Logging
 import org.beangle.commons.web.util.RequestUtils
 
 import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
@@ -37,66 +35,45 @@ import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
  * @author chaostone
  * @since 2.4
  */
-class DefaultStreamDownloader extends StreamDownloader {
+class DefaultStreamDownloader extends StreamDownloader with Logging {
 
-  def download(request: HttpServletRequest, response: HttpServletResponse, file: File) {
-    download(request, response, file, file.getName)
-  }
-
-  def download(request: HttpServletRequest, response: HttpServletResponse, url: URL, display: String) {
+  override def download(req: HttpServletRequest, res: HttpServletResponse, url: URL, fileName: String) {
     try {
-      download(request, response, url.openStream(), url.getFile, display)
+      download(req, res, url.openStream(), fileName)
     } catch {
-      case e: Exception => request.getServletContext.log(s"download file error=$display", e)
+      case e: Exception => logger.error(s"download file error=$fileName", e)
     }
   }
 
-  def download(request: HttpServletRequest, response: HttpServletResponse, file: File, display: String) {
+  override def download(req: HttpServletRequest, res: HttpServletResponse, file: File, fileName: String) {
     if (file.exists()) {
       try {
-        download(request, response, new FileInputStream(file), file.getAbsolutePath, display)
+        download(req, res, new FileInputStream(file), fileName)
       } catch {
-        case e: Exception => request.getServletContext.log(s"download file error=$display", e)
+        case e: Exception => logger.error(s"download file error=$fileName", e)
       }
     }
   }
 
-  def download(request: HttpServletRequest, response: HttpServletResponse, inStream: InputStream, name: String, display: String) {
-    val attach_name = getAttachName(name, display)
+  override def download(req: HttpServletRequest, res: HttpServletResponse, is: InputStream, fileName: String) {
     try {
-      response.reset()
-      addContent(request, response, attach_name)
-      IOs.copy(inStream, response.getOutputStream)
+      res.reset()
+      setContentHeader(res, fileName)
+      IOs.copy(is, res.getOutputStream)
     } catch {
-      case e: Exception => System.err.println(s"download file error $attach_name", e)
+      case e: Exception => logger.error(s"download file error $fileName", e)
     } finally {
-      IOs.close(inStream)
+      IOs.close(is)
     }
   }
 
-  protected def getAttachName(name: String, display: String): String = {
-    var attch_name = ""
-    val ext = Strings.substringAfterLast(name, ".")
-    if (Strings.isBlank(display)) {
-      attch_name = name
-      var iPos = attch_name.lastIndexOf("\\")
-      if (iPos > -1) attch_name = attch_name.substring(iPos + 1)
-      iPos = attch_name.lastIndexOf("/")
-      if (iPos > -1) attch_name = attch_name.substring(iPos + 1)
-    } else {
-      attch_name = display
-      if (!attch_name.endsWith("." + ext)) attch_name += "." + ext
-    }
-    attch_name
-  }
-
-  protected def addContent(request: HttpServletRequest, response: HttpServletResponse, attach: String) {
+  protected def setContentHeader(response: HttpServletResponse, attach: String) {
     var contentType = response.getContentType
     if (null == contentType) {
       contentType = MimeTypeProvider.getMimeType(Strings.substringAfterLast(attach, "."), MimeTypes.ApplicationOctetStream).toString
       response.setContentType(contentType)
     }
-    RequestUtils.setFileDownloadHeader(response, attach)
+    RequestUtils.setContentDisposition(response, attach)
   }
 
 }

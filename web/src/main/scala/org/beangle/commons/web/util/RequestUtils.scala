@@ -34,7 +34,6 @@ object RequestUtils {
    * <li>First,it lookup request header("x-forwarded-for"->"Proxy-Client-IP"->"WL-Proxy-Client-IP")
    * <li>Second,invoke request.getRemoteAddr()
    * </ul>
-   *
    * @param request
    */
   def getIpAddr(request: HttpServletRequest): String = {
@@ -100,11 +99,11 @@ object RequestUtils {
    * @see http://tools.ietf.org/html/rfc5987
    * @see https://blog.robotshell.org/2012/deal-with-http-header-encoding-for-file-download/
    */
-  def setFileDownloadHeader(response: HttpServletResponse, filename: String) {
-    val encodeFileName = URLEncoder.encode(filename, "UTF-8").replaceAll("\\+", "%20");
+  def setContentDisposition(response: HttpServletResponse, attachName: String) {
+    val encodeFileName = URLEncoder.encode(attachName, "UTF-8").replaceAll("\\+", "%20");
     val value = new StringBuilder("attachment;")
-    value ++= " filename=\"" + filename + "\";"
-    value ++= " filename*=utf-8''" + filename
+    value ++= " filename=\"" + attachName + "\";"
+    value ++= " filename*=utf-8''" + attachName
     response.setHeader("Content-Disposition", value.mkString)
   }
 

@@ -68,9 +68,7 @@ object EnNounPluralizer {
 }
 
 /**
- * <p>
- * EnNounPluralizer class.
- * </p>
+ * EnNounPluralizer.
  *
  * @author chaostone
  */

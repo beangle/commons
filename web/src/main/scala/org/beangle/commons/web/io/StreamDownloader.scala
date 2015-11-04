@@ -23,6 +23,7 @@ import java.io.InputStream
 import java.net.URL
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import org.beangle.commons.lang.Strings
 
 /**
  * Stream Downloader
@@ -32,11 +33,31 @@ import javax.servlet.http.HttpServletResponse
  */
 trait StreamDownloader {
 
-  def download(req: HttpServletRequest, res: HttpServletResponse, file: File): Unit
+  def download(req: HttpServletRequest, res: HttpServletResponse, file: File): Unit = {
+    download(req, res, file, file.getName)
+  }
 
-  def download(req: HttpServletRequest, res: HttpServletResponse, url: URL, display: String): Unit
+  def download(req: HttpServletRequest, res: HttpServletResponse, url: URL, fileName: String): Unit
 
-  def download(req: HttpServletRequest, res: HttpServletResponse, file: File, display: String): Unit
+  def download(req: HttpServletRequest, res: HttpServletResponse, file: File, fileName: String): Unit
 
-  def download(req: HttpServletRequest, res: HttpServletResponse, inStream: InputStream, name: String, display: String): Unit
+  def download(req: HttpServletRequest, res: HttpServletResponse, is: InputStream, fileName: String): Unit
+}
+
+object StreamDownloader {
+  def rename(fileName: String, newName: String): String = {
+    var attch_name = ""
+    val ext = Strings.substringAfterLast(fileName, ".")
+    if (Strings.isBlank(newName)) {
+      attch_name = fileName
+      var iPos = attch_name.lastIndexOf("\\")
+      if (iPos > -1) attch_name = attch_name.substring(iPos + 1)
+      iPos = attch_name.lastIndexOf("/")
+      if (iPos > -1) attch_name = attch_name.substring(iPos + 1)
+    } else {
+      attch_name = newName
+      if (!attch_name.endsWith("." + ext)) attch_name += "." + ext
+    }
+    attch_name
+  }
 }
