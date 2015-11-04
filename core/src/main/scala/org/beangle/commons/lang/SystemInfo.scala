@@ -56,9 +56,6 @@ object SystemInfo {
 
   val jre = new JavaRuntime(properties)
 
-  @deprecated("4.2.5", "using jre")
-  val javaRuntime = jre
-
   def tmpDir: String = System.getProperty("java.io.tmpdir")
 
   def host = new Host()
