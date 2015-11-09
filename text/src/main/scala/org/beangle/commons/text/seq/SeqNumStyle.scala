@@ -46,7 +46,7 @@ trait SeqNumStyle {
    * </p>
    *
    * @param seq a int.
-   * @return a {@link java.lang.String} object.
+   * @return a String object.
    */
   def build(seq: Int): String
 }

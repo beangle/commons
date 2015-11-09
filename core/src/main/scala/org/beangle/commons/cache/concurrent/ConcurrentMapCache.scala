@@ -27,7 +27,7 @@ import org.beangle.commons.cache.Cache
  * @author chaostone
  * @since 3.2.0
  */
-class ConcurrentMapCache[K, V](var name: String) extends Cache[K, V]() {
+class ConcurrentMapCache[K <: AnyRef, V <: AnyRef](var name: String) extends Cache[K, V]() {
 
   private val store = new collection.concurrent.TrieMap[K, V]()
 
@@ -41,9 +41,9 @@ class ConcurrentMapCache[K, V](var name: String) extends Cache[K, V]() {
     store.remove(key)
   }
 
-  override def keys(): Set[K] = store.keySet.toSet
+  override def keys: Iterable[_] = store.keySet
 
-  override def clear() {
+  override def clear(): Unit = {
     store.clear()
   }
 }

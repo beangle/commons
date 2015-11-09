@@ -19,18 +19,14 @@
 package org.beangle.commons.bean
 
 /**
- * <p>
  * Disposable interface.
- * </p>
  *
  * @author chaostone
  */
 trait Disposable {
 
   /**
-   * <p>
-   * destroy.
-   * </p>
+   * do destroy.
    */
-  def destroy()
+  def destroy(): Unit
 }

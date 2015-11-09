@@ -40,7 +40,7 @@ object Order {
    * asc.
    * </p>
    *
-   * @param property a {@link java.lang.String} object.
+   * @param property a String object.
    * @return a {@link org.beangle.commons.collection.Order} object.
    */
   def asc(property: String): Order = new Order(property, true)
@@ -50,7 +50,7 @@ object Order {
    * desc.
    * </p>
    *
-   * @param property a {@link java.lang.String} object.
+   * @param property a String object.
    * @return a {@link org.beangle.commons.collection.Order} object.
    */
   def desc(property: String): Order = new Order(property, false)
@@ -124,7 +124,7 @@ class Order(val property: String, val ascending: Boolean, val lowerCase: Boolean
    * Constructor for Order.
    * </p>
    *
-   * @param property a {@link java.lang.String} object.
+   * @param property a String object.
    */
   def this(property: String) {
     this(Order.analysis(property)._1, Order.analysis(property)._2)
@@ -135,7 +135,7 @@ class Order(val property: String, val ascending: Boolean, val lowerCase: Boolean
    * toString.
    * </p>
    *
-   * @return a {@link java.lang.String} object.
+   * @return a String object.
    */
   override def toString(): String = {
     if (lowerCase) "lower(" + property + ") " + (if (ascending) "asc" else "desc")

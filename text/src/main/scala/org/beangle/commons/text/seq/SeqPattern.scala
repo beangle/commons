@@ -60,7 +60,7 @@ class SeqPattern(val seqNumStyle: SeqNumStyle, val pattern: String) {
    * curSeqText.
    * </p>
    *
-   * @return a {@link java.lang.String} object.
+   * @return a String object.
    */
   def curSeqText(): String = seqNumStyle.build(seq)
 
@@ -69,7 +69,7 @@ class SeqPattern(val seqNumStyle: SeqNumStyle, val pattern: String) {
    * next.
    * </p>
    *
-   * @return a {@link java.lang.String} object.
+   * @return a String object.
    */
   def next(): String = {
     seq += 1

@@ -25,9 +25,7 @@ object Objects {
   @inline
   def default[T](clazz: Class[T]): T = Primitives.default(clazz)
   /**
-   * <p>
    * Compares two objects for equality, where either one or both objects may be {@code null}.
-   * </p>
    *
    * <pre>
    * equals(null, null)                  = true
@@ -84,13 +82,13 @@ object Objects {
    * Returns a default value if the object passed is {@code null}.
    * </p>
    *
-   * <pre>
+   * {{{
    * defaultIfNull(null, null)      = null
    * defaultIfNull(null, "")        = ""
    * defaultIfNull(null, "zz")      = "zz"
    * defaultIfNull("abc", *)        = "abc"
    * defaultIfNull(Boolean.TRUE, *) = Boolean.TRUE
-   * </pre>
+   * }}}
    *
    * @param <T> the type of the object
    * @param object the {@code Object} to test, may be {@code null}
@@ -118,10 +116,9 @@ object Objects {
   /**
    * Creates an instance of {@link ToStringBuilder}.
    * <p>
-   * This is helpful for implementing {@link Object#toString()}. Specification by example:
+   * This is helpful for implementing {@code Object#toString()}. Specification by example:
    *
-   * <pre>
-   * {@code
+   * {{{
    *   // Returns "ClassName{}"
    *   Objects.toStringBuilder(this)
    *       .toString();
@@ -149,8 +146,7 @@ object Objects {
    *       .add("x", 1)
    *       .add("y", null)
    *       .toString();
-   *   }}
-   * </pre>
+   * }}}
    *
    * @param self the object to generate the string for (typically {@code this}),
    *          used only for its class name
@@ -161,20 +157,19 @@ object Objects {
   }
 
   /**
-   * Creates an instance of {@link ToStringBuilder} in the same manner as
-   * {@link Objects#toStringBuilder(Object)}, but using the name of {@code clazz} instead of using
-   * an
-   * instance's {@link Object#getClass()}.
+   * Creates an instance of [[ToStringBuilder]] in the same manner as
+   * {@code toStringBuilder(AnyRef)}, but using the name of {@code clazz} instead of using
+   * an instance's {@code Object#getClass()}.
    * <p>
    *
-   * @param clazz the {@link Class} of the instance
+   * @param clazz the Class of the instance
    */
   def toStringBuilder(clazz: Class[_]): ToStringBuilder = new ToStringBuilder(simpleName(clazz))
 
   /**
-   * Creates an instance of {@link ToStringBuilder} in the same manner as
-   * {@link Objects#toStringBuilder(Object)}, but using {@code className} instead
-   * of using an instance's {@link Object#getClass()}.
+   * Creates an instance of [[ToStringBuilder]] in the same manner as
+   * {@code toStringBuilder(AnyRef)}, but using {@code className} instead
+   * of using an class instance.
    *
    * @param className the name of the instance type
    */
@@ -197,7 +192,7 @@ object Objects {
   }
 
   /**
-   * Support class for {@link Objects#toStringBuilder}.
+   * Support class for Objects.toStringBuilder.
    */
   class ToStringBuilder(val className: String) {
 
@@ -216,7 +211,7 @@ object Objects {
 
     /**
      * Adds a name/value pair to the formatted output in {@code name=value} format. If {@code value}
-     * is {@code null}, the string {@code "null"} is used, unless {@link #omitNull()} is
+     * is {@code null}, the string {@code "null"} is used, unless {@link Objects#omitNull()} is
      * called, in which case this
      * name/value pair will not be added.
      */

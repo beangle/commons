@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.cache.concurrent
 
-import org.beangle.commons.cache.{Cache, CacheManager}
+import org.beangle.commons.cache.{ Cache, CacheManager }
 
 /**
  * Concurrent Map Cache Manager.
@@ -31,7 +31,7 @@ class ConcurrentMapCacheManager extends CacheManager {
 
   private val caches = new collection.mutable.HashMap[String, ConcurrentMapCache[_, _]]
 
-  override def getCache[K, V](name: String): Cache[K, V] = {
+  override def getCache[K <: AnyRef, V <: AnyRef](name: String): Cache[K, V] = {
     var cache = caches.get(name).orNull
     if (cache == null) {
       caches.synchronized {

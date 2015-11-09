@@ -31,8 +31,8 @@ class CollatorOrdering(val asc: Boolean, val collator: Collator = Collator.getIn
    * compare.
    * </p>
    *
-   * @param what0 a {@link java.lang.String} object.
-   * @param what1 a {@link java.lang.String} object.
+   * @param what0 a String object.
+   * @param what1 a String object.
    * @return a int.
    */
   def compare(what0: String, what1: String): Int = {

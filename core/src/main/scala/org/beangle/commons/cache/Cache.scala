@@ -24,12 +24,12 @@ package org.beangle.commons.cache
  * @author chaostone
  * @since 3.2.0
  */
-trait Cache[K, V] {
+trait Cache[K <: AnyRef, V <: AnyRef] {
 
   /**
    * Return the cache name.
    */
-  def name(): String
+  def name: String
 
   /**
    * Get Some(T) or None
@@ -49,7 +49,7 @@ trait Cache[K, V] {
   /**
    * Return cached keys
    */
-  def keys(): Set[K]
+  def keys: Iterable[_]
 
   /**
    * Remove all mappings from the cache.

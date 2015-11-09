@@ -29,7 +29,7 @@ trait CacheManager {
   /**
    * Return the cache associated with the given name.
    */
-  def getCache[K, V](name: String): Cache[K, V]
+  def getCache[K <: AnyRef, V <: AnyRef](name: String): Cache[K, V]
 
   /**
    * Return a collection of the caches known by this cache manager.

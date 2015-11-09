@@ -100,10 +100,9 @@ object RequestUtils {
    * @see https://blog.robotshell.org/2012/deal-with-http-header-encoding-for-file-download/
    */
   def setContentDisposition(response: HttpServletResponse, attachName: String) {
-    val encodeFileName = URLEncoder.encode(attachName, "UTF-8").replaceAll("\\+", "%20");
     val value = new StringBuilder("attachment;")
     value ++= " filename=\"" + attachName + "\";"
-    value ++= " filename*=utf-8''" + attachName
+    value ++= " filename*=utf-8''" + URLEncoder.encode(attachName, "UTF-8").replaceAll("\\+", "%20")
     response.setHeader("Content-Disposition", value.mkString)
   }
 
@@ -114,7 +113,6 @@ object RequestUtils {
    */
   def getUserAgent(request: HttpServletRequest): Useragent = {
     val head = request.getHeader("USER-AGENT")
-    val agent = new Useragent(getIpAddr(request), Browser.parse(head), Os.parse(head))
-    agent
+    new Useragent(getIpAddr(request), Browser.parse(head), Os.parse(head))
   }
 }

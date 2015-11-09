@@ -92,7 +92,7 @@ class CsvWriter(val writer: Writer, val format: CsvFormat = new CsvFormat.Builde
   /**
    * processLine.
    *
-   * @param nextElement a {@link java.lang.String} object.
+   * @param nextElement a String object.
    * @return a {@link java.lang.StringBuilder} object.
    */
   protected def processLine(nextElement: String): StringBuilder = {
