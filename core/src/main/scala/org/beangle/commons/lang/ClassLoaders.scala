@@ -119,11 +119,9 @@ object ClassLoaders {
     val loader = if (classLoader == null) defaultClassLoader else classLoader
     if (buildins.contains(className)) buildins.get(className)
     else {
-      try {
+      if (null != loader.getResource(Strings.replace(className, ".", "/") + ".class"))
         Some(loader.loadClass(if (className.contains(".")) className else "java.lang." + className))
-      } catch {
-        case e: ClassNotFoundException => None
-      }
+      else None
     }
   }
 

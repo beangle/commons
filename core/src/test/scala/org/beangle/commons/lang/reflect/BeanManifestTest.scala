@@ -25,6 +25,7 @@ import org.scalatest.{ FunSpec, Matchers }
 import org.scalatest.junit.JUnitRunner
 import org.beangle.commons.lang.testbean.Department
 import org.beangle.commons.lang.testbean.BigBookStore
+import org.beangle.commons.cache.concurrent.ConcurrentMapCacheManager
 
 @RunWith(classOf[JUnitRunner])
 class BeanManifestTest extends FunSpec with Matchers {
@@ -99,7 +100,11 @@ class BeanManifestTest extends FunSpec with Matchers {
       assert(p2.typeinfo.isMapType)
       assert(p2.typeinfo.asInstanceOf[MapType].keyType == classOf[String])
       assert(p2.typeinfo.asInstanceOf[MapType].valueType == classOf[Object])
-
+    }
+    it("find corrent default constructor parameters") {
+      val params = BeanManifest.get(classOf[ConcurrentMapCacheManager]).defaultConstructorParams
+      assert(params.size == 1)
+      assert(params(1) == "concurrent")
     }
   }
 
