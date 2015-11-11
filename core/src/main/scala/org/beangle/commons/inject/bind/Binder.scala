@@ -23,7 +23,7 @@ import Binder._
 import scala.collection.mutable.ListBuffer
 import org.beangle.commons.inject.Scope
 import org.beangle.commons.lang.annotation.description
-import org.beangle.commons.bean.ScalaSingletonFactory
+import org.beangle.commons.collection.Collections
 
 object Binder {
 
@@ -57,7 +57,7 @@ object Binder {
 
     var description: String = _
 
-    def isAbstract(): Boolean = abstractFlag
+    def isAbstract: Boolean = abstractFlag
 
     def property(property: String, value: AnyRef): Definition = {
       properties.put(property, value)
@@ -192,9 +192,9 @@ object Binder {
  */
 class Binder(val module: String) {
 
-  val definitionBuffer = new ListBuffer[Definition]
+  val definitions = new ListBuffer[Definition]
 
-  def definitions: List[Definition] = definitionBuffer.toList
+  val singletons = Collections.newMap[String, AnyRef]
 
   def innerName(clazz: Class[_]): String = {
     clazz.getSimpleName + "#" + Math.abs(module.hashCode) + definitions.size
@@ -211,12 +211,7 @@ class Binder(val module: String) {
    * bind object with a name.
    */
   def bind(beanName: String, singleton: AnyRef): Unit = {
-    val objectType= singleton.getClass
-    val definition = new Definition(beanName, classOf[ScalaSingletonFactory[_]], Scope.Singleton.toString)
-    definition.constructor(objectType)
-    val an = objectType.getAnnotation(classOf[description])
-    if (null != an) definition.description = an.value()
-    add(definition)
+    singletons += (beanName -> singleton)
   }
   /**
    * bind.
@@ -228,6 +223,6 @@ class Binder(val module: String) {
    * add.
    */
   protected[bind] def add(definition: Definition) {
-    definitionBuffer += definition
+    definitions += definition
   }
 }
