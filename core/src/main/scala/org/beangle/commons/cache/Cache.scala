@@ -44,7 +44,7 @@ trait Cache[K <: AnyRef, V <: AnyRef] {
   /**
    * Evict specified key
    */
-  def evict(key: K): Unit
+  def evict(key: K): Boolean
 
   /**
    * Return cached keys

@@ -29,32 +29,29 @@ import org.beangle.commons.cache.{ Cache, CacheManager }
  */
 class ConcurrentMapCacheManager(val name: String = "concurrent") extends CacheManager {
 
-  private val caches = new java.util.concurrent.ConcurrentHashMap[String, ConcurrentMapCache[_, _]]
+  private var caches = Map.empty[String, ConcurrentMapCache[_, _]]
 
   override def getCache[K <: AnyRef, V <: AnyRef](name: String): Cache[K, V] = {
-    val cache = caches.get(name)
-    if (cache == null) {
-      caches.synchronized {
-        val cache = caches.get(name)
-        if (cache == null) {
-          val newcache = new ConcurrentMapCache[K, V](name)
-          caches.put(name, newcache)
-          newcache
-        } else {
-          cache.asInstanceOf[Cache[K, V]]
+    caches.get(name) match {
+      case Some(cache) => cache.asInstanceOf[Cache[K, V]]
+      case None =>
+        caches.synchronized {
+          caches.get(name) match {
+            case Some(cache) => cache.asInstanceOf[Cache[K, V]]
+            case None =>
+              val newcache = new ConcurrentMapCache[K, V](name)
+              caches += (name -> newcache)
+              newcache
+          }
         }
-      }
-    } else {
-      cache.asInstanceOf[Cache[K, V]]
     }
   }
 
-  override def cacheNames: Set[String] = {
-    import collection.JavaConversions._
-    caches.keySet.toSet
+  override def cacheNames: collection.Set[String] = {
+    caches.keySet
   }
 
   override def destroy(): Unit = {
-    caches.clear()
+    caches = Map.empty
   }
 }

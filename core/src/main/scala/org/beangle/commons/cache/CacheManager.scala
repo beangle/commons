@@ -36,7 +36,7 @@ trait CacheManager extends Disposable {
   /**
    * Return a collection of the caches known by this cache manager.
    */
-  def cacheNames: Set[String]
+  def cacheNames: collection.Set[String]
 
   def name: String
 }

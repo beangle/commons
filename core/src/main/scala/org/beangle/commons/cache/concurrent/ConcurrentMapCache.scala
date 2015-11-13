@@ -29,7 +29,7 @@ import org.beangle.commons.cache.Cache
  */
 class ConcurrentMapCache[K <: AnyRef, V <: AnyRef](var name: String) extends Cache[K, V]() {
 
-  private val store = new collection.concurrent.TrieMap[K, V]()
+  private val store = new collection.concurrent.TrieMap[K, V]
 
   override def get(key: K): Option[V] = store.get(key)
 
@@ -37,8 +37,8 @@ class ConcurrentMapCache[K <: AnyRef, V <: AnyRef](var name: String) extends Cac
     store.put(key, value)
   }
 
-  override def evict(key: K) {
-    store.remove(key)
+  override def evict(key: K): Boolean = {
+    !store.remove(key).isEmpty
   }
 
   override def keys: Iterable[_] = store.keySet

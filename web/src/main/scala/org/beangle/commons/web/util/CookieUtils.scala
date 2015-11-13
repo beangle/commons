@@ -57,10 +57,9 @@ object CookieUtils {
    */
   def getCookie(request: HttpServletRequest, name: String): Cookie = {
     val cookies = request.getCookies
+    if (cookies == null) return null
+
     var returnCookie: Cookie = null
-    if (cookies == null) {
-      return returnCookie
-    }
     for (i <- 0 until cookies.length; if (null == returnCookie)) {
       val thisCookie = cookies(i)
       if (thisCookie.getName == name && thisCookie.getValue != "") {
@@ -76,11 +75,11 @@ object CookieUtils {
    */
   def addCookie(request: HttpServletRequest, response: HttpServletResponse,
     name: String, value: String, path: String, age: Int) {
-    var cookie: Cookie = null
-    cookie = new Cookie(name, URLEncoder.encode(value, "utf-8"))
+    val cookie = new Cookie(name, URLEncoder.encode(value, "utf-8"))
     cookie.setSecure(false)
     cookie.setPath(path)
     cookie.setMaxAge(age)
+    cookie.setHttpOnly(true)
     response.addCookie(cookie)
   }
 
