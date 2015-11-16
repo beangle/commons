@@ -60,11 +60,11 @@ object CookieUtils {
     if (cookies == null) return null
 
     var returnCookie: Cookie = null
-    for (i <- 0 until cookies.length; if (null == returnCookie)) {
+    var i = 0
+    while (i < cookies.length && null == returnCookie) {
       val thisCookie = cookies(i)
-      if (thisCookie.getName == name && thisCookie.getValue != "") {
-        returnCookie = thisCookie
-      }
+      if (thisCookie.getName == name && thisCookie.getValue != "") returnCookie = thisCookie
+      i += 1
     }
     returnCookie
   }

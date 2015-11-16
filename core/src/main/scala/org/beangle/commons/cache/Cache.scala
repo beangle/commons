@@ -40,7 +40,14 @@ trait Cache[K <: AnyRef, V <: AnyRef] {
    * Put a new Value
    */
   def put(key: K, value: V): Unit
-
+  /**
+   * Exists key
+   */
+  def exists(key: K): Boolean
+  /**
+   * Same with put,but return true when absent
+   */
+  def putIfAbsent(key: K, value: V): Boolean
   /**
    * Evict specified key
    */
@@ -55,4 +62,8 @@ trait Cache[K <: AnyRef, V <: AnyRef] {
    * Remove all mappings from the cache.
    */
   def clear(): Unit
+  /**
+   * Max live seconds in this cache,-1 is forever
+   */
+  def liveTime: Int
 }

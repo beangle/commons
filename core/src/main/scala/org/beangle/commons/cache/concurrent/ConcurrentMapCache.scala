@@ -27,7 +27,7 @@ import org.beangle.commons.cache.Cache
  * @author chaostone
  * @since 3.2.0
  */
-class ConcurrentMapCache[K <: AnyRef, V <: AnyRef](var name: String) extends Cache[K, V]() {
+class ConcurrentMapCache[K <: AnyRef, V <: AnyRef](var name: String) extends Cache[K, V] {
 
   private val store = new collection.concurrent.TrieMap[K, V]
 
@@ -41,9 +41,21 @@ class ConcurrentMapCache[K <: AnyRef, V <: AnyRef](var name: String) extends Cac
     !store.remove(key).isEmpty
   }
 
+  override def exists(key: K): Boolean = {
+    store.contains(key)
+  }
+
+  override def putIfAbsent(key: K, value: V): Boolean = {
+    store.putIfAbsent(key, value).isEmpty
+  }
+
   override def keys: Iterable[_] = store.keySet
 
   override def clear(): Unit = {
     store.clear()
+  }
+
+  override def liveTime: Int = {
+    -1
   }
 }
