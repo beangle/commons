@@ -104,7 +104,7 @@ object Binder {
     }
 
     def proxy(property: String, clazz: Class[_]): this.type = {
-      val targetBean = config.innerName(clazz)
+      val targetBean = config.newInnerBeanName(clazz)
       val targetDefinition = new Definition(targetBean, clazz, Scope.Singleton.toString)
       val an = clazz.getAnnotation(classOf[description])
       if (null != an) targetDefinition.description = an.value()
@@ -196,7 +196,7 @@ class Binder(val module: String) {
 
   val singletons = Collections.newMap[String, AnyRef]
 
-  def innerName(clazz: Class[_]): String = {
+  def newInnerBeanName(clazz: Class[_]): String = {
     clazz.getSimpleName + "#" + Math.abs(module.hashCode) + definitions.size
   }
 
