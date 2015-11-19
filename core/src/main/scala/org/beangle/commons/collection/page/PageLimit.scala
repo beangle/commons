@@ -43,7 +43,7 @@ class PageLimit(val pageIndex: Int, val pageSize: Int) extends Limit {
    * </p>
    *
    * @see java.lang.Object#toString()
-   * @return a {@link java.lang.String} object.
+   * @return a String object.
    */
   override def toString(): String = {
     new StringBuilder().append("pageIndex:").append(pageIndex)

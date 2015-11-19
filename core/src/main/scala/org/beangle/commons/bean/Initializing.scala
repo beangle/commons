@@ -19,20 +19,14 @@
 package org.beangle.commons.bean
 
 /**
- * <p>
  * Initializing interface.
- * </p>
  *
  * @author chaostone
  */
 trait Initializing {
 
   /**
-   * <p>
-   * init.
-   * </p>
-   *
-   * @throws java.lang.Exception if any.
+   * do initialization.
    */
-  def init()
+  def init(): Unit
 }

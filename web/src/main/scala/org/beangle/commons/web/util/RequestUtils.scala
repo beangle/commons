@@ -25,6 +25,7 @@ import org.beangle.commons.codec.net.BCoder
 import org.beangle.commons.http.agent._
 import org.beangle.commons.lang.Strings
 import javax.servlet.http.HttpServletResponse
+import org.beangle.commons.collection.Collections
 
 object RequestUtils {
 
@@ -34,23 +35,27 @@ object RequestUtils {
    * <li>First,it lookup request header("x-forwarded-for"->"Proxy-Client-IP"->"WL-Proxy-Client-IP")
    * <li>Second,invoke request.getRemoteAddr()
    * </ul>
-   *
    * @param request
    */
   def getIpAddr(request: HttpServletRequest): String = {
-    var ip = request.getHeader("x-forwarded-for")
-    if (ip == null || ip.length == 0 || "unknown".equalsIgnoreCase(ip)) {
-      ip = request.getHeader("Proxy-Client-IP")
-    }
-    if (ip == null || ip.length == 0 || "unknown".equalsIgnoreCase(ip)) {
-      ip = request.getHeader("WL-Proxy-Client-IP")
-    }
-    if (ip == null || ip.length == 0 || "unknown".equalsIgnoreCase(ip)) {
-      ip = request.getRemoteAddr
-    }
-    ip
+    val ip = request.getHeader("x-forwarded-for")
+    if (null == ip) request.getRemoteAddr else ip
   }
 
+  def getProxies(request: HttpServletRequest): List[String] = {
+    val headers = request.getHeaders("x-forwarded-for")
+    if (headers.hasMoreElements) {
+      val client = headers.nextElement
+      val proxies = Collections.newBuffer[String]
+      while (headers.hasMoreElements) {
+        proxies += headers.nextElement
+      }
+      proxies += request.getRemoteAddr
+      proxies.toList
+    } else {
+      List.empty
+    }
+  }
   /**
    * Return the true servlet path.
    * When servletPath provided by container is empty,It will return requestURI-contextpath'
@@ -100,11 +105,10 @@ object RequestUtils {
    * @see http://tools.ietf.org/html/rfc5987
    * @see https://blog.robotshell.org/2012/deal-with-http-header-encoding-for-file-download/
    */
-  def setFileDownloadHeader(response: HttpServletResponse, filename: String) {
-    val encodeFileName = URLEncoder.encode(filename, "UTF-8").replaceAll("\\+", "%20");
+  def setContentDisposition(response: HttpServletResponse, attachName: String) {
     val value = new StringBuilder("attachment;")
-    value ++= " filename=\"" + filename + "\";"
-    value ++= " filename*=utf-8''" + filename
+    value ++= " filename=\"" + attachName + "\";"
+    value ++= " filename*=utf-8''" + URLEncoder.encode(attachName, "UTF-8").replaceAll("\\+", "%20")
     response.setHeader("Content-Disposition", value.mkString)
   }
 
@@ -115,7 +119,6 @@ object RequestUtils {
    */
   def getUserAgent(request: HttpServletRequest): Useragent = {
     val head = request.getHeader("USER-AGENT")
-    val agent = new Useragent(getIpAddr(request), Browser.parse(head), Os.parse(head))
-    agent
+    new Useragent(getIpAddr(request), Browser.parse(head), Os.parse(head))
   }
 }

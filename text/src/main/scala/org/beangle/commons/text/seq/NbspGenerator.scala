@@ -29,7 +29,7 @@ class NbspGenerator {
    * generator.
    *
    * @param repeat a int.
-   * @return a {@link java.lang.String} object.
+   * @return a String object.
    */
   def generator(repeat: Int): String = {
     val repeater = "&nbsp;"

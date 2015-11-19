@@ -64,13 +64,6 @@ trait ContainerAware {
   def container_=(container: Container): Unit
 }
 
-@deprecated("using ContainerListener", "4.4.1")
-trait ContainerRefreshedHook extends ContainerListener {
-  def notify(container: Container): Unit
-  override def onStarted(container: Container): Unit = {
-    notify(container)
-  }
-}
 
 trait ContainerListener {
 

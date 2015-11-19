@@ -27,7 +27,7 @@ import org.beangle.commons.lang.time.Stopwatch
 import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 
 /**
- * SplitStreamDownloader
+ * RangedWagon
  * <p>
  * Split download senario like this:
  * <li>Server first response:200</li>
@@ -53,26 +53,20 @@ import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
  * @author chaostone
  * @since 2.4
  */
-class SplitStreamDownloader extends DefaultStreamDownloader {
+class RangedWagon extends DefaultWagon {
 
-  override def download(request: HttpServletRequest, response: HttpServletResponse,
-    input: InputStream, name: String, display: String) {
-
-    val attach = getAttachName(name, display)
-    response.reset()
-    addContent(request, response, attach)
-    response.setHeader("Accept-Ranges", "bytes")
-    response.setHeader("connection", "Keep-Alive")
+  override def copy(input: InputStream, req: HttpServletRequest, res: HttpServletResponse): Unit = {
+    res.setHeader("Accept-Ranges", "bytes")
+    res.setHeader("connection", "Keep-Alive")
     var length = 0
     var start = 0L
     var begin = 0L
     var stop = 0L
-    val watch = new Stopwatch(true)
     try {
       length = input.available()
       stop = length - 1
-      response.setContentLength(length)
-      val rangestr = request.getHeader("Range")
+      res.setContentLength(length)
+      val rangestr = req.getHeader("Range")
       if (null != rangestr) {
         val readlength = Strings.substringAfter(rangestr, "bytes=").split("-")
         start = java.lang.Long.parseLong(readlength(0))
@@ -80,12 +74,12 @@ class SplitStreamDownloader extends DefaultStreamDownloader {
           stop = java.lang.Long.parseLong(readlength(1))
         }
         if (start != 0) {
-          response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT)
+          res.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT)
           val crange = "bytes " + start + "-" + stop + "/" + length
-          response.setHeader("Content-Range", crange)
+          res.setHeader("Content-Range", crange)
         }
       }
-      val output = response.getOutputStream
+      val output = res.getOutputStream
       input.skip(start)
       begin = start
       val size = 4 * 1024
@@ -93,24 +87,21 @@ class SplitStreamDownloader extends DefaultStreamDownloader {
       var step = maxStep(start, stop, size)
       while (step > 0) {
         val readed = input.read(buffer, 0, step)
-        if (readed == -1) //break
+        if (readed == -1) {
+          step = 0
+        } else {
           output.write(buffer, 0, readed)
-        start += readed
-        step = maxStep(start, stop, size)
+          start += readed
+          step = maxStep(start, stop, size)
+        }
       }
-    } catch {
-      case e: IOException =>
-      case e: Exception => request.getServletContext.log(s"download file error $attach", e)
     } finally {
       IOs.close(input)
     }
   }
 
   def maxStep(start: Long, stop: Long, bufferSize: Int): Int = {
-    if (stop - start + 1 >= bufferSize) {
-      bufferSize
-    } else {
-      (stop - start + 1).toInt
-    }
+    if (stop - start + 1 >= bufferSize) bufferSize
+    else (stop - start + 1).toInt
   }
 }

@@ -16,27 +16,39 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.web.io
+package org.beangle.commons.web.util
 
-import java.io.File
-import java.io.InputStream
-import java.net.URL
-import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import javax.servlet.http.Cookie
 
 /**
- * Stream Downloader
- *
  * @author chaostone
- * @since 2.1
  */
-trait StreamDownloader {
+class CookieGenerator(name: String) {
+  var domain: String = _
+  var path: String = _
+  var secure: Boolean = _
+  var httpOnly: Boolean = true
+  var maxAge: Int = -1
 
-  def download(req: HttpServletRequest, res: HttpServletResponse, file: File): Unit
+  def addCookie(response: HttpServletResponse, value: String): Unit = {
+    val cookie = createCookie(value)
+    cookie.setMaxAge(maxAge)
+    cookie.setSecure(secure)
+    cookie.setHttpOnly(httpOnly)
+    response.addCookie(cookie)
+  }
 
-  def download(req: HttpServletRequest, res: HttpServletResponse, url: URL, display: String): Unit
+  def removeCookie(response: HttpServletResponse): Unit = {
+    val cookie = createCookie("")
+    cookie.setMaxAge(0)
+    response.addCookie(cookie);
+  }
 
-  def download(req: HttpServletRequest, res: HttpServletResponse, file: File, display: String): Unit
-
-  def download(req: HttpServletRequest, res: HttpServletResponse, inStream: InputStream, name: String, display: String): Unit
+  protected def createCookie(value: String): Cookie = {
+    val cookie = new Cookie(name, value);
+    if (domain != null) cookie.setDomain(domain)
+    cookie.setPath(path)
+    cookie
+  }
 }

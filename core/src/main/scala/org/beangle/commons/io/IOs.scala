@@ -38,8 +38,6 @@ object IOs {
    * @param input the <code>InputStream</code> to read from
    * @param output the <code>OutputStream</code> to write to
    * @return the number of bytes copied
-   * @throws NullPointerException if the input or output is null
-   * @throws IOException if an I/O error occurs
    * @since 3.1
    */
   def copy(input: InputStream, output: OutputStream): Long = {
@@ -70,8 +68,6 @@ object IOs {
    * @param input the <code>Reader</code> to read from
    * @param output the <code>Writer</code> to write to
    * @return the number of characters copied
-   * @throws NullPointerException if the input or output is null
-   * @throws IOException if an I/O error occurs
    * @since 3.1
    */
   def copy(input: Reader, output: Writer): Long = {

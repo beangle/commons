@@ -70,7 +70,7 @@ class CsvReader(reader: Reader, format: CsvFormat) {
   /**
    * readNext.
    *
-   * @return an array of {@link java.lang.String} objects.
+   * @return an array of String objects.
    */
   def readNext(): Array[String] = {
     var result: Array[String] = null

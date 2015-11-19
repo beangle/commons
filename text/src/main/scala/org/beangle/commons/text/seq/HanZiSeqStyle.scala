@@ -61,7 +61,7 @@ class HanZiSeqStyle extends SeqNumStyle {
    * </p>
    *
    * @param num a int.
-   * @return a {@link java.lang.String} object.
+   * @return a String object.
    */
   def basicOf(num: Int): String = CHINESE_NAMES(num)
 
@@ -71,7 +71,7 @@ class HanZiSeqStyle extends SeqNumStyle {
    * </p>
    *
    * @param index a int.
-   * @return a {@link java.lang.String} object.
+   * @return a String object.
    */
   def priorityOf(index: Int): String = {
     if (index < 2) {
@@ -86,8 +86,8 @@ class HanZiSeqStyle extends SeqNumStyle {
    * buildText.
    * </p>
    *
-   * @param str1 a {@link java.lang.String} object.
-   * @return a {@link java.lang.String} object.
+   * @param str1 a String object.
+   * @return a String object.
    */
   def buildText(str1: String): String = {
     val sb = new StringBuilder()

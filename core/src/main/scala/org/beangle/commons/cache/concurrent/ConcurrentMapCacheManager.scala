@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.cache.concurrent
 
-import org.beangle.commons.cache.{Cache, CacheManager}
+import org.beangle.commons.cache.{ Cache, CacheManager }
 
 /**
  * Concurrent Map Cache Manager.
@@ -27,23 +27,31 @@ import org.beangle.commons.cache.{Cache, CacheManager}
  * @version 1.0
  * @since 3.2.0
  */
-class ConcurrentMapCacheManager extends CacheManager {
+class ConcurrentMapCacheManager(val name: String = "concurrent") extends CacheManager {
 
-  private val caches = new collection.mutable.HashMap[String, ConcurrentMapCache[_, _]]
+  private var caches = Map.empty[String, ConcurrentMapCache[_, _]]
 
-  override def getCache[K, V](name: String): Cache[K, V] = {
-    var cache = caches.get(name).orNull
-    if (cache == null) {
-      caches.synchronized {
-        cache = caches.get(name).orNull
-        if (cache == null) {
-          cache = new ConcurrentMapCache[K, V](name)
-          caches.put(name, cache)
+  override def getCache[K <: AnyRef, V <: AnyRef](name: String): Cache[K, V] = {
+    caches.get(name) match {
+      case Some(cache) => cache.asInstanceOf[Cache[K, V]]
+      case None =>
+        caches.synchronized {
+          caches.get(name) match {
+            case Some(cache) => cache.asInstanceOf[Cache[K, V]]
+            case None =>
+              val newcache = new ConcurrentMapCache[K, V](name)
+              caches += (name -> newcache)
+              newcache
+          }
         }
-      }
     }
-    cache.asInstanceOf[Cache[K, V]]
   }
 
-  override def cacheNames: Set[String] = caches.keySet.toSet
+  override def cacheNames: collection.Set[String] = {
+    caches.keySet
+  }
+
+  override def destroy(): Unit = {
+    caches = Map.empty
+  }
 }

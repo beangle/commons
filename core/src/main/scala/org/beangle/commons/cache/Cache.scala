@@ -24,12 +24,12 @@ package org.beangle.commons.cache
  * @author chaostone
  * @since 3.2.0
  */
-trait Cache[K, V] {
+trait Cache[K <: AnyRef, V <: AnyRef] {
 
   /**
    * Return the cache name.
    */
-  def name(): String
+  def name: String
 
   /**
    * Get Some(T) or None
@@ -40,19 +40,30 @@ trait Cache[K, V] {
    * Put a new Value
    */
   def put(key: K, value: V): Unit
-
+  /**
+   * Exists key
+   */
+  def exists(key: K): Boolean
+  /**
+   * Same with put,but return true when absent
+   */
+  def putIfAbsent(key: K, value: V): Boolean
   /**
    * Evict specified key
    */
-  def evict(key: K): Unit
+  def evict(key: K): Boolean
 
   /**
    * Return cached keys
    */
-  def keys(): Set[K]
+  def keys: Iterable[_]
 
   /**
    * Remove all mappings from the cache.
    */
   def clear(): Unit
+  /**
+   * Max live seconds in this cache,-1 is forever
+   */
+  def liveTime: Int
 }

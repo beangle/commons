@@ -87,8 +87,8 @@ class String2DateConverter extends StringConverterFactory[String, ju.Date] {
    * normalize.
    * </p>
    *
-   * @param dateStr a {@link java.lang.String} object.
-   * @return a {@link java.lang.String} object.
+   * @param dateStr a String object.
+   * @return a String object.
    */
   def normalize(dateStr: String): String = {
     if (!dateStr.contains("-")) {

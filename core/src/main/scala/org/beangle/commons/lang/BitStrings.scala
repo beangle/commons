@@ -28,9 +28,9 @@ object BitStrings {
   /**
    * 比较两个等长字符串的每一位，若都大于0，则返回结果的相应位为1，否则为0;
    *
-   * @param first a {@link java.lang.String} object.
-   * @param second a {@link java.lang.String} object.
-   * @return a {@link java.lang.String} object.
+   * @param first a String.
+   * @param second a String.
+   * @return a String.
    */
   def and(first: String, second: String): String = {
     val buffer = new StringBuilder()
@@ -45,9 +45,9 @@ object BitStrings {
    * 比较两个等长字符串的每一位，相或<br>
    * 适用于仅含有1和0的字符串.
    *
-   * @param first a {@link java.lang.String} object.
-   * @param second a {@link java.lang.String} object.
-   * @return a {@link java.lang.String} object.
+   * @param first a String.
+   * @param second a String.
+   * @return a String.
    */
   def or(first: String, second: String): String = {
     val buffer = new StringBuilder()
@@ -61,9 +61,9 @@ object BitStrings {
   /**
    * 将一个字符串，按照boolString的形式进行变化. 如果boolString[i]!=0则保留str[i],否则置0
    *
-   * @param str a {@link java.lang.String} object.
-   * @param boolString a {@link java.lang.String} object.
-   * @return a {@link java.lang.String} object.
+   * @param str a String.
+   * @param boolString a String.
+   * @return a String.
    */
   def andWith(str: String, boolString: String): String = {
     if (Strings.isEmpty(str)) return null
@@ -77,8 +77,8 @@ object BitStrings {
   /**
    * 将"314213421340asdf"转换成"1111111111101111"
    *
-   * @param first a {@link java.lang.String} object.
-   * @return a {@link java.lang.String} object.
+   * @param first a String object.
+   * @return a String object.
    */
   def convertToBoolStr(first: String): String = {
     val occupyBuffer = new StringBuilder(first.length)
@@ -92,7 +92,7 @@ object BitStrings {
   /**
    * 返回零一串的整型值
    *
-   * @param binaryStr a {@link java.lang.String} object.
+   * @param binaryStr a String object.
    * @return a long.
    */
   def binValueOf(binaryStr: String): Long = {
@@ -113,8 +113,8 @@ object BitStrings {
    * reverse.
    * </p>
    *
-   * @param binaryStr a {@link java.lang.String} object.
-   * @return a {@link java.lang.String} object.
+   * @param binaryStr a String object.
+   * @return a String object.
    */
   def reverse(binaryStr: String): String = {
     val occupyBuffer = new StringBuilder(binaryStr.length)

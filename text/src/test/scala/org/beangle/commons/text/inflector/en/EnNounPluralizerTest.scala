@@ -16,11 +16,21 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.bean
+package org.beangle.commons.text.inflector.en
 
-class ScalaSingletonFactory[T](override val objectType: Class[T]) extends Factory[T] {
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.FunSpec
 
-  val result = objectType.getField("MODULE$").get(null).asInstanceOf[T]
-
-  override def singleton: Boolean = true
+/**
+ * @author chaostone
+ */
+@RunWith(classOf[JUnitRunner])
+class EnNounPluralizerTest extends FunSpec with Matchers {
+  describe("EnNounPluralizer") {
+    it("pluralize") {
+      assert("accounts" == (new EnNounPluralizer).pluralize("account"))
+    }
+  }
 }

@@ -42,7 +42,10 @@ trait BindRegistry {
    *
    */
   def register(name: String, clazz: Class[_]): Unit
-
+  /**
+   * register singleton
+   */
+  def register(name: String, obj: AnyRef): Unit
   /**
    * register bean definition
    * @param name beanName

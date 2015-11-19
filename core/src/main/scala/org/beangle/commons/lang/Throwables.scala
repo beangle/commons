@@ -92,8 +92,4 @@ object Throwables {
     sw.toString
   }
 
-  @deprecated("Using stackTrace(e)","4.2.4")
-  def getStackTrace(throwable: Throwable): String = {
-    stackTrace(throwable)
-  }
 }

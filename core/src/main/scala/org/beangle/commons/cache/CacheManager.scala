@@ -18,21 +18,25 @@
  */
 package org.beangle.commons.cache
 
+import org.beangle.commons.bean.Disposable
+
 /**
  * Cache Manager
  *
  * @author chaostone
  * @since 3.2.0
  */
-trait CacheManager {
+trait CacheManager extends Disposable {
 
   /**
    * Return the cache associated with the given name.
    */
-  def getCache[K, V](name: String): Cache[K, V]
+  def getCache[K <: AnyRef, V <: AnyRef](name: String): Cache[K, V]
 
   /**
    * Return a collection of the caches known by this cache manager.
    */
-  def cacheNames: Set[String]
+  def cacheNames: collection.Set[String]
+
+  def name: String
 }

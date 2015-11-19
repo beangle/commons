@@ -72,9 +72,7 @@ abstract class AbstractBindModule extends Module {
    * Generate a inner bean definition
    */
   protected final def bean(clazz: Class[_]): Definition = {
-    val defn = new Definition(clazz.getName, clazz, Scope.Singleton.toString)
-    defn.beanName = clazz.getName + "#" + Math.abs(System.identityHashCode(defn))
-    defn
+    bind(binder.newInnerBeanName(clazz), clazz).head
   }
 
   final def inject[T](clazz: Class[T]): Injection[T] = {
@@ -158,7 +156,7 @@ abstract class AbstractBindModule extends Module {
   protected def binding(): Unit
 
   private def buildInnerReference(clazz: Class[_]): ReferenceValue = {
-    val targetBean = binder.innerName(clazz)
+    val targetBean = binder.newInnerBeanName(clazz)
     binder.add(new Definition(targetBean, clazz, Scope.Singleton.toString))
     new ReferenceValue(targetBean)
   }

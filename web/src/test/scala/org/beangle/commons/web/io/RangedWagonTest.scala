@@ -18,23 +18,23 @@
  */
 package org.beangle.commons.web.io
 
-import java.io.{ByteArrayOutputStream, File, OutputStream}
+import java.io.{ ByteArrayOutputStream, File, OutputStream }
 
 import org.beangle.commons.lang.ClassLoaders
 import org.junit.runner.RunWith
-import org.mockito.Mockito.{mock, verify, when}
-import org.scalatest.{FunSpec, Matchers}
+import org.mockito.Mockito.{ mock, verify, when }
+import org.scalatest.{ FunSpec, Matchers }
 import org.scalatest.junit.JUnitRunner
 
-import javax.servlet.{ServletOutputStream, WriteListener}
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import javax.servlet.{ ServletOutputStream, WriteListener }
+import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 
 @RunWith(classOf[JUnitRunner])
-class SplitStreamDownloaderTest extends FunSpec with Matchers {
+class RangedWagonTest extends FunSpec with Matchers {
 
-  val streamDownloader: StreamDownloader = new SplitStreamDownloader
+  val wagon: Wagon = new RangedWagon
 
-  describe("SplitStreamDownloader") {
+  describe("RangedWagon") {
     it("download") {
       var request = mock(classOf[HttpServletRequest])
       var response = mock(classOf[HttpServletResponse])
@@ -48,7 +48,7 @@ class SplitStreamDownloaderTest extends FunSpec with Matchers {
         def setWriteListener(writeListener: WriteListener) {}
       })
       val testDoc = ClassLoaders.getResource("download.txt")
-      streamDownloader.download(request, response, testDoc, null)
+      wagon.copy(testDoc, request, response)
       verify(response).setHeader("Accept-Ranges", "bytes")
       val file = new File(testDoc.toURI())
       request = mock(classOf[HttpServletRequest])
@@ -65,7 +65,7 @@ class SplitStreamDownloaderTest extends FunSpec with Matchers {
         def setWriteListener(writeListener: WriteListener) {}
       })
       when(request.getHeader("Range")).thenReturn("bytes=5-12")
-      streamDownloader.download(request, response, testDoc, null)
+      wagon.copy(testDoc, request, response)
       verify(response).setStatus(206)
       verify(response).setHeader("Content-Range", "bytes 5-12/" + file.length)
     }

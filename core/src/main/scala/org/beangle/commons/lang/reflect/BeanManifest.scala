@@ -124,7 +124,11 @@ class PropertyDescriptor(val name: String, val typeinfo: TypeInfo, val getter: O
 
 class ConstructorDescriptor(val constructor: Constructor[_], val args: Vector[TypeInfo])
 
-class BeanManifest(val properties: Map[String, PropertyDescriptor], val constructors: List[ConstructorDescriptor]) {
+/**
+ * defaultConstructorParams is 1 based
+ */
+class BeanManifest(val properties: Map[String, PropertyDescriptor],
+    val constructors: List[ConstructorDescriptor], val defaultConstructorParams: Map[Int, Any]) {
 
   def getGetter(property: String): Option[Method] = {
     properties.get(property) match {
@@ -304,7 +308,20 @@ object BeanManifest {
       }
       ctors += new ConstructorDescriptor(ctor, infoes.toVector)
     }
-    new BeanManifest(properties.toMap, ctors.toList)
+    //find default constructor parameters
+    val defaultConstructorParams: Map[Int, Any] =
+      ClassLoaders.get(clazz.getName + "$") match {
+        case Some(oclazz) =>
+          val osinglton = oclazz.getDeclaredField("MODULE$").get(null)
+          val params = Collections.newMap[Int, Any]
+          oclazz.getDeclaredMethods foreach { m =>
+            val index = Strings.substringAfter(m.getName, "$lessinit$greater$default$")
+            if (Strings.isNotEmpty(index)) params.put(Integer.parseInt(index), m.invoke(osinglton))
+          }
+          params.toMap
+        case None => Map.empty
+      }
+    new BeanManifest(properties.toMap, ctors.toList, defaultConstructorParams)
   }
 
   private def extract(t: java.lang.reflect.Type, types: collection.Map[String, Class[_]]): Class[_] = {
