@@ -61,5 +61,8 @@ class MapConverterTest extends FunSpec with Matchers {
       converter.getLong(datas, "empty4") should be(None)
       converter.getLong(datas, "emptyDoesNotExists") should be(None)
     }
+    it("convert array") {
+      converter.convert(Array("1", "2"), classOf[Long]) should equal(Array(1L, 2L))
+    }
   }
 }

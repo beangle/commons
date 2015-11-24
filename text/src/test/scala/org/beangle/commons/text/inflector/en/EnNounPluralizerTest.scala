@@ -30,7 +30,7 @@ import org.scalatest.FunSpec
 class EnNounPluralizerTest extends FunSpec with Matchers {
   describe("EnNounPluralizer") {
     it("pluralize") {
-      assert("accounts" == (new EnNounPluralizer).pluralize("account"))
+      assert("accounts" == EnNounPluralizer.pluralize("account"))
     }
   }
 }

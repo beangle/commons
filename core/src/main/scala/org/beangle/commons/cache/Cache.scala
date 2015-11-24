@@ -40,14 +40,23 @@ trait Cache[K <: AnyRef, V <: AnyRef] {
    * Put a new Value
    */
   def put(key: K, value: V): Unit
+
+  /**
+   * Touch the key
+   * @return false if key not exists
+   */
+  def touch(key: K): Boolean
+
   /**
    * Exists key
    */
   def exists(key: K): Boolean
+
   /**
    * Same with put,but return true when absent
    */
   def putIfAbsent(key: K, value: V): Boolean
+
   /**
    * Evict specified key
    */

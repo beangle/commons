@@ -57,6 +57,8 @@ object Binder {
 
     var description: String = _
 
+    val nowires = Collections.newSet[String]
+
     def isAbstract: Boolean = abstractFlag
 
     def property(property: String, value: AnyRef): Definition = {
@@ -66,6 +68,11 @@ object Binder {
 
     def constructor(args: Any*): this.type = {
       this.constructorArgs = args
+      this
+    }
+
+    def nowire(properties: String*): this.type = {
+      nowires ++= properties
       this
     }
   }
@@ -152,6 +159,11 @@ object Binder {
 
     def init(method: String): this.type = {
       for (definition <- beans) definition.initMethod = method
+      this
+    }
+
+    def nowire(properties: String*): this.type = {
+      for (definition <- beans) definition.nowire(properties: _*)
       this
     }
 
