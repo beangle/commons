@@ -18,20 +18,15 @@
  */
 package org.beangle.commons.text.inflector.en
 
-import org.beangle.commons.text.inflector.rule.AbstractRegexReplacementRule.disjunction
-import java.util.Arrays
 import java.util.Locale
 import java.util.regex.Matcher
-import org.beangle.commons.text.inflector.Rule
-import org.beangle.commons.text.inflector.RuleBasedPluralizer
-import org.beangle.commons.text.inflector.rule.AbstractRegexReplacementRule
-import org.beangle.commons.text.inflector.rule.CategoryInflectionRule
-import org.beangle.commons.text.inflector.rule.IrregularMappingRule
-import org.beangle.commons.text.inflector.rule.RegexReplacementRule
-import org.beangle.commons.text.inflector.rule.SuffixInflectionRule
-import EnNounPluralizer._
 
-object EnNounPluralizer {
+import org.beangle.commons.text.inflector.RuleBasedPluralizer
+import org.beangle.commons.text.inflector.rule.{ CategoryInflectionRule, IrregularMappingRule, RegexReplacementRule, SuffixInflectionRule }
+import org.beangle.commons.text.inflector.rule.AbstractRegexReplacementRule
+import org.beangle.commons.text.inflector.rule.AbstractRegexReplacementRule.disjunction
+
+object EnNounPluralizer extends RuleBasedPluralizer {
 
   private val POSTFIX_ADJECTIVE_REGEX = "(" +
     "(?!major|lieutenant|brigadier|adjutant)\\S+(?=(?:-|\\s+)general)|" +
@@ -65,32 +60,24 @@ object EnNounPluralizer {
   private val CATEGORY_O_OS_RULE = Array("albino", "archipelago", "armadillo", "commando", "crescendo", "fiasco", "ditto", "dynamo", "embryo", "ghetto", "guano", "inferno", "jumbo", "lumbago", "magneto", "manifesto", "medico", "octavo", "photo", "pro", "quarto", "canto", "lingo", "generalissimo", "stylo", "rhino", "casino", "auto", "macro", "zero", "solo", "soprano", "basso", "alto", "contralto", "tempo", "piano", "virtuoso")
 
   private val CATEGORY_SINGULAR_S_RULE = Array(".*ss", "acropolis", "aegis", "alias", "asbestos", "bathos", "bias", "bronchitis", "bursitis", "caddis", "cannabis", "canvas", "chaos", "cosmos", "dais", "digitalis", "epidermis", "ethos", "eyas", "gas", "glottis", "hubris", "ibis", "lens", "mantis", "marquis", "metropolis", "pathos", "pelvis", "polis", "rhinoceros", "sassafras", "trellis", ".*us", "[A-Z].*es", "ephemeris", "iris", "clitoris", "chrysalis", "epididymis", ".*itis")
-}
-
-/**
- * EnNounPluralizer.
- *
- * @author chaostone
- */
-class EnNounPluralizer extends RuleBasedPluralizer {
 
   private val enrules = List(new RegexReplacementRule("^(\\s)$", "$1"), new CategoryInflectionRule(CATEGORY_UNINFLECTED_NOUNS,
     "-", "-"), new AbstractRegexReplacementRule("(?i)^(?:" + POSTFIX_ADJECTIVE_REGEX + ")$") {
 
     override def replace(m: Matcher): String = {
-      EnNounPluralizer.this.pluralize(m.group(1)) + m.group(2)
+      pluralize(m.group(1)) + m.group(2)
     }
   }, new AbstractRegexReplacementRule("(?i)(.*?)((?:-|\\s+)(?:" + disjunction(PREPOSITIONS) +
     "|d[eu])(?:-|\\s+))a(?:-|\\s+)(.*)") {
 
     override def replace(m: Matcher): String = {
-      EnNounPluralizer.this.pluralize(m.group(1)) + m.group(2) +
-        EnNounPluralizer.this.pluralize(m.group(3))
+      pluralize(m.group(1)) + m.group(2) +
+        pluralize(m.group(3))
     }
   }, new AbstractRegexReplacementRule("(?i)(.*?)((-|\\s+)(" + disjunction(PREPOSITIONS) + "|d[eu])((-|\\s+)(.*))?)") {
 
     override def replace(m: Matcher): String = {
-      EnNounPluralizer.this.pluralize(m.group(1)) + m.group(2)
+      pluralize(m.group(1)) + m.group(2)
     }
   }, new IrregularMappingRule(NOMINATIVE_PRONOUNS, "(?i)" + disjunction(NOMINATIVE_PRONOUNS.keySet)), new IrregularMappingRule(ACCUSATIVE_PRONOUNS,
     "(?i)" + disjunction(ACCUSATIVE_PRONOUNS.keySet)), new IrregularMappingRule(ACCUSATIVE_PRONOUNS,

@@ -58,4 +58,8 @@ class ConcurrentMapCache[K <: AnyRef, V <: AnyRef](var name: String) extends Cac
   override def liveTime: Int = {
     -1
   }
+
+  def touch(key: K): Boolean = {
+    store.contains(key)
+  }
 }
