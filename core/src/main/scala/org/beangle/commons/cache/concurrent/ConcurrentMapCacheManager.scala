@@ -31,7 +31,7 @@ class ConcurrentMapCacheManager(val name: String = "concurrent") extends CacheMa
 
   private var caches = Map.empty[String, ConcurrentMapCache[_, _]]
 
-  override def getCache[K <: AnyRef, V <: AnyRef](name: String): Cache[K, V] = {
+  override def getCache[K , V](name: String, keyType: Class[K], valueType: Class[V]): Cache[K, V] = {
     caches.get(name) match {
       case Some(cache) => cache.asInstanceOf[Cache[K, V]]
       case None =>
@@ -39,16 +39,12 @@ class ConcurrentMapCacheManager(val name: String = "concurrent") extends CacheMa
           caches.get(name) match {
             case Some(cache) => cache.asInstanceOf[Cache[K, V]]
             case None =>
-              val newcache = new ConcurrentMapCache[K, V](name)
+              val newcache = new ConcurrentMapCache[K, V]
               caches += (name -> newcache)
               newcache
           }
         }
     }
-  }
-
-  override def cacheNames: collection.Set[String] = {
-    caches.keySet
   }
 
   override def destroy(): Unit = {

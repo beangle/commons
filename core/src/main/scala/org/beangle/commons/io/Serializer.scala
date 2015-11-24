@@ -23,7 +23,7 @@ import javax.activation.MimeType
 
 trait Serializer {
 
-  def serialize(data: AnyRef, os: OutputStream, params: Map[String, Any])
+  def serialize(data: Any, os: OutputStream, params: Map[String, Any])
 
   def supportMediaTypes: Seq[MimeType]
 
