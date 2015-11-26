@@ -37,7 +37,17 @@ trait Cache[K, V] {
   def put(key: K, value: V): Unit
 
   /**
-   * Touch the key
+   * Touch the key,restart ttl
+   * The default implementation is equivalent to
+   * {{{
+   *  val v = cache.get(k)
+   *  if(v.isEmpty) false
+   *  else {
+   *    cache.remove(k)
+   *    cache.put(k,v.get)
+   *    true
+   *  }
+   * }}}
    * @return false if key not exists
    */
   def touch(key: K): Boolean
