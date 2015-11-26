@@ -24,7 +24,7 @@ package org.beangle.commons.collection
  * (not thread safe)
  * @since 4.2.3
  */
-final class IdentityMap[K <: AnyRef, V <: AnyRef](capacity: Int = 1024) {
+final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
   assert(capacity % 2 == 0)
 
   private val table = new Array[Entry[K, V]](capacity)
