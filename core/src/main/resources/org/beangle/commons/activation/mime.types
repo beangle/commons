@@ -27,7 +27,7 @@ type=application/vnd.openxmlformats-officedocument.presentationml.presentation e
 #misc
 type=application/x-rar          exts=rar
 type=application/zip            exts=zip
-type=application/xml            exts=xml
+type=application/xml            exts=xml,pom
 type=application/x-java         exts=class
 type=application/x-java-archive exts=jar,war
 type=application/pdf            exts=pdf
