@@ -39,10 +39,10 @@ type=application/x-ms-wmz       exts=dll
 type=magnus-internal/cgi        exts=cgi,exe,bat
 type=application/x-tar          exts=tar
 type=application/octet-stream   exts=bin
+type=application/javascript     exts=js,jsonp
 
 # text file formats
 type=text/x-component   exts=htc
-type=text/javascript    exts=js,jsonp
 type=text/plain         exts=txt,ftl,properties
 type=text/html          exts=html,htm,shtml
 type=text/css           exts=css
