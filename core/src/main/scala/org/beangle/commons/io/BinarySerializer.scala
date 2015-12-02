@@ -31,11 +31,11 @@ trait BinarySerializer extends Serializer {
     List(MimeTypes.ApplicationOctetStream)
   }
 
-  override def serialize(data: AnyRef, os: OutputStream, params: Map[String, Any]): Unit = {
+  override def serialize(data: Any, os: OutputStream, params: Map[String, Any]): Unit = {
     os.write(serialize(data, params))
   }
 
-  def serialize(data: AnyRef, params: Map[String, Any]): Array[Byte]
+  def serialize(data: Any, params: Map[String, Any]): Array[Byte]
 
   def deserialize(bits: Array[Byte], params: Map[String, Any]): AnyRef
 }

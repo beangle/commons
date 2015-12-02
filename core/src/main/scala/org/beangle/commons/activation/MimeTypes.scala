@@ -37,6 +37,8 @@ object MimeTypes {
 
   val ApplicationJsonApi = this("application/vnd.api+json")
 
+  val ApplicationJavascript = this("application/javascript")
+
   val ApplicationOctetStream = this("application/octet-stream");
 
   val ApplicationXhtmlXml = this("application/xhtml+xml")

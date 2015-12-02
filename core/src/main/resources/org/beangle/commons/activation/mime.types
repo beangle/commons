@@ -27,7 +27,7 @@ type=application/vnd.openxmlformats-officedocument.presentationml.presentation e
 #misc
 type=application/x-rar          exts=rar
 type=application/zip            exts=zip
-type=application/xml            exts=xml
+type=application/xml            exts=xml,pom
 type=application/x-java         exts=class
 type=application/x-java-archive exts=jar,war
 type=application/pdf            exts=pdf
@@ -39,10 +39,10 @@ type=application/x-ms-wmz       exts=dll
 type=magnus-internal/cgi        exts=cgi,exe,bat
 type=application/x-tar          exts=tar
 type=application/octet-stream   exts=bin
+type=application/javascript     exts=js,jsonp
 
 # text file formats
 type=text/x-component   exts=htc
-type=text/javascript    exts=js,jsonp
 type=text/plain         exts=txt,ftl,properties
 type=text/html          exts=html,htm,shtml
 type=text/css           exts=css

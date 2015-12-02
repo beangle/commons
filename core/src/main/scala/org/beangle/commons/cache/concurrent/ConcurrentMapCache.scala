@@ -27,7 +27,7 @@ import org.beangle.commons.cache.Cache
  * @author chaostone
  * @since 3.2.0
  */
-class ConcurrentMapCache[K <: AnyRef, V <: AnyRef](var name: String) extends Cache[K, V] {
+class ConcurrentMapCache[K, V] extends Cache[K, V] {
 
   private val store = new collection.concurrent.TrieMap[K, V]
 
@@ -49,13 +49,23 @@ class ConcurrentMapCache[K <: AnyRef, V <: AnyRef](var name: String) extends Cac
     store.putIfAbsent(key, value).isEmpty
   }
 
-  override def keys: Iterable[_] = store.keySet
+  override def replace(key: K, value: V): Option[V] = {
+    store.replace(key, value)
+  }
+
+  override def replace(key: K, oldvalue: V, newvalue: V): Boolean = {
+    store.replace(key, oldvalue, newvalue)
+  }
 
   override def clear(): Unit = {
     store.clear()
   }
 
-  override def liveTime: Int = {
+  override def ttl: Int = {
+    -1
+  }
+
+  override def tti: Int = {
     -1
   }
 

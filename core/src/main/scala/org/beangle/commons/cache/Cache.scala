@@ -24,12 +24,7 @@ package org.beangle.commons.cache
  * @author chaostone
  * @since 3.2.0
  */
-trait Cache[K <: AnyRef, V <: AnyRef] {
-
-  /**
-   * Return the cache name.
-   */
-  def name: String
+trait Cache[K, V] {
 
   /**
    * Get Some(T) or None
@@ -42,7 +37,17 @@ trait Cache[K <: AnyRef, V <: AnyRef] {
   def put(key: K, value: V): Unit
 
   /**
-   * Touch the key
+   * Touch the key,restart ttl
+   * The default implementation is equivalent to
+   * {{{
+   *  val v = cache.get(k)
+   *  if(v.isEmpty) false
+   *  else {
+   *    cache.remove(k)
+   *    cache.put(k,v.get)
+   *    true
+   *  }
+   * }}}
    * @return false if key not exists
    */
   def touch(key: K): Boolean
@@ -58,21 +63,32 @@ trait Cache[K <: AnyRef, V <: AnyRef] {
   def putIfAbsent(key: K, value: V): Boolean
 
   /**
+   * return Some(v) when exists old value
+   */
+  def replace(key: K, value: V): Option[V]
+
+  /**
+   * return true is (k,oldvalue) exists
+   */
+  def replace(key: K, oldvalue: V, newvalue: V): Boolean
+
+  /**
    * Evict specified key
    */
   def evict(key: K): Boolean
 
   /**
-   * Return cached keys
-   */
-  def keys: Iterable[_]
-
-  /**
    * Remove all mappings from the cache.
    */
   def clear(): Unit
+
   /**
-   * Max live seconds in this cache,-1 is forever
+   * Time to live seconds,-1 is forever
    */
-  def liveTime: Int
+  def ttl: Int
+
+  /**
+   * Time to idle seconds,-1 is forever
+   */
+  def tti: Int
 }
