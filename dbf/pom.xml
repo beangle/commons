@@ -6,13 +6,13 @@
     <artifactId>beangle-commons-parent_2.12</artifactId>
     <version>4.4.8</version>
   </parent>
-  <artifactId>beangle-commons-text_2.12</artifactId>
+  <artifactId>beangle-commons-dbf_2.12</artifactId>
   <packaging>jar</packaging>
-  <name>Beangle Commons Text</name>
+  <name>Beangle Commons DBF</name>
 
   <properties>
-    <bundle.symbolicName>org.beangle.commons.text</bundle.symbolicName>
-    <bundle.namespace>org.beangle.commons.text</bundle.namespace>
+    <bundle.symbolicName>org.beangle.commons.dbf</bundle.symbolicName>
+    <bundle.namespace>org.beangle.commons.dbf</bundle.namespace>
   </properties>
 
   <dependencies>

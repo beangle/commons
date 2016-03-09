@@ -50,6 +50,12 @@ class HourMinute(val value: Short) extends Serializable {
     time.substring(0, 2) + ":" + time.substring(2, 4)
   }
 
+  def hour: Int = {
+    value / 100
+  }
+  def minute: Int = {
+    value % 100
+  }
   private def minutes: Int = {
     var time = String.valueOf(value)
     if (value >= 6000) throw new RuntimeException("Invalid time " + time)

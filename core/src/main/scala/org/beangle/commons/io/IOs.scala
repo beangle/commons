@@ -180,14 +180,14 @@ object IOs {
 
   /**
    * Close many objects quitely.
-   * TODO Support AutoCloseable when beangle based on jdk 1.7
+   * swallow any exception.
    */
-  def close(objs: Closeable*) {
+  def close(objs: AutoCloseable*) {
     objs foreach { obj =>
       try {
         if (obj != null) obj.close()
       } catch {
-        case ioe: IOException =>
+        case ioe: Exception =>
       }
     }
   }
