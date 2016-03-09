@@ -1234,4 +1234,8 @@ object Strings {
     }
     new String(chars, 0, pos);
   }
+
+  def format(format: String, args: Any*): String = {
+    new java.util.Formatter().format(format, args.toArray.asInstanceOf[Array[Object]]: _*).toString
+  }
 }
