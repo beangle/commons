@@ -83,9 +83,7 @@ class String2DateConverter extends StringConverterFactory[String, ju.Date] {
   }
 
   /**
-   * <p>
    * normalize.
-   * </p>
    *
    * @param dateStr a String object.
    * @return a String object.

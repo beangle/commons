@@ -44,6 +44,7 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     else if (this.value == other.value) 0
     else 1
   }
+
   def |(other: WeekState): WeekState = {
     new WeekState(this.value | other.value)
   }
@@ -54,6 +55,17 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
 
   override def toString: String = {
     java.lang.Long.toBinaryString(value)
+  }
+
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case ws: WeekState => ws.value == this.value
+      case _             => false
+    }
+  }
+
+  override def hashCode: Int = {
+    java.lang.Long.hashCode(value)
   }
 
   def span: Tuple2[Int, Int] = {

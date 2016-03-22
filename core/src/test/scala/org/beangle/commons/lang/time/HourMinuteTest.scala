@@ -32,5 +32,8 @@ class HourMinuteTest extends FunSpec with Matchers {
     it("distance") {
       assert(60 == (HourMinute("13:34") - HourMinute("12:34")))
     }
+    it("equals") {
+      assert(HourMinute("12:34") == new HourMinute(1234))
+    }
   }
 }

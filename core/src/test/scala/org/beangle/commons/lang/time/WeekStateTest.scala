@@ -59,5 +59,12 @@ class WeekStateTest extends FunSpec with Matchers {
     it("is serializable") {
       assert(WeekState("101100").isInstanceOf[Serializable])
     }
+
+    it("equals") {
+      assert(WeekState("101100") == new WeekState(44))
+    }
+    it("hashCode") {
+      assert(WeekState("101100").hashCode == java.lang.Long.hashCode(44L))
+    }
   }
 }

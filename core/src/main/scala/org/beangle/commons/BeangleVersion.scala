@@ -22,7 +22,7 @@ object BeangleVersion {
 
   def name = "Beangle Scala Development Toolkit"
 
-  def version = "4.4.0"
+  def version = "4.4.9"
 
   def major = 4
 
