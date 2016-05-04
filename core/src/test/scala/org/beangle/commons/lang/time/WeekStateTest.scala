@@ -37,18 +37,18 @@ class WeekStateTest extends FunSpec with Matchers {
     }
 
     it("get span") {
-      assert(WeekState("1100").span == (2 -> 3))
+      assert(WeekState("001100").span == (2 -> 3))
     }
 
     it("get weeks") {
-      assert(WeekState("10110").weeks == 3)
-      assert(WeekState("").weeks == 0)
+      assert(WeekState("10110").size == 3)
+      assert(WeekState("").size == 0)
       assert(WeekState("").first == -1)
       assert(WeekState("").last == -1)
     }
 
     it("get weekList") {
-      assert(WeekState("101100").weekList == List(2, 3, 5))
+      assert(WeekState("101100").weeks == List(2, 3, 5))
     }
 
     it("is occupied") {
@@ -66,5 +66,11 @@ class WeekStateTest extends FunSpec with Matchers {
     it("hashCode") {
       assert(WeekState("101100").hashCode == java.lang.Long.hashCode(44L))
     }
+    it("of") {
+      assert(WeekState.of(1) == WeekState("10"))
+      assert(WeekState.of(1, 2) == WeekState("110"))
+      assert(WeekState.of(3, 4) == WeekState("11000"))
+    }
+
   }
 }

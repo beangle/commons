@@ -22,6 +22,13 @@ import org.beangle.commons.bean.{ Properties => BeanProperties }
 
 class Properties extends collection.mutable.HashMap[String, Any] {
 
+  def this(tuples: Tuple2[String, _]*) {
+    this()
+    tuples foreach { tuple =>
+      this.put(tuple._1, tuple._2)
+    }
+  }
+
   def this(obj: Object, attrs: String*) {
     this()
     for (attr <- attrs) {

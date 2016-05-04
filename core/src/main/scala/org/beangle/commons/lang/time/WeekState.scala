@@ -26,6 +26,22 @@ object WeekState {
   def apply(value: String): WeekState = {
     new WeekState(value)
   }
+
+  def of(weekIndex: Int): WeekState = {
+    return new WeekState(1 << weekIndex)
+  }
+
+  def of(weekIndecies: Iterable[Int]): WeekState = {
+    var v = 0l
+    for (index <- weekIndecies) {
+      v |= (1 << index)
+    }
+    new WeekState(v)
+  }
+
+  def of(weekIndecies: Int*): WeekState = {
+    of(weekIndecies)
+  }
 }
 
 /**
@@ -78,8 +94,20 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     }
   }
 
-  def weeks: Int = {
-    Strings.count(toString, "1")
+  /**
+   * how many weeks
+   * @see http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetTable
+   * @see http://www.geeksforgeeks.org/count-set-bits-in-an-integer/
+   */
+  def size: Int = {
+    var c = 0
+    var n = this.value
+    while (n > 0) {
+      // clear the least significant bit set
+      n &= (n - 1)
+      c += 1
+    }
+    c
   }
 
   def last: Int = {
@@ -100,7 +128,7 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     }
   }
 
-  def weekList: List[Int] = {
+  def weeks: List[Int] = {
     val weekstr = toString
     var i = weekstr.length - 1
     val result = new collection.mutable.ListBuffer[Int]

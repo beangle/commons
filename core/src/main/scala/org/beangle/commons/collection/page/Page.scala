@@ -62,12 +62,12 @@ import Page._
  *
  * @author chaostone
  */
-trait Page[E] extends Seq[E] {
+trait Page[E] extends collection.immutable.Seq[E] {
 
   def totalPages: Int
 
   def pageIndex: Int
-  
+
   def pageSize: Int
 
   def totalItems: Int
@@ -77,10 +77,10 @@ trait Page[E] extends Seq[E] {
   def hasNext: Boolean
 
   def previous(): Page[E]
-  
+
   def hasPrevious: Boolean
 
   def moveTo(pageIndex: Int): Page[E]
 
-  def items: Seq[E]
+  def items: collection.Seq[E]
 }
