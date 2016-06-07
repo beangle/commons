@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2015, Beangle Software.
+ * Copyright (c) 2005-2016, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -26,6 +26,22 @@ object WeekState {
   def apply(value: String): WeekState = {
     new WeekState(value)
   }
+
+  def of(weekIndex: Int): WeekState = {
+    return new WeekState(1l << weekIndex)
+  }
+
+  def of(weekIndecies: Iterable[Int]): WeekState = {
+    var v = 0l
+    for (index <- weekIndecies) {
+      v |= (1l << index)
+    }
+    new WeekState(v)
+  }
+
+  def of(weekIndecies: Int*): WeekState = {
+    of(weekIndecies)
+  }
 }
 
 /**
@@ -44,6 +60,7 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     else if (this.value == other.value) 0
     else 1
   }
+
   def |(other: WeekState): WeekState = {
     new WeekState(this.value | other.value)
   }
@@ -56,6 +73,17 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     java.lang.Long.toBinaryString(value)
   }
 
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case ws: WeekState => ws.value == this.value
+      case _             => false
+    }
+  }
+
+  override def hashCode: Int = {
+    java.lang.Long.hashCode(value)
+  }
+
   def span: Tuple2[Int, Int] = {
     if (value > 0) {
       val str = toString
@@ -66,8 +94,20 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     }
   }
 
-  def weeks: Int = {
-    Strings.count(toString, "1")
+  /**
+   * how many weeks
+   * @see http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetTable
+   * @see http://www.geeksforgeeks.org/count-set-bits-in-an-integer/
+   */
+  def size: Int = {
+    var c = 0
+    var n = this.value
+    while (n > 0) {
+      // clear the least significant bit set
+      n &= (n - 1)
+      c += 1
+    }
+    c
   }
 
   def last: Int = {
@@ -88,7 +128,7 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     }
   }
 
-  def weekList: List[Int] = {
+  def weeks: List[Int] = {
     val weekstr = toString
     var i = weekstr.length - 1
     val result = new collection.mutable.ListBuffer[Int]

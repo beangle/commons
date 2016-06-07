@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2015, Beangle Software.
+ * Copyright (c) 2005-2016, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -43,10 +43,10 @@ object Properties {
     while (resolver.hasNested(name)) {
       val next = resolver.next(name)
       result =
-        if (result.isInstanceOf[Map[_, _]]) getPropertyOfMapBean(result.asInstanceOf[Map[Any, _]], next)
-        else if (resolver.isMapped(next)) getMappedProperty(result, next)
-        else if (resolver.isIndexed(next)) getIndexedProperty(result, next)
-        else getSimpleProperty(result, next)
+        if (result.isInstanceOf[Map[_, _]]) { getPropertyOfMapBean(result.asInstanceOf[Map[Any, _]], next) }
+        else if (resolver.isMapped(next)) { getMappedProperty(result, next) }
+        else if (resolver.isIndexed(next)) { getIndexedProperty(result, next) }
+        else { getSimpleProperty(result, next) }
       if (result == null) return null.asInstanceOf[T]
       name = resolver.remove(name)
     }

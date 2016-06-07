@@ -3,12 +3,12 @@
   <parent>
     <groupId>org.beangle</groupId>
     <artifactId>beangle-scala</artifactId>
-    <version>23.1</version>
+    <version>23.3</version>
   </parent>
   <groupId>org.beangle.commons</groupId>
   <artifactId>beangle-commons-parent_2.12</artifactId>
   <packaging>pom</packaging>
-  <version>4.4.8</version>
+  <version>4.5.0</version>
   <name>Beangle Commons Parent</name>
 
   <modules>
@@ -21,7 +21,7 @@
   </modules>
 
   <description>
-  The Beangle Commons Framework.
+    The Beangle Commons Framework.
   </description>
 
   <url>https://github.com/beangle/commons</url>
@@ -52,4 +52,34 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <!--
+      <build>
+      <plugins>
+      <plugin>
+      <groupId>org.scalastyle</groupId>
+      <artifactId>scalastyle-maven-plugin</artifactId>
+      <version>0.8.0</version>
+      <configuration>
+      <verbose>false</verbose>
+      <failOnViolation>true</failOnViolation>
+      <includeTestSourceDirectory>true</includeTestSourceDirectory>
+      <failOnWarning>false</failOnWarning>
+      <sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
+      <testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
+      <configLocation>/home/chaostone/beangle/commons/scalastyle_config.xml</configLocation>
+      <outputFile>${project.basedir}/target/scalastyle-output.xml</outputFile>
+      <outputEncoding>UTF-8</outputEncoding>
+      </configuration>
+      <executions>
+      <execution>
+      <goals>
+      <goal>check</goal>
+      </goals>
+      </execution>
+      </executions>
+      </plugin>
+      </plugins>
+      </build>
+  -->
 </project>

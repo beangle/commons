@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2015, Beangle Software.
+ * Copyright (c) 2005-2016, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -60,9 +60,11 @@ object TypeInfo {
               val typeParams = getGenericParamType(c, classOf[collection.Map[_, _]])
               MapType(clazz, typeParams("A"), typeParams("B"))
             } else if (classOf[collection.Iterable[_]].isAssignableFrom(clazz)) {
-              CollectionType(clazz, getGenericParamType(c, classOf[collection.Iterable[_]]).head._2)
+              val paramTypes = getGenericParamType(c, classOf[collection.Iterable[_]])
+              if (paramTypes.isEmpty) CollectionType(clazz, classOf[Any]) else CollectionType(clazz, paramTypes.head._2)
             } else if (classOf[java.util.Collection[_]].isAssignableFrom(clazz)) {
-              CollectionType(clazz, getGenericParamType(c, classOf[java.util.Collection[_]]).head._2)
+              val paramTypes = getGenericParamType(c, classOf[java.util.Collection[_]])
+              if (paramTypes.isEmpty) CollectionType(clazz, classOf[Any]) else CollectionType(clazz, paramTypes.head._2)
             } else {
               val typeParams = getGenericParamType(c, classOf[java.util.Map[_, _]])
               MapType(clazz, typeParams("K"), typeParams("V"))
@@ -341,7 +343,7 @@ object BeanManifest {
     if (Modifier.isStatic(modifiers) || !Modifier.isPublic(modifiers) || method.isBridge) return None
 
     val name = method.getName
-    if (name.contains("$") && !name.contains("_$eq") || ignores.contains(name)) return None
+    if (name.contains("$") && !name.contains("_$eq") || name.startsWith("_") || ignores.contains(name)) return None
 
     val parameterTypes = method.getParameterTypes
     if (0 == parameterTypes.length && method.getReturnType != classOf[Unit]) {

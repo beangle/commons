@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2015, Beangle Software.
+ * Copyright (c) 2005-2016, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,9 +19,9 @@
 package org.beangle.commons.inject.bind
 
 import java.{ util => ju }
-
 import org.beangle.commons.inject.Scope
 import org.beangle.commons.inject.bind.Binder.{ Definition, DefinitionBinder, ReferenceValue, Injection, InjectPlaceHolder, PropertyPlaceHolder }
+import org.beangle.commons.lang.Strings
 
 /**
  * Module interface.
@@ -33,7 +33,9 @@ trait Module {
    */
   def configure(binder: Binder): Unit
 }
-
+object Module {
+  final val profileProperty = "cdi.profiles"
+}
 /**
  * Abstract AbstractBindModule class.
  * The subclass can writed in /META-INF/beangle/cdi.xml
@@ -154,6 +156,11 @@ abstract class AbstractBindModule extends Module {
    * binding.
    */
   protected def binding(): Unit
+
+  final def devEnabled: Boolean = {
+    val profiles = System.getProperty(Module.profileProperty)
+    null != profiles && Strings.split(profiles, ",").toSet.contains("dev")
+  }
 
   private def buildInnerReference(clazz: Class[_]): ReferenceValue = {
     val targetBean = binder.newInnerBeanName(clazz)

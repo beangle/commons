@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2015, Beangle Software.
+ * Copyright (c) 2005-2016, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -23,7 +23,7 @@ package org.beangle.commons.collection.page
  *
  * @author chaostone
  */
-class SinglePage[E](val pageIndex: Int, val pageSize: Int, val totalItems: Int, val items: Seq[E]) extends Page[E] {
+class SinglePage[E](val pageIndex: Int, val pageSize: Int, val totalItems: Int, val items: collection.Seq[E]) extends Page[E] {
 
   def totalPages: Int = {
     if (totalItems < pageSize) {
@@ -45,7 +45,9 @@ class SinglePage[E](val pageIndex: Int, val pageSize: Int, val totalItems: Int, 
 
   def moveTo(pageIndex: Int): Page[E] = this
 
-  def apply(index: Int): E = items(index)
+  def apply(index: Int): E = {
+    items(index)
+  }
 
   def length: Int = items.size
 

@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2015, Beangle Software.
+ * Copyright (c) 2005-2016, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -31,6 +31,9 @@ class HourMinuteTest extends FunSpec with Matchers {
     }
     it("distance") {
       assert(60 == (HourMinute("13:34") - HourMinute("12:34")))
+    }
+    it("equals") {
+      assert(HourMinute("12:34") == new HourMinute(1234))
     }
   }
 }

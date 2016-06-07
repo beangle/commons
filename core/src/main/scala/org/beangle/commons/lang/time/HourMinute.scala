@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2015, Beangle Software.
+ * Copyright (c) 2005-2016, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -53,9 +53,11 @@ class HourMinute(val value: Short) extends Serializable {
   def hour: Int = {
     value / 100
   }
+
   def minute: Int = {
     value % 100
   }
+
   private def minutes: Int = {
     var time = String.valueOf(value)
     if (value >= 6000) throw new RuntimeException("Invalid time " + time)
@@ -72,5 +74,9 @@ class HourMinute(val value: Short) extends Serializable {
       case hm: HourMinute => hm.value == this.value
       case _              => false
     }
+  }
+
+  override def hashCode: Int = {
+    value
   }
 }
