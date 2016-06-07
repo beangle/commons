@@ -28,13 +28,13 @@ object WeekState {
   }
 
   def of(weekIndex: Int): WeekState = {
-    return new WeekState(1 << weekIndex)
+    return new WeekState(1l << weekIndex)
   }
 
   def of(weekIndecies: Iterable[Int]): WeekState = {
     var v = 0l
     for (index <- weekIndecies) {
-      v |= (1 << index)
+      v |= (1l << index)
     }
     new WeekState(v)
   }

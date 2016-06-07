@@ -43,10 +43,10 @@ object Properties {
     while (resolver.hasNested(name)) {
       val next = resolver.next(name)
       result =
-        if (result.isInstanceOf[Map[_, _]]) getPropertyOfMapBean(result.asInstanceOf[Map[Any, _]], next)
-        else if (resolver.isMapped(next)) getMappedProperty(result, next)
-        else if (resolver.isIndexed(next)) getIndexedProperty(result, next)
-        else getSimpleProperty(result, next)
+        if (result.isInstanceOf[Map[_, _]]) { getPropertyOfMapBean(result.asInstanceOf[Map[Any, _]], next) }
+        else if (resolver.isMapped(next)) { getMappedProperty(result, next) }
+        else if (resolver.isIndexed(next)) { getIndexedProperty(result, next) }
+        else { getSimpleProperty(result, next) }
       if (result == null) return null.asInstanceOf[T]
       name = resolver.remove(name)
     }
