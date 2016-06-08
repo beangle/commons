@@ -48,6 +48,11 @@ object HttpUtils {
     var conn: HttpURLConnection = null
     try {
       conn = constructedUrl.openConnection().asInstanceOf[HttpURLConnection]
+      conn.setConnectTimeout(5 * 1000)
+      conn.setReadTimeout(5 * 1000)
+      conn.setRequestMethod("GET")
+      conn.setDoOutput(true)
+
       if (conn.isInstanceOf[HttpsURLConnection] && null != hostnameVerifier) {
         conn.asInstanceOf[HttpsURLConnection].setHostnameVerifier(hostnameVerifier)
       }
@@ -67,9 +72,7 @@ object HttpUtils {
     } catch {
       case e: Exception => throw new RuntimeException(e)
     } finally {
-      if (conn != null) {
-        conn.disconnect()
-      }
+      if (conn != null) conn.disconnect()
     }
   }
 }
