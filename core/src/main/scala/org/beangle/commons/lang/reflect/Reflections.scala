@@ -67,6 +67,7 @@ object Reflections {
     idx match {
       case Some(i) =>
         val gis = clazz.getGenericInterfaces()
+        //如果此时出现genericInterfaces<interfaces,表示子类、父类均实现了接口，但是子类的class中好像没有范型信息，估计是scala编译导致的。
         if (gis.length > i) {
           getParamType(interfaces(i), gis(i), expected, paramTypes)
         } else {
