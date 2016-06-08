@@ -36,7 +36,7 @@ object Reflections {
     Objects.default(clazz)
   }
 
-  def getInstance[T : ClassTag](name: String)(implicit manifest:Manifest[T]): T = {
+  def getInstance[T: ClassTag](name: String)(implicit manifest: Manifest[T]): T = {
     var moduleClass = ClassLoaders.load(name)
     if (!manifest.runtimeClass.isAssignableFrom(moduleClass)) {
       ClassLoaders.get(name + "$") match {
@@ -61,11 +61,18 @@ object Reflections {
   }
 
   private def getInterfaceParamType(clazz: Class[_], expected: Class[_],
-    paramTypes: collection.Map[String, Class[_]] = Map.empty): collection.Map[String, Class[_]] = {
+                                    paramTypes: collection.Map[String, Class[_]] = Map.empty): collection.Map[String, Class[_]] = {
     val interfaces = clazz.getInterfaces
     val idx = (0 until interfaces.length) find { i => expected.isAssignableFrom(interfaces(i)) }
     idx match {
-      case Some(i) => getParamType(interfaces(i), clazz.getGenericInterfaces()(i), expected, paramTypes)
+      case Some(i) =>
+        val gis = clazz.getGenericInterfaces()
+        if (gis.length > i) {
+          getParamType(interfaces(i), gis(i), expected, paramTypes)
+        } else {
+          val superClass = clazz.getSuperclass
+          getInterfaceParamType(superClass, expected, getParamType(superClass, clazz.getGenericSuperclass, superClass, paramTypes))
+        }
       case _ => {
         val superClass = clazz.getSuperclass
         getInterfaceParamType(superClass, expected, getParamType(superClass, clazz.getGenericSuperclass, superClass, paramTypes))
@@ -74,7 +81,7 @@ object Reflections {
   }
 
   private def getParamType(clazz: Class[_], tp: Type, expected: Class[_],
-    paramTypes: collection.Map[String, Class[_]] = Map.empty): collection.Map[String, Class[_]] = {
+                           paramTypes: collection.Map[String, Class[_]] = Map.empty): collection.Map[String, Class[_]] = {
     if (classOf[AnyRef] == clazz) return paramTypes
 
     val newParamTypes: collection.Map[String, Class[_]] = tp match {
