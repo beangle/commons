@@ -23,15 +23,21 @@ import org.scalatest.FunSpec
 import org.scalatest.Matchers
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
+import org.beangle.commons.lang.reflect.BeanInfos
 
 @RunWith(classOf[JUnitRunner])
 class PropertiesSpec extends FunSpec with Matchers {
 
   describe("Properties") {
     it("Get or Set property") {
+      BeanInfos.forType(classOf[TestBean]).properties("javaMap")
       val bean = new TestBean
       Properties.set(bean, "intValue", 2)
       bean.intValue should be(2)
+
+      bean.javaMap = new java.util.HashMap[Int, String]
+      Properties.copy(bean, "javaMap(1)", "2")
+      bean.javaMap.get(1) should be("2")
     }
   }
 }

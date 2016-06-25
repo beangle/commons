@@ -20,166 +20,52 @@ package org.beangle.commons.lang.reflect
 
 import java.beans.Transient
 import java.lang.Character.isUpperCase
-import java.lang.reflect.{ Constructor, Method, Modifier, ParameterizedType, TypeVariable }
+import java.lang.reflect.{ Method, Modifier, ParameterizedType, TypeVariable }
+
 import scala.collection.mutable
 import scala.language.existentials
+import scala.reflect.runtime.{ universe => ru }
+
 import org.beangle.commons.collection.{ Collections, IdentityCache }
 import org.beangle.commons.lang.{ ClassLoaders, Strings }
 import org.beangle.commons.lang.Strings.{ substringAfter, substringBefore, uncapitalize }
 
-case class Getter(val method: Method, val returnType: Class[_], val isTransient: Boolean)
-
-case class Setter(val method: Method, val parameterTypes: Array[Class[_]])
-
-sealed trait TypeInfo {
-  def clazz: Class[_]
-  def isElementType: Boolean = false
-  def isCollectionType: Boolean = false
-  def isMapType: Boolean = false
-  def isSetType: Boolean = false
-}
-
-object TypeInfo {
-
-  def of(clazz: Class[_]): TypeInfo = {
-    of(clazz, clazz.getGenericSuperclass)
-  }
-
-  def of(clazz: Class[_], typ: java.lang.reflect.Type): TypeInfo = {
-    import Reflections._
-    if (CollectionType.isCollectionType(clazz) || classOf[java.util.Map[_, _]].isAssignableFrom(clazz)) {
-      if (clazz.isArray) {
-        CollectionType(clazz, clazz.getComponentType)
-      } else {
-        typ match {
-          case pt: ParameterizedType =>
-            if (pt.getActualTypeArguments.size == 1) CollectionType(clazz, typeAt(pt, 0))
-            else MapType(clazz, typeAt(pt, 0), typeAt(pt, 1))
-          case c: Class[_] => {
-            if (classOf[collection.Map[_, _]].isAssignableFrom(clazz)) {
-              val typeParams = getGenericParamType(c, classOf[collection.Map[_, _]])
-              MapType(clazz, typeParams("A"), typeParams("B"))
-            } else if (classOf[collection.Iterable[_]].isAssignableFrom(clazz)) {
-              val paramTypes = getGenericParamType(c, classOf[collection.Iterable[_]])
-              if (paramTypes.isEmpty) CollectionType(clazz, classOf[Any]) else CollectionType(clazz, paramTypes.head._2)
-            } else if (classOf[java.util.Collection[_]].isAssignableFrom(clazz)) {
-              val paramTypes = getGenericParamType(c, classOf[java.util.Collection[_]])
-              if (paramTypes.isEmpty) CollectionType(clazz, classOf[Any]) else CollectionType(clazz, paramTypes.head._2)
-            } else {
-              val typeParams = getGenericParamType(c, classOf[java.util.Map[_, _]])
-              MapType(clazz, typeParams("K"), typeParams("V"))
-            }
-          }
-        }
-      }
-    } else {
-      ElementType(clazz)
-    }
-  }
-
-  def typeAt(typ: java.lang.reflect.Type, idx: Int): Class[_] = {
-    typ match {
-      case c: Class[_] => c
-      case pt: ParameterizedType =>
-        pt.getActualTypeArguments()(idx) match {
-          case c: Class[_] => c
-          case _           => classOf[AnyRef]
-        }
-      case _ => classOf[AnyRef]
-    }
-  }
-}
-case class ElementType(val clazz: Class[_]) extends TypeInfo {
-  override def isElementType: Boolean = true
-}
-
-object CollectionType {
-  def isCollectionType(clazz: Class[_]): Boolean = {
-    classOf[collection.Iterable[_]].isAssignableFrom(clazz) || classOf[java.util.Collection[_]].isAssignableFrom(clazz) || clazz.isArray()
-  }
-}
-
-case class CollectionType(val clazz: Class[_], val componentType: Class[_]) extends TypeInfo {
-  override def isSetType: Boolean = {
-    classOf[collection.Set[_]].isAssignableFrom(clazz) || classOf[java.util.Set[_]].isAssignableFrom(clazz)
-  }
-  override def isCollectionType: Boolean = true
-}
-
-case class MapType(val clazz: Class[_], val keyType: Class[_], valueType: Class[_]) extends TypeInfo {
-  override def isMapType: Boolean = true
-}
-
-class PropertyDescriptor(val name: String, val typeinfo: TypeInfo, val getter: Option[Method], val setter: Option[Method], val isTransient: Boolean) {
-  def writable: Boolean = {
-    None != setter
-  }
-
-  def clazz: Class[_] = {
-    typeinfo.clazz
-  }
-
-  def readable: Boolean = {
-    None != getter
-  }
-}
-
-class ConstructorDescriptor(val constructor: Constructor[_], val args: Vector[TypeInfo])
-
-/**
- * defaultConstructorParams is 1 based
- */
-class BeanManifest(val properties: Map[String, PropertyDescriptor],
-    val constructors: List[ConstructorDescriptor], val defaultConstructorParams: Map[Int, Any]) {
-
-  def getGetter(property: String): Option[Method] = {
-    properties.get(property) match {
-      case Some(p) => p.getter
-      case None    => None
-    }
-  }
-
-  def getPropertyType(property: String): Option[Class[_]] = {
-    properties.get(property) match {
-      case Some(p) => Some(p.clazz)
-      case None    => None
-    }
-  }
-
-  def getSetter(property: String): Option[Method] = {
-    properties.get(property) match {
-      case Some(p) => p.setter
-      case None    => None
-    }
-  }
-
-  def readables: Map[String, PropertyDescriptor] = {
-    properties.filter(p => p._2.readable)
-  }
-  def writables: Map[String, PropertyDescriptor] = {
-    properties.filter(p => p._2.writable)
-  }
-
-  def getWritableProperties(): Set[String] = {
-    properties.filter(e => e._2.writable).keySet
-  }
-}
-
-object BeanManifest {
-
-  private val cache = new IdentityCache[Class[_], BeanManifest]
+object BeanInfos {
   /**
-   * Support scala case class
+   * Ignore scala case class methods
    */
   private val ignores = Set("hashCode", "toString", "productArity", "productPrefix", "productIterator")
 
-  import scala.reflect.runtime.{ universe => ru }
-  def forType[T](clazz: Class[T])(implicit ttag: ru.TypeTag[T] = null, manifest: Manifest[T]): BeanManifest = {
+  val Default = new BeanInfos()
+
+  def get(clazz: Class[_]): BeanInfo = {
+    Default.get(clazz)
+  }
+  def get(obj: Any): BeanInfo = {
+    Default.get(obj.getClass, null)
+  }
+  def get(clazz: Class[_], typ: ru.Type): BeanInfo = {
+    Default.get(clazz, typ)
+  }
+  def forType[T](clazz: Class[T])(implicit ttag: ru.TypeTag[T] = null, manifest: Manifest[T]): BeanInfo = {
+    Default.forType(clazz)(ttag, manifest)
+  }
+}
+
+class BeanInfos {
+  private val cache = new IdentityCache[Class[_], BeanInfo]
+
+  def clear() {
+    val i = cache.keysIterator
+    while (i.hasNext) cache.remove(i.next())
+  }
+
+  def forType[T](clazz: Class[T])(implicit ttag: ru.TypeTag[T] = null, manifest: Manifest[T]): BeanInfo = {
     assert(null != ttag && manifest.runtimeClass != classOf[Object])
     get(clazz, ttag.tpe)
   }
 
-  def get(obj: Any): BeanManifest = {
+  def get(obj: Any): BeanInfo = {
     get(obj.getClass, null)
   }
 
@@ -190,14 +76,14 @@ object BeanManifest {
    * DON'T using get(class,tye=null) style definition,for scala with invoke get(obj:Any) when invocation is get(someClass).
    * So Don't using default argument and argument overload together.
    */
-  def get(clazz: Class[_]): BeanManifest = {
+  def get(clazz: Class[_]): BeanInfo = {
     get(clazz, null)
   }
   /**
    * Get BeanManifest from cache or load it by type.
    * It search from cache, when failure build it and put it into cache.
    */
-  def get(clazz: Class[_], tpe: ru.Type): BeanManifest = {
+  def get(clazz: Class[_], tpe: ru.Type): BeanInfo = {
     var exist = cache.get(clazz)
     if (null == exist) {
       exist = load(clazz, tpe)
@@ -208,7 +94,7 @@ object BeanManifest {
   /**
    * Load BeanManifest using reflections
    */
-  def load(clazz: Class[_], tpe: ru.Type = null): BeanManifest = {
+  private def load(clazz: Class[_], tpe: ru.Type = null): BeanInfo = {
     val getters = new mutable.HashMap[String, Getter]
     val setters = new mutable.HashMap[String, Setter]
     var nextClass = clazz
@@ -278,14 +164,11 @@ object BeanManifest {
     allprops foreach { p =>
       val getter = filterGetters.get(p)
       val setter = setters.get(p)
-      var clazz = if (None == getter) setter.get.parameterTypes(0) else getter.get.returnType
+      val clazz = if (None == getter) setter.get.parameterTypes(0) else getter.get.returnType
 
       val typeinfo =
-        if (clazz == classOf[Object] && null != tpe) {
-          var typeName = tpe.member(ru.TermName(p)).typeSignatureIn(tpe).erasure.toString
-          typeName = Strings.replace(typeName, "()", "")
-          clazz = ClassLoaders.load(typeName)
-          ElementType(clazz)
+        if (null != tpe) {
+          typeof(clazz, tpe, p)
         } else {
           TypeInfo.of(clazz, if (None == getter) setter.get.method.getGenericParameterTypes()(0) else getter.get.method.getGenericReturnType)
         }
@@ -323,7 +206,37 @@ object BeanManifest {
           params.toMap
         case None => Map.empty
       }
-    new BeanManifest(properties.toMap, ctors.toList, defaultConstructorParams)
+    new BeanInfo(properties.toMap, ctors.toList, defaultConstructorParams)
+  }
+
+  /**
+   * Get TypeInfo using scala type
+   */
+  private def typeof(clazz: Class[_], typ: ru.Type, name: String): TypeInfo = {
+    if (clazz == classOf[Object]) {
+      var typeName = typ.member(ru.TermName(name)).typeSignatureIn(typ).erasure.toString
+      ElementType(ClassLoaders.load(Strings.replace(typeName, "()", "")))
+    } else if (clazz == classOf[Option[_]]) {
+      val a = typ.member(ru.TermName(name)).typeSignatureIn(typ)
+      val innerType = a.resultType.typeArgs.head.toString
+      CollectionType(clazz, ClassLoaders.load(innerType))
+    } else if (TypeInfo.isCollectionType(clazz)) {
+      if (clazz.isArray) {
+        CollectionType(clazz, clazz.getComponentType)
+      } else {
+        val typeSignature = typ.member(ru.TermName(name)).typeSignatureIn(typ).toString
+        val elementName = Strings.substringBetween(typeSignature, "[", "]")
+        CollectionType(clazz, ClassLoaders.load(elementName))
+      }
+    } else if (TypeInfo.isMapType(clazz)) {
+      val typeSignature = typ.member(ru.TermName(name)).typeSignatureIn(typ).toString
+      val kvtype = Strings.substringBetween(typeSignature, "[", "]")
+      val mapKeyType = Strings.substringBefore(kvtype, ",").trim
+      val mapEleType = Strings.substringAfter(kvtype, ",").trim
+      MapType(clazz, ClassLoaders.load(mapKeyType), ClassLoaders.load(mapEleType))
+    } else {
+      ElementType(clazz)
+    }
   }
 
   private def extract(t: java.lang.reflect.Type, types: collection.Map[String, Class[_]]): Class[_] = {
@@ -343,7 +256,7 @@ object BeanManifest {
     if (Modifier.isStatic(modifiers) || !Modifier.isPublic(modifiers) || method.isBridge) return None
 
     val name = method.getName
-    if (name.contains("$") && !name.contains("_$eq") || name.startsWith("_") || ignores.contains(name)) return None
+    if (name.contains("$") && !name.contains("_$eq") || name.startsWith("_") || BeanInfos.ignores.contains(name)) return None
 
     val parameterTypes = method.getParameterTypes
     if (0 == parameterTypes.length && method.getReturnType != classOf[Unit]) {

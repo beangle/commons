@@ -19,22 +19,44 @@
 package org.beangle.commons.bean
 
 import java.lang.reflect.{ Array => Jarray }
-import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.Throwables
-import org.beangle.commons.lang.reflect.BeanManifest
-import org.beangle.commons.lang.reflect.MethodInfo
-import org.beangle.commons.conversion.Conversion
+import org.beangle.commons.lang.{ Strings, Throwables }
+import org.beangle.commons.lang.reflect.{ BeanInfo, MethodInfo, BeanInfos }
 import org.beangle.commons.conversion.impl.DefaultConversion
-import scala.collection.Map
-import scala.collection.mutable
+import org.beangle.commons.conversion.Conversion
+import org.beangle.commons.lang.reflect.MapType
 
 object Properties {
+  private val Default = new Properties(BeanInfos.Default, DefaultConversion.Instance)
+
+  def set(bean: AnyRef, propertyName: String, value: Any): Any = {
+    Default.set(bean, propertyName, value)
+  }
+  def get[T <: Any](inputBean: Any, propertyName: String): T = {
+    Default.get(inputBean, propertyName)
+  }
+  def copy(bean: AnyRef, propertyName: String, value: Any): Any = {
+    Default.copy(bean, propertyName, value)
+  }
+  def isWriteable(bean: AnyRef, name: String): Boolean = {
+    Default.isWriteable(bean, name)
+  }
+
+  def getType(clazz: Class[_], name: String): Class[_] = {
+    Default.getType(clazz, name)
+  }
+
+  def writables(clazz: Class[_]): Set[String] = {
+    Default.writables(clazz)
+  }
+}
+
+class Properties(beanInfos: BeanInfos, conversion: Conversion) {
 
   private val resolver = new PropertyNameResolver()
 
   @throws(classOf[NoSuchMethodException])
-  def set(bean: AnyRef, name: String, value: Any) {
-    copy(bean, name, value, null)
+  def set(bean: AnyRef, propertyName: String, value: Any): Any = {
+    copy(bean, propertyName, value, null)
   }
 
   def get[T <: Any](inputBean: Any, propertyName: String): T = {
@@ -43,10 +65,11 @@ object Properties {
     while (resolver.hasNested(name)) {
       val next = resolver.next(name)
       result =
-        if (result.isInstanceOf[Map[_, _]]) { getPropertyOfMapBean(result.asInstanceOf[Map[Any, _]], next) }
-        else if (resolver.isMapped(next)) { getMappedProperty(result, next) }
-        else if (resolver.isIndexed(next)) { getIndexedProperty(result, next) }
-        else { getSimpleProperty(result, next) }
+        if (result.isInstanceOf[Map[_, _]]) getPropertyOfMapBean(result.asInstanceOf[Map[Any, _]], next)
+        else if (resolver.isMapped(next)) getMappedProperty(result, next)
+        else if (resolver.isIndexed(next)) getIndexedProperty(result, next)
+        else getSimpleProperty(result, next)
+
       if (result == null) return null.asInstanceOf[T]
       name = resolver.remove(name)
     }
@@ -57,25 +80,35 @@ object Properties {
     result.asInstanceOf[T]
   }
 
-  def copy(bean: AnyRef, propertyName: String, value: Any, conversion: Conversion): Any = {
+  def copy(bean: AnyRef, propertyName: String, value: Any): Any = {
+    copy(bean, propertyName, value, this.conversion)
+  }
+
+  def isWriteable(bean: AnyRef, name: String): Boolean = {
+    beanInfos.get(bean).getSetter(name).isDefined
+  }
+
+  def getType(clazz: Class[_], name: String): Class[_] = {
+    beanInfos.get(clazz).getPropertyType(name).orNull
+  }
+
+  def writables(clazz: Class[_]): Set[String] = {
+    beanInfos.get(clazz).getWritableProperties
+  }
+
+  private def copy(bean: AnyRef, propertyName: String, value: Any, conversion: Conversion): Any = {
     var result: Any = bean
     var name = propertyName
     while (resolver.hasNested(name)) {
-      val next = resolver.next(name)
-      result =
-        if (bean.isInstanceOf[Map[_, _]]) getPropertyOfMapBean(result.asInstanceOf[Map[Any, _]], next)
-        else if (resolver.isMapped(next)) getMappedProperty(result, next)
-        else if (resolver.isIndexed(next)) getIndexedProperty(result, next)
-        else getSimpleProperty(result, next)
-
+      result = getDirectProperty(result, resolver.next(name))
       if (result == null) throw new RuntimeException("Null property value for '" + name + "' on bean class '" + bean.getClass + "'")
       name = resolver.remove(name)
     }
 
-    if (result.isInstanceOf[mutable.Map[_, _]]) {
-      setPropertyOfMapBean(result.asInstanceOf[mutable.Map[Any, Any]], name, value)
+    if (result.isInstanceOf[collection.mutable.Map[_, _]] || result.isInstanceOf[java.util.Map[_, _]]) {
+      setPropertyOfMapBean(result.asInstanceOf[collection.mutable.Map[Any, Any]], name, value)
     } else if (resolver.isMapped(name)) {
-      setMappedProperty(result, name, value)
+      copyMappedProperty(result, name, value)
     } else if (resolver.isIndexed(name)) {
       return copyIndexedProperty(result, name, value, conversion)
     } else {
@@ -83,29 +116,19 @@ object Properties {
     }
     return value
   }
-
-  def copy(bean: AnyRef, name: String, value: AnyRef): Any = {
-    copy(bean, name, value, DefaultConversion.Instance)
+  private def getDirectProperty(result: Any, name: String): Any = {
+    if (result.isInstanceOf[Map[_, _]]) getPropertyOfMapBean(result.asInstanceOf[Map[Any, _]], name)
+    else if (resolver.isMapped(name)) getMappedProperty(result, name)
+    else if (resolver.isIndexed(name)) getIndexedProperty(result, name)
+    else getSimpleProperty(result, name)
   }
 
-  def isWriteable(bean: AnyRef, name: String): Boolean = {
-    BeanManifest.get(bean).getSetter(name).isDefined
-  }
-
-  def getType(clazz: Class[_], name: String): Class[_] = {
-    BeanManifest.get(clazz).getPropertyType(name).orNull
-  }
-
-  def writables(clazz: Class[_]): Set[String] = {
-    BeanManifest.get(clazz).getWritableProperties
-  }
-
-  private def getSimpleProperty[T](bean: Any, name: String): T = {
-    BeanManifest.get(bean).getGetter(name) match {
-      case Some(method) => method.invoke(bean).asInstanceOf[T]
+  private def getSimpleProperty(bean: Any, name: String): Any = {
+    beanInfos.get(bean).getGetter(name) match {
+      case Some(method) => method.invoke(bean)
       case _ =>
         System.err.println("Cannot find get" + Strings.capitalize(name) + " in " + bean.getClass)
-        null.asInstanceOf[T]
+        null
     }
   }
 
@@ -121,8 +144,8 @@ object Properties {
     if (key == null) {
       throw new IllegalArgumentException("Invalid mapped property '" + name + "'")
     }
-    val value = getSimpleProperty[Map[Any, _]](bean, resolver.getProperty(name))
-    if (null == value) null else value.get(key).orNull
+    val value = getSimpleProperty(bean, resolver.getProperty(name))
+    if (null == value) null else getMapped(value, key)
   }
 
   private def getIndexedProperty(bean: Any, name: String): Any = {
@@ -130,13 +153,13 @@ object Properties {
     if (index < 0) {
       throw new IllegalArgumentException("Invalid indexed property '" + name + "'")
     }
-    val value = getSimpleProperty[AnyRef](bean, resolver.getProperty(name))
+    val value = getSimpleProperty(bean, resolver.getProperty(name))
     if (null == value) return null
-    if (value.getClass.isArray) Jarray.get(value, index) else value.asInstanceOf[Seq[_]](index)
+    if (value.getClass.isArray) Jarray.get(value, index) else getIndexed(value, index)
   }
 
   private def copySimpleProperty(bean: Any, name: String, value: Any, conversion: Conversion): Any = {
-    val manifest = BeanManifest.get(bean)
+    val manifest = beanInfos.get(bean)
     val info = manifest.getSetter(name) match {
       case Some(method) => {
         val converted = if (null == conversion) value else conversion.convert(value, manifest.getPropertyType(name).get)
@@ -169,14 +192,13 @@ object Properties {
     if (rs.getClass.isArray) {
       if (null != conversion) converted = conversion.convert(value, rs.getClass().getComponentType())
       Jarray.set(rs, index, value)
-    } else if (rs.isInstanceOf[mutable.Seq[_]]) {
-      rs.asInstanceOf[mutable.Seq[Any]].update(index, value)
+    } else {
+      setIndexed(rs, index, value)
     }
     return converted
   }
 
-  private def setMappedProperty(bean: Any, name: String, value: Any) {
-    // Identify the key of the requested individual property
+  private def getMappedKey(name: String, bean: Any): String = {
     var key: String = null
     try {
       key = resolver.getKey(name)
@@ -186,24 +208,69 @@ object Properties {
     }
     if (key == null) throw new IllegalArgumentException("Invalid mapped property '" + name
       + "' on bean class '" + bean.getClass() + "'")
-
-    // Isolate the name
+    key;
+  }
+  private def setMappedProperty(bean: Any, name: String, value: Any) {
+    val key = getMappedKey(name, bean)
     val resolvedName = resolver.getProperty(name)
     val rs = if (resolvedName != null && resolvedName.length() >= 0) getSimpleProperty(bean, resolvedName) else bean
-    if (rs.isInstanceOf[mutable.Map[_, _]]) rs.asInstanceOf[mutable.Map[Any, Any]].put(key, value)
+    setMapped(rs, key, value)
   }
 
-  private def setPropertyOfMapBean(bean: mutable.Map[Any, Any], propertyName: String, value: Any) {
+  private def copyMappedProperty(bean: Any, name: String, value: Any) {
+    val key = getMappedKey(name, bean)
+    val resolvedName = resolver.getProperty(name)
+    val rs = if (resolvedName != null && resolvedName.length() >= 0) getSimpleProperty(bean, resolvedName) else bean
+    val typeInfo = beanInfos.get(bean).getPropertyTypeInfo(resolvedName).get.asInstanceOf[MapType]
+    val key1 = conversion.convert(key, typeInfo.keyType)
+    val value1 = conversion.convert(value, typeInfo.valueType)
+    setMapped(rs, key1, value1)
+  }
+  private def setPropertyOfMapBean(bean: Any, propertyName: String, value: Any) {
     var pname = propertyName
     if (resolver.isMapped(propertyName)) {
       val name = resolver.getProperty(propertyName)
       if (name == null || name.length() == 0)
         pname = resolver.getKey(propertyName)
-
     }
     if (resolver.isIndexed(pname) || resolver.isMapped(pname)) throw new IllegalArgumentException(
       "Indexed or mapped properties are not supported on" + " objects of type Map: " + pname)
-    bean.put(pname, value)
+    setMapped(bean, pname, value)
   }
 
+  private def getIndexed(bean: Any, index: Int): Any = {
+    bean match {
+      case null                 => null
+      case s: collection.Seq[_] => s(index)
+      case x: java.util.List[_] => x.get(index)
+      case _                    => throw new RuntimeException("Don't support getIndexed on " + bean.getClass())
+    }
+  }
+
+  private def setIndexed(bean: Any, index: Int, value: Any): Unit = {
+    bean match {
+      case null                           =>
+      case s: collection.mutable.Seq[Any] => s.update(index, value)
+      case x: java.util.List[Any]         => x.set(index, value)
+      case _                              => throw new RuntimeException("Don't support setIndexed on " + bean.getClass())
+    }
+  }
+
+  private def setMapped(bean: Any, key: Any, value: Any): Unit = {
+    bean match {
+      case null                                =>
+      case s: collection.mutable.Map[Any, Any] => s.put(key, value)
+      case x: java.util.Map[Any, Any]          => x.put(key, value)
+      case _                                   => throw new RuntimeException("Don't support setMaped on " + bean.getClass())
+    }
+  }
+
+  private def getMapped(bean: Any, key: Any): Any = {
+    bean match {
+      case null                                =>
+      case s: collection.mutable.Map[Any, Any] => s.get(key).orNull
+      case x: java.util.Map[Any, Any]          => x.get(key)
+      case _                                   => throw new RuntimeException("Don't support setMaped on " + bean.getClass())
+    }
+  }
 }

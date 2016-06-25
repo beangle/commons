@@ -32,15 +32,17 @@ class TestBean {
 
   var intValue: Int = _
 
+  var javaMap: java.util.Map[Int, String] = _
+
   var testEnum: TestEnum.TestVal = _
 
   def methodWithManyArguments(i: Int,
-    f: Float,
-    I: java.lang.Integer,
-    F: java.lang.Float,
-    c: TestBean,
-    c1: TestBean,
-    c2: TestBean): String = "test"
+                              f: Float,
+                              I: java.lang.Integer,
+                              F: java.lang.Float,
+                              c: TestBean,
+                              c1: TestBean,
+                              c2: TestBean): String = "test"
 
   @description("method1")
   def method1(a: Long): Unit = {
@@ -96,8 +98,11 @@ class Book extends NumIdBean[java.lang.Long] {
   def myId = id
 
   var name = "book"
-  val version = "3.0"
 
+  var versions: List[Int] = _
+
+  var versionSales: Map[Int, java.lang.Integer] = _
+  var versionSales2: java.util.Map[Int, java.lang.Integer] = _
   def isEmpty = false
 
   var authors: List[Author] = _
@@ -115,7 +120,9 @@ class AbstractEntity[ID](val id: ID)
 
 class NumberIdBean[T <: Number](id: T) extends AbstractEntity[T](id)
 
-class Author(id: Integer) extends NumberIdBean[Integer](id)
+class Author(id: Integer) extends NumberIdBean[Integer](id) {
+  var age: Option[Int] = _
+}
 
 class BigBookStore(val department: Seq[Department], val books: Map[String, Book]) {
   var properties: java.util.Properties = _
@@ -141,4 +148,3 @@ trait Hierarchical[T] {
 class Department extends NumIdBean[Long] with Hierarchical[Department] {
   var name = "department"
 }
-
