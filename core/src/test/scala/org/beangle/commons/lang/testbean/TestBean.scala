@@ -36,6 +36,8 @@ class TestBean {
 
   var testEnum: TestEnum.TestVal = _
 
+  var parent: Option[TestBean] = None
+
   def methodWithManyArguments(i: Int,
                               f: Float,
                               I: java.lang.Integer,

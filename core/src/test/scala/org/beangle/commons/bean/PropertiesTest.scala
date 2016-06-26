@@ -19,14 +19,13 @@
 package org.beangle.commons.bean
 
 import org.beangle.commons.lang.testbean.TestBean
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 import org.beangle.commons.lang.reflect.BeanInfos
+import org.junit.runner.RunWith
+import org.scalatest.{ FunSpec, Matchers }
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class PropertiesSpec extends FunSpec with Matchers {
+class PropertiesTest extends FunSpec with Matchers {
 
   describe("Properties") {
     it("Get or Set property") {
@@ -38,6 +37,22 @@ class PropertiesSpec extends FunSpec with Matchers {
       bean.javaMap = new java.util.HashMap[Int, String]
       Properties.copy(bean, "javaMap(1)", "2")
       bean.javaMap.get(1) should be("2")
+    }
+
+    it("get option nested value") {
+      BeanInfos.forType(classOf[TestBean]).properties("javaMap")
+      val bean = new TestBean
+      var parent = new TestBean
+      parent.id = 2
+      val a = Properties.get[Object](bean, "parent.id")
+      assert(null == a)
+      bean.parent = Some(parent)
+      val b = Properties.get[Object](bean, "parent.id")
+      assert(2 == b)
+
+      Properties.set(bean, "parent.id", 4)
+      val c = Properties.get[Object](bean, "parent.id")
+      assert(4 == c)
     }
   }
 }

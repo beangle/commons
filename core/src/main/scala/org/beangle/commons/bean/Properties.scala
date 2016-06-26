@@ -70,7 +70,10 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
         else if (resolver.isIndexed(next)) getIndexedProperty(result, next)
         else getSimpleProperty(result, next)
 
-      if (result == null) return null.asInstanceOf[T]
+      if (null != result && result.isInstanceOf[Option[_]]) {
+        result = result.asInstanceOf[Option[_]].getOrElse(null)
+      }
+      if (null == result) return null.asInstanceOf[T]
       name = resolver.remove(name)
     }
     result = if (result.isInstanceOf[Map[_, _]]) getPropertyOfMapBean(result.asInstanceOf[Map[Any, _]], name)
@@ -101,6 +104,9 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
     var name = propertyName
     while (resolver.hasNested(name)) {
       result = getDirectProperty(result, resolver.next(name))
+      if (null != result && result.isInstanceOf[Option[_]]) {
+        result = result.asInstanceOf[Option[_]].getOrElse(null)
+      }
       if (result == null) throw new RuntimeException("Null property value for '" + name + "' on bean class '" + bean.getClass + "'")
       name = resolver.remove(name)
     }
