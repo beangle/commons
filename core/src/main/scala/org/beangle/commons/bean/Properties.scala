@@ -21,9 +21,9 @@ package org.beangle.commons.bean
 import java.lang.reflect.{ Array => Jarray }
 import org.beangle.commons.lang.{ Strings, Throwables }
 import org.beangle.commons.lang.reflect.{ BeanInfo, MethodInfo, BeanInfos }
+import org.beangle.commons.lang.reflect.{ MapType, TypeInfo, CollectionType }
 import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.conversion.Conversion
-import org.beangle.commons.lang.reflect.MapType
 
 object Properties {
   private val Default = new Properties(BeanInfos.Default, DefaultConversion.Instance)
@@ -168,7 +168,8 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
     val manifest = beanInfos.get(bean)
     val info = manifest.getSetter(name) match {
       case Some(method) => {
-        val converted = if (null == conversion) value else conversion.convert(value, manifest.getPropertyType(name).get)
+        val p = manifest.properties(name)
+        val converted = convert(value, p.clazz, p.typeinfo, conversion)
         method.invoke(bean, converted.asInstanceOf[Object])
         converted
       }
@@ -196,7 +197,7 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
 
     var converted = value
     if (rs.getClass.isArray) {
-      if (null != conversion) converted = conversion.convert(value, rs.getClass().getComponentType())
+      converted = convert(value, rs.getClass().getComponentType(), null, conversion)
       Jarray.set(rs, index, value)
     } else {
       setIndexed(rs, index, value)
@@ -215,6 +216,24 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
     if (key == null) throw new IllegalArgumentException("Invalid mapped property '" + name
       + "' on bean class '" + bean.getClass() + "'")
     key;
+  }
+  private def convert(value: Any, clazz: Class[_], typeInfo: TypeInfo, conversion: Conversion): Any = {
+    if (null == conversion) { value }
+    else {
+      if (classOf[Option[_]].isAssignableFrom(clazz)) {
+        if (null == value) {
+          None
+        } else if (value.isInstanceOf[Option[_]]) {
+          value
+        } else if (null != typeInfo) {
+          Option(conversion.convert(value, typeInfo.asInstanceOf[CollectionType].componentType))
+        } else {
+          None
+        }
+      } else {
+        conversion.convert(value, clazz)
+      }
+    }
   }
   private def setMappedProperty(bean: Any, name: String, value: Any) {
     val key = getMappedKey(name, bean)

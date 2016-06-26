@@ -53,6 +53,21 @@ class PropertiesTest extends FunSpec with Matchers {
       Properties.set(bean, "parent.id", 4)
       val c = Properties.get[Object](bean, "parent.id")
       assert(4 == c)
+
+      Properties.copy(bean, "parent", "")
+      assert(Properties.get[Object](bean, "parent") == None)
+
+      Properties.copy(bean, "parent", null)
+      assert(Properties.get[Object](bean, "parent") == None)
+
+      Properties.copy(bean, "parent", None)
+      assert(Properties.get[Object](bean, "parent") == None)
+
+      Properties.copy(bean, "parent", parent)
+      assert(Properties.get[Object](bean, "parent") == Some(parent))
+
+      Properties.copy(bean, "parent", Some(parent))
+      assert(Properties.get[Object](bean, "parent") == Some(parent))
     }
   }
 }

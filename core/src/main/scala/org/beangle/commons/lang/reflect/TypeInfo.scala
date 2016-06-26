@@ -31,8 +31,6 @@ sealed trait TypeInfo {
   def isElementType: Boolean = false
   def isCollectionType: Boolean = false
   def isMapType: Boolean = false
-  @deprecated
-  def isSetType: Boolean = false
 }
 
 object TypeInfo {
@@ -99,10 +97,14 @@ case class ElementType(val clazz: Class[_]) extends TypeInfo {
 }
 
 case class CollectionType(val clazz: Class[_], val componentType: Class[_]) extends TypeInfo {
-  override def isSetType: Boolean = {
+  def isSetType: Boolean = {
     classOf[collection.Set[_]].isAssignableFrom(clazz) || classOf[java.util.Set[_]].isAssignableFrom(clazz)
   }
   override def isCollectionType: Boolean = true
+
+  def isOptionType: Boolean = {
+    classOf[Option[_]].isAssignableFrom(clazz)
+  }
 }
 
 case class MapType(val clazz: Class[_], val keyType: Class[_], valueType: Class[_]) extends TypeInfo {
