@@ -217,24 +217,23 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
       + "' on bean class '" + bean.getClass() + "'")
     key;
   }
+
   private def convert(value: Any, clazz: Class[_], typeInfo: TypeInfo, conversion: Conversion): Any = {
-    if (null == conversion) { value }
-    else {
-      if (classOf[Option[_]].isAssignableFrom(clazz)) {
-        if (null == value) {
-          None
-        } else if (value.isInstanceOf[Option[_]]) {
-          value
-        } else if (null != typeInfo) {
-          Option(conversion.convert(value, typeInfo.asInstanceOf[CollectionType].componentType))
-        } else {
-          None
-        }
+    if (classOf[Option[_]].isAssignableFrom(clazz)) {
+      if (null == value) {
+        None
+      } else if (value.isInstanceOf[Option[_]]) {
+        value
+      } else if (null != typeInfo) {
+        if (null == conversion) Option(value) else Option(conversion.convert(value, typeInfo.asInstanceOf[CollectionType].componentType))
       } else {
-        conversion.convert(value, clazz)
+        Option(value)
       }
+    } else {
+      if (null == conversion) value else conversion.convert(value, clazz)
     }
   }
+
   private def setMappedProperty(bean: Any, name: String, value: Any) {
     val key = getMappedKey(name, bean)
     val resolvedName = resolver.getProperty(name)

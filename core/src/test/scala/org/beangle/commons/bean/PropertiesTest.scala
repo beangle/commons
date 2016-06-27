@@ -69,5 +69,17 @@ class PropertiesTest extends FunSpec with Matchers {
       Properties.copy(bean, "parent", Some(parent))
       assert(Properties.get[Object](bean, "parent") == Some(parent))
     }
+
+    it("get set option[primitives]") {
+      BeanInfos.forType(classOf[TestBean]).properties("javaMap")
+      val bean = new TestBean
+      var parent = new TestBean
+
+      Properties.set(bean, "age", 4)
+      assert(bean.age == Some(4))
+
+      Properties.set(bean, "age", null)
+      assert(bean.age == None)
+    }
   }
 }

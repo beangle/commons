@@ -32,6 +32,8 @@ class TestBean {
 
   var intValue: Int = _
 
+  var age: Option[Int] = _
+
   var javaMap: java.util.Map[Int, String] = _
 
   var testEnum: TestEnum.TestVal = _
