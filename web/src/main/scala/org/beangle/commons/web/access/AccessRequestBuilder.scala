@@ -19,9 +19,6 @@
 package org.beangle.commons.web.access
 
 import javax.servlet.http.HttpServletRequest
-//remove if not needed
-import scala.collection.JavaConversions._
-
 /**
  * @author chaostone
  * @since 3.0.1

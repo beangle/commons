@@ -273,28 +273,28 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
 
   private def setIndexed(bean: Any, index: Int, value: Any): Unit = {
     bean match {
-      case null                           =>
-      case s: collection.mutable.Seq[Any] => s.update(index, value)
-      case x: java.util.List[Any]         => x.set(index, value)
-      case _                              => throw new RuntimeException("Don't support setIndexed on " + bean.getClass())
+      case null                         =>
+      case s: collection.mutable.Seq[_] => s.asInstanceOf[collection.mutable.Seq[Any]].update(index, value)
+      case x: java.util.List[_]         => x.asInstanceOf[java.util.List[Any]].set(index, value)
+      case _                            => throw new RuntimeException("Don't support setIndexed on " + bean.getClass())
     }
   }
 
   private def setMapped(bean: Any, key: Any, value: Any): Unit = {
     bean match {
-      case null                                =>
-      case s: collection.mutable.Map[Any, Any] => s.put(key, value)
-      case x: java.util.Map[Any, Any]          => x.put(key, value)
-      case _                                   => throw new RuntimeException("Don't support setMaped on " + bean.getClass())
+      case null                            =>
+      case s: collection.mutable.Map[_, _] => s.asInstanceOf[collection.mutable.Map[Any, Any]].put(key, value)
+      case x: java.util.Map[_, _]          => x.asInstanceOf[java.util.Map[Any, Any]].put(key, value)
+      case _                               => throw new RuntimeException("Don't support setMaped on " + bean.getClass())
     }
   }
 
   private def getMapped(bean: Any, key: Any): Any = {
     bean match {
-      case null                                =>
-      case s: collection.mutable.Map[Any, Any] => s.get(key).orNull
-      case x: java.util.Map[Any, Any]          => x.get(key)
-      case _                                   => throw new RuntimeException("Don't support setMaped on " + bean.getClass())
+      case null                            =>
+      case s: collection.mutable.Map[_, _] => s.asInstanceOf[collection.mutable.Map[Any, _]].get(key).orNull
+      case x: java.util.Map[_, _]          => x.get(key)
+      case _                               => throw new RuntimeException("Don't support getMapped on " + bean.getClass())
     }
   }
 }

@@ -26,8 +26,6 @@ import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import org.beangle.commons.web.filter.GenericHttpFilter
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * Access monitor filter

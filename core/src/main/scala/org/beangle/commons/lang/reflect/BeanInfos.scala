@@ -97,9 +97,10 @@ class BeanInfos {
   private def load(clazz: Class[_], tpe: ru.Type = null): BeanInfo = {
     val getters = new mutable.HashMap[String, Getter]
     val setters = new mutable.HashMap[String, Setter]
+    val fields = new mutable.HashSet[String]
+    val interfaceSets = new mutable.HashSet[Class[_]]
     var nextClass = clazz
     var paramTypes: collection.Map[String, Class[_]] = Map.empty
-    val fields = new mutable.HashSet[String]
     while (null != nextClass && classOf[AnyRef] != nextClass) {
       val declaredMethods = nextClass.getDeclaredMethods
       nextClass.getDeclaredFields() foreach { f => fields += f.getName }
@@ -118,46 +119,18 @@ class BeanInfos {
           case None =>
         }
       }
+      navIterface(nextClass, interfaceSets, getters, setters, paramTypes)
+
       val nextType = nextClass.getGenericSuperclass
       nextClass = nextClass.getSuperclass
-      paramTypes = nextType match {
-        case ptSuper: ParameterizedType =>
-          val tmp = new mutable.HashMap[String, Class[_]]
-          val ps = ptSuper.getActualTypeArguments
-          val tvs = nextClass.getTypeParameters
-          (0 until ps.length) foreach { k =>
-            tmp.put(tvs(k).getName,
-              ps(k) match {
-                case c: Class[_]           => c
-                case tv: TypeVariable[_]   => paramTypes(tv.getName)
-                case pt: ParameterizedType => pt.getRawType.asInstanceOf[Class[_]]
-              })
-          }
-          tmp
-        case _ => Map.empty
-      }
+      paramTypes = getParamTypes(nextClass, nextType, paramTypes)
     }
 
     val filterGetters = getters.map {
       case (name, getter) =>
-        (name, Getter(getter.method, getter.returnType, getter.isTransient || !(setters.contains(name) || fields.contains(name))))
+        val logicTransient = !Modifier.isAbstract(getter.method.getModifiers) && !(setters.contains(name) || fields.contains(name))
+        (name, Getter(getter.method, getter.returnType, getter.isTransient || logicTransient))
     }
-
-    if (Modifier.isAbstract(clazz.getModifiers) || clazz.isInterface) {
-      clazz.getMethods foreach { method =>
-        if (Modifier.isAbstract(method.getModifiers)) {
-          findAccessor(method) foreach {
-            case (readable, name) =>
-              if (readable) {
-                filterGetters.put(name, Getter(method, method.getReturnType, method.isAnnotationPresent(classOf[Transient])))
-              } else {
-                setters.put(name, Setter(method, method.getParameterTypes))
-              }
-          }
-        }
-      }
-    }
-
     // organize setter and getter
     val allprops = filterGetters.keySet ++ setters.keySet
     val properties = Collections.newMap[String, PropertyDescriptor]
@@ -209,6 +182,61 @@ class BeanInfos {
     new BeanInfo(properties.toMap, ctors.toList, defaultConstructorParams)
   }
 
+  private def navIterface(clazz: Class[_], interfaceSets: mutable.HashSet[Class[_]],
+                          getters: mutable.HashMap[String, Getter], setters: mutable.HashMap[String, Setter],
+                          paramTypes: collection.Map[String, Class[_]]): Unit = {
+    if (null == clazz || classOf[AnyRef] == clazz) return ;
+    val interfaceTypes = clazz.getGenericInterfaces
+    val interfaces = clazz.getInterfaces
+    (0 until interfaceTypes.length) foreach { i =>
+      if (!interfaceSets.contains(interfaces(i))) {
+        interfaceSets.add(interfaces(i))
+        val interfaceParamTypes = getParamTypes(interfaces(i), interfaceTypes(i), paramTypes)
+        val interface = interfaces(i)
+        val declaredMethods = interface.getDeclaredMethods
+        (0 until declaredMethods.length) foreach { i =>
+          val method = declaredMethods(i)
+          findAccessor(method) match {
+            case Some(Tuple2(readable, name)) =>
+              if (readable) {
+                if (!getters.contains(name))
+                  getters.put(name, Getter(method, extract(method.getGenericReturnType, interfaceParamTypes), method.isAnnotationPresent(classOf[Transient])))
+              } else {
+                if (!setters.contains(name)) {
+                  val types = method.getGenericParameterTypes
+                  val paramsTypes = new Array[Class[_]](types.length)
+                  (0 until types.length) foreach { j => paramsTypes(j) = extract(types(j), interfaceParamTypes) }
+                  setters.put(name, Setter(method, paramsTypes))
+                }
+              }
+            case None =>
+          }
+        }
+        navIterface(interface, interfaceSets, getters, setters, paramTypes)
+      }
+    }
+  }
+  /**
+   * 得到类和对应泛型的参数信息
+   */
+  private def getParamTypes(clazz: Class[_], typ: java.lang.reflect.Type, paramTypes: collection.Map[String, Class[_]]): collection.Map[String, Class[_]] = {
+    typ match {
+      case ptSuper: ParameterizedType =>
+        val tmp = new mutable.HashMap[String, Class[_]]
+        val ps = ptSuper.getActualTypeArguments
+        val tvs = clazz.getTypeParameters
+        (0 until ps.length) foreach { k =>
+          val paramType = ps(k) match {
+            case c: Class[_]           => Some(c)
+            case tv: TypeVariable[_]   => paramTypes.get(tv.getName)
+            case pt: ParameterizedType => Some(pt.getRawType.asInstanceOf[Class[_]])
+          }
+          paramType foreach (pt => tmp.put(tvs(k).getName, pt))
+        }
+        tmp
+      case _ => Map.empty
+    }
+  }
   /**
    * Get TypeInfo using scala type
    */

@@ -170,7 +170,7 @@ object IOs {
       val properties = new ju.Properties()
       properties.load(input)
       close(input)
-      collection.JavaConversions.propertiesAsScalaMap(properties).toMap
+      collection.JavaConverters.propertiesAsScalaMap(properties).toMap
     }
   }
 
