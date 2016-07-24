@@ -34,20 +34,20 @@ object ClassInfo {
 /**
  * Class meta information.It contains method signature,property names
  */
-class ClassInfo(methodInfos: Map[String, Seq[MethodInfo]]) {
+class ClassInfo(val methods: Map[String, Seq[MethodInfo]]) {
   /**
    * Return public metheds according to given name
    */
   def getMethods(name: String): Seq[MethodInfo] = {
-    methodInfos.get(name).getOrElse(Seq.empty)
+    methods.get(name).getOrElse(Seq.empty)
   }
 
   /**
    * Return all public methods.
    */
-  def methods: Seq[MethodInfo] = {
+  def methodList: List[MethodInfo] = {
     val rs = new mutable.ListBuffer[MethodInfo]
-    for ((key, value) <- methodInfos; info <- value) rs += info
+    for ((key, value) <- methods; info <- value) rs += info
     rs.sorted.toList
   }
 
