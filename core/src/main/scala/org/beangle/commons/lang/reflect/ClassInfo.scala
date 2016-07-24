@@ -18,142 +18,37 @@
  */
 package org.beangle.commons.lang.reflect
 
-import java.lang.reflect.{ Method, Modifier, ParameterizedType, TypeVariable }
+import java.lang.reflect.Method
+
 import scala.collection.mutable
 import scala.language.existentials
+
 import org.beangle.commons.lang.Objects
-import org.beangle.commons.collection.IdentityCache
 
 object ClassInfo {
-
-  /**
-   * Java Object's method
-   */
-  val reservedMethodNames = Set("hashCode", "equals", "toString", "wait", "notify", "notifyAll", "getClass")
-  /**
-   * class info cache
-   */
-  var cache = new IdentityCache[Class[_], ClassInfo]
-
-  /**
-   * Return true when Method is public and not static and not volatile.
-   * <p>
-   * javassist.util.proxy.ProxyFactory.getMethods has error due to bridge method.
-   */
-  private def goodMethod(method: Method): Boolean = {
-    val modifiers = method.getModifiers
-    if (Modifier.isStatic(modifiers) || Modifier.isPrivate(modifiers)) return false
-    if (method.isBridge || reservedMethodNames.contains(method.getName)) return false
-    true
-  }
-
-  /**
-   * Load ClassInfo using reflections
-   */
-  def load(clazz: Class[_]): ClassInfo = {
-    val methods = new mutable.HashSet[MethodInfo]
-    var nextClass = clazz
-    var index = 0
-    var paramTypes: collection.Map[String, Class[_]] = Map.empty
-    while (null != nextClass && classOf[AnyRef] != nextClass) {
-      val declaredMethods = nextClass.getDeclaredMethods
-      (0 until declaredMethods.length) foreach { i =>
-        val method = declaredMethods(i)
-        if (goodMethod(method)) {
-          val types = method.getGenericParameterTypes
-          val paramsTypes = new Array[Class[_]](types.length)
-          (0 until types.length) foreach { j => paramsTypes(j) = extract(types(j), paramTypes) }
-          if (!methods.add(new MethodInfo(index, method, paramsTypes, extract(method.getGenericReturnType, paramTypes)))) index -= 1
-          index += 1
-        }
-      }
-      val nextType = nextClass.getGenericSuperclass
-      nextClass = nextClass.getSuperclass
-      paramTypes = nextType match {
-        case ptSuper: ParameterizedType =>
-          val tmp = new mutable.HashMap[String, Class[_]]
-          val ps = ptSuper.getActualTypeArguments
-          val tvs = nextClass.getTypeParameters
-          (0 until ps.length) foreach { k =>
-            tmp.put(tvs(k).getName,
-              ps(k) match {
-                case c: Class[_] => c
-                case tv: TypeVariable[_] => paramTypes(tv.getName)
-                case pt: ParameterizedType => pt.getRawType.asInstanceOf[Class[_]]
-              })
-          }
-          tmp
-        case _ => Map.empty
-      }
-    }
-    new ClassInfo(methods.toSeq)
-  }
-
-  private def extract(t: java.lang.reflect.Type, types: collection.Map[String, Class[_]]): Class[_] = {
-    t match {
-      case pt: ParameterizedType => pt.getRawType.asInstanceOf[Class[_]]
-      case tv: TypeVariable[_] => types.get(tv.getName).getOrElse(classOf[AnyRef])
-      case c: Class[_] => c
-      case _ => classOf[AnyRef]
-    }
-  }
-  /**
-   * Get ClassInfo from cache or load it by type.
-   * It search from cache, when failure build it and put it into cache.
-   */
-  def get(clazz: Class[_]): ClassInfo = {
-    var exist = cache.get(clazz)
-    if (null == exist) {
-      exist = load(clazz)
-      cache.put(clazz, exist)
-    }
-    exist
+  def apply(methodInfos: Seq[MethodInfo]): ClassInfo = {
+    new ClassInfo(methodInfos.groupBy(info => info.method.getName))
   }
 }
 
 /**
  * Class meta information.It contains method signature,property names
  */
-class ClassInfo(methodinfos: Seq[MethodInfo]) {
-
-  val methods: Map[String, Seq[MethodInfo]] = methodinfos.groupBy(info => info.method.getName)
-  /**
-   * unqiue method indexes,without any override
-   */
-  private val methodIndexs = methods.mapValues(ms => if (ms.size == 1) ms.head.index else -1).filter(e => e._2 > -1)
-
-  /**
-   * Return method index,return -1 if not found.
-   */
-  def getIndex(name: String, args: Any*): Int = {
-    methodIndexs.get(name) match {
-      case Some(index) => index
-      case _ =>
-        methods.get(name) match {
-          case Some(exists) =>
-            exists.find(_.matches(args)) match {
-              case Some(info) => info.index
-              case _ => -1
-            }
-          case _ => -1
-        }
-    }
-  }
-
+class ClassInfo(methodInfos: Map[String, Seq[MethodInfo]]) {
   /**
    * Return public metheds according to given name
    */
   def getMethods(name: String): Seq[MethodInfo] = {
-    methods.get(name).getOrElse(Seq.empty)
+    methodInfos.get(name).getOrElse(Seq.empty)
   }
 
   /**
    * Return all public methods.
    */
-  def getMethods(): Seq[MethodInfo] = {
-    val methodInfos = new mutable.ListBuffer[MethodInfo]
-    for ((key, value) <- methods; info <- value) methodInfos += info
-    methodInfos.sorted.toList
+  def methods: Seq[MethodInfo] = {
+    val rs = new mutable.ListBuffer[MethodInfo]
+    for ((key, value) <- methodInfos; info <- value) rs += info
+    rs.sorted.toList
   }
 
 }
@@ -161,9 +56,12 @@ class ClassInfo(methodinfos: Seq[MethodInfo]) {
 /**
  * Method name and return type and parameters type
  */
-class MethodInfo(val index: Int, val method: Method, val parameterTypes: Array[Class[_]], val returnType: Class[_]) extends Ordered[MethodInfo] {
+final class MethodInfo(val method: Method, val parameterTypes: Array[Class[_]], val returnType: Class[_])
+    extends Ordered[MethodInfo] {
 
-  override def compare(o: MethodInfo): Int = this.index - o.index
+  override def compare(o: MethodInfo): Int = {
+    this.method.getName.compareTo(o.method.getName)
+  }
 
   def matches(args: Any*): Boolean = {
     if (parameterTypes.length != args.length) return false

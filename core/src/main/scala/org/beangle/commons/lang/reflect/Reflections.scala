@@ -141,4 +141,26 @@ object Reflections {
       }
     } else (ann, method)
   }
+
+  /**
+   * 得到类和对应泛型的参数信息
+   */
+  def deduceParamTypes(clazz: Class[_], typ: java.lang.reflect.Type, paramTypes: collection.Map[String, Class[_]]): collection.Map[String, Class[_]] = {
+    typ match {
+      case ptSuper: ParameterizedType =>
+        val tmp = new collection.mutable.HashMap[String, Class[_]]
+        val ps = ptSuper.getActualTypeArguments
+        val tvs = clazz.getTypeParameters
+        (0 until ps.length) foreach { k =>
+          val paramType = ps(k) match {
+            case c: Class[_]           => Some(c)
+            case tv: TypeVariable[_]   => paramTypes.get(tv.getName)
+            case pt: ParameterizedType => Some(pt.getRawType.asInstanceOf[Class[_]])
+          }
+          paramType foreach (pt => tmp.put(tvs(k).getName, pt))
+        }
+        tmp
+      case _ => Map.empty
+    }
+  }
 }

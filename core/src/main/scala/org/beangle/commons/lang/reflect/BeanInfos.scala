@@ -29,6 +29,7 @@ import scala.reflect.runtime.{ universe => ru }
 import org.beangle.commons.collection.{ Collections, IdentityCache }
 import org.beangle.commons.lang.{ ClassLoaders, Strings }
 import org.beangle.commons.lang.Strings.{ substringAfter, substringBefore, uncapitalize }
+import org.beangle.commons.lang.reflect.Reflections.deduceParamTypes
 
 object BeanInfos {
   /**
@@ -123,7 +124,7 @@ class BeanInfos {
 
       val nextType = nextClass.getGenericSuperclass
       nextClass = nextClass.getSuperclass
-      paramTypes = getParamTypes(nextClass, nextType, paramTypes)
+      paramTypes = deduceParamTypes(nextClass, nextType, paramTypes)
     }
 
     val filterGetters = getters.map {
@@ -191,7 +192,7 @@ class BeanInfos {
     (0 until interfaceTypes.length) foreach { i =>
       if (!interfaceSets.contains(interfaces(i))) {
         interfaceSets.add(interfaces(i))
-        val interfaceParamTypes = getParamTypes(interfaces(i), interfaceTypes(i), paramTypes)
+        val interfaceParamTypes = deduceParamTypes(interfaces(i), interfaceTypes(i), paramTypes)
         val interface = interfaces(i)
         val declaredMethods = interface.getDeclaredMethods
         (0 until declaredMethods.length) foreach { i =>
@@ -214,27 +215,6 @@ class BeanInfos {
         }
         navIterface(interface, interfaceSets, getters, setters, paramTypes)
       }
-    }
-  }
-  /**
-   * 得到类和对应泛型的参数信息
-   */
-  private def getParamTypes(clazz: Class[_], typ: java.lang.reflect.Type, paramTypes: collection.Map[String, Class[_]]): collection.Map[String, Class[_]] = {
-    typ match {
-      case ptSuper: ParameterizedType =>
-        val tmp = new mutable.HashMap[String, Class[_]]
-        val ps = ptSuper.getActualTypeArguments
-        val tvs = clazz.getTypeParameters
-        (0 until ps.length) foreach { k =>
-          val paramType = ps(k) match {
-            case c: Class[_]           => Some(c)
-            case tv: TypeVariable[_]   => paramTypes.get(tv.getName)
-            case pt: ParameterizedType => Some(pt.getRawType.asInstanceOf[Class[_]])
-          }
-          paramType foreach (pt => tmp.put(tvs(k).getName, pt))
-        }
-        tmp
-      case _ => Map.empty
     }
   }
   /**
