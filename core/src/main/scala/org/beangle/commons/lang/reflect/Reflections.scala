@@ -116,8 +116,8 @@ object Reflections {
     val ann = method.getAnnotation(clazz)
     if (null == ann) {
       val delaringClass = method.getDeclaringClass
-      if (delaringClass == classOf[Object]) return false
       val superClass = delaringClass.getSuperclass
+      if (null == superClass) return false
       try {
         isAnnotationPresent(superClass.getMethod(method.getName(), method.getParameterTypes(): _*), clazz)
       } catch {
