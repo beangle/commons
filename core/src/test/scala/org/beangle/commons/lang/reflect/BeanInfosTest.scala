@@ -28,52 +28,71 @@ import org.beangle.commons.lang.testbean.BigBookStore
 import org.beangle.commons.cache.concurrent.ConcurrentMapCacheManager
 
 @RunWith(classOf[JUnitRunner])
-class BeanManifestTest extends FunSpec with Matchers {
-  describe("BeanManifest") {
+class BeanInfosTest extends FunSpec with Matchers {
+  describe("BeanInfos") {
     it("find real template parameter") {
-      assert(BeanManifest.get(classOf[Book]).getPropertyType("id") == Some(classOf[java.lang.Long]))
-      assert(BeanManifest.forType(classOf[BookPrimitiveId]).getPropertyType("id") == Some(classOf[Long]))
-      assert(BeanManifest.get(classOf[BookStore]).getPropertyType("id") == Some(classOf[String]))
-      assert(BeanManifest.get(classOf[Author]).getPropertyType("id") == Some(classOf[Integer]))
+      assert(BeanInfos.forType(classOf[Book]).getPropertyType("id") == Some(classOf[java.lang.Long]))
+      assert(BeanInfos.forType(classOf[BookPrimitiveId]).getPropertyType("id") == Some(classOf[Long]))
+      assert(BeanInfos.forType(classOf[BookStore]).getPropertyType("id") == Some(classOf[String]))
+      assert(BeanInfos.forType(classOf[Author]).getPropertyType("id") == Some(classOf[Integer]))
     }
 
     it("ignore normal read property") {
-      assert(BeanManifest.get(classOf[Book]).getGetter("empty").isDefined)
+      assert(BeanInfos.get(classOf[Book]).getGetter("empty").isDefined)
     }
     it("Can get iterface methods") {
       val method = classOf[NumIdBean[_]].getMethod("name")
       assert(Modifier.isAbstract(method.getModifiers))
-      assert(BeanManifest.get(classOf[NumIdBean[_]]).properties.size == 3)
+      assert(BeanInfos.get(classOf[NumIdBean[_]]).properties.size == 3)
 
-      assert(BeanManifest.get(classOf[Entity[_]]).properties.size == 3)
-      assert(BeanManifest.get(classOf[Entity[_]]).properties("persisted").isTransient)
-      assert(!BeanManifest.get(classOf[Entity[_]]).properties("id").isTransient)
+      assert(BeanInfos.get(classOf[Entity[_]]).properties.size == 3)
+      assert(BeanInfos.get(classOf[Entity[_]]).properties("persisted").isTransient)
+      assert(!BeanInfos.get(classOf[Entity[_]]).properties("id").isTransient)
     }
 
     it("Have correct virtual getter") {
-      val empty = BeanManifest.get(classOf[Book]).properties.get("empty")
+      val empty = BeanInfos.get(classOf[Book]).properties.get("empty")
       assert(empty.isDefined)
       assert(empty.get.isTransient)
     }
 
-    it("Have correct trait fields") {
-      val empty = BeanManifest.forType(classOf[Department]).properties.get("parent")
-      assert(empty.isDefined)
-      assert(empty.get.clazz == classOf[Department])
+    it("Have correct trait fields (template generic) type") {
+      val t = BeanInfos.forType(classOf[Department]).properties("parent")
+      val typeinfo = t.typeinfo
+      assert(typeinfo.isInstanceOf[CollectionType])
+      assert(typeinfo.asInstanceOf[CollectionType].componentType == classOf[Department])
+    }
+    it("find option inner type") {
+      val t = BeanInfos.get(classOf[Author]).properties("age")
+      val typeinfo = t.typeinfo
+      assert(typeinfo.isInstanceOf[CollectionType])
+      assert(typeinfo.asInstanceOf[CollectionType].componentType == classOf[Int])
     }
 
-    it("not null implicit value") {
-      val clazz = classOf[Department]
-      fun(clazz)
-    }
     it("find list author") {
-      val t = BeanManifest.get(classOf[Book]).properties("authors")
+      val t = BeanInfos.get(classOf[Book]).properties("authors")
       val typeinfo = t.typeinfo
       assert(typeinfo.isInstanceOf[CollectionType])
       assert(typeinfo.asInstanceOf[CollectionType].componentType == classOf[Author])
     }
+    it("find primitives") {
+      val bm = BeanInfos.get(classOf[Book])
+      val typeinfo = bm.properties("versions").typeinfo
+      assert(typeinfo.isInstanceOf[CollectionType])
+      assert(typeinfo.asInstanceOf[CollectionType].componentType == classOf[Int])
+
+      val typeinfo2 = bm.properties("versionSales").typeinfo
+      assert(typeinfo2.isInstanceOf[MapType])
+      assert(typeinfo2.asInstanceOf[MapType].keyType == classOf[Int])
+      assert(typeinfo2.asInstanceOf[MapType].valueType == classOf[Integer])
+
+      val typeinfo3 = bm.properties("versionSales2").typeinfo
+      assert(typeinfo3.isInstanceOf[MapType])
+      assert(typeinfo3.asInstanceOf[MapType].keyType == classOf[Int])
+      assert(typeinfo3.asInstanceOf[MapType].valueType == classOf[Integer])
+    }
     it("find corrent constructor info") {
-      val t = BeanManifest.get(classOf[BigBookStore])
+      val t = BeanInfos.get(classOf[BigBookStore])
       assert(!t.constructors.isEmpty)
       val ctor = t.constructors.head
       assert(2 == ctor.args.size)
@@ -102,13 +121,10 @@ class BeanManifestTest extends FunSpec with Matchers {
       assert(p2.typeinfo.asInstanceOf[MapType].valueType == classOf[Object])
     }
     it("find corrent default constructor parameters") {
-      val params = BeanManifest.get(classOf[ConcurrentMapCacheManager]).defaultConstructorParams
+      val params = BeanInfos.get(classOf[ConcurrentMapCacheManager]).defaultConstructorParams
       assert(params.size == 1)
       assert(params(1) == "concurrent")
     }
   }
 
-  def fun(c: Class[_]): BeanManifest = {
-    BeanManifest.get(c)
-  }
 }

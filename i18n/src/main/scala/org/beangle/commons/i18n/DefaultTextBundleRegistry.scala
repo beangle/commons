@@ -23,8 +23,6 @@ import java.nio.charset.Charset
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
-import scala.collection.JavaConversions.collectionAsScalaIterable
-
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.{ Charsets, ClassLoaders, Strings }
 import org.beangle.commons.lang.annotation.description
@@ -134,11 +132,10 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
     sb.toString
   }
 
-  import collection.JavaConversions._
   def getBundles(locale: Locale): List[TextBundle] = {
     caches.get(locale) match {
-      case Some(map) => map.values.toList
-      case None => List.empty
+      case Some(map) => collection.JavaConverters.collectionAsScalaIterable(map.values).toList
+      case None      => List.empty
     }
   }
 

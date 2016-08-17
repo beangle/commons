@@ -170,7 +170,7 @@ object IOs {
       val properties = new ju.Properties()
       properties.load(input)
       close(input)
-      collection.JavaConversions.propertiesAsScalaMap(properties).toMap
+      collection.JavaConverters.propertiesAsScalaMap(properties).toMap
     }
   }
 
@@ -189,6 +189,15 @@ object IOs {
       } catch {
         case ioe: Exception =>
       }
+    }
+  }
+
+  def using[T <: AutoCloseable, R](res: T)(func: T => R): R = {
+    try {
+      func(res)
+    } finally {
+      if (res != null)
+        res.close()
     }
   }
 

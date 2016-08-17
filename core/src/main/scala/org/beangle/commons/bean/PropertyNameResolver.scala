@@ -69,7 +69,8 @@ class PropertyNameResolver {
   def getIndex(expression: String): Int = {
     if (expression == null || expression.length == 0) return -1
 
-    Range(0, expression.length) foreach { i =>
+    var i = 0
+    while (i < expression.length) {
       val c = expression.charAt(i)
       if (c == Nested || c == MappedStart) {
         return -1
@@ -80,6 +81,7 @@ class PropertyNameResolver {
         if (value.length == 0) throw new IllegalArgumentException("No Index Value")
         return Integer.parseInt(value, 10)
       }
+      i += 1
     }
     -1
   }
@@ -94,7 +96,8 @@ class PropertyNameResolver {
   def getKey(expression: String): String = {
     if (expression == null || expression.length == 0) return null
 
-    Range(0, expression.length) foreach { i =>
+    var i = 0
+    while (i < expression.length) {
       val c = expression.charAt(i)
       if (c == Nested || c == IndexedStart) {
         return null
@@ -103,6 +106,7 @@ class PropertyNameResolver {
         if (end < 0) throw new IllegalArgumentException("Missing End Delimiter")
         return expression.substring(i + 1, end)
       }
+      i += 1
     }
     null
   }
@@ -116,10 +120,12 @@ class PropertyNameResolver {
   def getProperty(expression: String): String = {
     if (expression == null || expression.length == 0) return expression
 
-    Range(0, expression.length) foreach { i =>
+    var i = 0
+    while (i < expression.length) {
       val c = expression.charAt(i)
       if (c == Nested) return expression.substring(0, i)
       else if (c == MappedStart || c == IndexedStart) return expression.substring(0, i)
+      i += 1
     }
     expression
   }
@@ -144,10 +150,12 @@ class PropertyNameResolver {
   def isIndexed(expression: String): Boolean = {
     if (expression == null || expression.length == 0) return false
 
-    Range(0, expression.length) foreach { i =>
+    var i = 0
+    while (i < expression.length) {
       val c = expression.charAt(i)
       if (c == Nested || c == MappedStart) return false
       else if (c == IndexedStart) return true
+      i += 1
     }
     false
   }
@@ -161,11 +169,12 @@ class PropertyNameResolver {
    */
   def isMapped(expression: String): Boolean = {
     if (expression == null || expression.length == 0) return false
-
-    Range(0, expression.length) foreach { i =>
+    var i = 0
+    while (i < expression.length) {
       val c = expression.charAt(i)
       if (c == Nested || c == IndexedStart) return false
       else if (c == MappedStart) return true
+      i += 1
     }
     false
   }
@@ -181,7 +190,8 @@ class PropertyNameResolver {
 
     var indexed = false
     var mapped = false
-    Range(0, expression.length) foreach { i =>
+    var i = 0
+    while (i < expression.length) {
       val c = expression.charAt(i)
       if (indexed) {
         if (c == IndexedEnd) return expression.substring(0, i + 1)
@@ -192,6 +202,7 @@ class PropertyNameResolver {
         else if (c == MappedStart) mapped = true
         else if (c == IndexedStart) indexed = true
       }
+      i += 1
     }
     expression
   }

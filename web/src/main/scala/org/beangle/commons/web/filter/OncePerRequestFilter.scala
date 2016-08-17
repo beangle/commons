@@ -20,8 +20,6 @@ package org.beangle.commons.web.filter
 
 import javax.servlet.ServletException
 import javax.servlet.ServletRequest
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * Once per request filter.

@@ -20,7 +20,6 @@ package org.beangle.commons.web.init
 
 import java.{ util => ju }
 import java.util.EnumSet
-import scala.collection.JavaConversions.asScalaBuffer
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.Strings.{ split, substringAfter, substringBefore }
@@ -55,7 +54,7 @@ class BootstrapListener extends ServletContextListener {
     if (initializers.isEmpty) {
       servletContext.log("No Beangle Initializer types detected on classpath")
     } else {
-      for (initializer <- initializers) {
+      for (initializer <- collection.JavaConverters.asScalaBuffer(initializers)) {
         initializer.boss = this
         sce.getServletContext.log(s"${initializer.getClass.getName} registering ...")
         initializer.onStartup(servletContext)

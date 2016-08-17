@@ -27,8 +27,6 @@ import java.net.URISyntaxException
 import java.net.URL
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.HttpsURLConnection
-//remove if not needed
-import scala.collection.JavaConversions._
 
 object HttpUtils {
 

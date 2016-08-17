@@ -20,8 +20,6 @@ package org.beangle.commons.web.session
 
 import javax.servlet.http.HttpSession
 import org.beangle.commons.event.Event
-//remove if not needed
-import scala.collection.JavaConversions._
 
 /**
  * HttpSession Creation Event

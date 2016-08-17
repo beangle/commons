@@ -22,8 +22,6 @@ import java.io.IOException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import org.beangle.commons.lang.Strings
-//remove if not needed
-import scala.collection.JavaConversions._
 
 object RedirectUtils {
 

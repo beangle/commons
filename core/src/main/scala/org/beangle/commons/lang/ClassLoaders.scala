@@ -28,8 +28,8 @@ import scala.collection.mutable
  */
 object ClassLoaders {
   private val buildins = Map("Byte" -> classOf[Byte], "Boolean" -> classOf[Boolean], "Short" -> classOf[Short],
-    "Int" -> classOf[Int], "Long" -> classOf[Long], "Char" -> classOf[Char], "String" -> classOf[String],
-    "Float" -> classOf[Float], "Double" -> classOf[Double])
+    "Int" -> classOf[Int], "Integer" -> classOf[java.lang.Integer], "Long" -> classOf[Long], "Char" -> classOf[Char], "String" -> classOf[String],
+    "Float" -> classOf[Float], "Double" -> classOf[Double], "Option" -> classOf[Option[_]])
   /**
    * Return the default ClassLoader to use: typically the thread context
    * ClassLoader, if available; the ClassLoader that loaded the ClassLoaders

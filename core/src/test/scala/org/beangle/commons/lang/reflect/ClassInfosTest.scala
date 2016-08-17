@@ -16,22 +16,28 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.bean
+package org.beangle.commons.lang.reflect
 
-import org.beangle.commons.lang.testbean.TestBean
+import org.beangle.commons.lang.testbean.NumIdBean
+
+import org.junit.runner.RunWith
 import org.scalatest.FunSpec
 import org.scalatest.Matchers
 import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class PropertiesSpec extends FunSpec with Matchers {
+class ClassInfosTest extends FunSpec with Matchers {
 
-  describe("Properties") {
-    it("Get or Set property") {
-      val bean = new TestBean
-      Properties.set(bean, "intValue", 2)
-      bean.intValue should be(2)
+  describe("Entity") {
+    it("transient persisted property") {
+      val m = BeanInfos.get(classOf[NumIdBean[_]]).properties.get("persisted")
+      assert(None != m)
+      assert(m.get.isTransient)
+      val mis = ClassInfos.get(classOf[NumIdBean[_]]).getMethods("persisted")
+      assert(mis.size == 1)
+      val mi = mis.head
+      val anns = mi.method.getAnnotations
+      assert(null != anns && anns.length == 1)
     }
   }
 }

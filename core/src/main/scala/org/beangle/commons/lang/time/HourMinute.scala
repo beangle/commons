@@ -42,12 +42,16 @@ object HourMinute {
  * 一天中的分钟时间，格式如23:33
  */
 @value
-class HourMinute(val value: Short) extends Serializable {
+class HourMinute(val value: Short) extends Serializable with Ordered[HourMinute] {
   override def toString(): String = {
     var time = String.valueOf(value)
     if (value >= 6000) throw new RuntimeException("Invalid time " + time)
     while (time.length < 4) time = "0" + time
     time.substring(0, 2) + ":" + time.substring(2, 4)
+  }
+
+  override def compare(o: HourMinute): Int = {
+    this.value - o.value
   }
 
   def hour: Int = {
