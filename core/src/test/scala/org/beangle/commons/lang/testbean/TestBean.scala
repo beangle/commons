@@ -140,7 +140,7 @@ trait Hierarchical[T] {
   var indexno: String = _
 
   /** 父级菜单 */
-  var parent: T = _
+  var parent: Option[T] = None
 
   var children = Collections.newBuffer[T]
 

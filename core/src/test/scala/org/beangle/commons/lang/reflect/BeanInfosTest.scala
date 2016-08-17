@@ -56,15 +56,11 @@ class BeanInfosTest extends FunSpec with Matchers {
       assert(empty.get.isTransient)
     }
 
-    it("Have correct trait fields") {
-      val empty = BeanInfos.forType(classOf[Department]).properties.get("parent")
-      assert(empty.isDefined)
-      assert(empty.get.clazz == classOf[Department])
-    }
-
-    it("not null implicit value") {
-      val clazz = classOf[Department]
-      fun(clazz)
+    it("Have correct trait fields (template generic) type") {
+      val t = BeanInfos.forType(classOf[Department]).properties("parent")
+      val typeinfo = t.typeinfo
+      assert(typeinfo.isInstanceOf[CollectionType])
+      assert(typeinfo.asInstanceOf[CollectionType].componentType == classOf[Department])
     }
     it("find option inner type") {
       val t = BeanInfos.get(classOf[Author]).properties("age")
@@ -131,7 +127,4 @@ class BeanInfosTest extends FunSpec with Matchers {
     }
   }
 
-  def fun(c: Class[_]): BeanInfo = {
-    BeanInfos.get(c)
-  }
 }
