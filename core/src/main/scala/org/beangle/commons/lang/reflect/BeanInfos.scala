@@ -132,6 +132,7 @@ class BeanInfos {
         val logicTransient = !Modifier.isAbstract(getter.method.getModifiers) && !(setters.contains(name) || fields.contains(name))
         (name, Getter(getter.method, getter.returnType, getter.isTransient || logicTransient))
     }
+
     // organize setter and getter
     val allprops = filterGetters.keySet ++ setters.keySet
     val properties = Collections.newMap[String, PropertyDescriptor]
@@ -160,13 +161,20 @@ class BeanInfos {
         pt match {
           case c: Class[_] => ElementType(c)
           case t: ParameterizedType =>
-            if (t.getActualTypeArguments().size == 1) CollectionType(clazz, typeAt(t, 0))
-            else MapType(clazz, typeAt(t, 0), typeAt(t, 1))
+            val rawType = t.getRawType.asInstanceOf[Class[_]]
+            if (TypeInfo.isCollectionType(rawType) && t.getActualTypeArguments.size == 1) {
+              CollectionType(clazz, typeAt(t, 0))
+            } else if (TypeInfo.isMapType(rawType) && t.getActualTypeArguments.size == 2) {
+              MapType(clazz, typeAt(t, 0), typeAt(t, 1))
+            } else {
+              ElementType(rawType)
+            }
           case _ => throw new RuntimeException("cannot process " + pt)
         }
       }
       ctors += new ConstructorDescriptor(ctor, infoes.toVector)
     }
+
     //find default constructor parameters
     val defaultConstructorParams: Map[Int, Any] =
       ClassLoaders.get(clazz.getName + "$") match {
@@ -180,6 +188,15 @@ class BeanInfos {
           params.toMap
         case None => Map.empty
       }
+
+    // change accessible for none public class
+    if (!Modifier.isPublic(clazz.getModifiers)) {
+      properties foreach {
+        case (k, v) =>
+          v.getter.foreach { m => m.setAccessible(true) }
+          v.setter.foreach { m => m.setAccessible(true) }
+      }
+    }
     new BeanInfo(properties.toMap, ctors.toList, defaultConstructorParams)
   }
 

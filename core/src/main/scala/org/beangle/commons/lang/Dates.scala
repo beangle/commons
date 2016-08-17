@@ -23,9 +23,7 @@ import java.util.Calendar._
 import java.sql.Date
 import java.sql.Time
 /**
- * <p>
  * Dates class.
- * </p>
  *
  * @author chaostone
  */

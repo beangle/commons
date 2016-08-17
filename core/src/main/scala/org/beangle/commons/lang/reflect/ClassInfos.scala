@@ -74,6 +74,9 @@ object ClassInfos {
       nextClass = nextClass.getSuperclass
       paramTypes = deduceParamTypes(nextClass, nextType, paramTypes)
     }
+    if (!Modifier.isPublic(clazz.getModifiers)) {
+      methods.foreach { x => x.method.setAccessible(true) }
+    }
     ClassInfo(methods.toSeq)
   }
 

@@ -192,6 +192,15 @@ object IOs {
     }
   }
 
+  def using[T <: AutoCloseable, R](res: T)(func: T => R): R = {
+    try {
+      func(res)
+    } finally {
+      if (res != null)
+        res.close()
+    }
+  }
+
   private def toBufferedReader(reader: Reader): BufferedReader = {
     if (reader.isInstanceOf[BufferedReader]) reader.asInstanceOf[BufferedReader] else new BufferedReader(reader)
   }
