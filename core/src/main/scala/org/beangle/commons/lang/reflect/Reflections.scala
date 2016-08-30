@@ -62,6 +62,7 @@ object Reflections {
 
   private def getInterfaceParamType(clazz: Class[_], expected: Class[_],
                                     paramTypes: collection.Map[String, Class[_]] = Map.empty): collection.Map[String, Class[_]] = {
+    require(clazz != null, "clazz is null")
     val interfaces = clazz.getInterfaces
     val idx = (0 until interfaces.length) find { i => expected.isAssignableFrom(interfaces(i)) }
     idx match {
@@ -72,11 +73,19 @@ object Reflections {
           getParamType(interfaces(i), gis(i), expected, paramTypes)
         } else {
           val superClass = clazz.getSuperclass
-          getInterfaceParamType(superClass, expected, getParamType(superClass, clazz.getGenericSuperclass, superClass, paramTypes))
+          if (null == superClass) {
+            Map.empty
+          } else {
+            getInterfaceParamType(superClass, expected, getParamType(superClass, clazz.getGenericSuperclass, superClass, paramTypes))
+          }
         }
       case _ => {
         val superClass = clazz.getSuperclass
-        getInterfaceParamType(superClass, expected, getParamType(superClass, clazz.getGenericSuperclass, superClass, paramTypes))
+        if (null == superClass) {
+          Map.empty
+        } else {
+          getInterfaceParamType(superClass, expected, getParamType(superClass, clazz.getGenericSuperclass, superClass, paramTypes))
+        }
       }
     }
   }

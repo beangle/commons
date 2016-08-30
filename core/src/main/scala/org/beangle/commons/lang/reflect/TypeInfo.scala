@@ -70,7 +70,11 @@ object TypeInfo {
               if (paramTypes.isEmpty) CollectionType(clazz, classOf[Any]) else CollectionType(clazz, paramTypes.head._2)
             } else {
               val typeParams = getGenericParamType(c, classOf[java.util.Map[_, _]])
-              MapType(clazz, typeParams("K"), typeParams("V"))
+              if (typeParams.size < 2) {
+                MapType(clazz, classOf[Any], classOf[Any])
+              } else {
+                MapType(clazz, typeParams("K"), typeParams("V"))
+              }
             }
           }
         }

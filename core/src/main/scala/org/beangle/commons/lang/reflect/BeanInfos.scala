@@ -286,17 +286,26 @@ class BeanInfos {
     val parameterTypes = method.getParameterTypes
     if (0 == parameterTypes.length && method.getReturnType != classOf[Unit]) {
       val propertyName =
-        if (name.startsWith("get") && name.length > 3 && isUpperCase(name.charAt(3))) uncapitalize(substringAfter(name, "get"))
-        else if (name.startsWith("is") && name.length > 2 && isUpperCase(name.charAt(2))) uncapitalize(substringAfter(name, "is"))
+        if (name.startsWith("get") && name.length > 3 && isUpperCase(name.charAt(3))) javaBeanPropertyName(name, 3)
+        else if (name.startsWith("is") && name.length > 2 && isUpperCase(name.charAt(2))) javaBeanPropertyName(name, 2)
         else name
       Some((true, propertyName))
     } else if (1 == parameterTypes.length) {
       val propertyName =
-        if (name.startsWith("set") && name.length > 3 && isUpperCase(name.charAt(3))) uncapitalize(substringAfter(name, "set"))
+        if (name.startsWith("set") && name.length > 3 && isUpperCase(name.charAt(3))) javaBeanPropertyName(name, 3)
         else if (name.endsWith("_$eq")) substringBefore(name, "_$eq")
         else null
 
       if (null != propertyName && !propertyName.contains("$")) Some((false, propertyName)) else None
     } else None
+  }
+
+  private def javaBeanPropertyName(n: String, methodIndex: Int): String = {
+    val a = n.substring(methodIndex)
+    if (isUpperCase(a.charAt(0))) {
+      if (a.length > 1 && isUpperCase(a.charAt(1))) a else uncapitalize(a)
+    } else {
+      a
+    }
   }
 }
