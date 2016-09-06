@@ -126,6 +126,8 @@ class NumberIdBean[T <: Number](id: T) extends AbstractEntity[T](id)
 
 class Author(id: Integer) extends NumberIdBean[Integer](id) {
   var age: Option[Int] = _
+
+  var `type`: String = _
 }
 
 class BigBookStore(val department: Seq[Department], val books: Map[String, Book]) {

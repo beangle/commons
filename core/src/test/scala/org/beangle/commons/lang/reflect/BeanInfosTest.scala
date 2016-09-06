@@ -68,7 +68,10 @@ class BeanInfosTest extends FunSpec with Matchers {
       assert(typeinfo.isInstanceOf[CollectionType])
       assert(typeinfo.asInstanceOf[CollectionType].componentType == classOf[Int])
     }
-
+    it("find escaped key method") {
+      val t = BeanInfos.get(classOf[Author]).properties("type")
+      assert(t.getter.isDefined)
+    }
     it("find list author") {
       val t = BeanInfos.get(classOf[Book]).properties("authors")
       val typeinfo = t.typeinfo
