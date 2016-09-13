@@ -76,7 +76,10 @@ object TypeInfo {
                 MapType(clazz, typeParams("K"), typeParams("V"))
               }
             }
+
           }
+          case _ =>
+            MapType(clazz, classOf[Any], classOf[Any])
         }
       }
     } else {

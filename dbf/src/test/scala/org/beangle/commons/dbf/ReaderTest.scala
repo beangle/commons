@@ -32,9 +32,11 @@ class ReaderTest extends FunSpec with Matchers {
     it("readinfo") {
       val fileName = "/home/chaostone/buf/XL_2013_10.dbf"
       val in = new File(fileName)
-      System.out.println(Reader.readInfo(in))
-      val csv = new File(fileName.replace("dbf", "csv"))
-//      Reader.writeToCsv(in, csv, Charset.forName("GB18030"))
+      if (in.exists) {
+        println(Reader.readInfo(in))
+        val csv = new File(fileName.replace("dbf", "csv"))
+        Reader.writeToCsv(in, csv, Charset.forName("GB18030"))
+      }
     }
   }
 }
