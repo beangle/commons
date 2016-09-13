@@ -65,7 +65,7 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
     while (resolver.hasNested(name)) {
       val next = resolver.next(name)
       result =
-        if (result.isInstanceOf[Map[_, _]]) getPropertyOfMapBean(result.asInstanceOf[Map[Any, _]], next)
+        if (isMapType(result)) getPropertyOfMap(result, next)
         else if (resolver.isMapped(next)) getMappedProperty(result, next)
         else if (resolver.isIndexed(next)) getIndexedProperty(result, next)
         else getSimpleProperty(result, next)
@@ -76,7 +76,7 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
       if (null == result) return null.asInstanceOf[T]
       name = resolver.remove(name)
     }
-    result = if (result.isInstanceOf[Map[_, _]]) getPropertyOfMapBean(result.asInstanceOf[Map[Any, _]], name)
+    result = if (isMapType(result)) getPropertyOfMap(result, name)
     else if (resolver.isMapped(name)) getMappedProperty(result, name)
     else if (resolver.isIndexed(name)) getIndexedProperty(result, name)
     else getSimpleProperty(result, name)
@@ -111,8 +111,8 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
       name = resolver.remove(name)
     }
 
-    if (result.isInstanceOf[collection.mutable.Map[_, _]] || result.isInstanceOf[java.util.Map[_, _]]) {
-      setPropertyOfMapBean(result.asInstanceOf[collection.mutable.Map[Any, Any]], name, value)
+    if (isMapType(result)) {
+      setPropertyOfMapBean(result, name, value)
     } else if (resolver.isMapped(name)) {
       copyMappedProperty(result, name, value)
     } else if (resolver.isIndexed(name)) {
@@ -122,8 +122,9 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
     }
     return value
   }
+
   private def getDirectProperty(result: Any, name: String): Any = {
-    if (result.isInstanceOf[Map[_, _]]) getPropertyOfMapBean(result.asInstanceOf[Map[Any, _]], name)
+    if (isMapType(result)) getPropertyOfMap(result, name)
     else if (resolver.isMapped(name)) getMappedProperty(result, name)
     else if (resolver.isIndexed(name)) getIndexedProperty(result, name)
     else getSimpleProperty(result, name)
@@ -133,16 +134,16 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
     beanInfos.get(bean).getGetter(name) match {
       case Some(method) => method.invoke(bean)
       case _ =>
-        System.err.println("Cannot find get" + Strings.capitalize(name) + " in " + bean.getClass)
+        System.err.println("Cannot find " + Strings.capitalize(name) + " Getter in " + bean.getClass)
         null
     }
   }
 
-  private def getPropertyOfMapBean(bean: Map[Any, _], propertyName: String): Any = {
+  private def getPropertyOfMap(bean: Any, propertyName: String): Any = {
     var name = resolver.getProperty(propertyName)
     if (name == null || name.length == 0) name = resolver.getKey(propertyName)
     else name = propertyName
-    bean.get(name).orNull
+    getMapped(bean, name)
   }
 
   private def getMappedProperty(bean: Any, name: String): Any = {
@@ -250,6 +251,7 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
     val value1 = conversion.convert(value, typeInfo.valueType)
     setMapped(rs, key1, value1)
   }
+
   private def setPropertyOfMapBean(bean: Any, propertyName: String, value: Any) {
     var pname = propertyName
     if (resolver.isMapped(propertyName)) {
@@ -291,10 +293,14 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
 
   private def getMapped(bean: Any, key: Any): Any = {
     bean match {
-      case null                            =>
+      case null                            => null
       case s: collection.mutable.Map[_, _] => s.asInstanceOf[collection.mutable.Map[Any, _]].get(key).orNull
       case x: java.util.Map[_, _]          => x.get(key)
       case _                               => throw new RuntimeException("Don't support getMapped on " + bean.getClass())
     }
+  }
+
+  private def isMapType(obj: Any): Boolean = {
+    obj.isInstanceOf[collection.mutable.Map[_, _]] || obj.isInstanceOf[java.util.Map[_, _]]
   }
 }

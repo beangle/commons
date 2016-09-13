@@ -18,8 +18,8 @@
  */
 package org.beangle.commons.bean
 
-import org.beangle.commons.lang.testbean.TestBean
 import org.beangle.commons.lang.reflect.BeanInfos
+import org.beangle.commons.lang.testbean.TestBean
 import org.junit.runner.RunWith
 import org.scalatest.{ FunSpec, Matchers }
 import org.scalatest.junit.JUnitRunner
@@ -80,6 +80,22 @@ class PropertiesTest extends FunSpec with Matchers {
 
       Properties.set(bean, "age", null)
       assert(bean.age == None)
+    }
+    it("test scala map") {
+      val p = new org.beangle.commons.collection.Properties("id" -> 1, "name" -> "mike")
+      assert(Properties.get[Any](p, "id") == 1)
+      assert(Properties.get[Any](p, "name") == "mike")
+      Properties.set(p, "id", 2)
+      assert(Properties.get[Any](p, "id") == 2)
+    }
+    it("test java map") {
+      val p = new java.util.HashMap[Any, Any]()
+      p.put("id", 1)
+      p.put("name", "mike")
+      assert(Properties.get[Any](p, "id") == 1)
+      assert(Properties.get[Any](p, "name") == "mike")
+      Properties.set(p, "id", 2)
+      assert(Properties.get[Any](p, "id") == 2)
     }
   }
 }
