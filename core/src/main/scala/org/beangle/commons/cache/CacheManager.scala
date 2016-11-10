@@ -31,6 +31,6 @@ trait CacheManager extends Disposable {
   /**
    * Return the cache associated with the given name.
    */
-  def getCache[K, V ](name: String, keyType: Class[K], valueType: Class[V]): Cache[K, V]
+  def getCache[K, V](name: String, keyType: Class[K], valueType: Class[V]): Cache[K, V]
 
 }
