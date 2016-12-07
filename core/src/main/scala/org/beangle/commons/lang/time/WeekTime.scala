@@ -24,16 +24,16 @@ import org.beangle.commons.bean.component
 import org.beangle.commons.lang.Objects
 import org.beangle.commons.lang.annotation.beta
 import org.beangle.commons.lang.time.WeekDay.WeekDay
+import java.util.Calendar
+import java.time.LocalDate
 
 /**循环时间*/
 @beta
 @component
 class WeekTime extends Ordered[WeekTime] with Serializable {
 
+  /**起始日期*/
   var startOn: java.sql.Date = _
-
-  /** 星期几 */
-  var weekday: WeekDay = _
 
   /** 开始时间 */
   var beginAt: HourMinute = _
@@ -47,16 +47,46 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
   def this(other: WeekTime) {
     this()
     this.startOn = other.startOn
-    this.weekday = other.weekday
     this.beginAt = other.beginAt
     this.endAt = other.endAt
     this.weekstate = other.weekstate
   }
 
+  def dates: List[java.sql.Date] = {
+    val s = startOn.toLocalDate()
+    weekstate.weeks.map { x => java.sql.Date.valueOf(s.plusWeeks(x - 1)) }
+  }
+
+  def firstDay: java.sql.Date = {
+    val cal = ju.Calendar.getInstance
+    cal.setTime(startOn)
+    cal.add(ju.Calendar.WEEK_OF_YEAR, weekstate.first - 1)
+    new java.sql.Date(cal.getTime.getTime)
+  }
+
+  def lastDay: java.sql.Date = {
+    val cal = ju.Calendar.getInstance
+    cal.setTime(startOn)
+    cal.add(ju.Calendar.WEEK_OF_YEAR, weekstate.last - 1)
+    new java.sql.Date(cal.getTime.getTime)
+  }
+
+  def weekday: WeekDay = {
+    WeekDay.of(startOn)
+  }
+
+  def isOverlap(o: WeekTime): Boolean = {
+    startOn.equals(o.startOn) && weekstate.isOverlap(o.weekstate) & beginAt < o.endAt & o.beginAt < endAt;
+  }
+
   override def compare(other: WeekTime): Int = {
-    Objects.compareBuilder.add(this.startOn, other.startOn).add(this.weekday, other.weekday)
+    Objects.compareBuilder.add(this.startOn, other.startOn)
       .add(this.beginAt, other.beginAt).add(this.endAt, other.endAt).add(this.weekstate, other.weekstate)
       .toComparison()
+  }
+
+  override def toString: String = {
+    s"[startOn:$startOn, beginAt:$beginAt endAt:$endAt weekstate:$weekstate]"
   }
 
   override def hashCode(): Int = {
@@ -64,7 +94,6 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
     var result = 1
     result = prime * result + startOn.hashCode()
     result = prime * result + (if ((weekstate == null)) 0 else weekstate.hashCode)
-    result = prime * result + (if ((weekday == null)) 0 else weekday.hashCode)
     result = prime * result + (if ((beginAt == null)) 0 else beginAt.hashCode)
     result = prime * result + (if ((endAt == null)) 0 else endAt.hashCode)
     result
@@ -75,61 +104,10 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
       case null => false
       case wt: WeekTime => {
         if (wt eq this) true
-        else Objects.equalsBuilder.add(this.startOn, wt.startOn).add(this.weekday, wt.weekday).add(this.beginAt, wt.beginAt).add(this.endAt, wt.endAt).
+        else Objects.equalsBuilder.add(this.startOn, wt.startOn).add(this.beginAt, wt.beginAt).add(this.endAt, wt.endAt).
           add(this.weekstate, wt.weekstate).isEquals
       }
       case _ => false
-    }
-  }
-
-  def firstDate: ju.Date = {
-    val cal = ju.Calendar.getInstance
-    cal.setTime(startOn)
-    while (cal.get(ju.Calendar.DAY_OF_WEEK) != weekday.index) {
-      cal.add(ju.Calendar.DAY_OF_YEAR, 1)
-    }
-    cal.add(ju.Calendar.WEEK_OF_YEAR, weekstate.first - 1)
-    cal.getTime
-  }
-
-  /**
-   * FIXME need more tests
-   */
-  def rebase(newStartOn: java.sql.Date): List[WeekTime] = {
-    if (newStartOn.after(startOn)) {
-      if (newStartOn.after(firstDate)) {
-        throw new RuntimeException("Cannot rebase a date after firstDate!")
-      } else {
-        val nwt = new WeekTime(this)
-        nwt.startOn = newStartOn
-        List(nwt)
-      }
-    } else {
-      val newStartCal = ju.Calendar.getInstance
-      newStartCal.setTime(newStartOn)
-      var days = 0
-      while (newStartCal.before(startOn)) {
-        newStartCal.add(ju.Calendar.DAY_OF_YEAR, 1)
-        days += 1
-      }
-      val weekcnt = days / 7
-      var newWeeks = this.toString();
-      newWeeks += ("0" * weekcnt)
-      if (newWeeks.length <= 64) {
-        val nwt = new WeekTime(this)
-        nwt.startOn = newStartOn
-        nwt.weekstate = new WeekState(newWeeks)
-        List(nwt)
-      } else {
-        val nwt1 = new WeekTime(this)
-        nwt1.startOn = newStartOn
-        nwt1.weekstate = new WeekState(newWeeks.substring(0, 64))
-        val nwt2 = new WeekTime(this)
-        newStartCal.add(ju.Calendar.WEEK_OF_YEAR, 64)
-        nwt2.startOn = new java.sql.Date(newStartCal.getTime.getTime)
-        nwt2.weekstate = new WeekState(newWeeks.substring(64))
-        List(nwt1, nwt2)
-      }
     }
   }
 }

@@ -22,8 +22,9 @@ package org.beangle.commons {
     type JDouble = java.lang.Double
     type JFloat = java.lang.Double
     type JInt = java.lang.Integer
+    type JShort = java.lang.Short
     type JByte = java.lang.Byte
     type JBoolean = java.lang.Boolean
     type JChar = java.lang.Character
   }
-} 
+}

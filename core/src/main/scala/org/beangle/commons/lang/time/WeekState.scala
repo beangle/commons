@@ -23,6 +23,9 @@ import org.beangle.commons.lang.annotation.beta
 import org.beangle.commons.lang.annotation.value
 
 object WeekState {
+
+  val Zero = new WeekState(0l)
+
   def apply(value: String): WeekState = {
     new WeekState(value)
   }
@@ -69,6 +72,10 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     new WeekState(this.value & other.value)
   }
 
+  def isOverlap(other: WeekState): Boolean = {
+    (this.value & other.value) > 0
+  }
+
   override def toString: String = {
     java.lang.Long.toBinaryString(value)
   }
@@ -85,13 +92,9 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
   }
 
   def span: Tuple2[Int, Int] = {
-    if (value > 0) {
-      val str = toString
-      val length = str.length
-      (length - str.lastIndexOf('1') - 1, length - str.indexOf('1') - 1)
-    } else {
-      (-1, -1)
-    }
+    val str = toString
+    val length = str.length
+    (length - str.lastIndexOf('1') - 1, length - str.indexOf('1') - 1)
   }
 
   /**
@@ -111,21 +114,13 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
   }
 
   def last: Int = {
-    if (value > 0) {
-      val str = toString
-      str.length - str.indexOf('1') - 1
-    } else {
-      -1
-    }
+    val str = toString
+    str.length - str.indexOf('1') - 1
   }
 
   def first: Int = {
-    if (value > 0) {
-      val str = toString
-      str.length - str.lastIndexOf('1') - 1
-    } else {
-      -1
-    }
+    val str = toString
+    str.length - str.lastIndexOf('1') - 1
   }
 
   def weeks: List[Int] = {

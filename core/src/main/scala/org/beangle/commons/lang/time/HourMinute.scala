@@ -19,14 +19,24 @@
 package org.beangle.commons.lang.time
 import org.beangle.commons.lang.Numbers.{ toShort, toInt }
 import org.beangle.commons.lang.annotation.value
+import java.text.SimpleDateFormat
+
 /**
  * Hour and minute of day
  * @version 4.0.5
  * @since 4.0.5
  */
 object HourMinute {
+
+  val Zero = new HourMinute(0)
+
   def apply(time: String): HourMinute = {
     new HourMinute(convert(time))
+  }
+
+  def of(date: java.util.Date): HourMinute = {
+    val sdf = new SimpleDateFormat("HH:mm")
+    new HourMinute(convert(sdf.format(date)))
   }
 
   def convert(time: String): Short = {
@@ -43,9 +53,11 @@ object HourMinute {
  */
 @value
 class HourMinute(val value: Short) extends Serializable with Ordered[HourMinute] {
+
+  require(value >= 6000, s"Invalid time value $value,It should less than or equals 6000")
+
   override def toString(): String = {
     var time = String.valueOf(value)
-    if (value >= 6000) throw new RuntimeException("Invalid time " + time)
     while (time.length < 4) time = "0" + time
     time.substring(0, 2) + ":" + time.substring(2, 4)
   }
@@ -64,7 +76,6 @@ class HourMinute(val value: Short) extends Serializable with Ordered[HourMinute]
 
   private def minutes: Int = {
     var time = String.valueOf(value)
-    if (value >= 6000) throw new RuntimeException("Invalid time " + time)
     while (time.length < 4) time = "0" + time
     toInt(time.substring(0, 2)) * 60 + toInt(time.substring(2, 4))
   }
