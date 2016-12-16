@@ -35,5 +35,13 @@ class HourMinuteTest extends FunSpec with Matchers {
     it("equals") {
       assert(HourMinute("12:34") == new HourMinute(1234))
     }
+
+    it("plus") {
+      assert(HourMinute("12:34") + 30 == new HourMinute(1304))
+      assert(HourMinute("12:34") - 30 == new HourMinute(1204))
+      assert(HourMinute("12:34") + 120 == new HourMinute(1434))
+      assert(HourMinute("23:34") + 110 == new HourMinute(124))
+      assert(HourMinute("01:34") - 110 == new HourMinute(2344))
+    }
   }
 }

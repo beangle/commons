@@ -29,13 +29,11 @@ class WeekTimeTest extends FunSpec with Matchers {
   describe("WeekTime") {
     it("firstDate ") {
       val wt = new WeekTime
-      wt.startOn = Date.valueOf("2014-12-28")
+      wt.startOn = Date.valueOf("2015-01-01")
       wt.weekstate = WeekState("1010");
-      wt.weekday = WeekDay.Thu
-      assert(wt.firstDate == Date.valueOf("2015-01-01"))
-      wt.weekday = WeekDay.Fri
+      assert(wt.firstDay == Date.valueOf("2015-01-01"))
       wt.weekstate = WeekState("1100");
-      assert(wt.firstDate == Date.valueOf("2015-01-09"))
+      assert(wt.firstDay == Date.valueOf("2015-01-08"))
     }
   }
 }

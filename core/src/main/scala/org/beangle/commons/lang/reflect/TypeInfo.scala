@@ -61,7 +61,7 @@ object TypeInfo {
           case c: Class[_] => {
             if (classOf[collection.Map[_, _]].isAssignableFrom(clazz)) {
               val typeParams = getGenericParamType(c, classOf[collection.Map[_, _]])
-              MapType(clazz, typeParams("A"), typeParams("B"))
+              MapType(clazz, typeParams("K"), typeParams("V"))
             } else if (classOf[collection.Iterable[_]].isAssignableFrom(clazz)) {
               val paramTypes = getGenericParamType(c, classOf[collection.Iterable[_]])
               if (paramTypes.isEmpty) CollectionType(clazz, classOf[Any]) else CollectionType(clazz, paramTypes.head._2)
