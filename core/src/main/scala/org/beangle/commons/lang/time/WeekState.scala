@@ -114,13 +114,21 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
   }
 
   def last: Int = {
-    val str = toString
-    str.length - str.indexOf('1') - 1
+    if (value > 0) {
+      val str = toString
+      str.length - str.indexOf('1') - 1
+    } else {
+      -1
+    }
   }
 
   def first: Int = {
-    val str = toString
-    str.length - str.lastIndexOf('1') - 1
+    if (value > 0) {
+      val str = toString
+      str.length - str.lastIndexOf('1') - 1
+    } else {
+      -1
+    }
   }
 
   def weeks: List[Int] = {

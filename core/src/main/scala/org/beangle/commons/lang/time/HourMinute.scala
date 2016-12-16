@@ -54,7 +54,7 @@ object HourMinute {
 @value
 class HourMinute(val value: Short) extends Serializable with Ordered[HourMinute] {
 
-  require(value >= 6000, s"Invalid time value $value,It should less than or equals 6000")
+  require(value <= 2400, s"Invalid time value $value,It should less than or equals 2400")
 
   override def toString(): String = {
     var time = String.valueOf(value)
@@ -74,10 +74,27 @@ class HourMinute(val value: Short) extends Serializable with Ordered[HourMinute]
     value % 100
   }
 
+  def +(minutesDuration: Int): HourMinute = {
+    var minutesValue = minutes + minutesDuration
+    val day = 24 * 60
+    if (minutesValue < 0) {
+      while (minutesValue < 0) {
+        minutesValue += day
+      }
+    } else {
+      while (minutesValue >= day) {
+        minutesValue -= day
+      }
+    }
+    new HourMinute(((minutesValue / 60) * 100 + minutesValue % 60).asInstanceOf[Short])
+  }
+
+  def -(minutesDuration: Int): HourMinute = {
+    this + (0 - minutesDuration)
+  }
+
   private def minutes: Int = {
-    var time = String.valueOf(value)
-    while (time.length < 4) time = "0" + time
-    toInt(time.substring(0, 2)) * 60 + toInt(time.substring(2, 4))
+    hour * 60 + minute
   }
 
   def -(other: HourMinute): Short = {
