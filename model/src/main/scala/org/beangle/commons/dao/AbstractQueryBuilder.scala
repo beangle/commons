@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.data.dao
+package org.beangle.commons.dao
 
 import org.beangle.commons.collection.Order
 import org.beangle.commons.collection.page.PageLimit
-import org.beangle.data.dao._
+import org.beangle.commons.dao._
 import org.beangle.commons.lang.Assert
 import org.beangle.commons.lang.Strings._
 
