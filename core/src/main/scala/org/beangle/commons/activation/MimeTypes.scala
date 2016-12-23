@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.activation
 
-import org.beangle.commons.inject.Resources
+import org.beangle.commons.config.Resources
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.ClassLoaders.{ getResource, getResources }
 import javax.activation.MimeType

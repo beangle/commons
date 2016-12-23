@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<cdi>
+  <container>
+    <module class="org.beangle.commons.cdi.spring.bean.TestModule"/>
+  </container>
+</cdi>

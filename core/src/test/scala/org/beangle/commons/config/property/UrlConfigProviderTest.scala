@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.config.property
 
-import org.beangle.commons.inject.Resources
+import org.beangle.commons.config.Resources
 import org.beangle.commons.lang.ClassLoaders
 import org.scalatest.FunSpec
 import org.scalatest.Matchers

@@ -18,47 +18,20 @@
  */
 package org.beangle.commons.web.servlet
 
-import org.beangle.commons.inject.{ Container, ContainerListener }
 import org.beangle.commons.lang.Throwables
 import javax.servlet.ServletException
 import javax.servlet.http.{ HttpServlet, HttpServletRequest, HttpServletResponse }
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 
-class DelegatingServletProxy extends HttpServlet with ContainerListener {
-
-  private var delegate: HttpServlet = _
-
-  protected var targetBeanName: String = _
-
-  override def init() {
-    if (null == targetBeanName) targetBeanName = getServletName()
-    val wac = Container.ROOT
-    if (wac == null) Container.addListener(this)
-    else delegate = initDelegate(wac)
-  }
+class DelegatingServletProxy(delegate: HttpServlet) extends HttpServlet {
 
   protected override def service(req: ServletRequest, resp: ServletResponse) {
     delegate.service(req, resp);
-  }
-
-  override def onStarted(container: Container) {
-    try {
-      delegate = initDelegate(container)
-    } catch {
-      case e: ServletException => Throwables.propagate(e)
-    }
   }
 
   override def destroy() {
     if (delegate != null) delegate.destroy()
   }
 
-  protected def initDelegate(container: Container): HttpServlet = {
-    container.getBean[HttpServlet](targetBeanName) match {
-      case Some(servlet) =>
-        servlet.init(getServletConfig()); servlet
-      case None => throw new RuntimeException("Cannot find " + targetBeanName + " in context.")
-    }
-  }
 }
