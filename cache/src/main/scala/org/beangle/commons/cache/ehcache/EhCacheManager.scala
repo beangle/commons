@@ -42,7 +42,7 @@ class EhCacheManager(val name: String = "ehcache", autoCreate: Boolean = false) 
 
   private var xmlConfig: XmlConfiguration = _
 
-  private var underlingManager: org.ehcache.CacheManager = _
+  private var innerManager: org.ehcache.CacheManager = _
 
   def init(): Unit = {
     assert(null != name)
@@ -50,7 +50,7 @@ class EhCacheManager(val name: String = "ehcache", autoCreate: Boolean = false) 
       configUrl = ClassLoaders.getResource(name + ".xml")
       if (null == configUrl) logger.warn(s"Cannot find ${name}.xml in classpath.")
     }
-    underlingManager =
+    innerManager =
       if (null != configUrl) {
         xmlConfig = new XmlConfiguration(configUrl)
         CacheManagerBuilder.newCacheManager(xmlConfig)
@@ -58,32 +58,32 @@ class EhCacheManager(val name: String = "ehcache", autoCreate: Boolean = false) 
         val config = new DefaultConfiguration(null.asInstanceOf[ClassLoader], Array.empty[ServiceCreationConfiguration[_]]: _*)
         CacheManagerBuilder.newCacheManager(config)
       }
-    underlingManager.init()
+    innerManager.init()
   }
 
   protected override def newCache[K, V](name: String, keyType: Class[K], valueType: Class[V]): Cache[K, V] = {
-    val c = underlingManager.getCache(name, keyType, valueType)
+    val c = innerManager.getCache(name, keyType, valueType)
     if (null == c) {
       val builder = getConfigBuilder(name + ".Template", keyType, valueType)
-      new EhCache(underlingManager.createCache(name, builder.build()))
+      new EhCache(innerManager.createCache(name, builder.build()))
     } else {
       new EhCache(c)
     }
   }
 
   protected[ehcache] def newCache[K, V](name: String, config: CacheConfiguration[K, V]): Cache[K, V] = {
-    val newer = new EhCache(underlingManager.createCache(name, config))
+    val newer = new EhCache(innerManager.createCache(name, config))
     register(name, newer)
     newer
   }
 
   protected override def findCache[K, V](name: String, keyType: Class[K], valueType: Class[V]): Cache[K, V] = {
-    val ul = underlingManager.getCache(name, keyType, valueType)
+    val ul = innerManager.getCache(name, keyType, valueType)
     if (null == ul) null else new EhCache(ul)
   }
 
   protected[ehcache] def getEhcache[K, V](name: String, keyType: Class[K], valueType: Class[V]): org.ehcache.Cache[K, V] = {
-    underlingManager.getCache(name, keyType, valueType)
+    innerManager.getCache(name, keyType, valueType)
   }
 
   protected[ehcache] def getConfigBuilder[K, V](template: String, keyType: Class[K], valueType: Class[V]): CacheConfigurationBuilder[K, V] = {
@@ -98,6 +98,6 @@ class EhCacheManager(val name: String = "ehcache", autoCreate: Boolean = false) 
   }
 
   override def destroy(): Unit = {
-    underlingManager.close()
+    innerManager.close()
   }
 }

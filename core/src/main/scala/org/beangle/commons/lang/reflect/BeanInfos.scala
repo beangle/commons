@@ -58,7 +58,9 @@ class BeanInfos {
 
   def clear() {
     val i = cache.keysIterator
-    while (i.hasNext) cache.remove(i.next())
+    val keySet = Collections.newSet[Class[_]]
+    while (i.hasNext) keySet.add(i.next())
+    keySet.foreach { k => cache.remove(k) }
   }
 
   def forType[T](clazz: Class[T])(implicit ttag: ru.TypeTag[T] = null, manifest: Manifest[T]): BeanInfo = {

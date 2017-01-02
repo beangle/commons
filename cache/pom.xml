@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.beangle.commons</groupId>
     <artifactId>beangle-commons-parent_2.12</artifactId>
-    <version>4.6.0-SNAPSHOT</version>
+    <version>4.6.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.beangle.commons</groupId>
@@ -15,6 +15,7 @@
     <bundle.symbolicName>org.beangle.commons.cache</bundle.symbolicName>
     <bundle.namespace>org.beangle.commons.cache</bundle.namespace>
     <ehcache.version>3.1.3</ehcache.version>
+    <caffeine.version>2.3.5</caffeine.version>
     <jedis.version>2.9.0</jedis.version>
     <jgroups.version>3.6.11.Final</jgroups.version>
     <fst.version>2.48</fst.version>
@@ -41,6 +42,12 @@
       <groupId>org.ehcache</groupId>
       <artifactId>ehcache</artifactId>
       <version>${ehcache.version}</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
+      <version>${caffeine.version}</version>
       <optional>true</optional>
     </dependency>
     <dependency>

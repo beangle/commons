@@ -18,7 +18,6 @@
  */
 package org.beangle.commons.cache
 
-import org.beangle.commons.cache.{ Cache, CacheManager }
 import org.beangle.commons.collection.Collections
 
 /**
@@ -55,7 +54,7 @@ abstract class AbstractCacheManager(val autoCreate: Boolean) extends CacheManage
   protected def register[K, V](name: String, cache: Cache[K, V]): Unit = {
     registry += (name -> cache)
   }
-  
+
   protected def newCache[K, V](name: String, keyType: Class[K], valueType: Class[V]): Cache[K, V]
 
   protected def findCache[K, V](name: String, keyType: Class[K], valueType: Class[V]): Cache[K, V]
