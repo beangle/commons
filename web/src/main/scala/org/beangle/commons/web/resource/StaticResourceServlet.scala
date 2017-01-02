@@ -18,7 +18,6 @@
  */
 package org.beangle.commons.web.resource
 
-import org.beangle.commons.inject.Container
 import org.beangle.commons.io.ClasspathResourceLoader
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.web.resource.filter.HeaderFilter
@@ -29,10 +28,10 @@ import javax.servlet.http.{ HttpServlet, HttpServletRequest, HttpServletResponse
 
 class StaticResourceServlet extends HttpServlet {
 
-  private var processor: ResourceProcessor = _
+  var processor: ResourceProcessor = _
 
   override def init(config: ServletConfig): Unit = {
-    processor = buildProcessor()
+    buildProcessor()
   }
 
   @throws(classOf[Exception])
@@ -45,13 +44,11 @@ class StaticResourceServlet extends HttpServlet {
     processor.process(uri, request, response)
   }
 
-  protected def buildProcessor(): ResourceProcessor = {
-    Container.ROOT.getBean(classOf[ResourceProcessor]) match {
-      case Some(p) => p
-      case None =>
-        val p = new ResourceProcessor(new ClasspathResourceLoader, new PathResolverImpl())
-        p.filters = List(new HeaderFilter)
-        p
+  protected def buildProcessor(): Unit = {
+    if (null == processor) {
+      val p = new ResourceProcessor(new ClasspathResourceLoader, new PathResolverImpl())
+      p.filters = List(new HeaderFilter)
+      processor = p
     }
   }
 }

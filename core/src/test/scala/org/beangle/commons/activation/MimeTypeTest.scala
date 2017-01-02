@@ -21,7 +21,7 @@ package org.beangle.commons.activation
 import org.junit.runner.RunWith
 import org.scalatest.{ FunSpec, Matchers }
 import org.scalatest.junit.JUnitRunner
-import org.beangle.commons.inject.Resources
+import org.beangle.commons.config.Resources
 import org.beangle.commons.lang.ClassLoaders.{ getResource, getResources }
 
 @RunWith(classOf[JUnitRunner])

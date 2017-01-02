@@ -1,0 +1,13 @@
+Entity.id=非业务主键
+Coded.code=代码
+Enabled.enabled=是否启用
+Hierarchical.indexno=顺序号
+Named.name=名称
+NumId.id=非业务主键
+StringId.id=非业务主键
+TemporalAt.beginAt=生效时间
+TemporalAt.endAt=失效时间
+TemporalOn.beginOn=生效日期
+TemporalOn.endOn=失效日期
+Updated.updatedAt=更新时间
+Remark.remark=备注
