@@ -57,10 +57,7 @@ class BeanInfos {
   private val cache = new IdentityCache[Class[_], BeanInfo]
 
   def clear() {
-    val i = cache.keysIterator
-    val keySet = Collections.newSet[Class[_]]
-    while (i.hasNext) keySet.add(i.next())
-    keySet.foreach { k => cache.remove(k) }
+    val i = cache.clear()
   }
 
   def forType[T](clazz: Class[T])(implicit ttag: ru.TypeTag[T] = null, manifest: Manifest[T]): BeanInfo = {
