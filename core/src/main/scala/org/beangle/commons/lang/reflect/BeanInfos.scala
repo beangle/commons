@@ -242,11 +242,11 @@ class BeanInfos {
   private def typeof(clazz: Class[_], typ: ru.Type, name: String): TypeInfo = {
     if (clazz == classOf[Object]) {
       var typeName = typ.member(ru.TermName(name)).typeSignatureIn(typ).erasure.toString
-      ElementType(ClassLoaders.load(Strings.replace(typeName, "()", "")))
+      ElementType(ClassLoaders.load(Strings.replace(typeName, "()", "")),false)
     } else if (clazz == classOf[Option[_]]) {
       val a = typ.member(ru.TermName(name)).typeSignatureIn(typ)
       val innerType = a.resultType.typeArgs.head.toString
-      CollectionType(clazz, ClassLoaders.load(innerType))
+      ElementType(ClassLoaders.load(innerType), true)
     } else if (TypeInfo.isCollectionType(clazz)) {
       if (clazz.isArray) {
         CollectionType(clazz, clazz.getComponentType)
@@ -262,7 +262,7 @@ class BeanInfos {
       val mapEleType = Strings.substringAfter(kvtype, ",").trim
       MapType(clazz, ClassLoaders.load(mapKeyType), ClassLoaders.load(mapEleType))
     } else {
-      ElementType(clazz)
+      ElementType(clazz,false)
     }
   }
 
