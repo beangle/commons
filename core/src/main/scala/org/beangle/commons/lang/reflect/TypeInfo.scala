@@ -77,14 +77,21 @@ object TypeInfo {
                 MapType(clazz, typeParams("K"), typeParams("V"))
               }
             }
-
           }
-          case _ =>
-            MapType(clazz, classOf[Any], classOf[Any])
+          case _ => MapType(clazz, classOf[Any], classOf[Any])
         }
       }
     } else {
-      ElementType(clazz, false)
+      if (clazz == classOf[Option[_]]) {
+        val innerType = typ match {
+          case pt: ParameterizedType =>
+            if (pt.getActualTypeArguments.size == 1) typeAt(pt, 0) else classOf[AnyRef]
+          case c: Class[_] => classOf[AnyRef]
+        }
+        ElementType(innerType, true)
+      } else {
+        ElementType(clazz, false)
+      }
     }
   }
 
