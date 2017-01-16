@@ -489,7 +489,7 @@ abstract class BindModuleProcessor extends BeanDefinitionRegistryPostProcessor w
   private def convertInjectValue(typeinfo: TypeInfo, registry: BindRegistry, excludeBeanName: String): AnyRef = {
     val result =
       typeinfo match {
-        case ElementType(clazz) => Injection(clazz)
+        case ElementType(clazz,optional) => Injection(clazz)
         case CollectionType(clazz, componentType) =>
           if (componentType == classOf[AnyRef]) List.empty
           else {
@@ -583,7 +583,7 @@ abstract class BindModuleProcessor extends BeanDefinitionRegistryPostProcessor w
     val properties = unsatisfiedNonSimpleProperties(mbd, beanName)
     for ((propertyName, propertyType) <- properties) {
       propertyType match {
-        case ElementType(clazz) =>
+        case ElementType(clazz,optional) =>
           val beanNames = registry.getBeanNames(propertyType.clazz)
           var binded = false
           if (beanNames.size == 1) {
