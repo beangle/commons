@@ -63,6 +63,9 @@ class WeekStateTest extends FunSpec with Matchers {
     it("equals") {
       assert(WeekState("101100") == new WeekState(44))
     }
+    it("bit operation") {
+      assert((new WeekState(15) ^ new WeekState(2)) == new WeekState(13))
+    }
     it("hashCode") {
       assert(WeekState("101100").hashCode == java.lang.Long.hashCode(44L))
     }
