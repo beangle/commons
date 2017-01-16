@@ -31,6 +31,7 @@ sealed trait TypeInfo {
   def isElementType: Boolean = false
   def isCollectionType: Boolean = false
   def isMapType: Boolean = false
+  def optional: Boolean
 }
 
 object TypeInfo {
@@ -76,14 +77,21 @@ object TypeInfo {
                 MapType(clazz, typeParams("K"), typeParams("V"))
               }
             }
-
           }
-          case _ =>
-            MapType(clazz, classOf[Any], classOf[Any])
+          case _ => MapType(clazz, classOf[Any], classOf[Any])
         }
       }
     } else {
-      ElementType(clazz)
+      if (clazz == classOf[Option[_]]) {
+        val innerType = typ match {
+          case pt: ParameterizedType =>
+            if (pt.getActualTypeArguments.size == 1) typeAt(pt, 0) else classOf[AnyRef]
+          case c: Class[_] => classOf[AnyRef]
+        }
+        ElementType(innerType, true)
+      } else {
+        ElementType(clazz, false)
+      }
     }
   }
 
@@ -99,7 +107,7 @@ object TypeInfo {
     }
   }
 }
-case class ElementType(val clazz: Class[_]) extends TypeInfo {
+case class ElementType(clazz: Class[_], optional: Boolean = false) extends TypeInfo {
   override def isElementType: Boolean = true
 }
 
@@ -109,12 +117,15 @@ case class CollectionType(val clazz: Class[_], val componentType: Class[_]) exte
   }
   override def isCollectionType: Boolean = true
 
-  def isOptionType: Boolean = {
-    classOf[Option[_]].isAssignableFrom(clazz)
+  override def optional: Boolean = {
+    false
   }
 }
 
 case class MapType(val clazz: Class[_], val keyType: Class[_], valueType: Class[_]) extends TypeInfo {
+  override def optional: Boolean = {
+    false
+  }
   override def isMapType: Boolean = true
 }
 

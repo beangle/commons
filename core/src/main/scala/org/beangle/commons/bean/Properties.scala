@@ -220,13 +220,13 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
   }
 
   private def convert(value: Any, clazz: Class[_], typeInfo: TypeInfo, conversion: Conversion): Any = {
-    if (classOf[Option[_]].isAssignableFrom(clazz)) {
+    if (typeInfo.optional) {
       if (null == value) {
         None
       } else if (value.isInstanceOf[Option[_]]) {
         value
       } else if (null != typeInfo) {
-        if (null == conversion) Option(value) else Option(conversion.convert(value, typeInfo.asInstanceOf[CollectionType].componentType))
+        if (null == conversion) Option(value) else Option(conversion.convert(value, clazz))
       } else {
         Option(value)
       }
