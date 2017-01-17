@@ -59,14 +59,15 @@ class BeanInfosTest extends FunSpec with Matchers {
     it("Have correct trait fields (template generic) type") {
       val t = BeanInfos.forType(classOf[Department]).properties("parent")
       val typeinfo = t.typeinfo
-      assert(typeinfo.isInstanceOf[CollectionType])
-      assert(typeinfo.asInstanceOf[CollectionType].componentType == classOf[Department])
+      assert(typeinfo.isInstanceOf[ElementType])
+      assert(typeinfo.asInstanceOf[ElementType].clazz == classOf[Department])
+      assert(typeinfo.asInstanceOf[ElementType].optional)
     }
     it("find option inner type") {
       val t = BeanInfos.get(classOf[Author]).properties("age")
       val typeinfo = t.typeinfo
-      assert(typeinfo.isInstanceOf[CollectionType])
-      assert(typeinfo.asInstanceOf[CollectionType].componentType == classOf[Int])
+      assert(typeinfo.isInstanceOf[ElementType])
+      assert(typeinfo.asInstanceOf[ElementType].clazz == classOf[Int])
     }
     it("find escaped key method") {
       val t = BeanInfos.get(classOf[Author]).properties("type")
