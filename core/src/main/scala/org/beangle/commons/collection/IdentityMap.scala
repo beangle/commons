@@ -40,6 +40,14 @@ final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
     null.asInstanceOf[V]
   }
 
+  def clear(): Unit = {
+    var i = 0
+    val tab = table
+    while (i < tab.length) {
+      tab(i) = null
+      i += 1
+    }
+  }
   def contains(key: K): Boolean = {
     null != get(key)
   }
@@ -115,6 +123,8 @@ final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
             index += 1
           }
         }
+      } else {
+        entry = null
       }
       hasNext = (entry != null)
     }

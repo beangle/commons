@@ -146,17 +146,6 @@ object Binder {
 
   class ScalarProperty(name: String, propertyType: Class[_]) extends Property(name, propertyType) with TypeNameHolder
 
-  final class OptionToOneProperty(name: String, propertyType: Class[_], binder: Binder)
-      extends ScalarProperty(name, propertyType) with ToOneProperty {
-    def targetEntity_=(s: String): Unit = {
-      this.typeName = Some(s + "?")
-      binder.optionEntityTypes.put(s + "?", s)
-    }
-    def targetEntity: String = {
-      this.typeName.get
-    }
-  }
-
   final class IdProperty(name: String, propertyType: Class[_]) extends Property(name, propertyType) with TypeNameHolder
 
   trait ToOneProperty {
@@ -164,7 +153,7 @@ object Binder {
     def targetEntity: String
   }
 
-  final class ManyToOneProperty(name: String, propertyType: Class[_]) extends Property(name, propertyType) with Fetchable with ToOneProperty {
+  final class ManyToOneProperty(name: String, propertyType: Class[_], optional: Boolean) extends Property(name, propertyType) with Fetchable with ToOneProperty {
     var targetEntity: String = _
   }
 
@@ -296,11 +285,6 @@ final class Binder extends Logging {
   val enumTypes = new mutable.HashMap[String, String]
 
   /**
-   * Buildin option entity types[classname? -> classname]
-   */
-  val optionEntityTypes = new mutable.HashMap[String, String]
-
-  /**
    * Classname.property -> Collection
    */
   val collectMap = new mutable.HashMap[String, Collection]
@@ -359,12 +343,13 @@ final class Binder extends Logging {
     manifest.readables foreach {
       case (name, prop) =>
         if (prop.readable & prop.writable) {
-          val propType = prop.clazz
+          val optional = prop.typeinfo.optional
+          val propType = prop.typeinfo.clazz
           val p =
             if (name == "id") {
               bindId(name, propType, typ)
             } else if (isEntity(propType)) {
-              bindManyToOne(name, propType, typ)
+              bindManyToOne(name, propType, optional)
             } else if (isSeq(propType)) {
               bindSeq(name, propType, entity, typ)
             } else if (isSet(propType)) {
@@ -374,7 +359,7 @@ final class Binder extends Logging {
             } else if (isComponent(propType)) {
               bindComponent(name, propType, entity, typ)
             } else {
-              bindScalar(name, propType, scalarTypeName(name, propType, typ))
+              bindScalar(name, propType, scalarTypeName(name, propType, optional))
             }
           entity.properties += (name -> p)
         }
@@ -420,13 +405,14 @@ final class Binder extends Logging {
     manifest.readables foreach {
       case (name, prop) =>
         if (prop.writable) {
-          val propType = prop.clazz
+          val optional = prop.typeinfo.optional
+          val propType = prop.typeinfo.clazz
           val p =
             if (isEntity(propType)) {
               if (propType == entity.clazz) {
                 cp.parentProperty = Some(name); null.asInstanceOf[Property]
               } else {
-                bindManyToOne(name, propType, ctpe)
+                bindManyToOne(name, propType, optional)
               }
             } else if (isSeq(propType)) {
               bindSeq(name, propType, entity, ctpe)
@@ -437,7 +423,7 @@ final class Binder extends Logging {
             } else if (isComponent(propType)) {
               bindComponent(name, propType, entity, ctpe)
             } else {
-              bindScalar(name, propType, scalarTypeName(name, propType, ctpe))
+              bindScalar(name, propType, scalarTypeName(name, propType, optional))
             }
           if (null != p) cp.properties += (name -> p)
         }
@@ -445,28 +431,21 @@ final class Binder extends Logging {
     cp
   }
 
-  private def scalarTypeName(name: String, clazz: Class[_], tpe: ru.Type): String = {
-    if (clazz == classOf[Option[_]]) {
-      val a = tpe.member(ru.TermName(name)).typeSignatureIn(tpe)
-      val innerType = a.resultType.typeArgs.head.toString
-      val innerClass = ClassLoaders.load(innerType)
-      if (-1 == innerClass.getName.indexOf('.') || innerClass.getName.startsWith("java.")) {
-        Primitives.unwrap(innerClass).getName + "?"
-      } else {
-        if (isEntity(innerClass)) {
-          innerClass.getName + "?"
-        } else {
-          throw new RuntimeException("Option[" + innerClass.getName + "] not supported,Only Supports Option[Enity] and Option[primitive]")
-        }
-      }
-    } else if (clazz.isAnnotationPresent(classOf[value])) {
+  private def scalarTypeName(name: String, clazz: Class[_], optional: Boolean): String = {
+    if (clazz.isAnnotationPresent(classOf[value])) {
       valueTypes += clazz
       clazz.getName
     } else if (classOf[Enumeration#Value].isAssignableFrom(clazz)) {
       val typeName = clazz.getName
       enumTypes.put(typeName, Strings.substringBeforeLast(typeName, "$"))
       typeName
-    } else clazz.getName
+    } else {
+      if (optional && (-1 == clazz.getName.indexOf('.') || clazz.getName.startsWith("java."))) {
+        Primitives.unwrap(clazz).getName + "?"
+      } else {
+        clazz.getName
+      }
+    }
   }
 
   private def bindMap(name: String, propertyType: Class[_], entity: Entity, tye: ru.Type): MapProperty = {
@@ -526,29 +505,17 @@ final class Binder extends Logging {
   }
 
   private def bindScalar(name: String, propertyType: Class[_], typeName: String): ScalarProperty = {
-    val key = if (typeName.contains(".") && typeName.endsWith("?")) {
-      isEntity(ClassLoaders.load(typeName.substring(0, typeName.length - 1)))
-    } else {
-      false
-    }
-    val p: ScalarProperty =
-      if (key) {
-        val toOne = new OptionToOneProperty(name, propertyType, this)
-        toOne.targetEntity = typeName.substring(0, typeName.length - 1)
-        toOne
-      } else {
-        new ScalarProperty(name, propertyType)
-      }
-    val column = new Column(columnName(name, key))
+    val p = new ScalarProperty(name, propertyType)
+    val column = new Column(columnName(name, false))
     column.nullable = typeName.endsWith("?")
     if (None == p.typeName) p.typeName = Some(typeName)
     p.columns += column
     p
   }
 
-  private def bindManyToOne(name: String, propertyType: Class[_], tye: ru.Type): ManyToOneProperty = {
-    val p = new ManyToOneProperty(name, propertyType)
-    val column = new Column(columnName(name, true), false)
+  private def bindManyToOne(name: String, propertyType: Class[_], optional: Boolean): ManyToOneProperty = {
+    val p = new ManyToOneProperty(name, propertyType, optional)
+    val column = new Column(columnName(name, true), optional)
     p.targetEntity = propertyType.getName
     p.columns += column
     p

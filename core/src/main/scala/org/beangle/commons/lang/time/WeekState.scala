@@ -72,6 +72,10 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     new WeekState(this.value & other.value)
   }
 
+  def ^(other: WeekState): WeekState = {
+    new WeekState(this.value ^ other.value)
+  }
+
   def isOverlap(other: WeekState): Boolean = {
     (this.value & other.value) > 0
   }
