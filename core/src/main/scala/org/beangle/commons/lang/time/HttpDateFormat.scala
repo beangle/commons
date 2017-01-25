@@ -18,20 +18,30 @@
  */
 package org.beangle.commons.lang.time
 
-import java.util.Date
 import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
 import java.util.TimeZone
+import java.time.ZoneId
 
 /**
  *  Preferred HTTP date format (RFC 1123).
  *  @see https://www.ietf.org/rfc/rfc1123.txt
  */
+@deprecated("Using DateFormats.Http", "4.6.2")
 object HttpDateFormat {
 
-  val format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz")
+  private val format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz")
   format.setTimeZone(TimeZone.getTimeZone("GMT"))
 
-  def format(date: Date): String = {
+  def format(date: java.util.Date): String = {
     format.format(date)
+  }
+
+  def format(date: java.time.ZonedDateTime): String = {
+    date.format(DateTimeFormatter.RFC_1123_DATE_TIME)
+  }
+
+  def format(date: java.time.LocalDateTime): String = {
+    date.atZone(ZoneId.of("GMT")).format(DateTimeFormatter.RFC_1123_DATE_TIME)
   }
 }

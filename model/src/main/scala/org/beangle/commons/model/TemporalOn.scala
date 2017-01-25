@@ -26,6 +26,7 @@ package org.beangle.commons.model
  *
  * @author chaostone
  */
+@deprecated("Using DateRange", "4.6.2")
 trait TemporalOn {
 
   /**

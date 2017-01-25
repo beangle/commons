@@ -36,6 +36,8 @@
  */
 package org.beangle.commons.model
 
+import java.time.Instant
+
 /**
  * Contain create and update time interface.
  *
@@ -46,6 +48,6 @@ trait Updated {
   /**
    * Updated At
    */
-  var updatedAt: java.util.Date = _
+  var updatedAt: Instant = _
 
 }

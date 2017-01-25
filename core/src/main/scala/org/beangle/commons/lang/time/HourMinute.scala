@@ -17,9 +17,9 @@
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.lang.time
-import org.beangle.commons.lang.Numbers.{ toShort, toInt }
+
+import org.beangle.commons.lang.Numbers.toShort
 import org.beangle.commons.lang.annotation.value
-import java.text.SimpleDateFormat
 
 /**
  * Hour and minute of day
@@ -34,9 +34,11 @@ object HourMinute {
     new HourMinute(convert(time))
   }
 
-  def of(date: java.util.Date): HourMinute = {
-    val sdf = new SimpleDateFormat("HH:mm")
-    new HourMinute(convert(sdf.format(date)))
+  def of(hour: Int, minute: Int): HourMinute = {
+    new HourMinute((hour * 100 + minute).asInstanceOf[Short])
+  }
+  def of(time: java.time.LocalTime): HourMinute = {
+    of(time.getHour, time.getMinute)
   }
 
   def convert(time: String): Short = {

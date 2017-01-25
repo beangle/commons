@@ -20,7 +20,7 @@ package org.beangle.commons.model
 
 import scala.collection.mutable.ListBuffer
 
-trait Journal[T <: TemporalOn] extends Component {
+trait Journal[T <: DateRange] extends Component {
 
   var head: T = _
 

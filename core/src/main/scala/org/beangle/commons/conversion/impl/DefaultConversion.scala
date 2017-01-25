@@ -43,6 +43,8 @@ class DefaultConversion extends AbstractGenericConversion {
 
   addConverter(new String2DateConverter)
 
+  addConverter(new String2TemporalConverter)
+
   addConverter(String2TimeConverter)
 
   addConverter(String2HourMinuteConverter)
