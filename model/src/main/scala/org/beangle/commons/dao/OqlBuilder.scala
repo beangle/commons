@@ -18,11 +18,10 @@
  */
 package org.beangle.commons.dao
 
-import org.beangle.commons.model.meta.EntityType
 import org.beangle.commons.lang.Assert
 import org.beangle.commons.lang.Strings._
 import org.beangle.commons.lang.ClassLoaders
-import org.beangle.commons.model.bind.Jpas
+import org.beangle.commons.orm.Jpas
 
 object OqlBuilder {
   val Lang = Query.Lang("Oql")

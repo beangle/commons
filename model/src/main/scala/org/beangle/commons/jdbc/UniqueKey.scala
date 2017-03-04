@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2017, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -16,28 +16,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.model.util
+package org.beangle.commons.jdbc
 
-import org.beangle.commons.model.meta._
-import org.beangle.commons.model._
 /**
- * Populator interface.
+ * Unique Key
  *
  * @author chaostone
  */
-trait Populator {
-  /**
-   * populate.
-   */
-  def populate(target: Entity[_], EntityType: EntityType, params: collection.Map[String, Any]): Int
+class UniqueKey(table: Table, name: Identifier) extends Constraint(table, name) {
 
-  /**
-   *
-   */
-  def populate(target: Entity[_], EntityType: EntityType, attr: String, value: Any): Boolean
-
-  /**
-   * initProperty.
-   */
-  def init(target: Entity[_], t: EntityType, attr: String): (Any, Property)
+  override def clone(): this.type = {
+    super.clone()
+  }
 }

@@ -16,28 +16,27 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.model.util
+package org.beangle.commons.model.pojo
 
-import org.beangle.commons.model.meta._
-import org.beangle.commons.model._
+import java.time.LocalDateTime
+
 /**
- * Populator interface.
+ * 有时效性的实体
+ * </p>
+ * 指有具体生效时间和失效时间的实体。一般生效时间不能为空，失效时间可以为空。
+ * 具体时间采用时间时间格式便于比对。
  *
  * @author chaostone
  */
-trait Populator {
-  /**
-   * populate.
-   */
-  def populate(target: Entity[_], EntityType: EntityType, params: collection.Map[String, Any]): Int
+trait TemporalAt {
 
   /**
-   *
+   * 获得生效时间
    */
-  def populate(target: Entity[_], EntityType: EntityType, attr: String, value: Any): Boolean
+  var beginAt: LocalDateTime = _
 
   /**
-   * initProperty.
+   * 获得失效时间
    */
-  def init(target: Entity[_], t: EntityType, attr: String): (Any, Property)
+  var endAt: Option[LocalDateTime] = None
 }

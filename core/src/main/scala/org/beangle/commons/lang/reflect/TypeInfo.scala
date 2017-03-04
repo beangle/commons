@@ -28,9 +28,9 @@ case class Setter(val method: Method, val parameterTypes: Array[Class[_]])
 
 sealed trait TypeInfo {
   def clazz: Class[_]
-  def isElementType: Boolean = false
-  def isCollectionType: Boolean = false
-  def isMapType: Boolean = false
+  def isElement: Boolean = false
+  def isCollection: Boolean = false
+  def isMap: Boolean = false
   def optional: Boolean
 }
 
@@ -108,14 +108,14 @@ object TypeInfo {
   }
 }
 case class ElementType(clazz: Class[_], optional: Boolean = false) extends TypeInfo {
-  override def isElementType: Boolean = true
+  override def isElement: Boolean = true
 }
 
-case class CollectionType(val clazz: Class[_], val componentType: Class[_]) extends TypeInfo {
+case class CollectionType(val clazz: Class[_], val elementType: Class[_]) extends TypeInfo {
   def isSetType: Boolean = {
     classOf[collection.Set[_]].isAssignableFrom(clazz) || classOf[java.util.Set[_]].isAssignableFrom(clazz)
   }
-  override def isCollectionType: Boolean = true
+  override def isCollection: Boolean = true
 
   override def optional: Boolean = {
     false
@@ -126,7 +126,7 @@ case class MapType(val clazz: Class[_], val keyType: Class[_], valueType: Class[
   override def optional: Boolean = {
     false
   }
-  override def isMapType: Boolean = true
+  override def isMap: Boolean = true
 }
 
 class PropertyDescriptor(val name: String, val typeinfo: TypeInfo, val getter: Option[Method], val setter: Option[Method], val isTransient: Boolean) {

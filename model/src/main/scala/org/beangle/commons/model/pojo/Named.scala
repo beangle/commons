@@ -16,28 +16,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.model.util
+package org.beangle.commons.model.pojo
 
-import org.beangle.commons.model.meta._
-import org.beangle.commons.model._
-/**
- * Populator interface.
- *
- * @author chaostone
- */
-trait Populator {
-  /**
-   * populate.
-   */
-  def populate(target: Entity[_], EntityType: EntityType, params: collection.Map[String, Any]): Int
+trait Named {
 
-  /**
-   *
-   */
-  def populate(target: Entity[_], EntityType: EntityType, attr: String, value: Any): Boolean
-
-  /**
-   * initProperty.
-   */
-  def init(target: Entity[_], t: EntityType, attr: String): (Any, Property)
+  var name: String = _
 }

@@ -20,8 +20,8 @@ package org.beangle.commons.dao
 
 object Query {
   case class Lang(val name: String)
-  val OQL = new Lang("hql")
-  val SQL = new Lang("sql")
+  val OQL = Lang("hql")
+  val SQL = Lang("sql")
 }
 import Query._
 /**
@@ -31,32 +31,11 @@ import Query._
  */
 trait Query[T] {
 
-  /**
-   * Returns query statement.
-   */
   def statement: String
 
-  /**
-   * getParams.
-   */
   def params: Map[String, Any]
 
-  /**
-   * <p>
-   * isCacheable.
-   * </p>
-   *
-   * @return a boolean.
-   */
   def cacheable: Boolean
 
-  /**
-   * <p>
-   * getLang.
-   * </p>
-   *
-   * @return a {@link org.beangle.commons.dao.query.Lang} object.
-   */
   def lang: Lang
 }
-

@@ -21,8 +21,7 @@ package org.beangle.commons.model.util
 import java.lang.reflect.Method
 
 import org.beangle.commons.model.Entity
-import org.beangle.commons.model.meta.EntityType
-import org.beangle.commons.model.meta.Type
+import org.beangle.commons.model.meta._
 import org.beangle.commons.lang.Objects
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.logging.Logging
@@ -42,16 +41,16 @@ object ConvertPopulator extends Logging {
 import ConvertPopulator._
 import org.beangle.commons.lang.reflect.BeanInfos
 
-class ConvertPopulator(val conversion: Conversion = DefaultConversion.Instance) extends Populator with Logging {
-
+class ConvertPopulator(conversion: Conversion = DefaultConversion.Instance) extends Populator with Logging {
   val properties = new Properties(BeanInfos.Default, conversion)
   /**
    * Initialize target's attribuate path,Return the last property value and type.
    */
-  override def init(target: Entity[_], t: Type, attr: String): (Any, Type) = {
+  override def init(target: Entity[_], t: EntityType, attr: String): (Any, Property) = {
     var propObj: Any = target
     var property: Any = null
-    var objtype = t
+    var objtype: StructType = t
+    var propertyType: Property = null
 
     var index = 0
     val attrs = Strings.split(attr, ".")
@@ -59,17 +58,25 @@ class ConvertPopulator(val conversion: Conversion = DefaultConversion.Instance) 
       val nested = attrs(index)
       try {
         property = properties.get[Object](propObj, nested)
-        objtype.getPropertyType(nested) match {
+        objtype.getProperty(nested) match {
           case Some(t) => {
             property match {
               case null | None =>
-                property = t.newInstance()
+                property = t.clazz.newInstance()
                 properties.set(propObj.asInstanceOf[AnyRef], nested, property)
               case Some(p) =>
                 property = p
               case _ =>
             }
-            objtype = t
+            if (index < attrs.length) {
+              t match {
+                case n: StructType => objtype = n
+                case _ =>
+                  logger.error(s"Cannot find property type [$nested] of ${propObj.getClass}")
+                  throw new RuntimeException("Cannot find property type " + nested + " of " + propObj.getClass().getName())
+              }
+            }
+            propertyType = t
           }
           case None => {
             logger.error(s"Cannot find property type [$nested] of ${propObj.getClass}")
@@ -82,14 +89,14 @@ class ConvertPopulator(val conversion: Conversion = DefaultConversion.Instance) 
         case e: Exception => throw new RuntimeException(e)
       }
     }
-    return (property, objtype)
+    return (property, propertyType)
   }
 
   /**
    * 安静的拷贝属性，如果属性非法或其他错误则记录日志
    */
-  override def populate(target: Entity[_], entityType: EntityType, attr: String, value: Any): Boolean = {
-    populate(target, entityType, Map(attr -> value)) == 1
+  override def populate(target: Entity[_], EntityType: EntityType, attr: String, value: Any): Boolean = {
+    populate(target, EntityType, Map(attr -> value)) == 1
   }
 
   /**
@@ -99,7 +106,7 @@ class ConvertPopulator(val conversion: Conversion = DefaultConversion.Instance) 
    * 如果params中的id为null，则将该实体的置为null.<br>
    * 否则新生成一个实体，将其id设为params中指定的值。 空字符串按照null处理
    */
-  override def populate(entity: Entity[_], entityType: EntityType, params: collection.Map[String, Any]): Int = {
+  override def populate(entity: Entity[_], EntityType: EntityType, params: collection.Map[String, Any]): Int = {
     var success = 0
     params foreach {
       case (attr, v) =>
@@ -113,33 +120,37 @@ class ConvertPopulator(val conversion: Conversion = DefaultConversion.Instance) 
         } else {
           val parentAttr = Strings.substring(attr, 0, attr.lastIndexOf('.'))
           try {
-            val ot = init(entity, entityType, parentAttr)
+            val ot = init(entity, EntityType, parentAttr)
             if (null == ot) {
               logger.error(s"error attr:[$attr] value:[$value]")
             } else {
-              // 属性也是实体类对象
-              if (ot._2.isEntityType) {
-                val foreignKey = ot._2.asInstanceOf[EntityType].idName
-                if (attr.endsWith("." + foreignKey)) {
-                  if (null == value) {
-                    copyValue(entity, parentAttr, null)
-                  } else {
-                    val oldValue = properties.get[Object](entity, attr)
-                    val newValue = convert(ot._2, foreignKey, value)
-                    if (!Objects.equals(oldValue, newValue)) {
-                      // 如果外键已经有值
-                      if (null != oldValue) {
-                        copyValue(entity, parentAttr, null)
-                        init(entity, entityType, parentAttr)
+              ot._2 match {
+                case sp: SingularProperty =>
+                  sp.propertyType match {
+                    case ft: EntityType =>
+                      val foreignKey = ft.id.name
+                      if (attr.endsWith("." + foreignKey)) {
+                        if (null == value) {
+                          copyValue(entity, parentAttr, null)
+                        } else {
+                          val oldValue = properties.get[Object](entity, attr)
+                          val newValue = convert(ft, foreignKey, value)
+                          if (!Objects.equals(oldValue, newValue)) {
+                            // 如果外键已经有值
+                            if (null != oldValue) {
+                              copyValue(entity, parentAttr, null)
+                              init(entity, EntityType, parentAttr)
+                            }
+                            properties.set(entity, attr, newValue)
+                          }
+                        }
+                      } else {
+                        copyValue(entity, attr, value)
                       }
-                      properties.set(entity, attr, newValue)
-                    }
+                    case _ =>
+                      copyValue(entity, attr, value)
                   }
-                } else {
-                  copyValue(entity, attr, value)
-                }
-              } else {
-                copyValue(entity, attr, value)
+                case _ =>
               }
             }
           } catch {
@@ -153,12 +164,12 @@ class ConvertPopulator(val conversion: Conversion = DefaultConversion.Instance) 
     success
   }
 
-  private def convert(t: Type, attr: String, value: Any): Any = {
+  private def convert(t: EntityType, attr: String, value: Any): Any = {
     if (value.isInstanceOf[AnyRef] && null == value) null
     else {
-      t.getPropertyType(attr) match {
-        case Some(ty) => conversion.convert(value, ty.returnedClass)
-        case None     => throw new RuntimeException("cannot find attribuate type of " + attr + " in " + t.name)
+      t.getProperty(attr) match {
+        case Some(ty) => conversion.convert(value, ty.clazz)
+        case None     => throw new RuntimeException("cannot find attribuate type of " + attr + " in " + t.entityName)
       }
     }
   }

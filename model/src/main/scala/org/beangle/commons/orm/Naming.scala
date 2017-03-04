@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2017, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -16,28 +16,39 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.model.util
+package org.beangle.commons.orm
 
-import org.beangle.commons.model.meta._
-import org.beangle.commons.model._
+object NamingPolicy {
+  /**
+   * 表名最大长度
+   */
+  val DefaultMaxLength = 30
+}
 /**
- * Populator interface.
+ * Entity table and Collection Table Naming Strategy.
  *
  * @author chaostone
  */
-trait Populator {
-  /**
-   * populate.
-   */
-  def populate(target: Entity[_], EntityType: EntityType, params: collection.Map[String, Any]): Int
+trait NamingPolicy {
 
+  import NamingPolicy._
   /**
+   * Convert class to table name
    *
+   * @param clazz
+   * @param entityName
    */
-  def populate(target: Entity[_], EntityType: EntityType, attr: String, value: Any): Boolean
+  def classToTableName(clazz: Class[_], entityName: String): Name
 
   /**
-   * initProperty.
+   * Convert collection to table name
+   *
+   * @param clazz
+   * @param entityName
+   * @param tableName
+   * @param collectionName
    */
-  def init(target: Entity[_], t: EntityType, attr: String): (Any, Property)
+  def collectionToTableName(clazz: Class[_], entityName: String, tableName: String, collectionName: String): Name
 }
+
+case class Name(schema: Option[String], text: String)

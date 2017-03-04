@@ -21,6 +21,10 @@
       <artifactId>beangle-commons-core_2.12</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.beangle.commons</groupId>
+      <artifactId>beangle-commons-text_2.12</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>

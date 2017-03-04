@@ -16,28 +16,41 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.model.util
+package org.beangle.commons.model.pojo
 
-import org.beangle.commons.model.meta._
-import org.beangle.commons.model._
+import org.beangle.commons.collection.Collections
+import org.beangle.commons.lang.Strings
+import org.beangle.commons.lang.Numbers
 /**
- * Populator interface.
+ * <p>
+ * Hierarchical interface.
+ * </p>
  *
  * @author chaostone
  */
-trait Populator {
-  /**
-   * populate.
-   */
-  def populate(target: Entity[_], EntityType: EntityType, params: collection.Map[String, Any]): Int
+trait Hierarchical[T] extends Ordered[T] {
 
-  /**
-   *
-   */
-  def populate(target: Entity[_], EntityType: EntityType, attr: String, value: Any): Boolean
+  /** index no */
+  var indexno: String = _
 
-  /**
-   * initProperty.
-   */
-  def init(target: Entity[_], t: EntityType, attr: String): (Any, Property)
+  /** 父级菜单 */
+  var parent: Option[T] = None
+
+  var children = Collections.newBuffer[T]
+
+  def depth: Int = {
+    Strings.count(indexno, ".") + 1
+  }
+
+  def lastindex: Int = {
+    var index = Strings.substringAfterLast(indexno, ".")
+    if (Strings.isEmpty(index)) index = indexno
+    var idx = Numbers.toInt(index)
+    if (idx <= 0) idx = 1
+    idx
+  }
+
+  def compare(that: T): Int = {
+    this.indexno.compareTo(that.asInstanceOf[Hierarchical[_]].indexno)
+  }
 }
