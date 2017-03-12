@@ -70,12 +70,16 @@ private[orm] object Proxy extends Logging {
       case (name, p) =>
         if (p.readable) {
           val getter = p.getter.get
-          val value = Primitives.defaultLiteral(p.clazz)
-          val body = s"public ${p.clazz.getName} ${getter.getName}() { return $value;}"
+          val value = if (p.typeinfo.optional) "null" else Primitives.defaultLiteral(p.clazz)
+          val body = if (p.typeinfo.optional) {
+            s"public scala.Option ${getter.getName}() { return $value;}"
+          } else {
+            s"public ${p.clazz.getName} ${getter.getName}() { return $value;}"
+          }
           val ctmod = javac.compile(body).asInstanceOf[CtMethod]
           if (isComponent(p.clazz)) {
             componentTypes += (name -> generateComponent(p.clazz, name + "."))
-            ctmod.setBody("{_lastAccessed.add(\"" + name + "\");return super." + getter.getName + "();}")
+            ctmod.setBody("{return super." + getter.getName + "();}")
           } else {
             ctmod.setBody("{_lastAccessed.add( \"" + name + "\");return " + value + ";}")
           }
@@ -101,6 +105,7 @@ private[orm] object Proxy extends Logging {
     val maked = cct.toClass
     val proxy = maked.getConstructor().newInstance().asInstanceOf[EntityProxy]
     logger.debug(s"generate $classFullName using $watch")
+    // cct.debugWriteFile("/tmp/model/")
     proxies.put(classFullName, proxy.getClass)
     proxy
   }
@@ -126,10 +131,14 @@ private[orm] object Proxy extends Logging {
       case (name, p) =>
         if (p.readable) {
           val getter = p.getter.get
-          val value = Primitives.defaultLiteral(p.clazz)
-          val body = s"public ${p.clazz.getName} ${getter.getName}() { return $value;}"
+          val value = if (p.typeinfo.optional) "null" else Primitives.defaultLiteral(p.clazz)
+          val body =
+            if (p.typeinfo.optional) {
+              s"public scala.Option ${getter.getName}() { return $value;}"
+            } else {
+              s"public ${p.clazz.getName} ${getter.getName}() { return $value;}"
+            }
           val ctmod = javac.compile(body).asInstanceOf[CtMethod]
-
           val accessed = "_parent.lastAccessed()"
           if (isComponent(p.clazz)) {
             componentTypes += (name -> generateComponent(p.clazz, path + name + "."))
@@ -164,6 +173,7 @@ private[orm] object Proxy extends Logging {
     cct.addMethod(ctmod)
 
     val maked = cct.toClass()
+    // cct.debugWriteFile("/tmp/model/")
     proxies.put(classFullName, maked)
     maked
   }

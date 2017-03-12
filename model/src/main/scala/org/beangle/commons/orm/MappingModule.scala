@@ -151,21 +151,12 @@ object MappingModule {
     // only apply unique on component properties
     def is(holder: EntityHolder[_], declarations: Seq[Declaration]): Unit = {
       val lasts = asScalaSet(holder.proxy.lastAccessed)
+      if (!declarations.isEmpty && lasts.isEmpty) {
+        throw new RuntimeException("Cannot find access properties for " + holder.mapping.entityName + " with declarations:" + declarations)
+      }
       lasts foreach { property =>
-        holder.mapping match {
-          case sm: SingularMapping =>
-
-            sm.mapping match {
-              case e: EmbeddableTypeMapping =>
-                declarations foreach (d => if (d.isInstanceOf[Unique]) d(holder, p))
-              case _ =>
-                declarations foreach (d => d(holder, p))
-            }
-          case _ =>
-            declarations foreach (d => d(holder, p))
-        }
         val p = holder.mapping.getProperty(property)
-
+        declarations foreach (d => d(holder, p))
         p.mergeable = false
       }
       lasts.clear()
