@@ -54,13 +54,6 @@ class SqlType(var code: Int, var name: String) {
   var scale: Option[Int] = None
 
   override def toString: String = {
-    length match {
-      case Some(l) => s"${name}($l)"
-      case None =>
-        precision match {
-          case Some(p) => s"${name}($p,${scale.getOrElse(0)})"
-          case None    => name
-        }
-    }
+    name
   }
 }

@@ -13,11 +13,13 @@ trait Engine {
 
   def quoteChars: Tuple2[Char, Char]
 
-  def sqlType(sqlCode: Int): SqlType
+  def toType(sqlCode: Int): SqlType
 
-  def sqlType(sqlCode: Int, length: Int): SqlType
+  def toType(sqlCode: Int, length: Int): SqlType
 
-  def sqlType(sqlCode: Int, precision: Int, scale: Int): SqlType
+  def toType(sqlCode: Int, precision: Int, scale: Int): SqlType
+
+  def toType(sqlCode: Int, length: Int, precision: Int, scale: Int): SqlType
 
   def needQuote(name: String): Boolean = {
     val rs = (name.indexOf(' ') > -1) || keywords.contains(name.toLowerCase)
@@ -77,26 +79,26 @@ abstract class AbstractEngine extends Engine {
     }
   }
 
-  override def sqlType(sqlCode: Int): SqlType = {
-    sqlType(sqlCode, 0, 0)
+  override def toType(sqlCode: Int): SqlType = {
+    toType(sqlCode, 0, 0)
   }
 
-  override def sqlType(sqlCode: Int, length: Int): SqlType = {
+  override def toType(sqlCode: Int, length: Int): SqlType = {
     if (SqlType.isNumberType(sqlCode)) {
-      sqlType(sqlCode, 0, length, 0)
+      toType(sqlCode, 0, length, 0)
     } else {
-      sqlType(sqlCode, length, 0, 0)
+      toType(sqlCode, length, 0, 0)
     }
   }
 
-  override def sqlType(sqlCode: Int, precision: Int, scale: Int): SqlType = {
-    sqlType(sqlCode, 0, precision, scale)
+  override def toType(sqlCode: Int, precision: Int, scale: Int): SqlType = {
+    toType(sqlCode, 0, precision, scale)
   }
 
-  private def sqlType(sqlCode: Int, length: Int, precision: Int, scale: Int): SqlType = {
+  override def toType(sqlCode: Int, length: Int, precision: Int, scale: Int): SqlType = {
     if (sqlCode == Types.OTHER) new SqlType(sqlCode, "other") else
       try {
-        val result = new SqlType(sqlCode, typeNames.get(sqlCode, precision, precision, scale))
+        val result = new SqlType(sqlCode, typeNames.get(sqlCode, length, precision, scale))
         if (precision > 0) {
           result.precision = Some(precision)
           result.scale = Some(scale)
@@ -108,6 +110,7 @@ abstract class AbstractEngine extends Engine {
         case e: Exception => new SqlType(sqlCode, "unkown")
       }
   }
+
   def storeCase: StoreCase.Value = {
     StoreCase.Mixed
   }

@@ -24,7 +24,7 @@ class Column(var name: Identifier, var sqlType: SqlType, var nullable: Boolean =
   }
 
   def hasCheck: Boolean = {
-    check != null
+    check != null && check.isDefined
   }
 
   def literalName(engine: Engine): String = {
