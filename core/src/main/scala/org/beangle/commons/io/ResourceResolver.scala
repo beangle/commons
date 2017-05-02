@@ -34,6 +34,12 @@ trait ResourceResolver {
   def getResources(locationPattern: String): List[URL]
 }
 
+object ResourcePatternResolver {
+  def getResources(locationPattern: String): List[URL] = {
+    new ResourcePatternResolver().getResources(locationPattern)
+  }
+}
+
 class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResourceLoader) extends ResourceResolver {
 
   private val equinoxResolveMethod: Method = {

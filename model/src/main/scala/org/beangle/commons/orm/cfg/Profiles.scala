@@ -8,24 +8,32 @@ import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.Strings.{ replace, substringBetween, isEmpty, isNotEmpty, rightPad, substringBeforeLast, unCamel }
 import org.beangle.commons.logging.Logging
 import org.beangle.commons.orm.NamingPolicy
+import org.beangle.commons.orm.MappingModule
+import org.beangle.commons.lang.reflect.Reflections
 
-class Profiles extends Logging {
+class Profiles(resources: Resources) extends Logging {
 
   private val profiles = new collection.mutable.HashMap[String, MappingProfile]
 
-  private val configLocations = new collection.mutable.HashSet[URL]
-
   private val namings = new collection.mutable.HashMap[String, NamingPolicy]
 
+  val modules = new collection.mutable.HashSet[MappingModule]
+
   namings.put("rails", new RailsNamingPolicy(this))
+
+  for (url <- resources.paths) addConfig(url)
+  if (!profiles.isEmpty) logger.info(s"Table name pattern: -> ${this.toString}")
 
   def addConfig(url: URL): Unit = {
     try {
       logger.debug(s"loading $url")
       val is = url.openStream()
       if (null != is) {
-        configLocations.add(url)
-        (scala.xml.XML.load(is) \ "naming" \ "profile") foreach { ele => parseProfile(ele, null) }
+        val xml = scala.xml.XML.load(is)
+        (xml \ "naming" \ "profile") foreach { ele => parseProfile(ele, null) }
+        (xml \ "mapping") foreach { ele =>
+          modules += Reflections.getInstance[MappingModule]((ele \ "@class").text)
+        }
         is.close()
       }
       autoWire()
@@ -90,6 +98,10 @@ class Profiles extends Logging {
     }
   }
 
+  def getNamingPolicy(clazz: Class[_]): Option[NamingPolicy] = {
+    getProfile(clazz).map { p => p.naming }
+  }
+
   def getProfile(clazz: Class[_]): Option[MappingProfile] = {
     var name = clazz.getName()
     var matched: Option[MappingProfile] = None
@@ -102,12 +114,6 @@ class Profiles extends Logging {
     matched
   }
 
-  def setResources(resources: Resources) {
-    if (null != resources) {
-      for (url <- resources.paths) addConfig(url)
-      if (!profiles.isEmpty) logger.info(s"Table name pattern: -> ${this.toString}")
-    }
-  }
   /**
    * adjust parent relation by package name
    */

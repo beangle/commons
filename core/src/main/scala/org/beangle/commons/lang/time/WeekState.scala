@@ -50,7 +50,6 @@ object WeekState {
 /**
  * week index is 1 based.
  */
-@beta
 @value
 class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
 

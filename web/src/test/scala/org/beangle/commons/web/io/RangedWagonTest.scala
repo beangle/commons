@@ -47,7 +47,7 @@ class RangedWagonTest extends FunSpec with Matchers {
 
         def setWriteListener(writeListener: WriteListener) {}
       })
-      val testDoc = ClassLoaders.getResource("download.txt")
+      val testDoc = ClassLoaders.getResource("download.txt").get
       wagon.copy(testDoc, request, response)
       verify(response).setHeader("Accept-Ranges", "bytes")
       val file = new File(testDoc.toURI())

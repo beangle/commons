@@ -12,7 +12,7 @@
   <properties>
     <bundle.symbolicName>org.beangle.commons.cdi</bundle.symbolicName>
     <bundle.namespace>org.beangle.commons.cdi</bundle.namespace>
-    <spring.version>4.0.4.RELEASE</spring.version>
+    <spring.version>4.3.8.RELEASE</spring.version>
   </properties>
 
   <dependencies>

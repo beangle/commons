@@ -70,9 +70,16 @@ class ConvertPopulator(conversion: Conversion = DefaultConversion.Instance) exte
             }
             if (index < attrs.length) {
               t match {
-                case n: StructType => objtype = n
+                case n: SingularProperty => {
+                  n.propertyType match {
+                    case s: StructType => objtype = s
+                    case _ =>
+                      logger.error(s"Cannot find property type [$nested] of ${propObj.getClass}")
+                      throw new RuntimeException("Cannot find property type " + nested + " of " + propObj.getClass().getName())
+                  }
+                }
                 case _ =>
-                  logger.error(s"Cannot find property type [$nested] of ${propObj.getClass}")
+                  logger.error(s"Cannot populate collection property type [$nested] of ${propObj.getClass}")
                   throw new RuntimeException("Cannot find property type " + nested + " of " + propObj.getClass().getName())
               }
             }
@@ -95,8 +102,8 @@ class ConvertPopulator(conversion: Conversion = DefaultConversion.Instance) exte
   /**
    * 安静的拷贝属性，如果属性非法或其他错误则记录日志
    */
-  override def populate(target: Entity[_], EntityType: EntityType, attr: String, value: Any): Boolean = {
-    populate(target, EntityType, Map(attr -> value)) == 1
+  override def populate(target: Entity[_], entityType: EntityType, attr: String, value: Any): Boolean = {
+    populate(target, entityType, Map(attr -> value)) == 1
   }
 
   /**
@@ -106,7 +113,7 @@ class ConvertPopulator(conversion: Conversion = DefaultConversion.Instance) exte
    * 如果params中的id为null，则将该实体的置为null.<br>
    * 否则新生成一个实体，将其id设为params中指定的值。 空字符串按照null处理
    */
-  override def populate(entity: Entity[_], EntityType: EntityType, params: collection.Map[String, Any]): Int = {
+  override def populate(entity: Entity[_], entityType: EntityType, params: collection.Map[String, Any]): Int = {
     var success = 0
     params foreach {
       case (attr, v) =>
@@ -120,7 +127,7 @@ class ConvertPopulator(conversion: Conversion = DefaultConversion.Instance) exte
         } else {
           val parentAttr = Strings.substring(attr, 0, attr.lastIndexOf('.'))
           try {
-            val ot = init(entity, EntityType, parentAttr)
+            val ot = init(entity, entityType, parentAttr)
             if (null == ot) {
               logger.error(s"error attr:[$attr] value:[$value]")
             } else {
@@ -139,7 +146,7 @@ class ConvertPopulator(conversion: Conversion = DefaultConversion.Instance) exte
                             // 如果外键已经有值
                             if (null != oldValue) {
                               copyValue(entity, parentAttr, null)
-                              init(entity, EntityType, parentAttr)
+                              init(entity, entityType, parentAttr)
                             }
                             properties.set(entity, attr, newValue)
                           }

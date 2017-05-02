@@ -26,7 +26,7 @@ class Schema(var database: Database, var name: Identifier) {
    */
   def getTable(tbname: String): Option[Table] = {
     val engine = database.engine
-    val nschema = this.name.toLiteral(engine)
+    val nschema = name.toLiteral(engine)
     if (tbname.contains(".")) {
       if (nschema != engine.toIdentifier(Strings.substringBefore(tbname, ".")).value) None
       else tables.get(engine.toIdentifier(Strings.substringAfter(tbname, ".")).value)

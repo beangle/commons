@@ -61,9 +61,15 @@ class RailsNamingPolicy(profiles: Profiles) extends NamingPolicy with Logging {
     //    }
     Name(profiles.getSchema(clazz), collectionTableName)
   }
+
+  override def propertyToColumnName(clazz: Class[_], property: String): String = {
+    addUnderscores(property)
+  }
+
   private def unqualify(qualifiedName: String): String = {
     val loc = qualifiedName.lastIndexOf('.')
     if (loc < 0) qualifiedName else qualifiedName.substring(loc + 1)
   }
+
   private def addUnderscores(name: String): String = unCamel(name.replace('.', '_'), '_')
 }

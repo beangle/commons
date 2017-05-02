@@ -102,13 +102,19 @@ class StringsTest extends FunSpec with Matchers {
       replace("aba", "a", "") should equal("b")
       replace("aba", "a", "z") should equal("zbz")
     }
-    it("Strip chars"){
-      stripEnd(null,"a") should be (null)
-      stripEnd(null,null) should be (null)
-      stripEnd("abc","") should be ("abc")
-      stripEnd("abc",null) should be ("abc")
-      stripEnd("abc","c") should be ("ab")
-      stripEnd("abc","b") should be ("abc")
+    it("Strip chars") {
+      stripEnd(null, "a") should be(null)
+      stripEnd(null, null) should be(null)
+      stripEnd("abc", "") should be("abc")
+      stripEnd("abc", null) should be("abc")
+      stripEnd("abc", "c") should be("ab")
+      stripEnd("abc", "b") should be("abc")
+    }
+    it("capitalize chars") {
+      capitalize("zbc") should be("Zbc")
+      capitalize("") should be("")
+      capitalize("Zbc") should be("Zbc")
+      uncapitalize("Zbc") should be("zbc")
     }
   }
 }

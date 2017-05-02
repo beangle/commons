@@ -39,7 +39,7 @@ trait Engine {
   }
 
   def toIdentifier(literal: String): Identifier = {
-    if (Strings.isEmpty(literal)) return null
+    if (Strings.isEmpty(literal)) return Identifier.empty
     if (literal.charAt(0) == quoteChars._1) Identifier(literal.substring(1, literal.length - 1), true)
     else {
       storeCase match {
@@ -101,13 +101,11 @@ abstract class AbstractEngine extends Engine {
           result.precision = Some(precision)
           result.scale = Some(scale)
         } else {
-          result.length = Some(length)
+          if (length > 0) result.length = Some(length)
         }
         result
       } catch {
-        case e: Exception =>
-          println("Cannot find type code" + sqlCode)
-          new SqlType(sqlCode, "unkown")
+        case e: Exception => new SqlType(sqlCode, "unkown")
       }
   }
   def storeCase: StoreCase.Value = {

@@ -29,22 +29,22 @@ import java.{ util => ju }
 class InternetDateFormatTest extends FunSpec with Matchers {
   describe("InternetDateFormat") {
     it("format") {
-      val cal =  ju.Calendar.getInstance
+      val cal = ju.Calendar.getInstance
       cal.set(ju.Calendar.MILLISECOND, 0)
-      val date= cal.getTime
-      val utcString = UTCFormat.format(date)
+      val date = cal.getTime
+      val utcString = DateFormats.UTC.format(date)
       val format = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
       format.setTimeZone(java.util.TimeZone.getTimeZone("UTC"))
       val newDate = format.format(date)
       assert(utcString == newDate)
 
-      val gmtString = GMTFormat.format(date)
+      val gmtString = DateFormats.GMT.format(date)
       println(gmtString)
     }
     it("parse") {
       val s = "2014-12-17T04:37:15.230Z"
-      val date1 = UTCFormat.parse("2014-12-17T04:37:15.230Z")
-      val date2 = UTCFormat.parse("2014-12-17 04:37:15.230Z")
+      val date1 = DateFormats.UTC.parse("2014-12-17T04:37:15.230Z")
+      val date2 = DateFormats.UTC.parse("2014-12-17 04:37:15.230Z")
       assert(date1 == date2)
     }
   }

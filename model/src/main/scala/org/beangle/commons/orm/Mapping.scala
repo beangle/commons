@@ -26,19 +26,17 @@ import scala.collection.mutable.Buffer
 import org.beangle.commons.jdbc.SqlType
 import java.sql.Types
 
-class SimpleColumn(val column: Column) extends ColumnHolder with TypeNameHolder {
+class SimpleColumn(column: Column) extends ColumnHolder {
+  require(null != column)
+  val columns: Buffer[Column] = Buffer.empty[Column]
   columns += column
-}
-
-trait TypeNameHolder {
-  var typeName: Option[String] = None
 }
 
 trait Fetchable {
   var fetch: Option[String] = None
 }
 trait ColumnHolder {
-  var columns: Buffer[Column] = Buffer.empty[Column]
+  def columns: Iterable[Column]
 }
 
 trait Mapping extends Cloneable {
@@ -59,7 +57,7 @@ trait StructTypeMapping extends Mapping {
   }
 }
 
-final class EntityTypeMapping(val typ: EntityType, val table: Table) extends StructTypeMapping {
+final class EntityTypeMapping(var typ: EntityType, var table: Table) extends StructTypeMapping {
   var cacheUsage: String = _
   var cacheRegion: String = _
   var isLazy: Boolean = true
@@ -85,11 +83,12 @@ final class EntityTypeMapping(val typ: EntityType, val table: Table) extends Str
   }
 }
 
-final class BasicTypeMapping(val typ: BasicType, column: Column, tpeName: String = null)
-    extends Mapping with Cloneable with ColumnHolder with TypeNameHolder {
+final class BasicTypeMapping(val typ: BasicType, column: Column)
+    extends Mapping with Cloneable with ColumnHolder {
+
+  var columns: Buffer[Column] = Buffer.empty[Column]
 
   if (null != column) columns += column
-  if (null != tpeName) this.typeName = Some(tpeName)
 
   def copy(): BasicTypeMapping = {
     val cloned = super.clone().asInstanceOf[BasicTypeMapping]
@@ -105,8 +104,6 @@ final class BasicTypeMapping(val typ: BasicType, column: Column, tpeName: String
 
 final class EmbeddableTypeMapping(val typ: EmbeddableType) extends StructTypeMapping {
 
-  def parentName: Option[String] = None
-
   def copy(): EmbeddableTypeMapping = {
     val cloned = super.clone().asInstanceOf[EmbeddableTypeMapping]
     val cp = Collections.newMap[String, PropertyMapping[_]]
@@ -120,7 +117,7 @@ final class EmbeddableTypeMapping(val typ: EmbeddableType) extends StructTypeMap
 
 }
 
-abstract class PropertyMapping[T <: Property](val property: T) extends TypeNameHolder {
+abstract class PropertyMapping[T <: Property](val property: T) {
   var access: Option[String] = None
   var cascade: Option[String] = None
   var mergeable: Boolean = true
@@ -136,16 +133,23 @@ abstract class PropertyMapping[T <: Property](val property: T) extends TypeNameH
 }
 
 final class SingularMapping(property: SingularProperty, var mapping: Mapping)
-    extends PropertyMapping(property) with Fetchable {
+    extends PropertyMapping(property) with Fetchable with ColumnHolder with Cloneable {
   def copy: this.type = {
     val cloned = super.clone().asInstanceOf[this.type]
     cloned.mapping = this.mapping.copy()
     cloned
   }
+
+  def columns: Iterable[Column] = {
+    mapping match {
+      case s: BasicTypeMapping => s.columns
+      case _                   => throw new RuntimeException("Columns on apply on BasicTypeMapping")
+    }
+  }
 }
 
 abstract class PluralMapping[T <: PluralProperty](property: T, var element: Mapping)
-    extends PropertyMapping(property) with Fetchable {
+    extends PropertyMapping(property) with Fetchable with Cloneable {
   var ownerColumn: Column = _
   var inverse: Boolean = false
   var where: Option[String] = None

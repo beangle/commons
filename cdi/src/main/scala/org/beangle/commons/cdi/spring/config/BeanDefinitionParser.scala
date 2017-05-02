@@ -212,7 +212,7 @@ class BeanDefinitionParser extends Logging {
     bd.setAutowireMode(getAutowireMode(ele.getAttribute(AUTOWIRE_ATTRIBUTE)))
 
     if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
-      bd.setDependsOn(StringUtils.tokenizeToStringArray(ele.getAttribute(DEPENDS_ON_ATTRIBUTE), MULTI_VALUE_ATTRIBUTE_DELIMITERS))
+      bd.setDependsOn(StringUtils.tokenizeToStringArray(ele.getAttribute(DEPENDS_ON_ATTRIBUTE), MULTI_VALUE_ATTRIBUTE_DELIMITERS):_*)
     }
 
     if (ele.hasAttribute(PRIMARY_ATTRIBUTE))

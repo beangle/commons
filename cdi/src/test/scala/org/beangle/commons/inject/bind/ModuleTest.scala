@@ -28,7 +28,7 @@ class ModuleTest extends FunSpec with Matchers {
 
   describe("BindModule") {
     it("has corrent dev model detected.") {
-      val module = new AbstractBindModule {
+      val module = new BindModule {
         protected override def binding(): Unit = {}
       }
       System.setProperty(Module.profileProperty, "dev")

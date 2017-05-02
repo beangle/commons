@@ -1,5 +1,7 @@
 package org.beangle.commons.jdbc
 
+import org.beangle.commons.lang.Strings
+
 class Database(val engine: Engine) {
 
   var schemas = new collection.mutable.HashMap[Identifier, Schema]
@@ -9,6 +11,10 @@ class Database(val engine: Engine) {
   }
 
   def getOrCreateSchema(schema: String): Schema = {
-    getOrCreateSchema(engine.toIdentifier(schema))
+    if (Strings.isEmpty(schema)) {
+      getOrCreateSchema(Identifier.empty)
+    } else {
+      getOrCreateSchema(engine.toIdentifier(schema))
+    }
   }
 }

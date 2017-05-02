@@ -30,6 +30,7 @@ object Domain {
     def getSimpleProperty(property: String): Option[Property] = {
       properties.get(property)
     }
+
     def getProperty(property: String): Option[Property] = {
       val idx = property.indexOf(".")
       if (idx == -1) getSimpleProperty(property)
@@ -41,9 +42,15 @@ object Domain {
     }
   }
 
-  class EntityTypeImpl(val clazz: Class[_], val entityName: String) extends MutableStructType with EntityType {
+  class EntityTypeImpl(val entityName: String, var clazz: Class[_]) extends MutableStructType with EntityType {
     val properties = Collections.newMap[String, Property]
-    var id: Property = _
+    var idName: String = "id"
+    def id: Property = {
+      properties.get(idName).orNull
+    }
+    override def toString: String = {
+      s"${entityName}[${clazz.getName}]"
+    }
   }
 
   final class EmbeddableTypeImpl(val clazz: Class[_]) extends MutableStructType with EmbeddableType {
@@ -58,12 +65,12 @@ object Domain {
   final class SingularPropertyImpl(name: String, clazz: Class[_], var propertyType: Type)
     extends PropertyImpl(name, clazz) with SingularProperty
 
-  final class CollectionPropertyImpl(name: String, clazz: Class[_], val element: Type)
+  final class CollectionPropertyImpl(name: String, clazz: Class[_], var element: Type)
       extends PropertyImpl(name, clazz) with CollectionProperty {
     var orderBy: Option[String] = None
   }
 
-  final class MapPropertyImpl(name: String, clazz: Class[_], val key: Type, val element: Type)
+  final class MapPropertyImpl(name: String, clazz: Class[_], val key: Type, var element: Type)
     extends PropertyImpl(name, clazz) with MapProperty
 }
 
@@ -111,6 +118,9 @@ object ImmutableDomain {
     new ImmutableDomain(buildEntityMap(entities))
   }
 
+  def empty: Domain = {
+    new ImmutableDomain(Map.empty[String, EntityType])
+  }
 }
 class ImmutableDomain(val entities: Map[String, EntityType]) extends Domain {
   override def getEntity(name: String): Option[EntityType] = {

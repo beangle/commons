@@ -1,7 +1,11 @@
 package org.beangle.commons.jdbc
+object Identifier {
+  val empty = Identifier("")
+}
 
 case class Identifier(value: String, quoted: Boolean = false) extends Ordered[Identifier] {
 
+  assert(null != value)
   def toCase(lower: Boolean): Identifier = {
     Identifier(if (lower) value.toLowerCase() else value.toUpperCase(), quoted)
   }

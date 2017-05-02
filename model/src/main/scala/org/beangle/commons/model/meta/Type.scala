@@ -29,9 +29,6 @@ trait Property {
   def name: String
   def clazz: Class[_]
   def optional: Boolean
-  //  def isAssociation:Boolean
-  //  def isCollection:Boolean
-  //  def isMap:Boolean
 }
 trait SingularProperty extends Property {
   def propertyType: Type

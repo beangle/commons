@@ -19,69 +19,55 @@
 package org.beangle.commons.orm
 
 import java.lang.reflect.Modifier
+import java.net.URL
 
 import scala.collection.mutable
 import scala.reflect.runtime.{ universe => ru }
 
 import org.beangle.commons.collection.Collections
-import org.beangle.commons.jdbc.{ Column, Database }
+import org.beangle.commons.config.Resources
+import org.beangle.commons.jdbc.{ Column, DBScripts, Database }
 import org.beangle.commons.lang.{ ClassLoaders, Primitives, Strings }
-import org.beangle.commons.lang.annotation.value
+import org.beangle.commons.lang.annotation.{ beta, value }
 import org.beangle.commons.lang.reflect.BeanInfos
 import org.beangle.commons.logging.Logging
-import org.beangle.commons.orm._
-import org.beangle.commons.model.meta._
-import org.beangle.commons.model.meta.Domain._
+import org.beangle.commons.model.{ IntId, LongId, ShortId, StringId }
+import org.beangle.commons.model.meta.{ BasicType, Domain }
+import org.beangle.commons.model.meta.{ ImmutableDomain, SingularProperty, Type }
+import org.beangle.commons.model.meta.Domain.{ CollectionPropertyImpl, EmbeddableTypeImpl, EntityTypeImpl, MapPropertyImpl, MutableStructType, SingularPropertyImpl }
 import org.beangle.commons.orm.Jpas.{ isComponent, isEntity, isMap, isSeq, isSet }
+import org.beangle.commons.orm.cfg.Profiles
 
 object Mappings {
   case class Holder(mapping: EntityTypeMapping, meta: MutableStructType)
-  /**
-   * @param key 表示是否是一个外键
-   * @return @propertyName @用以区分是否需要采用命名策略再次命名
-   */
-  def columnName(propertyName: String, key: Boolean = false): String = {
-    val lastDot = propertyName.lastIndexOf(".")
-    val columnName = if (lastDot == -1) s"@${propertyName}" else "@" + propertyName.substring(lastDot + 1)
-    if (key) columnName + "Id" else columnName
-  }
 }
 
-import Mappings._
-final class Mappings(val database: Database, val namingPolicy: NamingPolicy) extends Logging {
+final class Mappings(val database: Database, val profiles: Profiles) extends Logging {
 
-  var sqlTypeMapping = new SqlTypeMapping(database.engine)
+  def this(database: Database, ormLocations: List[URL]) {
+    this(database, new Profiles(new Resources(None, ormLocations, None)))
+  }
+
+  var sqlTypeMapping = new DefaultSqlTypeMapping(database.engine)
 
   val entities = new mutable.HashMap[String, EntityTypeImpl]
 
-  /**
-   * all type mappings(clazz -> Entity)
-   */
+  /**all type mappings(clazz -> Entity)*/
   val classMappings = new mutable.HashMap[Class[_], EntityTypeMapping]
 
-  /**
-   * custome types
-   */
+  /**custome types*/
   val types = new mutable.HashMap[String, TypeDef]
 
-  /**
-   * Buildin value types
-   */
+  /** Buildin value types */
   val valueTypes = new mutable.HashSet[Class[_]]
 
-  /**
-   * Buildin enum types
-   */
+  /**  Buildin enum types */
   val enumTypes = new mutable.HashMap[String, String]
 
-  /**
-   * Classname.property -> Collection
-   */
+  /** Classname.property -> Collection */
   val collectMap = new mutable.HashMap[String, Collection]
 
-  /**
-   * Only entities
-   */
+  /** Only entities */
   val entityMappings = Collections.newMap[String, EntityTypeMapping]
 
   def collections: Iterable[Collection] = collectMap.values
@@ -113,15 +99,27 @@ final class Mappings(val database: Database, val namingPolicy: NamingPolicy) ext
   }
 
   def autobind(): Unit = {
+    profiles.modules foreach { m =>
+      m.configure(this)
+    }
     //superclass first
     classMappings.keys.toList.sortWith { (a, b) => a.isAssignableFrom(b) } foreach (cls => merge(classMappings(cls)))
+
+    //remove interface and abstract class binding
+    val notEntities = entityMappings.filter {
+      case (n, c) => (c.clazz.isInterface() || Modifier.isAbstract(c.clazz.getModifiers))
+    }
+    entityMappings --= notEntities.keys
   }
 
+  def generateSql(pattern: String): DBScripts = {
+    null
+  }
   /**
    * support features
    * <li> buildin primary type will be not null
    */
-  def merge(entity: EntityTypeMapping): Unit = {
+  private def merge(entity: EntityTypeMapping): Unit = {
     val cls = entity.clazz
     // search parent and interfaces
     var supclz: Class[_] = cls.getSuperclass
@@ -149,16 +147,16 @@ final class Mappings(val database: Database, val namingPolicy: NamingPolicy) ext
   }
 
   def autobind(cls: Class[_], entityName: String, typ: ru.Type): EntityTypeMapping = {
+    if (cls.isAnnotationPresent(Jpas.JpaEntityAnn)) return null
+
     val fixedEntityName = if (entityName == null) Jpas.findEntityName(cls) else entityName
     val entity = refEntity(cls, fixedEntityName)
     val mapping = refMapping(cls, fixedEntityName)
     val mh = Mappings.Holder(mapping, entity)
-    if (cls.isAnnotationPresent(Jpas.JpaEntityAnn)) return mapping
     val manifest = BeanInfos.get(mapping.clazz, typ)
     manifest.readables foreach {
       case (name, prop) =>
-        if (prop.readable & prop.writable) {
-
+        if (prop.readable & prop.writable && !mapping.properties.contains(name)) {
           val optional = prop.typeinfo.optional
           val propType = prop.typeinfo.clazz
           val p =
@@ -185,29 +183,48 @@ final class Mappings(val database: Database, val namingPolicy: NamingPolicy) ext
   }
 
   def buildDomain(): Domain = {
-    new ImmutableDomain(entities.toMap)
+    ImmutableDomain(entities.values)
   }
 
-  private def refEntity(clazz: Class[_], entityName: String): EntityTypeImpl = {
+  def refEntity(clazz: Class[_], entityName: String): EntityTypeImpl = {
     entities.get(entityName) match {
-      case Some(entity) => entity
+      case Some(entity) => {
+        if (entity.clazz != clazz && entity.clazz.isAssignableFrom(clazz)) entity.clazz = clazz
+        entity
+      }
       case None =>
-        val e = new EntityTypeImpl(clazz, entityName)
+        val e = new EntityTypeImpl(entityName, clazz)
         entities.put(entityName, e)
         e
     }
   }
 
-  private def refMapping(clazz: Class[_], entityName: String): EntityTypeMapping = {
-    entityMappings.get(entityName) match {
-      case Some(entity) => entity
+  def refMapping(clazz: Class[_], entityName: String): EntityTypeMapping = {
+    classMappings.get(clazz) match {
+      case Some(m) => m
       case None =>
-        val naming = namingPolicy.classToTableName(clazz, entityName)
-        val schema = database.getOrCreateSchema(naming.schema.get)
-        val table = schema.createTable(naming.text)
-        val e = new EntityTypeMapping(refEntity(clazz, entityName), table)
-        entityMappings.put(entityName, e)
-        e
+        val em = entityMappings.get(entityName) match {
+          case Some(entity) => {
+            if (entity.clazz != clazz && entity.clazz.isAssignableFrom(clazz)) {
+              entity.typ.asInstanceOf[EntityTypeImpl].clazz = clazz
+            }
+            entity
+          }
+          case None =>
+            val naming = profiles.getNamingPolicy(clazz) match {
+              case Some(p) => p.classToTableName(clazz, entityName)
+              case None =>
+                logger.warn(s"Cannot find profile for $entityName")
+                Name(None, entityName)
+            }
+            val schema = database.getOrCreateSchema(naming.schema.orNull)
+            val table = schema.createTable(naming.text)
+            val e = new EntityTypeMapping(refEntity(clazz, entityName), table)
+            entityMappings.put(entityName, e)
+            e
+        }
+        classMappings.put(clazz, em)
+        em
     }
   }
 
@@ -228,7 +245,8 @@ final class Mappings(val database: Database, val namingPolicy: NamingPolicy) ext
           val p =
             if (isEntity(propType)) {
               if (propType == mh.mapping.clazz) {
-                ct.parentName = Some(name); null.asInstanceOf[PropertyMapping[SingularProperty]]
+                ct.parentName = Some(name);
+                null.asInstanceOf[PropertyMapping[SingularProperty]]
               } else {
                 bindManyToOne(cmh, name, propType, optional)
               }
@@ -250,6 +268,9 @@ final class Mappings(val database: Database, val namingPolicy: NamingPolicy) ext
   }
 
   private def scalarTypeName(name: String, clazz: Class[_]): String = {
+    if (clazz == classOf[Object]) {
+      throw new RuntimeException("Cannot find scalar type for object")
+    }
     if (clazz.isAnnotationPresent(classOf[value])) {
       valueTypes += clazz
       clazz.getName
@@ -258,11 +279,27 @@ final class Mappings(val database: Database, val namingPolicy: NamingPolicy) ext
       enumTypes.put(typeName, Strings.substringBeforeLast(typeName, "$"))
       typeName
     } else {
-      if (-1 == clazz.getName.indexOf('.') || clazz.getName.startsWith("java.")) {
-        Primitives.unwrap(clazz).getName
-      } else {
-        clazz.getName
-      }
+      clazz.getName
+      //FIXME
+      //      if (-1 == clazz.getName.indexOf('.') || clazz.getName.startsWith("java.")) {
+      //        Primitives.unwrap(clazz).getName
+      //      } else {
+      //        clazz.getName
+      //      }
+    }
+  }
+
+  private def idTypeOf(clazz: Class[_]): Class[_] = {
+    if (classOf[LongId].isAssignableFrom(clazz)) {
+      classOf[Long]
+    } else if (classOf[IntId].isAssignableFrom(clazz)) {
+      classOf[Int]
+    } else if (classOf[ShortId].isAssignableFrom(clazz)) {
+      classOf[Short]
+    } else if (classOf[StringId].isAssignableFrom(clazz)) {
+      classOf[String]
+    } else {
+      BeanInfos.get(clazz).getPropertyType("id").get
     }
   }
 
@@ -286,8 +323,8 @@ final class Mappings(val database: Database, val namingPolicy: NamingPolicy) ext
     if (isEntity(mapKeyClazz)) {
       val k = refEntity(mapKeyClazz, mapKeyType)
       keyMeta = k
-      val idType = BeanInfos.get(mapKeyClazz).getPropertyType("id").get
-      keyMapping = new BasicTypeMapping(new BasicType(idType), refColumn(mapKeyClazz, mapKeyType))
+      val idType = idTypeOf(mapKeyClazz)
+      keyMapping = new BasicTypeMapping(new BasicType(idType), newRefColumn(mapKeyClazz, mapKeyType))
     } else {
       val k = new BasicType(mapKeyClazz)
       keyMeta = k
@@ -298,8 +335,8 @@ final class Mappings(val database: Database, val namingPolicy: NamingPolicy) ext
     if (isEntity(mapEleClazz)) {
       val e = refEntity(mapEleClazz, mapEleType)
       eleMeta = e
-      val idType = BeanInfos.get(mapEleClazz).getPropertyType("id").get
-      eleMapping = new BasicTypeMapping(new BasicType(idType), refColumn(mapEleClazz, mapEleType))
+      val idType = idTypeOf(mapEleClazz)
+      eleMapping = new BasicTypeMapping(new BasicType(idType), newRefColumn(mapEleClazz, mapEleType))
     } else {
       val e = new BasicType(mapEleClazz)
       eleMeta = e
@@ -309,7 +346,7 @@ final class Mappings(val database: Database, val namingPolicy: NamingPolicy) ext
     val meta = new MapPropertyImpl(name, propertyType, keyMeta, eleMeta)
     mh.meta.addProperty(meta)
     val p = new MapMapping(meta, keyMapping, eleMapping)
-    if (propertyType.getName.startsWith("scala.")) p.typeName = Some("map")
+    p.ownerColumn = newRefColumn(mh.mapping.clazz, mh.mapping.entityName)
     p
   }
 
@@ -321,13 +358,12 @@ final class Mappings(val database: Database, val namingPolicy: NamingPolicy) ext
     val typeSignature = typeNameOf(tye, name)
     val entityName = Strings.substringBetween(typeSignature, "[", "]")
     val entityClazz = ClassLoaders.load(entityName)
-    val toManyElement = refEntity(entityClazz, entityName)
-    val meta = new CollectionPropertyImpl(name, propertyType, toManyElement)
+    val meta = new CollectionPropertyImpl(name, propertyType, refEntity(entityClazz, entityName))
     mh.meta.addProperty(meta)
 
-    val p = new CollectionMapping(meta, refMapping(entityClazz, entityName))
-    p.ownerColumn = refColumn(entityClazz, entityName)
-    //    if (propertyType.getName.startsWith("scala.")) p.typeName = Some("seq")
+    val p = new CollectionMapping(meta, refToOneMapping(entityClazz, entityName))
+    //may be a many2many,so generate owner column.
+    p.ownerColumn = newRefColumn(mh.mapping.clazz, mh.mapping.entityName)
     p
   }
 
@@ -335,14 +371,16 @@ final class Mappings(val database: Database, val namingPolicy: NamingPolicy) ext
     val typeSignature = typeNameOf(tye, name)
     val entityName = Strings.substringBetween(typeSignature, "[", "]")
     val entityClazz = ClassLoaders.load(entityName)
-    val toManyElement = refEntity(entityClazz, entityName)
-    val meta = new CollectionPropertyImpl(name, propertyType, toManyElement)
+    val meta = new CollectionPropertyImpl(name, propertyType, refEntity(entityClazz, entityName))
     mh.meta.addProperty(meta)
 
-    val p = new CollectionMapping(meta, refMapping(entityClazz, entityName))
-    p.ownerColumn = refColumn(entityClazz, entityName)
-    //    if (propertyType.getName.startsWith("scala.")) p.typeName = Some("set")
+    val p = new CollectionMapping(meta, refToOneMapping(entityClazz, entityName))
+    p.ownerColumn = newRefColumn(mh.mapping.clazz, mh.mapping.entityName)
     p
+  }
+
+  def refToOneMapping(entityClazz: Class[_], entityName: String): BasicTypeMapping = {
+    new BasicTypeMapping(new BasicType(idTypeOf(entityClazz)), newRefColumn(entityClazz, entityName))
   }
 
   private def bindId(mh: Mappings.Holder, name: String, propertyType: Class[_], tye: ru.Type): SingularMapping = {
@@ -351,7 +389,7 @@ final class Mappings(val database: Database, val namingPolicy: NamingPolicy) ext
     meta.optional = false
     mh.meta.addProperty(meta)
 
-    val column = newColumn(columnName(name), propertyType, false)
+    val column = newColumn(columnName(mh.mapping.clazz, name), propertyType, false)
     column.nullable = meta.optional
     val elemMapping = new BasicTypeMapping(typ, column)
 
@@ -367,12 +405,12 @@ final class Mappings(val database: Database, val namingPolicy: NamingPolicy) ext
     meta.optional = optional
     mh.meta.addProperty(meta)
 
-    val column = newColumn(columnName(name, false), propertyType, true)
+    val column = newColumn(columnName(mh.mapping.clazz, name, false), propertyType, true)
     column.nullable = meta.optional
     val elemMapping = new BasicTypeMapping(typ, column)
     val p = new SingularMapping(meta, elemMapping)
-    if (None == p.typeName) p.typeName = Some(typeName)
-
+    //FIXME
+    //    if (None == p.typeName) p.typeName = Some(typeName)
     mh.mapping.table.add(column)
     p
   }
@@ -383,19 +421,32 @@ final class Mappings(val database: Database, val namingPolicy: NamingPolicy) ext
     meta.optional = optional
     mh.meta.addProperty(meta)
 
-    val column = newColumn(columnName(name, true), propertyType, optional)
-    val idType = BeanInfos.get(propertyType).getPropertyType("id").get
+    val idType = idTypeOf(propertyType)
+    val column = newColumn(columnName(mh.mapping.clazz, name, true), idType, optional)
     val p = new SingularMapping(meta, new BasicTypeMapping(new BasicType(idType), column))
     mh.mapping.table.add(column)
-
     p
   }
 
   private def newColumn(name: String, clazz: Class[_], optional: Boolean): Column = {
-    new Column(database.engine.toIdentifier(name), this.sqlTypeMapping.sqlType(clazz), optional)
+    new Column(database.engine.toIdentifier(name), sqlTypeMapping.sqlType(clazz), optional)
   }
-  def refColumn(clazz: Class[_], entityName: String): Column = {
-    val idType = BeanInfos.get(clazz).getPropertyType("id").get
-    new Column(database.engine.toIdentifier(columnName(entityName, true)), sqlTypeMapping.sqlType(idType), false)
+
+  /**
+   * @param key 表示是否是一个外键
+   */
+  def columnName(clazz: Class[_], propertyName: String, key: Boolean = false): String = {
+    val lastDot = propertyName.lastIndexOf(".")
+    var colName = if (lastDot == -1) propertyName else propertyName.substring(lastDot + 1)
+    colName = if (key) colName + "Id" else colName
+    profiles.getNamingPolicy(clazz) foreach { np =>
+      colName = np.propertyToColumnName(clazz, colName)
+    }
+    colName
+  }
+
+  private def newRefColumn(clazz: Class[_], entityName: String): Column = {
+    val idType = idTypeOf(clazz)
+    new Column(database.engine.toIdentifier(columnName(clazz, entityName, true)), sqlTypeMapping.sqlType(idType), false)
   }
 }

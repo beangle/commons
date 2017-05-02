@@ -19,8 +19,9 @@
 package org.beangle.commons.cdi.bind
 
 import java.{ util => ju }
+
 import org.beangle.commons.cdi.Scope
-import org.beangle.commons.cdi.bind.Binder.{ Definition, DefinitionBinder, ReferenceValue, Injection, InjectPlaceHolder, PropertyPlaceHolder }
+import org.beangle.commons.cdi.bind.Binder.{ Definition, DefinitionBinder, InjectPlaceHolder, Injection, PropertyPlaceHolder, ReferenceValue }
 import org.beangle.commons.lang.Strings
 
 /**
@@ -37,11 +38,11 @@ object Module {
   final val profileProperty = "cdi.profiles"
 }
 /**
- * Abstract AbstractBindModule class.
+ * Abstract BindModule class.
  * The subclass can writed in /META-INF/beangle/cdi.xml
  * using modules=com.your.class
  */
-abstract class AbstractBindModule extends Module {
+abstract class BindModule extends Module {
 
   protected var binder: Binder = _
 

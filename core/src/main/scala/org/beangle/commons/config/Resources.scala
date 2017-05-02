@@ -25,18 +25,18 @@ import java.net.URL
  *
  * @author chaostone
  */
-class Resources(val global: URL, val locals: List[URL], val user: URL) {
+class Resources(val global: Option[URL], val locals: List[URL], val user: Option[URL]) {
 
   def paths: List[URL] = {
     val all = new collection.mutable.ListBuffer[URL]
-    if (null != global) all += global
-    if (null != locals) all ++= locals
-    if (null != user) all += user
+    all ++= global
+    all ++= locals
+    all ++= user
     all.toList
   }
 
   def isEmpty: Boolean = {
-    null == global && null == user && (null == locals || locals.isEmpty)
+    global.isEmpty && user.isEmpty && locals.isEmpty
   }
 
   override def toString(): String = "{global:" + global + "  locals:" + locals + "  user:" + user + "}"
