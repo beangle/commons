@@ -14,9 +14,6 @@ class SqlType(var code: Int, var name: String) {
 
   def this(code: Int, name: String, length: Int) {
     this(code, name)
-    if (code == -5) {
-      println(3)
-    }
     if (SqlType.isNumberType(code)) {
       this.precision = Some(length)
       this.scale = Some(0)

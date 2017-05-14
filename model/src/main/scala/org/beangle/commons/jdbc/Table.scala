@@ -55,7 +55,6 @@ class Table(var schema: Schema, var name: Identifier) extends Ordered[Table] wit
     columns foreach { col =>
       val st = col.sqlType
       col.sqlType = engine.toType(st.code, st.length.getOrElse(0), st.precision.getOrElse(0), st.scale.getOrElse(0))
-      println(col.sqlType, st)
       col.name = col.name.attach(engine)
     }
     this.name = this.name.attach(engine)

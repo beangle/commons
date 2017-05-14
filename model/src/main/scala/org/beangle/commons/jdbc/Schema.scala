@@ -8,16 +8,17 @@ class Schema(var database: Database, var name: Identifier) {
 
   assert(null != name)
 
-  val tables = new mutable.HashMap[String, Table]
+  val tables = new mutable.HashMap[Identifier, Table]
 
   val sequences = new mutable.HashSet[Sequence]
 
   def createTable(tbname: String): Table = {
-    tables.get(tbname) match {
+    val tableId = Identifier(tbname)
+    tables.get(tableId) match {
       case Some(table) => table
       case None =>
         val ntable = new Table(this, database.engine.toIdentifier(tbname))
-        tables.put(tbname, ntable)
+        tables.put(tableId, ntable)
         ntable
     }
   }
@@ -29,9 +30,9 @@ class Schema(var database: Database, var name: Identifier) {
     val nschema = name.toLiteral(engine)
     if (tbname.contains(".")) {
       if (nschema != engine.toIdentifier(Strings.substringBefore(tbname, ".")).value) None
-      else tables.get(engine.toIdentifier(Strings.substringAfter(tbname, ".")).value)
+      else tables.get(engine.toIdentifier(Strings.substringAfter(tbname, ".")))
     } else {
-      tables.get(engine.toIdentifier(tbname).value)
+      tables.get(engine.toIdentifier(tbname))
     }
   }
   def filterTables(includes: Seq[String], excludes: Seq[String]): Seq[Table] = {
@@ -56,7 +57,7 @@ class Schema(var database: Database, var name: Identifier) {
     if (null != excludes) {
       for (exclude <- excludes) filter.exclude(engine.toIdentifier(exclude).value)
     }
-    val seqMap = sequences.map(f => (f.qualifiedName, f)).toMap
+    val seqMap = sequences.map(f => (f.name, f)).toMap
     filter.filter(seqMap.keys).map { s => seqMap(s) }
   }
 
@@ -68,12 +69,13 @@ class Schema(var database: Database, var name: Identifier) {
     val excludes = new collection.mutable.ListBuffer[String]
     val includes = new collection.mutable.ListBuffer[String]
 
-    def filter(tables: Iterable[String]): List[String] = {
-      val results = new collection.mutable.ListBuffer[String]
-      for (tabame <- tables) {
+    def filter(tables: Iterable[Identifier]): List[Identifier] = {
+      val results = new collection.mutable.ListBuffer[Identifier]
+      for (tabId <- tables) {
+        val tabame = tabId.value
         val tableName = if (tabame.contains(".")) Strings.substringAfter(tabame, ".") else tabame
         if (includes.exists(p => p == "*" || tableName.startsWith(p) && !excludes.contains(tableName)))
-          results += tabame
+          results += tabId
       }
       results.toList
     }
