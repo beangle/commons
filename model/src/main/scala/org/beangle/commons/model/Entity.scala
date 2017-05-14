@@ -67,6 +67,8 @@ abstract class LongId extends NumId[Long]
 
 abstract class IntId extends NumId[Int]
 
+abstract class ShortId extends NumId[Short]
+
 abstract class StringId extends Entity[String] {
   var id: String = _
 }

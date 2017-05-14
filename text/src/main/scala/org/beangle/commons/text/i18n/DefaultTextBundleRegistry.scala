@@ -63,17 +63,16 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
 
   protected def loadNewBundle(bundleName: String, locale: Locale): Map[String, TextBundle] = {
     val resource = toDefaultResourceName(bundleName, locale)
-    val url = ClassLoaders.getResource(resource)
-    if (null == url) {
-      Map(bundleName -> new DefaultTextBundle(locale, resource, Map.empty))
-    } else {
-      val prefix = Strings.substringBeforeLast(bundleName, ".") + "."
-      val bundles = readBundles(url.openStream).map {
-        case (name, values) =>
-          if (name.length == 0) (bundleName, new DefaultTextBundle(locale, resource, values))
-          else (prefix + name, new DefaultTextBundle(locale, resource, values))
-      }
-      bundles.toMap
+    ClassLoaders.getResource(resource) match {
+      case None => Map(bundleName -> new DefaultTextBundle(locale, resource, Map.empty))
+      case Some(url) =>
+        val prefix = Strings.substringBeforeLast(bundleName, ".") + "."
+        val bundles = readBundles(url.openStream).map {
+          case (name, values) =>
+            if (name.length == 0) (bundleName, new DefaultTextBundle(locale, resource, values))
+            else (prefix + name, new DefaultTextBundle(locale, resource, values))
+        }
+        bundles.toMap
     }
   }
 
@@ -82,8 +81,10 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
    */
   protected def loadJavaBundle(bundleName: String, locale: Locale): Option[TextBundle] = {
     val resource = toJavaResourceName(bundleName, locale)
-    val properties = IOs.readJavaProperties(ClassLoaders.getResource(resource))
-    if (properties.isEmpty) None else Some(new DefaultTextBundle(locale, resource, properties))
+    ClassLoaders.getResource(resource) match {
+      case None    => None
+      case Some(r) => Some(new DefaultTextBundle(locale, resource, IOs.readJavaProperties(r)))
+    }
   }
 
   /**

@@ -29,15 +29,15 @@ trait Populator {
   /**
    * populate.
    */
-  def populate(target: Entity[_], entityType: EntityType, params: collection.Map[String, Any]): Int
+  def populate(target: Entity[_], EntityType: EntityType, params: collection.Map[String, Any]): Int
 
   /**
    *
    */
-  def populate(target: Entity[_], entityType: EntityType, attr: String, value: Any): Boolean
+  def populate(target: Entity[_], EntityType: EntityType, attr: String, value: Any): Boolean
 
   /**
    * initProperty.
    */
-  def init(target: Entity[_], t: Type, attr: String): (Any, Type)
+  def init(target: Entity[_], t: EntityType, attr: String): (Any, Property)
 }

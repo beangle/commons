@@ -47,8 +47,10 @@ class EhCacheManager(val name: String = "ehcache", autoCreate: Boolean = false) 
   def init(): Unit = {
     assert(null != name)
     if (null == configUrl) {
-      configUrl = ClassLoaders.getResource(name + ".xml")
-      if (null == configUrl) logger.warn(s"Cannot find ${name}.xml in classpath.")
+      ClassLoaders.getResource(name + ".xml") match {
+        case Some(u) => configUrl = u
+        case None    => logger.warn(s"Cannot find ${name}.xml in classpath.")
+      }
     }
     innerManager =
       if (null != configUrl) {

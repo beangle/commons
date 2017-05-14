@@ -85,7 +85,7 @@ class BeanInfos {
    */
   def get(clazz: Class[_], tpe: ru.Type): BeanInfo = {
     var exist = cache.get(clazz)
-    if (null == exist) {
+    if (null == exist || (null != tpe && !exist.usingTypeReflection)) {
       exist = load(clazz, tpe)
       cache.put(clazz, exist)
     }
@@ -95,6 +95,9 @@ class BeanInfos {
    * Load BeanManifest using reflections
    */
   private def load(clazz: Class[_], tpe: ru.Type = null): BeanInfo = {
+    if (clazz.getName.startsWith("java.") || clazz.getName.startsWith("scala.")) {
+      throw new RuntimeException("Cannot reflect class:" + clazz.getName)
+    }
     val getters = new mutable.HashMap[String, Getter]
     val setters = new mutable.HashMap[String, Setter]
     val fields = new mutable.HashSet[String]
@@ -196,7 +199,7 @@ class BeanInfos {
           v.setter.foreach { m => m.setAccessible(true) }
       }
     }
-    new BeanInfo(properties.toMap, ctors.toList, defaultConstructorParams)
+    new BeanInfo(properties.toMap, ctors.toList, defaultConstructorParams, null != tpe)
   }
 
   private def navIterface(clazz: Class[_], interfaceSets: mutable.HashSet[Class[_]],
@@ -239,7 +242,7 @@ class BeanInfos {
   private def typeof(clazz: Class[_], typ: ru.Type, name: String): TypeInfo = {
     if (clazz == classOf[Object]) {
       var typeName = typ.member(ru.TermName(name)).typeSignatureIn(typ).erasure.toString
-      ElementType(ClassLoaders.load(Strings.replace(typeName, "()", "")),false)
+      ElementType(ClassLoaders.load(Strings.replace(typeName, "()", "")), false)
     } else if (clazz == classOf[Option[_]]) {
       val a = typ.member(ru.TermName(name)).typeSignatureIn(typ)
       val innerType = a.resultType.typeArgs.head.toString
@@ -259,7 +262,7 @@ class BeanInfos {
       val mapEleType = Strings.substringAfter(kvtype, ",").trim
       MapType(clazz, ClassLoaders.load(mapKeyType), ClassLoaders.load(mapEleType))
     } else {
-      ElementType(clazz,false)
+      ElementType(clazz, false)
     }
   }
 

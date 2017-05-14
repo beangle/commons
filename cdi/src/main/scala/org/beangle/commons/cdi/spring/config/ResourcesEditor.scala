@@ -33,10 +33,10 @@ class ResourcesEditor extends PropertyEditorSupport {
 
   private val resourceResolver = new ResourcePatternResolver
 
-  private def getResource(location: String): URL = {
-    if (Strings.isBlank(location)) return null
+  private def getResource(location: String): Option[URL] = {
+    if (Strings.isBlank(location)) return None
     val resourceList = resourceResolver.getResources(location)
-    if (resourceList.isEmpty) null else resourceList.head
+    if (resourceList.isEmpty) None else Some(resourceList.head)
   }
 
   private def getResources(locationPattern: String): List[URL] = {
@@ -46,9 +46,9 @@ class ResourcesEditor extends PropertyEditorSupport {
   override def setAsText(text: String) {
     if (Strings.isNotBlank(text)) {
       val paths = text.split(";")
-      var global: URL = null
-      var locals: List[URL] = null
-      var user: URL = null
+      var global: Option[URL] = None
+      var locals: List[URL] = List.empty
+      var user: Option[URL] = None
       if (paths.length > 0) global = getResource(paths(0))
       if (paths.length > 1) locals = getResources(paths(1))
       if (paths.length > 2) user = getResource(paths(2))

@@ -489,7 +489,7 @@ abstract class BindModuleProcessor extends BeanDefinitionRegistryPostProcessor w
   private def convertInjectValue(typeinfo: TypeInfo, registry: BindRegistry, excludeBeanName: String): AnyRef = {
     val result =
       typeinfo match {
-        case ElementType(clazz,optional) => Injection(clazz)
+        case ElementType(clazz, optional) => Injection(clazz)
         case CollectionType(clazz, componentType) =>
           if (componentType == classOf[AnyRef]) List.empty
           else {
@@ -583,7 +583,7 @@ abstract class BindModuleProcessor extends BeanDefinitionRegistryPostProcessor w
     val properties = unsatisfiedNonSimpleProperties(mbd, beanName)
     for ((propertyName, propertyType) <- properties) {
       propertyType match {
-        case ElementType(clazz,optional) =>
+        case ElementType(clazz, optional) =>
           val beanNames = registry.getBeanNames(propertyType.clazz)
           var binded = false
           if (beanNames.size == 1) {
@@ -646,7 +646,7 @@ abstract class BindModuleProcessor extends BeanDefinitionRegistryPostProcessor w
           val method = m.setter.get
           val typeinfo = m.typeinfo
           if (null == method.getAnnotation(classOf[nowire]) && !pvs.contains(name)) {
-            if (typeinfo.isElementType) {
+            if (typeinfo.isElement) {
               if (!typeinfo.clazz.getName.startsWith("java.") && !typeinfo.clazz.getName.startsWith("scala.")) {
                 //Skip Factory.result method for it's a provider,DONOT need wire
                 if (!(name == "result" && classOf[Factory[_]].isAssignableFrom(clazz))) properties.put(name, typeinfo)

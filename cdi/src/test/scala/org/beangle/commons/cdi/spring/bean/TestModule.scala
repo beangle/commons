@@ -19,9 +19,9 @@
 package org.beangle.commons.cdi.spring.bean
 
 import org.beangle.commons.cdi.Scope
-import org.beangle.commons.cdi.bind.AbstractBindModule
+import org.beangle.commons.cdi.bind.BindModule
 
-object TestModule extends AbstractBindModule {
+object TestModule extends BindModule {
 
   protected def binding(): Unit = {
     bind(classOf[SomeAction]).in(Scope.Prototype)

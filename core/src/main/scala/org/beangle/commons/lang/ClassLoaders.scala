@@ -74,12 +74,12 @@ object ClassLoaders {
   /**
    * Load a given resource(Cannot start with slash /).
    */
-  def getResource(resourceName: String, callingClass: Class[_] = null): URL = {
+  def getResource(resourceName: String, callingClass: Class[_] = null): Option[URL] = {
     var url: URL = null
     val iter = loaders(callingClass).iterator
     while (null == url && iter.hasNext)
       url = iter.next().getResource(resourceName)
-    url
+    Option(url)
   }
 
   /**
@@ -101,13 +101,8 @@ object ClassLoaders {
    * This is a convenience method to load a resource as a stream.
    * The algorithm used to find the resource is given in getResource()
    */
-  def getResourceAsStream(resourceName: String, callingClass: Class[_] = null): InputStream = {
-    val url = getResource(resourceName, callingClass)
-    try {
-      if ((url != null)) url.openStream() else null
-    } catch {
-      case e: IOException => null
-    }
+  def getResourceAsStream(resourceName: String, callingClass: Class[_] = null): Option[InputStream] = {
+    getResource(resourceName, callingClass).map { r => r.openStream() }
   }
 
   def load(className: String, classLoader: ClassLoader = null): Class[_] = {

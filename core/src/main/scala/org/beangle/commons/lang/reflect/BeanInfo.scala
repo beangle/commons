@@ -27,7 +27,8 @@ import scala.reflect.runtime.{ universe => ru }
  * defaultConstructorParams is 1 based
  */
 class BeanInfo(val properties: Map[String, PropertyDescriptor],
-               val constructors: List[ConstructorDescriptor], val defaultConstructorParams: Map[Int, Any]) {
+               val constructors: List[ConstructorDescriptor], val defaultConstructorParams: Map[Int, Any],
+               protected[reflect] val usingTypeReflection: Boolean) {
 
   def getGetter(property: String): Option[Method] = {
     properties.get(property) match {

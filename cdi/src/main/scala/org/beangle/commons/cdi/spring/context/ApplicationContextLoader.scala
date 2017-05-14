@@ -28,7 +28,7 @@ import org.springframework.context.{ ApplicationContext, ConfigurableApplication
 import org.springframework.context.support.{ AbstractRefreshableApplicationContext, AbstractRefreshableConfigApplicationContext }
 
 /**
- * Simple Spring context loader
+ * Load ApplicationContext
  */
 class ApplicationContextLoader extends ContextLoader with Logging {
 
@@ -38,12 +38,13 @@ class ApplicationContextLoader extends ContextLoader with Logging {
     if (ctxClassName != null) {
       ClassLoaders.load(ctxClassName)
     } else {
-      val propUrl = ClassLoaders.getResource("org/springframework/web/context/ContextLoader.properties")
-      if (null != propUrl) {
-        val properties = IOs.readJavaProperties(propUrl)
-        ClassLoaders.load(properties("org.springframework.web.context.WebApplicationContext"))
-      } else
-        classOf[XmlWebApplicationContext]
+      ClassLoaders.getResource("org/springframework/web/context/ContextLoader.properties") match {
+        case Some(propUrl) =>
+          val properties = IOs.readJavaProperties(propUrl)
+          ClassLoaders.load(properties("org.springframework.web.context.WebApplicationContext"))
+        case None =>
+          classOf[XmlWebApplicationContext]
+      }
     }
   }
 

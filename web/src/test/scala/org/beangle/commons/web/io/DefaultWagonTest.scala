@@ -49,7 +49,7 @@ class DefaultStreamDownloaderTest extends FunSpec with Matchers {
 
         def setWriteListener(writeListener: WriteListener) {}
       })
-      val testDoc = ClassLoaders.getResource("download.txt")
+      val testDoc = ClassLoaders.getResource("download.txt").get
       wagon.copy(testDoc, request, response)
     }
 

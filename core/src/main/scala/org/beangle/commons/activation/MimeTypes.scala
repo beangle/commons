@@ -72,9 +72,9 @@ object MimeTypes {
   def buildMimeTypes(resources: Resources): Map[String, MimeType] = {
     val buf = new collection.mutable.HashMap[String, MimeType]
     if (null != resources) {
-      buf ++= readMimeTypes(resources.global)
-      if (null != resources.locals) resources.locals foreach { path => buf ++= readMimeTypes(path) }
-      buf ++= readMimeTypes(resources.user)
+      resources.paths foreach { p =>
+        buf ++= readMimeTypes(p)
+      }
     }
     buf.toMap
   }

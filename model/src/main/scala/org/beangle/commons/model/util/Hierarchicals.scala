@@ -21,7 +21,7 @@ package org.beangle.commons.model.util
 import scala.collection.mutable
 import org.beangle.commons.bean.Properties
 import org.beangle.commons.lang.Objects
-import org.beangle.commons.model.Hierarchical
+import org.beangle.commons.model.pojo.Hierarchical
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.Numbers
 import org.beangle.commons.collection.Collections

@@ -21,18 +21,23 @@ package org.beangle.commons.conversion.converter
 import org.scalatest.FunSpec
 import org.scalatest.Matchers
 
-import java.{util => ju}
+import java.{ util => ju }
 import org.beangle.commons.conversion.Converter
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.Instant
+import java.time.ZoneId
 
 @RunWith(classOf[JUnitRunner])
 class DateConverterTest extends FunSpec with Matchers {
 
   private def converToDate(dateStr: String,
-    year: Int,
-    month: Int,
-    day: Int) {
+                           year: Int,
+                           month: Int,
+                           day: Int) {
     val c = new String2DateConverter().getConverter(classOf[ju.Date]).orNull
     val date = c.apply(dateStr)
     val calendar = new ju.GregorianCalendar()
@@ -54,6 +59,28 @@ class DateConverterTest extends FunSpec with Matchers {
       converter.normalize("1980-09-1") should equal("1980-09-01")
       converter.normalize("1980-9-01") should equal("1980-09-01")
       converter.normalize("1980-09-01") should equal("1980-09-01")
+    }
+
+    it("Convert String to Temporal") {
+      val c = new String2TemporalConverter()
+      val lc = c.getConverter(classOf[LocalDate])
+      lc.isDefined should be(true)
+      lc.get.apply("1980-09-09") should be equals LocalDate.parse("1980-09-09")
+
+      val dtc = c.getConverter(classOf[LocalDateTime])
+      dtc.isDefined should be(true)
+      dtc.get.apply("1980-09-09T11:12:00") should be equals LocalDateTime.parse("1980-09-09T11:12:00")
+      dtc.get.apply("1980-09-09T11:12") should be equals LocalDateTime.parse("1980-09-09T11:12:00")
+
+      val tc = c.getConverter(classOf[LocalTime])
+      tc.isDefined should be(true)
+      tc.get.apply("11:12:00") should be equals LocalTime.parse("11:12:00")
+      tc.get.apply("11:12") should be equals LocalTime.parse("11:12:00")
+
+      val ic = c.getConverter(classOf[Instant])
+      ic.isDefined should be(true)
+      ic.get.apply("2017-01-25T06:45:03.595Z") should be equals Instant.parse("2017-01-25T06:45:03.595Z")
+      ic.get.apply("2017-01-25T14:45:03.595") should be equals Instant.parse("2017-01-25T06:45:03.595Z")
     }
   }
 }

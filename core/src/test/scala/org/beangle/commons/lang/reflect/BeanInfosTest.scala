@@ -77,13 +77,13 @@ class BeanInfosTest extends FunSpec with Matchers {
       val t = BeanInfos.get(classOf[Book]).properties("authors")
       val typeinfo = t.typeinfo
       assert(typeinfo.isInstanceOf[CollectionType])
-      assert(typeinfo.asInstanceOf[CollectionType].componentType == classOf[Author])
+      assert(typeinfo.asInstanceOf[CollectionType].elementType == classOf[Author])
     }
     it("find primitives") {
       val bm = BeanInfos.get(classOf[Book])
       val typeinfo = bm.properties("versions").typeinfo
       assert(typeinfo.isInstanceOf[CollectionType])
-      assert(typeinfo.asInstanceOf[CollectionType].componentType == classOf[Int])
+      assert(typeinfo.asInstanceOf[CollectionType].elementType == classOf[Int])
 
       val typeinfo2 = bm.properties("versionSales").typeinfo
       assert(typeinfo2.isInstanceOf[MapType])
@@ -101,7 +101,7 @@ class BeanInfosTest extends FunSpec with Matchers {
       val ctor = t.constructors.head
       assert(2 == ctor.args.size)
       assert(ctor.args.head.isInstanceOf[CollectionType])
-      assert(ctor.args.head.asInstanceOf[CollectionType].componentType == classOf[Department])
+      assert(ctor.args.head.asInstanceOf[CollectionType].elementType == classOf[Department])
 
       assert(ctor.args(1).isInstanceOf[MapType])
       assert(ctor.args(1).asInstanceOf[MapType].keyType == classOf[String])
@@ -109,18 +109,18 @@ class BeanInfosTest extends FunSpec with Matchers {
 
       val p = t.properties("properties")
       assert(p.clazz == classOf[java.util.Properties])
-      assert(p.typeinfo.isMapType)
+      assert(p.typeinfo.isMap)
       assert(p.typeinfo.asInstanceOf[MapType].keyType == classOf[Object])
       assert(p.typeinfo.asInstanceOf[MapType].valueType == classOf[Object])
 
       val prices = t.properties("prices")
       assert(prices.clazz == classOf[Range])
-      assert(prices.typeinfo.isCollectionType)
-      assert(prices.typeinfo.asInstanceOf[CollectionType].componentType == classOf[Object])
+      assert(prices.typeinfo.isCollection)
+      assert(prices.typeinfo.asInstanceOf[CollectionType].elementType == classOf[Object])
 
       val p2 = t.properties("properties2")
       assert(p2.clazz == classOf[org.beangle.commons.collection.Properties])
-      assert(p2.typeinfo.isMapType)
+      assert(p2.typeinfo.isMap)
       assert(p2.typeinfo.asInstanceOf[MapType].keyType == classOf[String])
       assert(p2.typeinfo.asInstanceOf[MapType].valueType == classOf[Object])
     }

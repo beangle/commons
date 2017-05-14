@@ -18,33 +18,33 @@
  */
 package org.beangle.commons.lang.time
 
-import java.text.DecimalFormat
-import java.util.SimpleTimeZone
-import java.util.regex.Pattern
-import java.util.Calendar
-import java.util.GregorianCalendar
-import java.util.Date
-import java.util.TimeZone
 import java.text.DateFormat
+import java.text.DecimalFormat
 import java.text.FieldPosition
 import java.text.ParsePosition
+import java.util.Calendar
+import java.util.Date
+import java.util.GregorianCalendar
+import java.util.SimpleTimeZone
+import java.util.TimeZone
+import java.util.regex.Pattern
 /**
  * This object handles Internet date/time strings in accordance with RFC 3339. It
  * provides methods to convert from Calendar to RFC 3339 format strings and to parse these strings back into
  * the same constructs.
  * Strings are parsed in accordance with the RFC 3339 format:
- * 
+ *
  * <pre>
  * YYYY-MM-DD(T|t|\s)hh:mm:ss[.ddd][tzd]
  * </pre>
- * 
+ *
  * The <code>tzd</code> represents the time zone designator and is either an
  * upper or lower case 'Z' indicating UTC or a signed <code>hh:mm</code> offset.
- * 
+ *
  * https://www.ietf.org/rfc/rfc3339.txt
  * @see www.hackcraft.net/web/datetime
  */
-object InternetDateFormat {
+private[time] object InternetDateFormat {
 
   val df2 = new DecimalFormat("00")
   val df3 = new DecimalFormat("000")
@@ -170,44 +170,3 @@ object InternetDateFormat {
     format(cal)
   }
 }
-
-object UTCFormat extends DateFormat {
-  /**
-   * A time zone with zero offset and no DST.
-   */
-  val UTC = new SimpleTimeZone(0, "Z")
-
-  override def parse(source: String, pos: ParsePosition): Date = {
-    return InternetDateFormat.parse(source).getTime
-  }
-
-  override def parse( source:String): Date = {
-    parse(source,  null)
-  }
-
-  override def format(date: Date, toAppendTo: StringBuffer,
-    fieldPosition: FieldPosition): StringBuffer = {
-    toAppendTo.append(InternetDateFormat.format(date, UTC))
-  }
-}
-
-object GMTFormat extends DateFormat {
-  /**
-   * A time zone with zero offset and no DST.
-   */
-  val GMT =TimeZone.getTimeZone("GMT")
-
-  override def parse(source: String, pos: ParsePosition): Date = {
-    return InternetDateFormat.parse(source).getTime
-  }
-
-  override def parse( source:String): Date = {
-    parse(source,  null)
-  }
-
-  override def format(date: Date, toAppendTo: StringBuffer,
-    fieldPosition: FieldPosition): StringBuffer = {
-    toAppendTo.append(InternetDateFormat.format(date, GMT))
-  }
-}
-

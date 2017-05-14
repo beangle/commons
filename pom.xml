@@ -3,12 +3,12 @@
   <parent>
     <groupId>org.beangle</groupId>
     <artifactId>beangle-scala</artifactId>
-    <version>24.0</version>
+    <version>24.1</version>
   </parent>
   <groupId>org.beangle.commons</groupId>
   <artifactId>beangle-commons-parent_2.12</artifactId>
   <packaging>pom</packaging>
-  <version>4.6.2</version>
+  <version>5.0.0.M1</version>
   <name>Beangle Commons Parent</name>
 
   <modules>
@@ -52,10 +52,15 @@
         <artifactId>beangle-commons-web_2.12</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.beangle.commons</groupId>
+        <artifactId>beangle-commons-text_2.12</artifactId>
+        <version>${project.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
-  <!--
+
       <build>
       <plugins>
       <plugin>
@@ -67,9 +72,9 @@
       <failOnViolation>true</failOnViolation>
       <includeTestSourceDirectory>true</includeTestSourceDirectory>
       <failOnWarning>false</failOnWarning>
-      <sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
-      <testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
-      <configLocation>/home/chaostone/beangle/commons/scalastyle_config.xml</configLocation>
+      <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
+      <testSourceDirectory>${project.basedir}/src/test/scala</testSourceDirectory>
+      <configLocation>${session.executionRootDirectory}/scalastyle_config.xml</configLocation>
       <outputFile>${project.basedir}/target/scalastyle-output.xml</outputFile>
       <outputEncoding>UTF-8</outputEncoding>
       </configuration>
@@ -83,5 +88,5 @@
       </plugin>
       </plugins>
       </build>
-  -->
+
 </project>

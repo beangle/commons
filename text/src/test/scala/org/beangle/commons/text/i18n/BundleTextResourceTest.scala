@@ -44,7 +44,7 @@ class BundleTextResourceTest extends FunSpec with Matchers {
       tr("hello", "hello", "Jack") should equal("你好 Jack")
     }
     it("read Bundles") {
-      val url = ClassLoaders.getResource("message2.zh_CN")
+      val url = ClassLoaders.getResource("message2.zh_CN").get
       val bundles = new DefaultTextBundleRegistry().readBundles(url.openStream)
       assert(null != bundles)
       assert(bundles.contains(""))

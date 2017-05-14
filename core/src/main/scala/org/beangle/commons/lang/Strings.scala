@@ -58,12 +58,16 @@ object Strings {
    * @since 2.0
    */
   def capitalize(str: String): String = {
-    if (str eq null) return str
-    if (str.length == 0) return str
-    val strLen = str.length
-    new StringBuilder(strLen).append(Character.toTitleCase(str.charAt(0)))
-      .append(str.substring(1))
-      .toString
+    if ((str eq null) || str.length == 0) return str
+    val head = str.charAt(0)
+    val upper = Character.toUpperCase(head)
+    if (upper == head) {
+      str
+    } else {
+      val chars = str.toCharArray
+      chars(0) = upper
+      new String(chars)
+    }
   }
 
   /**
@@ -1164,8 +1168,15 @@ object Strings {
    */
   def uncapitalize(str: String): String = {
     if ((str eq null) || str.length == 0) return str
-    new StringBuilder(str.length).append(Character.toLowerCase(str.charAt(0)))
-      .append(str.substring(1)).toString
+    val head = str.charAt(0)
+    val lower = Character.toLowerCase(head)
+    if (lower == head) {
+      str
+    } else {
+      val chars = str.toCharArray
+      chars(0) = lower
+      new String(chars)
+    }
   }
 
   /**

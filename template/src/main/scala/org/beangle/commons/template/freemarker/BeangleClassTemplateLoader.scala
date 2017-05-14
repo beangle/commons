@@ -46,8 +46,8 @@ class BeangleClassTemplateLoader(prefixStr: String = null) extends URLTemplateLo
 
   protected def getURL(name: String): URL = {
     var url = ClassLoaders.getResource(name)
-    if (null != prefix && null == url) url = ClassLoaders.getResource(prefix + name)
-    url
+    if (null != prefix && url.isEmpty) url = ClassLoaders.getResource(prefix + name)
+    url.orNull
   }
 
 }

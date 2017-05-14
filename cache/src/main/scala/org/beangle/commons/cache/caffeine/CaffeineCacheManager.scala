@@ -11,7 +11,10 @@ import org.beangle.commons.lang.ClassLoaders
 
 class CaffeineCacheManager(autoCreate: Boolean = false) extends AbstractCacheManager(autoCreate) {
 
-  val specs = IOs.readProperties(ClassLoaders.getResource("META-INF/caffeine.properties"))
+  val specs = ClassLoaders.getResource("META-INF/caffeine.properties") match {
+    case Some(p) => IOs.readProperties(p)
+    case None    => Map.empty[String, String]
+  }
 
   var maximumSize: Int = 10000
 
