@@ -42,14 +42,14 @@ class DefaultSqlTypeMapping(engine: Engine) {
   def sqlType(clazz: Class[_]): SqlType = {
     class2Types.get(clazz) match {
       case Some(t) =>
-        val sqlType = engine.sqlType(t)
+        val sqlType = engine.toType(t)
         if (sqlType.code == Types.VARCHAR) sqlType.length = Some(255)
         sqlType
       case None =>
         if (clazz.getName.contains("$")) {
           val containerClass = Class.forName(Strings.substringBefore(clazz.getName, "$") + "$")
           if (classOf[Enumeration].isAssignableFrom(containerClass)) {
-            engine.sqlType(Types.INTEGER)
+            engine.toType(Types.INTEGER)
           } else {
             throw new RuntimeException(s"Cannot find sqltype for ${clazz.getName}")
           }

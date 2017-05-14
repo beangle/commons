@@ -41,18 +41,18 @@ object Engines {
       StoreCase.Lower
     }
 
-    override def sqlType(sqlCode: Int, length: Int, scale: Int): SqlType = {
+    override def toType(sqlCode: Int, length: Int, precision: Int, scale: Int): SqlType = {
       if (sqlCode == DECIMAL) {
-        val result = length match {
+        val result = precision match {
           case 1  => new SqlType(BOOLEAN, "boolean")
           case 5  => new SqlType(SMALLINT, "int2")
           case 10 => new SqlType(INTEGER, "int4")
           case 19 => new SqlType(BIGINT, "int8")
-          case _  => super.sqlType(sqlCode, length, scale)
+          case _  => super.toType(sqlCode, length, scale)
         }
         result.length = Some(length)
         result
-      } else super.sqlType(sqlCode, length, scale)
+      } else super.toType(sqlCode, length, precision, scale)
     }
   }
 

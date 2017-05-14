@@ -14,9 +14,6 @@ class SqlType(var code: Int, var name: String) {
 
   def this(code: Int, name: String, length: Int) {
     this(code, name)
-    if (code == -5) {
-      println(3)
-    }
     if (SqlType.isNumberType(code)) {
       this.precision = Some(length)
       this.scale = Some(0)
@@ -54,13 +51,6 @@ class SqlType(var code: Int, var name: String) {
   var scale: Option[Int] = None
 
   override def toString: String = {
-    length match {
-      case Some(l) => s"${name}($l)"
-      case None =>
-        precision match {
-          case Some(p) => s"${name}($p,${scale.getOrElse(0)})"
-          case None    => name
-        }
-    }
+    name
   }
 }
