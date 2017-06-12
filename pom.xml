@@ -13,13 +13,10 @@
 
   <modules>
     <module>core</module>
-    <module>csv</module>
     <module>text</module>
     <module>web</module>
-    <module>cdi</module>
-    <module>model</module>
-    <module>template</module>
-    <module>cache</module>
+    <module>csv</module>
+    <module>dbf</module>
   </modules>
 
   <description>
