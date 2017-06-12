@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2017, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -180,10 +180,6 @@ final class Mappings(val database: Database, val profiles: Profiles) extends Log
         }
     }
     mapping
-  }
-
-  def buildDomain(): Domain = {
-    ImmutableDomain(entities.values)
   }
 
   def refEntity(clazz: Class[_], entityName: String): EntityTypeImpl = {

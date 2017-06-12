@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2017, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,9 +18,12 @@
  */
 package org.beangle.commons.dao
 
-import org.beangle.commons.model.Entity
-import org.beangle.commons.collection.page.PageLimit
 import scala.collection.immutable.Seq
+
+import org.beangle.commons.collection.page.PageLimit
+import org.beangle.commons.model.Entity
+import org.beangle.commons.model.meta.Domain
+
 /**
  * dao 查询辅助类
  *
@@ -132,4 +135,6 @@ trait EntityDao {
   def duplicate(entityName: String, id: Any, params: collection.Map[String, _]): Boolean
 
   def duplicate[T <: Entity[_]](clazz: Class[T], id: Any, codeName: String, codeValue: Any): Boolean
+
+  def domain: Domain
 }
