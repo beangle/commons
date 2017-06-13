@@ -1,1 +1,0 @@
-org.springframework.beans.BeanInfoFactory=org.beangle.commons.cdi.spring.beans.ScalaBeanInfoFactory

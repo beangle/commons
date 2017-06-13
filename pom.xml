@@ -8,18 +8,15 @@
   <groupId>org.beangle.commons</groupId>
   <artifactId>beangle-commons-parent_2.12</artifactId>
   <packaging>pom</packaging>
-  <version>5.0.0.M2</version>
+  <version>5.0.0.M3</version>
   <name>Beangle Commons Parent</name>
 
   <modules>
     <module>core</module>
-    <module>csv</module>
     <module>text</module>
     <module>web</module>
-    <module>cdi</module>
-    <module>model</module>
-    <module>template</module>
-    <module>cache</module>
+    <module>csv</module>
+    <module>dbf</module>
   </modules>
 
   <description>

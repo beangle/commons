@@ -6,23 +6,19 @@
     <artifactId>beangle-commons-parent_2.12</artifactId>
     <version>5.0.0.M3</version>
   </parent>
-  <artifactId>beangle-commons-web_2.12</artifactId>
+  <artifactId>beangle-commons-dbf_2.12</artifactId>
   <packaging>jar</packaging>
-  <name>Beangle Commons Web</name>
+  <name>Beangle Commons DBF</name>
 
   <properties>
-    <bundle.symbolicName>org.beangle.commons.web</bundle.symbolicName>
-    <bundle.namespace>org.beangle.commons.web</bundle.namespace>
+    <bundle.symbolicName>org.beangle.commons.dbf</bundle.symbolicName>
+    <bundle.namespace>org.beangle.commons.dbf</bundle.namespace>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.beangle.commons</groupId>
       <artifactId>beangle-commons-core_2.12</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
     </dependency>
   </dependencies>
 </project>
