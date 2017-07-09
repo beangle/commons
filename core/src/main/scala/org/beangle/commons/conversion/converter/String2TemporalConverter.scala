@@ -18,15 +18,12 @@
  */
 package org.beangle.commons.conversion.converter
 
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
+import java.time.{ Instant, LocalDate, LocalDateTime, LocalTime, ZoneId, ZonedDateTime }
 import java.time.temporal.Temporal
 
 import org.beangle.commons.conversion.Converter
+import org.beangle.commons.lang.{ Dates, Strings }
 import org.beangle.commons.lang.Strings.isEmpty
-import java.time.ZoneId
 
 /**
  * DateConverter
@@ -36,25 +33,32 @@ import java.time.ZoneId
  */
 class String2TemporalConverter extends StringConverterFactory[String, Temporal] {
 
-  register(classOf[LocalDate], DateConverter)
+  register(classOf[LocalDate], LocalDateConverter)
 
-  register(classOf[LocalDateTime], DateTimeConverter)
+  register(classOf[LocalDateTime], LocalDateTimeConverter)
 
   register(classOf[LocalTime], TimeConverter)
 
   register(classOf[Instant], InstantConverter)
 
-  object DateConverter extends Converter[String, LocalDate] {
+  object LocalDateConverter extends Converter[String, LocalDate] {
     override def apply(value: String): LocalDate = {
       if (isEmpty(value)) return null
-      LocalDate.parse(value)
+      LocalDate.parse(Dates.normalize(value))
     }
   }
 
-  object DateTimeConverter extends Converter[String, LocalDateTime] {
+  object LocalDateTimeConverter extends Converter[String, LocalDateTime] {
     override def apply(value: String): LocalDateTime = {
       if (isEmpty(value)) return null
-      LocalDateTime.parse(value)
+      LocalDateTime.parse(normalize(value))
+    }
+  }
+
+  object ZonedDateTimeConverter extends Converter[String, ZonedDateTime] {
+    override def apply(value: String): ZonedDateTime = {
+      if (isEmpty(value)) return null
+      ZonedDateTime.parse(value)
     }
   }
 
@@ -69,10 +73,20 @@ class String2TemporalConverter extends StringConverterFactory[String, Temporal] 
     override def apply(value: String): Instant = {
       if (isEmpty(value)) return null
       if (!value.endsWith("Z")) {
-        LocalDateTime.parse(value).atZone(ZoneId.systemDefault).toInstant
+        LocalDateTime.parse(normalize(value)).atZone(ZoneId.systemDefault).toInstant
       } else {
         Instant.parse(value)
       }
     }
+  }
+
+  /**
+   * Change DateTime Format
+   * 1. YYYY-MM-DD HH:mm into YYYY-MM-DDTHH:mm:00
+   * 2. YYYY-MM-DD HH:mm:ss into YYYY-MM-DDTHH:mm:ss
+   */
+  def normalize(value: String): String = {
+    val v = if (value.length == 16) value + ":00" else value
+    Strings.replace(v, " ", "T")
   }
 }

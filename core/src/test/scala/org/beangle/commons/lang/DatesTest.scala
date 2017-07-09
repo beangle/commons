@@ -36,5 +36,12 @@ class DatesTest extends FunSpec with Matchers {
       val format = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
       format.format(datetime) should equal("2014-09-09 09-09-10")
     }
+
+    it("Normalize date string") {
+      Dates.normalize("1980-9-1") should equal("1980-09-01")
+      Dates.normalize("1980-09-1") should equal("1980-09-01")
+      Dates.normalize("1980-9-01") should equal("1980-09-01")
+      Dates.normalize("1980-09-01") should equal("1980-09-01")
+    }
   }
 }

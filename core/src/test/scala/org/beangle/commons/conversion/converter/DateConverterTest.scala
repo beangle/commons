@@ -34,31 +34,33 @@ import java.time.ZoneId
 @RunWith(classOf[JUnitRunner])
 class DateConverterTest extends FunSpec with Matchers {
 
-  private def converToDate(dateStr: String,
-                           year: Int,
-                           month: Int,
-                           day: Int) {
+  private def converToDate(dateStr: String, year: Int, month: Int, day: Int) {
     val c = new String2DateConverter().getConverter(classOf[ju.Date]).orNull
     val date = c.apply(dateStr)
     val calendar = new ju.GregorianCalendar()
     calendar.setTime(date)
     calendar.get(ju.Calendar.YEAR) should be(year)
-    calendar.get(ju.Calendar.MONTH) should be(month)
+    calendar.get(ju.Calendar.MONTH) should be(month - 1)
     calendar.get(ju.Calendar.DAY_OF_MONTH) should be(day)
   }
 
+  private def converToDateX(dateStr: String, year: Int, month: Int, day: Int) {
+    val c = new String2TemporalConverter().getConverter(classOf[java.time.LocalDate]).orNull
+    val date = c.apply(dateStr)
+    date.getYear should be(year)
+    date.getMonth.getValue should be(month)
+    date.getDayOfMonth should be(day)
+  }
+
   describe("DateConverter") {
-    it("Convert String to date") {
-      converToDate("19800909", 1980, 8, 9)
-      converToDate("1980-09-09", 1980, 8, 9)
+    it("Convert String to ju.date") {
+      converToDate("19800909", 1980, 9, 9)
+      converToDate("1980-09-09", 1980, 9, 9)
     }
 
-    it("Normalize date string") {
-      val converter = new String2DateConverter();
-      converter.normalize("1980-9-1") should equal("1980-09-01")
-      converter.normalize("1980-09-1") should equal("1980-09-01")
-      converter.normalize("1980-9-01") should equal("1980-09-01")
-      converter.normalize("1980-09-01") should equal("1980-09-01")
+    it("Convert String to datex") {
+      converToDateX("19800909", 1980, 9, 9)
+      converToDateX("1980-09-09", 1980, 9, 9)
     }
 
     it("Convert String to Temporal") {
