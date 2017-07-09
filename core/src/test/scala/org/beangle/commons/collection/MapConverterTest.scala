@@ -18,11 +18,11 @@
  */
 package org.beangle.commons.collection
 
-import java.sql.Date
-import java.util.Calendar
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
+
+import java.time.LocalDate
+
 import org.junit.runner.RunWith
+import org.scalatest.{ FunSpec, Matchers }
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
@@ -42,13 +42,11 @@ class MapConverterTest extends FunSpec with Matchers {
       val month = 9
       val day = 1
       var dateDatas = this.datas + ("birthday" -> (year + "-" + month + "-" + day))
-      val birthday = converter.get(dateDatas, "birthday", classOf[Date]).get
-      val calendar = Calendar.getInstance
-      calendar.setTime(birthday)
-      calendar.get(Calendar.YEAR) should be(year)
-      calendar.get(Calendar.MONTH) should be(month - 1)
-      calendar.get(Calendar.DAY_OF_MONTH) should be(day)
-      converter.get(dateDatas, "birthday", classOf[Date]) should equal(Some(birthday))
+      val birthday = converter.getDate(dateDatas, "birthday").get
+      birthday.getYear should be(year)
+      birthday.getMonth.getValue should be(month)
+      birthday.getDayOfMonth should be(day)
+      converter.get(dateDatas, "birthday", classOf[LocalDate]) should equal(Some(birthday))
     }
 
     it("Get Null") {
