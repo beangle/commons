@@ -21,13 +21,17 @@ package org.beangle.commons.io
 import org.beangle.commons.activation.MimeTypes
 import javax.activation.MimeType
 import java.io.OutputStream
+import java.io.ByteArrayOutputStream
+import java.io.ObjectInputStream
+import java.io.ByteArrayInputStream
+import java.io.ObjectOutputStream
 
 /**
  * @author chaostone
  */
 trait BinarySerializer extends Serializer {
 
-  override def supportMediaTypes: Seq[MimeType] = {
+  override def mediaTypes: Seq[MimeType] = {
     List(MimeTypes.ApplicationOctetStream)
   }
 
@@ -38,4 +42,20 @@ trait BinarySerializer extends Serializer {
   def serialize(data: Any, params: Map[String, Any]): Array[Byte]
 
   def deserialize(bits: Array[Byte], params: Map[String, Any]): AnyRef
+}
+
+object DefaultBinarySerializer extends BinarySerializer {
+
+  def serialize(data: Any, params: Map[String, Any]): Array[Byte] = {
+    val bos = new ByteArrayOutputStream
+    val oos = new ObjectOutputStream(bos)
+    oos.writeObject(data)
+    bos.toByteArray
+  }
+
+  def deserialize(bits: Array[Byte], params: Map[String, Any]): AnyRef = {
+    val bis = new ByteArrayInputStream(bits)
+    val ois = new ObjectInputStream(bis)
+    ois.readObject()
+  }
 }

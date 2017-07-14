@@ -25,6 +25,6 @@ trait Serializer {
 
   def serialize(data: Any, os: OutputStream, params: Map[String, Any])
 
-  def supportMediaTypes: Seq[MimeType]
+  def mediaTypes: Seq[MimeType]
 
 }
