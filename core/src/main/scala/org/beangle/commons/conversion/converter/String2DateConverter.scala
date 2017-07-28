@@ -23,6 +23,7 @@ import java.util.Calendar.{ YEAR, MONTH, DAY_OF_MONTH, HOUR_OF_DAY, MINUTE, SECO
 import org.beangle.commons.conversion.Converter
 import org.beangle.commons.lang.Strings.{ substring, transformToInt, split, isEmpty, contains, isNotBlank }
 import org.beangle.commons.lang.Numbers.toInt
+import org.beangle.commons.lang.Dates
 
 /**
  * DateConverter
@@ -78,33 +79,8 @@ class String2DateConverter extends StringConverterFactory[String, ju.Date] {
   }
 
   private class SqlDateConverter extends Converter[String, java.sql.Date] {
-
-    override def apply(input: String): java.sql.Date = java.sql.Date.valueOf(normalize(input))
-  }
-
-  /**
-   * normalize.
-   *
-   * @param dateStr a String object.
-   * @return a String object.
-   */
-  def normalize(dateStr: String): String = {
-    if (!dateStr.contains("-")) {
-      val dateBuf = new StringBuilder(dateStr)
-      dateBuf.insert("yyyyMM".length, '-')
-      dateBuf.insert("yyyy".length, '-')
-      dateBuf.toString
-    } else {
-      if (dateStr.length >= 10) dateStr else if (dateStr.length < 8) throw new IllegalArgumentException() else {
-        val value = dateStr.toCharArray()
-        val dayIndex = if (value(6) == '-') 7 else { if (value(7) == '-') 8 else -1 }
-        if (dayIndex < 0) throw new IllegalArgumentException()
-        val sb = new StringBuilder(10)
-        sb.appendAll(value, 0, 5)
-        if (dayIndex - 5 < 3) sb.append('0').appendAll(value, 5, 2) else sb.appendAll(value, 5, 3)
-        if (value.length - dayIndex < 2) sb.append('0').appendAll(value, dayIndex, 1) else sb.appendAll(value, dayIndex, 2)
-        sb.toString
-      }
+    override def apply(input: String): java.sql.Date = {
+      java.sql.Date.valueOf(Dates.normalize(input))
     }
   }
 
