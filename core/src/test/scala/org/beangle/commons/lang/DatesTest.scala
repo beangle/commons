@@ -42,6 +42,7 @@ class DatesTest extends FunSpec with Matchers {
       Dates.normalize("1980-09-1") should equal("1980-09-01")
       Dates.normalize("1980-9-01") should equal("1980-09-01")
       Dates.normalize("1980-09-01") should equal("1980-09-01")
+      Dates.normalize("1980.9.1") should equal("1980-09-01")
     }
   }
 }

@@ -79,11 +79,17 @@ object Dates {
 
   /**
    * normalize.
-   *
+   * change other formats to uniform one.
+   * <p>
+   *    YYYYMMDD => YYYY-MM-DD
+   *    YYYY-M-D => YYYY-MM-DD
+   *    YYYY.MM.dd =>YYYY-MM-DD
+   * </p>
    * @param dateStr a String object.
    * @return a String object.
    */
-  def normalize(dateStr: String): String = {
+  def normalize(str: String): String = {
+    val dateStr = if (str.contains(".")) Strings.replace(str, ".", "-") else str
     if (!dateStr.contains("-")) {
       val dateBuf = new StringBuilder(dateStr)
       dateBuf.insert("yyyyMM".length, '-')
