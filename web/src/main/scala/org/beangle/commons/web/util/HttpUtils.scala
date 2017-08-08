@@ -30,20 +30,20 @@ import javax.net.ssl.HttpsURLConnection
 
 object HttpUtils {
 
-  def getResponseText(urlString: String): String = {
+  def getResponseText(urlString: String): Option[String] = {
     var url = new URL(urlString)
     val uri = new URI(url.getProtocol, url.getUserInfo, url.getHost, url.getPort, url.getPath, url.getQuery,
       url.getRef)
-    url = uri.toURL()
-    getResponseText(url, null)
+    getResponseText(uri.toURL, null)
   }
 
-  def getResponseText(constructedUrl: URL, encoding: String): String = {
+  def getResponseText(constructedUrl: URL, encoding: String): Option[String] = {
     getResponseText(constructedUrl, null, encoding)
   }
 
-  def getResponseText(constructedUrl: URL, hostnameVerifier: HostnameVerifier, encoding: String): String = {
+  def getResponseText(constructedUrl: URL, hostnameVerifier: HostnameVerifier, encoding: String): Option[String] = {
     var conn: HttpURLConnection = null
+    var in: BufferedReader = null
     try {
       conn = constructedUrl.openConnection().asInstanceOf[HttpURLConnection]
       conn.setConnectTimeout(5 * 1000)
@@ -54,23 +54,26 @@ object HttpUtils {
       if (conn.isInstanceOf[HttpsURLConnection] && null != hostnameVerifier) {
         conn.asInstanceOf[HttpsURLConnection].setHostnameVerifier(hostnameVerifier)
       }
-      var in: BufferedReader = null
-      in = if (null == encoding) new BufferedReader(new InputStreamReader(conn.getInputStream)) else new BufferedReader(new InputStreamReader(conn.getInputStream,
-        encoding))
-      var line: String = in.readLine()
-      val stringBuffer = new StringBuffer(255)
-      stringBuffer.synchronized {
+      if (conn.getResponseCode == 200) {
+        in =
+          if (null == encoding) new BufferedReader(new InputStreamReader(conn.getInputStream))
+          else new BufferedReader(new InputStreamReader(conn.getInputStream, encoding))
+        var line: String = in.readLine()
+        val sb = new StringBuilder(255)
         while (line != null) {
-          stringBuffer.append(line)
-          stringBuffer.append("\n")
+          sb.append(line)
+          sb.append("\n")
           line = in.readLine()
         }
-        stringBuffer.toString
+        Some(sb.toString)
+      } else {
+        None
       }
     } catch {
-      case e: Exception => throw new RuntimeException(e)
+      case e: Exception => throw new RuntimeException(e); None
     } finally {
-      if (conn != null) conn.disconnect()
+      if (null != in) in.close()
+      if (null != conn) conn.disconnect()
     }
   }
 }
