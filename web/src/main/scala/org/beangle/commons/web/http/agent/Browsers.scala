@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.http.agent
+package org.beangle.commons.web.http.agent
 
-import org.beangle.commons.http.agent.Engines._
+import org.beangle.commons.web.http.agent.Engines._
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import org.beangle.commons.lang.Strings

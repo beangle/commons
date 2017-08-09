@@ -39,6 +39,10 @@ trait BinarySerializer extends Serializer {
     os.write(serialize(data, params))
   }
 
+  def register(clazz: Class[_]): Unit = {
+
+  }
+
   def serialize(data: Any, params: Map[String, Any]): Array[Byte]
 
   def deserialize(bits: Array[Byte], params: Map[String, Any]): AnyRef
