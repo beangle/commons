@@ -54,12 +54,15 @@ object DefaultBinarySerializer extends BinarySerializer {
     val bos = new ByteArrayOutputStream
     val oos = new ObjectOutputStream(bos)
     oos.writeObject(data)
-    bos.toByteArray
+    val bytes = bos.toByteArray
+    oos.close()
+    bytes
   }
 
   def deserialize(bits: Array[Byte], params: Map[String, Any]): AnyRef = {
-    val bis = new ByteArrayInputStream(bits)
-    val ois = new ObjectInputStream(bis)
-    ois.readObject()
+    val ois = new ObjectInputStream(new ByteArrayInputStream(bits))
+    val obj = ois.readObject()
+    ois.close()
+    obj
   }
 }
