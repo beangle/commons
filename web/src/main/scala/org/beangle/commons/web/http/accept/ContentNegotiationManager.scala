@@ -16,5 +16,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.http.agent
+package org.beangle.commons.web.http.accept
 
+import javax.servlet.http.HttpServletRequest
+import javax.activation.MimeType
+
+class ContentNegotiationManager(val resolvers: Seq[ContentTypeResolver]) {
+
+  def resolve(request: HttpServletRequest): Seq[MimeType] = {
+    val iter = resolvers.iterator
+    while (iter.hasNext) {
+      val resolver = iter.next()
+      val mimeTypes = resolver.resolve(request)
+      if (!mimeTypes.isEmpty) return mimeTypes
+    }
+    Seq.empty
+  }
+}

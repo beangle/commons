@@ -16,24 +16,22 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.http
+package org.beangle.commons.web.http.accept
 
-/**
- * @see http://zh.wikipedia.org/zh-cn/%E8%B6%85%E6%96%87%E6%9C%AC%E4%BC%A0%E8%BE%93%E5%8D%8F%E8%AE%AE
- */
-object HttpMethods {
+import javax.servlet.http.HttpServletRequest
+import javax.activation.MimeType
+import org.beangle.commons.activation.MimeTypeProvider
 
-  val GET = "GET"
+class ParameterContentResolver(val parameterName: String) extends ContentTypeResolver {
 
-  val POST = "POST"
-
-  val HEAD = "HEAD"
-
-  val OPTIONS = "OPTIONS"
-
-  val PUT = "PUT"
-
-  val DELETE = "DELETE"
-
-  val TRACE = "TRACE"
+  def resolve(request: HttpServletRequest): Seq[MimeType] = {
+    val ext = request.getParameter(parameterName)
+    if (null == ext) Seq.empty
+    else {
+      MimeTypeProvider.getMimeType(ext) match {
+        case Some(mimeType) => List(mimeType)
+        case None => Seq.empty
+      }
+    }
+  }
 }

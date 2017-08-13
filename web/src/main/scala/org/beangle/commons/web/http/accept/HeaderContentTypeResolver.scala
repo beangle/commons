@@ -16,25 +16,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.http.accept
+package org.beangle.commons.web.http.accept
 
-import javax.servlet.http.HttpServletRequest
 import javax.activation.MimeType
-import org.beangle.commons.activation.MimeTypeProvider
-import org.beangle.commons.web.util.RequestUtils
-import org.beangle.commons.lang.Strings
+import javax.servlet.http.HttpServletRequest
+import org.beangle.commons.activation.MimeTypes
 
-class PathExtensionContentResolver extends ContentTypeResolver {
+class HeaderContentTypeResolver extends ContentTypeResolver {
 
   def resolve(request: HttpServletRequest): Seq[MimeType] = {
-    val servletPath = RequestUtils.getServletPath(request)
-    val ext = Strings.substringAfterLast(servletPath, ".")
-    if (ext.length == 0) Seq.empty
-    else {
-      MimeTypeProvider.getMimeType(ext) match {
-        case Some(mimeType) => List(mimeType)
-        case None => Seq.empty
-      }
-    }
+    MimeTypes.parse(request.getHeader("Accept"))
   }
+
 }

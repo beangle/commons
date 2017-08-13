@@ -22,7 +22,7 @@ import java.net.URLEncoder
 import javax.servlet.ServletContext
 import javax.servlet.http.HttpServletRequest
 import org.beangle.commons.codec.net.BCoder
-import org.beangle.commons.http.agent._
+import org.beangle.commons.web.http.agent._
 import org.beangle.commons.lang.Strings
 import javax.servlet.http.HttpServletResponse
 import org.beangle.commons.collection.Collections
