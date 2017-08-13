@@ -18,15 +18,17 @@
  */
 package org.beangle.commons.net.http
 
-import java.io.{ BufferedReader, InputStream, InputStreamReader }
+import java.io.{ BufferedReader, ByteArrayOutputStream, InputStreamReader }
 import java.net.{ HttpURLConnection, URL }
 
-import javax.net.ssl.{ HostnameVerifier, HttpsURLConnection }
+import org.beangle.commons.io.IOs
 import org.beangle.commons.logging.Logging
+
+import javax.net.ssl.{ HostnameVerifier, HttpsURLConnection }
 
 object HttpUtils extends Logging {
 
-  def getData(urlString: String): Option[InputStream] = {
+  def getData(urlString: String): Option[Array[Byte]] = {
     val url = new URL(urlString)
     var conn: HttpURLConnection = null
     try {
@@ -36,7 +38,9 @@ object HttpUtils extends Logging {
       conn.setRequestMethod(HttpMethods.GET)
       conn.setDoOutput(true)
       if (conn.getResponseCode == 200) {
-        Some(conn.getInputStream)
+        val bos = new ByteArrayOutputStream
+        IOs.copy(conn.getInputStream, bos)
+        Some(bos.toByteArray)
       } else {
         None
       }
