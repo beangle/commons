@@ -16,39 +16,57 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.web.util
+package org.beangle.commons.net.http
 
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.MalformedURLException
-import java.net.URI
-import java.net.URISyntaxException
-import java.net.URL
-import javax.net.ssl.HostnameVerifier
-import javax.net.ssl.HttpsURLConnection
+import java.io.{ BufferedReader, ByteArrayOutputStream, InputStreamReader }
+import java.net.{ HttpURLConnection, URL }
 
-object HttpUtils {
+import org.beangle.commons.io.IOs
+import org.beangle.commons.logging.Logging
 
-  def getResponseText(urlString: String): Option[String] = {
-    var url = new URL(urlString)
-    val uri = new URI(url.getProtocol, url.getUserInfo, url.getHost, url.getPort, url.getPath, url.getQuery,
-      url.getRef)
-    getResponseText(uri.toURL, null)
+import javax.net.ssl.{ HostnameVerifier, HttpsURLConnection }
+
+object HttpUtils extends Logging {
+
+  def getData(urlString: String): Option[Array[Byte]] = {
+    val url = new URL(urlString)
+    var conn: HttpURLConnection = null
+    try {
+      conn = url.openConnection().asInstanceOf[HttpURLConnection]
+      conn.setConnectTimeout(5 * 1000)
+      conn.setReadTimeout(5 * 1000)
+      conn.setRequestMethod(HttpMethods.GET)
+      conn.setDoOutput(true)
+      if (conn.getResponseCode == 200) {
+        val bos = new ByteArrayOutputStream
+        IOs.copy(conn.getInputStream, bos)
+        Some(bos.toByteArray)
+      } else {
+        None
+      }
+    } catch {
+      case e: Exception => logger.error("Cannot open url " + urlString, e); None
+    } finally {
+      if (null != conn) conn.disconnect()
+    }
   }
 
-  def getResponseText(constructedUrl: URL, encoding: String): Option[String] = {
-    getResponseText(constructedUrl, null, encoding)
+  def getText(urlString: String): Option[String] = {
+    getText(new URL(urlString), null)
   }
 
-  def getResponseText(constructedUrl: URL, hostnameVerifier: HostnameVerifier, encoding: String): Option[String] = {
+  def getText(constructedUrl: URL, encoding: String): Option[String] = {
+    getText(constructedUrl, null, encoding)
+  }
+
+  def getText(url: URL, hostnameVerifier: HostnameVerifier, encoding: String): Option[String] = {
     var conn: HttpURLConnection = null
     var in: BufferedReader = null
     try {
-      conn = constructedUrl.openConnection().asInstanceOf[HttpURLConnection]
+      conn = url.openConnection().asInstanceOf[HttpURLConnection]
       conn.setConnectTimeout(5 * 1000)
       conn.setReadTimeout(5 * 1000)
-      conn.setRequestMethod("GET")
+      conn.setRequestMethod(HttpMethods.GET)
       conn.setDoOutput(true)
 
       if (conn.isInstanceOf[HttpsURLConnection] && null != hostnameVerifier) {
@@ -70,7 +88,7 @@ object HttpUtils {
         None
       }
     } catch {
-      case e: Exception => throw new RuntimeException(e); None
+      case e: Exception => logger.error("Cannot open url " + url, e); None
     } finally {
       if (null != in) in.close()
       if (null != conn) conn.disconnect()

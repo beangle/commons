@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Beangle.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.http.agent
+package org.beangle.commons.web.http.agent
 
 /**
  * Container class for user-agent information with operating system and browser details.
