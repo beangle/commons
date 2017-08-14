@@ -89,15 +89,19 @@ object MimeTypes {
   private def readMimeTypes(url: URL): Map[String, MimeType] = {
     if (null == url) return Map.empty
     val buf = new collection.mutable.HashMap[String, MimeType]
+    val types = new collection.mutable.HashSet[String]
     IOs.readLines(url.openStream()) foreach { line =>
       if (Strings.isNotBlank(line) && !line.startsWith("#")) {
-        val mimetype = new MimeType(Strings.substringBetween(line, "=", "exts").trim)
+        val mimetypeStr = Strings.substringBetween(line, "=", "exts").trim
+        assert(!types.contains(mimetypeStr), "duplicate mime type:" + mimetypeStr)
+        types += mimetypeStr
+
+        val mimetype = new MimeType(mimetypeStr)
         Strings.split(Strings.substringAfter(line, "exts").trim.substring(1), ',') foreach { ext =>
           val extension = ext.trim
-          buf.get(extension) match {
-            case Some(m) => println(s"exists $extension = " + m + ", the newer is " + mimetype)
-            case None    => buf.put(extension, mimetype)
-          }
+          val exists = buf.get(extension)
+          assert(exists.isEmpty, s"exists $extension = " + exists.get + ", the newer is " + mimetype)
+          buf.put(extension, mimetype)
         }
       }
     }
