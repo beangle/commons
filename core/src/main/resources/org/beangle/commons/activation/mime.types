@@ -757,8 +757,7 @@ type=video/h261                                                                e
 type=video/h263                                                                exts=h263
 type=video/h264                                                                exts=h264
 type=video/jpeg                                                                exts=jpgv
-type=video/jpm                                                                 exts=jpgm
-type=video/jpm                                                                 exts=jpm
+type=video/jpm                                                                 exts=jpgm,jpm
 type=video/mj2                                                                 exts=mj2,mjp2
 type=video/mp4                                                                 exts=m4v,mp4,mp4v,mpg4
 type=video/mpeg2                                                               exts=mpv2
