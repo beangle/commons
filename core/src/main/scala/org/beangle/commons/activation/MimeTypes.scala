@@ -18,13 +18,20 @@
  */
 package org.beangle.commons.activation
 
+import java.net.URL
+
 import org.beangle.commons.config.Resources
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.ClassLoaders.{ getResource, getResources }
-import javax.activation.MimeType
-import java.net.URL
 import org.beangle.commons.lang.Strings
 
+import javax.activation.MimeType
+
+/**
+ * @see https://www.iana.org/assignments/media-types/media-types.xhtml
+ * @see http://www.mime-type.net/
+ * @see https://www.sitepoint.com/mime-types-complete-list/
+ */
 object MimeTypes {
 
   val All = this("*/*")
@@ -86,7 +93,11 @@ object MimeTypes {
       if (Strings.isNotBlank(line) && !line.startsWith("#")) {
         val mimetype = new MimeType(Strings.substringBetween(line, "=", "exts").trim)
         Strings.split(Strings.substringAfter(line, "exts").trim.substring(1), ',') foreach { ext =>
-          buf.put(ext.trim, mimetype)
+          val extension = ext.trim
+          buf.get(extension) match {
+            case Some(m) => println(s"exists $extension = " + m + ", the newer is " + mimetype)
+            case None    => buf.put(extension, mimetype)
+          }
         }
       }
     }
