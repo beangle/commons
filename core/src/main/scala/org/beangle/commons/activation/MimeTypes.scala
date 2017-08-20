@@ -120,18 +120,19 @@ object MimeTypes {
     mimeTypes.toList
   }
 
-  def mimeTypeResources: Resources = {
-    new Resources(getResource("org/beangle/commons/activation/mime.types"),
-      getResources("META-INF/mime.types"), getResource("mime.types"))
-  }
 }
 
 object MimeTypeProvider {
 
   import MimeTypes._
-  private val contentTypes: Map[String, MimeType] = buildMimeTypes(mimeTypeResources)
+  private val contentTypes: Map[String, MimeType] = {
+    buildMimeTypes(new Resources(getResource("org/beangle/commons/activation/mime.types"),
+      getResources("META-INF/mime.types"), getResource("mime.types")))
+  }
 
-  def getMimeType(ext: String, defaultValue: MimeType): MimeType = contentTypes.get(ext).getOrElse(defaultValue)
+  def getMimeType(ext: String, defaultValue: MimeType): MimeType = {
+    contentTypes.get(ext).getOrElse(defaultValue)
+  }
 
   def getMimeType(ext: String): Option[MimeType] = contentTypes.get(ext)
 
