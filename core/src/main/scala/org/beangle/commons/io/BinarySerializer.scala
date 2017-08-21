@@ -33,8 +33,6 @@ trait BinarySerializer extends Serializer with Deserializer {
     List(MimeTypes.ApplicationOctetStream)
   }
 
-  def register(clazz: Class[_], os: ObjectSerializer): Unit
-
   def registerClass(clazz: Class[_]): Unit
 }
 
