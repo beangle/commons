@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.web.resource
 
-import org.beangle.commons.activation.MimeTypeProvider
+import org.beangle.commons.activation.MimeTypes
 import org.beangle.commons.io.{ IOs, ResourceLoader }
 import org.beangle.commons.lang.Strings.substringAfterLast
 
@@ -53,7 +53,7 @@ class ResourceProcessor(private val loader: ResourceLoader, private val resolver
   }
 
   protected def getContentType(uri: String, request: HttpServletRequest): String = {
-    val contentType = MimeTypeProvider.getMimeType(substringAfterLast(uri, ".")).orNull
+    val contentType = MimeTypes.getMimeType(substringAfterLast(uri, ".")).orNull
     if (null == contentType) request.getServletContext().getMimeType(uri) else contentType.toString
   }
 

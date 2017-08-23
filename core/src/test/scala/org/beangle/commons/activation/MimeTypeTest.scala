@@ -31,7 +31,7 @@ class MimeTypeTest extends FunSpec with Matchers {
       val resources = new Resources(getResource("org/beangle/commons/activation/mime_test.types"),
         getResources("META-INF/mime_test.types"), getResource("mime_test.types"))
       val map = MimeTypes.buildMimeTypes(resources)
-      assert(map.size == 5)
+      assert(map.size == 10)
       assert(None != map.get("xxx"))
     }
     it("parse") {
@@ -42,9 +42,16 @@ class MimeTypeTest extends FunSpec with Matchers {
 
   describe("MimeTypeProvider") {
     it("load resource") {
-      val xlsx = MimeTypeProvider.getMimeType("xlsx")
+      val xlsx = MimeTypes.getMimeType("xlsx")
       assert(None != xlsx)
       assert(xlsx.get.getSubType == "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+      val all = MimeTypes.getMimeType("*/*")
+      assert(Some(MimeTypes.All) == all)
+
+      val csv = MimeTypes.parse("text/csv").head
+      assert(MimeTypes.TextCsv == csv)
+
     }
   }
 }

@@ -18,51 +18,74 @@
  */
 package org.beangle.commons.io
 
+import java.io.{ ByteArrayInputStream, ByteArrayOutputStream, Externalizable, InputStream, OutputStream }
+
 import org.beangle.commons.activation.MimeTypes
+
 import javax.activation.MimeType
-import java.io.OutputStream
-import java.io.ByteArrayOutputStream
-import java.io.ObjectInputStream
-import java.io.ByteArrayInputStream
-import java.io.ObjectOutputStream
 
 /**
  * @author chaostone
  */
-trait BinarySerializer extends Serializer {
+trait BinarySerializer extends Serializer with Deserializer {
 
   override def mediaTypes: Seq[MimeType] = {
     List(MimeTypes.ApplicationOctetStream)
   }
 
-  override def serialize(data: Any, os: OutputStream, params: Map[String, Any]): Unit = {
-    os.write(serialize(data, params))
-  }
+  def registerClass(clazz: Class[_]): Unit
 
-  def register(clazz: Class[_]): Unit = {
+  def asBytes(data: Any): Array[Byte]
 
-  }
-
-  def serialize(data: Any, params: Map[String, Any]): Array[Byte]
-
-  def deserialize(bits: Array[Byte], params: Map[String, Any]): AnyRef
+  def asObject[T](clazz: Class[T], data: Array[Byte]): T
 }
 
-object DefaultBinarySerializer extends BinarySerializer {
+abstract class AbstractBinarySerializer extends BinarySerializer {
+  private var serializers = Map.empty[Class[_], ObjectSerializer]
 
-  def serialize(data: Any, params: Map[String, Any]): Array[Byte] = {
-    val bos = new ByteArrayOutputStream
-    val oos = new ObjectOutputStream(bos)
-    oos.writeObject(data)
-    val bytes = bos.toByteArray
-    oos.close()
-    bytes
+  def register(clazz: Class[_], os: ObjectSerializer): Unit = {
+    serializers += (clazz -> os)
   }
 
-  def deserialize(bits: Array[Byte], params: Map[String, Any]): AnyRef = {
-    val ois = new ObjectInputStream(new ByteArrayInputStream(bits))
-    val obj = ois.readObject()
-    ois.close()
-    obj
+  def serialize(data: Any, os: OutputStream, params: Map[String, Any]): Unit = {
+    if (null == data) return ;
+    serializers.get(data.getClass) match {
+      case Some(serializer) => serializer.serialize(data, os, params)
+      case None             => throw new RuntimeException(s"Cannot find ${data.getClass.getName}'s corresponding ObjectSerializer.")
+    }
   }
+
+  def deserialize[T](clazz: Class[T], is: InputStream, params: Map[String, Any]): T = {
+    serializers.get(clazz) match {
+      case Some(serializer) =>
+        val rs = serializer.deserialize(is, params).asInstanceOf[T]
+        IOs.close(is)
+        rs
+      case None => throw new RuntimeException(s"Cannot find ${clazz.getName}'s ObjectSerializer.")
+    }
+  }
+
+  override def asBytes(data: Any): Array[Byte] = {
+    val os = new ByteArrayOutputStream
+    serialize(data, os, Map.empty)
+    os.toByteArray
+  }
+
+  override def asObject[T](clazz: Class[T], data: Array[Byte]): T = {
+    deserialize(clazz, new ByteArrayInputStream(data), Map.empty)
+  }
+
 }
+
+object DefaultBinarySerializer extends AbstractBinarySerializer {
+
+  def registerClass(clazz: Class[_]): Unit = {
+    if (classOf[Externalizable].isAssignableFrom(clazz) || classOf[java.io.Serializable].isAssignableFrom(clazz)) {
+      register(clazz, ObjectSerializer.Default)
+    } else {
+      throw new RuntimeException("DefaultBinarySerializer only supports class implements Externalizable or Serializable")
+    }
+  }
+
+}
+
