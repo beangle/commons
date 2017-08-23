@@ -45,7 +45,7 @@ object HttpUtils extends Logging {
         None
       }
     } catch {
-      case e: Exception => logger.error("Cannot open url " + urlString, e); None
+      case e: Exception => logger.error("Cannot open url " + urlString + ",for " + e.getMessage); None
     } finally {
       if (null != conn) conn.disconnect()
     }
@@ -88,7 +88,7 @@ object HttpUtils extends Logging {
         None
       }
     } catch {
-      case e: Exception => logger.error("Cannot open url " + url, e); None
+      case e: Exception => logger.error("Cannot open url " + url + " for " + e.getMessage); None
     } finally {
       if (null != in) in.close()
       if (null != conn) conn.disconnect()
