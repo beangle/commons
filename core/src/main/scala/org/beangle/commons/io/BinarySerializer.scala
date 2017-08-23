@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.io
 
-import java.io.{ Externalizable, InputStream, OutputStream }
+import java.io.{ ByteArrayInputStream, ByteArrayOutputStream, Externalizable, InputStream, OutputStream }
 
 import org.beangle.commons.activation.MimeTypes
 
@@ -34,6 +34,10 @@ trait BinarySerializer extends Serializer with Deserializer {
   }
 
   def registerClass(clazz: Class[_]): Unit
+
+  def asBytes(data: Any): Array[Byte]
+
+  def asObject[T](clazz: Class[T], data: Array[Byte]): T
 }
 
 abstract class AbstractBinarySerializer extends BinarySerializer {
@@ -56,6 +60,16 @@ abstract class AbstractBinarySerializer extends BinarySerializer {
       case Some(serializer) => serializer.deserialize(is, params).asInstanceOf[T]
       case None             => throw new RuntimeException("Cannot find coresponding ObjectSerializer,register it first.")
     }
+  }
+
+  override def asBytes(data: Any): Array[Byte] = {
+    val os = new ByteArrayOutputStream
+    serialize(data, os, Map.empty)
+    os.toByteArray
+  }
+
+  override def asObject[T](clazz: Class[T], data: Array[Byte]): T = {
+    deserialize(clazz, new ByteArrayInputStream(data), Map.empty)
   }
 
 }
