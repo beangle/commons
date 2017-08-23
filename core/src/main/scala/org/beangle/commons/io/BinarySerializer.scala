@@ -57,8 +57,11 @@ abstract class AbstractBinarySerializer extends BinarySerializer {
 
   def deserialize[T](clazz: Class[T], is: InputStream, params: Map[String, Any]): T = {
     serializers.get(clazz) match {
-      case Some(serializer) => serializer.deserialize(is, params).asInstanceOf[T]
-      case None             => throw new RuntimeException("Cannot find coresponding ObjectSerializer,register it first.")
+      case Some(serializer) =>
+        val rs = serializer.deserialize(is, params).asInstanceOf[T]
+        IOs.close(is)
+        rs
+      case None => throw new RuntimeException("Cannot find coresponding ObjectSerializer,register it first.")
     }
   }
 

@@ -556,6 +556,7 @@ type=application/xop+xml                                                       e
 type=application/x-pkcs12                                                      exts=p12,pfx
 type=application/x-pkcs7-certificates                                          exts=p7b,spc
 type=application/x-pkcs7-certreqresp                                           exts=p7r
+type=application/x-protobuf                                                    exts=protobuf
 type=application/xproc+xml                                                     exts=xpl
 type=application/x-rar-compressed                                              exts=rar
 type=application/x-research-info-systems                                       exts=ris
