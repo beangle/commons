@@ -20,7 +20,7 @@ package org.beangle.commons.web.http.accept
 
 import javax.servlet.http.HttpServletRequest
 import javax.activation.MimeType
-import org.beangle.commons.activation.MimeTypeProvider
+import org.beangle.commons.activation.MimeTypes
 
 class ParameterContentResolver(val parameterName: String) extends ContentTypeResolver {
 
@@ -28,7 +28,7 @@ class ParameterContentResolver(val parameterName: String) extends ContentTypeRes
     val ext = request.getParameter(parameterName)
     if (null == ext) Seq.empty
     else {
-      MimeTypeProvider.getMimeType(ext) match {
+      MimeTypes.getMimeType(ext) match {
         case Some(mimeType) => List(mimeType)
         case None => Seq.empty
       }

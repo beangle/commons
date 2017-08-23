@@ -1,3 +1,6 @@
+type=application/x-www-form-urlencoded                                         exts=
+type=application/vnd.api+json                                                  exts=
+type=multipart/form-data                                                       exts=
 #application
 type=application/andrew-inset                                                  exts=ez
 type=application/annodex                                                       exts=anx

@@ -51,7 +51,7 @@ abstract class AbstractBinarySerializer extends BinarySerializer {
     if (null == data) return ;
     serializers.get(data.getClass) match {
       case Some(serializer) => serializer.serialize(data, os, params)
-      case None             => throw new RuntimeException("Cannot find coresponding ObjectSerializer,register it first.")
+      case None             => throw new RuntimeException(s"Cannot find ${data.getClass.getName}'s corresponding ObjectSerializer.")
     }
   }
 
@@ -61,7 +61,7 @@ abstract class AbstractBinarySerializer extends BinarySerializer {
         val rs = serializer.deserialize(is, params).asInstanceOf[T]
         IOs.close(is)
         rs
-      case None => throw new RuntimeException("Cannot find coresponding ObjectSerializer,register it first.")
+      case None => throw new RuntimeException(s"Cannot find ${clazz.getName}'s ObjectSerializer.")
     }
   }
 

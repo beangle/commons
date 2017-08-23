@@ -34,47 +34,44 @@ import javax.activation.MimeType
  */
 object MimeTypes {
 
-  val All = this("*/*")
+  val All = new MimeType("*/*")
 
-  val ApplicationAtomXml = this("application/atom+xml")
-
-  val ApplicationFormUrlencoded = this("application/x-www-form-urlencoded");
-
-  val ApplicationJson = this("application/json")
-
-  val ApplicationJsonApi = this("application/vnd.api+json")
-
-  val ApplicationJavascript = this("application/javascript")
-
-  val ApplicationOctetStream = this("application/octet-stream");
-
-  val ApplicationXhtmlXml = this("application/xhtml+xml")
-
-  val ApplicationXml = this("application/xml")
-
-  val ApplicationPdf = this("application/pdf")
-
-  val ImageGif = this("image/gif");
-
-  val ImageJpeg = this("image/jpeg")
-
-  val ImagePng = this("image/png")
-
-  val MultipartFormData = this("multipart/form-data")
-
-  val TextHtml = this("text/html")
-
-  val TextPlain = this("text/plain")
-
-  val TextXml = this("text/xml")
-
-  val TextCsv = this("text/csv")
-
-  val TextJavaScript = this("text/javascript")
-
-  def apply(mimeType: String): javax.activation.MimeType = {
-    new javax.activation.MimeType(mimeType)
+  private val types: Map[String, MimeType] = {
+    buildMimeTypes(new Resources(getResource("org/beangle/commons/activation/mime.types"),
+      getResources("META-INF/mime.types"), getResource("mime.types")))
   }
+
+  val ApplicationAtomXml = types("application/atom+xml")
+
+  val ApplicationFormUrlencoded = types("application/x-www-form-urlencoded")
+
+  val ApplicationJson = types("application/json")
+
+  val ApplicationJsonApi = types("application/vnd.api+json")
+
+  val ApplicationJavascript = types("application/javascript")
+
+  val ApplicationOctetStream = types("application/octet-stream")
+
+  val ApplicationXhtmlXml = types("application/xhtml+xml")
+
+  val ApplicationXml = types("application/xml")
+
+  val ApplicationPdf = types("application/pdf")
+
+  val ImageGif = types("image/gif");
+
+  val ImageJpeg = types("image/jpeg")
+
+  val ImagePng = types("image/png")
+
+  val MultipartFormData = types("multipart/form-data")
+
+  val TextHtml = types("text/html")
+
+  val TextPlain = types("text/plain")
+
+  val TextCsv = types("text/csv")
 
   def buildMimeTypes(resources: Resources): Map[String, MimeType] = {
     val buf = new collection.mutable.HashMap[String, MimeType]
@@ -83,57 +80,55 @@ object MimeTypes {
         buf ++= readMimeTypes(p)
       }
     }
+    buf.put("*/*", All)
     buf.toMap
   }
 
   private def readMimeTypes(url: URL): Map[String, MimeType] = {
     if (null == url) return Map.empty
     val buf = new collection.mutable.HashMap[String, MimeType]
-    val types = new collection.mutable.HashSet[String]
     IOs.readLines(url.openStream()) foreach { line =>
       if (Strings.isNotBlank(line) && !line.startsWith("#")) {
         val mimetypeStr = Strings.substringBetween(line, "=", "exts").trim
-        assert(!types.contains(mimetypeStr), "duplicate mime type:" + mimetypeStr)
-        types += mimetypeStr
-
+        assert(!buf.contains(mimetypeStr), "duplicate mime type:" + mimetypeStr)
         val mimetype = new MimeType(mimetypeStr)
-        Strings.split(Strings.substringAfter(line, "exts").trim.substring(1), ',') foreach { ext =>
-          val extension = ext.trim
-          val exists = buf.get(extension)
-          assert(exists.isEmpty, s"exists $extension = " + exists.get + ", the newer is " + mimetype)
-          buf.put(extension, mimetype)
+        buf.put(mimetypeStr, mimetype)
+
+        val exts = Strings.substringAfter(line, "exts").trim.substring(1)
+        if (Strings.isNotBlank(exts)) {
+          Strings.split(exts, ',') foreach { ext =>
+            val extension = ext.trim
+            val exists = buf.get(extension)
+            assert(exists.isEmpty, s"exists $extension = " + exists.get + ", the newer is " + mimetype)
+            buf.put(extension, mimetype)
+          }
         }
       }
     }
     buf.toMap
   }
 
+  def getMimeType(ext: String, defaultValue: MimeType): MimeType = {
+    types.get(ext).getOrElse(defaultValue)
+  }
+
+  def getMimeType(ext: String): Option[MimeType] = {
+    types.get(ext)
+  }
+
   def parse(str: String): Seq[MimeType] = {
     if (null == str) return Seq.empty
 
     val mimeTypes = new collection.mutable.ListBuffer[MimeType]
-    str.split(",\\s*") foreach { token =>
+    Strings.split(str, ",") foreach { token =>
       val commaIndex = token.indexOf(";")
       val mimetype = if (commaIndex > -1) token.substring(0, commaIndex).trim else token.trim
-      mimeTypes += new MimeType(mimetype)
+      types.get(mimetype) match {
+        case Some(mt) => mimeTypes += mt
+        case None     => new MimeType(mimetype)
+      }
     }
     mimeTypes.toList
   }
-
 }
 
-object MimeTypeProvider {
-
-  import MimeTypes._
-  private val contentTypes: Map[String, MimeType] = {
-    buildMimeTypes(new Resources(getResource("org/beangle/commons/activation/mime.types"),
-      getResources("META-INF/mime.types"), getResource("mime.types")))
-  }
-
-  def getMimeType(ext: String, defaultValue: MimeType): MimeType = {
-    contentTypes.get(ext).getOrElse(defaultValue)
-  }
-
-  def getMimeType(ext: String): Option[MimeType] = contentTypes.get(ext)
-
-}

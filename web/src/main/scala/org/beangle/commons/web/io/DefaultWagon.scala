@@ -21,10 +21,7 @@ package org.beangle.commons.web.io
 import java.io.{ File, FileInputStream, InputStream }
 import java.net.URL
 
-import org.beangle.commons.activation.{ MimeTypeProvider, MimeTypes }
 import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.Strings
-import org.beangle.commons.web.util.RequestUtils
 
 import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 
