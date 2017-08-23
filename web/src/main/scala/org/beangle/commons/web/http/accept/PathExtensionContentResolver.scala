@@ -20,7 +20,7 @@ package org.beangle.commons.web.http.accept
 
 import javax.servlet.http.HttpServletRequest
 import javax.activation.MimeType
-import org.beangle.commons.activation.MimeTypeProvider
+import org.beangle.commons.activation.MimeTypes
 import org.beangle.commons.web.util.RequestUtils
 import org.beangle.commons.lang.Strings
 
@@ -31,7 +31,7 @@ class PathExtensionContentResolver extends ContentTypeResolver {
     val ext = Strings.substringAfterLast(servletPath, ".")
     if (ext.length == 0) Seq.empty
     else {
-      MimeTypeProvider.getMimeType(ext) match {
+      MimeTypes.getMimeType(ext) match {
         case Some(mimeType) => List(mimeType)
         case None => Seq.empty
       }

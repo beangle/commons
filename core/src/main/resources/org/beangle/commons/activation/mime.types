@@ -1,3 +1,6 @@
+type=application/x-www-form-urlencoded                                         exts=
+type=application/vnd.api+json                                                  exts=
+type=multipart/form-data                                                       exts=
 #application
 type=application/andrew-inset                                                  exts=ez
 type=application/annodex                                                       exts=anx
@@ -556,6 +559,7 @@ type=application/xop+xml                                                       e
 type=application/x-pkcs12                                                      exts=p12,pfx
 type=application/x-pkcs7-certificates                                          exts=p7b,spc
 type=application/x-pkcs7-certreqresp                                           exts=p7r
+type=application/x-protobuf                                                    exts=protobuf
 type=application/xproc+xml                                                     exts=xpl
 type=application/x-rar-compressed                                              exts=rar
 type=application/x-research-info-systems                                       exts=ris
