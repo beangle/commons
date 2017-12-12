@@ -23,6 +23,6 @@ package org.beangle.commons.logging
  */
 trait Logging {
 
-  protected val logger = new Logger(getClass)
+  protected val logger = Logger(getClass)
 
 }

@@ -3,12 +3,12 @@
   <parent>
     <groupId>org.beangle</groupId>
     <artifactId>beangle-scala</artifactId>
-    <version>24.2</version>
+    <version>24.5</version>
   </parent>
   <groupId>org.beangle.commons</groupId>
   <artifactId>beangle-commons-parent_2.12</artifactId>
   <packaging>pom</packaging>
-  <version>5.0.0.M6</version>
+  <version>5.0.0</version>
   <name>Beangle Commons Parent</name>
 
   <modules>
@@ -57,6 +57,16 @@
     </dependencies>
   </dependencyManagement>
 
+  <dependencies>
+    <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-core</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+      </dependency>
+  </dependencies>
 
       <build>
       <plugins>
