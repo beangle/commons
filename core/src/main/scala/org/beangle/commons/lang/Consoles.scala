@@ -27,7 +27,7 @@ object Consoles {
     var content: String = null
     var anwser = false
     do {
-      print(msg)
+      printImmediate(msg)
       content = Strings.trim(scanner.nextLine())
       anwser = yes.contains(content)
     } while (!(yes.contains(content) || no.contains(content)))
@@ -39,7 +39,7 @@ object Consoles {
     var content: String = null
     var exit = false
     do {
-      print(prompt)
+      printImmediate(prompt)
       if (scanner.hasNextLine) {
         content = Strings.trim(scanner.nextLine())
         exit = exits.contains(content)
@@ -56,7 +56,7 @@ object Consoles {
     val promptMsg = msg + (if (null != defaultStr) "(default " + defaultStr + ")" else "")
     var exit = false
     do {
-      print(promptMsg)
+      printImmediate(promptMsg)
       if (scanner.hasNextLine) {
         content = scanner.nextLine()
         if (Strings.isEmpty(content)) content = defaultStr
@@ -74,7 +74,7 @@ object Consoles {
     val promptMsg = msg + (if (null != defaultStr) "(default " + defaultStr + ")" else "")
     var exit = false
     do {
-      print(promptMsg)
+      printImmediate(promptMsg)
       if (scanner.hasNextLine) {
         content = scanner.nextLine()
         if (Strings.isEmpty(content)) content = defaultStr
@@ -89,5 +89,10 @@ object Consoles {
   def readPassword(): String = new String(System.console().readPassword())
 
   def readPassword(fmt: String, args: Any*): String = io.StdIn.readLine(fmt, args: _*)
+
+  private def printImmediate(msg: String): Unit = {
+    Console.print(msg)
+    if (!msg.endsWith("\n")) Console.flush()
+  }
 
 }
