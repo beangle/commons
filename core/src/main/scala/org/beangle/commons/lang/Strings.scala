@@ -1116,7 +1116,20 @@ object Strings {
    * @return the trimmed string, {@code null} if null String input
    * @since 3.0
    */
-  def trim(str: String): String = if (str == null) null else str.trim()
+  def trim(str: String): String = {
+    if (str == null) null else str.trim()
+  }
+
+  def trimEnd(str: String): String = {
+    if (str == null) { null }
+    else {
+      var len = str.length
+      while (len > 0 && (str.charAt(len - 1) <= ' ')) {
+        len -= 1
+      }
+      if (len < str.length) str.substring(0, len) else str
+    }
+  }
   /**
    * <p>Strips any of a set of characters from the end of a String.</p>
    *

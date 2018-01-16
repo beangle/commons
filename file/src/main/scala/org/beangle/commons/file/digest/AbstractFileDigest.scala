@@ -15,7 +15,7 @@ abstract class AbstractFileDigest {
     var count = 0
     val input = new FileInputStream(file)
     var n = input.read(buffer)
-    val eof = IOs.eof
+    val eof = -1
 
     while (eof != n) {
       md.update(buffer, 0, n)
