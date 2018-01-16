@@ -17,6 +17,7 @@
     <module>web</module>
     <module>csv</module>
     <module>dbf</module>
+    <module>file</module>
   </modules>
 
   <description>
