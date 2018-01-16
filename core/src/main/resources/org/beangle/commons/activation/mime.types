@@ -744,6 +744,7 @@ type=text/x-c                                                                  e
 type=text/x-component                                                          exts=htc
 type=text/x-fortran                                                            exts=f,f77,f90,for
 type=text/x-java-source                                                        exts=java
+type=text/x-scala-source                                                       exts=scala
 type=text/x-jsp                                                                exts=jsp
 type=text/x-nfo                                                                exts=nfo
 type=text/x-opml                                                               exts=opml

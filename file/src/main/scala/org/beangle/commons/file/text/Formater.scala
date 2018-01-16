@@ -4,11 +4,34 @@ import java.io.{ File, FileInputStream, FileOutputStream }
 
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.io.IOs
+import org.beangle.commons.io.Files./
 import org.beangle.commons.lang.{ Charsets, Strings }
+import org.beangle.commons.activation.MimeTypes
 
 object Formater {
   val LF = "\n"
   val CRLF = "\r\n"
+
+  def format(formater: Formater, dir: File, ext: Option[String]) {
+    if (dir.isFile) {
+      ext match {
+        case Some(f) =>
+          if (dir.getName.endsWith(f)) formater.format(dir)
+        case None => {
+          val fileExt = Strings.substringAfterLast(dir.getName, ".")
+
+          MimeTypes.getMimeType(fileExt) foreach { m =>
+            if (m.getPrimaryType == "text" || fileExt == "xml") formater.format(dir)
+          }
+        }
+      }
+    } else {
+      dir.list() foreach { childName =>
+        format(formater, new File(dir.getAbsolutePath + / + childName), ext)
+      }
+    }
+  }
+
 }
 
 trait Formater {

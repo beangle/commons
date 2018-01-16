@@ -1,8 +1,7 @@
 package org.beangle.commons.file.text
 
 import org.junit.runner.RunWith
-import org.scalatest.Matchers
-import org.scalatest.FunSpec
+import org.scalatest.{ FunSpec, Matchers }
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
