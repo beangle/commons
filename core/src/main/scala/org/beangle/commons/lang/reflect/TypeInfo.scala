@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2018, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -28,9 +28,10 @@ case class Setter(val method: Method, val parameterTypes: Array[Class[_]])
 
 sealed trait TypeInfo {
   def clazz: Class[_]
-  def isElementType: Boolean = false
-  def isCollectionType: Boolean = false
-  def isMapType: Boolean = false
+  def isElement: Boolean = false
+  def isCollection: Boolean = false
+  def isMap: Boolean = false
+  def optional: Boolean
 }
 
 object TypeInfo {
@@ -76,14 +77,21 @@ object TypeInfo {
                 MapType(clazz, typeParams("K"), typeParams("V"))
               }
             }
-
           }
-          case _ =>
-            MapType(clazz, classOf[Any], classOf[Any])
+          case _ => MapType(clazz, classOf[Any], classOf[Any])
         }
       }
     } else {
-      ElementType(clazz)
+      if (clazz == classOf[Option[_]]) {
+        val innerType = typ match {
+          case pt: ParameterizedType =>
+            if (pt.getActualTypeArguments.size == 1) typeAt(pt, 0) else classOf[AnyRef]
+          case c: Class[_] => classOf[AnyRef]
+        }
+        ElementType(innerType, true)
+      } else {
+        ElementType(clazz, false)
+      }
     }
   }
 
@@ -99,23 +107,26 @@ object TypeInfo {
     }
   }
 }
-case class ElementType(val clazz: Class[_]) extends TypeInfo {
-  override def isElementType: Boolean = true
+case class ElementType(clazz: Class[_], optional: Boolean = false) extends TypeInfo {
+  override def isElement: Boolean = true
 }
 
-case class CollectionType(val clazz: Class[_], val componentType: Class[_]) extends TypeInfo {
+case class CollectionType(val clazz: Class[_], val elementType: Class[_]) extends TypeInfo {
   def isSetType: Boolean = {
     classOf[collection.Set[_]].isAssignableFrom(clazz) || classOf[java.util.Set[_]].isAssignableFrom(clazz)
   }
-  override def isCollectionType: Boolean = true
+  override def isCollection: Boolean = true
 
-  def isOptionType: Boolean = {
-    classOf[Option[_]].isAssignableFrom(clazz)
+  override def optional: Boolean = {
+    false
   }
 }
 
 case class MapType(val clazz: Class[_], val keyType: Class[_], valueType: Class[_]) extends TypeInfo {
-  override def isMapType: Boolean = true
+  override def optional: Boolean = {
+    false
+  }
+  override def isMap: Boolean = true
 }
 
 class PropertyDescriptor(val name: String, val typeinfo: TypeInfo, val getter: Option[Method], val setter: Option[Method], val isTransient: Boolean) {

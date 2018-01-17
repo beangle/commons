@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2018, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -32,7 +32,7 @@ class UrlConfigProviderTest extends FunSpec with Matchers {
     it("Get Property") {
       val config = new MultiProviderPropertyConfig
       val provider = new UrlPropertyConfigProvider
-      val resources = new Resources(ClassLoaders.getResource("system-default.properties"), null, ClassLoaders.getResource("system.properties"))
+      val resources = new Resources(ClassLoaders.getResource("system-default.properties"), List.empty, ClassLoaders.getResource("system.properties"))
       provider.resources = resources
       val properties = provider.getConfig
       config.add(properties)

@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2018, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -58,12 +58,16 @@ object Strings {
    * @since 2.0
    */
   def capitalize(str: String): String = {
-    if (str eq null) return str
-    if (str.length == 0) return str
-    val strLen = str.length
-    new StringBuilder(strLen).append(Character.toTitleCase(str.charAt(0)))
-      .append(str.substring(1))
-      .toString
+    if ((str eq null) || str.length == 0) return str
+    val head = str.charAt(0)
+    val upper = Character.toUpperCase(head)
+    if (upper == head) {
+      str
+    } else {
+      val chars = str.toCharArray
+      chars(0) = upper
+      new String(chars)
+    }
   }
 
   /**
@@ -1112,7 +1116,20 @@ object Strings {
    * @return the trimmed string, {@code null} if null String input
    * @since 3.0
    */
-  def trim(str: String): String = if (str == null) null else str.trim()
+  def trim(str: String): String = {
+    if (str == null) null else str.trim()
+  }
+
+  def trimEnd(str: String): String = {
+    if (str == null) { null }
+    else {
+      var len = str.length
+      while (len > 0 && (str.charAt(len - 1) <= ' ')) {
+        len -= 1
+      }
+      if (len < str.length) str.substring(0, len) else str
+    }
+  }
   /**
    * <p>Strips any of a set of characters from the end of a String.</p>
    *
@@ -1164,8 +1181,15 @@ object Strings {
    */
   def uncapitalize(str: String): String = {
     if ((str eq null) || str.length == 0) return str
-    new StringBuilder(str.length).append(Character.toLowerCase(str.charAt(0)))
-      .append(str.substring(1)).toString
+    val head = str.charAt(0)
+    val lower = Character.toLowerCase(head)
+    if (lower == head) {
+      str
+    } else {
+      val chars = str.toCharArray
+      chars(0) = lower
+      new String(chars)
+    }
   }
 
   /**

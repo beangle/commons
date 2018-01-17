@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2018, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -50,7 +50,6 @@ object WeekState {
 /**
  * week index is 1 based.
  */
-@beta
 @value
 class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
 
@@ -70,6 +69,10 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
 
   def &(other: WeekState): WeekState = {
     new WeekState(this.value & other.value)
+  }
+
+  def ^(other: WeekState): WeekState = {
+    new WeekState(this.value ^ other.value)
   }
 
   def isOverlap(other: WeekState): Boolean = {

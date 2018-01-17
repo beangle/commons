@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2018, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -20,7 +20,7 @@ package org.beangle.commons.web.io
 
 import java.io.{ File, InputStream }
 import java.net.URL
-import org.beangle.commons.activation.{ MimeTypeProvider, MimeTypes }
+import org.beangle.commons.activation.MimeTypes
 import org.beangle.commons.lang.Strings
 import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 import org.beangle.commons.web.util.RequestUtils
@@ -43,7 +43,7 @@ object Wagon {
   def setContentHeader(response: HttpServletResponse, attach: String) {
     var contentType = response.getContentType
     if (null == contentType) {
-      contentType = MimeTypeProvider.getMimeType(Strings.substringAfterLast(attach, "."), MimeTypes.ApplicationOctetStream).toString
+      contentType = MimeTypes.getMimeType(Strings.substringAfterLast(attach, "."), MimeTypes.ApplicationOctetStream).toString
       response.setContentType(contentType)
     }
     RequestUtils.setContentDisposition(response, attach)

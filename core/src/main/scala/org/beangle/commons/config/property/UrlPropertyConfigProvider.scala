@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2018, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -38,18 +38,10 @@ class UrlPropertyConfigProvider extends PropertyConfig.Provider {
    * getConfig.
    */
   def getConfig(): collection.Map[String, Any] = {
-    try {
-      val properties = new collection.mutable.HashMap[String, Any]
-      properties ++= IOs.readJavaProperties(resources.global)
-      if (null != resources.locals) {
-        for (url <- resources.locals) properties ++= IOs.readJavaProperties(url)
-      }
-      properties ++= IOs.readJavaProperties(resources.user)
-      properties
-    } catch {
-      case e: Exception => {
-        throw new RuntimeException(e)
-      }
+    val properties = new collection.mutable.HashMap[String, Any]
+    resources.paths foreach { p =>
+      properties ++= IOs.readJavaProperties(p)
     }
+    properties
   }
 }

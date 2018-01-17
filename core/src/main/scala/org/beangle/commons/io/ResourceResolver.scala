@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2018, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -32,6 +32,12 @@ trait ResourceResolver {
   val ClasspathAllUrlPrefix = "classpath*:"
   val ClasspathUrlPrefix = "classpath:"
   def getResources(locationPattern: String): List[URL]
+}
+
+object ResourcePatternResolver {
+  def getResources(locationPattern: String): List[URL] = {
+    new ResourcePatternResolver().getResources(locationPattern)
+  }
 }
 
 class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResourceLoader) extends ResourceResolver {

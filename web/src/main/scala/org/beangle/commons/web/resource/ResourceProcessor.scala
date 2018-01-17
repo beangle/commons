@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2018, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.web.resource
 
-import org.beangle.commons.activation.MimeTypeProvider
+import org.beangle.commons.activation.MimeTypes
 import org.beangle.commons.io.{ IOs, ResourceLoader }
 import org.beangle.commons.lang.Strings.substringAfterLast
 
@@ -53,7 +53,7 @@ class ResourceProcessor(private val loader: ResourceLoader, private val resolver
   }
 
   protected def getContentType(uri: String, request: HttpServletRequest): String = {
-    val contentType = MimeTypeProvider.getMimeType(substringAfterLast(uri, ".")).orNull
+    val contentType = MimeTypes.getMimeType(substringAfterLast(uri, ".")).orNull
     if (null == contentType) request.getServletContext().getMimeType(uri) else contentType.toString
   }
 

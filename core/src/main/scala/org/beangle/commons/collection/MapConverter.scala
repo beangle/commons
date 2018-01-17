@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2018, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,8 +18,7 @@
  */
 package org.beangle.commons.collection
 
-import java.sql.Date
-import java.{ util => ju }
+import java.time.{ LocalDate, LocalDateTime }
 
 import scala.collection.Map
 import scala.reflect.ClassTag
@@ -27,6 +26,7 @@ import scala.reflect.ClassTag
 import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.{ Objects, Strings }
 import org.beangle.commons.lang.Strings.{ isNotEmpty, split }
+
 /**
  * MapConverter class.
  *
@@ -71,12 +71,12 @@ class MapConverter(val conversion: DefaultConversion = DefaultConversion.Instanc
     get(data, name, classOf[Boolean])
   }
 
-  def getDate(data: Map[String, Any], name: String): Option[Date] = {
-    get(data, name, classOf[Date])
+  def getDate(data: Map[String, Any], name: String): Option[LocalDate] = {
+    get(data, name, classOf[LocalDate])
   }
 
-  def getDateTime(data: Map[String, Any], name: String): Option[ju.Date] = {
-    get(data, name, classOf[ju.Date])
+  def getDateTime(data: Map[String, Any], name: String): Option[LocalDateTime] = {
+    get(data, name, classOf[LocalDateTime])
   }
 
   def getFloat(data: Map[String, Any], name: String): Option[Float] = {

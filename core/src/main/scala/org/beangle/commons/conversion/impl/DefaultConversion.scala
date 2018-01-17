@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2018, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -42,6 +42,8 @@ class DefaultConversion extends AbstractGenericConversion {
   addConverter(new String2NumberConverter)
 
   addConverter(new String2DateConverter)
+
+  addConverter(new String2TemporalConverter)
 
   addConverter(String2TimeConverter)
 

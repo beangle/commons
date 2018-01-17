@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2018, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -44,7 +44,7 @@ class BundleTextResourceTest extends FunSpec with Matchers {
       tr("hello", "hello", "Jack") should equal("你好 Jack")
     }
     it("read Bundles") {
-      val url = ClassLoaders.getResource("message2.zh_CN")
+      val url = ClassLoaders.getResource("message2.zh_CN").get
       val bundles = new DefaultTextBundleRegistry().readBundles(url.openStream)
       assert(null != bundles)
       assert(bundles.contains(""))

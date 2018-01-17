@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2018, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -35,6 +35,14 @@ class DatesTest extends FunSpec with Matchers {
       val datetime = Dates.join(date, time)
       val format = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
       format.format(datetime) should equal("2014-09-09 09-09-10")
+    }
+
+    it("Normalize date string") {
+      Dates.normalize("1980-9-1") should equal("1980-09-01")
+      Dates.normalize("1980-09-1") should equal("1980-09-01")
+      Dates.normalize("1980-9-01") should equal("1980-09-01")
+      Dates.normalize("1980-09-01") should equal("1980-09-01")
+      Dates.normalize("1980.9.1") should equal("1980-09-01")
     }
   }
 }

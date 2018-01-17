@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2018, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -47,7 +47,7 @@ class RangedWagonTest extends FunSpec with Matchers {
 
         def setWriteListener(writeListener: WriteListener) {}
       })
-      val testDoc = ClassLoaders.getResource("download.txt")
+      val testDoc = ClassLoaders.getResource("download.txt").get
       wagon.copy(testDoc, request, response)
       verify(response).setHeader("Accept-Ranges", "bytes")
       val file = new File(testDoc.toURI())

@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2018, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -23,8 +23,8 @@ import javax.activation.MimeType
 
 trait Serializer {
 
-  def serialize(data: Any, os: OutputStream, params: Map[String, Any])
+  def serialize(data: Any, os: OutputStream, params: Map[String, Any]):Unit
 
-  def supportMediaTypes: Seq[MimeType]
+  def mediaTypes: Seq[MimeType]
 
 }

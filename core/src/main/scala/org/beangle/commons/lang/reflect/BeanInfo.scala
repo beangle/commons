@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2018, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -27,7 +27,8 @@ import scala.reflect.runtime.{ universe => ru }
  * defaultConstructorParams is 1 based
  */
 class BeanInfo(val properties: Map[String, PropertyDescriptor],
-               val constructors: List[ConstructorDescriptor], val defaultConstructorParams: Map[Int, Any]) {
+               val constructors: List[ConstructorDescriptor], val defaultConstructorParams: Map[Int, Any],
+               protected[reflect] val usingTypeReflection: Boolean) {
 
   def getGetter(property: String): Option[Method] = {
     properties.get(property) match {

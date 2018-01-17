@@ -1,7 +1,7 @@
 /*
  * Beangle, Agile Development Scaffold and Toolkit
  *
- * Copyright (c) 2005-2016, Beangle Software.
+ * Copyright (c) 2005-2018, Beangle Software.
  *
  * Beangle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -21,10 +21,7 @@ package org.beangle.commons.web.io
 import java.io.{ File, FileInputStream, InputStream }
 import java.net.URL
 
-import org.beangle.commons.activation.{ MimeTypeProvider, MimeTypes }
 import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.Strings
-import org.beangle.commons.web.util.RequestUtils
 
 import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 
