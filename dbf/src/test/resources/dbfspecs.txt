@@ -10,7 +10,6 @@ Applies for / supported by:
    Fp = FoxPro         D5 = dBaseV
    CL = Clipper
 
-
 1. DBF Structure
 ================
 
@@ -22,7 +21,6 @@ n+1    1st record of fixed length (see 2&3)  \\\
        ...                                      / not empty
        last record                           ///
 last   optional: 0x1a (eof byte)
-
 
 2. DBF Header (variable size, depending on field count)
 =======================================================
@@ -68,7 +66,6 @@ Byte Size Contents Description                  Applies for (supported by)
 32    n*32         Field Descriptor, see (2a)   all
 +1     1   0x0D    Header Record Terminator     all
 
-
 2a. Field descriptor array in dbf header (fix 32 bytes for each field)
 ========================================
 
@@ -91,7 +88,6 @@ Byte Size Contents Description                  Applies for (supported by)
 24     7   0..0    reserved                     all
 31     1   0x01    Field is in .mdx index       D4, D5
            0x00    ignored                      FS, D3, Fb, Fp, CL
-
 
 2b. Field type and size in dbf header, field descriptor (1 byte)
 =======================================================
@@ -135,7 +131,6 @@ G 10   General   OLE objects                    D5, Fp  (.dbf type = 0x?5)
 
 V* fields are VC, VCZ, VB, VBZ
 
-
 3. Each Dbf record (fix length)
 ==================
 
@@ -150,7 +145,6 @@ FlagShip version 6 and newer supports .dbf file size larger than 2 Gigabytes
 (up to 16 Terabytes, system specific), all other DBMS supports .dbf up to 2GB
 only. The maximum record number is 2 billion (2,147,483,647), whereby all DBMS
 except FlagShip limits it further by locking scheme.
-
 
 4. .dbt file structure (FS, D3, D4, D5, Fb, CL)
 ======================
@@ -182,7 +176,6 @@ by PACK, ZAP or COPY FILE..TO.. commands or associated functions.
 
 FlagShip version 6 and newer supports .dbt file size larger than 2 Gigabytes
 (up to 16 Terabytes, system specific), all other DBMS supports .dbt up to 2GB.
-
 
 5. .dbv file structure (FS only)
 ======================
@@ -255,7 +248,6 @@ Byte Size Type   Default    Description
 758   10  uchar   0         reserved
 768   256 uchar   0..255    sort table at index creation (C type only)
 
-
 b. INDEX PAGES ea 1024 bytes (balanced binary tree)
 
 Byte Size  Type   Default  Description
@@ -267,7 +259,6 @@ Byte Size  Type   Default  Description
 
 n1 = (page * 1024) + (NKPP * 4) + 8
 n2 = n1 + (NKPP * 4)
-
 
 ----------------------------------------------------------------------------
 .idx Index file of FlagShip 4.4x                                   16-Apr-97
@@ -300,7 +291,6 @@ Byte Size Type   Default  Description
 518  20   char    xxx\0   first 19 chars of dbf name without path + \0
 538 230   char     0      FOR condition as string + \0
 768 256   char            sorting table active during the index creation
-
 
 b. INDEX PAGES ea 512 bytes (binary tree)
 
