@@ -24,7 +24,7 @@ import javax.servlet.http.Cookie
 /**
  * @author chaostone
  */
-class CookieGenerator(name: String) {
+class CookieGenerator(val name: String) {
   var domain: String = _
   var path: String = _
   var secure: Boolean = _
