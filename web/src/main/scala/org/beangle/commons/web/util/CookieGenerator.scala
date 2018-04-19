@@ -18,37 +18,77 @@
  */
 package org.beangle.commons.web.util
 
-import javax.servlet.http.HttpServletResponse
-import javax.servlet.http.Cookie
+import org.beangle.commons.lang.Strings
+import org.beangle.commons.web.url.UrlBuilder
+
+import javax.servlet.http.{ Cookie, HttpServletRequest, HttpServletResponse }
 
 /**
  * @author chaostone
  */
-class CookieGenerator(name: String) {
+class CookieGenerator(val name: String) {
   var domain: String = _
   var path: String = _
   var secure: Boolean = _
   var httpOnly: Boolean = true
   var maxAge: Int = -1
+  var port: Int = 80
 
-  def addCookie(response: HttpServletResponse, value: String): Unit = {
-    val cookie = createCookie(value)
+  def addCookie(request: HttpServletRequest, response: HttpServletResponse, value: String): Unit = {
+    val cookie = createCookie(request, value)
     cookie.setMaxAge(maxAge)
     cookie.setSecure(secure)
     cookie.setHttpOnly(httpOnly)
     response.addCookie(cookie)
   }
 
-  def removeCookie(response: HttpServletResponse): Unit = {
-    val cookie = createCookie("")
+  def removeCookie(request: HttpServletRequest, response: HttpServletResponse): Unit = {
+    val cookie = createCookie(request, "")
     cookie.setMaxAge(0)
     response.addCookie(cookie);
   }
 
-  protected def createCookie(value: String): Cookie = {
+  protected def createCookie(request: HttpServletRequest, value: String): Cookie = {
     val cookie = new Cookie(name, value);
-    if (domain != null) cookie.setDomain(domain)
+    if (domain != null && request.getServerName != domain) {
+      cookie.setDomain(domain)
+    }
     cookie.setPath(path)
     cookie
+  }
+
+  def base_=(baseUrl: String): Unit = {
+    var b = Strings.trim(baseUrl)
+    if (baseUrl.contains("https://")) {
+      this.secure = true
+      b = Strings.replace(b, "https://", "")
+    } else {
+      b = Strings.replace(b, "http://", "")
+    }
+    val pathIdx = b.indexOf('/')
+    if (-1 == pathIdx) {
+      this.path = "/"
+    } else {
+      this.path = b.substring(pathIdx)
+      b = b.substring(0, pathIdx)
+    }
+    val portIdx = b.indexOf(':')
+
+    if (-1 == portIdx) {
+      if (secure) port = 443
+    } else {
+      port = Integer.parseInt(b.substring(portIdx + 1))
+      b = b.substring(0, portIdx)
+    }
+    this.domain = b
+  }
+
+  def base: String = {
+    val b = new UrlBuilder("")
+    b.setServletPath(this.path)
+    b.setServerName(domain)
+    b.setPort(port)
+    b.setScheme(if (secure) "https" else "http")
+    b.buildUrl()
   }
 }

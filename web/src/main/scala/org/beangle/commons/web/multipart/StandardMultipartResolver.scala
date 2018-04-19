@@ -57,15 +57,31 @@ object StandardMultipartResolver extends MultipartResolver {
           val b = new ByteArrayOutputStream
           IOs.copy(part.getInputStream, b)
           val str = new String(b.toByteArray)
-          params.put(paramName, str)
+          val newValue =
+            params.get(paramName) match {
+              case Some(v) =>
+                if (v.getClass.isArray) {
+                  Array.concat(Array(str), v.asInstanceOf[Array[String]])
+                } else {
+                  Array(v, str)
+                }
+              case None => str
+            }
+          params.put(paramName, newValue)
         }
       } else {
-        params.put(part.getName, "")
+        if (isFormField(part) && !params.contains(part.getName)) {
+          params.put(part.getName, "")
+        }
       }
     }
     params.toMap
   }
 
+  private def isFormField(part: Part): Boolean = {
+    val isFile = ("application/octet-stream" == part.getContentType || part.getHeader("content-disposition").contains("filename"))
+    !isFile
+  }
   override def cleanup(request: HttpServletRequest): Unit = {
     if (isMultipart(request)) {
       val partItor = request.getParts().iterator
