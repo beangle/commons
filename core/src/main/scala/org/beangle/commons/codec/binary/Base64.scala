@@ -24,9 +24,17 @@ import org.beangle.commons.codec.Encoder
 import org.beangle.commons.codec.Decoder
 
 object Base64 {
-  def encode(data: Array[Byte]) = Base64Encoder.encode(data)
-  def decode(data: String) = Base64Decoder.decode(data)
-  def decode(data: Array[Char]) = Base64Decoder.decode(data)
+  def encode(data: Array[Byte]): String = {
+    Base64Encoder.encode(data)
+  }
+
+  def decode(data: String): Array[Byte] = {
+    Base64Decoder.decode(data)
+  }
+
+  def decode(data: Array[Char]): Array[Byte] = {
+    Base64Decoder.decode(data)
+  }
 }
 
 object Base64Encoder extends Encoder[Array[Byte], String] {

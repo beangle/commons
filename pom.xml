@@ -3,12 +3,12 @@
   <parent>
     <groupId>org.beangle</groupId>
     <artifactId>beangle-scala</artifactId>
-    <version>24.9</version>
+    <version>24.10</version>
   </parent>
   <groupId>org.beangle.commons</groupId>
   <artifactId>beangle-commons-parent_2.12</artifactId>
   <packaging>pom</packaging>
-  <version>5.1.0.M3</version>
+  <version>5.1.0</version>
   <name>Beangle Commons Parent</name>
 
   <modules>
@@ -60,41 +60,41 @@
 
   <dependencies>
     <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-core</artifactId>
-      </dependency>
-      <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-classic</artifactId>
-      </dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
   </dependencies>
 
-      <build>
-      <plugins>
+  <build>
+    <plugins>
       <plugin>
-      <groupId>org.scalastyle</groupId>
-      <artifactId>scalastyle-maven-plugin</artifactId>
-      <version>0.8.0</version>
-      <configuration>
-      <verbose>false</verbose>
-      <failOnViolation>true</failOnViolation>
-      <includeTestSourceDirectory>true</includeTestSourceDirectory>
-      <failOnWarning>false</failOnWarning>
-      <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
-      <testSourceDirectory>${project.basedir}/src/test/scala</testSourceDirectory>
-      <configLocation>${session.executionRootDirectory}/scalastyle_config.xml</configLocation>
-      <outputFile>${project.basedir}/target/scalastyle-output.xml</outputFile>
-      <outputEncoding>UTF-8</outputEncoding>
-      </configuration>
-      <executions>
-      <execution>
-      <goals>
-      <goal>check</goal>
-      </goals>
-      </execution>
-      </executions>
+        <groupId>org.scalastyle</groupId>
+        <artifactId>scalastyle-maven-plugin</artifactId>
+        <version>0.8.0</version>
+        <configuration>
+          <verbose>false</verbose>
+          <failOnViolation>true</failOnViolation>
+          <includeTestSourceDirectory>true</includeTestSourceDirectory>
+          <failOnWarning>false</failOnWarning>
+          <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
+          <testSourceDirectory>${project.basedir}/src/test/scala</testSourceDirectory>
+          <configLocation>${session.executionRootDirectory}/scalastyle_config.xml</configLocation>
+          <outputFile>${project.basedir}/target/scalastyle-output.xml</outputFile>
+          <outputEncoding>UTF-8</outputEncoding>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
-      </plugins>
-      </build>
+    </plugins>
+  </build>
 
 </project>
