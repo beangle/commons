@@ -79,7 +79,13 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
     }
 
     url match {
-      case None => Map(bundleName -> new DefaultTextBundle(locale, resource, Map.empty))
+      case None =>
+        val defaultBundle = new DefaultTextBundle(locale, resource, Map.empty)
+        if (bundleName == bname) {
+          Map(bundleName -> defaultBundle)
+        } else {
+          Map(bundleName -> defaultBundle, bname -> defaultBundle)
+        }
       case Some(url) =>
         val prefix = Strings.substringBeforeLast(bundleName, ".") + "."
         val bundles = readBundles(url.openStream).map {
@@ -87,7 +93,11 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
             if (name.length == 0) (bundleName, new DefaultTextBundle(locale, resource, values))
             else (prefix + name, new DefaultTextBundle(locale, resource, values))
         }
-        bundles.toMap
+        if (bundles.contains(bname)) {
+          bundles
+        } else {
+          bundles ++ Map(bname -> new DefaultTextBundle(locale, resource, Map.empty))
+        }
     }
   }
 

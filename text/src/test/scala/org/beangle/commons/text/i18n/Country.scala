@@ -21,3 +21,7 @@ package org.beangle.commons.text.i18n
 class Country {
   var name: String = _
 }
+
+class City {
+  var name: String = _
+}
