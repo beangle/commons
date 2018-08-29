@@ -33,8 +33,8 @@ class BundleTextResourceTest extends FunSpec with Matchers {
       val locale = new Locale("zh", "CN")
       val registry = new DefaultTextBundleRegistry()
       val bundle = registry.load(locale, "message")
-      val bundle2 = registry.load(locale, "message2")
-      val bundle3 = registry.load(locale, "message2.Country")
+      val bundle3 = registry.load(locale, "org.beangle.commons.text.i18n.Country")
+      val bundle2 = registry.load(locale, "org.beangle.commons.text.i18n.package")
       assert(null != bundle3)
       bundle3.get("name") should equal(Some("名称"))
       bundle.get("hello.world") should equal(Some("你好"))
@@ -44,7 +44,7 @@ class BundleTextResourceTest extends FunSpec with Matchers {
       tr("hello", "hello", "Jack") should equal("你好 Jack")
     }
     it("read Bundles") {
-      val url = ClassLoaders.getResource("message2.zh_CN").get
+      val url = ClassLoaders.getResource("org/beangle/commons/text/i18n/package.zh_CN").get
       val bundles = new DefaultTextBundleRegistry().readBundles(url.openStream)
       assert(null != bundles)
       assert(bundles.contains(""))
