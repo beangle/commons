@@ -26,7 +26,6 @@ import java.util.concurrent.ConcurrentHashMap
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.{ Charsets, ClassLoaders, Strings }
 import org.beangle.commons.lang.annotation.description
-import javax.xml.stream.events.Characters
 
 /**
  * @since 3.0.0

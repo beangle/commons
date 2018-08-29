@@ -122,7 +122,6 @@ class HierarchicalTextResource(clazz: Class[_], locale: ju.Locale, registry: Tex
    * Gets the message from the named resource bundle.
    */
   protected final def getClassMessage(className: String, key: String): String = {
-    registry.load(locale, substringBeforeLast(className, ".") + ".package")
     val bundle = registry.load(locale, className)
     if (null != bundle) bundle.get(key).orNull else null
   }
