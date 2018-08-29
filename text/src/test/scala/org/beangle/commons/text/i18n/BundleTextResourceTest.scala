@@ -32,6 +32,7 @@ class BundleTextResourceTest extends FunSpec with Matchers {
     it("read message by class") {
       val messages = Messages(Locale.SIMPLIFIED_CHINESE)
       assert(messages.get(classOf[Country], "name") == "名称")
+      assert(messages.get(classOf[City], "name") == "name")
     }
 
     it("Get text from bundle") {
