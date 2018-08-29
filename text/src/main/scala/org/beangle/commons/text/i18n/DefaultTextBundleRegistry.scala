@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.{ Charsets, ClassLoaders, Strings }
 import org.beangle.commons.lang.annotation.description
+
 /**
  * @since 3.0.0
  */
@@ -61,10 +62,30 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
     bundle
   }
 
-  protected def loadNewBundle(bundleName: String, locale: Locale): Map[String, TextBundle] = {
-    val resource = toDefaultResourceName(bundleName, locale)
-    ClassLoaders.getResource(resource) match {
-      case None => Map(bundleName -> new DefaultTextBundle(locale, resource, Map.empty))
+  protected def loadNewBundle(bname: String, locale: Locale): Map[String, TextBundle] = {
+    var bundleName = bname
+    var resource = toDefaultResourceName(bundleName, locale)
+    val url = ClassLoaders.getResource(resource) match {
+      case None =>
+        val className = Strings.substringAfterLast(bundleName, ".")
+        if (className.length > 0 && Character.isUpperCase(className.charAt(0))) {
+          bundleName = Strings.substringBeforeLast(bundleName, ".") + ".package"
+          resource = toDefaultResourceName(bundleName, locale)
+          ClassLoaders.getResource(resource)
+        } else {
+          None
+        }
+      case url @ Some(u) => url
+    }
+
+    url match {
+      case None =>
+        val defaultBundle = new DefaultTextBundle(locale, resource, Map.empty)
+        if (bundleName == bname) {
+          Map(bundleName -> defaultBundle)
+        } else {
+          Map(bundleName -> defaultBundle, bname -> defaultBundle)
+        }
       case Some(url) =>
         val prefix = Strings.substringBeforeLast(bundleName, ".") + "."
         val bundles = readBundles(url.openStream).map {
@@ -72,7 +93,11 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
             if (name.length == 0) (bundleName, new DefaultTextBundle(locale, resource, values))
             else (prefix + name, new DefaultTextBundle(locale, resource, values))
         }
-        bundles.toMap
+        if (bundles.contains(bname)) {
+          bundles
+        } else {
+          bundles ++ Map(bname -> new DefaultTextBundle(locale, resource, Map.empty))
+        }
     }
   }
 

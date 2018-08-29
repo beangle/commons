@@ -19,22 +19,28 @@
 package org.beangle.commons.text.i18n
 
 import java.util.Locale
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+
 import org.beangle.commons.lang.ClassLoaders
+import org.junit.runner.RunWith
+import org.scalatest.{ FunSpec, Matchers }
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class BundleTextResourceTest extends FunSpec with Matchers {
 
   describe("TextBundle") {
+    it("read message by class") {
+      val messages = Messages(Locale.SIMPLIFIED_CHINESE)
+      assert(messages.get(classOf[Country], "name") == "名称")
+      assert(messages.get(classOf[City], "name") == "name")
+    }
+
     it("Get text from bundle") {
       val locale = new Locale("zh", "CN")
       val registry = new DefaultTextBundleRegistry()
       val bundle = registry.load(locale, "message")
-      val bundle2 = registry.load(locale, "message2")
-      val bundle3 = registry.load(locale, "message2.Country")
+      val bundle3 = registry.load(locale, "org.beangle.commons.text.i18n.Country")
+      val bundle2 = registry.load(locale, "org.beangle.commons.text.i18n.package")
       assert(null != bundle3)
       bundle3.get("name") should equal(Some("名称"))
       bundle.get("hello.world") should equal(Some("你好"))
@@ -43,8 +49,9 @@ class BundleTextResourceTest extends FunSpec with Matchers {
       tr("china") should equal(Some("中国"))
       tr("hello", "hello", "Jack") should equal("你好 Jack")
     }
+
     it("read Bundles") {
-      val url = ClassLoaders.getResource("message2.zh_CN").get
+      val url = ClassLoaders.getResource("org/beangle/commons/text/i18n/package.zh_CN").get
       val bundles = new DefaultTextBundleRegistry().readBundles(url.openStream)
       assert(null != bundles)
       assert(bundles.contains(""))
