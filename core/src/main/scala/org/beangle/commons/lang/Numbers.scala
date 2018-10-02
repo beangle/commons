@@ -52,6 +52,19 @@ object Numbers {
       case nfe: NumberFormatException => defaultValue
     }
   }
+  /**
+   * transform to int.
+   *
+   * @param ids an array of String objects.
+   * @return an array of  int objects.
+   */
+  def toInt(ids: Array[String]): Array[Int] = {
+    val results = new Array[Int](ids.length)
+    (0 until ids.length) foreach { i =>
+      results(i) = toInt(ids(i))
+    }
+    results
+  }
 
   def toShort(str: String, defaultValue: Short = 0): Short = {
     if (isEmpty(str)) return defaultValue
@@ -71,6 +84,18 @@ object Numbers {
     }
   }
 
+  /**
+   * transformToLong.
+   *
+   * @param ids an array of String objects.
+   * @return an array of Long objects.
+   */
+  def toLong(ids: Array[String]): Array[Long] = {
+    if (null == ids) return null
+    val idsOfLong = new Array[Long](ids.length)
+    (0 until ids.length) foreach (i => idsOfLong(i) = java.lang.Long.parseLong(ids(i)))
+    idsOfLong
+  }
   def toFloat(str: String, defaultValue: Float = 0.0f): Float = {
     if (isEmpty(str)) return defaultValue
     try {

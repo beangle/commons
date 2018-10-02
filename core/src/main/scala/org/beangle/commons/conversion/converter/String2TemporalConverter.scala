@@ -24,6 +24,7 @@ import java.time.temporal.Temporal
 import org.beangle.commons.conversion.Converter
 import org.beangle.commons.lang.{ Dates, Strings }
 import org.beangle.commons.lang.Strings.isEmpty
+import java.time.YearMonth
 
 /**
  * DateConverter
@@ -40,6 +41,15 @@ class String2TemporalConverter extends StringConverterFactory[String, Temporal] 
   register(classOf[LocalTime], TimeConverter)
 
   register(classOf[Instant], InstantConverter)
+
+  register(classOf[YearMonth], YearMonthConverter)
+
+  object YearMonthConverter extends Converter[String, YearMonth] {
+    override def apply(value: String): YearMonth = {
+      if (isEmpty(value)) return null
+      YearMonth.parse(value)
+    }
+  }
 
   object LocalDateConverter extends Converter[String, LocalDate] {
     override def apply(value: String): LocalDate = {

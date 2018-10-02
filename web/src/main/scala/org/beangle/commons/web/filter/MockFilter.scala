@@ -37,7 +37,7 @@ class MockFilter extends Filter {
 
   var initialized: Boolean = false
 
-  def destroy() {
+  override def destroy() {
     destroyed = true
   }
 
@@ -46,7 +46,7 @@ class MockFilter extends Filter {
     chain.doFilter(request, response)
   }
 
-  def init(config: FilterConfig) {
+  override def init(config: FilterConfig) {
     initialized = true
   }
 }
