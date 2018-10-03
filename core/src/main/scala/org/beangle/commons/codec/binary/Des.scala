@@ -26,44 +26,42 @@ import javax.crypto.spec.{ DESKeySpec, IvParameterSpec }
  * @see https://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#impl
  */
 object Des {
-  def buildKey(key: Array[Byte]): SecretKey = {
-    SecretKeyFactory.getInstance("DES").generateSecret(new DESKeySpec(key))
+  def buildKey(key: String): SecretKey = {
+    SecretKeyFactory.getInstance("DES").generateSecret(new DESKeySpec(key.getBytes("UTF-8")))
   }
   /**
-   * CBC ecode and decode utility
+   * Cipher-Block Chaining ecode and decode utility
    */
   object CBC {
-    def encode2Hex(key: String, data: String): String = {
-      val d = new CBCEncoder(key.getBytes("UTF-8")).encode(data.getBytes("UTF-8"))
+    def encode2Hex(key: String, data: String, padding: String = Padding.PKCS5, iv: String = null): String = {
+      val d = new CBCEncoder(key, iv, padding).encode(data.getBytes("UTF-8"))
       Hex.encode(d, true)
     }
-    def decodeHex(key: String, data: String): String = {
-      new String(new CBCDecoder(key.getBytes("UTF-8")).decode(Hex.decode(data)))
+    def decodeHex(key: String, data: String, padding: String = Padding.PKCS5, iv: String = null): String = {
+      new String(new CBCDecoder(key, iv, padding).decode(Hex.decode(data)))
     }
-    def encode(key: String, data: Array[Byte]): Array[Byte] = {
-      new CBCEncoder(key.getBytes("UTF-8")).encode(data)
+    def encode(key: String, data: Array[Byte], padding: String = Padding.PKCS5, iv: String = null): Array[Byte] = {
+      new CBCEncoder(key, iv, padding).encode(data)
     }
-    def decode(key: String, data: Array[Byte]): Array[Byte] = {
-      new CBCDecoder(key.getBytes("UTF-8")).decode(data)
+    def decode(key: String, data: Array[Byte], padding: String = Padding.PKCS5, iv: String = null): Array[Byte] = {
+      new CBCDecoder(key, iv, padding).decode(data)
     }
-    def buildCipher(mode: Int, sk: SecretKey, key: Array[Byte]): Cipher = {
-      val cipher = Cipher.getInstance("DES/CBC/PKCS5Padding")
-      cipher.init(mode, sk, new IvParameterSpec(key))
+    def buildCipher(mode: Int, key: String, initVector: String, padding: String): Cipher = {
+      val cipher = Cipher.getInstance("DES/CBC/" + padding)
+      val iv = if (initVector eq null) key else initVector
+      val ivs = new IvParameterSpec(iv.getBytes("UTF-8"))
+      cipher.init(mode, Des.buildKey(key), ivs)
       cipher
     }
   }
-  class CBCEncoder(val key: Array[Byte]) extends Encoder[Array[Byte], Array[Byte]] {
-    val deskey = Des.buildKey(key)
-
+  class CBCEncoder(key: String, iv: String, padding: String) extends Encoder[Array[Byte], Array[Byte]] {
     def encode(data: Array[Byte]): Array[Byte] = {
-      CBC.buildCipher(Cipher.ENCRYPT_MODE, deskey, key).doFinal(data)
+      CBC.buildCipher(Cipher.ENCRYPT_MODE, key, iv, padding).doFinal(data)
     }
   }
-  class CBCDecoder(key: Array[Byte]) extends Decoder[Array[Byte], Array[Byte]] {
-    val deskey = Des.buildKey(key)
-
+  class CBCDecoder(key: String, iv: String, padding: String) extends Decoder[Array[Byte], Array[Byte]] {
     def decode(data: Array[Byte]): Array[Byte] = {
-      CBC.buildCipher(Cipher.DECRYPT_MODE, deskey, key).doFinal(data)
+      CBC.buildCipher(Cipher.DECRYPT_MODE, key, iv, padding).doFinal(data)
     }
   }
 }

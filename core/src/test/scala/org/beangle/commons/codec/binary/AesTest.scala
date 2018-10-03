@@ -25,16 +25,22 @@ import java.util.Arrays
 
 @RunWith(classOf[JUnitRunner])
 class AesTest extends FunSpec with Matchers {
-  describe("Aes cbc") {
-    it("encode and decode") {
+  describe("AES") {
+    it("ECB encode and decode") {
       var key = "8NONwyJtHesysWpM"
       val value = "ABCDEFGH"
       val encrypted = Aes.ECB.encode(key, value.getBytes())
       val a = Hex.decode("3c2b1416d82883dfeaa6a9aa5ecb8245")
       assert(Arrays.equals(a, encrypted))
-      assert("3c2b1416d82883dfeaa6a9aa5ecb8245" == Hex.encode(encrypted))
-      val d = Aes.ECB.decode(key, a)
-      assert(value == new String(Aes.ECB.decode(key, a)))
+      assert(value == Aes.ECB.decodeHex(key, "3c2b1416d82883dfeaa6a9aa5ecb8245"))
+    }
+
+    it("CBC encode and decode") {
+      var key = "xxdafafd21232345"
+      val value = "TextMustBe16Byte"
+      val encrypted = Aes.CBC.encode(key, value.getBytes, Padding.No)
+      assert("f95b74dbbd4c6a47fc92d10fd666cd69" == Hex.encode(encrypted))
+      assert(value == Aes.CBC.decodeHex(key, "f95b74dbbd4c6a47fc92d10fd666cd69", Padding.No))
     }
   }
 }

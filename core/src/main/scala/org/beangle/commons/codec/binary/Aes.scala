@@ -25,14 +25,18 @@ import javax.crypto.KeyGenerator
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import java.security.SecureRandom
-
+/**
+ * Advanced Encryption Standard
+ * @see https://en.wikipedia.org/wiki/Advanced_Encryption_Standard
+ */
 object Aes {
   def buildKey(key: String): SecretKey = {
     new SecretKeySpec(key.getBytes("UTF-8"), "AES")
   }
 
   /**
-   * ECB ecode and decode utility
+   * Electronic Codebook ecode and decode utility
+   * @see https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29
    */
   object ECB {
     def encode2Hex(key: String, data: String): String = {
@@ -72,6 +76,48 @@ object Aes {
     def decode(data: Array[Byte]): Array[Byte] = {
       ECB.buildCipher(Cipher.DECRYPT_MODE, skey).doFinal(data)
     }
+  }
 
+  /**
+   * Cipher-Block Chaining encode and decode utility
+   */
+  object CBC {
+    def encode2Hex(key: String, data: String, padding: String = Padding.PKCS5, iv: String = null): String = {
+      val d = new CBCEncoder(key, iv, padding).encode(data.getBytes("UTF-8"))
+      Hex.encode(d, true)
+    }
+
+    def decodeHex(key: String, data: String, padding: String = Padding.PKCS5, iv: String = null): String = {
+      new String(new CBCDecoder(key, iv, padding).decode(Hex.decode(data)))
+    }
+
+    def encode(key: String, data: Array[Byte], padding: String = Padding.PKCS5, iv: String = null): Array[Byte] = {
+      new CBCEncoder(key, iv, padding).encode(data)
+    }
+
+    def decode(key: String, data: Array[Byte], padding: String = Padding.PKCS5, iv: String = null): Array[Byte] = {
+      new CBCDecoder(key, iv, padding).decode(data)
+    }
+
+    def buildCipher(mode: Int, key: String, initVector: String, padding: String): Cipher = {
+      val sk = new SecretKeySpec(key.getBytes("UTF-8"), "AES")
+      val iv = if (initVector eq null) key else initVector
+      val ivs = new IvParameterSpec(iv.getBytes("UTF-8"))
+      val cipher = Cipher.getInstance("AES/CBC/" + padding)
+      cipher.init(mode, sk, ivs)
+      cipher
+    }
+  }
+
+  class CBCEncoder(key: String, iv: String, padding: String) extends Encoder[Array[Byte], Array[Byte]] {
+    def encode(data: Array[Byte]): Array[Byte] = {
+      CBC.buildCipher(Cipher.ENCRYPT_MODE, key, iv, padding).doFinal(data)
+    }
+  }
+
+  class CBCDecoder(key: String, iv: String, padding: String) extends Decoder[Array[Byte], Array[Byte]] {
+    def decode(data: Array[Byte]): Array[Byte] = {
+      CBC.buildCipher(Cipher.DECRYPT_MODE, key, iv, padding).doFinal(data)
+    }
   }
 }
