@@ -18,19 +18,7 @@
  */
 package org.beangle.commons.codec.binary
 
-import org.junit.runner.RunWith
-import org.scalatest.{ FunSpec, Matchers }
-import org.scalatest.junit.JUnitRunner
-
-@RunWith(classOf[JUnitRunner])
-class DesTest extends FunSpec with Matchers {
-  describe("Des cbc") {
-    it("encode and decode") {
-      var key = "ABCDEFGH"
-      val value = "AABBCCDDEE"
-      val encrypted = Des.CBC.encode(key, value.getBytes)
-      assert("c3ed812241678c3877561d25f9b3ac4e" == Hex.encode(encrypted))
-      assert(value == Des.CBC.decodeHex(key, "c3ed812241678c3877561d25f9b3ac4e"))
-    }
-  }
+object Padding {
+  val No = "NoPadding"
+  val PKCS5 = "PKCS5Padding"
 }
