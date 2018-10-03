@@ -21,49 +21,57 @@ package org.beangle.commons.codec.binary
 import org.beangle.commons.codec.{ Decoder, Encoder }
 
 import javax.crypto.{ Cipher, SecretKey, SecretKeyFactory }
-import javax.crypto.spec.{ DESKeySpec, IvParameterSpec }
-/**
- * @see https://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#impl
- */
-object Des {
-  def buildKey(key: Array[Byte]): SecretKey = {
-    SecretKeyFactory.getInstance("DES").generateSecret(new DESKeySpec(key))
+import javax.crypto.KeyGenerator
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
+import java.security.SecureRandom
+
+object Aes {
+  def buildKey(key: String): SecretKey = {
+    new SecretKeySpec(key.getBytes("UTF-8"), "AES")
   }
+
   /**
-   * CBC ecode and decode utility
+   * ECB ecode and decode utility
    */
-  object CBC {
+  object ECB {
     def encode2Hex(key: String, data: String): String = {
-      val d = new CBCEncoder(key.getBytes("UTF-8")).encode(data.getBytes("UTF-8"))
+      val d = new ECBEncoder(key).encode(data.getBytes("UTF-8"))
       Hex.encode(d, true)
     }
+
     def decodeHex(key: String, data: String): String = {
-      new String(new CBCDecoder(key.getBytes("UTF-8")).decode(Hex.decode(data)))
+      new String(new ECBDecoder(key).decode(Hex.decode(data)))
     }
+
     def encode(key: String, data: Array[Byte]): Array[Byte] = {
-      new CBCEncoder(key.getBytes("UTF-8")).encode(data)
+      new ECBEncoder(key).encode(data)
     }
+
     def decode(key: String, data: Array[Byte]): Array[Byte] = {
-      new CBCDecoder(key.getBytes("UTF-8")).decode(data)
+      new ECBDecoder(key).decode(data)
     }
-    def buildCipher(mode: Int, sk: SecretKey, key: Array[Byte]): Cipher = {
-      val cipher = Cipher.getInstance("DES/CBC/PKCS5Padding")
-      cipher.init(mode, sk, new IvParameterSpec(key))
+
+    def buildCipher(mode: Int, sk: SecretKey): Cipher = {
+      val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
+      cipher.init(mode, sk)
       cipher
     }
   }
-  class CBCEncoder(val key: Array[Byte]) extends Encoder[Array[Byte], Array[Byte]] {
-    val deskey = Des.buildKey(key)
+  class ECBEncoder(val key: String) extends Encoder[Array[Byte], Array[Byte]] {
+    val skey = Aes.buildKey(key)
 
     def encode(data: Array[Byte]): Array[Byte] = {
-      CBC.buildCipher(Cipher.ENCRYPT_MODE, deskey, key).doFinal(data)
+      ECB.buildCipher(Cipher.ENCRYPT_MODE, skey).doFinal(data)
     }
   }
-  class CBCDecoder(key: Array[Byte]) extends Decoder[Array[Byte], Array[Byte]] {
-    val deskey = Des.buildKey(key)
+
+  class ECBDecoder(key: String) extends Decoder[Array[Byte], Array[Byte]] {
+    val skey = Aes.buildKey(key)
 
     def decode(data: Array[Byte]): Array[Byte] = {
-      CBC.buildCipher(Cipher.DECRYPT_MODE, deskey, key).doFinal(data)
+      ECB.buildCipher(Cipher.DECRYPT_MODE, skey).doFinal(data)
     }
+
   }
 }
