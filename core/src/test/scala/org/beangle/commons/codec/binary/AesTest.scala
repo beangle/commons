@@ -21,16 +21,26 @@ package org.beangle.commons.codec.binary
 import org.junit.runner.RunWith
 import org.scalatest.{ FunSpec, Matchers }
 import org.scalatest.junit.JUnitRunner
+import java.util.Arrays
 
 @RunWith(classOf[JUnitRunner])
-class DesTest extends FunSpec with Matchers {
-  describe("Des cbc") {
-    it("encode and decode") {
-      var key = "ABCDEFGH"
-      val value = "AABBCCDDEE"
-      val encrypted = Des.CBC.encode(key, value.getBytes)
-      assert("c3ed812241678c3877561d25f9b3ac4e" == Hex.encode(encrypted))
-      assert(value == Des.CBC.decodeHex(key, "c3ed812241678c3877561d25f9b3ac4e"))
+class AesTest extends FunSpec with Matchers {
+  describe("AES") {
+    it("ECB encode and decode") {
+      var key = "8NONwyJtHesysWpM"
+      val value = "ABCDEFGH"
+      val encrypted = Aes.ECB.encode(key, value.getBytes())
+      val a = Hex.decode("3c2b1416d82883dfeaa6a9aa5ecb8245")
+      assert(Arrays.equals(a, encrypted))
+      assert(value == Aes.ECB.decodeHex(key, "3c2b1416d82883dfeaa6a9aa5ecb8245"))
+    }
+
+    it("CBC encode and decode") {
+      var key = "xxdafafd21232345"
+      val value = "TextMustBe16Byte"
+      val encrypted = Aes.CBC.encode(key, value.getBytes, Padding.No)
+      assert("f95b74dbbd4c6a47fc92d10fd666cd69" == Hex.encode(encrypted))
+      assert(value == Aes.CBC.decodeHex(key, "f95b74dbbd4c6a47fc92d10fd666cd69", Padding.No))
     }
   }
 }

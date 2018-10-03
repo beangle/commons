@@ -16,4 +16,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.web.http.agent
+package org.beangle.commons.codec.binary
+
+object Padding {
+  val No = "NoPadding"
+  val PKCS5 = "PKCS5Padding"
+}

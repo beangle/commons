@@ -35,7 +35,7 @@ abstract class GenericHttpFilter extends Filter with Initializing {
    * Standard way of initializing this filter. Map config parameters onto bean
    * properties of this filter, and invoke subclass initialization.
    */
-  def init(filterConfig: FilterConfig) {
+  override def init(filterConfig: FilterConfig) {
     this.filterConfig = filterConfig
     val filterName = filterConfig.getFilterName
     initParams(filterConfig, requiredProperties)
@@ -75,6 +75,6 @@ abstract class GenericHttpFilter extends Filter with Initializing {
    */
   def requiredProperties: Set[String] = Set.empty
 
-  def destroy() {
+  override def destroy() {
   }
 }

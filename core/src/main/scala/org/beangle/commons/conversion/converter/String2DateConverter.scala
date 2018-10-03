@@ -21,7 +21,7 @@ package org.beangle.commons.conversion.converter
 import java.{ util => ju }
 import java.util.Calendar.{ YEAR, MONTH, DAY_OF_MONTH, HOUR_OF_DAY, MINUTE, SECOND, MILLISECOND }
 import org.beangle.commons.conversion.Converter
-import org.beangle.commons.lang.Strings.{ substring, transformToInt, split, isEmpty, contains, isNotBlank }
+import org.beangle.commons.lang.Strings.{ substring, split, isEmpty, contains, isNotBlank }
 import org.beangle.commons.lang.Numbers.toInt
 import org.beangle.commons.lang.Dates
 
@@ -48,7 +48,7 @@ class String2DateConverter extends StringConverterFactory[String, ju.Date] {
       var badformat = false
       var dateElems: Array[Int] = null
       if (contains(times(0), "-")) {
-        dateElems = transformToInt(split(times(0), "-"))
+        dateElems = toInt(split(times(0), "-"))
         badformat = dateElems.length != 3
       } else {
         dateElems = new Array[Int](3)

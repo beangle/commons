@@ -757,22 +757,14 @@ object Strings {
   /**
    * splitToInteger.
    */
-  def splitToInt(ids: String): Array[Int] = {
-    if (isEmpty(ids)) new Array[Int](0) else transformToInt(split(ids, ','))
+  def splitToInt(ids: String): Seq[Int] = {
+    if (isEmpty(ids)) List.empty else Numbers.toInt(split(ids, ','))
   }
-  /**
-   * splitToInteger.
-   */
-  def splitToInteger(ids: String): Array[Integer] = {
-    if (isEmpty(ids)) new Array[Integer](0) else transformToInteger(split(ids, ','))
-  }
-
   /**
    * splitToLong.
    */
-  def splitToLong(ids: String): Array[java.lang.Long] = {
-    if (isEmpty(ids)) new Array[java.lang.Long](0)
-    else transformToLong(split(ids, ','))
+  def splitToLong(ids: String): Seq[Long] = {
+    if (isEmpty(ids)) List.empty else Numbers.toLong(split(ids, ','))
   }
 
   /**
@@ -848,42 +840,6 @@ object Strings {
     if (buf.length > 0) buf.append(delimiter)
     buf.toString
   }
-
-  /**
-   * transformToInt.
-   *
-   * @param ids an array of String objects.
-   * @return an array of {@link java.lang.Integer} objects.
-   */
-  def transformToInt(ids: Array[String]): Array[Int] = {
-    val results = new Array[Int](ids.length)
-    (0 until ids.length) foreach { i =>
-      results(i) = Numbers.toInt(ids(i))
-    }
-    results
-  }
-
-  def transformToInteger(ids: Array[String]): Array[Integer] = {
-    val idsOfInteger = new Array[Integer](ids.length)
-    (0 until ids.length) foreach { i =>
-      idsOfInteger(i) = Integer.valueOf(ids(i))
-    }
-    idsOfInteger
-  }
-
-  /**
-   * transformToJLong.
-   *
-   * @param ids an array of String objects.
-   * @return an array of {@link java.lang.Long} objects.
-   */
-  def transformToLong(ids: Array[String]): Array[java.lang.Long] = {
-    if (null == ids) return null
-    val idsOfLong = new Array[java.lang.Long](ids.length)
-    (0 until ids.length) foreach (i => idsOfLong(i) = java.lang.Long.valueOf(ids(i)))
-    idsOfLong
-  }
-
   /**
    * unCamel.
    */

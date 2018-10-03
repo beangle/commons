@@ -48,6 +48,13 @@ class StringsTest extends FunSpec with Matchers {
       codes(3) should equal("opq")
     }
 
+    it("Split2Int") {
+      val target = "3,4,5"
+      val codes = splitToInt(target)
+      codes.length should be(3)
+      codes(2) should equal(5)
+    }
+
     it("IsEqualSeq compare different string seq") {
       val first = "123,4546,"
       val second = ",4546,123"
