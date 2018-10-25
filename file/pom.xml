@@ -13,6 +13,7 @@
   <properties>
     <bundle.symbolicName>org.beangle.commons.file</bundle.symbolicName>
     <bundle.namespace>org.beangle.commons.file</bundle.namespace>
+    <commons.compress.version>1.18</commons.compress.version>
   </properties>
 
   <dependencies>
@@ -23,7 +24,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
-      <version>1.15</version>
+      <version>${commons.compress.version}</version>
     </dependency>
   </dependencies>
 </project>
