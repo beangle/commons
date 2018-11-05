@@ -22,18 +22,18 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSpec
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.Matchers
-import java.sql.Date
+import java.time.LocalDate
 
 @RunWith(classOf[JUnitRunner])
 class WeekTimeTest extends FunSpec with Matchers {
   describe("WeekTime") {
     it("firstDate ") {
       val wt = new WeekTime
-      wt.startOn = Date.valueOf("2015-01-01")
+      wt.startOn = LocalDate.parse("2015-01-01")
       wt.weekstate = WeekState("1010");
-      assert(wt.firstDay == Date.valueOf("2015-01-01"))
+      assert(wt.firstDay == LocalDate.parse("2015-01-01"))
       wt.weekstate = WeekState("1100");
-      assert(wt.firstDay == Date.valueOf("2015-01-08"))
+      assert(wt.firstDay == LocalDate.parse("2015-01-08"))
     }
   }
 }

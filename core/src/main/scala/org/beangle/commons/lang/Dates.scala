@@ -18,10 +18,9 @@
  */
 package org.beangle.commons.lang
 
-import java.{ util => ju }
-import java.util.Calendar._
-import java.sql.Date
-import java.sql.Time
+import java.time.{ LocalDate, LocalDateTime, LocalTime }
+import java.util.Calendar
+
 /**
  * Dates class.
  *
@@ -29,52 +28,20 @@ import java.sql.Time
  */
 object Dates {
 
-  /**
-   * Roll Minutes.
-   */
-  def rollMinutes(date: ju.Date, mount: Int): ju.Date = new ju.Date(date.getTime + mount * 60 * 1000)
-
-  def today: java.sql.Date = toDate(ju.Calendar.getInstance())
-
-  def now: ju.Date = new ju.Date()
-
-  def toDate(cal: ju.Calendar): Date = {
-    val cloned = getInstance()
-    cloned.set(HOUR_OF_DAY, 0)
-    cloned.set(MINUTE, 0)
-    cloned.set(SECOND, 0)
-    cloned.set(MILLISECOND, 0)
-    cloned.set(YEAR, cal.get(YEAR))
-    cloned.set(MONTH, cal.get(MONTH))
-    cloned.set(DAY_OF_MONTH, cal.get(DAY_OF_MONTH))
-    new java.sql.Date(cloned.getTimeInMillis())
+  def today: LocalDate = {
+    LocalDate.now()
   }
 
-  def toDate(date: ju.Date): Date = toDate(toCalendar(date))
-
-  def toCalendar(date: ju.Date): ju.Calendar = {
-    val cal = ju.Calendar.getInstance
-    cal.setTime(date)
-    cal
+  def now: LocalDateTime = {
+    LocalDateTime.now()
   }
 
-  def toCalendar(dateStr: String): ju.Calendar = {
-    val cal = getInstance()
-    cal.setTime(java.sql.Date.valueOf(dateStr))
-    cal
+  def toDate(cal: Calendar): LocalDate = {
+    LocalDate.from(Calendar.getInstance.toInstant)
   }
 
-  def join(date: Date, time: Time): ju.Date = {
-    val cal = getInstance
-    val timeCal = getInstance
-    cal.setTime(date)
-    timeCal.setTime(time)
-
-    cal.set(HOUR_OF_DAY, timeCal.get(HOUR_OF_DAY))
-    cal.set(MINUTE, timeCal.get(MINUTE))
-    cal.set(SECOND, timeCal.get(SECOND))
-    cal.set(MILLISECOND, 0)
-    cal.getTime()
+  def join(date: LocalDate, time: LocalTime): LocalDateTime = {
+    LocalDateTime.of(date, time)
   }
 
   /**

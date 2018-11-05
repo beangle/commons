@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.beangle.commons</groupId>
     <artifactId>beangle-commons-parent_2.12</artifactId>
-    <version>5.1.2</version>
+    <version>5.1.3</version>
   </parent>
   <artifactId>beangle-commons-file_2.12</artifactId>
   <packaging>jar</packaging>
@@ -13,6 +13,7 @@
   <properties>
     <bundle.symbolicName>org.beangle.commons.file</bundle.symbolicName>
     <bundle.namespace>org.beangle.commons.file</bundle.namespace>
+    <commons.compress.version>1.18</commons.compress.version>
   </properties>
 
   <dependencies>
@@ -23,7 +24,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
-      <version>1.15</version>
+      <version>${commons.compress.version}</version>
     </dependency>
   </dependencies>
 </project>

@@ -18,14 +18,12 @@
  */
 package org.beangle.commons.lang.time
 
-import java.{ util => ju }
+import java.time.LocalDate
 
 import org.beangle.commons.bean.component
 import org.beangle.commons.lang.Objects
 import org.beangle.commons.lang.annotation.beta
 import org.beangle.commons.lang.time.WeekDay.WeekDay
-import java.util.Calendar
-import java.time.LocalDate
 
 /**循环时间*/
 @beta
@@ -33,7 +31,7 @@ import java.time.LocalDate
 class WeekTime extends Ordered[WeekTime] with Serializable {
 
   /**起始日期*/
-  var startOn: java.sql.Date = _
+  var startOn: LocalDate = _
 
   /** 开始时间 */
   var beginAt: HourMinute = _
@@ -52,23 +50,16 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
     this.weekstate = other.weekstate
   }
 
-  def dates: List[java.sql.Date] = {
-    val s = startOn.toLocalDate()
-    weekstate.weeks.map { x => java.sql.Date.valueOf(s.plusWeeks(x - 1)) }
+  def dates: List[LocalDate] = {
+    weekstate.weeks.map { x => startOn.plusWeeks(x - 1) }
   }
 
-  def firstDay: java.sql.Date = {
-    val cal = ju.Calendar.getInstance
-    cal.setTime(startOn)
-    cal.add(ju.Calendar.WEEK_OF_YEAR, weekstate.first - 1)
-    new java.sql.Date(cal.getTime.getTime)
+  def firstDay: LocalDate = {
+    startOn.plusWeeks(weekstate.first - 1)
   }
 
-  def lastDay: java.sql.Date = {
-    val cal = ju.Calendar.getInstance
-    cal.setTime(startOn)
-    cal.add(ju.Calendar.WEEK_OF_YEAR, weekstate.last - 1)
-    new java.sql.Date(cal.getTime.getTime)
+  def lastDay: LocalDate = {
+    startOn.plusWeeks(weekstate.last - 1)
   }
 
   def weekday: WeekDay = {
