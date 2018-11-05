@@ -24,6 +24,7 @@ import java.time.{ LocalDate, LocalTime }
 import org.junit.runner.RunWith
 import org.scalatest.{ FunSpec, Matchers }
 import org.scalatest.junit.JUnitRunner
+import java.time.format.DateTimeFormatter
 
 @RunWith(classOf[JUnitRunner])
 class DatesTest extends FunSpec with Matchers {
@@ -33,8 +34,7 @@ class DatesTest extends FunSpec with Matchers {
       val date = LocalDate.parse("2014-09-09")
       val time = LocalTime.parse("09:09:10")
       val datetime = Dates.join(date, time)
-      val format = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
-      format.format(datetime) should equal("2014-09-09 09-09-10")
+      datetime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss")) should equal("2014-09-09 09-09-10")
     }
 
     it("Normalize date string") {
