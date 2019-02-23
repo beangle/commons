@@ -123,6 +123,9 @@ class BeanInfosTest extends FunSpec with Matchers {
       assert(p2.typeinfo.isMap)
       assert(p2.typeinfo.asInstanceOf[MapType].keyType == classOf[String])
       assert(p2.typeinfo.asInstanceOf[MapType].valueType == classOf[Object])
+
+      val p3 = t.properties("tempName")
+      assert(p3.isTransient)
     }
     //    it("find corrent default constructor parameters") {
     //      val params = BeanInfos.get(classOf[ConcurrentMapCacheManager]).defaultConstructorParams
