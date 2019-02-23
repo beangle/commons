@@ -40,13 +40,14 @@ class TestBean {
 
   var parent: Option[TestBean] = None
 
-  def methodWithManyArguments(i: Int,
-                              f: Float,
-                              I: java.lang.Integer,
-                              F: java.lang.Float,
-                              c: TestBean,
-                              c1: TestBean,
-                              c2: TestBean): String = "test"
+  def methodWithManyArguments(
+    i: Int,
+    f: Float,
+    I: java.lang.Integer,
+    F: java.lang.Float,
+    c: TestBean,
+    c1: TestBean,
+    c2: TestBean): String = "test"
 
   @description("method1")
   def method1(a: Long): Unit = {
@@ -134,6 +135,7 @@ class BigBookStore(val department: Seq[Department], val books: Map[String, Book]
   var properties: java.util.Properties = _
   var prices: Range = _
   var properties2: org.beangle.commons.collection.Properties = _
+  @transient var tempName: String = _
 }
 
 trait Hierarchical[T] {

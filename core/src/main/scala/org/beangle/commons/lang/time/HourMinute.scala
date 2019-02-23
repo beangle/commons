@@ -44,7 +44,8 @@ object HourMinute {
   def convert(time: String): Short = {
     var index = time.indexOf(':')
     require(index == 2 && time.length == 5, "illegal time,it should with 00:00 format")
-    require((toShort(time.substring(0, index)) < 60 && toShort(time.substring(index + 1, index + 3)) < 60),
+    require(
+      (toShort(time.substring(0, index)) < 60 && toShort(time.substring(index + 1, index + 3)) < 60),
       s"illegal time $time,it should within 60:60.")
     toShort(time.substring(0, index) + time.substring(index + 1, index + 3))
   }
@@ -74,6 +75,10 @@ class HourMinute(val value: Short) extends Serializable with Ordered[HourMinute]
 
   def minute: Int = {
     value % 100
+  }
+
+  def interval(other: HourMinute): Int = {
+    Math.abs(this.minutes - other.minutes)
   }
 
   def +(minutesDuration: Int): HourMinute = {
