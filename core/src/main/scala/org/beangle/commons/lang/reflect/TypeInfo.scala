@@ -22,7 +22,7 @@ import java.lang.reflect.{ Constructor, Method, ParameterizedType }
 
 import scala.language.existentials
 
-case class Getter(val method: Method, val returnType: Class[_], val isTransient: Boolean)
+case class Getter(val method: Method, val returnType: Class[_])
 
 case class Setter(val method: Method, val parameterTypes: Array[Class[_]])
 

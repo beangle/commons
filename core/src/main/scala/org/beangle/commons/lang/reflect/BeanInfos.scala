@@ -20,7 +20,7 @@ package org.beangle.commons.lang.reflect
 
 import java.beans.Transient
 import java.lang.Character.isUpperCase
-import java.lang.reflect.{ Method, Modifier, ParameterizedType, TypeVariable }
+import java.lang.reflect.{ Field, Method, Modifier, ParameterizedType, TypeVariable }
 
 import scala.collection.mutable
 import scala.language.existentials
@@ -100,19 +100,19 @@ class BeanInfos {
     }
     val getters = new mutable.HashMap[String, Getter]
     val setters = new mutable.HashMap[String, Setter]
-    val fields = new mutable.HashSet[String]
+    val fields = new mutable.HashMap[String, Field]
     val interfaceSets = new mutable.HashSet[Class[_]]
     var nextClass = clazz
     var paramTypes: collection.Map[String, Class[_]] = Map.empty
     while (null != nextClass && classOf[AnyRef] != nextClass) {
       val declaredMethods = nextClass.getDeclaredMethods
-      nextClass.getDeclaredFields() foreach { f => fields += f.getName }
+      nextClass.getDeclaredFields() foreach { f => fields += (f.getName -> f) }
       (0 until declaredMethods.length) foreach { i =>
         val method = declaredMethods(i)
         findAccessor(method) match {
           case Some(Tuple2(readable, name)) =>
             if (readable) {
-              getters.put(name, Getter(method, extract(method.getGenericReturnType, paramTypes), method.isAnnotationPresent(classOf[Transient])))
+              getters.put(name, Getter(method, extract(method.getGenericReturnType, paramTypes)))
             } else {
               val types = method.getGenericParameterTypes
               val paramsTypes = new Array[Class[_]](types.length)
@@ -128,18 +128,11 @@ class BeanInfos {
       nextClass = nextClass.getSuperclass
       paramTypes = deduceParamTypes(nextClass, nextType, paramTypes)
     }
-
-    val filterGetters = getters.map {
-      case (name, getter) =>
-        val logicTransient = !Modifier.isAbstract(getter.method.getModifiers) && !(setters.contains(name) || fields.contains(name))
-        (name, Getter(getter.method, getter.returnType, getter.isTransient || logicTransient))
-    }
-
     // organize setter and getter
-    val allprops = filterGetters.keySet ++ setters.keySet
+    val allprops = getters.keySet ++ setters.keySet
     val properties = Collections.newMap[String, PropertyDescriptor]
     allprops foreach { p =>
-      val getter = filterGetters.get(p)
+      val getter = getters.get(p)
       val setter = setters.get(p)
       val clazz = if (None == getter) setter.get.parameterTypes(0) else getter.get.returnType
 
@@ -150,8 +143,22 @@ class BeanInfos {
           TypeInfo.of(clazz, if (None == getter) setter.get.method.getGenericParameterTypes()(0) else getter.get.method.getGenericReturnType)
         }
 
-      val isTrasient = if (None == getter) false else getter.get.isTransient
-      val pd = new PropertyDescriptor(p, typeinfo, getter.map(x => x.method), setter.map(x => x.method), isTrasient)
+      val isTransient =
+        if (None == getter) {
+          false
+        } else {
+          val getMethod = getter.get.method
+          var trat = getMethod.isAnnotationPresent(classOf[Transient])
+          if (!trat) {
+            trat = !Modifier.isAbstract(getMethod.getModifiers) && !(setters.contains(p) || fields.contains(p))
+            if (!trat && fields.contains(p)) {
+              val field = fields(p)
+              trat = Modifier.isTransient(field.getModifiers)
+            }
+          }
+          trat
+        }
+      val pd = new PropertyDescriptor(p, typeinfo, getter.map(x => x.method), setter.map(x => x.method), isTransient)
       properties.put(p, pd)
     }
 
@@ -203,8 +210,8 @@ class BeanInfos {
   }
 
   private def navIterface(clazz: Class[_], interfaceSets: mutable.HashSet[Class[_]],
-                          getters: mutable.HashMap[String, Getter], setters: mutable.HashMap[String, Setter],
-                          paramTypes: collection.Map[String, Class[_]]): Unit = {
+    getters: mutable.HashMap[String, Getter], setters: mutable.HashMap[String, Setter],
+    paramTypes: collection.Map[String, Class[_]]): Unit = {
     if (null == clazz || classOf[AnyRef] == clazz) return ;
     val interfaceTypes = clazz.getGenericInterfaces
     val interfaces = clazz.getInterfaces
@@ -220,7 +227,7 @@ class BeanInfos {
             case Some(Tuple2(readable, name)) =>
               if (readable) {
                 if (!getters.contains(name))
-                  getters.put(name, Getter(method, extract(method.getGenericReturnType, interfaceParamTypes), method.isAnnotationPresent(classOf[Transient])))
+                  getters.put(name, Getter(method, extract(method.getGenericReturnType, interfaceParamTypes)))
               } else {
                 if (!setters.contains(name)) {
                   val types = method.getGenericParameterTypes
