@@ -167,17 +167,14 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
 
   private def copySimpleProperty(bean: Any, name: String, value: Any, conversion: Conversion): Any = {
     val manifest = beanInfos.get(bean)
-    val info = manifest.getSetter(name) match {
+    manifest.getSetter(name) match {
       case Some(method) => {
         val p = manifest.properties(name)
         val converted = convert(value, p.clazz, p.typeinfo, conversion)
         method.invoke(bean, converted.asInstanceOf[Object])
         converted
       }
-      case _ => {
-        System.err.println(s"Cannot find $name set method in ${bean.getClass.getName}")
-        null
-      }
+      case _ => null
     }
   }
 

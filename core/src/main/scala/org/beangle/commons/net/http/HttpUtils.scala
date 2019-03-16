@@ -19,7 +19,9 @@
 package org.beangle.commons.net.http
 
 import java.io.{ BufferedReader, ByteArrayOutputStream, InputStreamReader }
-import java.net.{ HttpURLConnection, URL }
+import java.net.{ URL, URLConnection }
+import java.net.HttpURLConnection.{ HTTP_FORBIDDEN, HTTP_MOVED_PERM, HTTP_MOVED_TEMP, HTTP_NOT_FOUND, HTTP_OK, HTTP_UNAUTHORIZED }
+import java.net.HttpURLConnection
 
 import org.beangle.commons.io.IOs
 import org.beangle.commons.logging.Logging
@@ -27,6 +29,30 @@ import org.beangle.commons.logging.Logging
 import javax.net.ssl.{ HostnameVerifier, HttpsURLConnection }
 
 object HttpUtils extends Logging {
+
+  private val statusMap = Map(
+    HTTP_OK -> "OK",
+    HTTP_FORBIDDEN -> "Access denied!",
+    HTTP_NOT_FOUND -> "Not Found",
+    HTTP_UNAUTHORIZED -> "Access denied")
+
+  def toString(httpCode: Int): String = {
+    statusMap.get(httpCode).getOrElse(String.valueOf(httpCode))
+  }
+
+  def followRedirect(c: URLConnection, method: String): HttpURLConnection = {
+    val conn = c.asInstanceOf[HttpURLConnection]
+    conn.setRequestMethod(method)
+    conn.setInstanceFollowRedirects(false)
+    val rc = conn.getResponseCode
+    rc match {
+      case HTTP_OK => conn
+      case HTTP_MOVED_TEMP | HTTP_MOVED_PERM =>
+        val newLoc = conn.getHeaderField("location")
+        followRedirect(new URL(newLoc).openConnection, method)
+      case _ => conn
+    }
+  }
 
   def getData(urlString: String): Option[Array[Byte]] = {
     val url = new URL(urlString)
