@@ -25,14 +25,26 @@ import java.net.HttpURLConnection
 
 import org.beangle.commons.io.IOs
 import org.beangle.commons.logging.Logging
+import java.security.cert.CertificateException
+import java.security.cert.X509Certificate
 
-import javax.net.ssl.{ HostnameVerifier, HttpsURLConnection, SSLSession }
+import javax.net.ssl.{ HostnameVerifier, HttpsURLConnection, SSLSession, SSLContext, X509TrustManager }
 
 object HttpUtils extends Logging {
 
-  private val TrustAllHosts = new HostnameVerifier() {
+  val TrustAllHosts = new HostnameVerifier() {
     def verify(arg0: String, arg1: SSLSession): Boolean = {
       true
+    }
+  }
+
+  private object NullTrustManager extends X509TrustManager {
+    override def checkClientTrusted(c: Array[X509Certificate], at: String): Unit = {
+    }
+    override def checkServerTrusted(c: Array[X509Certificate], s: String): Unit = {
+    }
+    override def getAcceptedIssuers(): Array[X509Certificate] = {
+      null
     }
   }
 
@@ -73,9 +85,8 @@ object HttpUtils extends Logging {
       conn.setReadTimeout(5 * 1000)
       conn.setRequestMethod(HttpMethods.GET)
       conn.setDoOutput(true)
-      if (conn.isInstanceOf[HttpsURLConnection] && null != hostnameVerifier) {
-        conn.asInstanceOf[HttpsURLConnection].setHostnameVerifier(hostnameVerifier)
-      }
+      configHttps(conn, hostnameVerifier)
+
       if (conn.getResponseCode == 200) {
         val bos = new ByteArrayOutputStream
         IOs.copy(conn.getInputStream, bos)
@@ -84,9 +95,22 @@ object HttpUtils extends Logging {
         None
       }
     } catch {
-      case e: Exception => logger.error("Cannot open url " + urlString + ",for " + e.getMessage); None
+      case e: Exception => logger.error("Cannot open url " + urlString + ",for " + e.getMessage, e); None
     } finally {
       if (null != conn) conn.disconnect()
+    }
+  }
+
+  def configHttps(connection: HttpURLConnection, verifier: HostnameVerifier): Unit = {
+    connection match {
+      case conn: HttpsURLConnection =>
+        conn.setHostnameVerifier(if (null == verifier) TrustAllHosts else verifier)
+        val sslContext = SSLContext.getInstance("SSL", "SunJSSE");
+        sslContext.init(null, Array(NullTrustManager), new java.security.SecureRandom());
+
+        val ssf = sslContext.getSocketFactory()
+        conn.setSSLSocketFactory(ssf)
+      case _ =>
     }
   }
 
@@ -107,10 +131,7 @@ object HttpUtils extends Logging {
       conn.setReadTimeout(5 * 1000)
       conn.setRequestMethod(HttpMethods.GET)
       conn.setDoOutput(true)
-
-      if (conn.isInstanceOf[HttpsURLConnection] && null != hostnameVerifier) {
-        conn.asInstanceOf[HttpsURLConnection].setHostnameVerifier(hostnameVerifier)
-      }
+      configHttps(conn, hostnameVerifier)
       if (conn.getResponseCode == 200) {
         in =
           if (null == encoding) new BufferedReader(new InputStreamReader(conn.getInputStream))
