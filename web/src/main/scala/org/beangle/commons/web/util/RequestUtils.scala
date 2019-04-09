@@ -126,7 +126,7 @@ object RequestUtils {
     req.getScheme() == "https" || "https" == req.getHeader("X-Forwarded-Proto")
   }
 
-  def getServetPort(req: HttpServletRequest): Int = {
+  def getServerPort(req: HttpServletRequest): Int = {
     val headPort = req.getHeader("X-Forwarded-Port")
     if (Strings.isEmpty(headPort)) {
       req.getServerPort()
