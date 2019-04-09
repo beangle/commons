@@ -19,34 +19,12 @@
 package org.beangle.commons.net.http
 
 import java.io.{ BufferedReader, ByteArrayOutputStream, InputStreamReader }
-import java.net.{ URL, URLConnection }
+import java.net.{ URL, URLConnection, HttpURLConnection }
 import java.net.HttpURLConnection.{ HTTP_FORBIDDEN, HTTP_MOVED_PERM, HTTP_MOVED_TEMP, HTTP_NOT_FOUND, HTTP_OK, HTTP_UNAUTHORIZED }
-import java.net.HttpURLConnection
-
 import org.beangle.commons.io.IOs
 import org.beangle.commons.logging.Logging
-import java.security.cert.CertificateException
-import java.security.cert.X509Certificate
-
-import javax.net.ssl.{ HostnameVerifier, HttpsURLConnection, SSLSession, SSLContext, X509TrustManager }
 
 object HttpUtils extends Logging {
-
-  val TrustAllHosts = new HostnameVerifier() {
-    def verify(arg0: String, arg1: SSLSession): Boolean = {
-      true
-    }
-  }
-
-  private object NullTrustManager extends X509TrustManager {
-    override def checkClientTrusted(c: Array[X509Certificate], at: String): Unit = {
-    }
-    override def checkServerTrusted(c: Array[X509Certificate], s: String): Unit = {
-    }
-    override def getAcceptedIssuers(): Array[X509Certificate] = {
-      null
-    }
-  }
 
   private val statusMap = Map(
     HTTP_OK -> "OK",
@@ -72,11 +50,7 @@ object HttpUtils extends Logging {
     }
   }
 
-  def getData(url: String): Option[Array[Byte]] = {
-    getData(url, TrustAllHosts)
-  }
-
-  def getData(urlString: String, hostnameVerifier: HostnameVerifier): Option[Array[Byte]] = {
+  def getData(urlString: String): Option[Array[Byte]] = {
     val url = new URL(urlString)
     var conn: HttpURLConnection = null
     try {
@@ -85,7 +59,7 @@ object HttpUtils extends Logging {
       conn.setReadTimeout(5 * 1000)
       conn.setRequestMethod(HttpMethods.GET)
       conn.setDoOutput(true)
-      configHttps(conn, hostnameVerifier)
+      Https.noverify(conn)
 
       if (conn.getResponseCode == 200) {
         val bos = new ByteArrayOutputStream
@@ -101,28 +75,11 @@ object HttpUtils extends Logging {
     }
   }
 
-  def configHttps(connection: HttpURLConnection, verifier: HostnameVerifier): Unit = {
-    connection match {
-      case conn: HttpsURLConnection =>
-        conn.setHostnameVerifier(if (null == verifier) TrustAllHosts else verifier)
-        val sslContext = SSLContext.getInstance("SSL", "SunJSSE");
-        sslContext.init(null, Array(NullTrustManager), new java.security.SecureRandom());
-
-        val ssf = sslContext.getSocketFactory()
-        conn.setSSLSocketFactory(ssf)
-      case _ =>
-    }
-  }
-
   def getText(urlString: String): Option[String] = {
     getText(new URL(urlString), null)
   }
 
-  def getText(constructedUrl: URL, encoding: String): Option[String] = {
-    getText(constructedUrl, TrustAllHosts, encoding)
-  }
-
-  def getText(url: URL, hostnameVerifier: HostnameVerifier, encoding: String): Option[String] = {
+  def getText(url: URL, encoding: String): Option[String] = {
     var conn: HttpURLConnection = null
     var in: BufferedReader = null
     try {
@@ -131,7 +88,7 @@ object HttpUtils extends Logging {
       conn.setReadTimeout(5 * 1000)
       conn.setRequestMethod(HttpMethods.GET)
       conn.setDoOutput(true)
-      configHttps(conn, hostnameVerifier)
+      Https.noverify(conn)
       if (conn.getResponseCode == 200) {
         in =
           if (null == encoding) new BufferedReader(new InputStreamReader(conn.getInputStream))
