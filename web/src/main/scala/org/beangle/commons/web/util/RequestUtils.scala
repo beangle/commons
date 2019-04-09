@@ -121,4 +121,9 @@ object RequestUtils {
     val head = request.getHeader("USER-AGENT")
     new Useragent(getIpAddr(request), Browser.parse(head), Os.parse(head))
   }
+
+  def isHttps(req: HttpServletRequest): Boolean = {
+    req.getScheme() == "https" || "https" == req.getHeader("X-Forwarded-Proto")
+  }
+
 }

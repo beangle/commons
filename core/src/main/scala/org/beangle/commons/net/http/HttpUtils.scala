@@ -26,9 +26,15 @@ import java.net.HttpURLConnection
 import org.beangle.commons.io.IOs
 import org.beangle.commons.logging.Logging
 
-import javax.net.ssl.{ HostnameVerifier, HttpsURLConnection }
+import javax.net.ssl.{ HostnameVerifier, HttpsURLConnection, SSLSession }
 
 object HttpUtils extends Logging {
+
+  private val TrustAllHosts = new HostnameVerifier() {
+    def verify(arg0: String, arg1: SSLSession): Boolean = {
+      true
+    }
+  }
 
   private val statusMap = Map(
     HTTP_OK -> "OK",
@@ -54,7 +60,11 @@ object HttpUtils extends Logging {
     }
   }
 
-  def getData(urlString: String): Option[Array[Byte]] = {
+  def getData(url: String): Option[Array[Byte]] = {
+    getData(url, TrustAllHosts)
+  }
+
+  def getData(urlString: String, hostnameVerifier: HostnameVerifier): Option[Array[Byte]] = {
     val url = new URL(urlString)
     var conn: HttpURLConnection = null
     try {
@@ -63,6 +73,9 @@ object HttpUtils extends Logging {
       conn.setReadTimeout(5 * 1000)
       conn.setRequestMethod(HttpMethods.GET)
       conn.setDoOutput(true)
+      if (conn.isInstanceOf[HttpsURLConnection] && null != hostnameVerifier) {
+        conn.asInstanceOf[HttpsURLConnection].setHostnameVerifier(hostnameVerifier)
+      }
       if (conn.getResponseCode == 200) {
         val bos = new ByteArrayOutputStream
         IOs.copy(conn.getInputStream, bos)
@@ -82,7 +95,7 @@ object HttpUtils extends Logging {
   }
 
   def getText(constructedUrl: URL, encoding: String): Option[String] = {
-    getText(constructedUrl, null, encoding)
+    getText(constructedUrl, TrustAllHosts, encoding)
   }
 
   def getText(url: URL, hostnameVerifier: HostnameVerifier, encoding: String): Option[String] = {
