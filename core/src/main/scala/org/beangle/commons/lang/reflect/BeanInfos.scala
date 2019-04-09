@@ -112,7 +112,10 @@ class BeanInfos {
         findAccessor(method) match {
           case Some(Tuple2(readable, name)) =>
             if (readable) {
-              getters.put(name, Getter(method, extract(method.getGenericReturnType, paramTypes)))
+              val puttable = getters.get(name).map(x=>isJavaBeanGetter(x.method)).getOrElse(true)
+              if (puttable) {
+                getters.put(name, Getter(method, extract(method.getGenericReturnType, paramTypes)))
+              }
             } else {
               val types = method.getGenericParameterTypes
               val paramsTypes = new Array[Class[_]](types.length)
@@ -282,6 +285,12 @@ class BeanInfos {
     }
   }
 
+  private def isJavaBeanGetter(method: Method): Boolean = {
+    val name = method.getName
+    if (name.startsWith("get") && name.length > 3 && isUpperCase(name.charAt(3))) { true }
+    else if (name.startsWith("is") && name.length > 2 && isUpperCase(name.charAt(2))) { true }
+    else { false }
+  }
   /**
    * Return this method is property read method (true,name) or write method(false,name) or None.
    */
