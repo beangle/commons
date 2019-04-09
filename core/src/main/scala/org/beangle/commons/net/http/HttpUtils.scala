@@ -19,22 +19,12 @@
 package org.beangle.commons.net.http
 
 import java.io.{ BufferedReader, ByteArrayOutputStream, InputStreamReader }
-import java.net.{ URL, URLConnection }
+import java.net.{ URL, URLConnection, HttpURLConnection }
 import java.net.HttpURLConnection.{ HTTP_FORBIDDEN, HTTP_MOVED_PERM, HTTP_MOVED_TEMP, HTTP_NOT_FOUND, HTTP_OK, HTTP_UNAUTHORIZED }
-import java.net.HttpURLConnection
-
 import org.beangle.commons.io.IOs
 import org.beangle.commons.logging.Logging
 
-import javax.net.ssl.{ HostnameVerifier, HttpsURLConnection, SSLSession }
-
 object HttpUtils extends Logging {
-
-  private val TrustAllHosts = new HostnameVerifier() {
-    def verify(arg0: String, arg1: SSLSession): Boolean = {
-      true
-    }
-  }
 
   private val statusMap = Map(
     HTTP_OK -> "OK",
@@ -60,11 +50,7 @@ object HttpUtils extends Logging {
     }
   }
 
-  def getData(url: String): Option[Array[Byte]] = {
-    getData(url, TrustAllHosts)
-  }
-
-  def getData(urlString: String, hostnameVerifier: HostnameVerifier): Option[Array[Byte]] = {
+  def getData(urlString: String): Option[Array[Byte]] = {
     val url = new URL(urlString)
     var conn: HttpURLConnection = null
     try {
@@ -73,9 +59,8 @@ object HttpUtils extends Logging {
       conn.setReadTimeout(5 * 1000)
       conn.setRequestMethod(HttpMethods.GET)
       conn.setDoOutput(true)
-      if (conn.isInstanceOf[HttpsURLConnection] && null != hostnameVerifier) {
-        conn.asInstanceOf[HttpsURLConnection].setHostnameVerifier(hostnameVerifier)
-      }
+      Https.noverify(conn)
+
       if (conn.getResponseCode == 200) {
         val bos = new ByteArrayOutputStream
         IOs.copy(conn.getInputStream, bos)
@@ -84,7 +69,7 @@ object HttpUtils extends Logging {
         None
       }
     } catch {
-      case e: Exception => logger.error("Cannot open url " + urlString + ",for " + e.getMessage); None
+      case e: Exception => logger.error("Cannot open url " + urlString + ",for " + e.getMessage, e); None
     } finally {
       if (null != conn) conn.disconnect()
     }
@@ -94,11 +79,7 @@ object HttpUtils extends Logging {
     getText(new URL(urlString), null)
   }
 
-  def getText(constructedUrl: URL, encoding: String): Option[String] = {
-    getText(constructedUrl, TrustAllHosts, encoding)
-  }
-
-  def getText(url: URL, hostnameVerifier: HostnameVerifier, encoding: String): Option[String] = {
+  def getText(url: URL, encoding: String): Option[String] = {
     var conn: HttpURLConnection = null
     var in: BufferedReader = null
     try {
@@ -107,10 +88,7 @@ object HttpUtils extends Logging {
       conn.setReadTimeout(5 * 1000)
       conn.setRequestMethod(HttpMethods.GET)
       conn.setDoOutput(true)
-
-      if (conn.isInstanceOf[HttpsURLConnection] && null != hostnameVerifier) {
-        conn.asInstanceOf[HttpsURLConnection].setHostnameVerifier(hostnameVerifier)
-      }
+      Https.noverify(conn)
       if (conn.getResponseCode == 200) {
         in =
           if (null == encoding) new BufferedReader(new InputStreamReader(conn.getInputStream))

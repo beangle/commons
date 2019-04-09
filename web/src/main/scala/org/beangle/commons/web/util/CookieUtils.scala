@@ -76,7 +76,7 @@ object CookieUtils {
   def addCookie(request: HttpServletRequest, response: HttpServletResponse,
     name: String, value: String, path: String, age: Int) {
     val cookie = new Cookie(name, URLEncoder.encode(value, "utf-8"))
-    cookie.setSecure(false)
+    cookie.setSecure(RequestUtils.isHttps(request))
     cookie.setPath(path)
     cookie.setMaxAge(age)
     cookie.setHttpOnly(true)
