@@ -156,3 +156,11 @@ trait Hierarchical[T] {
 class Department extends NumIdBean[Long] with Hierarchical[Department] {
   var name = "department"
 }
+
+class Menu {
+  var id: Long = _
+
+  def getId(): Long = {
+    id
+  }
+}

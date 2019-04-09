@@ -19,7 +19,7 @@
 package org.beangle.commons.lang.reflect
 
 import java.lang.reflect.Modifier
-import org.beangle.commons.lang.testbean.{ Author, Book, BookPrimitiveId, BookStore, Entity, NumIdBean }
+import org.beangle.commons.lang.testbean.{ Author, Book, BookPrimitiveId, BookStore, Entity, NumIdBean, Menu }
 import org.junit.runner.RunWith
 import org.scalatest.{ FunSpec, Matchers }
 import org.scalatest.junit.JUnitRunner
@@ -95,7 +95,17 @@ class BeanInfosTest extends FunSpec with Matchers {
       assert(typeinfo3.asInstanceOf[MapType].keyType == classOf[Int])
       assert(typeinfo3.asInstanceOf[MapType].valueType == classOf[Integer])
     }
-    it("find corrent constructor info") {
+
+    it("find correct get") {
+      val t = BeanInfos.get(classOf[Menu])
+      val getter = t.properties("id").getter
+      assert(None != getter)
+      getter foreach { g =>
+        assert(g.getName == "id")
+      }
+    }
+
+    it("find correct constructor info") {
       val t = BeanInfos.get(classOf[BigBookStore])
       assert(!t.constructors.isEmpty)
       val ctor = t.constructors.head
@@ -127,7 +137,7 @@ class BeanInfosTest extends FunSpec with Matchers {
       val p3 = t.properties("tempName")
       assert(p3.isTransient)
     }
-    //    it("find corrent default constructor parameters") {
+    //    it("find correct default constructor parameters") {
     //      val params = BeanInfos.get(classOf[ConcurrentMapCacheManager]).defaultConstructorParams
     //      assert(params.size == 1)
     //      assert(params(1) == "concurrent")
