@@ -8,7 +8,7 @@
   <groupId>org.beangle.commons</groupId>
   <artifactId>beangle-commons-parent_2.12</artifactId>
   <packaging>pom</packaging>
-  <version>5.1.7-SNAPSHOT</version>
+  <version>5.1.7</version>
   <name>Beangle Commons Parent</name>
 
   <modules>
