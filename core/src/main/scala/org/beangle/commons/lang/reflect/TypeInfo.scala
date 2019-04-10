@@ -62,7 +62,7 @@ object TypeInfo {
           case c: Class[_] => {
             if (classOf[collection.Map[_, _]].isAssignableFrom(clazz)) {
               val typeParams = getGenericParamType(c, classOf[collection.Map[_, _]])
-              MapType(clazz, typeParams("K"), typeParams("V"))
+              toMapType(clazz, typeParams)
             } else if (classOf[collection.Iterable[_]].isAssignableFrom(clazz)) {
               val paramTypes = getGenericParamType(c, classOf[collection.Iterable[_]])
               if (paramTypes.isEmpty) CollectionType(clazz, classOf[Any]) else CollectionType(clazz, paramTypes.head._2)
@@ -71,11 +71,7 @@ object TypeInfo {
               if (paramTypes.isEmpty) CollectionType(clazz, classOf[Any]) else CollectionType(clazz, paramTypes.head._2)
             } else {
               val typeParams = getGenericParamType(c, classOf[java.util.Map[_, _]])
-              if (typeParams.size < 2) {
-                MapType(clazz, classOf[Any], classOf[Any])
-              } else {
-                MapType(clazz, typeParams("K"), typeParams("V"))
-              }
+              toMapType(clazz, typeParams)
             }
           }
           case _ => MapType(clazz, classOf[Any], classOf[Any])
@@ -92,6 +88,14 @@ object TypeInfo {
       } else {
         ElementType(clazz, false)
       }
+    }
+  }
+
+  private def toMapType(clazz: Class[_], params: collection.Map[String, Class[_]]): MapType = {
+    if (params.contains("K") && params.contains("V")) {
+      MapType(clazz, params("K"), params("V"))
+    } else {
+      MapType(clazz, classOf[Any], classOf[Any])
     }
   }
 
