@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.collection
 
-import java.{ util => ju }
+import java.{util => ju}
 
 object Wrappers {
 

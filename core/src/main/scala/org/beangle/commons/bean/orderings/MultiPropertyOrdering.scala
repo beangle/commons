@@ -18,8 +18,9 @@
  */
 package org.beangle.commons.bean.orderings
 
-import scala.collection.mutable.ListBuffer
 import org.beangle.commons.lang.Strings
+
+import scala.collection.mutable.ListBuffer
 
 /**
  * 多个属性的比较

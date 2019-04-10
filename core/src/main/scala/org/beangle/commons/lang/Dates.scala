@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.lang
 
-import java.time.{ LocalDate, LocalDateTime, LocalTime }
+import java.time.{LocalDate, LocalDateTime, LocalTime}
 import java.util.Calendar
 
 /**

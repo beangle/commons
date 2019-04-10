@@ -18,9 +18,10 @@
  */
 package org.beangle.commons.net.http
 
-import java.io.{ BufferedReader, ByteArrayOutputStream, InputStreamReader }
-import java.net.{ URL, URLConnection, HttpURLConnection }
-import java.net.HttpURLConnection.{ HTTP_FORBIDDEN, HTTP_MOVED_PERM, HTTP_MOVED_TEMP, HTTP_NOT_FOUND, HTTP_OK, HTTP_UNAUTHORIZED }
+import java.io.{BufferedReader, ByteArrayOutputStream, InputStreamReader}
+import java.net.HttpURLConnection._
+import java.net.{HttpURLConnection, URL, URLConnection}
+
 import org.beangle.commons.io.IOs
 import org.beangle.commons.logging.Logging
 

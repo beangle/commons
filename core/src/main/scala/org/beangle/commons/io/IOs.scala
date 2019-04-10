@@ -18,13 +18,12 @@
  */
 package org.beangle.commons.io
 
-import java.io.{ BufferedReader, Closeable, IOException, InputStream, InputStreamReader, LineNumberReader, OutputStream, Reader, Writer }
+import java.io._
 import java.net.URL
 import java.nio.charset.Charset
-import java.{ util => ju }
+import java.{util => ju}
 
 import org.beangle.commons.lang.Charsets.UTF_8
-import org.beangle.commons.lang.time.Stopwatch
 
 object IOs {
 

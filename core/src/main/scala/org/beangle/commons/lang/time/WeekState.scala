@@ -19,7 +19,6 @@
 package org.beangle.commons.lang.time
 
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.annotation.beta
 import org.beangle.commons.lang.annotation.value
 
 object WeekState {

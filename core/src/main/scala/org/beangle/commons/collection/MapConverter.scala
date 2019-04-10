@@ -18,14 +18,14 @@
  */
 package org.beangle.commons.collection
 
-import java.time.{ LocalDate, LocalDateTime }
+import java.time.{LocalDate, LocalDateTime}
+
+import org.beangle.commons.conversion.impl.DefaultConversion
+import org.beangle.commons.lang.Strings.{isNotEmpty, split}
+import org.beangle.commons.lang.{Objects, Strings}
 
 import scala.collection.Map
 import scala.reflect.ClassTag
-
-import org.beangle.commons.conversion.impl.DefaultConversion
-import org.beangle.commons.lang.{ Objects, Strings }
-import org.beangle.commons.lang.Strings.{ isNotEmpty, split }
 
 /**
  * MapConverter class.

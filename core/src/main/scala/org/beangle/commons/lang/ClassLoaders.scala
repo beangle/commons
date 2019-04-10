@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.lang
 
-import java.io.{ IOException, InputStream }
+import java.io.InputStream
 import java.net.URL
 import java.util.Enumeration
 

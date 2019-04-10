@@ -18,13 +18,9 @@
  */
 package org.beangle.commons.codec.binary
 
-import org.beangle.commons.codec.{ Decoder, Encoder }
-
-import javax.crypto.{ Cipher, SecretKey, SecretKeyFactory }
-import javax.crypto.KeyGenerator
-import javax.crypto.spec.IvParameterSpec
-import javax.crypto.spec.SecretKeySpec
-import java.security.SecureRandom
+import javax.crypto.spec.{IvParameterSpec, SecretKeySpec}
+import javax.crypto.{Cipher, SecretKey}
+import org.beangle.commons.codec.{Decoder, Encoder}
 /**
  * Advanced Encryption Standard
  * @see https://en.wikipedia.org/wiki/Advanced_Encryption_Standard

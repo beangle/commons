@@ -18,7 +18,8 @@
  */
 package org.beangle.commons.logging
 
-import org.slf4j.{ Logger => JLogger, LoggerFactory }
+import org.slf4j.{LoggerFactory, Logger => JLogger}
+
 import scala.annotation.elidable
 import scala.annotation.elidable._
 

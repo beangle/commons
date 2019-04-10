@@ -31,7 +31,7 @@ object PropertyNameResolver {
   private val IndexedEnd = ']'
 }
 
-import PropertyNameResolver._
+import org.beangle.commons.bean.PropertyNameResolver._
 /**
  * Default Property Name Resolver .
  * <p>

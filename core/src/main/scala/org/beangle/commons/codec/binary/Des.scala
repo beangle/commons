@@ -18,10 +18,9 @@
  */
 package org.beangle.commons.codec.binary
 
-import org.beangle.commons.codec.{ Decoder, Encoder }
-
-import javax.crypto.{ Cipher, SecretKey, SecretKeyFactory }
-import javax.crypto.spec.{ DESKeySpec, IvParameterSpec }
+import javax.crypto.spec.{DESKeySpec, IvParameterSpec}
+import javax.crypto.{Cipher, SecretKey, SecretKeyFactory}
+import org.beangle.commons.codec.{Decoder, Encoder}
 /**
  * @see https://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#impl
  */

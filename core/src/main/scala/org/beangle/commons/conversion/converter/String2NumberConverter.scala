@@ -18,10 +18,10 @@
  */
 package org.beangle.commons.conversion.converter
 
-import org.beangle.commons.lang.Numbers
+import java.{lang => jl, math => jm}
+
 import org.beangle.commons.conversion.Converter
-import java.{ lang => jl }
-import java.{ math => jm }
+import org.beangle.commons.lang.Numbers
 /**
  * Convert string to number.
  *

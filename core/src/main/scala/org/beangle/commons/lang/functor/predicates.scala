@@ -18,8 +18,9 @@
  */
 package org.beangle.commons.lang.functor
 
-import org.beangle.commons.lang.Strings._
 import java.util.Collection
+
+import org.beangle.commons.lang.Strings._
 /**
  * 有效整型判断谓词
  *

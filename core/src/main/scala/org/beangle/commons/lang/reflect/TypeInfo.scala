@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.lang.reflect
 
-import java.lang.reflect.{ Constructor, Method, ParameterizedType }
+import java.lang.reflect.{Constructor, Method, ParameterizedType}
 
 import scala.language.existentials
 

@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.lang
 
-import java.net.{ InetAddress, NetworkInterface, UnknownHostException }
+import java.net.{InetAddress, NetworkInterface, UnknownHostException}
 
 import scala.collection.mutable
 /**

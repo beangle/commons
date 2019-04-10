@@ -20,10 +20,11 @@ package org.beangle.commons.lang.reflect
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.{Method, ParameterizedType, Type, TypeVariable}
+
+import org.beangle.commons.lang.{ClassLoaders, Objects, Throwables}
+
 import scala.language.existentials
-import org.beangle.commons.lang.{Objects, Throwables}
 import scala.reflect.ClassTag
-import org.beangle.commons.lang.ClassLoaders
 
 object Reflections {
 

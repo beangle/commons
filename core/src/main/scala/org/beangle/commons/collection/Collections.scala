@@ -18,12 +18,12 @@
  */
 package org.beangle.commons.collection
 
-import java.{ util => ju }
+import java.{util => ju}
+
+import org.beangle.commons.bean.{Properties => BeanProperties}
+import org.beangle.commons.lang.functor.Predicate
 
 import scala.collection.mutable
-
-import org.beangle.commons.bean.{ Properties => BeanProperties }
-import org.beangle.commons.lang.functor.Predicate
 
 object Collections {
 

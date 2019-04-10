@@ -18,11 +18,10 @@
  */
 package org.beangle.commons.io
 
-import java.net.URL
-import java.net.URLConnection
-import org.beangle.commons.lang.Strings
-import java.net.URI
+import java.net.{URI, URL, URLConnection}
 import java.util.jar.JarFile
+
+import org.beangle.commons.lang.Strings
 
 object Jars {
 

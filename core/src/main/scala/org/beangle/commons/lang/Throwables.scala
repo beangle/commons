@@ -18,8 +18,7 @@
  */
 package org.beangle.commons.lang
 
-import java.io.PrintWriter
-import java.io.StringWriter
+import java.io.{PrintWriter, StringWriter}
 /**
  * Static utility methods pertaining to instances of {@link Throwable}.
  *

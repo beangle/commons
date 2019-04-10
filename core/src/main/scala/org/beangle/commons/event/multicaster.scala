@@ -19,8 +19,6 @@
 package org.beangle.commons.event
 
 import scala.collection.mutable
-import org.beangle.commons.lang.annotation.description
-import org.beangle.commons.bean.Initializing
 
 /**
  * EventListener interface.

@@ -19,10 +19,10 @@
 package org.beangle.commons.config.property
 
 import org.beangle.commons.bean.Initializing
-import org.beangle.commons.lang.Numbers
-import org.beangle.commons.lang.Strings
-import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.conversion.converter.String2BooleanConverter
+import org.beangle.commons.conversion.impl.DefaultConversion
+import org.beangle.commons.lang.{Numbers, Strings}
+
 import scala.collection.mutable
 
 /**

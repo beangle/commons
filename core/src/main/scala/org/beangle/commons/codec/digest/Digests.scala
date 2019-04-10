@@ -18,8 +18,9 @@
  */
 package org.beangle.commons.codec.digest
 
-import org.beangle.commons.codec.binary.Hex
 import java.security.MessageDigest
+
+import org.beangle.commons.codec.binary.Hex
 import org.beangle.commons.lang.Charsets._
 /**
  * Digest tools

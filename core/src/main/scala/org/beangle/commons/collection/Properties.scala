@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.collection
 
-import org.beangle.commons.bean.{ Properties => BeanProperties }
+import org.beangle.commons.bean.{Properties => BeanProperties}
 
 class Properties extends collection.mutable.HashMap[String, Any] {
 

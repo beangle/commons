@@ -21,7 +21,7 @@ package org.beangle.commons.io
 import java.io._
 import java.nio.channels.FileChannel
 import java.nio.charset.Charset
-import org.beangle.commons.lang.Assert
+
 import org.beangle.commons.lang.Charsets.UTF_8
 
 object Files {

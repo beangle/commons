@@ -18,8 +18,6 @@
  */
 package org.beangle.commons.lang
 
-import java.util.Iterator
-
 /**
  * Assertion tool class
  *

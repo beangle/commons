@@ -18,8 +18,8 @@
  */
 package org.beangle.commons.conversion.converter
 
-import java.math.BigDecimal
-import java.math.BigInteger
+import java.math.{BigDecimal, BigInteger}
+
 import org.beangle.commons.conversion.Converter
 import org.beangle.commons.conversion.impl.ConverterFactory
 
@@ -61,7 +61,7 @@ object Number2NumberConverter {
   }
 }
 
-import Number2NumberConverter._
+import org.beangle.commons.conversion.converter.Number2NumberConverter._
 /**
  * Number Converter Factory
  *

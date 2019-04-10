@@ -18,11 +18,11 @@
  */
 package org.beangle.commons.lang
 
-import java.lang.Character.{ isLowerCase => isLower, isUpperCase => isUpper }
-import java.lang.Character.toLowerCase
+import java.lang.Character.{toLowerCase, isLowerCase => isLower, isUpperCase => isUpper}
+
 import org.beangle.commons.collection.Collections
+
 import scala.collection.mutable
-import scala.reflect.ClassTag
 /**
  * Operations on String that are {@code null} safe.
  *

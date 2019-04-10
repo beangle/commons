@@ -55,8 +55,6 @@ object Page {
     def iterator = Nil.iterator
   }
 }
-
-import Page._
 /**
  * 分页对象
  *

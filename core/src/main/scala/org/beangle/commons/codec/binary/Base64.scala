@@ -18,10 +18,7 @@
  */
 package org.beangle.commons.codec.binary
 
-import java.io.UnsupportedEncodingException
-import org.beangle.commons.codec.net.BCoder
-import org.beangle.commons.codec.Encoder
-import org.beangle.commons.codec.Decoder
+import org.beangle.commons.codec.{Decoder, Encoder}
 
 object Base64 {
   def encode(data: Array[Byte]): String = {

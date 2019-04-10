@@ -20,12 +20,11 @@ package org.beangle.commons.activation
 
 import java.net.URL
 
+import javax.activation.MimeType
 import org.beangle.commons.config.Resources
 import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.ClassLoaders.{ getResource, getResources }
+import org.beangle.commons.lang.ClassLoaders.{getResource, getResources}
 import org.beangle.commons.lang.Strings
-
-import javax.activation.MimeType
 
 /**
  * @see https://www.iana.org/assignments/media-types/media-types.xhtml

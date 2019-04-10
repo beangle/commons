@@ -19,6 +19,7 @@
 package org.beangle.commons.io
 
 import java.io.OutputStream
+
 import javax.activation.MimeType
 
 trait Serializer {

@@ -18,10 +18,11 @@
  */
 package org.beangle.commons.jndi
 
-import java.{ util => ju }
-import org.beangle.commons.bean.Factory
-import javax.naming.{ InitialContext, NameNotFoundException }
+import java.{util => ju}
+
+import javax.naming.{InitialContext, NameNotFoundException}
 import javax.sql.DataSource
+import org.beangle.commons.bean.Factory
 import org.beangle.commons.lang.annotation.description
 
 object JndiObjectFactory {

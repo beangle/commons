@@ -19,11 +19,11 @@
 package org.beangle.commons.codec.net
 
 import java.nio.charset.Charset
+
+import org.beangle.commons.codec.{Decoder, Encoder}
 import org.beangle.commons.codec.binary.Base64
+import org.beangle.commons.codec.net.BCoder._
 import org.beangle.commons.lang.Charsets
-import BCoder._
-import org.beangle.commons.codec.Encoder
-import org.beangle.commons.codec.Decoder
 
 object BCoder {
 

@@ -18,12 +18,12 @@
  */
 package org.beangle.commons.bean
 
-import java.lang.reflect.{ Array => Jarray }
-import org.beangle.commons.lang.{ Strings, Throwables }
-import org.beangle.commons.lang.reflect.{ BeanInfo, MethodInfo, BeanInfos }
-import org.beangle.commons.lang.reflect.{ MapType, TypeInfo, CollectionType }
-import org.beangle.commons.conversion.impl.DefaultConversion
+import java.lang.reflect.{Array => Jarray}
+
 import org.beangle.commons.conversion.Conversion
+import org.beangle.commons.conversion.impl.DefaultConversion
+import org.beangle.commons.lang.Strings
+import org.beangle.commons.lang.reflect.{BeanInfos, MapType, TypeInfo}
 
 object Properties {
   private val Default = new Properties(BeanInfos.Default, DefaultConversion.Instance)

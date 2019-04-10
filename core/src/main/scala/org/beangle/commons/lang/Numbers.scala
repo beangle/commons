@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.lang
 
-import java.{ lang => jl, math => jm }
+import java.{lang => jl, math => jm}
 
 import org.beangle.commons.lang.Strings.isEmpty
 

@@ -29,7 +29,7 @@ object PagedSeq {
     }
   }
 }
-import PagedSeq._
+import org.beangle.commons.collection.page.PagedSeq._
 /**
  * <p>
  * PagedSeq class.

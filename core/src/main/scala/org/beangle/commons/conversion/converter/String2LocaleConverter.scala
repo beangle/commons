@@ -19,8 +19,9 @@
 package org.beangle.commons.conversion.converter
 
 import java.util.Locale
-import org.beangle.commons.lang.Strings
+
 import org.beangle.commons.conversion.Converter
+import org.beangle.commons.lang.Strings
 
 /**
  * Convert String to Locale.

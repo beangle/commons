@@ -18,11 +18,10 @@
  */
 package org.beangle.commons.io
 
-import java.io.{ ByteArrayInputStream, ByteArrayOutputStream, Externalizable, InputStream, OutputStream }
-
-import org.beangle.commons.activation.MimeTypes
+import java.io._
 
 import javax.activation.MimeType
+import org.beangle.commons.activation.MimeTypes
 
 /**
  * @author chaostone

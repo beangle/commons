@@ -19,6 +19,7 @@
 package org.beangle.commons.collection
 
 import org.beangle.commons.lang.Strings
+
 import scala.collection.mutable.ListBuffer
 /**
  * 排序

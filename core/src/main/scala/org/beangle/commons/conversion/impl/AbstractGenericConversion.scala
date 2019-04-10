@@ -18,13 +18,13 @@
  */
 package org.beangle.commons.conversion.impl
 
-import java.lang.reflect.{ Array, Modifier }
+import java.lang.reflect.{Array, Modifier}
 
-import scala.collection.{ concurrent, mutable }
+import org.beangle.commons.conversion.{Conversion, Converter, ConverterRegistry}
+import org.beangle.commons.lang.{Objects, Primitives}
+
+import scala.collection.{concurrent, mutable}
 import scala.language.existentials
-
-import org.beangle.commons.conversion.{ Conversion, Converter, ConverterRegistry }
-import org.beangle.commons.lang.{ Objects, Primitives }
 /**
  * Generic Conversion Super class
  * It provider converter registry and converter search machanism.

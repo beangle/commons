@@ -20,16 +20,16 @@ package org.beangle.commons.lang.reflect
 
 import java.beans.Transient
 import java.lang.Character.isUpperCase
-import java.lang.reflect.{ Field, Method, Modifier, ParameterizedType, TypeVariable }
+import java.lang.reflect.{Field, Method, Modifier, ParameterizedType, TypeVariable}
+
+import org.beangle.commons.collection.{Collections, IdentityCache}
+import org.beangle.commons.lang.Strings.{substringBefore, uncapitalize}
+import org.beangle.commons.lang.reflect.Reflections.deduceParamTypes
+import org.beangle.commons.lang.{ClassLoaders, Strings}
 
 import scala.collection.mutable
 import scala.language.existentials
-import scala.reflect.runtime.{ universe => ru }
-
-import org.beangle.commons.collection.{ Collections, IdentityCache }
-import org.beangle.commons.lang.{ ClassLoaders, Strings }
-import org.beangle.commons.lang.Strings.{ substringBefore, uncapitalize }
-import org.beangle.commons.lang.reflect.Reflections.deduceParamTypes
+import scala.reflect.runtime.{universe => ru}
 
 object BeanInfos {
   /**

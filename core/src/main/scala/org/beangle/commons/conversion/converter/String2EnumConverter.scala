@@ -19,8 +19,7 @@
 package org.beangle.commons.conversion.converter
 
 import org.beangle.commons.conversion.Converter
-import org.beangle.commons.lang.Numbers
-import org.beangle.commons.lang.ClassLoaders
+import org.beangle.commons.lang.{ClassLoaders, Numbers}
 
 /**
  * Convert String to Enumeration.

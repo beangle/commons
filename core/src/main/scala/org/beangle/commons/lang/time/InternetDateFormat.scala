@@ -18,15 +18,8 @@
  */
 package org.beangle.commons.lang.time
 
-import java.text.DateFormat
 import java.text.DecimalFormat
-import java.text.FieldPosition
-import java.text.ParsePosition
-import java.util.Calendar
-import java.util.Date
-import java.util.GregorianCalendar
-import java.util.SimpleTimeZone
-import java.util.TimeZone
+import java.util._
 import java.util.regex.Pattern
 /**
  * This object handles Internet date/time strings in accordance with RFC 3339. It

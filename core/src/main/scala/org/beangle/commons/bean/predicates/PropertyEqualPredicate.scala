@@ -19,8 +19,6 @@
 package org.beangle.commons.bean.predicates
 
 import org.beangle.commons.bean.Properties
-import org.beangle.commons.lang.Assert
-import org.beangle.commons.lang.Objects
 import org.beangle.commons.lang.functor.Predicate
 
 /**
