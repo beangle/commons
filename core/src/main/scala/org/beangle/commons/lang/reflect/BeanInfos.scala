@@ -95,9 +95,16 @@ class BeanInfos {
    * Load BeanManifest using reflections
    */
   private def load(clazz: Class[_], tpe: ru.Type = null): BeanInfo = {
-    if (clazz.getName.startsWith("java.") || clazz.getName.startsWith("scala.")) {
+    val className = clazz.getName
+    if (className.startsWith("java.") || className.startsWith("scala.")) {
       throw new RuntimeException("Cannot reflect class:" + clazz.getName)
     }
+    val originBeanInfo: Option[BeanInfo] =
+      if (className.contains("$$") && className.startsWith(clazz.getSuperclass.getName)) {
+        Option(cache.get(clazz.getSuperclass))
+      } else {
+        None
+      }
     val getters = new mutable.HashMap[String, Getter]
     val setters = new mutable.HashMap[String, Setter]
     val fields = new mutable.HashMap[String, Field]
@@ -112,7 +119,7 @@ class BeanInfos {
         findAccessor(method) match {
           case Some(Tuple2(readable, name)) =>
             if (readable) {
-              val puttable = getters.get(name).map(x=>isJavaBeanGetter(x.method)).getOrElse(true)
+              val puttable = getters.get(name).map(x => isJavaBeanGetter(x.method)).getOrElse(true)
               if (puttable) {
                 getters.put(name, Getter(method, extract(method.getGenericReturnType, paramTypes)))
               }
@@ -142,6 +149,8 @@ class BeanInfos {
       val typeinfo =
         if (null != tpe) {
           typeof(clazz, tpe, p)
+        } else if (originBeanInfo.isDefined && originBeanInfo.get.properties.contains(p)) {
+          originBeanInfo.get.properties(p).typeinfo
         } else {
           TypeInfo.of(clazz, if (None == getter) setter.get.method.getGenericParameterTypes()(0) else getter.get.method.getGenericReturnType)
         }
@@ -213,8 +222,8 @@ class BeanInfos {
   }
 
   private def navIterface(clazz: Class[_], interfaceSets: mutable.HashSet[Class[_]],
-    getters: mutable.HashMap[String, Getter], setters: mutable.HashMap[String, Setter],
-    paramTypes: collection.Map[String, Class[_]]): Unit = {
+                          getters: mutable.HashMap[String, Getter], setters: mutable.HashMap[String, Setter],
+                          paramTypes: collection.Map[String, Class[_]]): Unit = {
     if (null == clazz || classOf[AnyRef] == clazz) return ;
     val interfaceTypes = clazz.getGenericInterfaces
     val interfaces = clazz.getInterfaces
