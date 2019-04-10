@@ -71,7 +71,7 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
         else getSimpleProperty(result, next)
 
       if (null != result && result.isInstanceOf[Option[_]]) {
-        result = result.asInstanceOf[Option[_]].getOrElse(null)
+        result = result.asInstanceOf[Option[_]].orNull
       }
       if (null == result) return null.asInstanceOf[T]
       name = resolver.remove(name)
@@ -105,7 +105,7 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
     while (resolver.hasNested(name)) {
       result = getDirectProperty(result, resolver.next(name))
       if (null != result && result.isInstanceOf[Option[_]]) {
-        result = result.asInstanceOf[Option[_]].getOrElse(null)
+        result = result.asInstanceOf[Option[_]].orNull
       }
       if (result == null) throw new RuntimeException("Null property value for '" + name + "' on bean class '" + bean.getClass + "'")
       name = resolver.remove(name)
@@ -120,7 +120,7 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
     } else {
       return copySimpleProperty(result, name, value, conversion)
     }
-    return value
+    value
   }
 
   private def getDirectProperty(result: Any, name: String): Any = {
@@ -168,12 +168,11 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
   private def copySimpleProperty(bean: Any, name: String, value: Any, conversion: Conversion): Any = {
     val manifest = beanInfos.get(bean)
     manifest.getSetter(name) match {
-      case Some(method) => {
+      case Some(method) =>
         val p = manifest.properties(name)
         val converted = convert(value, p.clazz, p.typeinfo, conversion)
         method.invoke(bean, converted.asInstanceOf[Object])
         converted
-      }
       case _ => null
     }
   }
@@ -195,12 +194,12 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
 
     var converted = value
     if (rs.getClass.isArray) {
-      converted = convert(value, rs.getClass().getComponentType(), null, conversion)
+      converted = convert(value, rs.getClass.getComponentType, null, conversion)
       Jarray.set(rs, index, value)
     } else {
       setIndexed(rs, index, value)
     }
-    return converted
+    converted
   }
 
   private def getMappedKey(name: String, bean: Any): String = {
@@ -209,11 +208,11 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
       key = resolver.getKey(name)
     } catch {
       case e: IllegalArgumentException =>
-        throw new IllegalArgumentException("Invalid mapped property '" + name + "' on bean class '" + bean.getClass() + "'")
+        throw new IllegalArgumentException("Invalid mapped property '" + name + "' on bean class '" + bean.getClass + "'")
     }
     if (key == null) throw new IllegalArgumentException("Invalid mapped property '" + name
-      + "' on bean class '" + bean.getClass() + "'")
-    key;
+      + "' on bean class '" + bean.getClass + "'")
+    key
   }
 
   private def convert(value: Any, clazz: Class[_], typeInfo: TypeInfo, conversion: Conversion): Any = {
@@ -253,8 +252,9 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
     var pname = propertyName
     if (resolver.isMapped(propertyName)) {
       val name = resolver.getProperty(propertyName)
-      if (name == null || name.length() == 0)
+      if (name == null || name.length() == 0) {
         pname = resolver.getKey(propertyName)
+      }
     }
     if (resolver.isIndexed(pname) || resolver.isMapped(pname)) throw new IllegalArgumentException(
       "Indexed or mapped properties are not supported on" + " objects of type Map: " + pname)
@@ -266,7 +266,7 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
       case null                 => null
       case s: collection.Seq[_] => s(index)
       case x: java.util.List[_] => x.get(index)
-      case _                    => throw new RuntimeException("Don't support getIndexed on " + bean.getClass())
+      case _                    => throw new RuntimeException("Don't support getIndexed on " + bean.getClass)
     }
   }
 
@@ -275,7 +275,7 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
       case null                         =>
       case s: collection.mutable.Seq[_] => s.asInstanceOf[collection.mutable.Seq[Any]].update(index, value)
       case x: java.util.List[_]         => x.asInstanceOf[java.util.List[Any]].set(index, value)
-      case _                            => throw new RuntimeException("Don't support setIndexed on " + bean.getClass())
+      case _                            => throw new RuntimeException("Don't support setIndexed on " + bean.getClass)
     }
   }
 
@@ -284,7 +284,7 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
       case null                            =>
       case s: collection.mutable.Map[_, _] => s.asInstanceOf[collection.mutable.Map[Any, Any]].put(key, value)
       case x: java.util.Map[_, _]          => x.asInstanceOf[java.util.Map[Any, Any]].put(key, value)
-      case _                               => throw new RuntimeException("Don't support setMaped on " + bean.getClass())
+      case _                               => throw new RuntimeException("Don't support setMaped on " + bean.getClass)
     }
   }
 
@@ -293,7 +293,7 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
       case null                            => null
       case s: collection.mutable.Map[_, _] => s.asInstanceOf[collection.mutable.Map[Any, _]].get(key).orNull
       case x: java.util.Map[_, _]          => x.get(key)
-      case _                               => throw new RuntimeException("Don't support getMapped on " + bean.getClass())
+      case _                               => throw new RuntimeException("Don't support getMapped on " + bean.getClass)
     }
   }
 
