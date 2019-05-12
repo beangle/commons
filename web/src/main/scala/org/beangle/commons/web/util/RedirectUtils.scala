@@ -18,17 +18,15 @@
  */
 package org.beangle.commons.web.util
 
-import java.io.IOException
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.beangle.commons.lang.Strings
 
 object RedirectUtils {
 
-  def sendRedirect(request: HttpServletRequest, response: HttpServletResponse, url: String) {
+  def sendRedirect(request: HttpServletRequest, response: HttpServletResponse, url: String): Unit = {
     if (!url.startsWith("http")) {
       val cxtPath = request.getContextPath
-      val redirectUrl = response.encodeRedirectURL((if (cxtPath == "/") "" else (cxtPath)) + url)
+      val redirectUrl = response.encodeRedirectURL((if (cxtPath == "/") "" else cxtPath) + url)
       response.sendRedirect(redirectUrl)
     } else {
       response.sendRedirect(url)

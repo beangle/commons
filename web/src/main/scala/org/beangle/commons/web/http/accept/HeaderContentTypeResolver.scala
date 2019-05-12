@@ -18,14 +18,13 @@
  */
 package org.beangle.commons.web.http.accept
 
-import javax.activation.MimeType
 import javax.servlet.http.HttpServletRequest
-import org.beangle.commons.activation.MimeTypes
+import org.beangle.commons.activation.{MediaType, MediaTypes}
 
 class HeaderContentTypeResolver extends ContentTypeResolver {
 
-  def resolve(request: HttpServletRequest): Seq[MimeType] = {
-    MimeTypes.parse(request.getHeader("Accept"))
+  def resolve(request: HttpServletRequest): Seq[MediaType] = {
+    MediaTypes.parse(request.getHeader("Accept"))
   }
 
 }

@@ -20,23 +20,22 @@ package org.beangle.commons.activation
 
 import java.net.URL
 
-import javax.activation.MimeType
 import org.beangle.commons.config.Resources
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.ClassLoaders.{getResource, getResources}
 import org.beangle.commons.lang.Strings
 
 /**
- * @see https://www.iana.org/assignments/media-types/media-types.xhtml
- * @see http://www.mime-type.net/
- * @see https://www.sitepoint.com/mime-types-complete-list/
- */
-object MimeTypes {
+  * @see https://www.iana.org/assignments/media-types/media-types.xhtml
+  * @see http://www.mime-type.net/
+  * @see https://www.sitepoint.com/mime-types-complete-list/
+  */
+object MediaTypes {
 
-  val All = new MimeType("*/*")
+  val All = MediaType("*/*")
 
-  private val types: Map[String, MimeType] = {
-    buildMimeTypes(new Resources(getResource("org/beangle/commons/activation/mime.types"),
+  private val types: Map[String, MediaType] = {
+    buildTypes(new Resources(getResource("org/beangle/commons/activation/mime.types"),
       getResources("META-INF/mime.types"), getResource("mime.types")))
   }
 
@@ -72,25 +71,25 @@ object MimeTypes {
 
   val TextCsv = types("text/csv")
 
-  def buildMimeTypes(resources: Resources): Map[String, MimeType] = {
-    val buf = new collection.mutable.HashMap[String, MimeType]
+  def buildTypes(resources: Resources): Map[String, MediaType] = {
+    val buf = new collection.mutable.HashMap[String, MediaType]
     if (null != resources) {
       resources.paths foreach { p =>
-        buf ++= readMimeTypes(p)
+        buf ++= readMediaTypes(p)
       }
     }
     buf.put("*/*", All)
     buf.toMap
   }
 
-  private def readMimeTypes(url: URL): Map[String, MimeType] = {
+  private def readMediaTypes(url: URL): Map[String, MediaType] = {
     if (null == url) return Map.empty
-    val buf = new collection.mutable.HashMap[String, MimeType]
+    val buf = new collection.mutable.HashMap[String, MediaType]
     IOs.readLines(url.openStream()) foreach { line =>
       if (Strings.isNotBlank(line) && !line.startsWith("#")) {
         val mimetypeStr = Strings.substringBetween(line, "=", "exts").trim
         assert(!buf.contains(mimetypeStr), "duplicate mime type:" + mimetypeStr)
-        val mimetype = new MimeType(mimetypeStr)
+        val mimetype = MediaType(mimetypeStr)
         buf.put(mimetypeStr, mimetype)
 
         val exts = Strings.substringAfter(line, "exts").trim.substring(1)
@@ -107,26 +106,50 @@ object MimeTypes {
     buf.toMap
   }
 
-  def getMimeType(ext: String, defaultValue: MimeType): MimeType = {
+  def get(ext: String, defaultValue: MediaType): MediaType = {
     types.get(ext).getOrElse(defaultValue)
   }
 
-  def getMimeType(ext: String): Option[MimeType] = {
+  def get(ext: String): Option[MediaType] = {
     types.get(ext)
   }
 
-  def parse(str: String): Seq[MimeType] = {
+  def parse(str: String): Seq[MediaType] = {
     if (null == str) return Seq.empty
 
-    val mimeTypes = new collection.mutable.ListBuffer[MimeType]
+    val mimeTypes = new collection.mutable.ListBuffer[MediaType]
     Strings.split(str, ",") foreach { token =>
       val commaIndex = token.indexOf(";")
       val mimetype = if (commaIndex > -1) token.substring(0, commaIndex).trim else token.trim
       types.get(mimetype) match {
         case Some(mt) => mimeTypes += mt
-        case None     => new MimeType(mimetype)
+        case None => MediaType(mimetype)
       }
     }
     mimeTypes.toList
+  }
+}
+
+object MediaType {
+  def apply(token: String): MediaType = {
+      val commaIndex = token.indexOf(";")
+      val mimetype = if (commaIndex > -1) token.substring(0, commaIndex).trim else token.trim
+      val slashIndex = token.indexOf("/")
+      if (-1 == slashIndex) {
+        new MediaType(mimetype)
+      }
+      else {
+        new MediaType(mimetype.substring(0, slashIndex), mimetype.substring(slashIndex + 1))
+      }
+  }
+}
+
+class MediaType(val primaryType: String, val subType: String) {
+  def this(pt: String) {
+    this(pt, "*")
+  }
+
+  override def toString: String = {
+    if (subType == "*") primaryType else primaryType + "/" + subType
   }
 }

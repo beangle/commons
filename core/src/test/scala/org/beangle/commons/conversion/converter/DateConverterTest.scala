@@ -18,23 +18,18 @@
  */
 package org.beangle.commons.conversion.converter
 
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
+import java.time.{Instant, LocalDate, LocalDateTime, LocalTime}
+import java.{util => ju}
 
-import java.{ util => ju }
-import org.beangle.commons.conversion.Converter
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.Instant
-import java.time.ZoneId
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class DateConverterTest extends FunSpec with Matchers {
+class DateConverterTest extends AnyFunSpec with Matchers {
 
-  private def converToDate(dateStr: String, year: Int, month: Int, day: Int) {
+  private def converToDate(dateStr: String, year: Int, month: Int, day: Int): Unit = {
     val c = new String2DateConverter().getConverter(classOf[ju.Date]).orNull
     val date = c.apply(dateStr)
     val calendar = new ju.GregorianCalendar()
@@ -44,7 +39,7 @@ class DateConverterTest extends FunSpec with Matchers {
     calendar.get(ju.Calendar.DAY_OF_MONTH) should be(day)
   }
 
-  private def converToDateX(dateStr: String, year: Int, month: Int, day: Int) {
+  private def converToDateX(dateStr: String, year: Int, month: Int, day: Int): Unit = {
     val c = new String2TemporalConverter().getConverter(classOf[java.time.LocalDate]).orNull
     val date = c.apply(dateStr)
     date.getYear should be(year)

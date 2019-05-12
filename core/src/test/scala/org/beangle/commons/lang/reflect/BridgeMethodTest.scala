@@ -18,15 +18,14 @@
  */
 package org.beangle.commons.lang.reflect
 
-import java.lang.reflect.Method
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.beangle.commons.lang.testbean.Dog
+import org.junit.runner.RunWith
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class BridgeMethodTest extends FunSpec with Matchers {
+class BridgeMethodTest extends AnyFunSpec with Matchers {
 
   describe("Reflection class bridge method") {
     it("Find bridge methods") {

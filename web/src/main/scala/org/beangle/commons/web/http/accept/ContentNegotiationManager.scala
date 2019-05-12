@@ -19,16 +19,16 @@
 package org.beangle.commons.web.http.accept
 
 import javax.servlet.http.HttpServletRequest
-import javax.activation.MimeType
+import org.beangle.commons.activation.MediaType
 
 class ContentNegotiationManager(val resolvers: Seq[ContentTypeResolver]) {
 
-  def resolve(request: HttpServletRequest): Seq[MimeType] = {
+  def resolve(request: HttpServletRequest): Seq[MediaType] = {
     val iter = resolvers.iterator
     while (iter.hasNext) {
       val resolver = iter.next()
       val mimeTypes = resolver.resolve(request)
-      if (!mimeTypes.isEmpty) return mimeTypes
+      if (mimeTypes.nonEmpty) return mimeTypes
     }
     Seq.empty
   }

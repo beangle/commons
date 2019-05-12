@@ -30,11 +30,12 @@ object Reflections {
 
   def newInstance[T](clazz: Class[T]): T = {
     try {
-      return clazz.newInstance()
+      clazz.getDeclaredConstructor().newInstance()
     } catch {
-      case e: Exception => Throwables.propagate(e)
+      case e: Exception =>
+        Throwables.propagate(e)
+        Objects.default(clazz)
     }
-    Objects.default(clazz)
   }
 
   def getInstance[T: ClassTag](name: String)(implicit manifest: Manifest[T]): T = {
@@ -46,7 +47,7 @@ object Reflections {
       }
     }
     if (moduleClass.getConstructors.length > 0) {
-      moduleClass.newInstance().asInstanceOf[T]
+      moduleClass.getDeclaredConstructor().newInstance().asInstanceOf[T]
     } else {
       moduleClass.getDeclaredField("MODULE$").get(null).asInstanceOf[T]
     }

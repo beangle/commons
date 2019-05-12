@@ -17,13 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.text.seq
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.Matchers
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class HanZiSeqStyleTest extends FunSpec with Matchers {
+class HanZiSeqStyleTest extends AnyFunSpec with Matchers {
 
   describe("HanZiSeqStyle") {
     it("Build HanZi Sequence") {

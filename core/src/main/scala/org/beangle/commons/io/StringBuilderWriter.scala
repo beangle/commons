@@ -21,82 +21,79 @@ package org.beangle.commons.io
 import java.io.Writer
 
 /**
- * {@link Writer} implementation that outputs to a {@link StringBuilder}.
- * <p>
- * <strong>NOTE:</strong> This implementation, as an alternative to
- * <code>java.io.StringWriter</code>, provides an <i>un-synchronized</i> (i.e. for use in a single
- * thread) implementation for better performance. For safe usage with multiple {@link Thread}s then
- * <code>java.io.StringWriter</code> should be used.
- *
- * @author chaostone
- * @since 3.1
- */
+  * {@link Writer} implementation that outputs to a {@link StringBuilder}.
+  * <p>
+  * <strong>NOTE:</strong> This implementation, as an alternative to
+  * <code>java.io.StringWriter</code>, provides an <i>un-synchronized</i> (i.e. for use in a single
+  * thread) implementation for better performance. For safe usage with multiple {@link Thread}s then
+  * <code>java.io.StringWriter</code> should be used.
+  * @author chaostone
+  * @since 3.1
+  */
 @SerialVersionUID(1L)
 class StringBuilderWriter(val builder: StringBuilder) extends Writer with Serializable {
 
   /**
-   * Construct a new {@link StringBuilder} instance with the specified capacity.
-   *
-   * @param capacity The initial capacity of the underlying {@link StringBuilder}
-   */
+    * Construct a new {@link StringBuilder} instance with the specified capacity.
+    * @param capacity The initial capacity of the underlying { @link StringBuilder}
+    */
   def this(capacity: Int = 16) {
     this(new StringBuilder(capacity))
   }
 
   /**
-   * Append a single character to this Writer.
-   */
+    * Append a single character to this Writer.
+    */
   override def append(value: Char): Writer = {
     builder.append(value)
     this
   }
 
   /**
-   * Append a character sequence to this Writer.
-   */
+    * Append a character sequence to this Writer.
+    */
   override def append(value: CharSequence): Writer = {
     builder.append(value)
     this
   }
 
   /**
-   * Append a portion of a character sequence to the {@link StringBuilder}.
-   */
+    * Append a portion of a character sequence to the {@link StringBuilder}.
+    */
   override def append(value: CharSequence, start: Int, end: Int): Writer = {
     builder.append(value, start, end)
     this
   }
 
   /**
-   * Closing this writer has no effect.
-   */
-  override def close() {
+    * Closing this writer has no effect.
+    */
+  override def close(): Unit = {
   }
 
   /**
-   * Flushing this writer has no effect.
-   */
-  override def flush() {
+    * Flushing this writer has no effect.
+    */
+  override def flush(): Unit = {
   }
 
   /**
-   * Write a String to the {@link StringBuilder}.
-   *
-   * @param value The value to write
-   */
-  override def write(value: String) {
+    * Write a String to the {@link StringBuilder}.
+    * @param value The value to write
+    */
+  override def write(value: String): Unit = {
     if (value != null) builder.append(value)
   }
 
   /**
-   * Write a portion of a character array to the {@link StringBuilder}.
-   */
-  override def write(value: Array[Char], offset: Int, length: Int) {
+    * Write a portion of a character array to the {@link StringBuilder}.
+    */
+  override def write(value: Array[Char], offset: Int, length: Int): Unit = {
     if (value != null) builder.appendAll(value, offset, length)
   }
 
   /**
-   * Returns {@link StringBuilder#toString()}.
-   */
-  override def toString(): String = builder.toString
+    * Returns {@link StringBuilder#toString()}.
+    */
+  override def toString: String = builder.toString
 }

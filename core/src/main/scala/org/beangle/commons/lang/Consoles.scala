@@ -34,7 +34,7 @@ object Consoles {
     anwser
   }
 
-  def shell(prompt: => String, exits: Set[String], p: String => Unit) {
+  def shell(prompt: => String, exits: Set[String], p: String => Unit): Unit = {
     val scanner = new Scanner(System.in)
     var content: String = null
     var exit = false

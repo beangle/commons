@@ -18,19 +18,16 @@
  */
 package org.beangle.commons.web.servlet
 
-import org.beangle.commons.lang.Throwables
-import javax.servlet.ServletException
-import javax.servlet.http.{ HttpServlet, HttpServletRequest, HttpServletResponse }
-import javax.servlet.ServletRequest
-import javax.servlet.ServletResponse
+import javax.servlet.{ServletRequest, ServletResponse}
+import javax.servlet.http.HttpServlet
 
 class DelegatingServletProxy(delegate: HttpServlet) extends HttpServlet {
 
-  protected override def service(req: ServletRequest, resp: ServletResponse) {
-    delegate.service(req, resp);
+  protected override def service(req: ServletRequest, resp: ServletResponse): Unit = {
+    delegate.service(req, resp)
   }
 
-  override def destroy() {
+  override def destroy(): Unit = {
     if (delegate != null) delegate.destroy()
   }
 

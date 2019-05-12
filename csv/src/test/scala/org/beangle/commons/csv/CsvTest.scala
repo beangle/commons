@@ -18,13 +18,13 @@
  */
 package org.beangle.commons.csv
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.Matchers
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class CsvTest extends FunSpec with Matchers {
+class CsvTest extends AnyFunSpec with Matchers {
 
   describe("CsvFormat") {
     it("Format") {

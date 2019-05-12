@@ -114,10 +114,6 @@ object SystemInfo {
 
     val home = properties("java.home")
 
-    val extDirs = properties("java.ext.dirs")
-
-    val endorsedDirs = properties("java.endorsed.dirs")
-
     val classpath = properties("java.class.path")
 
     val classVersion = properties("java.class.version")

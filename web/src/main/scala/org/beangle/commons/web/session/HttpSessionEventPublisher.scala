@@ -37,7 +37,7 @@ class HttpSessionEventPublisher(em: EventMulticaster) extends HttpSessionListene
    *
    * @param event HttpSessionEvent passed in by the container
    */
-  override def sessionCreated(event: HttpSessionEvent) {
+  override def sessionCreated(event: HttpSessionEvent): Unit = {
     em.multicast(new HttpSessionCreationEvent(event.getSession))
   }
 
@@ -47,7 +47,7 @@ class HttpSessionEventPublisher(em: EventMulticaster) extends HttpSessionListene
    *
    * @param event The HttpSessionEvent pass in by the container
    */
-  override def sessionDestroyed(event: HttpSessionEvent) {
+  override def sessionDestroyed(event: HttpSessionEvent): Unit = {
     em.multicast(new HttpSessionDestroyedEvent(event.getSession))
   }
 }

@@ -51,7 +51,7 @@ object Assert {
    * @throws IllegalArgumentException if expression is {@code false}
    * @see #isTrue(boolean, String, Object...)
    */
-  def isTrue(expression: Boolean) {
+  def isTrue(expression: Boolean): Unit = {
     if (expression == false) throw new IllegalArgumentException(IsTrueMsg)
   }
 
@@ -76,7 +76,7 @@ object Assert {
    * @throws IllegalArgumentException if expression is {@code false}
    * @see #isTrue(boolean)
    */
-  def isTrue(expression: Boolean, message: String, values: AnyRef*) {
+  def isTrue(expression: Boolean, message: String, values: AnyRef*): Unit = {
     if (!expression) throw new IllegalArgumentException(String.format(message, values))
   }
 

@@ -34,9 +34,9 @@ trait Initializer {
    * @param servletContext the {@code ServletContext} to initialize
    */
   @throws(classOf[ServletException])
-  def onStartup(servletContext: ServletContext)
+  def onStartup(servletContext: ServletContext): Unit
 
-  final def addListener(other: ServletContextListener) {
+  final def addListener(other: ServletContextListener): Unit = {
     boss.addListener(other)
   }
 }

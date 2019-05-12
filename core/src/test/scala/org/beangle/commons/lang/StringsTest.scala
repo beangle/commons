@@ -19,13 +19,13 @@
 package org.beangle.commons.lang
 
 import org.beangle.commons.lang.Strings._
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class StringsTest extends FunSpec with Matchers {
+class StringsTest extends AnyFunSpec with Matchers {
 
   describe("Strings") {
     it("Count target string") {

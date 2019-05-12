@@ -32,7 +32,7 @@ class TimerNode(val resource: String, var startTime: Long) extends Serializable 
 
   var totalTime: Long = _
 
-  def start(startTime: Long) {
+  def start(startTime: Long): Unit = {
     this.startTime = startTime
   }
 

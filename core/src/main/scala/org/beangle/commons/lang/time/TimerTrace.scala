@@ -23,26 +23,26 @@ object TimerTrace {
   protected var curStack: ThreadLocal[TimerStack] = new ThreadLocal[TimerStack]()
 
   /**
-   * System property that controls whether this timer should be used or not. Set to "true" activates
-   * the timer. Set to "false" to disactivate.
-   */
+    * System property that controls whether this timer should be used or not. Set to "true" activates
+    * the timer. Set to "false" to disactivate.
+    */
   val ACTIVATE_PROPERTY = "beangle.profile.activate"
 
   /**
-   * System property that controls the min time, that if exceeded will cause a log (at INFO level)
-   * to be created.
-   */
+    * System property that controls the min time, that if exceeded will cause a log (at INFO level)
+    * to be created.
+    */
   val MIN_TIME = "beangle.profile.mintime"
 
   /**
-   * Initialized in a static block, it can be changed at runtime by calling setActive(...)
-   */
+    * Initialized in a static block, it can be changed at runtime by calling setActive(...)
+    */
   var active: Boolean = "true".equalsIgnoreCase(System.getProperty(ACTIVATE_PROPERTY))
 
   /**
-   * Get the min time for this profiling, it searches for a System property
-   * 'beangle.profile.mintime' and default to 0.
-   */
+    * Get the min time for this profiling, it searches for a System property
+    * 'beangle.profile.mintime' and default to 0.
+    */
   private var mintime: Int = _
 
   try {
@@ -52,12 +52,11 @@ object TimerTrace {
   }
 
   /**
-   * Create and start a performance profiling with the <code>name</code> given. Deal with
-   * profile hierarchy automatically, so caller don't have to be concern about it.
-   *
-   * @param name profile name
-   */
-  def start(name: String) {
+    * Create and start a performance profiling with the <code>name</code> given. Deal with
+    * profile hierarchy automatically, so caller don't have to be concern about it.
+    * @param name profile name
+    */
+  def start(name: String): Unit = {
     if (!active) return
     val root = new TimerNode(name, System.currentTimeMillis())
     val stack = curStack.get.asInstanceOf[TimerStack]
@@ -65,10 +64,10 @@ object TimerTrace {
   }
 
   /**
-   * End a preformance profiling with the <code>name</code> given. Deal with
-   * profile hierarchy automatically, so caller don't have to be concern about it.
-   */
-  def end() {
+    * End a preformance profiling with the <code>name</code> given. Deal with
+    * profile hierarchy automatically, so caller don't have to be concern about it.
+    */
+  def end(): Unit = {
     if (!active) return
     val stack = curStack.get
     if (null == stack) return
@@ -86,45 +85,41 @@ object TimerTrace {
   }
 
   /**
-   * Do a log (at INFO level) of the time taken for this particular profiling.
-   *
-   * @param currentTimer profiling timer bean
-   */
-  private def printTimes(currentTimer: TimerNode) {
+    * Do a log (at INFO level) of the time taken for this particular profiling.
+    * @param currentTimer profiling timer bean
+    */
+  private def printTimes(currentTimer: TimerNode): Unit = {
     println(currentTimer.getPrintable)
   }
 
   /**
-   * Get the min time for this profiling, it searches for a System property
-   * 'beangle.profile.mintime' and default to 0.
-   *
-   * @return long
-   */
-  def getMinTime(): Int = mintime
+    * Get the min time for this profiling, it searches for a System property
+    * 'beangle.profile.mintime' and default to 0.
+    * @return long
+    */
+  def getMinTime: Int = mintime
 
   /**
-   * Change mintime
-   *
-   * @param mintime
-   */
-  def setMinTime(mintime: Int) {
+    * Change mintime
+    * @param mintime
+    */
+  def setMinTime(mintime: Int): Unit = {
     System.setProperty(MIN_TIME, String.valueOf(mintime))
     TimerTrace.mintime = mintime
   }
 
   /**
-   * Turn profiling on or off.
-   *
-   * @param active
-   */
-  def setActive(active: Boolean) {
+    * Turn profiling on or off.
+    * @param active
+    */
+  def setActive(active: Boolean): Unit = {
     if (active) System.setProperty(ACTIVATE_PROPERTY, "true") else System.clearProperty(ACTIVATE_PROPERTY)
     TimerTrace.active = active
   }
 
-  def isActive = active
+  def isActive: Boolean = active
 
-  def clear() {
+  def clear(): Unit = {
     curStack.set(null)
   }
 

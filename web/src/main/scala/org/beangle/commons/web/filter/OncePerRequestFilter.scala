@@ -38,7 +38,7 @@ abstract class OncePerRequestFilter extends GenericHttpFilter {
     }
   }
 
-  override def init() {
+  override def init(): Unit = {
     if (null == attributeName) attributeName = getClass.getName + this.hashCode() + ".FILTED"
   }
 }

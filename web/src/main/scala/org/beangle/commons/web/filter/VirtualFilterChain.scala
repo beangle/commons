@@ -27,7 +27,7 @@ import javax.servlet.{ Filter, FilterChain, ServletRequest, ServletResponse }
  */
 class VirtualFilterChain(val originalChain: FilterChain, val filterIter: Iterator[_ <: Filter]) extends FilterChain {
 
-  def doFilter(request: ServletRequest, response: ServletResponse) {
+  def doFilter(request: ServletRequest, response: ServletResponse): Unit = {
     if (filterIter.hasNext) filterIter.next.doFilter(request, response, this)
     else originalChain.doFilter(request, response)
   }

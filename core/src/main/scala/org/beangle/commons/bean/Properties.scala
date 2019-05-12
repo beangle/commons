@@ -31,12 +31,15 @@ object Properties {
   def set(bean: AnyRef, propertyName: String, value: Any): Any = {
     Default.set(bean, propertyName, value)
   }
+
   def get[T <: Any](inputBean: Any, propertyName: String): T = {
     Default.get(inputBean, propertyName)
   }
+
   def copy(bean: AnyRef, propertyName: String, value: Any): Any = {
     Default.copy(bean, propertyName, value)
   }
+
   def isWriteable(bean: AnyRef, name: String): Boolean = {
     Default.isWriteable(bean, name)
   }
@@ -231,14 +234,14 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
     }
   }
 
-  private def setMappedProperty(bean: Any, name: String, value: Any) {
+  private def setMappedProperty(bean: Any, name: String, value: Any): Unit = {
     val key = getMappedKey(name, bean)
     val resolvedName = resolver.getProperty(name)
     val rs = if (resolvedName != null && resolvedName.length() >= 0) getSimpleProperty(bean, resolvedName) else bean
     setMapped(rs, key, value)
   }
 
-  private def copyMappedProperty(bean: Any, name: String, value: Any) {
+  private def copyMappedProperty(bean: Any, name: String, value: Any): Unit = {
     val key = getMappedKey(name, bean)
     val resolvedName = resolver.getProperty(name)
     val rs = if (resolvedName != null && resolvedName.length() >= 0) getSimpleProperty(bean, resolvedName) else bean
@@ -248,7 +251,7 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
     setMapped(rs, key1, value1)
   }
 
-  private def setPropertyOfMapBean(bean: Any, propertyName: String, value: Any) {
+  private def setPropertyOfMapBean(bean: Any, propertyName: String, value: Any): Unit = {
     var pname = propertyName
     if (resolver.isMapped(propertyName)) {
       val name = resolver.getProperty(propertyName)
@@ -263,37 +266,37 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
 
   private def getIndexed(bean: Any, index: Int): Any = {
     bean match {
-      case null                 => null
+      case null => null
       case s: collection.Seq[_] => s(index)
       case x: java.util.List[_] => x.get(index)
-      case _                    => throw new RuntimeException("Don't support getIndexed on " + bean.getClass)
+      case _ => throw new RuntimeException("Don't support getIndexed on " + bean.getClass)
     }
   }
 
   private def setIndexed(bean: Any, index: Int, value: Any): Unit = {
     bean match {
-      case null                         =>
+      case null =>
       case s: collection.mutable.Seq[_] => s.asInstanceOf[collection.mutable.Seq[Any]].update(index, value)
-      case x: java.util.List[_]         => x.asInstanceOf[java.util.List[Any]].set(index, value)
-      case _                            => throw new RuntimeException("Don't support setIndexed on " + bean.getClass)
+      case x: java.util.List[_] => x.asInstanceOf[java.util.List[Any]].set(index, value)
+      case _ => throw new RuntimeException("Don't support setIndexed on " + bean.getClass)
     }
   }
 
   private def setMapped(bean: Any, key: Any, value: Any): Unit = {
     bean match {
-      case null                            =>
+      case null =>
       case s: collection.mutable.Map[_, _] => s.asInstanceOf[collection.mutable.Map[Any, Any]].put(key, value)
-      case x: java.util.Map[_, _]          => x.asInstanceOf[java.util.Map[Any, Any]].put(key, value)
-      case _                               => throw new RuntimeException("Don't support setMaped on " + bean.getClass)
+      case x: java.util.Map[_, _] => x.asInstanceOf[java.util.Map[Any, Any]].put(key, value)
+      case _ => throw new RuntimeException("Don't support setMaped on " + bean.getClass)
     }
   }
 
   private def getMapped(bean: Any, key: Any): Any = {
     bean match {
-      case null                            => null
+      case null => null
       case s: collection.mutable.Map[_, _] => s.asInstanceOf[collection.mutable.Map[Any, _]].get(key).orNull
-      case x: java.util.Map[_, _]          => x.get(key)
-      case _                               => throw new RuntimeException("Don't support getMapped on " + bean.getClass)
+      case x: java.util.Map[_, _] => x.get(key)
+      case _ => throw new RuntimeException("Don't support getMapped on " + bean.getClass)
     }
   }
 

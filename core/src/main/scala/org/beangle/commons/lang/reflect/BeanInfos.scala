@@ -56,7 +56,7 @@ object BeanInfos {
 class BeanInfos {
   private val cache = new IdentityCache[Class[_], BeanInfo]
 
-  def clear() {
+  def clear(): Unit = {
     cache.clear()
   }
 

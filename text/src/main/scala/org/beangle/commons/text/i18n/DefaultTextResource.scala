@@ -54,7 +54,7 @@ class DefaultTextResource(val locale: Locale, protected val registry: TextBundle
 
   def isKeyAsDefault(): Boolean = keyAsDefault
 
-  def setKeyAsDefault(keyAsDefault: Boolean) {
+  def setKeyAsDefault(keyAsDefault: Boolean): Unit = {
     this.keyAsDefault = keyAsDefault
   }
 

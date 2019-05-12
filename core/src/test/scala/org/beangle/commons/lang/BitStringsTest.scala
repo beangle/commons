@@ -18,13 +18,13 @@
  */
 package org.beangle.commons.lang
 
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class BitStringsTest extends FunSpec with Matchers {
+class BitStringsTest extends AnyFunSpec with Matchers {
 
   describe("BitStrings") {
     it("Calculate binary value of bit string") {

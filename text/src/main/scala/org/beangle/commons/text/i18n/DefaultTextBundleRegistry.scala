@@ -18,18 +18,18 @@
  */
 package org.beangle.commons.text.i18n
 
-import java.io.{ InputStream, InputStreamReader, LineNumberReader }
+import java.io.{InputStream, InputStreamReader, LineNumberReader}
 import java.nio.charset.Charset
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
 import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.{ Charsets, ClassLoaders, Strings }
+import org.beangle.commons.lang.{Charsets, ClassLoaders, Strings}
 import org.beangle.commons.lang.annotation.description
 
 /**
- * @since 3.0.0
- */
+  * @since 3.0.0
+  */
 @description("缺省TextBundle注册表")
 class DefaultTextBundleRegistry extends TextBundleRegistry {
 
@@ -39,7 +39,7 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
 
   var reloadable: Boolean = false
 
-  def addDefaults(bundleNames: String*) {
+  def addDefaults(bundleNames: String*): Unit = {
     defaultBundleNames ++= bundleNames
   }
 
@@ -75,7 +75,7 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
         } else {
           None
         }
-      case url @ Some(u) => url
+      case url@Some(u) => url
     }
 
     url match {
@@ -102,19 +102,19 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
   }
 
   /**
-   * Load java properties bundle with iso-8859-1
-   */
+    * Load java properties bundle with iso-8859-1
+    */
   protected def loadJavaBundle(bundleName: String, locale: Locale): Option[TextBundle] = {
     val resource = toJavaResourceName(bundleName, locale)
     ClassLoaders.getResource(resource) match {
-      case None    => None
+      case None => None
       case Some(r) => Some(new DefaultTextBundle(locale, resource, IOs.readJavaProperties(r)))
     }
   }
 
   /**
-   * java properties bundle name
-   */
+    * java properties bundle name
+    */
   protected def toJavaResourceName(bundleName: String, locale: Locale): String = {
     var fullName = bundleName
     val localeName = toLocaleStr(locale)
@@ -126,8 +126,8 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
   }
 
   /**
-   * Generater resource name like bundleName.zh_CN
-   */
+    * Generater resource name like bundleName.zh_CN
+    */
   protected def toDefaultResourceName(bundleName: String, locale: Locale): String = {
     val fullName = bundleName
     val localeName = toLocaleStr(locale)
@@ -139,8 +139,8 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
   }
 
   /**
-   * Convert locale to string with language_country[_variant]
-   */
+    * Convert locale to string with language_country[_variant]
+    */
   protected def toLocaleStr(locale: Locale): String = {
     if (locale == Locale.ROOT) return ""
     val language = locale.getLanguage
@@ -160,8 +160,8 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
 
   def getBundles(locale: Locale): List[TextBundle] = {
     caches.get(locale) match {
-      case Some(map) => collection.JavaConverters.collectionAsScalaIterable(map.values).toList
-      case None      => List.empty
+      case Some(map) => scala.jdk.CollectionConverters.asScala(map.values).toList
+      case None => List.empty
     }
   }
 
@@ -174,10 +174,11 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
     }
     msg
   }
+
   /**
-   * Read key value properties
-   * Group by Uppercased key,and default group
-   */
+    * Read key value properties
+    * Group by Uppercased key,and default group
+    */
   protected[i18n] def readBundles(input: InputStream, charset: Charset = Charsets.UTF_8): Map[String, Map[String, String]] = {
     if (null == input) Map.empty
     else {

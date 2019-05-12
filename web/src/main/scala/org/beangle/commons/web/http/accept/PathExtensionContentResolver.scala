@@ -19,19 +19,19 @@
 package org.beangle.commons.web.http.accept
 
 import javax.servlet.http.HttpServletRequest
-import javax.activation.MimeType
-import org.beangle.commons.activation.MimeTypes
+import org.beangle.commons.activation.{MediaType, MediaTypes}
 import org.beangle.commons.web.util.RequestUtils
 import org.beangle.commons.lang.Strings
 
 class PathExtensionContentResolver extends ContentTypeResolver {
 
-  def resolve(request: HttpServletRequest): Seq[MimeType] = {
+  def resolve(request: HttpServletRequest): Seq[MediaType] = {
     val servletPath = RequestUtils.getServletPath(request)
     val ext = Strings.substringAfterLast(servletPath, ".")
-    if (ext.length == 0) Seq.empty
-    else {
-      MimeTypes.getMimeType(ext) match {
+    if (ext.length == 0) {
+      Seq.empty
+    } else {
+      MediaTypes.get(ext) match {
         case Some(mimeType) => List(mimeType)
         case None => Seq.empty
       }

@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequest
 
 abstract class GenericCompositeFilter extends GenericHttpFilter {
 
-  override def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
+  override def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain): Unit = {
     new VirtualFilterChain(chain, getFilters(request).iterator).doFilter(request, response)
   }
 

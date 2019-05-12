@@ -39,14 +39,14 @@ class BootstrapListener extends ServletContextListener {
   import BootstrapListener._
   val others = new collection.mutable.ListBuffer[ServletContextListener]
 
-  override def contextInitialized(sce: ServletContextEvent) {
+  override def contextInitialized(sce: ServletContextEvent): Unit = {
     val servletContext = sce.getServletContext
     ServletContextHolder.store(servletContext)
 
     val initializers = new ju.LinkedList[Initializer]
     ClassLoaders.getResources(InitFile) foreach { url =>
       IOs.readJavaProperties(url) get ("initializer") match {
-        case Some(clazz) => initializers.add(ClassLoaders.load(clazz).newInstance.asInstanceOf[Initializer])
+        case Some(clazz) => initializers.add(ClassLoaders.load(clazz).getDeclaredConstructor().newInstance().asInstanceOf[Initializer])
         case None        =>
       }
     }
@@ -54,7 +54,7 @@ class BootstrapListener extends ServletContextListener {
     if (initializers.isEmpty) {
       servletContext.log("No Beangle Initializer types detected on classpath")
     } else {
-      for (initializer <- collection.JavaConverters.asScalaBuffer(initializers)) {
+      for (initializer <- scala.jdk.CollectionConverters.asScala(initializers)) {
         initializer.boss = this
         sce.getServletContext.log(s"${initializer.getClass.getName} registering ...")
         initializer.onStartup(servletContext)
@@ -81,13 +81,13 @@ class BootstrapListener extends ServletContextListener {
     }
   }
 
-  override def contextDestroyed(sce: ServletContextEvent) {
+  override def contextDestroyed(sce: ServletContextEvent): Unit = {
     others foreach { listener =>
       listener.contextDestroyed(sce)
     }
   }
 
-  def addListener(other: ServletContextListener) {
+  def addListener(other: ServletContextListener): Unit = {
     others += other
   }
 }

@@ -24,13 +24,14 @@ import org.beangle.commons.lang.annotation.description
 import org.beangle.commons.lang.testbean.{ Book, TestChild2Bean }
 import org.beangle.commons.lang.testbean.Entity
 import org.junit.runner.RunWith
-import org.scalatest.{ FunSpec, Matchers }
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
+import org.scalatestplus.junit.JUnitRunner
 import javax.sql.DataSource
 
 @RunWith(classOf[JUnitRunner])
-class ReflectionsTest extends FunSpec with Matchers {
+class ReflectionsTest extends AnyFunSpec with Matchers {
 
   describe("Reflections") {
     it("getSuperClassParamType") {

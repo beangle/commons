@@ -18,14 +18,13 @@
  */
 package org.beangle.commons.lang
 
-import org.scalatest.FunSpec
+import org.junit.runner.RunWith
 import org.scalatest.Matchers
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class PrimitivesTest extends FunSpec with Matchers {
+class PrimitivesTest extends AnyFunSpec with Matchers {
 
   describe("Primitives") {
     it("default") {

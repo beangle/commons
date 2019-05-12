@@ -34,7 +34,7 @@ object BatchReplaceMain {
   /**
    * Usage:BatchReplaceMain dir patternfile encoding
    */
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     if (args.length < 2) {
       println("using BatchReplaceMain dir patternfile encoding")
       return
@@ -78,7 +78,7 @@ object BatchReplaceMain {
   /**
    * replaceFile.
    */
-  def replaceFile(fileName: String, profiles: Map[String, List[Replacer]], charset: Charset) {
+  def replaceFile(fileName: String, profiles: Map[String, List[Replacer]], charset: Charset): Unit = {
     val file = new File(fileName)
     if (file.isFile && !file.isHidden) {
       val replacers = profiles.get(Strings.substringAfterLast(fileName, ".")).orNull
@@ -113,7 +113,7 @@ object BatchReplaceMain {
    * writeToFile.
    * </p>
    */
-  def writeToFile(str: String, fileName: String, charset: Charset) {
+  def writeToFile(str: String, fileName: String, charset: Charset): Unit = {
     var writer: OutputStreamWriter = null
     writer = if (null == charset) new OutputStreamWriter(new FileOutputStream(fileName)) else new OutputStreamWriter(new FileOutputStream(fileName),
       charset.name())

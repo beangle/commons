@@ -17,21 +17,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.conversion.converter
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
-import java.lang.reflect.InvocationTargetException
 import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.testbean.TestEnum
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.beangle.commons.lang.time.WeekDay._
+import org.junit.runner.RunWith
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 /**
  * @author chaostone
  * @since 3.0.0
  */
 @RunWith(classOf[JUnitRunner])
-class EnumConverterTest extends FunSpec with Matchers {
+class EnumConverterTest extends AnyFunSpec with Matchers {
 
   describe("EnumConverter") {
     it("Convert Enum") {

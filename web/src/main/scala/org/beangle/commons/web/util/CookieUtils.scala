@@ -74,7 +74,7 @@ object CookieUtils {
    * 刚方法自动将value进行编码存储
    */
   def addCookie(request: HttpServletRequest, response: HttpServletResponse,
-    name: String, value: String, path: String, age: Int) {
+    name: String, value: String, path: String, age: Int): Unit = {
     val cookie = new Cookie(name, URLEncoder.encode(value, "utf-8"))
     cookie.setSecure(RequestUtils.isHttps(request))
     cookie.setPath(path)
@@ -87,19 +87,19 @@ object CookieUtils {
    * 默认按照应用上下文进行设置
    */
   def addCookie(request: HttpServletRequest, response: HttpServletResponse,
-    name: String, value: String, age: Int) {
+    name: String, value: String, age: Int): Unit = {
     val contextPath = if (!request.getContextPath.endsWith("/")) request.getContextPath + "/" else request.getContextPath
     addCookie(request, response, name, value, contextPath, age)
   }
 
-  def deleteCookieByName(request: HttpServletRequest, response: HttpServletResponse, name: String) {
+  def deleteCookieByName(request: HttpServletRequest, response: HttpServletResponse, name: String): Unit = {
     deleteCookie(response, getCookie(request, name), "")
   }
 
   /**
    * Convenience method for deleting a cookie by name
    */
-  def deleteCookie(response: HttpServletResponse, cookie: Cookie, path: String) {
+  def deleteCookie(response: HttpServletResponse, cookie: Cookie, path: String): Unit = {
     if (cookie != null) {
       cookie.setMaxAge(0)
       cookie.setPath(path)

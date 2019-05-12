@@ -19,14 +19,13 @@
 package org.beangle.commons.lang.reflect
 
 import org.beangle.commons.lang.testbean.NumIdBean
-
 import org.junit.runner.RunWith
-import org.scalatest.FunSpec
 import org.scalatest.Matchers
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ClassInfosTest extends FunSpec with Matchers {
+class ClassInfosTest extends AnyFunSpec with Matchers {
 
   describe("Entity") {
     it("transient persisted property") {

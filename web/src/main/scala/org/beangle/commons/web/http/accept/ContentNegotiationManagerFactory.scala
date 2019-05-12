@@ -29,7 +29,7 @@ class ContentNegotiationManagerFactory extends Factory[ContentNegotiationManager
   var parameterName: String = _
   var result: ContentNegotiationManager = null
 
-  override def init() {
+  override def init(): Unit = {
     val resolvers = new collection.mutable.ListBuffer[ContentTypeResolver]
     if (this.favorPathExtension) resolvers += new PathExtensionContentResolver()
     if (this.favorParameter) resolvers += new ParameterContentResolver(parameterName)

@@ -20,16 +20,15 @@ package org.beangle.commons.io
 
 import java.io._
 
-import javax.activation.MimeType
-import org.beangle.commons.activation.MimeTypes
+import org.beangle.commons.activation.{MediaType, MediaTypes}
 
 /**
- * @author chaostone
- */
+  * @author chaostone
+  */
 trait BinarySerializer extends Serializer with Deserializer {
 
-  override def mediaTypes: Seq[MimeType] = {
-    List(MimeTypes.ApplicationOctetStream)
+  override def mediaTypes: Seq[MediaType] = {
+    List(MediaTypes.ApplicationOctetStream)
   }
 
   def registerClass(clazz: Class[_]): Unit
@@ -47,10 +46,10 @@ abstract class AbstractBinarySerializer extends BinarySerializer {
   }
 
   def serialize(data: Any, os: OutputStream, params: Map[String, Any]): Unit = {
-    if (null == data) return ;
+    if (null == data) return
     serializers.get(data.getClass) match {
       case Some(serializer) => serializer.serialize(data, os, params)
-      case None             => throw new RuntimeException(s"Cannot find ${data.getClass.getName}'s corresponding ObjectSerializer.")
+      case None => throw new RuntimeException(s"Cannot find ${data.getClass.getName}'s corresponding ObjectSerializer.")
     }
   }
 

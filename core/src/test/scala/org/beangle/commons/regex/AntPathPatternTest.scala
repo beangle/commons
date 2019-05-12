@@ -18,14 +18,14 @@
  */
 package org.beangle.commons.regex
 
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
 import org.beangle.commons.regex.AntPathPattern._
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class AntPathPatternTest extends FunSpec with Matchers {
+class AntPathPatternTest extends AnyFunSpec with Matchers {
 
   describe("AntPathPattern") {
     it("Match ant pattern expression") {

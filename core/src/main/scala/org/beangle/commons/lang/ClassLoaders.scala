@@ -121,6 +121,6 @@ object ClassLoaders {
   }
 
   def newInstance[T](className: String, classLoader: ClassLoader = null): T = {
-    load(className, classLoader).newInstance().asInstanceOf[T]
+    load(className, classLoader).getDeclaredConstructor().newInstance().asInstanceOf[T]
   }
 }

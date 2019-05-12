@@ -19,14 +19,14 @@
 package org.beangle.commons.dbf;
 
 import org.junit.runner.RunWith
-import org.scalatest.FunSpec
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 import org.scalatest.Matchers
 import java.io.File
 import java.nio.charset.Charset
 
 @RunWith(classOf[JUnitRunner])
-class ReaderTest extends FunSpec with Matchers {
+class ReaderTest extends AnyFunSpec with Matchers {
 
   describe("Reader") {
     it("readinfo") {

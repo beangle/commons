@@ -69,7 +69,7 @@ abstract class ConverterFactory[S, R] extends GenericConverter {
     }
   }
 
-  protected def register(targetType: Class[_], converter: Converter[S, _ <: R]) {
+  protected def register(targetType: Class[_], converter: Converter[S, _ <: R]): Unit = {
     converters.put(targetType, converter)
   }
 }

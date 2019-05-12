@@ -21,27 +21,27 @@ package org.beangle.commons.text.replace
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.Matchers
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class BatchReplaceMainTest extends FunSpec with Matchers {
+class BatchReplaceMainTest extends AnyFunSpec with Matchers {
   describe("BatchReplace") {
     it("Test batch replace expression") {
       val clause = "<#include \"/template/head.ftl\"/>"
       val pattern = Pattern.compile("<#(.*)/>")
       val m = pattern.matcher(clause)
       val rs = m.find()
-      debug(rs + "")
-      debug(m.groupCount() + "")
-      debug(Pattern.matches("<#(.*)/>", clause) + "")
+      debug(rs)
+      debug(m.groupCount())
+      debug(Pattern.matches("<#(.*)/>", clause))
       debug(m.group(1))
       val sb = new StringBuffer()
       m.appendReplacement(sb, "[#$1/]")
       debug(sb.toString)
-      debug(Pattern.matches("template", clause) + "")
+      debug(Pattern.matches("template", clause))
       val p = Pattern.compile("(cat)")
       val m1 = p.matcher("one cat two cats in the yard")
       val sb1 = new StringBuffer()
@@ -58,7 +58,7 @@ class BatchReplaceMainTest extends FunSpec with Matchers {
       debug(replacer.process(test))
     }
 
-    def debug(msg: String): Unit = {
+    def debug(msg: Any): Unit = {
       println(msg)
     }
   }
