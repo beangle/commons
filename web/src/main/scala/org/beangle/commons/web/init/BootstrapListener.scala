@@ -54,7 +54,8 @@ class BootstrapListener extends ServletContextListener {
     if (initializers.isEmpty) {
       servletContext.log("No Beangle Initializer types detected on classpath")
     } else {
-      for (initializer <- scala.jdk.CollectionConverters.asScala(initializers)) {
+      import scala.jdk.CollectionConverters._
+      for (initializer <- initializers.asScala) {
         initializer.boss = this
         sce.getServletContext.log(s"${initializer.getClass.getName} registering ...")
         initializer.onStartup(servletContext)

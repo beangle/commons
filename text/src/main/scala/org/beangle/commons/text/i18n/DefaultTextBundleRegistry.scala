@@ -159,8 +159,9 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
   }
 
   def getBundles(locale: Locale): List[TextBundle] = {
+    import scala.jdk.CollectionConverters._
     caches.get(locale) match {
-      case Some(map) => scala.jdk.CollectionConverters.asScala(map.values).toList
+      case Some(map) => map.values.asScala.toList
       case None => List.empty
     }
   }

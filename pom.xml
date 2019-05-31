@@ -6,7 +6,7 @@
     <version>26.0-SNAPSHOT</version>
   </parent>
   <groupId>org.beangle.commons</groupId>
-  <artifactId>beangle-commons-parent_2.12</artifactId>
+  <artifactId>beangle-commons-parent_${scala.epoch}</artifactId>
   <packaging>pom</packaging>
   <version>5.1.8-SNAPSHOT</version>
   <name>Beangle Commons Parent</name>
@@ -42,17 +42,17 @@
     <dependencies>
       <dependency>
         <groupId>org.beangle.commons</groupId>
-        <artifactId>beangle-commons-core_2.12</artifactId>
+        <artifactId>beangle-commons-core_${scala.epoch}</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.beangle.commons</groupId>
-        <artifactId>beangle-commons-web_2.12</artifactId>
+        <artifactId>beangle-commons-web_${scala.epoch}</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.beangle.commons</groupId>
-        <artifactId>beangle-commons-text_2.12</artifactId>
+        <artifactId>beangle-commons-text_${scala.epoch}</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>

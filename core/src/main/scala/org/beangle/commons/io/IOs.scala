@@ -169,7 +169,8 @@ object IOs {
       val properties = new ju.Properties()
       properties.load(input)
       close(input)
-      scala.jdk.CollectionConverters.asScala(properties).toMap
+      import scala.jdk.CollectionConverters._
+      properties.asScala.toMap
     }
   }
 
