@@ -3,10 +3,10 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.beangle.commons</groupId>
-    <artifactId>beangle-commons-parent_${scala.epoch}</artifactId>
+    <artifactId>beangle-commons-parent_2.13</artifactId>
     <version>5.1.8-SNAPSHOT</version>
   </parent>
-  <artifactId>beangle-commons-file_${scala.epoch}</artifactId>
+  <artifactId>beangle-commons-file_2.13</artifactId>
   <packaging>jar</packaging>
   <name>Beangle Commons File</name>
 
@@ -19,7 +19,7 @@
   <dependencies>
     <dependency>
       <groupId>org.beangle.commons</groupId>
-      <artifactId>beangle-commons-core_${scala.epoch}</artifactId>
+      <artifactId>beangle-commons-core_2.13</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
