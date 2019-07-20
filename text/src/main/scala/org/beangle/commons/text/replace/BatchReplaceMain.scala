@@ -18,16 +18,14 @@
  */
 package org.beangle.commons.text.replace
 
-import java.io.File
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.FilenameFilter
-import java.io.OutputStreamWriter
+import java.io.{File, FileOutputStream, FilenameFilter, OutputStreamWriter}
 import java.nio.charset.Charset
+
 import org.beangle.commons.io.Files
 import org.beangle.commons.lang.Strings
+import org.beangle.commons.lang.reflect.Reflections
+
 import scala.collection.mutable
-import org.beangle.commons.lang.ClassLoaders
 
 object BatchReplaceMain {
 
@@ -68,7 +66,7 @@ object BatchReplaceMain {
         older = Strings.replace(older, "\\t", "\t")
         newer = Strings.replace(newer, "\\n", "\n")
         newer = Strings.replace(newer, "\\t", "\t")
-        val replacer:Replacer = if (older == "replacer") ClassLoaders.newInstance(newer) else new PatternReplacer(older, newer)
+        val replacer:Replacer = if (older == "replacer") Reflections.newInstance(newer) else new PatternReplacer(older, newer)
         profiles.put(profileName, replacer :: profiles(profileName))
       }
     }

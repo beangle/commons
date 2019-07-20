@@ -38,6 +38,10 @@ object Reflections {
     }
   }
 
+  def newInstance[T](className: String, classLoader: ClassLoader = null): T = {
+    ClassLoaders.load(className, classLoader).getDeclaredConstructor().newInstance().asInstanceOf[T]
+  }
+
   def getInstance[T: ClassTag](name: String)(implicit manifest: Manifest[T]): T = {
     var moduleClass = ClassLoaders.load(name)
     if (!manifest.runtimeClass.isAssignableFrom(moduleClass)) {

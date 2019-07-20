@@ -28,7 +28,7 @@ class TypeTest extends AnyFunSpec with Matchers {
 
   describe("Types") {
     it("java primitives") {
-      val a = new JDouble(0)
+      val a = new JDouble("0")
       assert(a.getClass == classOf[java.lang.Double])
     }
   }

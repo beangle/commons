@@ -125,11 +125,4 @@ object ClassLoaders {
     }
   }
 
-  def newInstance[T](className: String, classLoader: ClassLoader = null): T = {
-    load(className, classLoader).getDeclaredConstructor().newInstance().asInstanceOf[T]
-  }
-
-  def newInstance[T](clazz: Class[_]): T = {
-    clazz.getDeclaredConstructor().newInstance().asInstanceOf[T]
-  }
 }

@@ -29,7 +29,7 @@ import org.beangle.commons.lang.functor.Predicate
 class PropertyEqualPredicate[T](name: String, value: Any) extends Predicate[T] {
 
   def apply(arg0: T): Boolean = {
-    (value == Properties.get[Any](arg0, name))
+    value == Properties.get[Any](arg0, name)
   }
 
 }

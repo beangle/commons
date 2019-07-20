@@ -79,10 +79,16 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
       if (null == result) return null.asInstanceOf[T]
       name = resolver.remove(name)
     }
-    result = if (isMapType(result)) getPropertyOfMap(result, name)
-    else if (resolver.isMapped(name)) getMappedProperty(result, name)
-    else if (resolver.isIndexed(name)) getIndexedProperty(result, name)
-    else getSimpleProperty(result, name)
+    result =
+      if (isMapType(result)) {
+        getPropertyOfMap(result, name)
+      } else if (resolver.isMapped(name)) {
+        getMappedProperty(result, name)
+      } else if (resolver.isIndexed(name)) {
+        getIndexedProperty(result, name)
+      } else {
+        getSimpleProperty(result, name)
+      }
     result.asInstanceOf[T]
   }
 
@@ -116,14 +122,15 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
 
     if (isMapType(result)) {
       setPropertyOfMapBean(result, name, value)
+      value
     } else if (resolver.isMapped(name)) {
       copyMappedProperty(result, name, value)
+      value
     } else if (resolver.isIndexed(name)) {
-      return copyIndexedProperty(result, name, value, conversion)
+      copyIndexedProperty(result, name, value, conversion)
     } else {
-      return copySimpleProperty(result, name, value, conversion)
+      copySimpleProperty(result, name, value, conversion)
     }
-    value
   }
 
   private def getDirectProperty(result: Any, name: String): Any = {
@@ -144,8 +151,11 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
 
   private def getPropertyOfMap(bean: Any, propertyName: String): Any = {
     var name = resolver.getProperty(propertyName)
-    if (name == null || name.length == 0) name = resolver.getKey(propertyName)
-    else name = propertyName
+    if (name == null || name.length == 0) {
+      name = resolver.getKey(propertyName)
+    } else {
+      name = propertyName
+    }
     getMapped(bean, name)
   }
 
@@ -232,13 +242,6 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
     } else {
       if (null == conversion) value else conversion.convert(value, clazz)
     }
-  }
-
-  private def setMappedProperty(bean: Any, name: String, value: Any): Unit = {
-    val key = getMappedKey(name, bean)
-    val resolvedName = resolver.getProperty(name)
-    val rs = if (resolvedName != null && resolvedName.length() >= 0) getSimpleProperty(bean, resolvedName) else bean
-    setMapped(rs, key, value)
   }
 
   private def copyMappedProperty(bean: Any, name: String, value: Any): Unit = {

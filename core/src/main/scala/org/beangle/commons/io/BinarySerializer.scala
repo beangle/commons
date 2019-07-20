@@ -46,10 +46,11 @@ abstract class AbstractBinarySerializer extends BinarySerializer {
   }
 
   def serialize(data: Any, os: OutputStream, params: Map[String, Any]): Unit = {
-    if (null == data) return
-    serializers.get(data.getClass) match {
-      case Some(serializer) => serializer.serialize(data, os, params)
-      case None => throw new RuntimeException(s"Cannot find ${data.getClass.getName}'s corresponding ObjectSerializer.")
+    if (null != data) {
+      serializers.get(data.getClass) match {
+        case Some(serializer) => serializer.serialize(data, os, params)
+        case None => throw new RuntimeException(s"Cannot find ${data.getClass.getName}'s corresponding ObjectSerializer.")
+      }
     }
   }
 

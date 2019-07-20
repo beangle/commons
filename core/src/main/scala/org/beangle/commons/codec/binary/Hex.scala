@@ -41,7 +41,7 @@ object HexEncoder extends Encoder[Array[Byte], String] {
    * Converts an array of bytes into an array of characters representing the hexadecimal values of each byte in order
    *
    * @param data   a byte[] to convert to Hex characters
-   * @param toLowerCase
+   * @param toLowerCase should to lower case
    * @return A Array[Char] containing hexadecimal characters
    */
   def encodeHex(data: Array[Byte], toLowerCase: Boolean): String = {
@@ -83,7 +83,7 @@ object HexDecoder extends Decoder[String, Array[Byte]] {
    * byte. An exception is thrown if the passed char array has an odd number of elements.
    */
   def decode(data: String): Array[Byte] = {
-    val d = data.toCharArray()
+    val d = data.toCharArray
     val len = d.length
     if ((len & 0x01) != 0) throw new RuntimeException("Odd number of characters.")
     val out = new Array[Byte](len >> 1)

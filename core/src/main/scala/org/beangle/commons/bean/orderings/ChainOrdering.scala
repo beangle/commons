@@ -18,17 +18,14 @@
  */
 package org.beangle.commons.bean.orderings
 
-/**
- * 组合比较器
- *
- * @author chaostone
- */
+/** 组合比较器
+  * @author chaostone
+  */
 class ChainOrdering[T](comparators: List[Ordering[T]]) extends Ordering[T] {
 
-  /**
-   * compare.
-   * @return 0 is equals,-1 first &lt; second ,1 first &gt; second
-   */
+  /** compare
+    * @return 0 is equals,-1 first &lt; second ,1 first &gt; second
+    */
   def compare(first: T, second: T): Int = {
     var rs = 0
     comparators find { com => rs = com.compare(first, second); rs != 0 }
