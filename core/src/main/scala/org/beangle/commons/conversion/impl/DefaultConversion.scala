@@ -24,8 +24,6 @@ object DefaultConversion {
 
   val Instance = new DefaultConversion()
 }
-
-import DefaultConversion._
 /**
  * Default Conversion implementation.
  * <p>

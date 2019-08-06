@@ -18,13 +18,13 @@
  */
 package org.beangle.commons.lang
 
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ObjectsTest extends FunSpec with Matchers {
+class ObjectsTest extends AnyFunSpec with Matchers {
 
   describe("Objects") {
     it("Equals object and array") {

@@ -19,17 +19,16 @@
 package org.beangle.commons.config.property
 
 import org.beangle.commons.bean.Initializing
-import org.beangle.commons.lang.Numbers
-import org.beangle.commons.lang.Strings
-import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.conversion.converter.String2BooleanConverter
+import org.beangle.commons.conversion.impl.DefaultConversion
+import org.beangle.commons.lang.{Numbers, Strings}
+
 import scala.collection.mutable
 
 /**
- * 系统配置
- *
- * @author chaostone
- */
+  * 系统配置
+  * @author chaostone
+  */
 class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
 
   private var properties = new mutable.HashMap[String, Any]
@@ -38,19 +37,19 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
 
   private var providers = new mutable.ListBuffer[PropertyConfig.Provider]
 
-  def init() {
+  def init(): Unit = {
     reload()
   }
 
   /**
-   * Get value according to name
-   */
+    * Get value according to name
+    */
   def get(name: String): Option[Any] = properties.get(name)
 
   /**
-   * Insert or Update name's value
-   */
-  def set(name: String, value: Any) {
+    * Insert or Update name's value
+    */
+  def set(name: String, value: Any): Unit = {
     properties.put(name, value)
   }
 
@@ -64,8 +63,8 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
   }
 
   /**
-   * getInt.
-   */
+    * getInt.
+    */
   def getInt(name: String): Option[Int] = {
     get(name) match {
       case Some(value) => Some(Numbers.toInt(value.asInstanceOf[String]))
@@ -74,8 +73,8 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
   }
 
   /**
-   * getBoolean.
-   */
+    * getBoolean.
+    */
   def getBoolean(name: String): Option[Boolean] = {
     get(name) match {
       case Some(value) => Some(String2BooleanConverter.apply(value.asInstanceOf[String]))
@@ -83,24 +82,24 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
     }
   }
 
-  def add(newer: collection.Map[String, Any]) {
+  def add(newer: collection.Map[String, Any]): Unit = {
     this.properties ++= newer
   }
 
-  def addListener(listener: PropertyConfigListener) {
+  def addListener(listener: PropertyConfigListener): Unit = {
     listeners += listener
   }
 
-  def removeListener(listener: PropertyConfigListener) {
+  def removeListener(listener: PropertyConfigListener): Unit = {
     listeners -= listener
   }
 
   /**
-   * <p>
-   * multicast.
-   * </p>
-   */
-  def multicast() {
+    * <p>
+    * multicast.
+    * </p>
+    */
+  def multicast(): Unit = {
     val e = new PropertyConfigEvent(this)
     for (listener <- listeners) {
       listener.onConfigEvent(e)
@@ -108,9 +107,9 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
   }
 
   /**
-   * toString.
-   */
-  override def toString(): String = {
+    * toString.
+    */
+  override def toString: String = {
     val sb = new StringBuilder("DefaultSystemConfig[")
     val props = properties.keySet.toList
     var maxlength = 0
@@ -127,18 +126,18 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
   }
 
   /**
-   * getNames.
-   */
+    * getNames.
+    */
   def names: Set[String] = properties.keySet.toSet
 
-  def addProvider(provider: PropertyConfig.Provider) {
+  def addProvider(provider: PropertyConfig.Provider): Unit = {
     providers += provider
   }
 
   /**
-   * reload.
-   */
-  def reload() {
+    * reload.
+    */
+  def reload(): Unit = {
     synchronized {
       for (provider <- providers) add(provider.getConfig)
       multicast()
@@ -146,10 +145,10 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
   }
 
   /**
-   * Setter for the field <code>providers</code>.
-   *
-   */
-  def setProviders(providers: List[PropertyConfig.Provider]) {
+    * Setter for the field <code>providers</code>.
+    *
+    */
+  def setProviders(providers: List[PropertyConfig.Provider]): Unit = {
     this.providers.clear()
     this.providers ++= providers
   }

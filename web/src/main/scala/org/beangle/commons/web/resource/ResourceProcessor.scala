@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.web.resource
 
-import org.beangle.commons.activation.MimeTypes
+import org.beangle.commons.activation.MediaTypes
 import org.beangle.commons.io.{ IOs, ResourceLoader }
 import org.beangle.commons.lang.Strings.substringAfterLast
 
@@ -28,7 +28,7 @@ class ResourceProcessor(private val loader: ResourceLoader, private val resolver
 
   var filters: List[ResourceFilter] = List.empty
 
-  def process(uri: String, request: HttpServletRequest, response: HttpServletResponse) {
+  def process(uri: String, request: HttpServletRequest, response: HttpServletResponse): Unit = {
     val names = resolver.resolve(uri)
     val resources = loader.load(names)
     if (resources.size != names.size) {
@@ -39,7 +39,7 @@ class ResourceProcessor(private val loader: ResourceLoader, private val resolver
 
       val chain = new ProcessChain(filters.iterator)
       chain.process(pc, request, response)
-      if (response.getStatus() == HttpServletResponse.SC_OK) {
+      if (response.getStatus == HttpServletResponse.SC_OK) {
         val isText = (null != response.getContentType && response.getContentType.startsWith("text/"))
         val os = response.getOutputStream
         for (res <- pc.resources) {
@@ -53,8 +53,8 @@ class ResourceProcessor(private val loader: ResourceLoader, private val resolver
   }
 
   protected def getContentType(uri: String, request: HttpServletRequest): String = {
-    val contentType = MimeTypes.getMimeType(substringAfterLast(uri, ".")).orNull
-    if (null == contentType) request.getServletContext().getMimeType(uri) else contentType.toString
+    val contentType = MediaTypes.get(substringAfterLast(uri, ".")).orNull
+    if (null == contentType) request.getServletContext.getMimeType(uri) else contentType.toString
   }
 
 }

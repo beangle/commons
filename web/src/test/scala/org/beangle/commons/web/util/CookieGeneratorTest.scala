@@ -20,11 +20,11 @@ package org.beangle.commons.web.util
 
 import org.junit.runner.RunWith
 import org.scalatest.Matchers
-import org.scalatest.FunSpec
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class CookieGeneratorTest extends FunSpec with Matchers {
+class CookieGeneratorTest extends AnyFunSpec with Matchers {
 
   describe("Cookieg") {
     it("set base with all part") {

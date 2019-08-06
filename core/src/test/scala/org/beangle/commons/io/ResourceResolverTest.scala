@@ -19,11 +19,12 @@
 package org.beangle.commons.io
 
 import org.junit.runner.RunWith
-import org.scalatest.{ FunSpec, Matchers }
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ResourceResolverTest extends FunSpec with Matchers {
+class ResourceResolverTest extends AnyFunSpec with Matchers {
   describe("ResourceResolver") {
     it("getResources") {
       val resolver = new ResourcePatternResolver

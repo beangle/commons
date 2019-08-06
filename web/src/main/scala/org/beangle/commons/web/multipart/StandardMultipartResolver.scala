@@ -61,7 +61,7 @@ object StandardMultipartResolver extends MultipartResolver {
             params.get(paramName) match {
               case Some(v) =>
                 if (v.getClass.isArray) {
-                  Array.concat(Array(str), v.asInstanceOf[Array[String]])
+                  Array.concat(Array[Any](str), v.asInstanceOf[Array[Any]])
                 } else {
                   Array(v, str)
                 }

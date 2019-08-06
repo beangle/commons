@@ -18,13 +18,13 @@
  */
 package org.beangle.commons.conversion.impl
 
-import java.lang.reflect.{ Array, Modifier }
+import java.lang.reflect.{Array, Modifier}
 
-import scala.collection.{ concurrent, mutable }
+import org.beangle.commons.conversion.{Conversion, Converter, ConverterRegistry}
+import org.beangle.commons.lang.{Objects, Primitives}
+
+import scala.collection.{concurrent, mutable}
 import scala.language.existentials
-
-import org.beangle.commons.conversion.{ Conversion, Converter, ConverterRegistry }
-import org.beangle.commons.lang.{ Objects, Primitives }
 /**
  * Generic Conversion Super class
  * It provider converter registry and converter search machanism.
@@ -67,7 +67,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
     }
   }
 
-  override def addConverter(converter: Converter[_, _]) {
+  override def addConverter(converter: Converter[_, _]): Unit = {
     var key: Tuple2[Class[_], Class[_]] = null
     val defaultKey = (classOf[Any], classOf[Any])
     for (m <- converter.getClass.getMethods if m.getName == "apply" && Modifier.isPublic(m.getModifiers) && !m.isBridge()) {
@@ -83,7 +83,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
     cache.clear()
   }
 
-  protected def addConverter(converter: GenericConverter) {
+  protected def addConverter(converter: GenericConverter): Unit = {
     val key = converter.getTypeinfo
     val sourceType = key._1.asInstanceOf[Class[_]]
     converters.get(sourceType) match {
@@ -147,7 +147,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
     null
   }
 
-  private def addInterfaces(interfaceType: Class[_], interfaces: mutable.Set[Class[_]]) {
+  private def addInterfaces(interfaceType: Class[_], interfaces: mutable.Set[Class[_]]): Unit = {
     interfaces.add(interfaceType)
     for (inheritedInterface <- interfaceType.getInterfaces) addInterfaces(inheritedInterface, interfaces)
   }

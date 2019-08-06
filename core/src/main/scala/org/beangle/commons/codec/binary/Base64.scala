@@ -18,10 +18,7 @@
  */
 package org.beangle.commons.codec.binary
 
-import java.io.UnsupportedEncodingException
-import org.beangle.commons.codec.net.BCoder
-import org.beangle.commons.codec.Encoder
-import org.beangle.commons.codec.Decoder
+import org.beangle.commons.codec.{Decoder, Encoder}
 
 object Base64 {
   def encode(data: Array[Byte]): String = {
@@ -81,7 +78,7 @@ object Base64Decoder extends Decoder[String, Array[Byte]] {
 
   def decode(data: Array[Char]): Array[Byte] = {
     var tempLen = data.length
-    Range(0, data.length) foreach { ix =>
+    data.indices foreach { ix =>
       if (data(ix) > '\u00ff' || Codes(data(ix)) < 0) tempLen -= 1
     }
     var len = (tempLen / 4) * 3
@@ -91,7 +88,7 @@ object Base64Decoder extends Decoder[String, Array[Byte]] {
     var shift = 0
     var accum = 0
     var index = 0
-    (0 until data.length) foreach { ix =>
+    data.indices foreach { ix =>
       val value = if (data(ix) <= '\u00ff') (Codes(data(ix))).toInt else -1
       if (value >= 0) {
         accum <<= 6

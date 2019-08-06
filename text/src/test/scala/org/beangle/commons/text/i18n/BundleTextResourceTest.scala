@@ -22,11 +22,12 @@ import java.util.Locale
 
 import org.beangle.commons.lang.ClassLoaders
 import org.junit.runner.RunWith
-import org.scalatest.{ FunSpec, Matchers }
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class BundleTextResourceTest extends FunSpec with Matchers {
+class BundleTextResourceTest extends AnyFunSpec with Matchers {
 
   describe("TextBundle") {
     it("read message by class") {

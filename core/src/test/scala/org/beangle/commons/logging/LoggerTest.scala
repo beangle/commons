@@ -19,7 +19,7 @@
 package org.beangle.commons.logging
 
 object LoggerTest {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     val logger = getLogger(getClass)
     val info = logger(Info)
     info("ddd")

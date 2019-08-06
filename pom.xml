@@ -3,12 +3,12 @@
   <parent>
     <groupId>org.beangle</groupId>
     <artifactId>beangle-scala</artifactId>
-    <version>25.2</version>
+    <version>26.2</version>
   </parent>
   <groupId>org.beangle.commons</groupId>
-  <artifactId>beangle-commons-parent_2.12</artifactId>
+  <artifactId>beangle-commons-parent_2.13</artifactId>
   <packaging>pom</packaging>
-  <version>5.1.7</version>
+  <version>5.1.8</version>
   <name>Beangle Commons Parent</name>
 
   <modules>
@@ -42,17 +42,17 @@
     <dependencies>
       <dependency>
         <groupId>org.beangle.commons</groupId>
-        <artifactId>beangle-commons-core_2.12</artifactId>
+        <artifactId>beangle-commons-core_2.13</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.beangle.commons</groupId>
-        <artifactId>beangle-commons-web_2.12</artifactId>
+        <artifactId>beangle-commons-web_2.13</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.beangle.commons</groupId>
-        <artifactId>beangle-commons-text_2.12</artifactId>
+        <artifactId>beangle-commons-text_2.13</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>

@@ -18,14 +18,15 @@
  */
 package org.beangle.commons.lang.time
 
-import org.junit.runner.RunWith
-import org.scalatest.FunSpec
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.Matchers
 import java.time.LocalDate
 
+import org.junit.runner.RunWith
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
+
 @RunWith(classOf[JUnitRunner])
-class WeekTimeTest extends FunSpec with Matchers {
+class WeekTimeTest extends AnyFunSpec with Matchers {
   describe("WeekTime") {
     it("firstDate ") {
       val wt = new WeekTime

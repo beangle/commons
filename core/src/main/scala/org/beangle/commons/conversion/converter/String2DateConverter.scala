@@ -18,12 +18,13 @@
  */
 package org.beangle.commons.conversion.converter
 
-import java.{ util => ju }
-import java.util.Calendar.{ YEAR, MONTH, DAY_OF_MONTH, HOUR_OF_DAY, MINUTE, SECOND, MILLISECOND }
+import java.util.Calendar._
+import java.{util => ju}
+
 import org.beangle.commons.conversion.Converter
-import org.beangle.commons.lang.Strings.{ substring, split, isEmpty, contains, isNotBlank }
-import org.beangle.commons.lang.Numbers.toInt
 import org.beangle.commons.lang.Dates
+import org.beangle.commons.lang.Numbers.toInt
+import org.beangle.commons.lang.Strings._
 
 /**
  * DateConverter

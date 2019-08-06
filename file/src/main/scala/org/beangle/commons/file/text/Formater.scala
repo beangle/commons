@@ -24,13 +24,13 @@ import org.beangle.commons.collection.Collections
 import org.beangle.commons.io.IOs
 import org.beangle.commons.io.Files./
 import org.beangle.commons.lang.{ Charsets, Strings }
-import org.beangle.commons.activation.MimeTypes
+import org.beangle.commons.activation.MediaTypes
 
 object Formater {
   val LF = "\n"
   val CRLF = "\r\n"
 
-  def format(formater: Formater, dir: File, ext: Option[String]) {
+  def format(formater: Formater, dir: File, ext: Option[String]): Unit = {
     if (dir.isFile) {
       ext match {
         case Some(f) =>
@@ -38,8 +38,8 @@ object Formater {
         case None => {
           val fileExt = Strings.substringAfterLast(dir.getName, ".")
 
-          MimeTypes.getMimeType(fileExt) foreach { m =>
-            if (m.getPrimaryType == "text" || fileExt == "xml") formater.format(dir)
+          MediaTypes.get(fileExt) foreach { m =>
+            if (m.primaryType == "text" || fileExt == "xml") formater.format(dir)
           }
         }
       }

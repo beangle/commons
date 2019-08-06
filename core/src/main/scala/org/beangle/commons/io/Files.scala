@@ -21,7 +21,7 @@ package org.beangle.commons.io
 import java.io._
 import java.nio.channels.FileChannel
 import java.nio.charset.Charset
-import org.beangle.commons.lang.Assert
+
 import org.beangle.commons.lang.Charsets.UTF_8
 
 object Files {
@@ -43,9 +43,9 @@ object Files {
   }
 
   /**
-   * Reads the contents of a file into a String.
-   * The file is always closed.
-   */
+    * Reads the contents of a file into a String.
+    * The file is always closed.
+    */
   def readString(file: File, charset: Charset = UTF_8): String = {
     var in: InputStream = null
     try {
@@ -59,9 +59,9 @@ object Files {
   }
 
   /**
-   * Writes a String to a file creating the file if it does not exist.
-   */
-  def writeString(file: File, data: String, charset: Charset = UTF_8) {
+    * Writes a String to a file creating the file if it does not exist.
+    */
+  def writeString(file: File, data: String, charset: Charset = UTF_8): Unit = {
     var out: OutputStream = null
     try {
       out = writeOpen(file)
@@ -72,9 +72,9 @@ object Files {
     }
   }
 
-  def touch(file: File) {
+  def touch(file: File): Unit = {
     if (!file.exists()) IOs.close(writeOpen(file))
-    val success = file.setLastModified(System.currentTimeMillis());
+    val success = file.setLastModified(System.currentTimeMillis)
     if (!success) throw new IOException("Unable to set the last modification time for " + file)
   }
 
@@ -85,17 +85,17 @@ object Files {
     } else {
       val parent = file.getParentFile
       if (parent != null) {
-        if (!parent.mkdirs() && !parent.isDirectory())
-          throw new IOException("Directory '" + parent + "' could not be created");
+        if (!parent.mkdirs() && !parent.isDirectory)
+          throw new IOException("Directory '" + parent + "' could not be created")
       }
     }
     new FileOutputStream(file, append)
   }
 
   /**
-   * Reads the contents of a file line by line to a List of Strings.
-   * The file is always closed.
-   */
+    * Reads the contents of a file line by line to a List of Strings.
+    * The file is always closed.
+    */
   def readLines(file: File, charset: Charset = UTF_8): List[String] = {
     var in: InputStream = null
     try {
@@ -112,24 +112,23 @@ object Files {
   }
 
   /**
-   * Copies a file to a new location preserving the file date.
-   * <p>
-   * This method copies the contents of the specified source file to the specified destination file.
-   * The directory holding the destination file is created if it does not exist. If the destination
-   * file exists, then this method will overwrite it.
-   * <p>
-   * <strong>Note:</strong> This method tries to preserve the file's last modified date/times using
-   * {@link File#setLastModified(long)}, however it is not guaranteed that the operation will
-   * succeed. If the modification operation fails, no indication is provided.
-   *
-   * @param srcFile an existing file to copy, must not be <code>null</code>
-   * @param destFile the new file, must not be <code>null</code>
-   */
+    * Copies a file to a new location preserving the file date.
+    * <p>
+    * This method copies the contents of the specified source file to the specified destination file.
+    * The directory holding the destination file is created if it does not exist. If the destination
+    * file exists, then this method will overwrite it.
+    * <p>
+    * <strong>Note:</strong> This method tries to preserve the file's last modified date/times using
+    * {@link File#setLastModified(long)}, however it is not guaranteed that the operation will
+    * succeed. If the modification operation fails, no indication is provided.
+    * @param srcFile  an existing file to copy, must not be <code>null</code>
+    * @param destFile the new file, must not be <code>null</code>
+    */
   @throws[IOException]("if source or destination is invalid or an IO error occurs during copying")
-  def copy(srcFile: File, destFile: File) {
-    null != srcFile
-    null != destFile
-    if (srcFile.exists() == false) {
+  def copy(srcFile: File, destFile: File): Unit = {
+    assert(null != srcFile)
+    assert(null != destFile)
+    if (!srcFile.exists) {
       throw new FileNotFoundException("Source '" + srcFile + "' does not exist")
     }
     if (srcFile.isDirectory) {
@@ -149,12 +148,12 @@ object Files {
       if (destFile.isDirectory) {
         throw new IOException("Destination '" + destFile + "' exists but is a directory")
       }
-      if (!destFile.canWrite()) throw new IOException("Destination '" + destFile + "' exists but is read-only")
+      if (!destFile.canWrite) throw new IOException("Destination '" + destFile + "' exists but is read-only")
     }
     doCopy(srcFile, destFile, true)
   }
 
-  private def doCopy(srcFile: File, destFile: File, preserveFileDate: Boolean) {
+  private def doCopy(srcFile: File, destFile: File, preserveFileDate: Boolean): Unit = {
     var fis: FileInputStream = null
     var fos: FileOutputStream = null
     var input: FileChannel = null

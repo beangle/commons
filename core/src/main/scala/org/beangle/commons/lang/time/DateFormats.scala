@@ -18,20 +18,12 @@
  */
 package org.beangle.commons.lang.time
 
-import java.text.DateFormat
-import java.text.DecimalFormat
-import java.text.FieldPosition
-import java.text.ParsePosition
-import java.text.SimpleDateFormat
+import java.text._
 import java.time.ZoneId
-
 import java.time.format.DateTimeFormatter
-import java.{ util => ju }
-import java.util.Calendar
-import java.util.GregorianCalendar
-import java.util.SimpleTimeZone
-import java.util.TimeZone
+import java.util.{Calendar, GregorianCalendar, SimpleTimeZone, TimeZone}
 import java.util.regex.Pattern
+import java.{util => ju}
 
 object DateFormats {
 

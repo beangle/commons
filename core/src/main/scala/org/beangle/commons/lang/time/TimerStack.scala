@@ -21,11 +21,10 @@ package org.beangle.commons.lang.time
 import java.util.Arrays
 
 /**
- * Record timer nodes
- *
- * @author chaostone
- * @since 3.0.0
- */
+  * Record timer nodes
+  * @author chaostone
+  * @since 3.0.0
+  */
 class TimerStack(root: TimerNode, initCapacity: Int) {
 
   var index: Int = -1
@@ -38,14 +37,14 @@ class TimerStack(root: TimerNode, initCapacity: Int) {
     this(root, 15)
   }
 
-  private def ensureCapacity() {
+  private def ensureCapacity(): Unit = {
     if (index >= nodes.length) {
       val newCapacity = nodes.length * 2
       nodes = Arrays.copyOf(nodes, newCapacity)
     }
   }
 
-  def push(node: TimerNode) {
+  def push(node: TimerNode): Unit = {
     ensureCapacity()
     nodes(index) = node
   }

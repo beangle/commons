@@ -17,13 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.text.seq
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.Matchers
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class MultiLevelSeqGeneratorTest extends FunSpec with Matchers {
+class MultiLevelSeqGeneratorTest extends AnyFunSpec with Matchers {
 
   describe("MultiLevelSeqGenerator") {
     it("Generate multi level sequence") {

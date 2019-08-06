@@ -21,7 +21,7 @@ package org.beangle.commons.io
 import java.io.IOException
 import java.net.URL
 
-import org.beangle.commons.lang.{ ClassLoaders, Strings }
+import org.beangle.commons.lang.{ClassLoaders, Strings}
 
 /**
  * Resource loader

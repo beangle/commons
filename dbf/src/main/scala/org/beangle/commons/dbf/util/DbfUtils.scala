@@ -87,7 +87,7 @@ object DbfUtils {
    * @return long value
    */
   def parseLong(bytes: Array[Byte]): Long = {
-    var result = 0l
+    var result = 0L
     var i = 0
     while (i < bytes.length) {
       val aByte = bytes(i)
@@ -103,7 +103,7 @@ object DbfUtils {
    * parses only positive numbers
    */
   def parseLong(bytes: Array[Byte], from: Int, to: Int): Long = {
-    var result = 0l
+    var result = 0L
     var i = 0
     while (i < to && i < bytes.length) {
       result *= 10

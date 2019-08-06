@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.lang
 
-import java.{ lang => jl }
+import java.{lang => jl}
 /**
  * Wrap or Unwrap primitive
  *

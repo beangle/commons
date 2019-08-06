@@ -18,10 +18,11 @@
  */
 package org.beangle.commons.conversion.impl
 
-import java.lang.reflect.ParameterizedType
-import java.lang.reflect.Type
+import java.lang.reflect.{ParameterizedType, Type}
+
 import org.beangle.commons.conversion.Converter
 import org.beangle.commons.lang.Objects
+
 import scala.collection.mutable
 /**
  * A converter factory that can convert objects from S to subtypes of R.
@@ -68,7 +69,7 @@ abstract class ConverterFactory[S, R] extends GenericConverter {
     }
   }
 
-  protected def register(targetType: Class[_], converter: Converter[S, _ <: R]) {
+  protected def register(targetType: Class[_], converter: Converter[S, _ <: R]): Unit = {
     converters.put(targetType, converter)
   }
 }

@@ -19,8 +19,6 @@
 package org.beangle.commons.event
 
 import scala.collection.mutable
-import org.beangle.commons.lang.annotation.description
-import org.beangle.commons.bean.Initializing
 
 /**
  * EventListener interface.
@@ -99,17 +97,17 @@ class DefaultEventMulticaster extends EventMulticaster {
 
   private var listenerCache: Map[ListenerCacheKey, List[EventListener[Event]]] = Map.empty
 
-  def multicast(e: Event) {
+  def multicast(e: Event): Unit = {
     val adapted = getListeners(e)
     for (listener <- adapted) listener.onEvent(e)
   }
 
-  def addListener(listener: EventListener[_]) {
+  def addListener(listener: EventListener[_]): Unit = {
     listeners ::= listener.asInstanceOf[EventListener[Event]]
     listenerCache = Map.empty
   }
 
-  def removeListener(listener: EventListener[_]) {
+  def removeListener(listener: EventListener[_]): Unit = {
     listeners = listeners diff List(listener.asInstanceOf[EventListener[Event]])
     listenerCache = Map.empty
   }
@@ -117,7 +115,7 @@ class DefaultEventMulticaster extends EventMulticaster {
   /**
    * removeAllListeners.
    */
-  def removeAllListeners() {
+  def removeAllListeners(): Unit = {
     listeners = Nil
     listenerCache = Map.empty
   }

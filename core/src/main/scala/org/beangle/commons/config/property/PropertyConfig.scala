@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.config.property
 
-import PropertyConfig._
+import org.beangle.commons.config.property.PropertyConfig._
 
 object PropertyConfig {
 

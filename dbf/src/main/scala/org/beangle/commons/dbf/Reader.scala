@@ -43,7 +43,7 @@ object Reader {
     new Reader(dataInput, Header.read(dataInput))
   }
 
-  def writeToCsv(dbf: File, csv: File, dbfEncoding: Charset) {
+  def writeToCsv(dbf: File, csv: File, dbfEncoding: Charset): Unit = {
     val reader = Reader(dbf)
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(csv)))
 

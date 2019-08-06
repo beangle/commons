@@ -60,14 +60,14 @@ class CsvWriter(val writer: Writer, val format: CsvFormat = new CsvFormat.Builde
   /**
    * write.
    */
-  def write(allLines: Seq[Array[String]]) {
+  def write(allLines: collection.Seq[Array[String]]): Unit = {
     for (line <- allLines) write(line)
   }
 
   /**
    * write.
    */
-  def write(nextLine: Array[String]) {
+  def write(nextLine: Array[String]): Unit = {
     if (nextLine == null) return
     val sb = new StringBuilder(InitialStringSize)
     for (i <- 0 until nextLine.length) {
@@ -113,14 +113,14 @@ class CsvWriter(val writer: Writer, val format: CsvFormat = new CsvFormat.Builde
   /**
    * flush.
    */
-  def flush() {
+  def flush(): Unit = {
     writer.flush()
   }
 
   /**
    * close.
    */
-  def close() {
+  def close(): Unit = {
     try {
       flush()
       writer.close()

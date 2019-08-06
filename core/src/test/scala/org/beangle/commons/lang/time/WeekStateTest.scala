@@ -19,11 +19,12 @@
 package org.beangle.commons.lang.time
 
 import org.junit.runner.RunWith
-import org.scalatest.{ FunSpec, Matchers }
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class WeekStateTest extends FunSpec with Matchers {
+class WeekStateTest extends AnyFunSpec with Matchers {
 
   describe("WeekState") {
     it("toString ") {

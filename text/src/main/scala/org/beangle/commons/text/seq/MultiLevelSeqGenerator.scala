@@ -42,7 +42,7 @@ class MultiLevelSeqGenerator {
   /**
    * add.
    */
-  def add(style: SeqPattern) {
+  def add(style: SeqPattern): Unit = {
     style.generator = this
     patterns.put(style.level, style)
   }
@@ -50,7 +50,7 @@ class MultiLevelSeqGenerator {
   /**
    * reset.
    */
-  def reset(level: Int) {
+  def reset(level: Int): Unit = {
     getPattern(level).reset()
   }
 }

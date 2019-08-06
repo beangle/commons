@@ -19,15 +19,16 @@
 package org.beangle.commons.web.url
 
 import org.junit.runner.RunWith
-import org.scalatest.{FunSpec, Matchers}
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 /**
  * @author chaostone
  * @version
  */
 @RunWith(classOf[JUnitRunner])
-class UrlBuilderTest extends FunSpec with Matchers {
+class UrlBuilderTest extends AnyFunSpec with Matchers {
 
   describe("UrlBuilder") {
     it("build full url") {

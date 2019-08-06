@@ -20,12 +20,12 @@ package org.beangle.commons.file.digest
 
 import org.junit.runner.RunWith
 import org.scalatest.Matchers
-import org.scalatest.FunSpec
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 import java.io.File
 
 @RunWith(classOf[JUnitRunner])
-class DigestTest extends FunSpec with Matchers {
+class DigestTest extends AnyFunSpec with Matchers {
 
   val file = new File("/tmp/pgadmin4-2.0.dmg")
   if (file.exists()) {

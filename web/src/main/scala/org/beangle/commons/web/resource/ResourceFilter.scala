@@ -24,6 +24,6 @@ import javax.servlet.http.HttpServletResponse
 trait ResourceFilter {
 
   def filter( context:ProcessContext, request:HttpServletRequest, response:HttpServletResponse,
-      chain:ProcessChain)
+      chain:ProcessChain): Unit
 
 }

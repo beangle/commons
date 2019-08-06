@@ -19,12 +19,13 @@
 package org.beangle.commons.codec.binary
 
 import org.junit.runner.RunWith
-import org.scalatest.{ FunSpec, Matchers }
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 import java.util.Arrays
 
 @RunWith(classOf[JUnitRunner])
-class AesTest extends FunSpec with Matchers {
+class AesTest extends AnyFunSpec with Matchers {
   describe("AES") {
     it("ECB encode and decode") {
       var key = "8NONwyJtHesysWpM"

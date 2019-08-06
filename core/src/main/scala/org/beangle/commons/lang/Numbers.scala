@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.lang
 
-import java.{ lang => jl, math => jm }
+import java.{lang => jl, math => jm}
 
 import org.beangle.commons.lang.Strings.isEmpty
 
@@ -75,7 +75,7 @@ object Numbers {
     }
   }
 
-  def toLong(str: String, defaultValue: Long = 0l): Long = {
+  def toLong(str: String, defaultValue: Long = 0L): Long = {
     if (isEmpty(str)) return defaultValue
     try {
       jl.Long.parseLong(str)

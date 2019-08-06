@@ -18,12 +18,13 @@
  */
 package org.beangle.commons.lang.reflect
 
-import java.lang.reflect.{ Method, Modifier, ParameterizedType, TypeVariable }
-import scala.collection.mutable
-import scala.language.existentials
-import org.beangle.commons.lang.Objects
+import java.lang.reflect.{Method, Modifier, ParameterizedType, TypeVariable}
+
 import org.beangle.commons.collection.IdentityCache
 import org.beangle.commons.lang.reflect.Reflections.deduceParamTypes
+
+import scala.collection.mutable
+import scala.language.existentials
 
 object ClassInfos {
 

@@ -17,10 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.net.http
-import java.net.{ Socket, HttpURLConnection }
-import javax.net.ssl.{ SSLEngine, HostnameVerifier, HttpsURLConnection, SSLSession, SSLContext, X509ExtendedTrustManager }
-import java.security.cert.CertificateException
+import java.net.{HttpURLConnection, Socket}
 import java.security.cert.X509Certificate
+
+import javax.net.ssl._
 
 object Https {
 

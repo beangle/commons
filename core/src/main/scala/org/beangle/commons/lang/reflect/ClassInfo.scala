@@ -20,10 +20,10 @@ package org.beangle.commons.lang.reflect
 
 import java.lang.reflect.Method
 
+import org.beangle.commons.lang.Objects
+
 import scala.collection.mutable
 import scala.language.existentials
-
-import org.beangle.commons.lang.Objects
 
 object ClassInfo {
   def apply(methodInfos: Seq[MethodInfo]): ClassInfo = {

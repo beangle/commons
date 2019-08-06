@@ -18,13 +18,13 @@
  */
 package org.beangle.commons.lang.reflect
 
-import java.lang.reflect.{ Constructor, Method, ParameterizedType }
+import java.lang.reflect.{Constructor, Method, ParameterizedType}
 
 import scala.language.existentials
 
-case class Getter(val method: Method, val returnType: Class[_])
+case class Getter(method: Method, returnType: Class[_])
 
-case class Setter(val method: Method, val parameterTypes: Array[Class[_]])
+case class Setter(method: Method, parameterTypes: Array[Class[_]])
 
 sealed trait TypeInfo {
   def clazz: Class[_]
@@ -57,9 +57,9 @@ object TypeInfo {
       } else {
         typ match {
           case pt: ParameterizedType =>
-            if (pt.getActualTypeArguments.size == 1) CollectionType(clazz, typeAt(pt, 0))
+            if (pt.getActualTypeArguments.length == 1) CollectionType(clazz, typeAt(pt, 0))
             else MapType(clazz, typeAt(pt, 0), typeAt(pt, 1))
-          case c: Class[_] => {
+          case c: Class[_] =>
             if (classOf[collection.Map[_, _]].isAssignableFrom(clazz)) {
               val typeParams = getGenericParamType(c, classOf[collection.Map[_, _]])
               toMapType(clazz, typeParams)
@@ -73,7 +73,6 @@ object TypeInfo {
               val typeParams = getGenericParamType(c, classOf[java.util.Map[_, _]])
               toMapType(clazz, typeParams)
             }
-          }
           case _ => MapType(clazz, classOf[Any], classOf[Any])
         }
       }
@@ -81,12 +80,12 @@ object TypeInfo {
       if (clazz == classOf[Option[_]]) {
         val innerType = typ match {
           case pt: ParameterizedType =>
-            if (pt.getActualTypeArguments.size == 1) typeAt(pt, 0) else classOf[AnyRef]
+            if (pt.getActualTypeArguments.length == 1) typeAt(pt, 0) else classOf[AnyRef]
           case c: Class[_] => classOf[AnyRef]
         }
-        ElementType(innerType, true)
+        ElementType(innerType, optional = true)
       } else {
-        ElementType(clazz, false)
+        ElementType(clazz)
       }
     }
   }
@@ -115,7 +114,7 @@ case class ElementType(clazz: Class[_], optional: Boolean = false) extends TypeI
   override def isElement: Boolean = true
 }
 
-case class CollectionType(val clazz: Class[_], val elementType: Class[_]) extends TypeInfo {
+case class CollectionType(clazz: Class[_], elementType: Class[_]) extends TypeInfo {
   def isSetType: Boolean = {
     classOf[collection.Set[_]].isAssignableFrom(clazz) || classOf[java.util.Set[_]].isAssignableFrom(clazz)
   }
@@ -126,7 +125,7 @@ case class CollectionType(val clazz: Class[_], val elementType: Class[_]) extend
   }
 }
 
-case class MapType(val clazz: Class[_], val keyType: Class[_], valueType: Class[_]) extends TypeInfo {
+case class MapType(clazz: Class[_], keyType: Class[_], valueType: Class[_]) extends TypeInfo {
   override def optional: Boolean = {
     false
   }
@@ -134,17 +133,11 @@ case class MapType(val clazz: Class[_], val keyType: Class[_], valueType: Class[
 }
 
 class PropertyDescriptor(val name: String, val typeinfo: TypeInfo, val getter: Option[Method], val setter: Option[Method], val isTransient: Boolean) {
-  def writable: Boolean = {
-    None != setter
-  }
+  def writable: Boolean = setter.isDefined
 
-  def clazz: Class[_] = {
-    typeinfo.clazz
-  }
+  def clazz: Class[_] = typeinfo.clazz
 
-  def readable: Boolean = {
-    None != getter
-  }
+  def readable: Boolean = getter.isDefined
 }
 
 class ConstructorDescriptor(val constructor: Constructor[_], val args: Vector[TypeInfo])

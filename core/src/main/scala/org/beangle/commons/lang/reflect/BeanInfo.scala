@@ -21,7 +21,6 @@ package org.beangle.commons.lang.reflect
 import java.lang.reflect.Method
 
 import scala.language.existentials
-import scala.reflect.runtime.{ universe => ru }
 
 /**
  * defaultConstructorParams is 1 based
@@ -64,7 +63,7 @@ class BeanInfo(val properties: Map[String, PropertyDescriptor],
     properties.filter(p => p._2.writable)
   }
 
-  def getWritableProperties(): Set[String] = {
+  def getWritableProperties: Set[String] = {
     properties.filter(e => e._2.writable).keySet
   }
 }

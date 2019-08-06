@@ -3,10 +3,10 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.beangle.commons</groupId>
-    <artifactId>beangle-commons-parent_2.12</artifactId>
-    <version>5.1.7</version>
+    <artifactId>beangle-commons-parent_2.13</artifactId>
+    <version>5.1.8</version>
   </parent>
-  <artifactId>beangle-commons-csv_2.12</artifactId>
+  <artifactId>beangle-commons-csv_2.13</artifactId>
   <packaging>jar</packaging>
   <name>Beangle Commons Csv</name>
 
@@ -18,7 +18,7 @@
   <dependencies>
     <dependency>
       <groupId>org.beangle.commons</groupId>
-      <artifactId>beangle-commons-core_2.12</artifactId>
+      <artifactId>beangle-commons-core_2.13</artifactId>
     </dependency>
   </dependencies>
 </project>

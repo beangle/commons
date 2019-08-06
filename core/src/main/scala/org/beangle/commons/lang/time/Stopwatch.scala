@@ -18,12 +18,8 @@
  */
 package org.beangle.commons.lang.time
 
-import java.util.concurrent.TimeUnit.MICROSECONDS
-import java.util.concurrent.TimeUnit.MILLISECONDS
-import java.util.concurrent.TimeUnit.NANOSECONDS
-import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.TimeUnit
-import org.beangle.commons.lang.Assert
+import java.util.concurrent.TimeUnit.{MICROSECONDS, MILLISECONDS, NANOSECONDS, SECONDS}
 
 object Stopwatch {
 
@@ -54,7 +50,7 @@ object Stopwatch {
     case _ => throw new AssertionError()
   }
 }
-import Stopwatch._
+import org.beangle.commons.lang.time.Stopwatch._
 /**
  * Simple Stopwatch
  * @author chaostone
@@ -137,5 +133,5 @@ class Stopwatch(val ticker: Ticker = Ticker.systemTicker(), start: Boolean = fal
    * Returns a string representation of the current elapsed time; equivalent to {@code toString(4)}
    * (four significant figures).
    */
-  override def toString(): String = format(elapsedNanos, 4)
+  override def toString: String = format(elapsedNanos, 4)
 }

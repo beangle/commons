@@ -19,25 +19,24 @@
 package org.beangle.commons.lang.time
 
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.annotation.beta
 import org.beangle.commons.lang.annotation.value
 
 object WeekState {
 
-  val Zero = new WeekState(0l)
+  val Zero = new WeekState(0L)
 
   def apply(value: String): WeekState = {
     new WeekState(value)
   }
 
   def of(weekIndex: Int): WeekState = {
-    return new WeekState(1l << weekIndex)
+    new WeekState(1L << weekIndex)
   }
 
   def of(weekIndecies: Iterable[Int]): WeekState = {
-    var v = 0l
+    var v = 0L
     for (index <- weekIndecies) {
-      v |= (1l << index)
+      v |= (1L << index)
     }
     new WeekState(v)
   }
@@ -146,7 +145,7 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
   }
 
   def isOccupied(week: Int): Boolean = {
-    (value & (1l << week)) > 0
+    (value & (1L << week)) > 0
   }
 
 }

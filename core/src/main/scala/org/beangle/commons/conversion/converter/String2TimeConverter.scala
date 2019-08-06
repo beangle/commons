@@ -18,9 +18,10 @@
  */
 package org.beangle.commons.conversion.converter
 
-import org.beangle.commons.lang.Strings
-import org.beangle.commons.conversion.Converter
 import java.sql.Time
+
+import org.beangle.commons.conversion.Converter
+import org.beangle.commons.lang.Strings
 
 /**
  * Convert String to Time.

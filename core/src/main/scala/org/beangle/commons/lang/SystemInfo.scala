@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.lang
 
-import java.net.{ InetAddress, NetworkInterface, UnknownHostException }
+import java.net.{InetAddress, NetworkInterface, UnknownHostException}
 
 import scala.collection.mutable
 /**
@@ -113,10 +113,6 @@ object SystemInfo {
     val version = properties("java.runtime.version")
 
     val home = properties("java.home")
-
-    val extDirs = properties("java.ext.dirs")
-
-    val endorsedDirs = properties("java.endorsed.dirs")
 
     val classpath = properties("java.class.path")
 

@@ -18,51 +18,61 @@
  */
 package org.beangle.commons.logging
 
-import org.slf4j.{ Logger => JLogger, LoggerFactory }
+import org.slf4j.{LoggerFactory, Logger => JLogger}
+
 import scala.annotation.elidable
 import scala.annotation.elidable._
 
 /**
- * Slf4j Logger delegate.
- */
+  * Slf4j Logger delegate.
+  */
 object Logger {
   def apply(clazz: Class[_]): Logger = {
     new Logger(LoggerFactory getLogger clazz)
   }
+
   sealed trait LevelLogger extends Any {
     def apply(msg: => String): Unit
-    def apply(msg: => String, t: Throwable)
+
+    def apply(msg: => String, t: Throwable): Unit
   }
 
   private[logging] object ZeroLogger extends LevelLogger {
-    @inline def apply(msg: => String) {}
-    @inline def apply(msg: => String, t: Throwable) {}
+    @inline def apply(msg: => String): Unit = {}
+
+    @inline def apply(msg: => String, t: Throwable): Unit = {}
   }
 
-  final class TraceLogger private[logging] (val logger: JLogger) extends AnyVal with LevelLogger {
-    @inline def apply(msg: => String) = logger.trace(msg)
-    @inline def apply(msg: => String, t: Throwable) = logger.trace(msg, t)
+  final class TraceLogger private[logging](val logger: JLogger) extends AnyVal with LevelLogger {
+    @inline def apply(msg: => String): Unit = logger.trace(msg)
+
+    @inline def apply(msg: => String, t: Throwable): Unit = logger.trace(msg, t)
   }
 
-  final class DebugLogger private[logging] (val logger: JLogger) extends AnyVal with LevelLogger {
-    @inline def apply(msg: => String) = logger.debug(msg)
-    @inline def apply(msg: => String, t: Throwable) = logger.debug(msg, t)
+  final class DebugLogger private[logging](val logger: JLogger) extends AnyVal with LevelLogger {
+    @inline def apply(msg: => String): Unit = logger.debug(msg)
+
+    @inline def apply(msg: => String, t: Throwable): Unit = logger.debug(msg, t)
   }
 
-  final class InfoLogger private[logging] (val logger: JLogger) extends AnyVal with LevelLogger {
-    @inline def apply(msg: => String) = logger.info(msg)
-    @inline def apply(msg: => String, t: Throwable) = logger.info(msg, t)
+  final class InfoLogger private[logging](val logger: JLogger) extends AnyVal with LevelLogger {
+    @inline def apply(msg: => String): Unit = logger.info(msg)
+
+    @inline def apply(msg: => String, t: Throwable): Unit = logger.info(msg, t)
   }
 
-  final class WarnLogger private[logging] (val logger: JLogger) extends AnyVal with LevelLogger {
-    @inline def apply(msg: => String) = logger.warn(msg)
-    @inline def apply(msg: => String, t: Throwable) = logger.warn(msg, t)
+  final class WarnLogger private[logging](val logger: JLogger) extends AnyVal with LevelLogger {
+    @inline def apply(msg: => String): Unit = logger.warn(msg)
+
+    @inline def apply(msg: => String, t: Throwable): Unit = logger.warn(msg, t)
   }
 
-  final class ErrorLogger private[logging] (val logger: JLogger) extends AnyVal with LevelLogger {
-    @inline def apply(msg: => String) = logger.error(msg)
-    @inline def apply(msg: => String, t: Throwable) = logger.error(msg, t)
+  final class ErrorLogger private[logging](val logger: JLogger) extends AnyVal with LevelLogger {
+    @inline def apply(msg: => String): Unit = logger.error(msg)
+
+    @inline def apply(msg: => String, t: Throwable): Unit = logger.error(msg, t)
   }
+
 }
 
 final class Logger(val logger: JLogger) extends AnyVal {
@@ -98,18 +108,23 @@ final class Logger(val logger: JLogger) extends AnyVal {
   final def error(msg: => String, t: => Throwable): Unit = if (logger.isErrorEnabled) logger.error(msg, t)
 
   import Logger._
+
   def apply(level: LogLevel): LevelLogger = level match {
     case Trace => if (logger.isTraceEnabled) new TraceLogger(logger) else ZeroLogger
     case Debug => if (logger.isDebugEnabled) new DebugLogger(logger) else ZeroLogger
-    case Info  => if (logger.isInfoEnabled) new InfoLogger(logger) else ZeroLogger
-    case Warn  => if (logger.isWarnEnabled) new WarnLogger(logger) else ZeroLogger
+    case Info => if (logger.isInfoEnabled) new InfoLogger(logger) else ZeroLogger
+    case Warn => if (logger.isWarnEnabled) new WarnLogger(logger) else ZeroLogger
     case Error => if (logger.isErrorEnabled) new ErrorLogger(logger) else ZeroLogger
   }
 
   @inline def apply(lvl: Trace.type): LevelLogger = if (logger.isTraceEnabled) new TraceLogger(logger) else ZeroLogger
+
   @inline def apply(lvl: Debug.type): LevelLogger = if (logger.isDebugEnabled) new DebugLogger(logger) else ZeroLogger
+
   @inline def apply(lvl: Info.type): LevelLogger = if (logger.isInfoEnabled) new InfoLogger(logger) else ZeroLogger
+
   @inline def apply(lvl: Warn.type): LevelLogger = if (logger.isWarnEnabled) new WarnLogger(logger) else ZeroLogger
+
   @inline def apply(lvl: Error.type): LevelLogger = if (logger.isErrorEnabled) new ErrorLogger(logger) else ZeroLogger
 
 }

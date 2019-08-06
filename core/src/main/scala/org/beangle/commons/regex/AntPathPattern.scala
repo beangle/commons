@@ -19,8 +19,8 @@
 package org.beangle.commons.regex
 
 import java.util.regex.Pattern
+
 import org.beangle.commons.lang.Strings
-import AntPathPattern._
 
 object AntPathPattern {
 

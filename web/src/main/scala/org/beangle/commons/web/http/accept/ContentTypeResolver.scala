@@ -19,9 +19,9 @@
 package org.beangle.commons.web.http.accept
 
 import javax.servlet.http.HttpServletRequest
-import javax.activation.MimeType
+import org.beangle.commons.activation.MediaType
 
 trait ContentTypeResolver {
 
-  def resolve(request: HttpServletRequest): Seq[MimeType]
+  def resolve(request: HttpServletRequest): Seq[MediaType]
 }

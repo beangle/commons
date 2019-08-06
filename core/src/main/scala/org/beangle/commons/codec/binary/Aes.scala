@@ -18,26 +18,22 @@
  */
 package org.beangle.commons.codec.binary
 
-import org.beangle.commons.codec.{ Decoder, Encoder }
+import javax.crypto.spec.{IvParameterSpec, SecretKeySpec}
+import javax.crypto.{Cipher, SecretKey}
+import org.beangle.commons.codec.{Decoder, Encoder}
 
-import javax.crypto.{ Cipher, SecretKey, SecretKeyFactory }
-import javax.crypto.KeyGenerator
-import javax.crypto.spec.IvParameterSpec
-import javax.crypto.spec.SecretKeySpec
-import java.security.SecureRandom
-/**
- * Advanced Encryption Standard
- * @see https://en.wikipedia.org/wiki/Advanced_Encryption_Standard
- */
+/** Advanced Encryption Standard
+  * @see https://en.wikipedia.org/wiki/Advanced_Encryption_Standard
+  */
 object Aes {
   def buildKey(key: String): SecretKey = {
     new SecretKeySpec(key.getBytes("UTF-8"), "AES")
   }
 
   /**
-   * Electronic Codebook ecode and decode utility
-   * @see https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29
-   */
+    * Electronic Codebook ecode and decode utility
+    * @see https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29
+    */
   object ECB {
     def encode2Hex(key: String, data: String, padding: String = Padding.PKCS5): String = {
       val d = new ECBEncoder(key, padding).encode(data.getBytes("UTF-8"))
@@ -62,8 +58,9 @@ object Aes {
       cipher
     }
   }
+
   class ECBEncoder(val key: String, padding: String) extends Encoder[Array[Byte], Array[Byte]] {
-    val skey = Aes.buildKey(key)
+    private val skey = Aes.buildKey(key)
 
     def encode(data: Array[Byte]): Array[Byte] = {
       ECB.buildCipher(Cipher.ENCRYPT_MODE, skey, padding).doFinal(data)
@@ -71,7 +68,7 @@ object Aes {
   }
 
   class ECBDecoder(key: String, padding: String) extends Decoder[Array[Byte], Array[Byte]] {
-    val skey = Aes.buildKey(key)
+    private val skey = Aes.buildKey(key)
 
     def decode(data: Array[Byte]): Array[Byte] = {
       ECB.buildCipher(Cipher.DECRYPT_MODE, skey, padding).doFinal(data)
@@ -79,8 +76,8 @@ object Aes {
   }
 
   /**
-   * Cipher-Block Chaining encode and decode utility
-   */
+    * Cipher-Block Chaining encode and decode utility
+    */
   object CBC {
     def encode2Hex(key: String, data: String, padding: String = Padding.PKCS5, iv: String = null): String = {
       val d = new CBCEncoder(key, iv, padding).encode(data.getBytes("UTF-8"))
@@ -120,4 +117,5 @@ object Aes {
       CBC.buildCipher(Cipher.DECRYPT_MODE, key, iv, padding).doFinal(data)
     }
   }
+
 }

@@ -35,14 +35,14 @@ abstract class GenericHttpFilter extends Filter with Initializing {
    * Standard way of initializing this filter. Map config parameters onto bean
    * properties of this filter, and invoke subclass initialization.
    */
-  override def init(filterConfig: FilterConfig) {
+  override def init(filterConfig: FilterConfig): Unit = {
     this.filterConfig = filterConfig
     val filterName = filterConfig.getFilterName
     initParams(filterConfig, requiredProperties)
     init()
   }
 
-  private final def initParams(config: FilterConfig, requiredProperties: Set[String]) {
+  private final def initParams(config: FilterConfig, requiredProperties: Set[String]): Unit = {
     val missingProps = new mutable.HashSet[String]
     if ((requiredProperties != null && !requiredProperties.isEmpty)) missingProps ++= requiredProperties
     val en = config.getInitParameterNames
@@ -66,7 +66,7 @@ abstract class GenericHttpFilter extends Filter with Initializing {
     (if (filterConfig != null) filterConfig.getFilterName else "None")
   }
 
-  override def init() {
+  override def init(): Unit = {
   }
 
   /**
@@ -75,6 +75,6 @@ abstract class GenericHttpFilter extends Filter with Initializing {
    */
   def requiredProperties: Set[String] = Set.empty
 
-  override def destroy() {
+  override def destroy(): Unit = {
   }
 }

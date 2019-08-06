@@ -18,8 +18,7 @@
  */
 package org.beangle.commons.lang
 
-import java.io.PrintWriter
-import java.io.StringWriter
+import java.io.{PrintWriter, StringWriter}
 /**
  * Static utility methods pertaining to instances of {@link Throwable}.
  *
@@ -44,7 +43,7 @@ object Throwables {
    * }
    * </pre>
    */
-  def propagateIfInstanceOf[X <: Throwable](throwable: Throwable, declaredType: Class[X]) {
+  def propagateIfInstanceOf[X <: Throwable](throwable: Throwable, declaredType: Class[X]): Unit = {
     if (throwable != null && declaredType.isInstance(throwable)) throw declaredType.cast(throwable)
   }
 

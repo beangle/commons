@@ -19,21 +19,27 @@
 package org.beangle.commons.lang.reflect
 
 import java.lang.annotation.Annotation
-import java.lang.reflect.{ Method, ParameterizedType, Type, TypeVariable }
+import java.lang.reflect.{Method, ParameterizedType, Type, TypeVariable}
+
+import org.beangle.commons.lang.{ClassLoaders, Objects, Throwables}
+
 import scala.language.existentials
-import org.beangle.commons.lang.{ Objects, Throwables }
 import scala.reflect.ClassTag
-import org.beangle.commons.lang.ClassLoaders
 
 object Reflections {
 
   def newInstance[T](clazz: Class[T]): T = {
     try {
-      return clazz.newInstance()
+      clazz.getDeclaredConstructor().newInstance()
     } catch {
-      case e: Exception => Throwables.propagate(e)
+      case e: Exception =>
+        Throwables.propagate(e)
+        Objects.default(clazz)
     }
-    Objects.default(clazz)
+  }
+
+  def newInstance[T](className: String, classLoader: ClassLoader = null): T = {
+    ClassLoaders.load(className, classLoader).getDeclaredConstructor().newInstance().asInstanceOf[T]
   }
 
   def getInstance[T: ClassTag](name: String)(implicit manifest: Manifest[T]): T = {
@@ -41,22 +47,25 @@ object Reflections {
     if (!manifest.runtimeClass.isAssignableFrom(moduleClass)) {
       ClassLoaders.get(name + "$") match {
         case Some(clazz) => moduleClass = clazz
-        case None        => throw new RuntimeException(name + " is not a module")
+        case None => throw new RuntimeException(name + " is not a module")
       }
     }
-    if (moduleClass.getConstructors.length > 0) moduleClass.newInstance().asInstanceOf[T]
-    else moduleClass.getDeclaredField("MODULE$").get(null).asInstanceOf[T]
+    if (moduleClass.getConstructors.length > 0) {
+      moduleClass.getDeclaredConstructor().newInstance().asInstanceOf[T]
+    } else {
+      moduleClass.getDeclaredField("MODULE$").get(null).asInstanceOf[T]
+    }
   }
 
   /**
-   * Find parameter types of given class's interface or superclass
-   */
+    * Find parameter types of given class's interface or superclass
+    */
   def getGenericParamType(clazz: Class[_], expected: Class[_]): collection.Map[String, Class[_]] = {
     if (!expected.isAssignableFrom(clazz)) return Map.empty
     if (expected.isInterface) {
       getInterfaceParamType(clazz, expected)
     } else {
-      getParamType(clazz.getSuperclass(), clazz.getGenericSuperclass(), expected)
+      getParamType(clazz.getSuperclass, clazz.getGenericSuperclass, expected)
     }
   }
 
@@ -67,7 +76,7 @@ object Reflections {
     val idx = (0 until interfaces.length) find { i => expected.isAssignableFrom(interfaces(i)) }
     idx match {
       case Some(i) =>
-        val gis = clazz.getGenericInterfaces()
+        val gis = clazz.getGenericInterfaces
         //如果此时出现genericInterfaces<interfaces,表示子类、父类均实现了接口，但是子类的class中好像没有范型信息，估计是scala编译导致的。
         if (gis.length > i) {
           getParamType(interfaces(i), gis(i), expected, paramTypes)
@@ -79,14 +88,13 @@ object Reflections {
             getInterfaceParamType(superClass, expected, getParamType(superClass, clazz.getGenericSuperclass, superClass, paramTypes))
           }
         }
-      case _ => {
+      case _ =>
         val superClass = clazz.getSuperclass
         if (null == superClass) {
           Map.empty
         } else {
           getInterfaceParamType(superClass, expected, getParamType(superClass, clazz.getGenericSuperclass, superClass, paramTypes))
         }
-      }
     }
   }
 
@@ -101,9 +109,9 @@ object Reflections {
         val tvs = clazz.getTypeParameters
         (0 until ps.length) foreach { k =>
           val resultType = ps(k) match {
-            case c: Class[_]           => c
-            case tv: TypeVariable[_]   => paramTypes.get(tv.getName).orNull
-            case pt: ParameterizedType => pt.getRawType().asInstanceOf[Class[_]]
+            case c: Class[_] => c
+            case tv: TypeVariable[_] => paramTypes.get(tv.getName).orNull
+            case pt: ParameterizedType => pt.getRawType.asInstanceOf[Class[_]]
           }
           if (null != resultType) tmp.put(tvs(k).getName, resultType)
         }
@@ -116,7 +124,7 @@ object Reflections {
       if (clazz.isInterface) {
         getInterfaceParamType(clazz, expected, newParamTypes)
       } else {
-        getParamType(clazz.getSuperclass(), clazz.getGenericSuperclass(), expected, newParamTypes)
+        getParamType(clazz.getSuperclass, clazz.getGenericSuperclass, expected, newParamTypes)
       }
     }
   }
@@ -128,15 +136,16 @@ object Reflections {
       val superClass = delaringClass.getSuperclass
       if (null == superClass) return false
       try {
-        isAnnotationPresent(superClass.getMethod(method.getName(), method.getParameterTypes(): _*), clazz)
+        isAnnotationPresent(superClass.getMethod(method.getName, method.getParameterTypes: _*), clazz)
       } catch {
         case e: NoSuchMethodException => false
       }
     } else true
   }
+
   /**
-   * Find annotation in method declare class hierarchy
-   */
+    * Find annotation in method declare class hierarchy
+    */
   def getAnnotation[T <: Annotation](method: Method, clazz: Class[T]): Tuple2[T, Method] = {
     val ann = method.getAnnotation(clazz)
     if (null == ann) {
@@ -144,7 +153,7 @@ object Reflections {
       val superClass = delaringClass.getSuperclass
       if (null == superClass) return null.asInstanceOf[Tuple2[T, Method]]
       try {
-        getAnnotation(superClass.getMethod(method.getName(), method.getParameterTypes(): _*), clazz)
+        getAnnotation(superClass.getMethod(method.getName, method.getParameterTypes: _*), clazz)
       } catch {
         case e: NoSuchMethodException => null.asInstanceOf[Tuple2[T, Method]]
       }
@@ -152,8 +161,8 @@ object Reflections {
   }
 
   /**
-   * 得到类和对应泛型的参数信息
-   */
+    * 得到类和对应泛型的参数信息
+    */
   def deduceParamTypes(clazz: Class[_], typ: java.lang.reflect.Type, paramTypes: collection.Map[String, Class[_]]): collection.Map[String, Class[_]] = {
     typ match {
       case ptSuper: ParameterizedType =>
@@ -162,8 +171,8 @@ object Reflections {
         val tvs = clazz.getTypeParameters
         (0 until ps.length) foreach { k =>
           val paramType = ps(k) match {
-            case c: Class[_]           => Some(c)
-            case tv: TypeVariable[_]   => paramTypes.get(tv.getName)
+            case c: Class[_] => Some(c)
+            case tv: TypeVariable[_] => paramTypes.get(tv.getName)
             case pt: ParameterizedType => Some(pt.getRawType.asInstanceOf[Class[_]])
           }
           paramType foreach (pt => tmp.put(tvs(k).getName, pt))

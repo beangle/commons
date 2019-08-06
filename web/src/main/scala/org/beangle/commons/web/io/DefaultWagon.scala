@@ -33,7 +33,7 @@ import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
  */
 class DefaultWagon extends Wagon {
 
-  override def copy(url: URL, req: HttpServletRequest, res: HttpServletResponse) {
+  override def copy(url: URL, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     try {
       copy(url.openStream, req, res)
     } catch {
@@ -41,7 +41,7 @@ class DefaultWagon extends Wagon {
     }
   }
 
-  override def copy(file: File, req: HttpServletRequest, res: HttpServletResponse) {
+  override def copy(file: File, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     if (file.exists()) {
       try {
         copy(new FileInputStream(file), req, res)
@@ -51,7 +51,7 @@ class DefaultWagon extends Wagon {
     }
   }
 
-  override def copy(is: InputStream, req: HttpServletRequest, res: HttpServletResponse) {
+  override def copy(is: InputStream, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     try {
       IOs.copy(is, res.getOutputStream)
     } catch {

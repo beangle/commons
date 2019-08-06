@@ -20,16 +20,16 @@ package org.beangle.commons.lang.reflect
 
 import java.beans.Transient
 import java.lang.Character.isUpperCase
-import java.lang.reflect.{ Field, Method, Modifier, ParameterizedType, TypeVariable }
+import java.lang.reflect.{Field, Method, Modifier, ParameterizedType, TypeVariable}
+
+import org.beangle.commons.collection.{Collections, IdentityCache}
+import org.beangle.commons.lang.Strings.{substringBefore, uncapitalize}
+import org.beangle.commons.lang.reflect.Reflections.deduceParamTypes
+import org.beangle.commons.lang.{ClassLoaders, Strings}
 
 import scala.collection.mutable
 import scala.language.existentials
-import scala.reflect.runtime.{ universe => ru }
-
-import org.beangle.commons.collection.{ Collections, IdentityCache }
-import org.beangle.commons.lang.{ ClassLoaders, Strings }
-import org.beangle.commons.lang.Strings.{ substringAfter, substringBefore, uncapitalize }
-import org.beangle.commons.lang.reflect.Reflections.deduceParamTypes
+import scala.reflect.runtime.{universe => ru}
 
 object BeanInfos {
   /**
@@ -56,8 +56,8 @@ object BeanInfos {
 class BeanInfos {
   private val cache = new IdentityCache[Class[_], BeanInfo]
 
-  def clear() {
-    val i = cache.clear()
+  def clear(): Unit = {
+    cache.clear()
   }
 
   def forType[T](clazz: Class[T])(implicit ttag: ru.TypeTag[T] = null, manifest: Manifest[T]): BeanInfo = {
@@ -113,13 +113,13 @@ class BeanInfos {
     var paramTypes: collection.Map[String, Class[_]] = Map.empty
     while (null != nextClass && classOf[AnyRef] != nextClass) {
       val declaredMethods = nextClass.getDeclaredMethods
-      nextClass.getDeclaredFields() foreach { f => fields += (f.getName -> f) }
+      nextClass.getDeclaredFields foreach { f => fields += (f.getName -> f) }
       (0 until declaredMethods.length) foreach { i =>
         val method = declaredMethods(i)
         findAccessor(method) match {
           case Some(Tuple2(readable, name)) =>
             if (readable) {
-              val puttable = getters.get(name).map(x => isJavaBeanGetter(x.method)).getOrElse(true)
+              val puttable = getters.get(name).forall(x => isJavaBeanGetter(x.method))
               if (puttable) {
                 getters.put(name, Getter(method, extract(method.getGenericReturnType, paramTypes)))
               }
@@ -144,7 +144,7 @@ class BeanInfos {
     allprops foreach { p =>
       val getter = getters.get(p)
       val setter = setters.get(p)
-      val clazz = if (None == getter) setter.get.parameterTypes(0) else getter.get.returnType
+      val clazz = if (getter.isEmpty) setter.get.parameterTypes(0) else getter.get.returnType
 
       val typeinfo =
         if (null != tpe) {
@@ -152,11 +152,11 @@ class BeanInfos {
         } else if (originBeanInfo.isDefined && originBeanInfo.get.properties.contains(p)) {
           originBeanInfo.get.properties(p).typeinfo
         } else {
-          TypeInfo.of(clazz, if (None == getter) setter.get.method.getGenericParameterTypes()(0) else getter.get.method.getGenericReturnType)
+          TypeInfo.of(clazz, if (getter.isEmpty) setter.get.method.getGenericParameterTypes()(0) else getter.get.method.getGenericReturnType)
         }
 
       val isTransient =
-        if (None == getter) {
+        if (getter.isEmpty) {
           false
         } else {
           val getMethod = getter.get.method
@@ -177,15 +177,15 @@ class BeanInfos {
     // find constructor with arguments
     val ctors = Collections.newBuffer[ConstructorDescriptor]
     import TypeInfo._
-    clazz.getConstructors() foreach { ctor =>
+    clazz.getConstructors foreach { ctor =>
       val infoes: Array[TypeInfo] = ctor.getGenericParameterTypes map { pt =>
         pt match {
           case c: Class[_] => ElementType(c)
           case t: ParameterizedType =>
             val rawType = t.getRawType.asInstanceOf[Class[_]]
-            if (TypeInfo.isCollectionType(rawType) && t.getActualTypeArguments.size == 1) {
+            if (TypeInfo.isCollectionType(rawType) && t.getActualTypeArguments.length == 1) {
               CollectionType(clazz, typeAt(t, 0))
-            } else if (TypeInfo.isMapType(rawType) && t.getActualTypeArguments.size == 2) {
+            } else if (TypeInfo.isMapType(rawType) && t.getActualTypeArguments.length == 2) {
               MapType(clazz, typeAt(t, 0), typeAt(t, 1))
             } else {
               ElementType(rawType)
@@ -261,11 +261,11 @@ class BeanInfos {
   private def typeof(clazz: Class[_], typ: ru.Type, name: String): TypeInfo = {
     if (clazz == classOf[Object]) {
       var typeName = typ.member(ru.TermName(name)).typeSignatureIn(typ).erasure.toString
-      ElementType(ClassLoaders.load(Strings.replace(typeName, "()", "")), false)
+      ElementType(ClassLoaders.load(Strings.replace(typeName, "()", "")))
     } else if (clazz == classOf[Option[_]]) {
       val a = typ.member(ru.TermName(name)).typeSignatureIn(typ)
       val innerType = a.resultType.typeArgs.head.toString
-      ElementType(ClassLoaders.load(innerType), true)
+      ElementType(ClassLoaders.load(innerType), optional = true)
     } else if (TypeInfo.isCollectionType(clazz)) {
       if (clazz.isArray) {
         CollectionType(clazz, clazz.getComponentType)
@@ -281,14 +281,14 @@ class BeanInfos {
       val mapEleType = Strings.substringAfter(kvtype, ",").trim
       MapType(clazz, ClassLoaders.load(mapKeyType), ClassLoaders.load(mapEleType))
     } else {
-      ElementType(clazz, false)
+      ElementType(clazz)
     }
   }
 
   private def extract(t: java.lang.reflect.Type, types: collection.Map[String, Class[_]]): Class[_] = {
     t match {
       case pt: ParameterizedType => pt.getRawType.asInstanceOf[Class[_]]
-      case tv: TypeVariable[_]   => types.get(tv.getName).getOrElse(classOf[AnyRef])
+      case tv: TypeVariable[_]   => types.getOrElse(tv.getName,classOf[AnyRef])
       case c: Class[_]           => c
       case _                     => classOf[AnyRef]
     }

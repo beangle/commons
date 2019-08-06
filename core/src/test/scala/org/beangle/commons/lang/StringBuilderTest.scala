@@ -18,13 +18,13 @@
  */
 package org.beangle.commons.lang
 
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class StringBuilderTest extends FunSpec with Matchers {
+class StringBuilderTest extends AnyFunSpec with Matchers {
 
   describe("StringBuilder") {
     it("Contains") {

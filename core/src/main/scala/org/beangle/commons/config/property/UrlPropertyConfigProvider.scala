@@ -18,8 +18,6 @@
  */
 package org.beangle.commons.config.property
 
-import java.net.URL
-
 import org.beangle.commons.config.Resources
 import org.beangle.commons.io.IOs
 

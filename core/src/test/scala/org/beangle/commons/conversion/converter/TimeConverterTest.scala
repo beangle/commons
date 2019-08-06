@@ -20,12 +20,13 @@ package org.beangle.commons.conversion.converter
 
 import java.sql.Time
 import org.junit.runner.RunWith
-import org.scalatest.{ FunSpec, Matchers }
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 import org.beangle.commons.lang.time.HourMinute
 
 @RunWith(classOf[JUnitRunner])
-class TimeConverterTest extends FunSpec with Matchers {
+class TimeConverterTest extends AnyFunSpec with Matchers {
 
   describe("TimeConverter") {
     it("Convert String to time") {

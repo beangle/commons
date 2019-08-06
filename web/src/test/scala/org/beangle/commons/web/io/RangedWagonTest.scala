@@ -18,19 +18,20 @@
  */
 package org.beangle.commons.web.io
 
-import java.io.{ ByteArrayOutputStream, File, OutputStream }
+import java.io.{ByteArrayOutputStream, File, OutputStream}
 
 import org.beangle.commons.lang.ClassLoaders
 import org.junit.runner.RunWith
-import org.mockito.Mockito.{ mock, verify, when }
-import org.scalatest.{ FunSpec, Matchers }
-import org.scalatest.junit.JUnitRunner
+import org.mockito.Mockito.{mock, verify, when}
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
-import javax.servlet.{ ServletOutputStream, WriteListener }
-import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
+import javax.servlet.{ServletOutputStream, WriteListener}
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 @RunWith(classOf[JUnitRunner])
-class RangedWagonTest extends FunSpec with Matchers {
+class RangedWagonTest extends AnyFunSpec with Matchers {
 
   val wagon: Wagon = new RangedWagon
 
@@ -40,12 +41,14 @@ class RangedWagonTest extends FunSpec with Matchers {
       var response = mock(classOf[HttpServletResponse])
       when(response.getOutputStream).thenReturn(new ServletOutputStream() {
         var outputStream: OutputStream = new ByteArrayOutputStream()
-        def write(b: Int) {
+
+        def write(b: Int): Unit = {
           outputStream.write(b)
         }
-        def isReady() = false
 
-        def setWriteListener(writeListener: WriteListener) {}
+        def isReady(): Boolean = false
+
+        def setWriteListener(writeListener: WriteListener): Unit = {}
       })
       val testDoc = ClassLoaders.getResource("download.txt").get
       wagon.copy(testDoc, request, response)
@@ -57,12 +60,13 @@ class RangedWagonTest extends FunSpec with Matchers {
 
         var outputStream: OutputStream = new ByteArrayOutputStream()
 
-        def write(b: Int) {
+        def write(b: Int): Unit = {
           outputStream.write(b)
         }
-        def isReady() = false
 
-        def setWriteListener(writeListener: WriteListener) {}
+        def isReady(): Boolean = false
+
+        def setWriteListener(writeListener: WriteListener): Unit = {}
       })
       when(request.getHeader("Range")).thenReturn("bytes=5-12")
       wagon.copy(testDoc, request, response)

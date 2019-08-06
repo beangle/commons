@@ -31,41 +31,40 @@ object PropertyNameResolver {
   private val IndexedEnd = ']'
 }
 
-import PropertyNameResolver._
-/**
- * Default Property Name Resolver .
- * <p>
- * This class assists in resolving property names in the following four formats, with the layout of
- * an identifying String in parentheses:
- * <ul>
- * <li><strong>Simple (<code>name</code>)</strong> - The specified <code>name</code> identifies an
- * individual property of a particular JavaBean. The name of the actual getter or setter method to
- * be used is determined using standard JavaBeans instrospection, a property named "xyz" will have a
- * getter method named <code>getXyz()</code> or (for boolean properties only) <code>isXyz()</code>,
- * and a setter method named <code>setXyz()</code>.</li>
- * <li><strong>Indexed (<code>name[index]</code>)</strong> - The underlying property value is
- * assumed to be an array. The appropriate (zero-relative) entry in the array is selected. <code>List</code>
- * objects are now also supported for read/write.</li>
- * <li><strong>Mapped (<code>name(key)</code>)</strong> - The JavaBean is assumed to have an
- * property getter and setter methods with an additional attribute of type
- * <code>java.lang.String</code>.</li>
- * <li><strong>Nested (<code>name1.name2[index].name3(key)</code>)</strong> - Combining mapped,
- * nested, and indexed references is also supported.</li>
- * </ul>
- *
- * @author chaostone
- * @since 3.2.0
- */
+import org.beangle.commons.bean.PropertyNameResolver._
+
+/** Default Property Name Resolver .
+  *
+  * <p>
+  * This class assists in resolving property names in the following four formats, with the layout of
+  * an identifying String in parentheses:
+  * <ul>
+  * <li><strong>Simple (<code>name</code>)</strong> - The specified <code>name</code> identifies an
+  * individual property of a particular JavaBean. The name of the actual getter or setter method to
+  * be used is determined using standard JavaBeans instrospection, a property named "xyz" will have a
+  * getter method named <code>getXyz()</code> or (for boolean properties only) <code>isXyz()</code>,
+  * and a setter method named <code>setXyz()</code>.</li>
+  * <li><strong>Indexed (<code>name[index]</code>)</strong> - The underlying property value is
+  * assumed to be an array. The appropriate (zero-relative) entry in the array is selected. <code>List</code>
+  * objects are now also supported for read/write.</li>
+  * <li><strong>Mapped (<code>name(key)</code>)</strong> - The JavaBean is assumed to have an
+  * property getter and setter methods with an additional attribute of type
+  * <code>java.lang.String</code>.</li>
+  * <li><strong>Nested (<code>name1.name2[index].name3(key)</code>)</strong> - Combining mapped,
+  * nested, and indexed references is also supported.</li>
+  * </ul>
+  * @author chaostone
+  * @since 3.2.0
+  */
 class PropertyNameResolver {
 
   /**
-   * Return the index value from the property expression or -1.
-   *
-   * @param expression The property expression
-   * @return The index value or -1 if the property is not indexed
-   * @throws IllegalArgumentException If the indexed property is illegally
-   *           formed or has an invalid (non-numeric) value.
-   */
+    * Return the index value from the property expression or -1.
+    * @param expression The property expression
+    * @return The index value or -1 if the property is not indexed
+    * @throws IllegalArgumentException If the indexed property is illegally
+    *                                  formed or has an invalid (non-numeric) value.
+    */
   def getIndex(expression: String): Int = {
     if (expression == null || expression.length == 0) return -1
 
@@ -87,12 +86,11 @@ class PropertyNameResolver {
   }
 
   /**
-   * Return the map key from the property expression or <code>null</code>.
-   *
-   * @param expression The property expression
-   * @return The index value
-   * @throws IllegalArgumentException If the mapped property is illegally formed.
-   */
+    * Return the map key from the property expression or <code>null</code>.
+    * @param expression The property expression
+    * @return The index value
+    * @throws IllegalArgumentException If the mapped property is illegally formed.
+    */
   def getKey(expression: String): String = {
     if (expression == null || expression.length == 0) return null
 
@@ -112,11 +110,10 @@ class PropertyNameResolver {
   }
 
   /**
-   * Return the property name from the property expression.
-   *
-   * @param expression The property expression
-   * @return The property name
-   */
+    * Return the property name from the property expression.
+    * @param expression The property expression
+    * @return The property name
+    */
   def getProperty(expression: String): String = {
     if (expression == null || expression.length == 0) return expression
 
@@ -131,22 +128,20 @@ class PropertyNameResolver {
   }
 
   /**
-   * Indicates whether or not the expression contains nested property expressions or not.
-   *
-   * @param expression The property expression
-   * @return The next property expression
-   */
+    * Indicates whether or not the expression contains nested property expressions or not.
+    * @param expression The property expression
+    * @return The next property expression
+    */
   def hasNested(expression: String): Boolean = {
     if (expression == null || expression.length == 0) false else remove(expression) != null
   }
 
   /**
-   * Indicate whether the expression is for an indexed property or not.
-   *
-   * @param expression The property expression
-   * @return <code>true</code> if the expresion is indexed,
-   *         otherwise <code>false</code>
-   */
+    * Indicate whether the expression is for an indexed property or not.
+    * @param expression The property expression
+    * @return <code>true</code> if the expresion is indexed,
+    *         otherwise <code>false</code>
+    */
   def isIndexed(expression: String): Boolean = {
     if (expression == null || expression.length == 0) return false
 
@@ -161,12 +156,11 @@ class PropertyNameResolver {
   }
 
   /**
-   * Indicate whether the expression is for a mapped property or not.
-   *
-   * @param expression The property expression
-   * @return <code>true</code> if the expresion is mapped,
-   *         otherwise <code>false</code>
-   */
+    * Indicate whether the expression is for a mapped property or not.
+    * @param expression The property expression
+    * @return <code>true</code> if the expresion is mapped,
+    *         otherwise <code>false</code>
+    */
   def isMapped(expression: String): Boolean = {
     if (expression == null || expression.length == 0) return false
     var i = 0
@@ -180,11 +174,10 @@ class PropertyNameResolver {
   }
 
   /**
-   * Extract the next property expression from the current expression.
-   *
-   * @param expression The property expression
-   * @return The next property expression
-   */
+    * Extract the next property expression from the current expression.
+    * @param expression The property expression
+    * @return The next property expression
+    */
   def next(expression: String): String = {
     if (expression == null || expression.length == 0) return null
 
@@ -208,12 +201,11 @@ class PropertyNameResolver {
   }
 
   /**
-   * Remove the last property expresson from the current expression.
-   *
-   * @param expression The property expression
-   * @return The new expression value, with first property
-   *         expression removed - null if there are no more expressions
-   */
+    * Remove the last property expresson from the current expression.
+    * @param expression The property expression
+    * @return The new expression value, with first property
+    *         expression removed - null if there are no more expressions
+    */
   def remove(expression: String): String = {
     if (expression == null || expression.length == 0) return null
 
