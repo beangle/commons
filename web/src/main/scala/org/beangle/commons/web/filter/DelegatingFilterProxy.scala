@@ -32,11 +32,11 @@ import javax.servlet.{ Filter, FilterChain, ServletException, ServletRequest, Se
  */
 class DelegatingFilterProxy(delegate: Filter) extends GenericHttpFilter {
 
-  def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
+  def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain): Unit = {
     delegate.doFilter(request, response, chain)
   }
 
-  override def destroy() {
+  override def destroy(): Unit = {
     if (delegate != null) delegate.destroy()
   }
 

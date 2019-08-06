@@ -19,11 +19,12 @@
 package org.beangle.commons.web.resource.impl
 
 import org.junit.runner.RunWith
-import org.scalatest.{ FunSpec, Matchers }
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class PathResolverImplTest extends FunSpec with Matchers {
+class PathResolverImplTest extends AnyFunSpec with Matchers {
   describe("PathResolverImpl") {
     it("resolve") {
       val resolver = new PathResolverImpl

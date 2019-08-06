@@ -18,15 +18,14 @@
  */
 package org.beangle.commons.conversion.converter
 
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
-import org.beangle.commons.conversion.Conversion
 import org.beangle.commons.conversion.impl.DefaultConversion
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class DefaultConverterTest extends FunSpec with Matchers {
+class DefaultConverterTest extends AnyFunSpec with Matchers {
 
   describe("DefaultConversion") {
     it("Convert null") {

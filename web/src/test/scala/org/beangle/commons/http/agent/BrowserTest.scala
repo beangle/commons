@@ -18,13 +18,13 @@
  */
 package org.beangle.commons.web.http.agent
 
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class BrowserTest extends FunSpec with Matchers {
+class BrowserTest extends AnyFunSpec with Matchers {
 
   val firefox3 = "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.14) Gecko/2009090216 Ubuntu/9.04 (jaunty) Firefox/3.0.14"
 

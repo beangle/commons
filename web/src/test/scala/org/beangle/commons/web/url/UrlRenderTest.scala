@@ -18,13 +18,13 @@
  */
 package org.beangle.commons.web.url
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.Matchers
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class UrlRenderTest extends FunSpec with Matchers {
+class UrlRenderTest extends AnyFunSpec with Matchers {
 
   describe("UrlRender") {
     it("testRender") {

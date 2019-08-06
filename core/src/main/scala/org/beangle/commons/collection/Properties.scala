@@ -20,9 +20,11 @@ package org.beangle.commons.collection
 
 import org.beangle.commons.bean.{Properties => BeanProperties}
 
-class Properties extends collection.mutable.HashMap[String, Any] {
+class Properties extends collection.mutable.Map[String, Any] {
 
-  def this(tuples: Tuple2[String, _]*) {
+  private[this] val data = Collections.newMap[String, Any]
+
+  def this(tuples: (String, _)*) {
     this()
     tuples foreach { tuple =>
       this.put(tuple._1, tuple._2)
@@ -46,5 +48,23 @@ class Properties extends collection.mutable.HashMap[String, Any] {
   def add(attr: String, obj: Object, nestedAttrs: String*): Unit = {
     if (null != obj)
       put(attr, new Properties(obj, nestedAttrs: _*))
+  }
+
+  override def iterator: Iterator[(String, Any)] = {
+    data.iterator
+  }
+
+  override def addOne(elem: (String, Any)): this.type = {
+    data.addOne(elem)
+    this
+  }
+
+  override def subtractOne(k: String): this.type = {
+    data.subtractOne(k)
+    this
+  }
+
+  override def get(k: String): Option[Any] = {
+    data.get(k)
   }
 }

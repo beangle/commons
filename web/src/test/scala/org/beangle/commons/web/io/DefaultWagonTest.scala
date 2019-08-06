@@ -18,21 +18,22 @@
  */
 package org.beangle.commons.web.io
 
-import java.io.{ ByteArrayOutputStream, OutputStream }
-import java.net.{ URLDecoder, URLEncoder }
+import java.io.{ByteArrayOutputStream, OutputStream}
+import java.net.{URLDecoder, URLEncoder}
 
 import org.beangle.commons.codec.net.BCoder
 import org.beangle.commons.lang.ClassLoaders
 import org.junit.runner.RunWith
-import org.mockito.Mockito.{ mock, when }
-import org.scalatest.{ FunSpec, Matchers }
-import org.scalatest.junit.JUnitRunner
+import org.mockito.Mockito.{mock, when}
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
-import javax.servlet.{ ServletOutputStream, WriteListener }
-import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
+import javax.servlet.{ServletOutputStream, WriteListener}
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 @RunWith(classOf[JUnitRunner])
-class DefaultStreamDownloaderTest extends FunSpec with Matchers {
+class DefaultWagonTest extends AnyFunSpec with Matchers {
 
   val wagon: Wagon = new DefaultWagon
 
@@ -42,12 +43,14 @@ class DefaultStreamDownloaderTest extends FunSpec with Matchers {
       val response = mock(classOf[HttpServletResponse])
       when(response.getOutputStream).thenReturn(new ServletOutputStream() {
         val outputStream: OutputStream = new ByteArrayOutputStream()
-        def write(b: Int) {
+
+        def write(b: Int): Unit = {
           outputStream.write(b)
         }
-        def isReady() = false
 
-        def setWriteListener(writeListener: WriteListener) {}
+        def isReady(): Boolean = false
+
+        def setWriteListener(writeListener: WriteListener): Unit = {}
       })
       val testDoc = ClassLoaders.getResource("download.txt").get
       wagon.copy(testDoc, request, response)

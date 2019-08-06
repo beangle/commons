@@ -19,11 +19,12 @@
 package org.beangle.commons.codec.binary
 
 import org.junit.runner.RunWith
-import org.scalatest.{ FunSpec, Matchers }
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class DesTest extends FunSpec with Matchers {
+class DesTest extends AnyFunSpec with Matchers {
   describe("Des cbc") {
     it("encode and decode") {
       var key = "ABCDEFGH"

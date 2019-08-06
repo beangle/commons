@@ -40,7 +40,7 @@ object Engines extends Enumeration {
 
     var categories: List[Browsers.Category] = Nil
 
-    def addCategory(category: Browsers.Category) {
+    def addCategory(category: Browsers.Category): Unit = {
       categories = categories ::: List(category)
     }
   }

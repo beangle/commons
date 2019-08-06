@@ -27,5 +27,5 @@ trait MultipartResolver {
 
   def resolve(request: HttpServletRequest): Map[String, Any]
 
-  def cleanup(request: HttpServletRequest)
+  def cleanup(request: HttpServletRequest): Unit
 }

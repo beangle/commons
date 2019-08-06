@@ -19,11 +19,12 @@
 package org.beangle.commons.file.text
 
 import org.junit.runner.RunWith
-import org.scalatest.{ FunSpec, Matchers }
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class FormaterTest extends FunSpec with Matchers {
+class FormaterTest extends AnyFunSpec with Matchers {
 
   val lines = "package org.beangle.commons.file\r\n\r\n\t/**\r\n\n\n\n\n\n \t*\ttab2space,fixcrlf,trim_trailing_whitespace,insert_final_newline{fixlast}  \t  \r\n \t*/ \t\r\npackage object text {"
   describe("Formater") {

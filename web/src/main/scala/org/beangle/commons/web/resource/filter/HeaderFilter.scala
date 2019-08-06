@@ -36,7 +36,7 @@ class HeaderFilter extends ResourceFilter {
   var expireDays = 7
 
   override def filter(context: ProcessContext, request: HttpServletRequest, response: HttpServletResponse,
-    chain: ProcessChain) {
+    chain: ProcessChain): Unit = {
     // Get max last modified time stamp.
     var maxLastModified = -1
     for (res <- context.resources) {
@@ -69,15 +69,15 @@ class HeaderFilter extends ResourceFilter {
    * saves some opening and closing
    */
   private def lastModified(url: URL): Long = {
-    if (url.getProtocol().equals("file")) {
-      return new File(url.getFile()).lastModified
+    if (url.getProtocol.equals("file")) {
+      return new File(url.getFile).lastModified
     } else {
       try {
         val conn = url.openConnection()
         conn match {
           case jarConn: JarURLConnection =>
-            val jarURL = jarConn.getJarFileURL();
-            if (jarURL.getProtocol().equals("file")) new File(jarURL.getFile()).lastModified() else -1
+            val jarURL = jarConn.getJarFileURL
+            if (jarURL.getProtocol.equals("file")) new File(jarURL.getFile).lastModified() else -1
           case _ => -1
         }
       } catch {

@@ -17,15 +17,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.conversion
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
-
 import org.beangle.commons.conversion.impl.DefaultConversion
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ConversionTest extends FunSpec with Matchers {
+class ConversionTest extends AnyFunSpec with Matchers {
 
   val con = new DefaultConversion();
 

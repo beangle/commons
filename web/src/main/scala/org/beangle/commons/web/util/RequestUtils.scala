@@ -105,7 +105,7 @@ object RequestUtils {
    * @see http://tools.ietf.org/html/rfc5987
    * @see https://blog.robotshell.org/2012/deal-with-http-header-encoding-for-file-download/
    */
-  def setContentDisposition(response: HttpServletResponse, attachName: String) {
+  def setContentDisposition(response: HttpServletResponse, attachName: String): Unit = {
     val value = new StringBuilder("attachment;")
     value ++= " filename=\"" + attachName + "\";"
     value ++= " filename*=utf-8''" + URLEncoder.encode(attachName, "UTF-8").replaceAll("\\+", "%20")

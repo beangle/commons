@@ -21,14 +21,15 @@ package org.beangle.commons.lang.reflect
 import java.lang.reflect.Modifier
 import org.beangle.commons.lang.testbean.{ Author, Book, BookPrimitiveId, BookStore, Entity, NumIdBean, Menu }
 import org.junit.runner.RunWith
-import org.scalatest.{ FunSpec, Matchers }
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 import org.beangle.commons.lang.testbean.Department
 import org.beangle.commons.lang.testbean.BigBookStore
 import org.beangle.commons.collection.Properties
 
 @RunWith(classOf[JUnitRunner])
-class BeanInfosTest extends FunSpec with Matchers {
+class BeanInfosTest extends AnyFunSpec with Matchers {
   describe("BeanInfos") {
     it("find real template parameter") {
       assert(BeanInfos.forType(classOf[Book]).getPropertyType("id") == Some(classOf[java.lang.Long]))

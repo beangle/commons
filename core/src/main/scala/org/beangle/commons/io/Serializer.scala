@@ -20,12 +20,12 @@ package org.beangle.commons.io
 
 import java.io.OutputStream
 
-import javax.activation.MimeType
+import org.beangle.commons.activation.MediaType
 
 trait Serializer {
 
   def serialize(data: Any, os: OutputStream, params: Map[String, Any]):Unit
 
-  def mediaTypes: Seq[MimeType]
+  def mediaTypes: Seq[MediaType]
 
 }

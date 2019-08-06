@@ -19,11 +19,12 @@
 package org.beangle.commons.codec.binary
 
 import org.junit.runner.RunWith
-import org.scalatest.{ FunSpec, Matchers }
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class Base64Test extends FunSpec with Matchers {
+class Base64Test extends AnyFunSpec with Matchers {
   describe("Base64") {
     it("encode and decode") {
       val data = "xtUkXCyc+OAdHqK1lJKubmnzGts="

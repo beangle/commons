@@ -52,7 +52,7 @@ object IOs {
     count
   }
 
-  def write(data: String, output: OutputStream, charset: Charset = null) {
+  def write(data: String, output: OutputStream, charset: Charset = null): Unit = {
     if (data != null) {
       if (charset == null)
         output.write(data.getBytes())
@@ -169,7 +169,8 @@ object IOs {
       val properties = new ju.Properties()
       properties.load(input)
       close(input)
-      collection.JavaConverters.propertiesAsScalaMap(properties).toMap
+      import scala.jdk.CollectionConverters._
+      properties.asScala.toMap
     }
   }
 
@@ -181,7 +182,7 @@ object IOs {
    * Close many objects quitely.
    * swallow any exception.
    */
-  def close(objs: AutoCloseable*) {
+  def close(objs: AutoCloseable*): Unit = {
     objs foreach { obj =>
       try {
         if (obj != null) obj.close()

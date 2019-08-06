@@ -78,7 +78,7 @@ object Base64Decoder extends Decoder[String, Array[Byte]] {
 
   def decode(data: Array[Char]): Array[Byte] = {
     var tempLen = data.length
-    Range(0, data.length) foreach { ix =>
+    data.indices foreach { ix =>
       if (data(ix) > '\u00ff' || Codes(data(ix)) < 0) tempLen -= 1
     }
     var len = (tempLen / 4) * 3
@@ -88,7 +88,7 @@ object Base64Decoder extends Decoder[String, Array[Byte]] {
     var shift = 0
     var accum = 0
     var index = 0
-    (0 until data.length) foreach { ix =>
+    data.indices foreach { ix =>
       val value = if (data(ix) <= '\u00ff') (Codes(data(ix))).toInt else -1
       if (value >= 0) {
         accum <<= 6

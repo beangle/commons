@@ -85,7 +85,7 @@ class SeqPattern(val seqNumStyle: SeqNumStyle, val pattern: String) {
    * reset.
    * </p>
    */
-  def reset() {
+  def reset(): Unit = {
     seq = 0
   }
 }

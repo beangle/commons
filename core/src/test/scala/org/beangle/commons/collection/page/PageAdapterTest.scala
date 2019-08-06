@@ -17,16 +17,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.beangle.commons.collection.page
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 /**
  * @author zhouqi
  */
 @RunWith(classOf[JUnitRunner])
-class PageAdapterTest extends FunSpec with Matchers {
+class PageAdapterTest extends AnyFunSpec with Matchers {
 
   describe("PagedSeq") {
     it("Move next or previous") {

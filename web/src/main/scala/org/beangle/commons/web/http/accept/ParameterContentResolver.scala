@@ -19,16 +19,16 @@
 package org.beangle.commons.web.http.accept
 
 import javax.servlet.http.HttpServletRequest
-import javax.activation.MimeType
-import org.beangle.commons.activation.MimeTypes
+import org.beangle.commons.activation.{MediaType, MediaTypes}
 
 class ParameterContentResolver(val parameterName: String) extends ContentTypeResolver {
 
-  def resolve(request: HttpServletRequest): Seq[MimeType] = {
+  def resolve(request: HttpServletRequest): Seq[MediaType] = {
     val ext = request.getParameter(parameterName)
-    if (null == ext) Seq.empty
-    else {
-      MimeTypes.getMimeType(ext) match {
+    if (null == ext) {
+      Seq.empty
+    } else {
+      MediaTypes.get(ext) match {
         case Some(mimeType) => List(mimeType)
         case None => Seq.empty
       }

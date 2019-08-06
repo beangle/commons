@@ -23,10 +23,14 @@ import java.{util => ju}
 object Wrappers {
 
   case class ImmutableJList[A](underlying: ju.List[A]) extends collection.immutable.Seq[A] {
-    def length = underlying.size
-    override def isEmpty = underlying.isEmpty
-    override def iterator: Iterator[A] = collection.JavaConverters.asScalaIterator(underlying.iterator)
-    def apply(i: Int) = underlying.get(i)
-    override def clone(): ImmutableJList[A] = ImmutableJList(new ju.ArrayList[A](underlying))
+    def length: Int = underlying.size
+
+    override def isEmpty: Boolean = underlying.isEmpty
+
+    import scala.jdk.CollectionConverters._
+    override def iterator: Iterator[A] = underlying.iterator.asScala
+
+    def apply(i: Int): A = underlying.get(i)
   }
+
 }

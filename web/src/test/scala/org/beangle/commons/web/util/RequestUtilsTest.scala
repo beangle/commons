@@ -20,12 +20,13 @@ package org.beangle.commons.web.util
 
 import org.junit.runner.RunWith
 import org.mockito.Mockito.{ mock, when }
-import org.scalatest.{ FunSpec, Matchers }
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
 import javax.servlet.http.HttpServletRequest
-import org.scalatest.junit.JUnitRunner
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class RequestUtilsTest extends FunSpec with Matchers {
+class RequestUtilsTest extends AnyFunSpec with Matchers {
 
   describe("RequestUtils") {
     it("testGetServletPath") {

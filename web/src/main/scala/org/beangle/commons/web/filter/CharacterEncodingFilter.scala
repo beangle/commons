@@ -32,7 +32,7 @@ class CharacterEncodingFilter extends GenericHttpFilter {
   var encoding: String = "utf-8"
   var forceEncoding = false
 
-  def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
+  def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain): Unit = {
     request.setCharacterEncoding(encoding)
     if (forceEncoding) response.setCharacterEncoding(encoding)
     chain.doFilter(request, response)

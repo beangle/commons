@@ -111,7 +111,7 @@ final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
     var hasNext = false
     var index = -1
 
-    def move() {
+    def move(): Unit = {
       if (index < table.length) {
         if (null != entry && null != entry.next) {
           entry = entry.next

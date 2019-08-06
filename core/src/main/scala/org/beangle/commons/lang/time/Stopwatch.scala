@@ -133,5 +133,5 @@ class Stopwatch(val ticker: Ticker = Ticker.systemTicker(), start: Boolean = fal
    * Returns a string representation of the current elapsed time; equivalent to {@code toString(4)}
    * (four significant figures).
    */
-  override def toString(): String = format(elapsedNanos, 4)
+  override def toString: String = format(elapsedNanos, 4)
 }

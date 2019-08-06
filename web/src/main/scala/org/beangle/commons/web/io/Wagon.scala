@@ -20,7 +20,7 @@ package org.beangle.commons.web.io
 
 import java.io.{ File, InputStream }
 import java.net.URL
-import org.beangle.commons.activation.MimeTypes
+import org.beangle.commons.activation.MediaTypes
 import org.beangle.commons.lang.Strings
 import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 import org.beangle.commons.web.util.RequestUtils
@@ -40,10 +40,10 @@ trait Wagon {
 
 object Wagon {
 
-  def setContentHeader(response: HttpServletResponse, attach: String) {
+  def setContentHeader(response: HttpServletResponse, attach: String): Unit = {
     var contentType = response.getContentType
     if (null == contentType) {
-      contentType = MimeTypes.getMimeType(Strings.substringAfterLast(attach, "."), MimeTypes.ApplicationOctetStream).toString
+      contentType = MediaTypes.get(Strings.substringAfterLast(attach, "."), MediaTypes.ApplicationOctetStream).toString
       response.setContentType(contentType)
     }
     RequestUtils.setContentDisposition(response, attach)

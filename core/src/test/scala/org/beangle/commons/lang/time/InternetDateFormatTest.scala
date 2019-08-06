@@ -18,15 +18,15 @@
  */
 package org.beangle.commons.lang.time
 
+import java.{util => ju}
+
 import org.junit.runner.RunWith
 import org.scalatest.Matchers
-import org.scalatest.FunSpec
-import org.scalatest.junit.JUnitRunner
-import java.text.SimpleDateFormat
-import java.{ util => ju }
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class InternetDateFormatTest extends FunSpec with Matchers {
+class InternetDateFormatTest extends AnyFunSpec with Matchers {
   describe("InternetDateFormat") {
     it("format") {
       val cal = ju.Calendar.getInstance

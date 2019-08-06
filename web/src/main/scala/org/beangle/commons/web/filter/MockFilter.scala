@@ -37,16 +37,16 @@ class MockFilter extends Filter {
 
   var initialized: Boolean = false
 
-  override def destroy() {
+  override def destroy(): Unit = {
     destroyed = true
   }
 
-  def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
+  def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain): Unit = {
     doFiltered = true
     chain.doFilter(request, response)
   }
 
-  override def init(config: FilterConfig) {
+  override def init(config: FilterConfig): Unit = {
     initialized = true
   }
 }

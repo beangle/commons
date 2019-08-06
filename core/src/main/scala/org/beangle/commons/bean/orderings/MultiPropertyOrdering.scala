@@ -22,20 +22,18 @@ import org.beangle.commons.lang.Strings
 
 import scala.collection.mutable.ListBuffer
 
-/**
- * 多个属性的比较
- *
- * @author chaostone
- */
+/** 多个属性的比较
+  * @author chaostone
+  */
 class MultiPropertyOrdering(propertyStr: String) extends Ordering[Any] {
 
-  val chain = buildChainOrdering(propertyStr);
+  private val chain = buildChainOrdering(propertyStr)
 
   def buildChainOrdering(propertyStr: String): ChainOrdering[Any] = {
     val properties = Strings.split(propertyStr, ',')
     val comparators = new ListBuffer[PropertyOrdering]
     properties.foreach(property => comparators += new PropertyOrdering(property.trim()))
-    return new ChainOrdering(comparators.toList)
+    new ChainOrdering(comparators.toList)
   }
 
   override def compare(arg0: Any, arg1: Any): Int = chain.compare(arg0, arg1)

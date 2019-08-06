@@ -18,39 +18,40 @@
  */
 package org.beangle.commons.activation
 
-import org.junit.runner.RunWith
-import org.scalatest.{ FunSpec, Matchers }
-import org.scalatest.junit.JUnitRunner
 import org.beangle.commons.config.Resources
-import org.beangle.commons.lang.ClassLoaders.{ getResource, getResources }
+import org.beangle.commons.lang.ClassLoaders.{getResource, getResources}
+import org.junit.runner.RunWith
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class MimeTypeTest extends FunSpec with Matchers {
-  describe("MimeType") {
+class MediaTypeTest extends AnyFunSpec with Matchers {
+  describe("MediaType") {
     it("load resource") {
       val resources = new Resources(getResource("org/beangle/commons/activation/mime_test.types"),
         getResources("META-INF/mime_test.types"), getResource("mime_test.types"))
-      val map = MimeTypes.buildMimeTypes(resources)
+      val map = MediaTypes.buildTypes(resources)
       assert(map.size == 10)
       assert(None != map.get("xxx"))
     }
     it("parse") {
-      val mimeTypes = MimeTypes.parse("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+      val mimeTypes = MediaTypes.parse("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
       assert(4 == mimeTypes.size)
     }
   }
 
-  describe("MimeTypeProvider") {
+  describe("MediaTypeProvider") {
     it("load resource") {
-      val xlsx = MimeTypes.getMimeType("xlsx")
+      val xlsx = MediaTypes.get("xlsx")
       assert(None != xlsx)
-      assert(xlsx.get.getSubType == "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+      assert(xlsx.get.subType == "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-      val all = MimeTypes.getMimeType("*/*")
-      assert(Some(MimeTypes.All) == all)
+      val all = MediaTypes.get("*/*")
+      assert(Some(MediaTypes.All) == all)
 
-      val csv = MimeTypes.parse("text/csv").head
-      assert(MimeTypes.TextCsv == csv)
+      val csv = MediaTypes.parse("text/csv").head
+      assert(MediaTypes.TextCsv == csv)
 
     }
   }

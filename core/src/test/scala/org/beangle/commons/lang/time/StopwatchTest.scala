@@ -18,13 +18,13 @@
  */
 package org.beangle.commons.lang.time
 
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class StopwatchTest extends FunSpec with Matchers {
+class StopwatchTest extends AnyFunSpec with Matchers {
   describe("Stopwatch") {
     it("Format nanos to string") {
       Stopwatch.format(2323, 4) should equal("2.323 μs")

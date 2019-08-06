@@ -19,11 +19,12 @@
 package org.beangle.commons.lang.time
 
 import org.junit.runner.RunWith
-import org.scalatest.{ FunSpec, Matchers }
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class HourMinuteTest extends FunSpec with Matchers {
+class HourMinuteTest extends AnyFunSpec with Matchers {
 
   describe("HourMinute") {
     it("is serializable") {

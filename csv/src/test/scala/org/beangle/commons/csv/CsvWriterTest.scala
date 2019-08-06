@@ -25,13 +25,13 @@ import java.io.FileWriter
 import java.io.IOException
 import java.io.StringWriter
 import org.beangle.commons.lang.SystemInfo
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.Matchers
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class CsvWriterTest extends FunSpec with Matchers {
+class CsvWriterTest extends AnyFunSpec with Matchers {
 
   private def invokeWriter(args: Array[String]): String = {
     val sw = new StringWriter()
@@ -50,7 +50,7 @@ class CsvWriterTest extends FunSpec with Matchers {
     sw.toString
   }
 
-  def correctlyParseNullString() {
+  def correctlyParseNullString(): Unit = {
     val sw = new StringWriter()
     val csvw = new CsvWriter(sw, new CsvFormat.Builder().escape('\'').build())
     csvw.write(null.asInstanceOf[Array[String]])

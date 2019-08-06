@@ -20,13 +20,13 @@ package org.beangle.commons.config.property
 
 import org.beangle.commons.config.Resources
 import org.beangle.commons.lang.ClassLoaders
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Matchers
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class UrlConfigProviderTest extends FunSpec with Matchers {
+class UrlConfigProviderTest extends AnyFunSpec with Matchers {
 
   describe("UrlConfigProvider") {
     it("Get Property") {
