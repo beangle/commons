@@ -27,6 +27,8 @@ import org.beangle.commons.logging.Logging
 
 object HttpUtils extends Logging {
 
+  private val Timeout=15*1000
+
   private val statusMap = Map(
     HTTP_OK -> "OK",
     HTTP_FORBIDDEN -> "Access denied!",
@@ -34,9 +36,11 @@ object HttpUtils extends Logging {
     HTTP_UNAUTHORIZED -> "Access denied")
 
   def toString(httpCode: Int): String = {
-    statusMap.get(httpCode).getOrElse(String.valueOf(httpCode))
+    statusMap.getOrElse(httpCode, String.valueOf(httpCode))
   }
 
+
+  @scala.annotation.tailrec
   def followRedirect(c: URLConnection, method: String): HttpURLConnection = {
     val conn = c.asInstanceOf[HttpURLConnection]
     conn.setRequestMethod(method)
@@ -56,10 +60,11 @@ object HttpUtils extends Logging {
     var conn: HttpURLConnection = null
     try {
       conn = url.openConnection().asInstanceOf[HttpURLConnection]
-      conn.setConnectTimeout(5 * 1000)
-      conn.setReadTimeout(5 * 1000)
+      conn.setConnectTimeout(Timeout)
+      conn.setReadTimeout(Timeout)
       conn.setRequestMethod(HttpMethods.GET)
-      conn.setDoOutput(true)
+      conn.setUseCaches(false)
+      conn.setDoOutput(false)
       Https.noverify(conn)
 
       if (conn.getResponseCode == 200) {
@@ -85,10 +90,11 @@ object HttpUtils extends Logging {
     var in: BufferedReader = null
     try {
       conn = url.openConnection().asInstanceOf[HttpURLConnection]
-      conn.setConnectTimeout(5 * 1000)
-      conn.setReadTimeout(5 * 1000)
+      conn.setConnectTimeout(Timeout)
+      conn.setReadTimeout(Timeout)
       conn.setRequestMethod(HttpMethods.GET)
-      conn.setDoOutput(true)
+      conn.setDoOutput(false)
+      conn.setUseCaches(false)
       Https.noverify(conn)
       if (conn.getResponseCode == 200) {
         in =
