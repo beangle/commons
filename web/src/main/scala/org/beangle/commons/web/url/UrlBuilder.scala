@@ -22,15 +22,16 @@ import javax.servlet.http.HttpServletRequest
 
 object UrlBuilder {
   def url(req: HttpServletRequest): String = {
-    val builder = new UrlBuilder(req.getContextPath())
+    val builder = new UrlBuilder(req.getContextPath)
     builder.setScheme(req.getScheme).setServerName(req.getServerName).setPort(req.getServerPort)
-      .setQueryString(req.getQueryString)
+      .setRequestURI(req.getRequestURI).setQueryString(req.getQueryString)
     builder.buildUrl()
   }
 }
+
 /**
- * @author chaostone
- */
+  * @author chaostone
+  */
 class UrlBuilder(cxtPath: String) {
 
   var scheme: String = _
@@ -50,8 +51,8 @@ class UrlBuilder(cxtPath: String) {
   var queryString: String = _
 
   /**
-   * Returns servetPath without contextPath
-   */
+    * Returns servetPath without contextPath
+    */
   private def buildServletPath(): String = {
     var uri = servletPath
     if (uri == null && null != requestURI) {
@@ -62,8 +63,8 @@ class UrlBuilder(cxtPath: String) {
   }
 
   /**
-   * Returns request Url contain pathinfo and queryString but without contextPath.
-   */
+    * Returns request Url contain pathinfo and queryString but without contextPath.
+    */
   def buildRequestUrl(): String = {
     val sb = new StringBuilder()
     sb.append(buildServletPath())
@@ -73,8 +74,8 @@ class UrlBuilder(cxtPath: String) {
   }
 
   /**
-   * Returns full url
-   */
+    * Returns full url
+    */
   def buildUrl(): String = {
     val sb = new StringBuilder()
     var includePort = true
@@ -109,24 +110,24 @@ class UrlBuilder(cxtPath: String) {
   }
 
   /**
-   * ContextPath should start with / but not ended with /
-   */
+    * ContextPath should start with / but not ended with /
+    */
   def setContextPath(contextPath: String): this.type = {
     this.contextPath = contextPath
     this
   }
 
   /**
-   * Set servletPath ,start with /
-   */
+    * Set servletPath ,start with /
+    */
   def setServletPath(servletPath: String): this.type = {
     this.servletPath = servletPath
     this
   }
 
   /**
-   * Set requestURI ,it should start with /
-   */
+    * Set requestURI ,it should start with /
+    */
   def setRequestURI(requestURI: String): this.type = {
     this.requestURI = requestURI
     this
