@@ -18,10 +18,10 @@
  */
 package org.beangle.commons.file.diff
 
-import java.io.{ BufferedInputStream, BufferedOutputStream, ByteArrayInputStream, ByteArrayOutputStream, File, FileInputStream, FileOutputStream, IOException, InputStream, OutputStream }
+import java.io._
 
 import org.apache.commons.compress.compressors.CompressorStreamFactory
-import org.beangle.commons.file.diff.bsdiff.{ Format, Offset, SuffixSort }
+import org.beangle.commons.file.diff.bsdiff.{Format, Offset, SuffixSort}
 import org.beangle.commons.io.Files
 
 /**
@@ -29,7 +29,7 @@ import org.beangle.commons.io.Files
  * source files (an old and new file).
  *
  * The algorithm based on bsdiff(http://www.daemonology.net/bsdiff/)
- * and transform from https://github.com/malensek/jbsdiff
+ * and ported from https://github.com/malensek/jbsdiff
  */
 object Bsdiff {
 

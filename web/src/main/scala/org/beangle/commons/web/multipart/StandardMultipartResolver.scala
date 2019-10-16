@@ -20,54 +20,38 @@ package org.beangle.commons.web.multipart
 
 import java.io.ByteArrayOutputStream
 
+import javax.servlet.http.{HttpServletRequest, Part}
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Strings
 
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.Part
+import scala.collection.mutable
 
-/**
- * Standard Multipart Resolver
- */
+/** 标准的Multipart解析器
+  * Standard Multipart Resolver
+  */
 object StandardMultipartResolver extends MultipartResolver {
 
   def isMultipart(request: HttpServletRequest): Boolean = {
-    if (!"post".equals(request.getMethod.toLowerCase)) return false
-
-    val contentType = request.getContentType
-    (contentType != null && contentType.toLowerCase.startsWith("multipart/"))
+    if ("post".equals(request.getMethod.toLowerCase)) {
+      val contentType = request.getContentType
+      contentType != null && contentType.toLowerCase.startsWith("multipart/")
+    } else {
+      false
+    }
   }
 
   def resolve(request: HttpServletRequest): Map[String, Any] = {
-    val parts = request.getParts
     val partItor = request.getParts.iterator
     val params = new collection.mutable.HashMap[String, Any]
-    while (partItor.hasNext()) {
+    while (partItor.hasNext) {
       val part = partItor.next
       if (part.getSize > 0) {
         val disposition = part.getHeader("content-disposition")
         if (disposition.contains("filename=")) {
-          val newParts = params.get(part.getName) match {
-            case Some(arr) => Array.concat(Array(part), arr.asInstanceOf[Array[Part]])
-            case None      => Array(part)
-          }
-          params.put(part.getName, newParts)
+          updatePart(params, part.getName, part)
         } else {
           val paramName = Strings.substringBetween(disposition, "name=\"", "\"")
-          val b = new ByteArrayOutputStream
-          IOs.copy(part.getInputStream, b)
-          val str = new String(b.toByteArray)
-          val newValue =
-            params.get(paramName) match {
-              case Some(v) =>
-                if (v.getClass.isArray) {
-                  Array.concat(Array[Any](str), v.asInstanceOf[Array[Any]])
-                } else {
-                  Array(v, str)
-                }
-              case None => str
-            }
-          params.put(paramName, newValue)
+          updateString(params, paramName, part)
         }
       } else {
         if (isFormField(part) && !params.contains(part.getName)) {
@@ -78,13 +62,52 @@ object StandardMultipartResolver extends MultipartResolver {
     params.toMap
   }
 
-  private def isFormField(part: Part): Boolean = {
-    val isFile = ("application/octet-stream" == part.getContentType || part.getHeader("content-disposition").contains("filename"))
-    !isFile
+  /** 将字符类型的参数更新到参数表
+    * @param params
+    * @param name
+    * @param part
+    */
+  def updateString(params: mutable.Map[String, Any], name: String, part: Part): Unit = {
+    val b = new ByteArrayOutputStream
+    IOs.copy(part.getInputStream, b)
+    val str = new String(b.toByteArray)
+    val newValue =
+      params.get(name) match {
+        case Some(v) =>
+          v match {
+            case a: Array[Any] => Array.concat(Array[Any](str), a)
+            case _ => Array(v, str)
+          }
+        case None => str
+      }
+    params.put(name, newValue)
   }
+
+  /** 将part类型的参数更新到参数表中
+    * @param params
+    * @param name
+    * @param part
+    */
+  def updatePart(params: mutable.Map[String, Any], name: String, part: Part): Unit = {
+    val newParts = params.get(name) match {
+      case Some(arr) =>
+        arr match {
+          case _: String => Array(part)
+          case a: Array[Part] => Array.concat(Array(part), a)
+        }
+      case None => Array(part)
+    }
+    params.put(name, newParts)
+  }
+
+  /** 是否一个普通的form表单域 */
+  private def isFormField(part: Part): Boolean = {
+    !("application/octet-stream" == part.getContentType || part.getHeader("content-disposition").contains("filename"))
+  }
+
   override def cleanup(request: HttpServletRequest): Unit = {
     if (isMultipart(request)) {
-      val partItor = request.getParts().iterator
+      val partItor = request.getParts.iterator
       while (partItor.hasNext) partItor.next.delete()
     }
   }
