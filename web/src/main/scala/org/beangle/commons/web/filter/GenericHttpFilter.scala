@@ -18,41 +18,40 @@
  */
 package org.beangle.commons.web.filter
 
-import scala.collection.mutable
-
-import org.beangle.commons.bean.{ Initializing, Properties }
+import javax.servlet.{Filter, FilterConfig, ServletException}
+import org.beangle.commons.bean.{Initializing, Properties}
 import org.beangle.commons.lang.Strings
 
-import javax.servlet.{ Filter, FilterConfig, ServletException }
+import scala.collection.mutable
+
 /**
- * @author chaostone
- */
+  * @author chaostone
+  */
 abstract class GenericHttpFilter extends Filter with Initializing {
 
-  var filterConfig: FilterConfig = _
+  private[this] var filterConfig: FilterConfig = _
 
   /**
-   * Standard way of initializing this filter. Map config parameters onto bean
-   * properties of this filter, and invoke subclass initialization.
-   */
+    * Standard way of initializing this filter. Map config parameters onto bean
+    * properties of this filter, and invoke subclass initialization.
+    */
   override def init(filterConfig: FilterConfig): Unit = {
     this.filterConfig = filterConfig
-    val filterName = filterConfig.getFilterName
     initParams(filterConfig, requiredProperties)
     init()
   }
 
   private final def initParams(config: FilterConfig, requiredProperties: Set[String]): Unit = {
     val missingProps = new mutable.HashSet[String]
-    if ((requiredProperties != null && !requiredProperties.isEmpty)) missingProps ++= requiredProperties
+    if (requiredProperties != null && requiredProperties.nonEmpty) missingProps ++= requiredProperties
     val en = config.getInitParameterNames
-    while (en.hasMoreElements()) {
-      val property = en.nextElement().asInstanceOf[String]
+    while (en.hasMoreElements) {
+      val property = en.nextElement()
       val value = config.getInitParameter(property)
       Properties.copy(this, property, value)
       missingProps.remove(property)
     }
-    if (missingProps.size > 0) {
+    if (missingProps.nonEmpty) {
       throw new ServletException("Initialization from FilterConfig for filter '" + config.getFilterName +
         "' failed; the following required properties were missing: " +
         Strings.join(missingProps, ", "))
@@ -60,19 +59,23 @@ abstract class GenericHttpFilter extends Filter with Initializing {
   }
 
   /**
-   * Make the name of this filter available to subclasses.
-   */
+    * Make the name of this filter available to subclasses.
+    */
   protected def filterName: String = {
-    (if (filterConfig != null) filterConfig.getFilterName else "None")
+    if (filterConfig != null) filterConfig.getFilterName else "None"
   }
 
   override def init(): Unit = {
   }
 
+  def config: FilterConfig = {
+    this.filterConfig
+  }
+
   /**
-   * Set of required properties (Strings) that must be supplied as config
-   * parameters to this filter.
-   */
+    * Set of required properties (Strings) that must be supplied as config
+    * parameters to this filter.
+    */
   def requiredProperties: Set[String] = Set.empty
 
   override def destroy(): Unit = {
