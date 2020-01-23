@@ -21,7 +21,7 @@ package org.beangle.commons.dbf;
 import org.junit.runner.RunWith
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.junit.JUnitRunner
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import java.io.File
 import java.nio.charset.Charset
 

@@ -21,7 +21,7 @@ package org.beangle.commons.lang.reflect
 import java.lang.reflect.Modifier
 import org.beangle.commons.lang.testbean.{ Author, Book, BookPrimitiveId, BookStore, Entity, NumIdBean, Menu }
 import org.junit.runner.RunWith
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.junit.JUnitRunner
 import org.beangle.commons.lang.testbean.Department

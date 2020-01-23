@@ -18,16 +18,16 @@
  */
 package org.beangle.commons.text.replace
 
-import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+import org.beangle.commons.logging.Logging
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.junit.runner.RunWith
 import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class BatchReplaceMainTest extends AnyFunSpec with Matchers {
+class BatchReplaceMainTest extends AnyFunSpec with Matchers with Logging{
   describe("BatchReplace") {
     it("Test batch replace expression") {
       val clause = "<#include \"/template/head.ftl\"/>"
@@ -59,7 +59,7 @@ class BatchReplaceMainTest extends AnyFunSpec with Matchers {
     }
 
     def debug(msg: Any): Unit = {
-      println(msg)
+      logger.debug(String.valueOf(msg))
     }
   }
 }

@@ -19,7 +19,7 @@
 package org.beangle.commons.codec.binary
 
 import org.junit.runner.RunWith
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.junit.JUnitRunner
 import java.util.Arrays

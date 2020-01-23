@@ -20,7 +20,7 @@ package org.beangle.commons.csv
 
 import java.io.StringReader
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.junit.runner.RunWith
 import org.scalatestplus.junit.JUnitRunner
 

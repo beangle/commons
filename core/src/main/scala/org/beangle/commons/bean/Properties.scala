@@ -24,6 +24,7 @@ import org.beangle.commons.conversion.Conversion
 import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.reflect.{BeanInfos, MapType, TypeInfo}
+import org.beangle.commons.logging.Logging
 
 object Properties {
   private val Default = new Properties(BeanInfos.Default, DefaultConversion.Instance)
@@ -53,7 +54,7 @@ object Properties {
   }
 }
 
-class Properties(beanInfos: BeanInfos, conversion: Conversion) {
+class Properties(beanInfos: BeanInfos, conversion: Conversion) extends Logging {
 
   private val resolver = new PropertyNameResolver()
 
@@ -144,7 +145,7 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
     beanInfos.get(bean).getGetter(name) match {
       case Some(method) => method.invoke(bean)
       case _ =>
-        System.err.println("Cannot find " + Strings.capitalize(name) + " Getter in " + bean.getClass)
+        logger.error("Cannot find " + Strings.capitalize(name) + " Getter in " + bean.getClass)
         null
     }
   }
@@ -203,7 +204,7 @@ class Properties(beanInfos: BeanInfos, conversion: Conversion) {
 
     // Isolate the name
     val resolvedName = resolver.getProperty(name)
-    var rs = if (resolvedName != null && resolvedName.length() >= 0) getSimpleProperty(bean, resolvedName) else bean
+    val rs = if (resolvedName != null && resolvedName.length() >= 0) getSimpleProperty(bean, resolvedName) else bean
 
     var converted = value
     if (rs.getClass.isArray) {

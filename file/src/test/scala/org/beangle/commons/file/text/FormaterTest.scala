@@ -18,13 +18,14 @@
  */
 package org.beangle.commons.file.text
 
+import org.beangle.commons.logging.Logging
 import org.junit.runner.RunWith
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class FormaterTest extends AnyFunSpec with Matchers {
+class FormaterTest extends AnyFunSpec with Matchers with Logging{
 
   val lines = "package org.beangle.commons.file\r\n\r\n\t/**\r\n\n\n\n\n\n \t*\ttab2space,fixcrlf,trim_trailing_whitespace,insert_final_newline{fixlast}  \t  \r\n \t*/ \t\r\npackage object text {"
   describe("Formater") {
@@ -33,8 +34,8 @@ class FormaterTest extends AnyFunSpec with Matchers {
       builder.enableTab2space(4).enableTrimTrailingWhiteSpace().insertFinalNewline()
       val formater = builder.build()
       val formated = formater.format(lines)
-      println(lines)
-      print(formated)
+      logger.info(lines)
+      logger.info(formated)
     }
   }
 }

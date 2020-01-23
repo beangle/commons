@@ -24,21 +24,22 @@ import java.nio.charset.Charset
 import java.{util => ju}
 
 import org.beangle.commons.lang.Charsets.UTF_8
+import org.beangle.commons.logging.Logging
 
-object IOs {
+object IOs extends Logging {
 
   private val defaultBufferSize = 1024 * 4
 
   private val eof = -1
 
   /**
-   * Copy bytes from a <code>InputStream</code> to an <code>OutputStream</code>.
-   *
-   * @param input the <code>InputStream</code> to read from
-   * @param output the <code>OutputStream</code> to write to
-   * @return the number of bytes copied
-   * @since 3.1
-   */
+    * Copy bytes from a <code>InputStream</code> to an <code>OutputStream</code>.
+    *
+    * @param input  the <code>InputStream</code> to read from
+    * @param output the <code>OutputStream</code> to write to
+    * @return the number of bytes copied
+    * @since 3.1
+    */
   def copy(input: InputStream, output: OutputStream): Long = {
     val buffer = new Array[Byte](defaultBufferSize)
     var count = 0
@@ -54,21 +55,22 @@ object IOs {
 
   def write(data: String, output: OutputStream, charset: Charset = null): Unit = {
     if (data != null) {
-      if (charset == null)
+      if (charset == null) {
         output.write(data.getBytes())
-      else
+      } else {
         output.write(data.getBytes(charset))
+      }
     }
   }
 
   /**
-   * Copy chars from a <code>Reader</code> to a <code>Writer</code>.
-   *
-   * @param input the <code>Reader</code> to read from
-   * @param output the <code>Writer</code> to write to
-   * @return the number of characters copied
-   * @since 3.1
-   */
+    * Copy chars from a <code>Reader</code> to a <code>Writer</code>.
+    *
+    * @param input  the <code>Reader</code> to read from
+    * @param output the <code>Writer</code> to write to
+    * @return the number of characters copied
+    * @since 3.1
+    */
   def copy(input: Reader, output: Writer): Long = {
     val buffer = new Array[Char](defaultBufferSize)
     var count = 0
@@ -83,9 +85,9 @@ object IOs {
   }
 
   /**
-   * Get the contents of a <code>Reader</code> as a list of Strings,
-   * one entry per line.
-   */
+    * Get the contents of a <code>Reader</code> as a list of Strings,
+    * one entry per line.
+    */
   def readLines(input: Reader): List[String] = {
     val reader = toBufferedReader(input)
     val list = new collection.mutable.ListBuffer[String]
@@ -109,28 +111,29 @@ object IOs {
   }
 
   /**
-   * Read key value properties
-   */
+    * Read key value properties
+    */
   def readProperties(url: URL): Map[String, String] = {
-    if (null == url) Map.empty
-    else {
+    if (null == url) {
+      Map.empty
+    } else {
       try {
         readProperties(url.openStream())
       } catch {
-        case e: Exception => {
-          System.err.println("load " + url + " error", e)
+        case e: Exception =>
+          logger.error("load " + url + " error", e)
           Map.empty
-        }
       }
     }
   }
 
   /**
-   * Read key value properties
-   */
+    * Read key value properties
+    */
   def readProperties(input: InputStream, charset: Charset = UTF_8): Map[String, String] = {
-    if (null == input) Map.empty
-    else {
+    if (null == input) {
+      Map.empty
+    } else {
       val texts = new collection.mutable.HashMap[String, String]
       val reader = new LineNumberReader(new InputStreamReader(input, charset))
       var line: String = reader.readLine
@@ -145,27 +148,29 @@ object IOs {
   }
 
   /**
-   * Read Java key value properties by url
-   */
+    * Read Java key value properties by url
+    */
   def readJavaProperties(url: URL): Map[String, String] = {
-    if (null == url) Map.empty
-    else {
+    if (null == url) {
+      Map.empty
+    } else {
       try {
         readJavaProperties(url.openStream())
       } catch {
-        case e: Exception => {
-          System.err.println("load " + url + " error", e)
+        case e: Exception =>
+          logger.error("load " + url + " error", e)
           Map.empty
-        }
       }
     }
   }
+
   /**
-   * Read java key value properties
-   */
+    * Read java key value properties
+    */
   def readJavaProperties(input: InputStream): Map[String, String] = {
-    if (null == input) Map.empty
-    else {
+    if (null == input) {
+      Map.empty
+    } else {
       val properties = new ju.Properties()
       properties.load(input)
       close(input)
@@ -179,15 +184,15 @@ object IOs {
   }
 
   /**
-   * Close many objects quitely.
-   * swallow any exception.
-   */
+    * Close many objects quitely.
+    * swallow any exception.
+    */
   def close(objs: AutoCloseable*): Unit = {
     objs foreach { obj =>
       try {
         if (obj != null) obj.close()
       } catch {
-        case ioe: Exception =>
+        case _: Exception =>
       }
     }
   }
@@ -196,12 +201,16 @@ object IOs {
     try {
       func(res)
     } finally {
-      if (res != null)
+      if (res != null) {
         res.close()
+      }
     }
   }
 
   private def toBufferedReader(reader: Reader): BufferedReader = {
-    if (reader.isInstanceOf[BufferedReader]) reader.asInstanceOf[BufferedReader] else new BufferedReader(reader)
+    reader match {
+      case reader1: BufferedReader => reader1
+      case _ => new BufferedReader(reader)
+    }
   }
 }

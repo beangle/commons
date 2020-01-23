@@ -22,7 +22,7 @@ import java.text.SimpleDateFormat
 import java.time.{ LocalDate, LocalTime }
 
 import org.junit.runner.RunWith
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.junit.JUnitRunner
 import java.time.format.DateTimeFormatter

@@ -19,7 +19,7 @@
 package org.beangle.commons.web.http.agent
 
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.junit.runner.RunWith
 import org.scalatestplus.junit.JUnitRunner
 

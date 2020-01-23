@@ -20,7 +20,7 @@ package org.beangle.commons.conversion.converter
 
 import java.sql.Time
 import org.junit.runner.RunWith
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.junit.JUnitRunner
 import org.beangle.commons.lang.time.HourMinute

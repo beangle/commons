@@ -18,7 +18,9 @@
  */
 package org.beangle.commons.lang.time
 
-object TimerTrace {
+import org.beangle.commons.logging.Logging
+
+object TimerTrace extends Logging {
 
   protected var curStack: ThreadLocal[TimerStack] = new ThreadLocal[TimerStack]()
 
@@ -48,18 +50,19 @@ object TimerTrace {
   try {
     mintime = Integer.parseInt(System.getProperty(MIN_TIME, "0"))
   } catch {
-    case e: NumberFormatException =>
+    case _: NumberFormatException =>
   }
 
   /**
     * Create and start a performance profiling with the <code>name</code> given. Deal with
     * profile hierarchy automatically, so caller don't have to be concern about it.
+    *
     * @param name profile name
     */
   def start(name: String): Unit = {
     if (!active) return
     val root = new TimerNode(name, System.currentTimeMillis())
-    val stack = curStack.get.asInstanceOf[TimerStack]
+    val stack = curStack.get
     if (null == stack) curStack.set(new TimerStack(root)) else stack.push(root)
   }
 
@@ -86,21 +89,24 @@ object TimerTrace {
 
   /**
     * Do a log (at INFO level) of the time taken for this particular profiling.
+    *
     * @param currentTimer profiling timer bean
     */
   private def printTimes(currentTimer: TimerNode): Unit = {
-    println(currentTimer.getPrintable)
+    logger.info(currentTimer.getPrintable)
   }
 
   /**
     * Get the min time for this profiling, it searches for a System property
     * 'beangle.profile.mintime' and default to 0.
+    *
     * @return long
     */
   def getMinTime: Int = mintime
 
   /**
     * Change mintime
+    *
     * @param mintime
     */
   def setMinTime(mintime: Int): Unit = {
@@ -110,6 +116,7 @@ object TimerTrace {
 
   /**
     * Turn profiling on or off.
+    *
     * @param active
     */
   def setActive(active: Boolean): Unit = {
