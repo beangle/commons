@@ -18,6 +18,18 @@
  */
 package org.beangle.commons.net.http
 
+import java.net.HttpURLConnection
+
 case class Response(status: Int, content: Any) {
-  def getText = String.valueOf(content)
+  def getText: String = {
+    String.valueOf(content)
+  }
+
+  def getOrElse(default: => String): String = {
+    if (status == HttpURLConnection.HTTP_OK) {
+      String.valueOf(content)
+    } else {
+      default
+    }
+  }
 }

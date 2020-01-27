@@ -21,6 +21,8 @@ package org.beangle.commons.io
 import java.io.File
 import java.nio.file.Paths
 
+import org.beangle.commons.io.Files./
+
 object Dirs {
 
   def on(path: String): Dirs = {
@@ -30,6 +32,7 @@ object Dirs {
   def on(file: File): Dirs = {
     new Dirs(file)
   }
+
   def on(file: File, child: String): Dirs = {
     new Dirs(new File(file, child))
   }
@@ -40,7 +43,7 @@ object Dirs {
 
   private def remove(file: File): Unit = {
     if (file.exists()) {
-      if (file.isDirectory()) {
+      if (file.isDirectory) {
         if (file.list().length == 0) {
           file.delete()
         } else {
@@ -62,6 +65,13 @@ object Dirs {
 }
 
 class Dirs(val pwd: File) {
+
+  def rename(newName: String): Dirs = {
+    val dest = new File(pwd.getParentFile.getAbsolutePath + / + newName)
+    pwd.renameTo(dest)
+    new Dirs(dest)
+  }
+
   def delete(children: String*): this.type = {
     children foreach { child =>
       Dirs.delete(new File(pwd, child))
@@ -83,6 +93,7 @@ class Dirs(val pwd: File) {
   def ls(): Seq[String] = {
     pwd.list().toSeq
   }
+
   def cd(child: String): Dirs = {
     new Dirs(new File(pwd, child))
   }
@@ -101,7 +112,11 @@ class Dirs(val pwd: File) {
   }
 
   def ln(target: File): this.type = {
-    val link = new File(pwd, target.getName)
+    ln(target, target.getName)
+  }
+
+  def ln(target: File, newName: String): this.type = {
+    val link = new File(pwd, newName)
     if (link.exists()) {
       if (java.nio.file.Files.isSymbolicLink(Paths.get(link.toURI))) {
         link.delete()
