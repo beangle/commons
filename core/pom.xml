@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.beangle.commons</groupId>
     <artifactId>beangle-commons-parent_2.13</artifactId>
-    <version>5.1.10</version>
+    <version>5.1.11</version>
   </parent>
   <artifactId>beangle-commons-core_2.13</artifactId>
   <packaging>jar</packaging>
@@ -19,7 +19,6 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <optional>true</optional>
     </dependency>
   </dependencies>
 </project>

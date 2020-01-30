@@ -24,27 +24,28 @@ import java.nio.charset.Charset
 import org.beangle.commons.io.Files
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.reflect.Reflections
+import org.beangle.commons.logging.Logging
 
 import scala.collection.mutable
 
-object BatchReplaceMain {
+object BatchReplaceMain extends Logging{
 
   /**
    * Usage:BatchReplaceMain dir patternfile encoding
    */
   def main(args: Array[String]): Unit = {
     if (args.length < 2) {
-      println("using BatchReplaceMain dir patternfile encoding")
+      logger.info("using BatchReplaceMain dir patternfile encoding")
       return
     }
     val dir = args(0)
     if (!new File(dir).exists()) {
-      println(dir + " not a valid file or directory")
+      logger.info(dir + " not a valid file or directory")
       return
     }
     val properties = args(1)
     if (!new File(properties).exists()) {
-      println(properties + " not valid file or directory")
+      logger.info(properties + " not valid file or directory")
     }
     var charset: Charset = null
     if (args.length >= 3) {
@@ -81,7 +82,7 @@ object BatchReplaceMain {
     if (file.isFile && !file.isHidden) {
       val replacers = profiles.get(Strings.substringAfterLast(fileName, ".")).orNull
       if (null == replacers) return
-      println("processing " + fileName)
+      logger.info("processing " + fileName)
       var filecontent = Files.readString(file, charset)
       filecontent = Replacer.process(filecontent, replacers)
       writeToFile(filecontent, fileName, charset)

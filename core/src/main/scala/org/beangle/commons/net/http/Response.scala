@@ -16,20 +16,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang
+package org.beangle.commons.net.http
 
-import org.junit.runner.RunWith
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.funspec.AnyFunSpec
-import org.scalatestplus.junit.JUnitRunner
+import java.net.HttpURLConnection
 
-@RunWith(classOf[JUnitRunner])
-class BitStringsTest extends AnyFunSpec with Matchers {
+case class Response(status: Int, content: Any) {
+  def getText: String = {
+    String.valueOf(content)
+  }
 
-  describe("BitStrings") {
-    it("Calculate binary value of bit string") {
-      BitStrings.binValueOf("00000000000000000000000000000000011111111111111111111") should be(1048575)
-      BitStrings.binValueOf("00000000000000000000000000000000000011100000000000000") should be(114688)
+  def getOrElse(default: => String): String = {
+    if (status == HttpURLConnection.HTTP_OK) {
+      String.valueOf(content)
+    } else {
+      default
     }
   }
 }

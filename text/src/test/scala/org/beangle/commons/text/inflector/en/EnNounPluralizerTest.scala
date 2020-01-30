@@ -20,7 +20,7 @@ package org.beangle.commons.text.inflector.en
 
 import org.junit.runner.RunWith
 import org.scalatestplus.junit.JUnitRunner
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 
 /**

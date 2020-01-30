@@ -24,7 +24,7 @@ import org.beangle.commons.lang.annotation.description
 import org.beangle.commons.lang.testbean.{Book, TestChild2Bean}
 import org.beangle.commons.lang.testbean.Entity
 import org.junit.runner.RunWith
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.junit.JUnitRunner
 import org.scalatestplus.junit.JUnitRunner

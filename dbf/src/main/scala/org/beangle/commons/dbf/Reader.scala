@@ -49,7 +49,7 @@ object Reader {
 
     try {
       val header = reader.header
-      val titles = new Array[String](header.fields.length)
+      //val titles = new Array[String](header.fields.length)
       val fieldCount = header.fields.length
       (0 until fieldCount) foreach { i =>
         val field = header.fields(i)

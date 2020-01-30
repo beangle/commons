@@ -44,7 +44,7 @@ class TimerNode(val resource: String, var startTime: Long) extends Serializable 
   /**
    * Get a formatted string representing all the methods that took longer than a specified time.
    */
-  def getPrintable(): String = getPrintable("")
+  def getPrintable: String = getPrintable("")
 
   protected def getPrintable(indent: String): String = {
     val buffer = new StringBuilder()

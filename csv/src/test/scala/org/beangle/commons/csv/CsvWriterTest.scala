@@ -26,7 +26,7 @@ import java.io.IOException
 import java.io.StringWriter
 import org.beangle.commons.lang.SystemInfo
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.junit.runner.RunWith
 import org.scalatestplus.junit.JUnitRunner
 

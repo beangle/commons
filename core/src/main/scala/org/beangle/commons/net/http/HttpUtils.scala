@@ -18,16 +18,18 @@
  */
 package org.beangle.commons.net.http
 
-import java.io.{BufferedReader, ByteArrayOutputStream, InputStreamReader}
+import java.io.{BufferedReader, ByteArrayOutputStream, InputStreamReader, OutputStreamWriter}
 import java.net.HttpURLConnection._
 import java.net.{HttpURLConnection, URL, URLConnection}
+import java.nio.charset.Charset
 
 import org.beangle.commons.io.IOs
+import org.beangle.commons.lang.Charsets
 import org.beangle.commons.logging.Logging
 
 object HttpUtils extends Logging {
 
-  private val Timeout=15*1000
+  private val Timeout = 15 * 1000
 
   private val statusMap = Map(
     HTTP_OK -> "OK",
@@ -55,51 +57,51 @@ object HttpUtils extends Logging {
     }
   }
 
-  def getData(urlString: String): Option[Array[Byte]] = {
+  def getData(urlString: String, method: String = HttpMethods.GET): Response = {
     val url = new URL(urlString)
     var conn: HttpURLConnection = null
     try {
       conn = url.openConnection().asInstanceOf[HttpURLConnection]
       conn.setConnectTimeout(Timeout)
       conn.setReadTimeout(Timeout)
-      conn.setRequestMethod(HttpMethods.GET)
+      conn.setRequestMethod(method)
       conn.setUseCaches(false)
       conn.setDoOutput(false)
       Https.noverify(conn)
 
-      if (conn.getResponseCode == 200) {
+      if (conn.getResponseCode == HTTP_OK) {
         val bos = new ByteArrayOutputStream
         IOs.copy(conn.getInputStream, bos)
-        Some(bos.toByteArray)
+        Response(conn.getResponseCode, bos.toByteArray)
       } else {
-        None
+        Response(conn.getResponseCode, conn.getResponseMessage)
       }
     } catch {
-      case e: Exception => logger.error("Cannot open url " + urlString + ",for " + e.getMessage, e); None
+      case e: Exception =>
+        report(url, e)
+        Response(HTTP_NOT_FOUND, e.getMessage)
     } finally {
       if (null != conn) conn.disconnect()
     }
   }
 
-  def getText(urlString: String): Option[String] = {
-    getText(new URL(urlString), null)
+  def getText(urlString: String): Response = {
+    getText(new URL(urlString), HttpMethods.GET, Charsets.UTF_8)
   }
 
-  def getText(url: URL, encoding: String): Option[String] = {
+  def getText(url: URL, method: String, encoding: Charset): Response = {
     var conn: HttpURLConnection = null
     var in: BufferedReader = null
     try {
       conn = url.openConnection().asInstanceOf[HttpURLConnection]
       conn.setConnectTimeout(Timeout)
       conn.setReadTimeout(Timeout)
-      conn.setRequestMethod(HttpMethods.GET)
+      conn.setRequestMethod(method)
       conn.setDoOutput(false)
       conn.setUseCaches(false)
       Https.noverify(conn)
-      if (conn.getResponseCode == 200) {
-        in =
-          if (null == encoding) new BufferedReader(new InputStreamReader(conn.getInputStream))
-          else new BufferedReader(new InputStreamReader(conn.getInputStream, encoding))
+      if (conn.getResponseCode == HTTP_OK) {
+        in = new BufferedReader(new InputStreamReader(conn.getInputStream, encoding))
         var line: String = in.readLine()
         val sb = new StringBuilder(255)
         while (line != null) {
@@ -107,15 +109,47 @@ object HttpUtils extends Logging {
           sb.append("\n")
           line = in.readLine()
         }
-        Some(sb.toString)
+        Response(HTTP_OK, sb.toString)
       } else {
-        None
+        Response(conn.getResponseCode, conn.getResponseMessage)
       }
     } catch {
-      case e: Exception => logger.error("Cannot open url " + url + " for " + e.getMessage); None
+      case e: Exception =>
+        report(url, e)
+        Response(HTTP_NOT_FOUND, e.getMessage)
     } finally {
       if (null != in) in.close()
       if (null != conn) conn.disconnect()
     }
+  }
+
+  def invoke(url: URL, body: String, contentType: String): Response = {
+    val conn = url.openConnection.asInstanceOf[HttpURLConnection]
+    Https.noverify(conn)
+    conn.setDoOutput(true)
+    conn.setRequestMethod(HttpMethods.POST)
+    conn.setRequestProperty("Content-Type", contentType)
+    val os = conn.getOutputStream
+    val osw = new OutputStreamWriter(os, "UTF-8")
+    osw.write(body)
+    osw.flush()
+    osw.close()
+    os.close() //don't forget to close the OutputStream
+    try {
+      conn.connect()
+      //read the inputstream and print it
+      val lines = IOs.readString(conn.getInputStream)
+      Response(conn.getResponseCode, lines)
+    } catch {
+      case e: Exception =>
+        report(url, e)
+        Response(HTTP_NOT_FOUND, conn.getResponseMessage)
+    } finally {
+      if (null != conn) conn.disconnect()
+    }
+  }
+
+  private[this] def report(url: URL, e: Exception): Unit = {
+    logger.error("Cannot open url " + url, e)
   }
 }

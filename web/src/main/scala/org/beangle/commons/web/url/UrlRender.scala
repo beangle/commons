@@ -71,6 +71,9 @@ class UrlRender {
       sb ++= referer
       return sb
     }
+    if (uriStr.startsWith("http")) {
+      return new StringBuilder(uriStr)
+    }
     var questIndex = uriStr.indexOf('?')
     val queryStr = if (-1 != questIndex) uriStr.substring(questIndex + 1) else null
     val uri = if (-1 == questIndex) uriStr else uriStr.substring(0, questIndex)

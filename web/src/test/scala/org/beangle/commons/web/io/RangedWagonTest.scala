@@ -23,7 +23,7 @@ import java.io.{ByteArrayOutputStream, File, OutputStream}
 import org.beangle.commons.lang.ClassLoaders
 import org.junit.runner.RunWith
 import org.mockito.Mockito.{mock, verify, when}
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.junit.JUnitRunner
 

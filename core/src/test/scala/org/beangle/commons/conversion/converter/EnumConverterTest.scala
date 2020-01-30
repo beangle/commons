@@ -21,7 +21,7 @@ import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.testbean.TestEnum
 import org.beangle.commons.lang.time.WeekDay._
 import org.junit.runner.RunWith
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.junit.JUnitRunner
 

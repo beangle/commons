@@ -19,8 +19,8 @@
 package org.beangle.commons.lang
 
 import org.junit.runner.RunWith
-import org.scalatest.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
@@ -28,7 +28,7 @@ class TypeTest extends AnyFunSpec with Matchers {
 
   describe("Types") {
     it("java primitives") {
-      val a = new JDouble("0")
+      val a = java.lang.Double.valueOf("0")
       assert(a.getClass == classOf[java.lang.Double])
     }
   }

@@ -22,7 +22,7 @@ import java.time.LocalDate
 
 import org.beangle.commons.lang.time.WeekDay.{ Mon, Sat, Sun, Wed }
 import org.junit.runner.RunWith
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.junit.JUnitRunner
 

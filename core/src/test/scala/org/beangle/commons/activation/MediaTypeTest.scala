@@ -21,8 +21,8 @@ package org.beangle.commons.activation
 import org.beangle.commons.config.Resources
 import org.beangle.commons.lang.ClassLoaders.{getResource, getResources}
 import org.junit.runner.RunWith
-import org.scalatest.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
@@ -33,7 +33,7 @@ class MediaTypeTest extends AnyFunSpec with Matchers {
         getResources("META-INF/mime_test.types"), getResource("mime_test.types"))
       val map = MediaTypes.buildTypes(resources)
       assert(map.size == 10)
-      assert(None != map.get("xxx"))
+      assert(map.get("xxx").isDefined)
     }
     it("parse") {
       val mimeTypes = MediaTypes.parse("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
@@ -44,11 +44,11 @@ class MediaTypeTest extends AnyFunSpec with Matchers {
   describe("MediaTypeProvider") {
     it("load resource") {
       val xlsx = MediaTypes.get("xlsx")
-      assert(None != xlsx)
+      assert(xlsx.isDefined)
       assert(xlsx.get.subType == "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
       val all = MediaTypes.get("*/*")
-      assert(Some(MediaTypes.All) == all)
+      assert(all.contains(MediaTypes.All))
 
       val csv = MediaTypes.parse("text/csv").head
       assert(MediaTypes.TextCsv == csv)

@@ -21,7 +21,7 @@ package org.beangle.commons.bean
 import org.beangle.commons.lang.reflect.BeanInfos
 import org.beangle.commons.lang.testbean.TestBean
 import org.junit.runner.RunWith
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.junit.JUnitRunner
 

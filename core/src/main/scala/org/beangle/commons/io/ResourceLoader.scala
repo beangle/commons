@@ -22,13 +22,14 @@ import java.io.IOException
 import java.net.URL
 
 import org.beangle.commons.lang.{ClassLoaders, Strings}
+import org.beangle.commons.logging.Logging
 
 /**
- * Resource loader
- *
- * @author chaostone
- * @since 3.3.0
- */
+  * Resource loader
+  *
+  * @author chaostone
+  * @since 3.3.0
+  */
 trait ResourceLoader {
 
   def load(resourceName: String): Option[URL]
@@ -39,7 +40,7 @@ trait ResourceLoader {
 
 }
 
-class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader {
+class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader with Logging {
 
   def this(loaderArray: ResourceLoader*) {
     this(loaderArray.toList)
@@ -47,8 +48,8 @@ class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader 
 
   override def load(resourceName: String): Option[URL] = {
     var url: Option[URL] = None
-    for (loader <- loaders if null == url) {
-      val url = loader.load(resourceName)
+    for (loader <- loaders if url.isEmpty) {
+      url = loader.load(resourceName)
     }
     url
   }
@@ -59,7 +60,8 @@ class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader 
       try {
         list = loader.loadAll(resourceName)
       } catch {
-        case e: IOException => System.err.println("cannot getResources " + resourceName, e)
+        case e: IOException =>
+          logger.error("cannot getResources " + resourceName, e)
       }
     }
     list
@@ -74,8 +76,8 @@ class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader 
 }
 
 /**
- * Load resource by class loader.
- */
+  * Load resource by class loader.
+  */
 class ClasspathResourceLoader(val prefixes: List[String] = List("")) extends ResourceLoader {
 
   def this(prefixStr: String) {
@@ -101,7 +103,7 @@ class ClasspathResourceLoader(val prefixes: List[String] = List("")) extends Res
     val urls = new collection.mutable.ListBuffer[URL]
     for (name <- names) {
       val url = load(name)
-      if (!url.isEmpty) urls += url.get
+      if (url.isDefined) urls += url.get
     }
     urls.toList
   }

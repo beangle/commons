@@ -27,6 +27,6 @@ object LoggerTest {
     val debug = logger(Debug)
     debug("debug")
 
-    println(debug.getClass())
+    info(debug.getClass.getName)
   }
 }
