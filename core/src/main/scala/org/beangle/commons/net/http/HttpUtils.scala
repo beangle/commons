@@ -47,6 +47,7 @@ object HttpUtils extends Logging {
     val conn = c.asInstanceOf[HttpURLConnection]
     conn.setRequestMethod(method)
     conn.setInstanceFollowRedirects(false)
+    Https.noverify(conn)
     val rc = conn.getResponseCode
     rc match {
       case HTTP_OK => conn
