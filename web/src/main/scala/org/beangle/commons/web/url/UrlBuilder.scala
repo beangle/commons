@@ -19,13 +19,20 @@
 package org.beangle.commons.web.url
 
 import javax.servlet.http.HttpServletRequest
+import org.beangle.commons.web.util.RequestUtils
 
 object UrlBuilder {
-  def url(req: HttpServletRequest): String = {
+  def apply(req: HttpServletRequest): UrlBuilder = {
     val builder = new UrlBuilder(req.getContextPath)
-    builder.setScheme(req.getScheme).setServerName(req.getServerName).setPort(req.getServerPort)
+    val scheme = if (RequestUtils.isHttps(req)) "https" else "http"
+    val port = RequestUtils.getServerPort(req)
+    builder.setScheme(scheme).setServerName(req.getServerName).setPort(port)
       .setRequestURI(req.getRequestURI).setQueryString(req.getQueryString)
-    builder.buildUrl()
+    builder
+  }
+
+  def url(req: HttpServletRequest): String = {
+    apply(req).buildUrl()
   }
 }
 
@@ -60,6 +67,17 @@ class UrlBuilder(cxtPath: String) {
       if (contextPath != "") uri = uri.substring(contextPath.length)
     }
     if ((null == uri)) "" else uri
+  }
+
+  def buildOrigin(): String = {
+    val sb = new StringBuilder
+    sb.append(scheme).append("://")
+    sb.append(serverName)
+    val includePort = port != (if (scheme == "http") 80 else 443)
+    if (includePort && port > 0) {
+      sb.append(':').append(port)
+    }
+    sb.toString
   }
 
   /**
