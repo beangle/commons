@@ -18,77 +18,45 @@
  */
 package org.beangle.commons.web.init
 
-import java.{ util => ju }
-import java.util.EnumSet
-import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.ClassLoaders
-import org.beangle.commons.lang.Strings.{ split, substringAfter, substringBefore }
-import javax.servlet.{ ServletContextEvent, ServletContextListener, ServletException }
-import javax.servlet.DispatcherType.REQUEST
+import javax.servlet.{ServletContextEvent, ServletContextListener}
 import org.beangle.commons.web.context.ServletContextHolder
 
-object BootstrapListener {
-  val InitFile = "META-INF/beangle/web-init.properties"
-}
-
 /**
- * Web BootstrapListener
- */
+  * Web BootstrapListener
+  * {{{
+  * <web-app xmlns="http://java.sun.com/xml/ns/javaee"
+  * xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  * xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+  * http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0" metadata-complete="true">
+  *
+  * <absolute-ordering/>
+  *
+  * <listener>
+  * <listener-class>org.beangle.commons.web.init.BootstrapListener</listener-class>
+  * </listener>
+  *
+  * </web-app>
+  * }}}
+  */
 class BootstrapListener extends ServletContextListener {
 
-  import BootstrapListener._
-  val others = new collection.mutable.ListBuffer[ServletContextListener]
+  var bootstrap: BootstrapInitializer = _
 
   override def contextInitialized(sce: ServletContextEvent): Unit = {
-    val servletContext = sce.getServletContext
-    ServletContextHolder.store(servletContext)
-
-    val initializers = new ju.LinkedList[Initializer]
-    ClassLoaders.getResources(InitFile) foreach { url =>
-      IOs.readJavaProperties(url) get ("initializer") match {
-        case Some(clazz) => initializers.add(ClassLoaders.load(clazz).getDeclaredConstructor().newInstance().asInstanceOf[Initializer])
-        case None        =>
-      }
-    }
-
-    if (initializers.isEmpty) {
-      servletContext.log("No Beangle Initializer types detected on classpath")
-    } else {
-      import scala.jdk.CollectionConverters._
-      for (initializer <- initializers.asScala) {
-        initializer.boss = this
-        sce.getServletContext.log(s"${initializer.getClass.getName} registering ...")
-        initializer.onStartup(servletContext)
-      }
-
-      //process filter order
-      val filterOrders = servletContext.getInitParameter("filter-orders")
-      if (null != filterOrders) {
-        val orders = split(filterOrders, ";")
-        orders foreach { order =>
-          val pattern = substringBefore(order, "=")
-          split(substringAfter(order, "="), ",") foreach { filterName =>
-            val fr = servletContext.getFilterRegistration(filterName)
-            if (null == fr) sys.error(s"Cannot find filter $filterName")
-            fr.addMappingForUrlPatterns(EnumSet.of(REQUEST), true, pattern)
-          }
-        }
-      }
-
-      // run listener
-      others foreach { listener =>
-        listener.contextInitialized(sce)
+    if (null == ServletContextHolder.context) {
+      bootstrap = new BootstrapInitializer(false)
+      bootstrap.onStartup(null, sce.getServletContext)
+      bootstrap.listeners foreach { l =>
+        l.contextInitialized(sce)
       }
     }
   }
 
   override def contextDestroyed(sce: ServletContextEvent): Unit = {
-    others foreach { listener =>
-      listener.contextDestroyed(sce)
+    if (null != bootstrap) {
+      bootstrap.listeners foreach { l =>
+        l.contextDestroyed(sce)
+      }
     }
-  }
-
-  def addListener(other: ServletContextListener): Unit = {
-    others += other
   }
 }

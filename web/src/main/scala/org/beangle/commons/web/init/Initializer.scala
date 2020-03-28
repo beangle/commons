@@ -26,7 +26,7 @@ import javax.servlet.ServletContextListener
  * @see BootstrapListener.InitFile
  */
 trait Initializer {
-  var boss: BootstrapListener = _
+  var boss: BootstrapInitializer = _
   /**
    * Configure the given {@link ServletContext} with any servlets, filters, listeners
    * context-params and attributes necessary for initializing this web application.
