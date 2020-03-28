@@ -19,7 +19,7 @@
 package org.beangle.commons.web.init
 
 import java.util.EnumSet
-import java.{util, util => ju}
+import java.{util => ju}
 
 import javax.servlet.DispatcherType.REQUEST
 import javax.servlet.{ServletContainerInitializer, ServletContext, ServletContextListener}
@@ -28,22 +28,34 @@ import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.Strings.{split, substringAfter, substringBefore}
 import org.beangle.commons.web.context.ServletContextHolder
 
-object Bootstrap {
+object BootstrapInitializer {
   val InitFile = "META-INF/beangle/web-init.properties"
 }
 
 /**
   * Web BootstrapListener
   */
-class Bootstrap extends ServletContainerInitializer {
+class BootstrapInitializer extends ServletContainerInitializer {
 
+  //这里做个代理,可以在context listener一旦调用初始化后，不能注册的情况下（BootstrapLister->Bootstrap）集中调用。
   val listeners = new collection.mutable.ListBuffer[ServletContextListener]
 
-  override def onStartup(clazzes: util.Set[Class[_]], servletContext: ServletContext): Unit = {
-    ServletContextHolder.store(servletContext)
+  /**是否要注册ServletContextListener*/
+  var register: Boolean = true
 
+  def this(r: Boolean) {
+    this()
+    register = r
+  }
+
+  override def onStartup(clazzes: ju.Set[Class[_]], ctx: ServletContext): Unit = {
+    if (null != ServletContextHolder.context) {
+      ctx.log("Bootstrap has executed,aborted")
+    }
+
+    ServletContextHolder.store(ctx)
     val initializers = new ju.LinkedList[Initializer]
-    ClassLoaders.getResources(Bootstrap.InitFile) foreach { url =>
+    ClassLoaders.getResources(BootstrapInitializer.InitFile) foreach { url =>
       IOs.readJavaProperties(url) get ("initializer") match {
         case Some(clazz) => initializers.add(ClassLoaders.load(clazz).getDeclaredConstructor().newInstance().asInstanceOf[Initializer])
         case None =>
@@ -51,32 +63,31 @@ class Bootstrap extends ServletContainerInitializer {
     }
 
     if (initializers.isEmpty) {
-      servletContext.log("No Beangle Initializer types detected on classpath")
+      ctx.log("None beangle initializer was detected on classpath.")
     } else {
       import scala.jdk.CollectionConverters._
       for (initializer <- initializers.asScala) {
         initializer.boss = this
-        servletContext.log(s"${initializer.getClass.getName} registering ...")
-        initializer.onStartup(servletContext)
+        ctx.log(s"${initializer.getClass.getName} initializing ...")
+        initializer.onStartup(ctx)
       }
-
       //process filter order
-      val filterOrders = servletContext.getInitParameter("filter-orders")
+      val filterOrders = ctx.getInitParameter("filter-orders")
       if (null != filterOrders) {
         val orders = split(filterOrders, ";")
         orders foreach { order =>
           val pattern = substringBefore(order, "=")
           split(substringAfter(order, "="), ",") foreach { filterName =>
-            val fr = servletContext.getFilterRegistration(filterName)
+            val fr = ctx.getFilterRegistration(filterName)
             if (null == fr) sys.error(s"Cannot find filter $filterName")
             fr.addMappingForUrlPatterns(EnumSet.of(REQUEST), true, pattern)
           }
         }
       }
-
-      //register each listener
-      listeners foreach { listener =>
-        servletContext.addListener(listener)
+      if (register) {
+        listeners foreach { l =>
+          ctx.addListener(l)
+        }
       }
     }
   }

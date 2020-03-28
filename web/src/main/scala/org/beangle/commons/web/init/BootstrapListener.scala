@@ -19,13 +19,44 @@
 package org.beangle.commons.web.init
 
 import javax.servlet.{ServletContextEvent, ServletContextListener}
+import org.beangle.commons.web.context.ServletContextHolder
 
 /**
   * Web BootstrapListener
+  * {{{
+  * <web-app xmlns="http://java.sun.com/xml/ns/javaee"
+  * xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  * xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+  * http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0" metadata-complete="true">
+  *
+  * <absolute-ordering/>
+  *
+  * <listener>
+  * <listener-class>org.beangle.commons.web.init.BootstrapListener</listener-class>
+  * </listener>
+  *
+  * </web-app>
+  * }}}
   */
-@deprecated("Use Bootstrap instead,Don't register listerner in web.xml")
 class BootstrapListener extends ServletContextListener {
 
+  var bootstrap: BootstrapInitializer = _
+
   override def contextInitialized(sce: ServletContextEvent): Unit = {
+    if (null == ServletContextHolder.context) {
+      bootstrap = new BootstrapInitializer(false)
+      bootstrap.onStartup(null, sce.getServletContext)
+      bootstrap.listeners foreach { l =>
+        l.contextInitialized(sce)
+      }
+    }
+  }
+
+  override def contextDestroyed(sce: ServletContextEvent): Unit = {
+    if (null != bootstrap) {
+      bootstrap.listeners foreach { l =>
+        l.contextDestroyed(sce)
+      }
+    }
   }
 }
