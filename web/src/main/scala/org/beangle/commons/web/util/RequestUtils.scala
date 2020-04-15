@@ -90,15 +90,6 @@ object RequestUtils {
     }
   }
 
-  def getRealPath(servletContext: ServletContext, path: String): String = {
-    val realPath = if (!path.startsWith("/")) servletContext.getRealPath("/" + path) else servletContext.getRealPath(path)
-    if (realPath == null) {
-      throw new RuntimeException("ServletContext resource [" + path + "] cannot be resolved to absolute file path - " +
-        "web application archive not expanded?")
-    }
-    realPath
-  }
-
   /**
    * Set Content-Disposition header
    * @see http://tools.ietf.org/html/rfc6266
