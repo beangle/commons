@@ -210,7 +210,7 @@ object Files {
     attributeSet(file)
     if (file.isDirectory && !file.isHidden && !JFiles.isSymbolicLink(file.toPath)) {
       file.listFiles() foreach { child =>
-        attrib(child, attributeSet)
+        travel(child, attributeSet)
       }
     }
   }
