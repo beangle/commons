@@ -21,6 +21,7 @@ package org.beangle.commons.io
 import java.io._
 import java.nio.channels.FileChannel
 import java.nio.charset.Charset
+import java.nio.file.{Files => JFiles}
 
 import org.beangle.commons.lang.Charsets.UTF_8
 
@@ -183,6 +184,34 @@ object Files {
     }
     if (preserveFileDate) {
       destFile.setLastModified(srcFile.lastModified())
+    }
+  }
+
+
+  def setReadOnly(file: File): Unit = {
+    if (file.exists() && file.canWrite) {
+      travel(file, x => x.setReadOnly())
+    }
+  }
+
+  def setWriteable(file: File): Unit = {
+    if (file.exists() && !JFiles.isWritable(file.toPath)) {
+      travel(file, x => x.setWritable(true))
+    }
+  }
+
+  def setExecutable(file: File): Unit = {
+    if (file.exists() && !JFiles.isExecutable(file.toPath)) {
+      travel(file, x => x.setExecutable(true))
+    }
+  }
+
+  def travel(file: File, attributeSet: File => Unit): Unit = {
+    attributeSet(file)
+    if (file.isDirectory && !file.isHidden && !JFiles.isSymbolicLink(file.toPath)) {
+      file.listFiles() foreach { child =>
+        attrib(child, attributeSet)
+      }
     }
   }
 }

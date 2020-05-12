@@ -41,10 +41,14 @@ object Dirs {
     if (file.exists()) remove(file)
   }
 
+  def isLink(file: File): Boolean = {
+    java.nio.file.Files.isSymbolicLink(file.toPath)
+  }
+
   private def remove(file: File): Unit = {
     if (file.exists()) {
       if (file.isDirectory) {
-        if (file.list().length == 0) {
+        if (file.list().length == 0 || isLink(file)) {
           file.delete()
         } else {
           //list all the directory contents
@@ -62,6 +66,7 @@ object Dirs {
       }
     }
   }
+
 }
 
 class Dirs(val pwd: File) {
@@ -113,6 +118,16 @@ class Dirs(val pwd: File) {
 
   def ln(target: File): this.type = {
     ln(target, target.getName)
+  }
+
+  def setReadOnly(): this.type = {
+    Files.setReadOnly(pwd)
+    this
+  }
+
+  def setWriteable(): this.type = {
+    Files.setWriteable(pwd)
+    this
   }
 
   def ln(target: File, newName: String): this.type = {
