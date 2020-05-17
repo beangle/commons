@@ -38,8 +38,11 @@ object Dirs {
   }
 
   def delete(file: File): Unit = {
-    if (file.exists()) remove(file)
-
+    if (isLink(file)) {
+      file.delete()
+    } else if (file.exists()) {
+      remove(file)
+    }
   }
 
   def isLink(file: File): Boolean = {
