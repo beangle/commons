@@ -38,7 +38,11 @@ object Dirs {
   }
 
   def delete(file: File): Unit = {
-    if (file.exists()) remove(file)
+    if (isLink(file)) {
+      file.delete()
+    } else if (file.exists()) {
+      remove(file)
+    }
   }
 
   def isLink(file: File): Boolean = {
@@ -131,16 +135,12 @@ class Dirs(val pwd: File) {
   }
 
   def ln(target: File, newName: String): this.type = {
+    if (!target.exists()) throw new RuntimeException("Cannot find target " + target.getAbsolutePath)
     val link = new File(pwd, newName)
+    if (java.nio.file.Files.isSymbolicLink(Paths.get(link.toURI))) link.delete()
     if (link.exists()) {
-      if (java.nio.file.Files.isSymbolicLink(Paths.get(link.toURI))) {
-        link.delete()
-        java.nio.file.Files.createSymbolicLink(Paths.get(link.toURI), Paths.get(target.toURI))
-      } else {
-        throw new RuntimeException("Cannot make link on existed file.")
-      }
+      throw new RuntimeException("Cannot make link on existed file.")
     } else {
-      if (!target.exists()) throw new RuntimeException("Cannot find target " + target.getAbsolutePath)
       java.nio.file.Files.createSymbolicLink(Paths.get(link.toURI), Paths.get(target.toURI))
     }
     this
