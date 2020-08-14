@@ -35,7 +35,7 @@ class UrlPropertyConfigProvider extends PropertyConfig.Provider {
   /**
    * getConfig.
    */
-  def getConfig(): collection.Map[String, Any] = {
+  def getConfig: collection.Map[String, Any] = {
     val properties = new collection.mutable.HashMap[String, Any]
     resources.paths foreach { p =>
       properties ++= IOs.readJavaProperties(p)

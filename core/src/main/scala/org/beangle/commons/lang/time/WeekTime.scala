@@ -42,7 +42,7 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
   /** 周状态数字 */
   var weekstate: WeekState = _
 
-  def this(other: WeekTime) {
+  def this(other: WeekTime) = {
     this()
     this.startOn = other.startOn
     this.beginAt = other.beginAt

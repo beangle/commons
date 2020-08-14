@@ -18,8 +18,8 @@
  */
 package org.beangle.commons.web.servlet
 
-import javax.servlet.{ServletRequest, ServletResponse}
-import javax.servlet.http.HttpServlet
+import jakarta.servlet.{ServletRequest, ServletResponse}
+import jakarta.servlet.http.HttpServlet
 
 class DelegatingServletProxy(delegate: HttpServlet) extends HttpServlet {
 

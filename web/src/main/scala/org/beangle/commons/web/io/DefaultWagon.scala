@@ -23,7 +23,7 @@ import java.net.URL
 
 import org.beangle.commons.io.IOs
 
-import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
+import jakarta.servlet.http.{ HttpServletRequest, HttpServletResponse }
 
 /**
  * Default DefaultWagon

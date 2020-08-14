@@ -29,8 +29,8 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.junit.JUnitRunner
 
-import javax.servlet.{ServletOutputStream, WriteListener}
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import jakarta.servlet.{ServletOutputStream, WriteListener}
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 @RunWith(classOf[JUnitRunner])
 class DefaultWagonTest extends AnyFunSpec with Matchers {

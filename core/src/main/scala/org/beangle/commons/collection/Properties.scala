@@ -24,14 +24,14 @@ class Properties extends collection.mutable.Map[String, Any] {
 
   private[this] val data = Collections.newMap[String, Any]
 
-  def this(tuples: (String, _)*) {
+  def this(tuples: (String, _)*) = {
     this()
     tuples foreach { tuple =>
       this.put(tuple._1, tuple._2)
     }
   }
 
-  def this(obj: Object, attrs: String*) {
+  def this(obj: Object, attrs: String*) = {
     this()
     for (attr <- attrs) {
       val idx = attr.indexOf("->")

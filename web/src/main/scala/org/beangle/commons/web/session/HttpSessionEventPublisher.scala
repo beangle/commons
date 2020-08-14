@@ -20,13 +20,13 @@ package org.beangle.commons.web.session
 
 import org.beangle.commons.event.EventMulticaster
 
-import javax.servlet.http.{ HttpSessionEvent, HttpSessionListener }
+import jakarta.servlet.http.{ HttpSessionEvent, HttpSessionListener }
 
 /**
  *
  * Publishes <code>HttpSessionApplicationEvent</code>s to the Bean Root Context.
- * Maps javax.servlet.http.HttpSessionListener.sessionCreated() to {@link HttpSessionCreationEvent}.
- * Maps javax.servlet.http.HttpSessionListener.sessionDestroyed() to
+ * Maps jakarta.servlet.http.HttpSessionListener.sessionCreated() to {@link HttpSessionCreationEvent}.
+ * Maps jakarta.servlet.http.HttpSessionListener.sessionDestroyed() to
  * {@link HttpSessionDestroyedEvent}.
  */
 class HttpSessionEventPublisher(em: EventMulticaster) extends HttpSessionListener {

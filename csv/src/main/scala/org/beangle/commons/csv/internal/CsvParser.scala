@@ -48,7 +48,7 @@ class CsvParser(var format: CsvFormat) {
   /**
    * isPending.
    */
-  def isPending(): Boolean = pending != null
+  def isPending: Boolean = pending != null
 
   /**
    * parseLineMulti.

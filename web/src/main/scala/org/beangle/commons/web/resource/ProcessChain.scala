@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.web.resource
 
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 class ProcessChain(filters: Iterator[ResourceFilter]) {
 

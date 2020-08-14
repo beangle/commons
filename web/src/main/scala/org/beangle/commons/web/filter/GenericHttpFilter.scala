@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.web.filter
 
-import javax.servlet.{Filter, FilterConfig, ServletException}
+import jakarta.servlet.{Filter, FilterConfig, ServletException}
 import org.beangle.commons.bean.{Initializing, Properties}
 import org.beangle.commons.lang.Strings
 

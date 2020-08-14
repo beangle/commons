@@ -57,7 +57,7 @@ class PropertyOrdering(cmpStr: String) extends Ordering[Any] {
     name = name.substring(0, name.indexOf(' '))
   }
 
-  def this(cmpWhat: String, asc: Boolean) {
+  def this(cmpWhat: String, asc: Boolean) = {
     this(cmpWhat + " " + (if (asc) "" else "desc"))
   }
 

@@ -52,7 +52,7 @@ object WeekState {
 @value
 class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
 
-  def this(str: String) {
+  def this(str: String) = {
     this(if (Strings.isEmpty(str)) 0 else java.lang.Long.parseLong(str, 2))
   }
 

@@ -20,7 +20,7 @@ package org.beangle.commons.web.util
 
 import java.net.{URLDecoder, URLEncoder}
 
-import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
+import jakarta.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
 
 object CookieUtils {
 

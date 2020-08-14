@@ -40,7 +40,7 @@ object SystemInfo {
     origin.toMap
   }
 
-  val properties = sysProperties
+  val properties = sysProperties()
 
   val os = new Os(properties)
 

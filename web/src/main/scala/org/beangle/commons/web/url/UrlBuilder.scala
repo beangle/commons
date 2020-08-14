@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.web.url
 
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequest
 import org.beangle.commons.web.util.RequestUtils
 
 object UrlBuilder {

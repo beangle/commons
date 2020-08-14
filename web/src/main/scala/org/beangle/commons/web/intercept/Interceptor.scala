@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.web.intercept
 
-import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
+import jakarta.servlet.http.{ HttpServletRequest, HttpServletResponse }
 import org.beangle.commons.lang.primitive.MutableInt
 
 trait Interceptor {

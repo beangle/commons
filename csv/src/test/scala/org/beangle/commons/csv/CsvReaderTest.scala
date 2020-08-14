@@ -27,7 +27,7 @@ import org.scalatestplus.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class CsvReaderTest extends AnyFunSpec with Matchers {
 
-  var reader: CsvReader = buildReader
+  var reader: CsvReader = buildReader()
 
   def buildReader(): CsvReader = {
     val sb = new StringBuilder()

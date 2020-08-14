@@ -20,10 +20,10 @@ package org.beangle.commons.web.filter
 
 import org.beangle.commons.lang.Throwables
 
-import javax.servlet.{ Filter, FilterChain, ServletException, ServletRequest, ServletResponse }
+import jakarta.servlet.{ Filter, FilterChain, ServletException, ServletRequest, ServletResponse }
 
 /**
- * Proxy for a standard Servlet 3.1 Filter, delegating to a managed
+ * Proxy for a standard Servlet 5.0 Filter, delegating to a managed
  * bean that implements the Filter interface. Supports a "targetBeanName"
  * filter init-param in {@code web.xml}, specifying the name of the
  * target bean in the application context.

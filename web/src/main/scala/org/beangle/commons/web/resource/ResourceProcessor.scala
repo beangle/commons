@@ -22,7 +22,7 @@ import org.beangle.commons.activation.MediaTypes
 import org.beangle.commons.io.{ IOs, ResourceLoader }
 import org.beangle.commons.lang.Strings.substringAfterLast
 
-import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
+import jakarta.servlet.http.{ HttpServletRequest, HttpServletResponse }
 
 class ResourceProcessor(private val loader: ResourceLoader, private val resolver: PathResolver) {
 

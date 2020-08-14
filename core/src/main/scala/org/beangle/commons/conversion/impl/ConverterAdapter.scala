@@ -33,5 +33,5 @@ class ConverterAdapter(iconverter: Converter[_, _], typeinfo: Tuple2[Class[_], C
 
   override def convert(input: Any, targetType: Class[_]): Any = converter.apply(input)
 
-  override def getTypeinfo(): Tuple2[Class[_], Class[_]] = typeinfo
+  override def getTypeinfo: Tuple2[Class[_], Class[_]] = typeinfo
 }

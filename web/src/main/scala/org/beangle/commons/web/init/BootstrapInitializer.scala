@@ -21,8 +21,8 @@ package org.beangle.commons.web.init
 import java.util.EnumSet
 import java.{util => ju}
 
-import javax.servlet.DispatcherType.REQUEST
-import javax.servlet.{ServletContainerInitializer, ServletContext, ServletContextListener}
+import jakarta.servlet.DispatcherType.REQUEST
+import jakarta.servlet.{ServletContainerInitializer, ServletContext, ServletContextListener}
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.Strings.{split, substringAfter, substringBefore}
@@ -43,7 +43,7 @@ class BootstrapInitializer extends ServletContainerInitializer {
   /**是否要注册ServletContextListener*/
   var register: Boolean = true
 
-  def this(r: Boolean) {
+  def this(r: Boolean) = {
     this()
     register = r
   }

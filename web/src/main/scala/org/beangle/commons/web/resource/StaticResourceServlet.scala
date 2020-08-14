@@ -23,8 +23,8 @@ import org.beangle.commons.lang.Strings
 import org.beangle.commons.web.resource.filter.HeaderFilter
 import org.beangle.commons.web.resource.impl.PathResolverImpl
 
-import javax.servlet.ServletConfig
-import javax.servlet.http.{ HttpServlet, HttpServletRequest, HttpServletResponse }
+import jakarta.servlet.ServletConfig
+import jakarta.servlet.http.{ HttpServlet, HttpServletRequest, HttpServletResponse }
 
 class StaticResourceServlet extends HttpServlet {
 

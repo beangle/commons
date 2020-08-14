@@ -28,7 +28,7 @@ package org.beangle.commons.conversion.impl
  */
 trait GenericConverter {
 
-  def getTypeinfo(): Tuple2[Class[_], Class[_]]
+  def getTypeinfo: Tuple2[Class[_], Class[_]]
 
   def convert(input: Any,targetType: Class[_]): Any
 }

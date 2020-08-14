@@ -24,7 +24,7 @@ object PropertyConfig {
 
   trait Provider {
 
-    def getConfig(): collection.Map[String, Any]
+    def getConfig: collection.Map[String, Any]
   }
 }
 

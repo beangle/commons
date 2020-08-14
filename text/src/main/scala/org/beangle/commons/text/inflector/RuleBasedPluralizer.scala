@@ -53,7 +53,7 @@ class RuleBasedPluralizer(var rules: List[Rule], var locale: Locale, var fallbac
   /**
    * Constructs a pluralizer with an empty list of rules. Use the setters to configure.
    */
-  def this() {
+  def this() = {
     this(List.empty, Locale.getDefault, null)
   }
 
@@ -64,7 +64,7 @@ class RuleBasedPluralizer(var rules: List[Rule], var locale: Locale, var fallbac
    * @param rules  the rules to apply in order
    * @param locale the locale specifying the language of the pluralizer
    */
-  def this(rules: List[Rule], locale: Locale) {
+  def this(rules: List[Rule], locale: Locale) = {
     this(rules, locale, IDENTITY_PLURALIZER)
   }
 

@@ -33,7 +33,7 @@ class TimerStack(root: TimerNode, initCapacity: Int) {
 
   push(root)
 
-  def this(root: TimerNode) {
+  def this(root: TimerNode) = {
     this(root, 15)
   }
 
