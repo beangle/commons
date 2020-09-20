@@ -18,8 +18,8 @@
  */
 package org.beangle.commons.web.multipart
 
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.Part
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.Part
 
 trait MultipartResolver {
 

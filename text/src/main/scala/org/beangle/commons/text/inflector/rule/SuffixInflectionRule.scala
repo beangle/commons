@@ -38,7 +38,7 @@ class SuffixInflectionRule(suffix: String, val singularSuffix: String, val plura
    * @param singularSuffix the singular suffix, starting with a "-" character
    * @param pluralSuffix the plural suffix, starting with a "-" character
    */
-  def this(singularSuffix: String, pluralSuffix: String) {
+  def this(singularSuffix: String, pluralSuffix: String) = {
     this(singularSuffix, singularSuffix, pluralSuffix)
   }
 

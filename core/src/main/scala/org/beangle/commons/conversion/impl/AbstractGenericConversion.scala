@@ -107,8 +107,8 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
     val interfaces = new mutable.LinkedHashSet[Class[_]]
     val classQueue = new mutable.Queue[Class[_]]
     classQueue += sourceType
-    while (!classQueue.isEmpty) {
-      val currentClass = classQueue.dequeue
+    while (classQueue.nonEmpty) {
+      val currentClass = classQueue.dequeue()
       val converter = getConverter(targetType, getConverters(currentClass))
       if (converter != null) return converter
       val superClass = currentClass.getSuperclass
@@ -117,7 +117,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
     }
     var iter = interfaces.iterator
     while (iter.hasNext) {
-      val interfaceType = iter.next
+      val interfaceType = iter.next()
       val converter = getConverter(targetType, getConverters(interfaceType))
       if (converter != null) return converter
     }
@@ -130,7 +130,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
     val interfaces = new mutable.LinkedHashSet[Class[_]]
     val queue = new mutable.Queue[Class[_]]()
     queue += targetType
-    while (!queue.isEmpty) {
+    while (queue.nonEmpty) {
       val cur = queue.dequeue()
       val converter = converters.get(cur).orNull
       if (converter != null) return converter
@@ -140,7 +140,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
     }
     var iter = interfaces.iterator
     while (iter.hasNext) {
-      val interfaceType = iter.next
+      val interfaceType = iter.next()
       val converter = converters.get(interfaceType).orNull
       if (converter != null) return converter
     }

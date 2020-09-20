@@ -32,5 +32,5 @@ object NoneConverter extends GenericConverter {
     Objects.default(targetType)
   }
 
-  override def getTypeinfo(): Tuple2[Class[_], Class[_]] = (classOf[AnyRef], classOf[AnyRef])
+  override def getTypeinfo: Tuple2[Class[_], Class[_]] = (classOf[AnyRef], classOf[AnyRef])
 }

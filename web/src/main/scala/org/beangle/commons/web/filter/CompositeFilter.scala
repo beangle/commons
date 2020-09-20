@@ -18,8 +18,8 @@
  */
 package org.beangle.commons.web.filter
 
-import javax.servlet.{ Filter, FilterChain, ServletRequest, ServletResponse }
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.{ Filter, FilterChain, ServletRequest, ServletResponse }
+import jakarta.servlet.http.HttpServletRequest
 
 abstract class GenericCompositeFilter extends GenericHttpFilter {
 
@@ -44,7 +44,7 @@ class MatchedCompositeFilter(urlMap: Map[String, List[Filter]]) extends GenericC
 
   val chainMap: Map[RequestMatcher, List[Filter]] = MatchedCompositeFilter.build(urlMap)
 
-  def this(filters: List[Filter]) {
+  def this(filters: List[Filter]) = {
     this(MatchedCompositeFilter.build(filters))
   }
 

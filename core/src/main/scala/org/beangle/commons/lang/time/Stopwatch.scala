@@ -69,7 +69,7 @@ class Stopwatch(val ticker: Ticker = Ticker.systemTicker(), start: Boolean = fal
     startTick = ticker.read()
   }
 
-  def this(start: Boolean) {
+  def this(start: Boolean) = {
     this(Ticker.systemTicker(), start)
   }
   /**

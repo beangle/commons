@@ -30,7 +30,7 @@ class ClassInfosTest extends AnyFunSpec with Matchers {
   describe("Entity") {
     it("transient persisted property") {
       val m = BeanInfos.get(classOf[NumIdBean[_]]).properties.get("persisted")
-      assert(None != m)
+      assert(m.isDefined)
       assert(m.get.isTransient)
       val mis = ClassInfos.get(classOf[NumIdBean[_]]).getMethods("persisted")
       assert(mis.size == 1)

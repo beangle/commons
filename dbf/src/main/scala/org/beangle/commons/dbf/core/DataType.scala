@@ -20,7 +20,7 @@ package org.beangle.commons.dbf.core
 
 object DataType extends Enumeration {
   class DataType(val v: Byte) extends Val {
-    def this(c: Char) {
+    def this(c: Char) = {
       this((c & 0xff).asInstanceOf[Byte])
     }
     override def toString = {

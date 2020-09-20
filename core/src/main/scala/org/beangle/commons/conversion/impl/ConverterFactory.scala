@@ -52,7 +52,7 @@ abstract class ConverterFactory[S, R] extends GenericConverter {
     null
   }
 
-  override def getTypeinfo(): Tuple2[Class[_], Class[_]] = {
+  override def getTypeinfo: Tuple2[Class[_], Class[_]] = {
     val superType = getClass.getGenericSuperclass
     if ((superType.isInstanceOf[ParameterizedType])) {
       val ptype = superType.asInstanceOf[ParameterizedType]

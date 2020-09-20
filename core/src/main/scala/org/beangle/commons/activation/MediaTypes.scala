@@ -152,7 +152,7 @@ object MediaType {
 }
 
 class MediaType(val primaryType: String, val subType: String) {
-  def this(pt: String) {
+  def this(pt: String) = {
     this(pt, "*")
   }
 

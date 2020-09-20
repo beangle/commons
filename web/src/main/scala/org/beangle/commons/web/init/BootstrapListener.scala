@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.web.init
 
-import javax.servlet.{ServletContextEvent, ServletContextListener}
+import jakarta.servlet.{ServletContextEvent, ServletContextListener}
 import org.beangle.commons.web.context.ServletContextHolder
 
 /**

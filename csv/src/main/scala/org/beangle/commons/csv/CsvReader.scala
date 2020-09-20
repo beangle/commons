@@ -44,7 +44,7 @@ class CsvReader(reader: Reader, format: CsvFormat) {
    * Constructor for CsvReader.
    * @param reader a {@link java.io.Reader} object.
    */
-  def this(reader: Reader) {
+  def this(reader: Reader) = {
     this(reader, new CsvFormat.Builder().build())
   }
 
@@ -75,7 +75,7 @@ class CsvReader(reader: Reader, format: CsvFormat) {
   def readNext(): Array[String] = {
     var result: Array[String] = null
     do {
-      val nextLine = getNextLine
+      val nextLine = getNextLine()
       if (!hasNext) {
         return result
       }
@@ -90,7 +90,7 @@ class CsvReader(reader: Reader, format: CsvFormat) {
           result = t
         }
       }
-    } while (parser.isPending);
+    } while (parser.isPending)
     result
   }
 }

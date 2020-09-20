@@ -19,8 +19,8 @@
 package org.beangle.commons.web.resource.filter
 
 import org.beangle.commons.web.resource.ResourceFilter
-import javax.servlet.http.HttpServletResponse
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import jakarta.servlet.http.HttpServletRequest
 import org.beangle.commons.web.resource.ProcessContext
 import org.beangle.commons.web.resource.ProcessChain
 import java.net.URL

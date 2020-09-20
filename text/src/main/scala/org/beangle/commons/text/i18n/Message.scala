@@ -28,14 +28,14 @@ class Message(val key: String, val params: List[Any]) {
   /**
    * Constructor for Message.
    */
-  def this(key: String, objs: Array[Any]) {
+  def this(key: String, objs: Array[Any]) = {
     this(key, objs.toList)
   }
 
   /**
    * Constructor for Message.
    */
-  def this(key: String) {
+  def this(key: String) = {
     this(key, List.empty)
   }
 }

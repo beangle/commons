@@ -18,9 +18,9 @@
  */
 package org.beangle.commons.web.init
 
-import javax.servlet.ServletContext
-import javax.servlet.ServletException
-import javax.servlet.ServletContextListener
+import jakarta.servlet.ServletContext
+import jakarta.servlet.ServletException
+import jakarta.servlet.ServletContextListener
 
 /**
  * @see BootstrapListener.InitFile

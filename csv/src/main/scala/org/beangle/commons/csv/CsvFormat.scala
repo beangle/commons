@@ -62,7 +62,7 @@ class CsvFormat private (val separators: Set[Char], val delimiter: Char) {
 
   val strictQuotes = false
 
-  private def this(separators: Set[Char], delimiter: Char, escape: Char) {
+  private def this(separators: Set[Char], delimiter: Char, escape: Char) = {
     this(separators, delimiter)
     this.escape = escape
   }

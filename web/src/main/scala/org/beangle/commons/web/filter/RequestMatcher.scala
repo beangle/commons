@@ -23,7 +23,7 @@ import java.util.regex.Pattern
 import org.beangle.commons.regex.AntPathPattern
 import org.beangle.commons.web.util.RequestUtils
 
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequest
 
 /**
  * Simple strategy to match an <tt>HttpServletRequest</tt>.
@@ -56,7 +56,7 @@ class AntPathRequestMatcher(val pattern: AntPathPattern, val method: String) ext
    * Creates a matcher with the specific pattern which will match all HTTP
    * methods.
    */
-  def this(patternStr: String, method: String = null) {
+  def this(patternStr: String, method: String = null) = {
     this(new AntPathPattern(patternStr), method)
   }
 
@@ -99,7 +99,7 @@ class RegexRequestMatcher(pattern: Pattern, method: String) extends RequestMatch
    * Creates a case-sensitive {@code Pattern} instance to match against the
    * request.
    */
-  def this(patternStr: String, method: String, caseInsensitive: Boolean) {
+  def this(patternStr: String, method: String, caseInsensitive: Boolean) = {
     this(if (caseInsensitive) Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE) else Pattern.compile(patternStr), method)
   }
 

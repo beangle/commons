@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.web.http.accept
 
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequest
 import org.beangle.commons.activation.{MediaType, MediaTypes}
 import org.beangle.commons.web.util.RequestUtils
 import org.beangle.commons.lang.Strings

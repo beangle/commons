@@ -356,7 +356,7 @@ object Strings {
     val keyBuf = new StringBuilder()
     val iter = keyList.iterator
     while (iter.hasNext) {
-      val key = iter.next
+      val key = iter.next()
       if (!keys(key)) keyBuf.append(key)
       if (iter.hasNext) keyBuf.append(',')
     }

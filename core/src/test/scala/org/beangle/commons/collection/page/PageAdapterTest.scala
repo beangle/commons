@@ -31,13 +31,13 @@ class PageAdapterTest extends AnyFunSpec with Matchers {
   describe("PagedSeq") {
     it("Move next or previous") {
       val page = new PagedSeq[Int]((0 until 26).toList, 20)
-      page.iterator.next should be(0)
+      page.iterator.next() should be(0)
       page.next()
-      page.iterator.next should be(20)
+      page.iterator.next() should be(20)
       page.moveTo(2)
-      page.iterator.next should be(20)
+      page.iterator.next() should be(20)
       page.previous()
-      page.iterator.next should be(0)
+      page.iterator.next() should be(0)
     }
   }
 }

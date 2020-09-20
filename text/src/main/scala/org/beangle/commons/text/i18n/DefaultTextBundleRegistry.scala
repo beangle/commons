@@ -58,7 +58,7 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
       }
       localeBundles.put(bundleName, bundle)
     }
-    if (reloadable) caches.clear
+    if (reloadable) caches.clear()
     bundle
   }
 

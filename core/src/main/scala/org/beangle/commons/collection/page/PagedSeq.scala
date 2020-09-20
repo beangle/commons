@@ -52,7 +52,7 @@ class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends Page[E]() {
   /**
    * Constructor for PagedSeq
    */
-  def this(datas: Seq[E], pageSize: Int) {
+  def this(datas: Seq[E], pageSize: Int) = {
     this(datas, PageLimit(1, pageSize))
   }
 

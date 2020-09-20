@@ -42,7 +42,7 @@ trait ResourceLoader {
 
 class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader with Logging {
 
-  def this(loaderArray: ResourceLoader*) {
+  def this(loaderArray: ResourceLoader*) = {
     this(loaderArray.toList)
   }
 
@@ -80,7 +80,7 @@ class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader 
   */
 class ClasspathResourceLoader(val prefixes: List[String] = List("")) extends ResourceLoader {
 
-  def this(prefixStr: String) {
+  def this(prefixStr: String) = {
     this(if (Strings.isEmpty(prefixStr)) List("") else Strings.split(prefixStr, " ").toList)
   }
 

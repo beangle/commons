@@ -46,13 +46,13 @@ object Page {
 
     def apply(index: Int): Any = null.asInstanceOf[Any]
 
-    def length(): Int = 0
+    def length: Int = 0
 
     def moveTo(pageIndex: Int): Page[Any] = this
 
     def items: Seq[Any] = Nil
 
-    def iterator = Nil.iterator
+    def iterator: Iterator[Any] = Nil.iterator
   }
 }
 /**

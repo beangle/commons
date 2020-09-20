@@ -127,7 +127,7 @@ class Order(val property: String, val ascending: Boolean, val lowerCase: Boolean
    *
    * @param property a String object.
    */
-  def this(property: String) {
+  def this(property: String) = {
     this(Order.analysis(property)._1, Order.analysis(property)._2)
   }
 

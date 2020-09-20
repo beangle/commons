@@ -46,7 +46,7 @@ object WeekDay extends Enumeration(1) {
     }
   }
 
-  val Mon, Tue, Wed, Thu, Fri, Sat, Sun = WeekDayValue
+  val Mon, Tue, Wed, Thu, Fri, Sat, Sun = WeekDayValue()
 
   private def WeekDayValue(): WeekDay = {
     new WeekDay()

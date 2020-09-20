@@ -21,7 +21,7 @@ package org.beangle.commons.web.util
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.web.url.UrlBuilder
 
-import javax.servlet.http.{ Cookie, HttpServletRequest, HttpServletResponse }
+import jakarta.servlet.http.{ Cookie, HttpServletRequest, HttpServletResponse }
 
 /**
  * @author chaostone

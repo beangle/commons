@@ -22,7 +22,7 @@ import java.io.{ File, InputStream }
 import java.net.URL
 import org.beangle.commons.activation.MediaTypes
 import org.beangle.commons.lang.Strings
-import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
+import jakarta.servlet.http.{ HttpServletRequest, HttpServletResponse }
 import org.beangle.commons.web.util.RequestUtils
 
 /**

@@ -20,7 +20,7 @@ package org.beangle.commons.web.multipart
 
 import java.io.ByteArrayOutputStream
 
-import javax.servlet.http.{HttpServletRequest, Part}
+import jakarta.servlet.http.{HttpServletRequest, Part}
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Strings
 

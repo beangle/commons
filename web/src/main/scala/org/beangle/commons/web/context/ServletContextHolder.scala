@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.web.context
 
-import javax.servlet.ServletContext
+import jakarta.servlet.ServletContext
 
 object ServletContextHolder {
 

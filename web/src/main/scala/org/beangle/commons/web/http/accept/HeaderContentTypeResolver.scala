@@ -18,7 +18,7 @@
  */
 package org.beangle.commons.web.http.accept
 
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequest
 import org.beangle.commons.activation.{MediaType, MediaTypes}
 
 class HeaderContentTypeResolver extends ContentTypeResolver {
