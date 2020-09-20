@@ -100,7 +100,7 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
     it("find correct get") {
       val t = BeanInfos.get(classOf[Menu])
       val getter = t.properties("id").getter
-      assert(None != getter)
+      assert(getter.isDefined)
       getter foreach { g =>
         assert(g.getName == "id")
       }
@@ -108,7 +108,7 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
 
     it("find correct constructor info") {
       val t = BeanInfos.get(classOf[BigBookStore])
-      assert(!t.constructors.isEmpty)
+      assert(t.constructors.nonEmpty)
       val ctor = t.constructors.head
       assert(2 == ctor.args.size)
       assert(ctor.args.head.isInstanceOf[CollectionType])

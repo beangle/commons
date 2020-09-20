@@ -260,9 +260,8 @@ class BeanInfos {
    */
   private def typeof(clazz: Class[_], typ: ru.Type, name: String): TypeInfo = {
     if (clazz == classOf[Object]) {
-      // (): Long
-      val typeName = typ.member(ru.TermName(name)).typeSignatureIn(typ).erasure.toString
-      ElementType(ClassLoaders.load(Strings.replace(typeName, "(): ", "")))
+      val typeName = typ.member(ru.TermName(name)).typeSignatureIn(typ).resultType.toString
+      ElementType(ClassLoaders.load(typeName))
     } else if (clazz == classOf[Option[_]]) {
       val a = typ.member(ru.TermName(name)).typeSignatureIn(typ)
       val innerType = a.resultType.typeArgs.head.toString
