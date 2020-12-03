@@ -24,11 +24,14 @@ import jakarta.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
 
 object CookieUtils {
 
+  private val Encoding = "utf-8"
+  private val EndingSlash = "/"
+
   def getCookieValue(cookie: Cookie): String = {
     try {
-      URLDecoder.decode(cookie.getValue, "utf-8")
+      URLDecoder.decode(cookie.getValue, Encoding)
     } catch {
-      case e: Exception => null
+      case _: Exception => null
     }
   }
 
@@ -42,10 +45,10 @@ object CookieUtils {
       if (null == cookie) {
         null
       } else {
-        URLDecoder.decode(cookie.getValue, "utf-8")
+        URLDecoder.decode(cookie.getValue, Encoding)
       }
     } catch {
-      case e: Exception => null
+      case _: Exception => null
     }
   }
 
@@ -54,16 +57,18 @@ object CookieUtils {
     */
   def getCookie(request: HttpServletRequest, name: String): Cookie = {
     val cookies = request.getCookies
-    if (cookies == null) return null
-
-    var returnCookie: Cookie = null
-    var i = 0
-    while (i < cookies.length && null == returnCookie) {
-      val thisCookie = cookies(i)
-      if (thisCookie.getName == name && thisCookie.getValue != "") returnCookie = thisCookie
-      i += 1
+    if (cookies == null) {
+      null
+    } else {
+      var returnCookie: Cookie = null
+      var i = 0
+      while (i < cookies.length && null == returnCookie) {
+        val thisCookie = cookies(i)
+        if (thisCookie.getName == name && thisCookie.getValue != "") returnCookie = thisCookie
+        i += 1
+      }
+      returnCookie
     }
-    returnCookie
   }
 
   /**
@@ -72,12 +77,12 @@ object CookieUtils {
     */
   def addCookie(request: HttpServletRequest, response: HttpServletResponse,
                 name: String, value: String, path: String, age: Int): Unit = {
-    val cookie = new Cookie(name, URLEncoder.encode(value, "utf-8"))
+    val cookie = new Cookie(name, URLEncoder.encode(value, Encoding))
     cookie.setSecure(RequestUtils.isHttps(request))
-    if (path.endsWith("/")) {
+    if (path.endsWith(EndingSlash)) {
       cookie.setPath(path)
     } else {
-      cookie.setPath(path + "/")
+      cookie.setPath(path + EndingSlash)
     }
     cookie.setMaxAge(age)
     cookie.setHttpOnly(true)
@@ -115,8 +120,8 @@ object CookieUtils {
 
   /** Clean all session cookies
     *
-    * @param request
-    * @param response
+    * @param request  request
+    * @param response response
     */
   def clearSession(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     val cookies = request.getCookies
@@ -137,6 +142,6 @@ object CookieUtils {
   }
 
   private def getDefaultCookiePath(request: HttpServletRequest): String = {
-    if (!request.getContextPath.endsWith("/")) request.getContextPath + "/" else request.getContextPath
+    if (!request.getContextPath.endsWith(EndingSlash)) request.getContextPath + EndingSlash else request.getContextPath
   }
 }
