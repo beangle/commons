@@ -74,7 +74,11 @@ object CookieUtils {
                 name: String, value: String, path: String, age: Int): Unit = {
     val cookie = new Cookie(name, URLEncoder.encode(value, "utf-8"))
     cookie.setSecure(RequestUtils.isHttps(request))
-    cookie.setPath(path)
+    if (path.endsWith("/")) {
+      cookie.setPath(path)
+    } else {
+      cookie.setPath(path + "/")
+    }
     cookie.setMaxAge(age)
     cookie.setHttpOnly(true)
     response.addCookie(cookie)
@@ -110,6 +114,7 @@ object CookieUtils {
   }
 
   /** Clean all session cookies
+    *
     * @param request
     * @param response
     */
