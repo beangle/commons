@@ -3,12 +3,12 @@
   <parent>
     <groupId>org.beangle</groupId>
     <artifactId>beangle-scala</artifactId>
-    <version>28.0</version>
+    <version>28.1</version>
   </parent>
   <groupId>org.beangle.commons</groupId>
   <artifactId>beangle-commons-parent_2.13</artifactId>
   <packaging>pom</packaging>
-  <version>5.2.0</version>
+  <version>5.2.1</version>
   <name>Beangle Commons Parent</name>
 
   <modules>
