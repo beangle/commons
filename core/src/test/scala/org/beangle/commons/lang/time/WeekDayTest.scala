@@ -18,13 +18,13 @@
  */
 package org.beangle.commons.lang.time
 
-import java.time.LocalDate
-
-import org.beangle.commons.lang.time.WeekDay.{ Mon, Sat, Sun, Wed }
+import org.beangle.commons.lang.time.WeekDay.{Mon, Sat, Sun, Wed}
 import org.junit.runner.RunWith
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.junit.JUnitRunner
+
+import java.time.LocalDate
 
 @RunWith(classOf[JUnitRunner])
 class WeekDayTest extends AnyFunSpec with Matchers {
@@ -50,6 +50,12 @@ class WeekDayTest extends AnyFunSpec with Matchers {
       //2015-4-8
       val now = LocalDate.of(2015, 4, 8)
       assert(WeekDay.of(now) == Wed)
+    }
+
+    it("next or previous") {
+      assert(Sun.next == Mon)
+      assert(Mon.previous == Sun)
+      assert(Sat.next == Sun)
     }
   }
 }

@@ -18,24 +18,37 @@
  */
 package org.beangle.commons.lang.time
 
-import java.time.LocalDate
-
 import org.beangle.commons.lang.annotation.beta
 
+import java.time.LocalDate
+
 /**
- * 国家标准GBT 7408-2005
- */
+  * 国家标准GBT 7408-2005
+  */
 @beta
 object WeekDay extends Enumeration(1) {
+
   class WeekDay extends super.Val {
     /**
-     * Java calendar Index
-     */
+      * Java calendar Index
+      */
     def index: Int = {
       id match {
         case 7 => 1
         case _ => id + 1
       }
+    }
+
+    def previous: WeekDay = {
+      val preDayId = this.id - 1
+      if (preDayId <= 0) WeekDay.Sun
+      else WeekDay(preDayId).asInstanceOf[WeekDay]
+    }
+
+    def next: WeekDay = {
+      val nextDayId = this.id + 1
+      if (nextDayId > 7) WeekDay.Mon
+      else WeekDay(nextDayId).asInstanceOf[WeekDay]
     }
   }
 
