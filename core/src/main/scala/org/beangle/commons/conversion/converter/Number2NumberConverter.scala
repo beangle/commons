@@ -23,7 +23,7 @@ import java.math.{BigDecimal, BigInteger}
 import org.beangle.commons.conversion.Converter
 import org.beangle.commons.conversion.impl.ConverterFactory
 
-object Number2NumberConverter {
+object Number2NumberConverter extends ConverterFactory[Number, Number] {
 
   private class ShortConverter extends Converter[Number, java.lang.Short] {
 
@@ -59,16 +59,6 @@ object Number2NumberConverter {
 
     override def apply(number: Number): BigDecimal = new BigDecimal(number.toString)
   }
-}
-
-import org.beangle.commons.conversion.converter.Number2NumberConverter._
-/**
- * Number Converter Factory
- *
- * @author chaostone
- * @since 3.2.0
- */
-class Number2NumberConverter extends ConverterFactory[Number, Number] {
 
   register(classOf[java.lang.Short], new ShortConverter())
 

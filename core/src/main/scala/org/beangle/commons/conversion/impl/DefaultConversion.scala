@@ -24,36 +24,38 @@ object DefaultConversion {
 
   val Instance = new DefaultConversion()
 }
+
 /**
- * Default Conversion implementation.
- * <p>
- * It register String to Boolean/Number/Date/Locale, Number to Number and Object to String buildin
- * converters.
- *
- * @author chaostone
- * @since 3.2.0
- */
+  * Default Conversion implementation.
+  * <p>
+  * It register String to Boolean/Number/Date/Locale, Number to Number and Object to String buildin
+  * converters.
+  * @author chaostone
+  * @since 3.2.0
+  */
 class DefaultConversion extends AbstractGenericConversion {
 
   addConverter(String2BooleanConverter)
 
-  addConverter(new String2NumberConverter)
+  addConverter(String2NumberConverter)
 
-  addConverter(new String2DateConverter)
+  addConverter(String2DateConverter)
 
-  addConverter(new String2TemporalConverter)
+  addConverter(String2TemporalConverter)
 
   addConverter(String2TimeConverter)
 
   addConverter(String2HourMinuteConverter)
 
-  addConverter(new String2EnumConverter)
+  addConverter(String2EnumConverter)
 
   addConverter(String2ScalaEnumConverter)
 
   addConverter(String2LocaleConverter)
 
-  addConverter(new Number2NumberConverter)
+  addConverter(Number2NumberConverter)
 
   addConverter(Object2StringConverter)
+
+  addConverter(IterableConverterFactory)
 }

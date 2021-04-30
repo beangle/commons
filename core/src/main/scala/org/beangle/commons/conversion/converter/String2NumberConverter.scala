@@ -28,7 +28,7 @@ import org.beangle.commons.lang.Numbers
  * @author chaostone
  * @since 3.2.0
  */
-class String2NumberConverter extends StringConverterFactory[String, Number] {
+object String2NumberConverter extends StringConverterFactory[String, Number] {
 
   register(classOf[jl.Short], new ShortConverter())
 
