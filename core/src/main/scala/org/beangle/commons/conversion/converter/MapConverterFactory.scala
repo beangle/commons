@@ -37,8 +37,8 @@ object MapConverterFactory extends ConverterFactory[ju.Map[_, _], scala.collecti
       val result: collection.Map[_, _] =
         it match {
           case cm: ju.concurrent.ConcurrentMap[_, _] => asScala(cm)
-          case m: ju.Map[_, _] => asScala(m)
           case p: ju.Properties => asScala(p)
+          case m: ju.Map[_, _] => asScala(m)
           case _ => null.asInstanceOf[collection.Map[_, _]]
         }
       if (immutable) {
