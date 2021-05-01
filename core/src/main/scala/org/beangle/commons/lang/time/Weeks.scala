@@ -16,15 +16,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons
+package org.beangle.commons.lang.time
 
-object BeangleVersion {
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
-  def name = "Beangle Scala Development Toolkit"
+object Weeks {
 
-  def version = "5.2.2"
-
-  def major = 5
-
-  def minor = 2
+  def between(a: LocalDate, b: LocalDate): Int = ChronoUnit.WEEKS.between(a, b).toInt
 }

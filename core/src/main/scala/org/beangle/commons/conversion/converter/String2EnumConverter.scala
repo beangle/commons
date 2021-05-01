@@ -27,7 +27,7 @@ import org.beangle.commons.lang.{ClassLoaders, Numbers}
  * @author chaostone
  * @since 3.2.0
  */
-class String2EnumConverter extends StringConverterFactory[String, Enum[_]] {
+object String2EnumConverter extends StringConverterFactory[String, Enum[_]] {
 
   private class EnumConverter[T <: Enum[_]](val enumType: Class[_]) extends Converter[String, T] {
     def enumValueOf[T <: Enum[T]](cls: Class[_], str: String): T = {

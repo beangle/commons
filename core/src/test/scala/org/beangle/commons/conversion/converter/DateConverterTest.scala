@@ -30,7 +30,7 @@ import org.scalatestplus.junit.JUnitRunner
 class DateConverterTest extends AnyFunSpec with Matchers {
 
   private def converToDate(dateStr: String, year: Int, month: Int, day: Int): Unit = {
-    val c = new String2DateConverter().getConverter(classOf[ju.Date]).orNull
+    val c = String2DateConverter.getConverter(classOf[ju.Date]).orNull
     val date = c.apply(dateStr)
     val calendar = new ju.GregorianCalendar()
     calendar.setTime(date)
@@ -40,7 +40,7 @@ class DateConverterTest extends AnyFunSpec with Matchers {
   }
 
   private def converToDateX(dateStr: String, year: Int, month: Int, day: Int): Unit = {
-    val c = new String2TemporalConverter().getConverter(classOf[java.time.LocalDate]).orNull
+    val c = String2TemporalConverter.getConverter(classOf[java.time.LocalDate]).orNull
     val date = c.apply(dateStr)
     date.getYear should be(year)
     date.getMonth.getValue should be(month)
@@ -59,7 +59,7 @@ class DateConverterTest extends AnyFunSpec with Matchers {
     }
 
     it("Convert String to Temporal") {
-      val c = new String2TemporalConverter()
+      val c = String2TemporalConverter
       val lc = c.getConverter(classOf[LocalDate])
       lc.isDefined should be(true)
       lc.get.apply("1980-09-09") should be equals LocalDate.parse("1980-09-09")

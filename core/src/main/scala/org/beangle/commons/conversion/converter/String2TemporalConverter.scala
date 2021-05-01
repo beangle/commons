@@ -31,7 +31,7 @@ import org.beangle.commons.lang.{Dates, Strings}
  * @author chaostone
  * @since 3.2.0
  */
-class String2TemporalConverter extends StringConverterFactory[String, Temporal] {
+object String2TemporalConverter extends StringConverterFactory[String, Temporal] {
 
   register(classOf[LocalDate], LocalDateConverter)
 

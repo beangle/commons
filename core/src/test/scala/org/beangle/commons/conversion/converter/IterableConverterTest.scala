@@ -16,46 +16,29 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons.lang.time
+package org.beangle.commons.conversion.converter
 
-import org.beangle.commons.lang.time.WeekDay.{Mon, Sat, Sun, Wed}
 import org.junit.runner.RunWith
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.junit.JUnitRunner
 
-import java.time.LocalDate
+import java.util
 
 @RunWith(classOf[JUnitRunner])
-class WeekDayTest extends AnyFunSpec with Matchers {
+class IterableConverterTest extends AnyFunSpec with Matchers {
 
-  describe("WeekDay") {
-    it("id starts at Mon") {
-      assert(Mon.id == 1)
-      assert(Sun.id == 7)
-      assert(Sat.id == 6)
-    }
+  describe("Iterable Converter") {
+    it("Convert java iterable to scala") {
+      val c = IterableConverterFactory
+      val seq = c.convert(new util.ArrayList[Integer], classOf[collection.Seq[Integer]])
+      seq.isInstanceOf[collection.Seq[Integer]] should be(true)
 
-    it("is serializable") {
-      assert(Sun.isInstanceOf[Serializable])
-    }
-
-    it("index starts at Sun") {
-      assert(Sun.index == 1)
-      assert(Mon.index == 2)
-      assert(Sat.index == 7)
-    }
-
-    it("of some day") {
-      //2015-4-8
-      val now = LocalDate.of(2015, 4, 8)
-      assert(WeekDay.of(now) == Wed)
-    }
-
-    it("next or previous") {
-      assert(Sun.next == Mon)
-      assert(Mon.previous == Sun)
-      assert(Sat.next == Sun)
+      val iseq = c.convert(new util.ArrayList[Integer], classOf[collection.immutable.Seq[Integer]])
+      iseq.isInstanceOf[collection.immutable.Seq[Integer]] should be(true)
+      val mc = MapConverterFactory
+      val map = mc.convert(new util.HashMap[String, String], classOf[collection.mutable.Map[String, String]])
+      map shouldNot equal(null)
     }
   }
 }

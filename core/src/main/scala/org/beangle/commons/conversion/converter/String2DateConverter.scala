@@ -32,7 +32,7 @@ import org.beangle.commons.lang.Strings._
  * @author chaostone
  * @since 3.2.0
  */
-class String2DateConverter extends StringConverterFactory[String, ju.Date] {
+object String2DateConverter extends StringConverterFactory[String, ju.Date] {
 
   register(classOf[ju.Date], new DateConverter())
 
@@ -41,10 +41,10 @@ class String2DateConverter extends StringConverterFactory[String, ju.Date] {
   private class DateConverter extends Converter[String, ju.Date] {
 
     override def apply(value: String): ju.Date = {
-      if (isEmpty(value.asInstanceOf[String])) {
+      if (isEmpty(value)) {
         return null
       }
-      val dateStr = value.asInstanceOf[String]
+      val dateStr = value
       val times = split(dateStr, " ")
       var badformat = false
       var dateElems: Array[Int] = null
