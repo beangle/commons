@@ -18,15 +18,15 @@
  */
 package org.beangle.commons.web.init
 
-import java.util.EnumSet
-import java.{util => ju}
-
 import jakarta.servlet.DispatcherType.REQUEST
 import jakarta.servlet.{ServletContainerInitializer, ServletContext, ServletContextListener}
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.Strings.{split, substringAfter, substringBefore}
 import org.beangle.commons.web.context.ServletContextHolder
+
+import java.util.EnumSet
+import java.{util => ju}
 
 object BootstrapInitializer {
   val InitFile = "META-INF/beangle/web-init.properties"
@@ -40,7 +40,7 @@ class BootstrapInitializer extends ServletContainerInitializer {
   //这里做个代理,可以在context listener一旦调用初始化后，不能注册的情况下（BootstrapLister->Bootstrap）集中调用。
   val listeners = new collection.mutable.ListBuffer[ServletContextListener]
 
-  /**是否要注册ServletContextListener*/
+  /** 是否要注册ServletContextListener */
   var register: Boolean = true
 
   def this(r: Boolean) = {
@@ -66,11 +66,13 @@ class BootstrapInitializer extends ServletContainerInitializer {
       ctx.log("None beangle initializer was detected on classpath.")
     } else {
       import scala.jdk.CollectionConverters._
-      for (initializer <- initializers.asScala) {
+      val inits = initializers.asScala
+      for (initializer <- inits) {
         initializer.boss = this
         ctx.log(s"${initializer.getClass.getName} initializing ...")
-        initializer.onStartup(ctx)
+        initializer.onConfig(ctx)
       }
+      inits foreach (x => x.onStartup(ctx))
       //process filter order
       val filterOrders = ctx.getInitParameter("filter-orders")
       if (null != filterOrders) {

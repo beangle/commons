@@ -32,7 +32,7 @@ import org.beangle.commons.web.context.ServletContextHolder
   * <absolute-ordering/>
   *
   * <listener>
-  * <listener-class>org.beangle.commons.web.init.BootstrapListener</listener-class>
+  *    <listener-class>org.beangle.commons.web.init.BootstrapListener</listener-class>
   * </listener>
   *
   * </web-app>

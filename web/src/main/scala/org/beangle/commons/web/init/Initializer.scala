@@ -23,16 +23,23 @@ import jakarta.servlet.ServletException
 import jakarta.servlet.ServletContextListener
 
 /**
- * @see BootstrapListener.InitFile
- */
+  * @see BootstrapListener.InitFile
+  */
 trait Initializer {
   var boss: BootstrapInitializer = _
+
+  /** config servletContext
+    * @param servletContext
+    */
+  def onConfig(servletContext: ServletContext): Unit={
+
+  }
+
   /**
-   * Configure the given {@link ServletContext} with any servlets, filters, listeners
-   * context-params and attributes necessary for initializing this web application.
-   *
-   * @param servletContext the {@code ServletContext} to initialize
-   */
+    * Configure the given {@link ServletContext} with any servlets, filters, listeners
+    * context-params and attributes necessary for initializing this web application.
+    * @param servletContext the {@code ServletContext} to initialize
+    */
   @throws(classOf[ServletException])
   def onStartup(servletContext: ServletContext): Unit
 
