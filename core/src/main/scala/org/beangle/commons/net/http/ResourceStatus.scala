@@ -16,15 +16,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.beangle.commons
+package org.beangle.commons.net.http
 
-object BeangleVersion {
+import java.net.URL
 
-  def name = "Beangle Scala Development Toolkit"
-
-  def version = "5.2.3"
-
-  def major = 5
-
-  def minor = 2
+case class ResourceStatus(status: Int, target: URL, length: Long, lastModified: Long, supportRange: Boolean) {
+  def isOk: Boolean = {
+    200 == status
+  }
 }
