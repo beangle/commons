@@ -18,14 +18,14 @@
  */
 package org.beangle.commons.net.http
 
+import org.beangle.commons.io.IOs
+import org.beangle.commons.lang.Charsets
+import org.beangle.commons.logging.Logging
+
 import java.io.{BufferedReader, ByteArrayOutputStream, InputStreamReader, OutputStreamWriter}
 import java.net.HttpURLConnection._
 import java.net.{HttpURLConnection, URL, URLConnection}
 import java.nio.charset.Charset
-
-import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.Charsets
-import org.beangle.commons.logging.Logging
 
 object HttpUtils extends Logging {
 
@@ -41,6 +41,16 @@ object HttpUtils extends Logging {
     statusMap.getOrElse(httpCode, String.valueOf(httpCode))
   }
 
+  def access(url: URL): ResourceStatus = {
+    val hc = followRedirect(url.openConnection(), "HEAD")
+    val rc = hc.getResponseCode
+    rc match {
+      case HTTP_OK =>
+        val supportRange = "bytes" == hc.getHeaderField("Accept-Ranges")
+        ResourceStatus(rc, hc.getURL, hc.getHeaderFieldLong("Content-Length", 0), hc.getLastModified, supportRange)
+      case _ => ResourceStatus(rc, hc.getURL, -1, -1, supportRange = false)
+    }
+  }
 
   @scala.annotation.tailrec
   def followRedirect(c: URLConnection, method: String): HttpURLConnection = {
@@ -149,6 +159,7 @@ object HttpUtils extends Logging {
       if (null != conn) conn.disconnect()
     }
   }
+
 
   private[this] def report(url: URL, e: Exception): Unit = {
     logger.error("Cannot open url " + url, e)
