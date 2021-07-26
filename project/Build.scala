@@ -3,7 +3,7 @@ import sbt._
 
 object BuildSettings {
   val buildOrganization = "org.beangle.commons"
-  val buildVersion = "5.2.4-SNAPSHOT"
+  val buildVersion = "5.2.4"
   val buildScalaVersion = "3.0.1"
 
   val commonSettings = Seq(
@@ -12,7 +12,7 @@ object BuildSettings {
     scalaVersion := buildScalaVersion,
     scalacOptions := Seq("-encoding", "UTF-8", "-feature", "-unchecked", "-deprecation"
       , "-language:implicitConversions", "-Xtarget:11", "-Xfatal-warnings"),
-    crossPaths := false)
+    crossPaths := true)
 }
 
 object Dependencies {

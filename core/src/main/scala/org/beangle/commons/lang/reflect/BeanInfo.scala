@@ -210,7 +210,6 @@ object BeanInfo extends Logging {
     }
   }
 
-
   inline def of[T](clazz:Class[T]): BeanInfo = ${ ofImpl[T]('clazz) }
 
   private def ofImpl[T](clazz:Expr[Class[T]])(implicit qctx: Quotes, ttype: scala.quoted.Type[T]): Expr[BeanInfo] = {

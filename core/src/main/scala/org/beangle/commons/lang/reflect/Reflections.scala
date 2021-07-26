@@ -157,7 +157,6 @@ object Reflections {
     } else (ann, method)
   }
 
-
   /**
     * 得到类和对应泛型的参数信息
     */

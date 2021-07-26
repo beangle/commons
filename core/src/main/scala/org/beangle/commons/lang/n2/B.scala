@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.lang.n2
 import scala.quoted.*
 import org.beangle.commons.lang.reflect.BeanInfos
