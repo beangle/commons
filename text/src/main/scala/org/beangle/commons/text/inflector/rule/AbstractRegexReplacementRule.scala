@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.text.inflector.rule
 
 import java.util.regex.Matcher
@@ -37,9 +36,8 @@ object AbstractRegexReplacementRule {
     var regex = ""
     for (i <- 0 until patterns.length) {
       regex += patterns(i)
-      if (i < patterns.length - 1) {
+      if (i < patterns.length - 1)
         regex += "|"
-      }
     }
     "(?:" + regex + ")"
   }
@@ -53,9 +51,8 @@ object AbstractRegexReplacementRule {
    * @param patterns  a set of regular expression patterns
    * @return a pattern that matches if any of the input patterns match
    */
-  def disjunction(patterns: Set[String]): String = {
+  def disjunction(patterns: Set[String]): String =
     disjunction(patterns.toArray)
-  }
 }
 
 import AbstractRegexReplacementRule._
@@ -72,9 +69,8 @@ abstract class AbstractRegexReplacementRule(regex: String) extends Rule {
 
   def apply(word: String): String = {
     val matcher = pattern.matcher(word)
-    if (!matcher.matches()) {
+    if (!matcher.matches())
       throw new IllegalArgumentException("Word '" + word + "' does not match regex: " + pattern.pattern())
-    }
     replace(matcher)
   }
 

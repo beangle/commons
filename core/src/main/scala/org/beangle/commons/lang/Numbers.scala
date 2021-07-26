@@ -1,24 +1,23 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.lang
 
-import java.{lang => jl, math => jm}
+import java.{ lang => jl, math => jm }
 
 import org.beangle.commons.lang.Strings.isEmpty
 
@@ -46,9 +45,9 @@ object Numbers {
    */
   def toInt(str: String, defaultValue: Int = 0): Int = {
     if (isEmpty(str)) return defaultValue
-    try {
+    try
       Integer.parseInt(str)
-    } catch {
+    catch {
       case nfe: NumberFormatException => defaultValue
     }
   }
@@ -68,18 +67,18 @@ object Numbers {
 
   def toShort(str: String, defaultValue: Short = 0): Short = {
     if (isEmpty(str)) return defaultValue
-    try {
+    try
       jl.Short.parseShort(str)
-    } catch {
+    catch {
       case nfe: NumberFormatException => defaultValue
     }
   }
 
   def toLong(str: String, defaultValue: Long = 0L): Long = {
     if (isEmpty(str)) return defaultValue
-    try {
+    try
       jl.Long.parseLong(str)
-    } catch {
+    catch {
       case nfe: NumberFormatException => defaultValue
     }
   }
@@ -98,18 +97,18 @@ object Numbers {
   }
   def toFloat(str: String, defaultValue: Float = 0.0f): Float = {
     if (isEmpty(str)) return defaultValue
-    try {
+    try
       jl.Float.parseFloat(str)
-    } catch {
+    catch {
       case nfe: NumberFormatException => defaultValue
     }
   }
 
   def toDouble(str: String, defaultValue: Double = 0.0d): Double = {
     if (isEmpty(str)) return defaultValue
-    try {
+    try
       jl.Double.parseDouble(str)
-    } catch {
+    catch {
       case nfe: NumberFormatException => defaultValue
     }
   }
@@ -117,63 +116,63 @@ object Numbers {
   // convert string to number object
   def convert2Int(str: String, defaultValue: jl.Integer = null): jl.Integer = {
     if (isEmpty(str)) return defaultValue
-    try {
+    try
       Integer.valueOf(str)
-    } catch {
+    catch {
       case nfe: NumberFormatException => defaultValue
     }
   }
 
   def convert2Short(str: String, defaultValue: jl.Short = null): jl.Short = {
     if (isEmpty(str)) return defaultValue
-    try {
+    try
       jl.Short.valueOf(str)
-    } catch {
+    catch {
       case nfe: NumberFormatException => defaultValue
     }
   }
 
   def convert2Long(str: String, defaultValue: jl.Long = null): jl.Long = {
     if (isEmpty(str)) return defaultValue
-    try {
+    try
       jl.Long.valueOf(str)
-    } catch {
+    catch {
       case nfe: NumberFormatException => defaultValue
     }
   }
 
   def convert2Float(str: String, defaultValue: jl.Float = null): jl.Float = {
     if (isEmpty(str)) return defaultValue
-    try {
+    try
       jl.Float.valueOf(str)
-    } catch {
+    catch {
       case nfe: NumberFormatException => defaultValue
     }
   }
 
   def convert2Double(str: String, defaultValue: jl.Double = null): jl.Double = {
     if (isEmpty(str)) return defaultValue
-    try {
+    try
       jl.Double.valueOf(str)
-    } catch {
+    catch {
       case nfe: NumberFormatException => defaultValue
     }
   }
 
   def convert2BigInt(str: String, defaultValue: jm.BigInteger = null): jm.BigInteger = {
     if (isEmpty(str)) return defaultValue
-    try {
+    try
       new jm.BigInteger(str)
-    } catch {
+    catch {
       case nfe: NumberFormatException => defaultValue
     }
   }
 
   def convert2BigDecimal(str: String, defaultValue: jm.BigDecimal = null): jm.BigDecimal = {
     if (isEmpty(str)) return defaultValue
-    try {
+    try
       new jm.BigDecimal(str)
-    } catch {
+    catch {
       case nfe: NumberFormatException => defaultValue
     }
   }

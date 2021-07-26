@@ -1,25 +1,25 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.conversion.converter
 
 import org.beangle.commons.conversion.Converter
-import org.beangle.commons.lang.{ClassLoaders, Numbers}
+import org.beangle.commons.lang.{ ClassLoaders, Numbers }
+import scala.reflect.{Enum=> ScalaEnum}
 
 /**
  * Convert String to Enumeration.
@@ -30,9 +30,8 @@ import org.beangle.commons.lang.{ClassLoaders, Numbers}
 object String2EnumConverter extends StringConverterFactory[String, Enum[_]] {
 
   private class EnumConverter[T <: Enum[_]](val enumType: Class[_]) extends Converter[String, T] {
-    def enumValueOf[T <: Enum[T]](cls: Class[_], str: String): T = {
+    def enumValueOf[T <: Enum[T]](cls: Class[_], str: String): T =
       Enum.valueOf(cls.asInstanceOf[Class[T]], str)
-    }
 
     override def apply(input: String): T = enumValueOf(enumType, input)
   }
@@ -43,36 +42,37 @@ object String2EnumConverter extends StringConverterFactory[String, Enum[_]] {
       val enumconverter = new EnumConverter(targetType)
       register(targetType, enumconverter)
       Some(enumconverter)
-    } else {
-      converter
     }
+    else
+      converter
   }
-
 }
 
-object String2ScalaEnumConverter extends StringConverterFactory[String, Enumeration#Value] {
+end String2EnumConverter
 
-  private class EnumConverter[T <: Enumeration#Value](enum: Enumeration) extends Converter[String, T] {
+object String2ScalaEnumConverter extends StringConverterFactory[String,  ScalaEnum] {
+
+  private class EnumConverter[T <: ScalaEnum](e: AnyRef) extends Converter[String, T] {
+    private val fromOrdinalMethod=e.getClass.getMethod("fromOrdinal",classOf[Int])
+    private val valueOfMethod=e.getClass.getMethod("valueOf",classOf[String])
+
     override def apply(input: String): T = {
       val result =
-        if (Numbers.isDigits(input)) enum.apply(Numbers.toInt(input))
-        else enum.withName(input)
+        if (Numbers.isDigits(input)) fromOrdinalMethod.invoke(e,Numbers.toInt(input))
+        else valueOfMethod.invoke(e,input)
       result.asInstanceOf[T]
     }
   }
 
-  override def getConverter[T <: Enumeration#Value](targetType: Class[T]): Option[Converter[String, T]] = {
+  override def getConverter[T <: ScalaEnum](targetType: Class[T]): Option[Converter[String, T]] = {
     val converter = super.getConverter(targetType)
     if (converter.isEmpty) {
-      val targetTypeName = targetType.getName()
-      val dollaIdx = targetTypeName.indexOf('$')
-      if (-1 == dollaIdx) throw new RuntimeException("Only support enum which value extends super.Val")
-      val enum = ClassLoaders.load(targetTypeName.substring(0, dollaIdx + 1)).getDeclaredField("MODULE$").get(null).asInstanceOf[Enumeration]
-      val enumconverter = new EnumConverter(enum)
+      val enm = ClassLoaders.load(targetType.getName() +"$").getDeclaredField("MODULE$").get(null)
+      val enumconverter = new EnumConverter(enm)
       register(targetType, enumconverter)
       Some(enumconverter)
-    } else {
-      converter
     }
+    else
+      converter
   }
 }

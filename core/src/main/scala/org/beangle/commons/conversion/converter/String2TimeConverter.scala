@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.conversion.converter
 
 import java.sql.Time
@@ -34,16 +33,17 @@ import org.beangle.commons.lang.Strings
  */
 object String2TimeConverter extends Converter[String, Time] {
 
-  override def apply(input: String): Time = {
-    if (Strings.isEmpty(input)) null
-    try {
-      Time.valueOf(normalize(input))
-    } catch {
-      case e: Exception => null
-    }
-  }
+  override def apply(input: String): Time =
+    if (Strings.isEmpty(input))
+      null
+    else
+      try
+        Time.valueOf(normalize(input))
+      catch {
+        case e: Exception => null
+      }
 
-  private def normalize(timeStr: String): String = {
+  private def normalize(timeStr: String): String =
     if (timeStr.length >= 8) timeStr
     else {
       val buf = new StringBuilder(timeStr)
@@ -52,5 +52,4 @@ object String2TimeConverter extends Converter[String, Time] {
       if (buf.charAt(5) != ':') buf.insert(5, ':')
       buf.toString
     }
-  }
 }

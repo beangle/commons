@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.lang
 
 import scala.collection.mutable.ListBuffer
@@ -96,9 +95,8 @@ object Objects {
    * @return {@code object} if it is not {@code null}, defaultValue otherwise
    * @since 3.0
    */
-  def defaultIfNull[T](value: T, defaultValue: T): T = {
+  def defaultIfNull[T](value: T, defaultValue: T): T =
     if (value != null) value else defaultValue
-  }
 
   /**
    * Return a hex String form of an object's identity hash code.
@@ -106,9 +104,8 @@ object Objects {
    * @param obj the object
    * @return the object's identity code in hex notation
    */
-  def getIdentityHexString(obj: AnyRef): String = {
+  def getIdentityHexString(obj: AnyRef): String =
     Integer.toHexString(System.identityHashCode(obj))
-  }
 
   def equalsBuilder: EqualsBuilder = new EqualsBuilder()
 
@@ -152,9 +149,8 @@ object Objects {
    *          used only for its class name
    * @since 3.1
    */
-  def toStringBuilder(self: AnyRef): ToStringBuilder = {
+  def toStringBuilder(self: AnyRef): ToStringBuilder =
     new ToStringBuilder(simpleName(self.getClass))
-  }
 
   /**
    * Creates an instance of [[ToStringBuilder]] in the same manner as
@@ -235,7 +231,6 @@ object Objects {
 
     private class ValueHolder(val value: String, val isNull: Boolean) {
     }
-
   }
 
   /**
@@ -250,11 +245,10 @@ object Objects {
 
     def add(lhs: Any, rhs: Any): EqualsBuilder = {
       if (!rs) return this
-      if (lhs.getClass.isArray && rhs.getClass.isArray) {
+      if (lhs.getClass.isArray && rhs.getClass.isArray)
         rs &= Objects.equals(lhs.asInstanceOf[Array[Any]], rhs.asInstanceOf[Array[Any]])
-      } else {
+      else
         rs &= Objects.equals(lhs, rhs)
-      }
       this
     }
 
@@ -292,12 +286,10 @@ object Objects {
     var comparison: Int = _
 
     def add(lhs: Any, rhs: Any, ordering: Ordering[Any] = null): this.type = {
-      if (comparison != 0) {
+      if (comparison != 0)
         return this
-      }
-      if (lhs == rhs) {
+      if (lhs == rhs)
         return this
-      }
       if (lhs == null) {
         comparison = -1
         return this
@@ -331,11 +323,9 @@ object Objects {
         return this
       }
     }
-    def toComparison(): Int = {
+    def toComparison(): Int =
       comparison
-    }
-    def build(): Int = {
+    def build(): Int =
       comparison
-    }
   }
 }

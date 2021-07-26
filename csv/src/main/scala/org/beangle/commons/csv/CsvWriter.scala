@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.csv
 
 import java.io.Closeable
@@ -37,11 +36,11 @@ object CsvWriter {
    */
   val NoQuoteChar = '\u0000'
 
-   /**
+  /**
    * The Escape constant to use when you wish to suppress all escaping.
    */
   val NoEscapeChar = '\u0000'
-   /**
+  /**
    * Default line terminator uses platform encoding.
    */
   val DefaultLineEnd = "\n"
@@ -60,9 +59,8 @@ class CsvWriter(val writer: Writer, val format: CsvFormat = new CsvFormat.Builde
   /**
    * write.
    */
-  def write(allLines: collection.Seq[Array[String]]): Unit = {
+  def write(allLines: collection.Seq[Array[String]]): Unit =
     for (line <- allLines) write(line)
-  }
 
   /**
    * write.
@@ -71,9 +69,8 @@ class CsvWriter(val writer: Writer, val format: CsvFormat = new CsvFormat.Builde
     if (nextLine == null) return
     val sb = new StringBuilder(InitialStringSize)
     for (i <- 0 until nextLine.length) {
-      if (i != 0) {
+      if (i != 0)
         sb.append(format.defaultSeparator())
-      }
       val nextElement = nextLine(i)
       if (null != nextElement) {
         if (!format.isDelimiter(NoQuoteChar)) sb.append(format.delimiter)
@@ -85,9 +82,8 @@ class CsvWriter(val writer: Writer, val format: CsvFormat = new CsvFormat.Builde
     writer.write(sb.toString)
   }
 
-  private def containsSpecialChar(line: String): Boolean = {
+  private def containsSpecialChar(line: String): Boolean =
     line.indexOf(format.delimiter) != -1 || line.indexOf(format.delimiter) != -1
-  }
 
   /**
    * processLine.
@@ -99,13 +95,12 @@ class CsvWriter(val writer: Writer, val format: CsvFormat = new CsvFormat.Builde
     val sb = new StringBuilder(InitialStringSize)
     for (j <- 0 until nextElement.length) {
       val nextChar = nextElement.charAt(j)
-      if (format.escape != NoEscapeChar && nextChar == format.delimiter) {
+      if (format.escape != NoEscapeChar && nextChar == format.delimiter)
         sb.append(format.escape).append(nextChar)
-      } else if (format.escape != NoEscapeChar && nextChar == format.escape) {
+      else if (format.escape != NoEscapeChar && nextChar == format.escape)
         sb.append(format.escape).append(nextChar)
-      } else {
+      else
         sb.append(nextChar)
-      }
     }
     sb
   }
@@ -113,20 +108,17 @@ class CsvWriter(val writer: Writer, val format: CsvFormat = new CsvFormat.Builde
   /**
    * flush.
    */
-  def flush(): Unit = {
+  def flush(): Unit =
     writer.flush()
-  }
 
   /**
    * close.
    */
-  def close(): Unit = {
+  def close(): Unit =
     try {
       flush()
       writer.close()
     } catch {
       case e: IOException => Throwables.propagate(e)
     }
-  }
-
 }

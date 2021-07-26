@@ -1,33 +1,31 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.collection.page
 
 object PagedSeq {
-  private def calcMaxPageNo(pageSize: Int, total: Int): Int = {
-    if (total <= pageSize) {
+  private def calcMaxPageNo(pageSize: Int, total: Int): Int =
+    if (total <= pageSize)
       1
-    } else {
+    else {
       val remainder = total % pageSize
       val quotient = total / pageSize
       if ((0 == remainder)) quotient else (quotient + 1)
     }
-  }
 }
 import org.beangle.commons.collection.page.PagedSeq._
 /**
@@ -108,7 +106,8 @@ class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends Page[E]() {
     if (pageIndex < 1) throw new RuntimeException("error pageIndex:" + pageIndex)
     this.pageIndex = pageIndex
     val toIndex = pageIndex * pageSize
-    val newPage = new SinglePage[E](pageIndex, pageSize, datas.size, datas.slice((pageIndex - 1) * pageSize,
+    val newPage = new SinglePage[E](pageIndex, pageSize, datas.size, datas.slice(
+      (pageIndex - 1) * pageSize,
       if ((toIndex < datas.size)) toIndex else datas.size))
     this.page = newPage
     this

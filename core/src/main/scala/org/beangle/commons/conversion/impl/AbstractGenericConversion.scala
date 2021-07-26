@@ -1,29 +1,28 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.conversion.impl
 
-import java.lang.reflect.{Array, Modifier}
+import java.lang.reflect.{ Array, Modifier }
 
-import org.beangle.commons.conversion.{Conversion, Converter, ConverterRegistry}
-import org.beangle.commons.lang.{Objects, Primitives}
+import org.beangle.commons.conversion.{ Conversion, Converter, ConverterRegistry }
+import org.beangle.commons.lang.{ Objects, Primitives }
 
-import scala.collection.{concurrent, mutable}
+import scala.collection.{ concurrent, mutable }
 import scala.language.existentials
 /**
  * Generic Conversion Super class
@@ -52,9 +51,9 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
       val targetObjClazz = targetClazz.getComponentType
       val targetObjType = Primitives.wrap(targetObjClazz)
       val converter = findConverter(sourceObjType, targetObjType)
-      if (null == converter) {
+      if (null == converter)
         Array.newInstance(targetObjClazz, 0).asInstanceOf[T]
-      } else {
+      else {
         val length = Array.getLength(source)
         val result = Array.newInstance(targetObjClazz, length).asInstanceOf[T]
         for (i <- 0 until length) Array.set(result, i, converter.convert(Array.get(source, i), targetObjType))
@@ -70,15 +69,14 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
   override def addConverter(converter: Converter[_, _]): Unit = {
     var key: Tuple2[Class[_], Class[_]] = null
     val defaultKey = (classOf[Any], classOf[Any])
-    for (m <- converter.getClass.getMethods if m.getName == "apply" && Modifier.isPublic(m.getModifiers) && !m.isBridge()) {
+    for (m <- converter.getClass.getMethods if m.getName == "apply" && Modifier.isPublic(m.getModifiers) && !m.isBridge())
       key = (m.getParameterTypes()(0), m.getReturnType)
-    }
     if (null == key) throw new IllegalArgumentException("Cannot find convert type pair " + converter.getClass)
     val sourceType = key._1.asInstanceOf[Class[_]]
     val adapter = new ConverterAdapter(converter, key)
     converters.get(sourceType) match {
       case Some(existed) => converters += (sourceType -> (existed + (key._2 -> adapter)))
-      case _             => converters += (sourceType -> Map((key._2 -> adapter)))
+      case _ => converters += (sourceType -> Map((key._2 -> adapter)))
     }
     cache.clear()
   }

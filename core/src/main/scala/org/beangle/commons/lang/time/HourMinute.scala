@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.lang.time
 
 import org.beangle.commons.lang.Numbers.toShort
@@ -30,16 +29,13 @@ object HourMinute {
 
   val Zero = new HourMinute(0)
 
-  def apply(time: String): HourMinute = {
+  def apply(time: String): HourMinute =
     new HourMinute(convert(time))
-  }
 
-  def of(hour: Int, minute: Int): HourMinute = {
+  def of(hour: Int, minute: Int): HourMinute =
     new HourMinute((hour * 100 + minute).asInstanceOf[Short])
-  }
-  def of(time: java.time.LocalTime): HourMinute = {
+  def of(time: java.time.LocalTime): HourMinute =
     of(time.getHour, time.getMinute)
-  }
 
   def convert(time: String): Short = {
     var index = time.indexOf(':')
@@ -65,57 +61,45 @@ class HourMinute(val value: Short) extends Serializable with Ordered[HourMinute]
     time.substring(0, 2) + ":" + time.substring(2, 4)
   }
 
-  override def compare(o: HourMinute): Int = {
+  override def compare(o: HourMinute): Int =
     this.value - o.value
-  }
 
-  def hour: Int = {
+  def hour: Int =
     value / 100
-  }
 
-  def minute: Int = {
+  def minute: Int =
     value % 100
-  }
 
-  def interval(other: HourMinute): Int = {
+  def interval(other: HourMinute): Int =
     Math.abs(this.minutes - other.minutes)
-  }
 
   def +(minutesDuration: Int): HourMinute = {
     var minutesValue = minutes + minutesDuration
     val day = 24 * 60
-    if (minutesValue < 0) {
-      while (minutesValue < 0) {
+    if (minutesValue < 0)
+      while (minutesValue < 0)
         minutesValue += day
-      }
-    } else {
-      while (minutesValue >= day) {
+    else
+      while (minutesValue >= day)
         minutesValue -= day
-      }
-    }
     new HourMinute(((minutesValue / 60) * 100 + minutesValue % 60).asInstanceOf[Short])
   }
 
-  def -(minutesDuration: Int): HourMinute = {
+  def -(minutesDuration: Int): HourMinute =
     this + (0 - minutesDuration)
-  }
 
-  private def minutes: Int = {
+  private def minutes: Int =
     hour * 60 + minute
-  }
 
-  def -(other: HourMinute): Short = {
+  def -(other: HourMinute): Short =
     (this.minutes - other.minutes).asInstanceOf[Short]
-  }
 
-  override def equals(obj: Any): Boolean = {
+  override def equals(obj: Any): Boolean =
     obj match {
       case hm: HourMinute => hm.value == this.value
-      case _              => false
+      case _ => false
     }
-  }
 
-  override def hashCode: Int = {
+  override def hashCode: Int =
     value
-  }
 }

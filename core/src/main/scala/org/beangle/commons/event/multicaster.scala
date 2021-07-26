@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.event
 
 import scala.collection.mutable
@@ -81,9 +80,8 @@ object DefaultEventMulticaster {
       (this.eventType == otherKey.eventType && this.sourceType == otherKey.sourceType)
     }
 
-    override def hashCode(): Int = {
+    override def hashCode(): Int =
       this.eventType.hashCode * 29 + this.sourceType.hashCode
-    }
   }
 }
 /**
@@ -123,18 +121,16 @@ class DefaultEventMulticaster extends EventMulticaster {
   private def getListeners(e: Event): List[EventListener[Event]] = {
     val key = new ListenerCacheKey(e.getClass, e.getSource.getClass)
     var adapted = listenerCache.get(key).orNull
-    if (null == adapted) {
+    if (null == adapted)
       this.synchronized {
         if (null == adapted) {
           val newer = new mutable.ListBuffer[EventListener[Event]]
-          for (listener <- listeners if listener.supportsEventType(e.getClass) && listener.supportsSourceType(e.getSource.getClass)) {
+          for (listener <- listeners if listener.supportsEventType(e.getClass) && listener.supportsSourceType(e.getSource.getClass))
             newer += listener
-          }
           adapted = newer.toList
           listenerCache += (key -> adapted)
         }
       }
-    }
     adapted
   }
 }

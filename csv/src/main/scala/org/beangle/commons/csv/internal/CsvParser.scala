@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.csv.internal
 
 import java.io.IOException
@@ -69,18 +68,15 @@ class CsvParser(var format: CsvFormat) {
    * @throws IOException if bad things happen during the read
    */
   private def parseLine(nextLine: String, multi: Boolean): Array[String] = {
-    if (!multi && pending != null) {
+    if (!multi && pending != null)
       pending = null
-    }
-    if (nextLine == null) {
+    if (nextLine == null)
       if (pending != null) {
         val s = pending
         pending = null
         return Array(s)
-      } else {
+      } else
         return null
-      }
-    }
     val tokensOnThisLine = new mutable.ListBuffer[String]()
     var sb = new StringBuilder(InitialReadSize)
     var inQuotes = false
@@ -103,60 +99,50 @@ class CsvParser(var format: CsvFormat) {
           i += 1
         } else {
           inQuotes = !inQuotes
-          if (!format.strictQuotes) {
+          if (!format.strictQuotes)
             if (i > 2 && !format.isSeparator(nextLine.charAt(i - 1)) &&
               nextLine.length > (i + 1) &&
-              !format.isSeparator(nextLine.charAt(i + 1))) {
-              if (ignoreLeadingWhiteSpace && sb.length > 0 && isAllWhiteSpace(sb)) {
+              !format.isSeparator(nextLine.charAt(i + 1)))
+              if (ignoreLeadingWhiteSpace && sb.length > 0 && isAllWhiteSpace(sb))
                 sb = new StringBuilder(InitialReadSize)
-              } else {
+              else
                 sb.append(c)
-              }
-            }
-          }
         }
         inField = !inField
       } else if (format.isSeparator(c) && !inQuotes) {
         tokensOnThisLine += sb.toString
         sb = new StringBuilder(InitialReadSize)
         inField = false
-      } else {
-        if (!format.strictQuotes || inQuotes) {
-          sb.append(c)
-          inField = true
-        }
+      } else if (!format.strictQuotes || inQuotes) {
+        sb.append(c)
+        inField = true
       }
       i += 1
     }
-    if (inQuotes) {
+    if (inQuotes)
       if (multi) {
         sb.append("\n")
         pending = sb.toString
         sb = null
-      } else {
+      } else
         throw new RuntimeException("Un-terminated Quoted field at end of CSV line")
-      }
-    }
-    if (sb != null) {
+    if (sb != null)
       tokensOnThisLine += sb.toString
-    }
     tokensOnThisLine.toArray
   }
 
   /**
    * precondition: the current character is a Quote or an Escape
    */
-  private def isNextCharacterEscapedQuote(nextLine: String, inQuotes: Boolean, i: Int): Boolean = {
+  private def isNextCharacterEscapedQuote(nextLine: String, inQuotes: Boolean, i: Int): Boolean =
     inQuotes && nextLine.length > (i + 1) && format.isDelimiter(nextLine.charAt(i + 1))
-  }
 
   /**
    * precondition: the current character is an Escape
    */
-  protected def isNextCharacterEscapable(nextLine: String, inQuotes: Boolean, i: Int): Boolean = {
+  protected def isNextCharacterEscapable(nextLine: String, inQuotes: Boolean, i: Int): Boolean =
     inQuotes && nextLine.length > (i + 1) &&
       (format.isDelimiter(nextLine.charAt(i + 1)) || format.isEscape(nextLine.charAt(i + 1)))
-  }
 
   /**
    * precondition: sb.length() > 0
@@ -165,9 +151,8 @@ class CsvParser(var format: CsvFormat) {
     val result = true
     for (i <- 0 until sb.length) {
       val c = sb.charAt(i)
-      if (!Character.isWhitespace(c)) {
+      if (!Character.isWhitespace(c))
         return false
-      }
     }
     result
   }

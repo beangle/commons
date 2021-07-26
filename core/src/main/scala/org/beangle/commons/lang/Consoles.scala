@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.lang
 
 import java.util.Scanner
@@ -26,11 +25,13 @@ object Consoles {
     val scanner = new Scanner(System.in)
     var content: String = null
     var anwser = false
-    do {
+    while ({
       printImmediate(msg)
       content = Strings.trim(scanner.nextLine())
       anwser = yes.contains(content)
-    } while (!(yes.contains(content) || no.contains(content)))
+      !(yes.contains(content) || no.contains(content))
+    })
+      ()
     anwser
   }
 
@@ -38,16 +39,17 @@ object Consoles {
     val scanner = new Scanner(System.in)
     var content: String = null
     var exit = false
-    do {
+    while ({
       printImmediate(prompt)
       if (scanner.hasNextLine) {
         content = Strings.trim(scanner.nextLine())
         exit = exits.contains(content)
-      } else {
+      } else
         exit = true
-      }
       if (!exit) p(content)
-    } while (!exit)
+      !exit
+    })
+      ()
   }
 
   def prompt(msg: String, defaultStr: String, f: String => Boolean): String = {
@@ -55,16 +57,17 @@ object Consoles {
     var content: String = null
     val promptMsg = msg + (if (null != defaultStr) "(default " + defaultStr + ")" else "")
     var exit = false
-    do {
+    while ({
       printImmediate(promptMsg)
       if (scanner.hasNextLine) {
         content = scanner.nextLine()
         if (Strings.isEmpty(content)) content = defaultStr
         exit = Strings.isNotEmpty(content) && f(content)
-      } else {
+      } else
         exit = true
-      }
-    } while (!exit)
+      !exit
+    })
+      ()
     content
   }
 
@@ -73,16 +76,17 @@ object Consoles {
     var content: String = null
     val promptMsg = msg + (if (null != defaultStr) "(default " + defaultStr + ")" else "")
     var exit = false
-    do {
+    while ({
       printImmediate(promptMsg)
       if (scanner.hasNextLine) {
         content = scanner.nextLine()
         if (Strings.isEmpty(content)) content = defaultStr
         exit = (null != content)
-      } else {
+      } else
         exit = true
-      }
-    } while (!exit)
+      !exit
+    })
+      ()
     content
   }
 
@@ -94,5 +98,4 @@ object Consoles {
     Console.print(msg)
     if (!msg.endsWith("\n")) Console.flush()
   }
-
 }

@@ -1,35 +1,33 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.io
 
 import java.io._
 
-import org.beangle.commons.activation.{MediaType, MediaTypes}
+import org.beangle.commons.activation.{ MediaType, MediaTypes }
 
 /**
-  * @author chaostone
-  */
+ * @author chaostone
+ */
 trait BinarySerializer extends Serializer with Deserializer {
 
-  override def mediaTypes: Seq[MediaType] = {
+  override def mediaTypes: Seq[MediaType] =
     List(MediaTypes.ApplicationOctetStream)
-  }
 
   def registerClass(clazz: Class[_]): Unit
 
@@ -41,20 +39,17 @@ trait BinarySerializer extends Serializer with Deserializer {
 abstract class AbstractBinarySerializer extends BinarySerializer {
   private var serializers = Map.empty[Class[_], ObjectSerializer]
 
-  def register(clazz: Class[_], os: ObjectSerializer): Unit = {
+  def register(clazz: Class[_], os: ObjectSerializer): Unit =
     serializers += (clazz -> os)
-  }
 
-  def serialize(data: Any, os: OutputStream, params: Map[String, Any]): Unit = {
-    if (null != data) {
+  def serialize(data: Any, os: OutputStream, params: Map[String, Any]): Unit =
+    if (null != data)
       serializers.get(data.getClass) match {
         case Some(serializer) => serializer.serialize(data, os, params)
         case None => throw new RuntimeException(s"Cannot find ${data.getClass.getName}'s corresponding ObjectSerializer.")
       }
-    }
-  }
 
-  def deserialize[T](clazz: Class[T], is: InputStream, params: Map[String, Any]): T = {
+  def deserialize[T](clazz: Class[T], is: InputStream, params: Map[String, Any]): T =
     serializers.get(clazz) match {
       case Some(serializer) =>
         val rs = serializer.deserialize(is, params).asInstanceOf[T]
@@ -62,7 +57,6 @@ abstract class AbstractBinarySerializer extends BinarySerializer {
         rs
       case None => throw new RuntimeException(s"Cannot find ${clazz.getName}'s ObjectSerializer.")
     }
-  }
 
   override def asBytes(data: Any): Array[Byte] = {
     val os = new ByteArrayOutputStream
@@ -70,20 +64,15 @@ abstract class AbstractBinarySerializer extends BinarySerializer {
     os.toByteArray
   }
 
-  override def asObject[T](clazz: Class[T], data: Array[Byte]): T = {
+  override def asObject[T](clazz: Class[T], data: Array[Byte]): T =
     deserialize(clazz, new ByteArrayInputStream(data), Map.empty)
-  }
-
 }
 
 object DefaultBinarySerializer extends AbstractBinarySerializer {
 
-  def registerClass(clazz: Class[_]): Unit = {
-    if (classOf[Externalizable].isAssignableFrom(clazz) || classOf[java.io.Serializable].isAssignableFrom(clazz)) {
+  def registerClass(clazz: Class[_]): Unit =
+    if (classOf[Externalizable].isAssignableFrom(clazz) || classOf[java.io.Serializable].isAssignableFrom(clazz))
       register(clazz, ObjectSerializer.Default)
-    } else {
+    else
       throw new RuntimeException("DefaultBinarySerializer only supports class implements Externalizable or Serializable")
-    }
-  }
-
 }

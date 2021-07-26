@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.text.i18n
 
 import java.text.MessageFormat
@@ -37,7 +36,7 @@ class DefaultTextFormater extends TextFormater {
   def format(text: String, locale: Locale, args: Any*): String = {
     var localeCache = caches.get(locale).orNull
     //double check
-    if (null eq localeCache) {
+    if (null eq localeCache)
       caches.synchronized {
         localeCache = caches.get(locale).orNull
         if (null == localeCache) {
@@ -45,7 +44,6 @@ class DefaultTextFormater extends TextFormater {
           caches.put(locale, localeCache)
         }
       }
-    }
     var format = localeCache.get(text)
     if (null == format) {
       format = new MessageFormat(text)

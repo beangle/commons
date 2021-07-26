@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.text.i18n
 
 import java.{ util => ju }
@@ -72,12 +71,12 @@ class HierarchicalTextResource(clazz: Class[_], locale: ju.Locale, registry: Tex
     }
 
     // traverse up hierarchy
-    if (clazz.isInterface()) {
+    if (clazz.isInterface())
       for (ifc <- clazz.getInterfaces()) {
         msg = findMessage(ifc, key, checked)
         if (null != msg) return msg
       }
-    } else {
+    else {
       val superClass = clazz.getSuperclass()
       if (!superClass.equals(classOf[Object]) && !clazz.isPrimitive()) {
         msg = findMessage(superClass, key, checked)
@@ -87,12 +86,11 @@ class HierarchicalTextResource(clazz: Class[_], locale: ju.Locale, registry: Tex
     null
   }
 
-  private def collectInterfaces(me: Class[_], interfaces: collection.mutable.Set[Class[_]]): Unit = {
+  private def collectInterfaces(me: Class[_], interfaces: collection.mutable.Set[Class[_]]): Unit =
     for (ifc <- me.getInterfaces()) {
       if (!ifc.getName.startsWith("java.") && !ifc.getName.startsWith("scala.")) interfaces.add(ifc)
       collectInterfaces(ifc, interfaces)
     }
-  }
 
   protected final def findPackageMessage(className: String, key: String, checkedSet: collection.mutable.Set[String]): String = {
     var msg: String = null
@@ -113,14 +111,12 @@ class HierarchicalTextResource(clazz: Class[_], locale: ju.Locale, registry: Tex
   /**
    * Gets the message from the named resource bundle.
    */
-  protected final def getPackageMessage(packageName: String, key: String): String = {
+  protected final def getPackageMessage(packageName: String, key: String): String =
     registry.load(locale, packageName + ".package").get(key).orNull
-  }
 
   /**
    * Gets the message from the named resource bundle.
    */
-  protected final def getClassMessage(className: String, key: String): String = {
+  protected final def getClassMessage(className: String, key: String): String =
     registry.load(locale, className).get(key).orNull
-  }
 }
