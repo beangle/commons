@@ -3,7 +3,7 @@ import sbt._
 
 object BuildSettings {
   val buildOrganization = "org.beangle.commons"
-  val buildVersion = "5.2.4"
+  val buildVersion = "5.2.5-SNAPSHOT"
   val buildScalaVersion = "3.0.1"
 
   val commonSettings = Seq(
