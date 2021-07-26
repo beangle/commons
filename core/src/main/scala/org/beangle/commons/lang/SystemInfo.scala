@@ -1,24 +1,23 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.lang
 
-import java.net.{InetAddress, NetworkInterface, UnknownHostException}
+import java.net.{ InetAddress, NetworkInterface, UnknownHostException }
 
 import scala.collection.mutable
 /**
@@ -62,13 +61,12 @@ object SystemInfo {
 
   class Host {
 
-    def hostname: String = {
-      try {
+    def hostname: String =
+      try
         InetAddress.getLocalHost.getHostName
-      } catch {
+      catch {
         case e: UnknownHostException => "unknownhost"
       }
-    }
 
     def addresses: Map[String, List[String]] = {
       val addresses = new mutable.HashMap[String, List[String]]
@@ -79,9 +77,8 @@ object SystemInfo {
           val networkInterface = e.nextElement()
           val name = networkInterface.getDisplayName
           val e2 = networkInterface.getInetAddresses
-          while (e2.hasMoreElements()) {
+          while (e2.hasMoreElements())
             addresses += (name -> (e2.nextElement().getHostAddress :: addresses.getOrElse(name, Nil)))
-          }
         }
       } catch {
         case e: Exception =>
@@ -161,7 +158,6 @@ object SystemInfo {
     val vendor = properties("java.vendor")
 
     val vendorUrl = properties("java.vendor.url")
-
   }
 
   class Os(properties: Map[String, String]) {

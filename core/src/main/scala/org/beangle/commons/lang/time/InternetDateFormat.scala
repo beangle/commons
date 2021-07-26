@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.lang.time
 
 import java.text.DecimalFormat
@@ -65,9 +64,8 @@ private[time] object InternetDateFormat {
    */
   private def parse(s: String, cal: Calendar): Unit = {
     val m = pattern.matcher(s)
-    if (!m.matches()) {
+    if (!m.matches())
       throw new IllegalArgumentException("Invalid date/time: " + s);
-    }
     cal.clear()
     cal.set(Calendar.YEAR, Integer.parseInt(m.group(1)))
     cal.set(Calendar.MONTH, Integer.parseInt(m.group(2)) - 1)
@@ -79,9 +77,9 @@ private[time] object InternetDateFormat {
       val fraction = java.lang.Float.parseFloat(m.group(7))
       cal.set(Calendar.MILLISECOND, (fraction * 1000F).asInstanceOf[Int])
     }
-    if (m.group(8) != null) {
+    if (m.group(8) != null)
       cal.setTimeZone(new SimpleTimeZone(0, "Z"))
-    } else {
+    else {
       val sign = if (m.group(9).equals("-")) -1 else 1
       val tzhour = Integer.parseInt(m.group(10))
       val tzminute = Integer.parseInt(m.group(11))
@@ -131,15 +129,14 @@ private[time] object InternetDateFormat {
     buf.append(".").append(df3.format(ms))
 
     var tzminute = (cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET)) / 60000
-    if (tzminute == 0) {
+    if (tzminute == 0)
       buf.append("Z")
-    } else {
+    else {
       if (tzminute < 0) {
         tzminute = -tzminute
         buf.append("-")
-      } else {
+      } else
         buf.append("+")
-      }
       val tzhour = tzminute / 60
       tzminute -= tzhour * 60
       buf.append(df2.format(tzhour))

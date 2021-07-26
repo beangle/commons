@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.regex
 
 import java.util.regex.Pattern
@@ -24,17 +23,14 @@ import org.beangle.commons.lang.Strings
 
 object AntPathPattern {
 
-  def matches(pattern: String, path: String): Boolean = {
+  def matches(pattern: String, path: String): Boolean =
     new AntPathPattern(pattern).matches(path)
-  }
 
-  def matchStart(pattern: String, path: String): Boolean = {
+  def matchStart(pattern: String, path: String): Boolean =
     new AntPathPattern(pattern).matchStart(path)
-  }
 
-  def isPattern(path: String): Boolean = {
+  def isPattern(path: String): Boolean =
     (path.indexOf('*') != -1 || path.indexOf('?') != -1)
-  }
 }
 
 /**
@@ -80,7 +76,7 @@ class AntPathPattern(val text: String) {
     while (i < length) {
       val c = text.charAt(i)
       var substr = String.valueOf(c)
-      if (c == '.') substr = "\\." else if (c == '?') substr = "." else if (c == '*') {
+      if (c == '.') substr = "\\." else if (c == '?') substr = "." else if (c == '*')
         if (i + 1 < length) {
           val next1 = text.charAt(i + 1)
           if (next1 == '*') {
@@ -90,14 +86,11 @@ class AntPathPattern(val text: String) {
             if (next2 == '/') {
               i += 1
               substr = "(.*/)*"
-            } else {
+            } else
               substr = "(.*)"
-            }
           } else substr = "([^/]*?)"
-        } else {
+        } else
           substr = "([^/]*?)"
-        }
-      }
       sb.append(substr)
       i += 1
     }
@@ -111,9 +104,8 @@ class AntPathPattern(val text: String) {
     case _ => false
   }
 
-  def matches(path: String): Boolean = {
+  def matches(path: String): Boolean =
     pattern.matcher(path).matches()
-  }
 
   def matchStart(path: String): Boolean = {
     val m = pattern.matcher(path)
@@ -121,7 +113,6 @@ class AntPathPattern(val text: String) {
     m.hitEnd()
   }
 
-  override def toString(): String = {
+  override def toString(): String =
     Strings.concat("ant:[", text, "] regex:[", pattern.toString, "]")
-  }
 }

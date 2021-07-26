@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.lang.functor
 
 import java.util.Collection
@@ -28,56 +27,47 @@ import org.beangle.commons.lang.Strings._
  */
 class InRange(val floor: Int, val upper: Int) extends Predicate[Number] {
 
-  def apply(value: Number): Boolean = {
-    if (null == value) {
+  def apply(value: Number): Boolean =
+    if (null == value)
       false
-    } else {
+    else {
       val valueInt = value.intValue()
       valueInt <= upper && valueInt >= floor
     }
-  }
 }
 
 object NotZero extends Predicate[Number] {
 
-  def apply(value: Number): Boolean = {
+  def apply(value: Number): Boolean =
     null != value && 0 != value.asInstanceOf[Number].intValue
-  }
-
 }
 
 object NotEmpty extends Predicate[String] {
 
-  def apply(value: String): Boolean = {
+  def apply(value: String): Boolean =
     (null != value) && (value.isInstanceOf[String]) && isNotEmpty(value.asInstanceOf[String])
-  }
-
 }
 
 object SingleWord extends Predicate[String] {
 
-  def apply(str: String): Boolean = {
+  def apply(str: String): Boolean =
     str.indexOf(DELIMITER) == -1
-  }
 }
 
 class InStr(val str: String) extends Predicate[String] {
 
-  def apply(arg0: String): Boolean = {
+  def apply(arg0: String): Boolean =
     -1 != str.indexOf(arg0.toString)
-  }
 }
 
 class Contains[T](val objs: Collection[_ <: T]) extends Predicate[T]() {
 
-  def apply(arg0: T): Boolean = {
+  def apply(arg0: T): Boolean =
     objs.contains(arg0)
-  }
 }
 
 class Max1Element extends Predicate[Collection[_]] {
 
-  def apply(col: Collection[_]): Boolean = {
+  def apply(col: Collection[_]): Boolean =
     col.size < 2
-  }
 }

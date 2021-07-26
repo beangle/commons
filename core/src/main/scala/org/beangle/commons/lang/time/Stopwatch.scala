@@ -1,25 +1,24 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.lang.time
 
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeUnit.{MICROSECONDS, MILLISECONDS, NANOSECONDS, SECONDS}
+import java.util.concurrent.TimeUnit.{ MICROSECONDS, MILLISECONDS, NANOSECONDS, SECONDS }
 
 object Stopwatch {
 
@@ -56,7 +55,7 @@ import org.beangle.commons.lang.time.Stopwatch._
  * @author chaostone
  * @since 3.0.0
  */
-class Stopwatch(val ticker: Ticker = Ticker.systemTicker(), start: Boolean = false) {
+class Stopwatch(val ticker: Ticker = Ticker.systemTicker(), immediately: Boolean = false) {
 
   var running: Boolean = _
 
@@ -64,13 +63,13 @@ class Stopwatch(val ticker: Ticker = Ticker.systemTicker(), start: Boolean = fal
 
   private var startTick: Long = _
 
-  if (start) {
+  if (immediately) {
     running = true
     startTick = ticker.read()
   }
 
-  def this(start: Boolean) = {
-    this(Ticker.systemTicker(), start)
+  def this(immediately: Boolean) = {
+    this(Ticker.systemTicker(), immediately)
   }
   /**
    * Starts the stopwatch.

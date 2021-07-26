@@ -1,30 +1,29 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.net.http
 
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Charsets
 import org.beangle.commons.logging.Logging
 
-import java.io.{BufferedReader, ByteArrayOutputStream, InputStreamReader, OutputStreamWriter}
+import java.io.{ BufferedReader, ByteArrayOutputStream, InputStreamReader, OutputStreamWriter }
 import java.net.HttpURLConnection._
-import java.net.{HttpURLConnection, URL, URLConnection}
+import java.net.{ HttpURLConnection, URL, URLConnection }
 import java.nio.charset.Charset
 
 object HttpUtils extends Logging {
@@ -37,9 +36,8 @@ object HttpUtils extends Logging {
     HTTP_NOT_FOUND -> "Not Found",
     HTTP_UNAUTHORIZED -> "Access denied")
 
-  def toString(httpCode: Int): String = {
+  def toString(httpCode: Int): String =
     statusMap.getOrElse(httpCode, String.valueOf(httpCode))
-  }
 
   def access(url: URL): ResourceStatus = {
     val hc = followRedirect(url.openConnection(), "HEAD")
@@ -84,21 +82,18 @@ object HttpUtils extends Logging {
         val bos = new ByteArrayOutputStream
         IOs.copy(conn.getInputStream, bos)
         Response(conn.getResponseCode, bos.toByteArray)
-      } else {
+      } else
         Response(conn.getResponseCode, conn.getResponseMessage)
-      }
     } catch {
       case e: Exception =>
         report(url, e)
         Response(HTTP_NOT_FOUND, e.getMessage)
-    } finally {
+    } finally
       if (null != conn) conn.disconnect()
-    }
   }
 
-  def getText(urlString: String): Response = {
+  def getText(urlString: String): Response =
     getText(new URL(urlString), HttpMethods.GET, Charsets.UTF_8)
-  }
 
   def getText(url: URL, method: String, encoding: Charset): Response = {
     var conn: HttpURLConnection = null
@@ -121,9 +116,8 @@ object HttpUtils extends Logging {
           line = in.readLine()
         }
         Response(HTTP_OK, sb.toString)
-      } else {
+      } else
         Response(conn.getResponseCode, conn.getResponseMessage)
-      }
     } catch {
       case e: Exception =>
         report(url, e)
@@ -155,13 +149,10 @@ object HttpUtils extends Logging {
       case e: Exception =>
         report(url, e)
         Response(HTTP_NOT_FOUND, conn.getResponseMessage)
-    } finally {
+    } finally
       if (null != conn) conn.disconnect()
-    }
   }
 
-
-  private[this] def report(url: URL, e: Exception): Unit = {
+  private[this] def report(url: URL, e: Exception): Unit =
     logger.error("Cannot open url " + url, e)
-  }
 }

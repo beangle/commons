@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.text.inflector
 
 import java.util.Collections
@@ -48,7 +47,7 @@ object RuleBasedPluralizer {
  * @author chaostone
  */
 class RuleBasedPluralizer(var rules: List[Rule], var locale: Locale, var fallbackPluralizer: Pluralizer)
-    extends Pluralizer {
+  extends Pluralizer {
 
   /**
    * Constructs a pluralizer with an empty list of rules. Use the setters to configure.
@@ -81,18 +80,16 @@ class RuleBasedPluralizer(var rules: List[Rule], var locale: Locale, var fallbac
    * The return value is not defined if this method is passed a plural form.
    */
   def pluralize(word: String, number: Int): String = {
-    if (number == 1) {
+    if (number == 1)
       return word
-    }
     val matcher = pattern.matcher(word)
     if (matcher.matches()) {
       val pre = matcher.group(1)
       val trimmedWord = matcher.group(2)
       val post = matcher.group(3)
       val plural = pluralizeInternal(trimmedWord)
-      if (plural == null) {
+      if (plural == null)
         return fallbackPluralizer.pluralize(word, number)
-      }
       return pre + postProcess(trimmedWord, plural) + post
     }
     word
@@ -105,9 +102,8 @@ class RuleBasedPluralizer(var rules: List[Rule], var locale: Locale, var fallbac
    * @param word a singular noun
    * @return the plural form of the noun, or <code>null</code> if no rule matches
    */
-  protected def pluralizeInternal(word: String): String = {
+  protected def pluralizeInternal(word: String): String =
     rules.find(_.applies(word)).map(_.apply(word)).getOrElse(null)
-  }
 
   /**
    * <p>
@@ -124,11 +120,10 @@ class RuleBasedPluralizer(var rules: List[Rule], var locale: Locale, var fallbac
    * @return the <code>pluralizedWord</code> after processing
    */
   protected def postProcess(trimmedWord: String, pluralizedWord: String): String = {
-    if (pluPattern1.matcher(trimmedWord).matches()) {
+    if (pluPattern1.matcher(trimmedWord).matches())
       return pluralizedWord.toUpperCase(locale)
-    } else if (pluPattern2.matcher(trimmedWord).matches()) {
+    else if (pluPattern2.matcher(trimmedWord).matches())
       return pluralizedWord.substring(0, 1).toUpperCase(locale) + pluralizedWord.substring(1)
-    }
     pluralizedWord
   }
 }

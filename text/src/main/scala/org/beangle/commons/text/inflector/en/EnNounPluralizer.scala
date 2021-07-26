@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.text.inflector.en
 
 import java.util.Locale
@@ -61,7 +60,8 @@ object EnNounPluralizer extends RuleBasedPluralizer {
 
   private val CATEGORY_SINGULAR_S_RULE = Array(".*ss", "acropolis", "aegis", "alias", "asbestos", "bathos", "bias", "bronchitis", "bursitis", "caddis", "cannabis", "canvas", "chaos", "cosmos", "dais", "digitalis", "epidermis", "ethos", "eyas", "gas", "glottis", "hubris", "ibis", "lens", "mantis", "marquis", "metropolis", "pathos", "pelvis", "polis", "rhinoceros", "sassafras", "trellis", ".*us", "[A-Z].*es", "ephemeris", "iris", "clitoris", "chrysalis", "epididymis", ".*itis")
 
-  private val enrules = List(new RegexReplacementRule("^(\\s)$", "$1"), new CategoryInflectionRule(CATEGORY_UNINFLECTED_NOUNS,
+  private val enrules = List(new RegexReplacementRule("^(\\s)$", "$1"), new CategoryInflectionRule(
+    CATEGORY_UNINFLECTED_NOUNS,
     "-", "-"), new AbstractRegexReplacementRule("(?i)^(?:" + POSTFIX_ADJECTIVE_REGEX + ")$") {
 
     override def replace(m: Matcher): String = {
@@ -79,8 +79,10 @@ object EnNounPluralizer extends RuleBasedPluralizer {
     override def replace(m: Matcher): String = {
       pluralize(m.group(1)) + m.group(2)
     }
-  }, new IrregularMappingRule(NOMINATIVE_PRONOUNS, "(?i)" + disjunction(NOMINATIVE_PRONOUNS.keySet)), new IrregularMappingRule(ACCUSATIVE_PRONOUNS,
-    "(?i)" + disjunction(ACCUSATIVE_PRONOUNS.keySet)), new IrregularMappingRule(ACCUSATIVE_PRONOUNS,
+  }, new IrregularMappingRule(NOMINATIVE_PRONOUNS, "(?i)" + disjunction(NOMINATIVE_PRONOUNS.keySet)), new IrregularMappingRule(
+    ACCUSATIVE_PRONOUNS,
+    "(?i)" + disjunction(ACCUSATIVE_PRONOUNS.keySet)), new IrregularMappingRule(
+    ACCUSATIVE_PRONOUNS,
     "(?i)(" + disjunction(PREPOSITIONS) + "\\s)" + "(" + disjunction(ACCUSATIVE_PRONOUNS.keySet) +
       ")") {
 
@@ -88,31 +90,43 @@ object EnNounPluralizer extends RuleBasedPluralizer {
       m.group(1) + mappings.get(m.group(2).toLowerCase())
     }
   }, new IrregularMappingRule(IRREGULAR_NOUNS, "(?i)(.*)\\b" + disjunction(IRREGULAR_NOUNS.keySet) +
-    "$"), new CategoryInflectionRule(CATEGORY_MAN_MANS_RULE, "-man", "-mans"), new RegexReplacementRule("(?i)(\\S*)(person)$",
-    "$1people"), new SuffixInflectionRule("-man", "-man", "-men"), new SuffixInflectionRule("-[lm]ouse",
-    "-ouse", "-ice"), new SuffixInflectionRule("-tooth", "-tooth", "-teeth"), new SuffixInflectionRule("-goose",
-    "-goose", "-geese"), new SuffixInflectionRule("-foot", "-foot", "-feet"), new SuffixInflectionRule("-ceps",
-    "-", "-"), new SuffixInflectionRule("-zoon", "-zoon", "-zoa"), new SuffixInflectionRule("-[csx]is",
-    "-is", "-es"), new CategoryInflectionRule(CATEGORY_EX_ICES_RULE, "-ex", "-ices"), new CategoryInflectionRule(CATEGORY_IX_ICES_RULE,
-    "-ix", "-ices"), new CategoryInflectionRule(CATEGORY_UM_A_RULE, "-um", "-a"), new CategoryInflectionRule(CATEGORY_US_I_RULE,
-    "-us", "-i"), new CategoryInflectionRule(CATEGORY_ON_A_RULE, "-on", "-a"), new CategoryInflectionRule(CATEGORY_A_AE_RULE,
-    "-a", "-ae"), new CategoryInflectionRule(CATEGORY_SINGULAR_S_RULE, "-s", "-ses"), new RegexReplacementRule("^([A-Z].*s)$",
-    "$1es"), new SuffixInflectionRule("-[cs]h", "-h", "-hes"), new SuffixInflectionRule("-x", "-x", "-xes"), new SuffixInflectionRule("-z",
-    "-z", "-zes"), new SuffixInflectionRule("-[aeo]lf", "-f", "-ves"), new SuffixInflectionRule("-[^d]eaf",
-    "-f", "-ves"), new SuffixInflectionRule("-arf", "-f", "-ves"), new SuffixInflectionRule("-[nlw]ife",
-    "-fe", "-ves"), new SuffixInflectionRule("-[aeiou]y", "-y", "-ys"), new RegexReplacementRule("^([A-Z].*y)$",
-    "$1s"), new SuffixInflectionRule("-y", "-y", "-ies"), new CategoryInflectionRule(CATEGORY_O_OS_RULE,
-    "-o", "-os"), new SuffixInflectionRule("-[aeiou]o", "-o", "-os"), new SuffixInflectionRule("-o",
+    "$"), new CategoryInflectionRule(CATEGORY_MAN_MANS_RULE, "-man", "-mans"), new RegexReplacementRule(
+    "(?i)(\\S*)(person)$",
+    "$1people"), new SuffixInflectionRule("-man", "-man", "-men"), new SuffixInflectionRule(
+    "-[lm]ouse",
+    "-ouse", "-ice"), new SuffixInflectionRule("-tooth", "-tooth", "-teeth"), new SuffixInflectionRule(
+    "-goose",
+    "-goose", "-geese"), new SuffixInflectionRule("-foot", "-foot", "-feet"), new SuffixInflectionRule(
+    "-ceps",
+    "-", "-"), new SuffixInflectionRule("-zoon", "-zoon", "-zoa"), new SuffixInflectionRule(
+    "-[csx]is",
+    "-is", "-es"), new CategoryInflectionRule(CATEGORY_EX_ICES_RULE, "-ex", "-ices"), new CategoryInflectionRule(
+    CATEGORY_IX_ICES_RULE,
+    "-ix", "-ices"), new CategoryInflectionRule(CATEGORY_UM_A_RULE, "-um", "-a"), new CategoryInflectionRule(
+    CATEGORY_US_I_RULE,
+    "-us", "-i"), new CategoryInflectionRule(CATEGORY_ON_A_RULE, "-on", "-a"), new CategoryInflectionRule(
+    CATEGORY_A_AE_RULE,
+    "-a", "-ae"), new CategoryInflectionRule(CATEGORY_SINGULAR_S_RULE, "-s", "-ses"), new RegexReplacementRule(
+    "^([A-Z].*s)$",
+    "$1es"), new SuffixInflectionRule("-[cs]h", "-h", "-hes"), new SuffixInflectionRule("-x", "-x", "-xes"), new SuffixInflectionRule(
+    "-z",
+    "-z", "-zes"), new SuffixInflectionRule("-[aeo]lf", "-f", "-ves"), new SuffixInflectionRule(
+    "-[^d]eaf",
+    "-f", "-ves"), new SuffixInflectionRule("-arf", "-f", "-ves"), new SuffixInflectionRule(
+    "-[nlw]ife",
+    "-fe", "-ves"), new SuffixInflectionRule("-[aeiou]y", "-y", "-ys"), new RegexReplacementRule(
+    "^([A-Z].*y)$",
+    "$1s"), new SuffixInflectionRule("-y", "-y", "-ies"), new CategoryInflectionRule(
+    CATEGORY_O_OS_RULE,
+    "-o", "-os"), new SuffixInflectionRule("-[aeiou]o", "-o", "-os"), new SuffixInflectionRule(
+    "-o",
     "-o", "-oes"), new SuffixInflectionRule("-", "-s"))
 
   rules = enrules
 
   locale = Locale.ENGLISH
 
-  protected override def postProcess(trimmedWord: String, pluralizedWord: String): String = {
-    if (trimmedWord == "I") {
-      return pluralizedWord
-    }
-    super.postProcess(trimmedWord, pluralizedWord)
-  }
+  protected override def postProcess(trimmedWord: String, pluralizedWord: String): String =
+    if (trimmedWord == "I") pluralizedWord
+    else super.postProcess(trimmedWord, pluralizedWord)
 }

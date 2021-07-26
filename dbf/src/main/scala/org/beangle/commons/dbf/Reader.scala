@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.dbf
 
 import java.io.{ BufferedInputStream, BufferedWriter, Closeable, DataInput, DataInputStream, EOFException, File, FileInputStream, FileWriter, IOException, InputStream, PrintWriter, RandomAccessFile }
@@ -131,11 +130,9 @@ object Reader {
     } catch {
       case e: IOException =>
         throw new DbfException("Cannot read header of .dbf file " + dbf, e)
-    } finally {
+    } finally
       in.close()
-    }
   }
-
 }
 
 /**
@@ -147,14 +144,12 @@ class Reader(dataInput: DataInput, val header: Header) extends Closeable {
   private def skipToDataBeginning(): Unit = {
     // it might be required to jump to the start of records at times
     val dataStartIndex = header.headerSize - 32 * (header.fieldsCount + 1) - 1
-    if (dataStartIndex > 0) {
+    if (dataStartIndex > 0)
       dataInput.skipBytes(dataStartIndex)
-    }
   }
 
-  def canSeek: Boolean = {
+  def canSeek: Boolean =
     dataInput.isInstanceOf[RandomAccessFile]
-  }
 
   /**
    * Attempt to seek to a specified record index. If successful the record can be read
@@ -163,17 +158,16 @@ class Reader(dataInput: DataInput, val header: Header) extends Closeable {
    * @param n The zero-based record index.
    */
   def seekToRecord(n: Int): Unit = {
-    if (!canSeek) {
+    if (!canSeek)
       throw new DbfException("Seeking is not supported.")
-    }
-    if (n < 0 || n >= header.numberOfRecords) {
-      throw new DbfException(Strings.format("Record index out of range [0, %d]: %d",
+    if (n < 0 || n >= header.numberOfRecords)
+      throw new DbfException(Strings.format(
+        "Record index out of range [0, %d]: %d",
         header.numberOfRecords, n))
-    }
     val position = header.headerSize + n * header.recordSize
-    try {
+    try
       dataInput.asInstanceOf[RandomAccessFile].seek(position)
-    } catch {
+    catch {
       case e: IOException =>
         throw new DbfException(
           Strings.format("Failed to seek to record %d of %d", n, header.numberOfRecords), e)
@@ -185,17 +179,18 @@ class Reader(dataInput: DataInput, val header: Header) extends Closeable {
    *
    * @return The next row as an Object array.
    */
-  def nextRecord(): Array[Object] = {
+  def nextRecord(): Array[Object] =
     try {
       var nextByte: Int = 0
-      do {
+      while ({
         nextByte = dataInput.readByte()
-        if (nextByte == DATA_ENDED) {
+        if (nextByte == DATA_ENDED)
           return null
-        } else if (nextByte == DATA_DELETED) {
+        else if (nextByte == DATA_DELETED)
           dataInput.skipBytes(header.recordSize - 1)
-        }
-      } while (nextByte == DATA_DELETED)
+        nextByte == DATA_DELETED
+      })
+        ()
 
       val recordObjects = new Array[Object](header.fieldsCount)
       (0 until header.fieldsCount) foreach { i =>
@@ -208,24 +203,22 @@ class Reader(dataInput: DataInput, val header: Header) extends Closeable {
       case e: IOException =>
         throw new DbfException("Cannot read next record form Dbf file", e)
     }
-  }
 
   private def readFieldValue(field: Field): Object = {
     val buf = new Array[Byte](field.fieldLength)
     dataInput.readFully(buf)
 
     field.dataType match {
-      case DataType.Char    => readCharacterValue(field, buf)
-      case DataType.Date    => readDateValue(field, buf)
-      case DataType.Float   => readFloatValue(field, buf)
+      case DataType.Char => readCharacterValue(field, buf)
+      case DataType.Date => readDateValue(field, buf)
+      case DataType.Float => readFloatValue(field, buf)
       case DataType.Logical => readLogicalValue(field, buf)
       case DataType.Numeric => readNumericValue(field, buf)
-      case _                => null
+      case null => null
     }
   }
-  protected def readCharacterValue(field: Field, buf: Array[Byte]): Object = {
+  protected def readCharacterValue(field: Field, buf: Array[Byte]): Object =
     return buf
-  }
 
   protected def readDateValue(field: Field, buf: Array[Byte]): Date = {
     val year = DbfUtils.parseInt(buf, 0, 4)
@@ -234,7 +227,7 @@ class Reader(dataInput: DataInput, val header: Header) extends Closeable {
     return new GregorianCalendar(year, month - 1, day).getTime()
   }
 
-  protected def readFloatValue(field: Field, buf: Array[Byte]): java.lang.Float = {
+  protected def readFloatValue(field: Field, buf: Array[Byte]): java.lang.Float =
     try {
       val floatBuf = DbfUtils.trimLeftSpaces(buf)
       val processable = (floatBuf.length > 0 && !DbfUtils.contains(floatBuf, '?'.asInstanceOf[Byte]))
@@ -243,14 +236,13 @@ class Reader(dataInput: DataInput, val header: Header) extends Closeable {
       case e: NumberFormatException =>
         throw new DbfException("Failed to parse Float from " + field.name, e)
     }
-  }
 
   protected def readLogicalValue(field: Field, buf: Array[Byte]): java.lang.Boolean = {
     val isTrue = (buf(0) == 'Y' || buf(0) == 'y' || buf(0) == 'T' || buf(0) == 't')
     if (isTrue) java.lang.Boolean.TRUE else java.lang.Boolean.FALSE
   }
 
-  protected def readNumericValue(field: Field, buf: Array[Byte]): Number = {
+  protected def readNumericValue(field: Field, buf: Array[Byte]): Number =
     try {
       val numericBuf = DbfUtils.trimLeftSpaces(buf)
       val processable = numericBuf.length > 0 && !DbfUtils.contains(numericBuf, '?'.asInstanceOf[Byte])
@@ -259,12 +251,10 @@ class Reader(dataInput: DataInput, val header: Header) extends Closeable {
       case e: NumberFormatException =>
         throw new DbfException("Failed to parse Number from " + field.name, e)
     }
-  }
 
-  override def close(): Unit = {
+  override def close(): Unit =
     dataInput match {
       case c: Closeable => c.close()
-      case _            =>
+      case _ =>
     }
-  }
 }

@@ -1,16 +1,14 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
@@ -18,9 +16,9 @@
  */
 package org.beangle.commons.collection
 
-import org.beangle.commons.bean.{Properties => BeanProperties}
+import org.beangle.commons.bean.{ Properties => BeanProperties }
 
-class Properties extends collection.mutable.Map[String, Any] {
+class Properties extends collection.mutable.Map[String, Any]{
 
   private[this] val data = Collections.newMap[String, Any]
 
@@ -45,14 +43,12 @@ class Properties extends collection.mutable.Map[String, Any] {
     }
   }
 
-  def add(attr: String, obj: Object, nestedAttrs: String*): Unit = {
+  def add(attr: String, obj: Object, nestedAttrs: String*): Unit =
     if (null != obj)
       put(attr, new Properties(obj, nestedAttrs: _*))
-  }
 
-  override def iterator: Iterator[(String, Any)] = {
+  override def iterator: Iterator[(String, Any)] =
     data.iterator
-  }
 
   override def addOne(elem: (String, Any)): this.type = {
     data.addOne(elem)
@@ -64,7 +60,6 @@ class Properties extends collection.mutable.Map[String, Any] {
     this
   }
 
-  override def get(k: String): Option[Any] = {
+  override def get(k: String): Option[Any] =
     data.get(k)
-  }
 }

@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.text.seq
 
 import HanZiSeqStyle._
@@ -49,9 +48,8 @@ class HanZiSeqStyle extends SeqNumStyle {
    * {@inheritDoc}
    */
   def build(seq: Int): String = {
-    if (seq > MAX) {
+    if (seq > MAX)
       throw new RuntimeException("seq greate than " + MAX)
-    }
     buildText(String.valueOf(seq))
   }
 
@@ -73,13 +71,11 @@ class HanZiSeqStyle extends SeqNumStyle {
    * @param index a int.
    * @return a String object.
    */
-  def priorityOf(index: Int): String = {
-    if (index < 2) {
+  def priorityOf(index: Int): String =
+    if (index < 2)
       ""
-    } else {
+    else
       PRIORITIES(index - 2)
-    }
-  }
 
   /**
    * <p>
@@ -94,9 +90,8 @@ class HanZiSeqStyle extends SeqNumStyle {
     for (i <- 0 until str1.length) {
       val numChar = str1.charAt(i)
       var temp = basicOf(numChar - '0')
-      if (numChar - '0' > 0) {
+      if (numChar - '0' > 0)
         temp = temp + priorityOf(str1.length - i)
-      }
       sb.append(temp)
     }
     var result = sb.toString

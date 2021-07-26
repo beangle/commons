@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.lang.time
 
 import org.beangle.commons.lang.Strings
@@ -25,25 +24,21 @@ object WeekState {
 
   val Zero = new WeekState(0L)
 
-  def apply(value: String): WeekState = {
+  def apply(value: String): WeekState =
     new WeekState(value)
-  }
 
-  def of(weekIndex: Int): WeekState = {
+  def of(weekIndex: Int): WeekState =
     new WeekState(1L << weekIndex)
-  }
 
   def of(weekIndecies: Iterable[Int]): WeekState = {
     var v = 0L
-    for (index <- weekIndecies) {
+    for (index <- weekIndecies)
       v |= (1L << index)
-    }
     new WeekState(v)
   }
 
-  def of(weekIndecies: Int*): WeekState = {
+  def of(weekIndecies: Int*): WeekState =
     of(weekIndecies)
-  }
 }
 
 /**
@@ -56,42 +51,34 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     this(if (Strings.isEmpty(str)) 0 else java.lang.Long.parseLong(str, 2))
   }
 
-  override def compare(other: WeekState): Int = {
+  override def compare(other: WeekState): Int =
     if (this.value < other.value) -1
     else if (this.value == other.value) 0
     else 1
-  }
 
-  def |(other: WeekState): WeekState = {
+  def |(other: WeekState): WeekState =
     new WeekState(this.value | other.value)
-  }
 
-  def &(other: WeekState): WeekState = {
+  def &(other: WeekState): WeekState =
     new WeekState(this.value & other.value)
-  }
 
-  def ^(other: WeekState): WeekState = {
+  def ^(other: WeekState): WeekState =
     new WeekState(this.value ^ other.value)
-  }
 
-  def isOverlap(other: WeekState): Boolean = {
+  def isOverlap(other: WeekState): Boolean =
     (this.value & other.value) > 0
-  }
 
-  override def toString: String = {
+  override def toString: String =
     java.lang.Long.toBinaryString(value)
-  }
 
-  override def equals(obj: Any): Boolean = {
+  override def equals(obj: Any): Boolean =
     obj match {
       case ws: WeekState => ws.value == this.value
-      case _             => false
+      case _ => false
     }
-  }
 
-  override def hashCode: Int = {
+  override def hashCode: Int =
     java.lang.Long.hashCode(value)
-  }
 
   def span: Tuple2[Int, Int] = {
     val str = toString
@@ -115,23 +102,19 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     c
   }
 
-  def last: Int = {
+  def last: Int =
     if (value > 0) {
       val str = toString
       str.length - str.indexOf('1') - 1
-    } else {
+    } else
       -1
-    }
-  }
 
-  def first: Int = {
+  def first: Int =
     if (value > 0) {
       val str = toString
       str.length - str.lastIndexOf('1') - 1
-    } else {
+    } else
       -1
-    }
-  }
 
   def weeks: List[Int] = {
     val weekstr = toString
@@ -144,8 +127,6 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     result.toList
   }
 
-  def isOccupied(week: Int): Boolean = {
+  def isOccupied(week: Int): Boolean =
     (value & (1L << week)) > 0
-  }
-
 }

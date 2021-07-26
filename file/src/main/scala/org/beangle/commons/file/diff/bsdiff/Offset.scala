@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.file.diff.bsdiff
 
 import java.io.DataInputStream
@@ -42,9 +41,8 @@ object Offset {
   def readOffset(in: InputStream): Int = {
     val buf = new Array[Byte](OFFSET_SIZE)
     val bytesRead = in.read(buf)
-    if (bytesRead < OFFSET_SIZE) {
+    if (bytesRead < OFFSET_SIZE)
       throw new IOException("Could not read offset.")
-    }
 
     var y = 0
     y = buf(7) & 0x7F
@@ -64,14 +62,12 @@ object Offset {
     y += buf(0) & 0xFF
 
     /* An integer overflow occurred */
-    if (y < 0) {
+    if (y < 0)
       throw new IOException(
         "Integer overflow: 64-bit offsets not supported.")
-    }
 
-    if ((buf(7) & 0x80) != 0) {
+    if ((buf(7) & 0x80) != 0)
       y = -y
-    }
 
     return y
   }
@@ -87,9 +83,8 @@ object Offset {
       y = -value
       /* Set the sign bit */
       buf(7) = (buf(7) | 0x80).asInstanceOf[Byte]
-    } else {
+    } else
       y = value
-    }
 
     buf(0) = (buf(0) | y % 256).asInstanceOf[Byte]
     y -= buf(0) & 0xFF
@@ -123,9 +118,8 @@ object Offset {
     writeOffset(b.seekLength, out)
   }
 
-  def readBlock(in: InputStream): Format.Block = {
+  def readBlock(in: InputStream): Format.Block =
     Format.Block(readOffset(in), readOffset(in), readOffset(in))
-  }
 
   def writeHeader(h: Format.Header, out: OutputStream): Unit = {
     out.write(Format.HeaderMagic.getBytes())
@@ -140,9 +134,8 @@ object Offset {
 
     headerIn.read(buf)
     val magic = new String(buf)
-    if (!"BSDIFF40".equals(magic)) {
+    if (!"BSDIFF40".equals(magic))
       throw new RuntimeException("Header missing magic number")
-    }
     Format.Header(readOffset(headerIn), readOffset(headerIn), readOffset(headerIn))
   }
 }
