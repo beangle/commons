@@ -40,11 +40,13 @@ object BeanInfos {
     if null == exist then None else Some(exist)
   }
 
-  inline def register[T](clazz:Class[T]): BeanInfo = ${ registerImpl('clazz);}
+  inline def of[T](clazz:Class[T]): BeanInfo = ${ ofImpl('clazz);}
 
-  private def registerImpl[T](ec:Expr[Class[T]])(implicit qctx: Quotes, ttype: scala.quoted.Type[T]):Expr[BeanInfo]={
+  private def ofImpl[T:Type](ec:Expr[Class[T]])(using  q: Quotes):Expr[BeanInfo]={
+    import quotes.reflect.*
+    val fetcher = new BeanInfoDigger[q.type,T]
     '{
-      val ci = BeanInfo.of(${ec})
+      val ci = ${fetcher.dig()}
       BeanInfos.update(ci)
     }
   }

@@ -209,165 +209,165 @@ object BeanInfo extends Logging {
       BeanInfo(clazz, ArraySeq.from(ctors), properties.toMap, filterMethods.toMap)
     }
   }
-
-  inline def of[T](clazz:Class[T]): BeanInfo = ${ ofImpl[T]('clazz) }
-
-  private def ofImpl[T](clazz:Expr[Class[T]])(implicit qctx: Quotes, ttype: scala.quoted.Type[T]): Expr[BeanInfo] = {
-    import qctx.reflect.{_, given}
-
-    def classOf(tpe: TypeRepr):Expr[Class[?]] =
-      Literal(ClassOfConstant(tpe)).asExpr.asInstanceOf[Expr[Class[?]]]
-
-    val typr=TypeRepr.of[T]
-    '{
-      val b = new BeanInfo.Builder(${classOf(typr)})
-      ${Expr.block(addMemberBody('b)(qctx,ttype),'b)}.build()
-    }
-  }
-
-  private def addMemberBody[T](t:Expr[BeanInfo.Builder])(implicit qctx: Quotes, ttype: scala.quoted.Type[T]): List[Expr[_]] = {
-    import qctx.reflect.{_, given}
-
-    case class FieldExpr(name:String,typeinfo:Expr[TypeInfo],transnt:Boolean,defaultValue:Option[Expr[Any]]=None)
-    case class MethodExpr(name:String,rt:Expr[TypeInfo],params:Seq[FieldExpr],asField:Boolean)
-
-    def classOf(tpe: TypeRepr):Expr[Class[?]] =
-      Literal(ClassOfConstant(tpe)).asExpr.asInstanceOf[Expr[Class[?]]]
-
-    def resolveType(typeRepr:TypeRepr,params:Map[String,TypeRepr]):Expr[TypeInfo]={
-      var tpe = typeRepr
-      var args:List[Expr[TypeInfo]]=List.empty
-      tpe match{
-        case d:TypeRef =>  if(tpe.typeSymbol.flags.is(Flags.Param)) tpe = params(tpe.typeSymbol.name)
-        case c:AppliedType=>  args = resolveParamTypes(c,params)
-        case d:AnnotatedType=> tpe = d.underlying
-        case _=>throw new RuntimeException("Unspported type :" +tpe)
-      }
-      (tpe,args)
-      if args.isEmpty then '{TypeInfo.get(${classOf(tpe)})}
-      else '{TypeInfo.get(${classOf(tpe)},${Expr.ofList(args)})}
-    }
-
-    def resolveClassTypes(a:AppliedType,ctx:Map[String,TypeRepr]=Map.empty):Map[String,TypeRepr]={
-      val params=new mutable.HashMap[String,TypeRepr]
-      val mts = a.typeSymbol.memberTypes
-      var i=0
-      a.args foreach { arg =>
-        val argType =  if(arg.typeSymbol.flags.is(Flags.Param)) then ctx(arg.typeSymbol.name)else arg
-        params.put(mts(i).name,argType)
-        i+=1
-      }
-      params.toMap
-    }
-
-    def resolveParamTypes(a:AppliedType,ctx:Map[String,TypeRepr]=Map.empty):List[Expr[TypeInfo]]={
-      val mts = a.typeSymbol.memberTypes
-      var i=0
-      val params = new mutable.ArrayBuffer[Expr[TypeInfo]]
-      a.args foreach { arg =>
-        arg match{
-          case d:TypeRef =>
-            val argType = if arg.typeSymbol.flags.is(Flags.Param) then ctx(arg.typeSymbol.name) else d
-            params += '{TypeInfo.get(${classOf(argType)})}
-          case c:AppliedType=> {
-            params += '{TypeInfo.get(${classOf(c)},${Expr.ofList(resolveParamTypes(c,ctx))})}
-          }
-        }
-        i+=1
-      }
-      params.toList
-    }
-
-    def resolveCtorDefaults(symbol: Symbol):Map[Int,Expr[Any]]={
-      val comp = symbol.companionClass
-      if(comp != Symbol.noSymbol){
-        val body = comp.tree.asInstanceOf[ClassDef].body
-        val idents: List[(Int,Expr[Any])] =
-          for case deff @ DefDef(name, _, _, _) <- body
-              if name.startsWith("$lessinit$greater$default$")
-          yield (name.substring("$lessinit$greater$default$".length).toInt,Ref(deff.symbol).asExpr)
-        idents.toMap
-      }else{
-        Map.empty
-      }
-    }
-
-    def resolveDefParams(defdef:DefDef,typeParams:Map[String,TypeRepr],defaults:Map[Int,Expr[Any]]): List[FieldExpr] ={
-      val paramList=new mutable.ArrayBuffer[FieldExpr]
-      defdef.paramss foreach { a =>
-        a match {
-          case TermParamClause(ps: List[ValDef])=>
-            var i=0
-            paramList ++= ps.map{vl =>
-              i+=1
-              FieldExpr(vl.name,resolveType(vl.tpt.tpe,typeParams),false,defaults.get(i))
-            }
-          case _=>
-        }
-      }
-      paramList.toList
-    }
-    val typeRepr = TypeRepr.of[T]
-    val fields = new mutable.ArrayBuffer[FieldExpr]
-    val methods= new mutable.ArrayBuffer[MethodExpr]()
-    val superBases= Set("scala.Any","scala.Matchable","java.lang.Object")
-    for(bc <- typeRepr.baseClasses if !superBases.contains(bc.fullName)){
-      val base=typeRepr.baseType(bc)
-      var params=Map.empty[String,TypeRepr]
-      base match{
-        case a:AppliedType=> params = resolveClassTypes(a)
-        case _=>
-      }
-
-      //Some fields declared in primary constructor will by ignored due to missing public access methods.
-      base.typeSymbol.declaredFields foreach{ mm=>
-        val tpe=mm.tree.asInstanceOf[ValDef].tpt.tpe
-        val transnt = mm.annotations exists(x => x.show.toLowerCase.contains("transient"))
-        fields += FieldExpr(mm.name,resolveType(tpe,params),transnt)
-      }
-
-      base.typeSymbol.declaredMethods foreach{  mm=>
-        val defdef =mm.tree.asInstanceOf[DefDef]
-        val rtType = resolveType(defdef.returnTpt.tpe,params)
-        val paramList= resolveDefParams(defdef,params,Map.empty)
-        if(!defdef.name.contains("$")){
-          methods += MethodExpr(defdef.name,rtType,paramList.toList,defdef.termParamss.isEmpty)
-        }
-      }
-    }
-
-    val typeSymbol = typeRepr.typeSymbol
-    val ctorDeclarations = typeSymbol.declarations.filter(_.isClassConstructor).toBuffer
-    ctorDeclarations -= typeSymbol.primaryConstructor
-    ctorDeclarations.prepend(typeSymbol.primaryConstructor)
-    val ctorDefaults = resolveCtorDefaults(typeSymbol)
-    val ctors = ctorDeclarations.map{ s =>
-      val defdef = s.tree.asInstanceOf[DefDef]
-      resolveDefParams(defdef,Map.empty,ctorDefaults)
-    }
-
-    val members = new mutable.ArrayBuffer[Expr[_]]()
-    members ++= ctors.map{ m=>
-      val paramInfos = m.map{ p=>
-        if(p.defaultValue.isEmpty) '{ParamInfo(${Expr(p.name)},${p.typeinfo},None)}
-        else '{ParamInfo(${Expr(p.name)},${p.typeinfo},Some(${p.defaultValue.get}))}
-      }
-      val paramList = Expr.ofList(paramInfos)
-      '{${t}.addCtor(${paramList})}
-    }
-    members ++= fields.toList.map { x =>
-      '{${t}.addField(${Expr(x.name)},${x.typeinfo},${Expr(x.transnt)})}
-    }
-    members ++= methods.map { x =>
-      val paramInfos = x.params.map{ p=>
-        if(p.defaultValue.isEmpty) '{ParamInfo(${Expr(p.name)},${p.typeinfo},None)}
-        else '{ParamInfo(${Expr(p.name)},${p.typeinfo},Some(${p.defaultValue.get}))}
-      }
-      val paramList = Expr.ofList(paramInfos)
-      '{${t}.addMethod(${Expr(x.name)},${x.rt},${paramList},${Expr(x.asField)})}
-    }
-    members.toList
-  }
+//
+//  inline def of[T](clazz:Class[T]): BeanInfo = ${ ofImpl[T]('clazz) }
+//
+//  private def ofImpl[T](clazz:Expr[Class[T]])(implicit qctx: Quotes, ttype: scala.quoted.Type[T]): Expr[BeanInfo] = {
+//    import qctx.reflect.{_, given}
+//
+//    def classOf(tpe: TypeRepr):Expr[Class[?]] =
+//      Literal(ClassOfConstant(tpe)).asExpr.asInstanceOf[Expr[Class[?]]]
+//
+//    val typr=TypeRepr.of[T]
+//    '{
+//      val b = new BeanInfo.Builder(${classOf(typr)})
+//      ${Expr.block(addMemberBody('b)(qctx,ttype),'b)}.build()
+//    }
+//  }
+//
+//  private def addMemberBody[T](t:Expr[BeanInfo.Builder])(implicit qctx: Quotes, ttype: scala.quoted.Type[T]): List[Expr[_]] = {
+//    import qctx.reflect.{_, given}
+//
+//    case class FieldExpr(name:String,typeinfo:Expr[TypeInfo],transnt:Boolean,defaultValue:Option[Expr[Any]]=None)
+//    case class MethodExpr(name:String,rt:Expr[TypeInfo],params:Seq[FieldExpr],asField:Boolean)
+//
+//    def classOf(tpe: TypeRepr):Expr[Class[?]] =
+//      Literal(ClassOfConstant(tpe)).asExpr.asInstanceOf[Expr[Class[?]]]
+//
+//    def resolveType(typeRepr:TypeRepr,params:Map[String,TypeRepr]):Expr[TypeInfo]={
+//      var tpe = typeRepr
+//      var args:List[Expr[TypeInfo]]=List.empty
+//      tpe match{
+//        case d:TypeRef =>  if(tpe.typeSymbol.flags.is(Flags.Param)) tpe = params(tpe.typeSymbol.name)
+//        case c:AppliedType=>  args = resolveParamTypes(c,params)
+//        case d:AnnotatedType=> tpe = d.underlying
+//        case _=>throw new RuntimeException("Unspported type :" +tpe)
+//      }
+//      (tpe,args)
+//      if args.isEmpty then '{TypeInfo.get(${classOf(tpe)})}
+//      else '{TypeInfo.get(${classOf(tpe)},${Expr.ofList(args)})}
+//    }
+//
+//    def resolveClassTypes(a:AppliedType,ctx:Map[String,TypeRepr]=Map.empty):Map[String,TypeRepr]={
+//      val params=new mutable.HashMap[String,TypeRepr]
+//      val mts = a.typeSymbol.memberTypes
+//      var i=0
+//      a.args foreach { arg =>
+//        val argType =  if(arg.typeSymbol.flags.is(Flags.Param)) then ctx(arg.typeSymbol.name)else arg
+//        params.put(mts(i).name,argType)
+//        i+=1
+//      }
+//      params.toMap
+//    }
+//
+//    def resolveParamTypes(a:AppliedType,ctx:Map[String,TypeRepr]=Map.empty):List[Expr[TypeInfo]]={
+//      val mts = a.typeSymbol.memberTypes
+//      var i=0
+//      val params = new mutable.ArrayBuffer[Expr[TypeInfo]]
+//      a.args foreach { arg =>
+//        arg match{
+//          case d:TypeRef =>
+//            val argType = if arg.typeSymbol.flags.is(Flags.Param) then ctx(arg.typeSymbol.name) else d
+//            params += '{TypeInfo.get(${classOf(argType)})}
+//          case c:AppliedType=> {
+//            params += '{TypeInfo.get(${classOf(c)},${Expr.ofList(resolveParamTypes(c,ctx))})}
+//          }
+//        }
+//        i+=1
+//      }
+//      params.toList
+//    }
+//
+//    def resolveCtorDefaults(symbol: Symbol):Map[Int,Expr[Any]]={
+//      val comp = symbol.companionClass
+//      if(comp != Symbol.noSymbol){
+//        val body = comp.tree.asInstanceOf[ClassDef].body
+//        val idents: List[(Int,Expr[Any])] =
+//          for case deff @ DefDef(name, _, _, _) <- body
+//              if name.startsWith("$lessinit$greater$default$")
+//          yield (name.substring("$lessinit$greater$default$".length).toInt,Ref(deff.symbol).asExpr)
+//        idents.toMap
+//      }else{
+//        Map.empty
+//      }
+//    }
+//
+//    def resolveDefParams(defdef:DefDef,typeParams:Map[String,TypeRepr],defaults:Map[Int,Expr[Any]]): List[FieldExpr] ={
+//      val paramList=new mutable.ArrayBuffer[FieldExpr]
+//      defdef.paramss foreach { a =>
+//        a match {
+//          case TermParamClause(ps: List[ValDef])=>
+//            var i=0
+//            paramList ++= ps.map{vl =>
+//              i+=1
+//              FieldExpr(vl.name,resolveType(vl.tpt.tpe,typeParams),false,defaults.get(i))
+//            }
+//          case _=>
+//        }
+//      }
+//      paramList.toList
+//    }
+//    val typeRepr = TypeRepr.of[T]
+//    val fields = new mutable.ArrayBuffer[FieldExpr]
+//    val methods= new mutable.ArrayBuffer[MethodExpr]()
+//    val superBases= Set("scala.Any","scala.Matchable","java.lang.Object")
+//    for(bc <- typeRepr.baseClasses if !superBases.contains(bc.fullName)){
+//      val base=typeRepr.baseType(bc)
+//      var params=Map.empty[String,TypeRepr]
+//      base match{
+//        case a:AppliedType=> params = resolveClassTypes(a)
+//        case _=>
+//      }
+//
+//      //Some fields declared in primary constructor will by ignored due to missing public access methods.
+//      base.typeSymbol.declaredFields foreach{ mm=>
+//        val tpe=mm.tree.asInstanceOf[ValDef].tpt.tpe
+//        val transnt = mm.annotations exists(x => x.show.toLowerCase.contains("transient"))
+//        fields += FieldExpr(mm.name,resolveType(tpe,params),transnt)
+//      }
+//
+//      base.typeSymbol.declaredMethods foreach{  mm=>
+//        val defdef =mm.tree.asInstanceOf[DefDef]
+//        val rtType = resolveType(defdef.returnTpt.tpe,params)
+//        val paramList= resolveDefParams(defdef,params,Map.empty)
+//        if(!defdef.name.contains("$")){
+//          methods += MethodExpr(defdef.name,rtType,paramList.toList,defdef.termParamss.isEmpty)
+//        }
+//      }
+//    }
+//
+//    val typeSymbol = typeRepr.typeSymbol
+//    val ctorDeclarations = typeSymbol.declarations.filter(_.isClassConstructor).toBuffer
+//    ctorDeclarations -= typeSymbol.primaryConstructor
+//    ctorDeclarations.prepend(typeSymbol.primaryConstructor)
+//    val ctorDefaults = resolveCtorDefaults(typeSymbol)
+//    val ctors = ctorDeclarations.map{ s =>
+//      val defdef = s.tree.asInstanceOf[DefDef]
+//      resolveDefParams(defdef,Map.empty,ctorDefaults)
+//    }
+//
+//    val members = new mutable.ArrayBuffer[Expr[_]]()
+//    members ++= ctors.map{ m=>
+//      val paramInfos = m.map{ p=>
+//        if(p.defaultValue.isEmpty) '{ParamInfo(${Expr(p.name)},${p.typeinfo},None)}
+//        else '{ParamInfo(${Expr(p.name)},${p.typeinfo},Some(${p.defaultValue.get}))}
+//      }
+//      val paramList = Expr.ofList(paramInfos)
+//      '{${t}.addCtor(${paramList})}
+//    }
+//    members ++= fields.toList.map { x =>
+//      '{${t}.addField(${Expr(x.name)},${x.typeinfo},${Expr(x.transnt)})}
+//    }
+//    members ++= methods.map { x =>
+//      val paramInfos = x.params.map{ p=>
+//        if(p.defaultValue.isEmpty) '{ParamInfo(${Expr(p.name)},${p.typeinfo},None)}
+//        else '{ParamInfo(${Expr(p.name)},${p.typeinfo},Some(${p.defaultValue.get}))}
+//      }
+//      val paramList = Expr.ofList(paramInfos)
+//      '{${t}.addMethod(${Expr(x.name)},${x.rt},${paramList},${Expr(x.asField)})}
+//    }
+//    members.toList
+//  }
 
 }
 

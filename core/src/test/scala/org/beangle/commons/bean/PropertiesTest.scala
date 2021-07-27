@@ -25,7 +25,7 @@ import org.scalatest.funspec.AnyFunSpec
 
 class PropertiesTest extends AnyFunSpec with Matchers {
 
-  BeanInfos.register(classOf[TestBean])
+  BeanInfos.of(classOf[TestBean])
   describe("Properties") {
     it("Get or Set property") {
       BeanInfos.load(classOf[TestBean]).properties("javaMap")

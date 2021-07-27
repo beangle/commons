@@ -26,12 +26,12 @@ import java.lang.reflect.Modifier
 import org.beangle.commons.lang.reflect.TypeInfo.*
 
 class BeanInfosTest extends AnyFunSpec with Matchers {
-  BeanInfos.register(classOf[Book])
-  BeanInfos.register(classOf[BookPrimitiveId])
-  BeanInfos.register(classOf[BookStore])
-  BeanInfos.register(classOf[Author])
-  BeanInfos.register(classOf[BigBookStore])
-  BeanInfos.register(classOf[Department])
+  BeanInfos.of(classOf[Book])
+  BeanInfos.of(classOf[BookPrimitiveId])
+  BeanInfos.of(classOf[BookStore])
+  BeanInfos.of(classOf[Author])
+  BeanInfos.of(classOf[BigBookStore])
+  BeanInfos.of(classOf[Department])
 
   describe("BeanInfos") {
     it("transient persisted property") {

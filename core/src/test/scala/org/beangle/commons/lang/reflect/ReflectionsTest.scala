@@ -31,35 +31,35 @@ import javax.sql.DataSource
 class ReflectionsTest extends AnyFunSpec with Matchers {
 
   describe("Reflections") {
-//    it("getSuperClassParamType") {
-//      val dataSourceType = Reflections.getGenericParamTypes(classOf[JndiDataSourceFactory], classOf[Factory[_]])
-//      assert(dataSourceType.size == 1)
-//      assert(dataSourceType.values.head == classOf[DataSource])
-//
-//      val idType = Reflections.getGenericParamTypes(classOf[Book], classOf[Entity[_]])
-//      assert(idType.size == 1)
-//      assert(idType.values.head == classOf[java.lang.Long])
-//    }
-//    it("getAnnotation") {
-//      val clazz = classOf[TestChild2Bean]
-//      val method1 = clazz.getMethod("method1", classOf[Long])
-//      val method2 = clazz.getMethod("method2", classOf[Long])
-//      assert(null != Reflections.getAnnotation(method1, classOf[description]))
-//      assert(null == Reflections.getAnnotation(method2, classOf[description]))
-//    }
+    it("getSuperClassParamType") {
+      val dataSourceType = Reflections.getGenericParamTypes(classOf[JndiDataSourceFactory], classOf[Factory[_]])
+      assert(dataSourceType.size == 1)
+      assert(dataSourceType.values.head == classOf[DataSource])
+
+      val idType = Reflections.getGenericParamTypes(classOf[Book], classOf[Entity[_]])
+      assert(idType.size == 1)
+      assert(idType.values.head == classOf[java.lang.Long])
+    }
+    it("getAnnotation") {
+      val clazz = classOf[TestChild2Bean]
+      val method1 = clazz.getMethod("method1", classOf[Long])
+      val method2 = clazz.getMethod("method2", classOf[Long])
+      assert(null != Reflections.getAnnotation(method1, classOf[description]))
+      assert(null == Reflections.getAnnotation(method2, classOf[description]))
+    }
     it("getTraitParamType") {
       val atypes = Reflections.getGenericParamTypes(classOf[C],  Set(classOf[A[_]]))
       assert(atypes.size == 1)
       assert(atypes.get("T").isDefined)
 
-//      val btypes = Reflections.getGenericParamTypes(classOf[C], classOf[B[_]])
-//      assert(btypes.size == 1)
-//      assert(btypes.get("T1").isDefined)
+      val btypes = Reflections.getGenericParamTypes(classOf[C], classOf[B[_]])
+      assert(btypes.size == 1)
+      assert(btypes.get("T1").isDefined)
     }
-//    it("newInstance") {
-//      val a: String = Reflections.newInstance("java.lang.String")
-//      assert(a.length == 0)
-//    }
+    it("newInstance") {
+      val a: String = Reflections.newInstance("java.lang.String")
+      assert(a.length == 0)
+    }
   }
 }
 
