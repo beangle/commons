@@ -40,13 +40,35 @@ object BeanInfos {
     if null == exist then None else Some(exist)
   }
 
+  inline def of(inline clazzes:Class[_]*):List[BeanInfo] = ${ofImpl('clazzes)}
+
   inline def of[T](clazz:Class[T]): BeanInfo = ${ ofImpl('clazz);}
 
-  private def ofImpl[T:Type](ec:Expr[Class[T]])(implicit quotes: Quotes):Expr[BeanInfo]={
+  def ofImpl(argsExpr:Expr[Seq[Class[_]]])(using Quotes):Expr[List[BeanInfo]]={
     import quotes.reflect.*
-    val fetcher = new BeanInfoDigger[quotes.type,T]
+    argsExpr match{
+      case Varargs(cls)=>
+       val biList = cls.map { cl =>
+           cl.asTerm match{
+             case TypeApply(term,trees) => new BeanInfoDigger[quotes.type](trees.head.tpe).dig()
+           }
+        }
+       '{
+         val bis = ${Expr.ofList(biList)}
+         bis.foreach{ bi=> BeanInfos.update(bi)}
+         bis
+       }
+      case _=>
+        report.error(s"Args must be explicit", argsExpr)
+        '{???}
+    }
+  }
+
+  def ofImpl[T:Type](ec:Expr[Class[T]])(implicit quotes: Quotes):Expr[BeanInfo]={
+    import quotes.reflect.*
+    val digger = new BeanInfoDigger[quotes.type](quotes.reflect.TypeRepr.of[T])
     '{
-      val ci = ${fetcher.dig()}
+      val ci = ${digger.dig()}
       BeanInfos.update(ci)
     }
   }

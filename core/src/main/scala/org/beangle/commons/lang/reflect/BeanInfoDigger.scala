@@ -21,9 +21,9 @@ import scala.collection.mutable
 import BeanInfo.*
 import scala.quoted.*
 
-class BeanInfoDigger[Q <: Quotes, T: Type](using val q: Q) {
+class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
   import q.reflect.*
-  val typeRepr = TypeRepr.of[T]
+  val typeRepr = trr.asInstanceOf[TypeRepr]
   val symbol = typeRepr.typeSymbol
 
   def dig(): Expr[BeanInfo] = {
@@ -39,7 +39,7 @@ class BeanInfoDigger[Q <: Quotes, T: Type](using val q: Q) {
   case class FieldExpr(name:String,typeinfo:Expr[TypeInfo],transnt:Boolean,defaultValue:Option[Expr[Any]]=None)
   case class MethodExpr(name:String,rt:Expr[TypeInfo],params:Seq[FieldExpr],asField:Boolean)
 
-  private def addMemberBody[T](t:Expr[BeanInfo.Builder]): List[Expr[_]] = {
+  private def addMemberBody(t:Expr[BeanInfo.Builder]): List[Expr[_]] = {
     val fields = new mutable.ArrayBuffer[FieldExpr]
     val methods= new mutable.ArrayBuffer[MethodExpr]()
     val superBases= Set("scala.Any","scala.Matchable","java.lang.Object")
@@ -73,9 +73,11 @@ class BeanInfoDigger[Q <: Quotes, T: Type](using val q: Q) {
     ctorDeclarations -= typeSymbol.primaryConstructor
     ctorDeclarations.prepend(typeSymbol.primaryConstructor)
     val ctorDefaults = resolveCtorDefaults(typeSymbol)
+    var i=0
     val ctors = ctorDeclarations.map{ s =>
       val defdef = s.tree.asInstanceOf[DefDef]
-      resolveDefParams(defdef,Map.empty,ctorDefaults)
+      i += 1
+      resolveDefParams(defdef,Map.empty,if i==1 then ctorDefaults else Map.empty)
     }
 
     val members = new mutable.ArrayBuffer[Expr[_]]()
