@@ -42,9 +42,9 @@ object BeanInfos {
 
   inline def of[T](clazz:Class[T]): BeanInfo = ${ ofImpl('clazz);}
 
-  private def ofImpl[T:Type](ec:Expr[Class[T]])(using  q: Quotes):Expr[BeanInfo]={
+  private def ofImpl[T:Type](ec:Expr[Class[T]])(implicit quotes: Quotes):Expr[BeanInfo]={
     import quotes.reflect.*
-    val fetcher = new BeanInfoDigger[q.type,T]
+    val fetcher = new BeanInfoDigger[quotes.type,T]
     '{
       val ci = ${fetcher.dig()}
       BeanInfos.update(ci)
