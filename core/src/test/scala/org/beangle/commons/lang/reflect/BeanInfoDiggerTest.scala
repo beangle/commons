@@ -19,7 +19,7 @@ package org.beangle.commons.lang.reflect
 import org.beangle.commons.lang.reflect.BeanInfos
 
 import java.beans.{BeanInfo, Transient}
-import org.beangle.commons.lang.testbean.NumIdBean
+import org.beangle.commons.lang.testbean.*
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import org.beangle.commons.lang.testbean
