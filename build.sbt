@@ -1,8 +1,6 @@
 import Dependencies._
 import BuildSettings._
 
-ThisBuild / organization := "org.beangle"
-
 ThisBuild / scmInfo := Some(
   ScmInfo(
     url("https://github.com/beangle/commons"),
@@ -19,7 +17,7 @@ ThisBuild / developers := List(
   )
 )
 
-ThisBuild / description := "The Beangle Commons Library."
+ThisBuild / description := "The Beangle Commons Library"
 ThisBuild / homepage := Some(url("http://beangle.github.io/commons/index.html"))
 
 lazy val root = (project in file("."))
