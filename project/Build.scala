@@ -35,7 +35,6 @@ object Dependencies {
   val slf4jVer = "1.7.32"
   val logbackVer = "1.2.4"
   val scalatestVer = "3.2.9"
-  val servletapiVer ="5.0.0"
   val compressVer = "1.21"
 
   val slf4j = "org.slf4j" % "slf4j-api" % slf4jVer
