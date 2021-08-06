@@ -21,6 +21,36 @@ import scala.collection.mutable
 import BeanInfo.*
 import scala.quoted.*
 
+object BeanInfoDigger{
+  def digInto(argsExpr:Expr[Seq[Class[_]]],cache:Expr[BeanInfoCache])(using Quotes):Expr[List[BeanInfo]]={
+    import quotes.reflect.*
+    argsExpr match{
+      case Varargs(cls)=>
+        val biList = cls.map { cl =>
+          cl.asTerm match{
+            case TypeApply(term,trees) => new BeanInfoDigger[quotes.type](trees.head.tpe).dig()
+          }
+        }
+        '{
+        val bis = ${Expr.ofList(biList)}
+        bis.foreach{ bi=> ${cache}.update(bi)}
+        bis
+        }
+      case _=>
+        report.error(s"Args must be explicit", argsExpr)
+        '{???}
+    }
+  }
+
+  def digInto[T:Type](ec:Expr[Class[T]],cache:Expr[BeanInfoCache])(implicit quotes: Quotes):Expr[BeanInfo]={
+    import quotes.reflect.*
+    val digger = new BeanInfoDigger[quotes.type](quotes.reflect.TypeRepr.of[T])
+    '{
+    ${cache}.update(${digger.dig()})
+    }
+  }
+}
+
 class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
   import q.reflect.*
   val typeRepr = trr.asInstanceOf[TypeRepr]
