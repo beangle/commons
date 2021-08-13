@@ -17,9 +17,12 @@
 
 package org.beangle.commons.lang
 
+import org.beangle.commons.lang.reflect.Reflections
+
 /**
  * Create Enumeration value
- * @since 3.1
+  *
+  * @since 3.1
  */
 object Enums {
 
@@ -31,10 +34,12 @@ object Enums {
    *
    * @since 3.1
    */
-  def get[T <: Enum[T]](enumClass: Class[T], value: String): Option[T] =
-    try
-      Some(Enum.valueOf(enumClass, value))
-    catch {
+  def get[T <: _root_.scala.reflect.Enum](enumClass: Class[T], value: String): Option[T] =
+    try {
+      println(enumClass)
+      val e = Reflections.getInstance[AnyRef](enumClass.getName)
+      Some(enumClass.getMethod("valueOf",classOf[String]).invoke(e,value).asInstanceOf[T])
+    } catch {
       case iae: IllegalArgumentException => None
     }
 }

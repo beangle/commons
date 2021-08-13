@@ -32,9 +32,9 @@ object BeanInfoDigger{
           }
         }
         '{
-        val bis = ${Expr.ofList(biList)}
-        bis.foreach{ bi=> ${cache}.update(bi)}
-        bis
+          val bis = ${Expr.ofList(biList)}
+          bis.foreach{ bi=> ${cache}.update(bi)}
+          bis
         }
       case _=>
         report.error(s"Args must be explicit", argsExpr)
@@ -46,7 +46,7 @@ object BeanInfoDigger{
     import quotes.reflect.*
     val digger = new BeanInfoDigger[quotes.type](quotes.reflect.TypeRepr.of[T])
     '{
-    ${cache}.update(${digger.dig()})
+      ${cache}.update(${digger.dig()})
     }
   }
 }

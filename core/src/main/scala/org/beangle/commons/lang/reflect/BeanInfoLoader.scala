@@ -40,7 +40,7 @@ object BeanInfoLoader {
   private case class Setter(method: Method, parameterTypes: Array[TypeInfo])
 
   /**
-   * Load BeanManifest using reflections
+   * Load BeanInfo using reflections
    */
   def load(clazz: Class[_] ): BeanInfo = {
     val className = clazz.getName

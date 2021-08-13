@@ -16,6 +16,7 @@
  */
 
 package org.beangle.commons.lang.reflect
+
 import org.beangle.commons.collection.IdentityCache
 
 class BeanInfoCache {
@@ -33,17 +34,16 @@ class BeanInfoCache {
     if null == exist then None else Some(exist)
   }
 
-  inline def of(inline clazzes:Class[_]*):List[BeanInfo] = ${BeanInfoDigger.digInto('clazzes,'this)}
+  inline def of(inline clazzes: Class[_]*): List[BeanInfo] = ${BeanInfoDigger.digInto('clazzes, 'this)}
 
-  inline def of[T](clazz:Class[T]): BeanInfo = ${BeanInfoDigger.digInto('clazz,'this);}
-
+  inline def of[T](clazz: Class[T]): BeanInfo = ${BeanInfoDigger.digInto('clazz, 'this);}
 
   /** register classInfo
     *
     * @param bi
     */
-  def update(bi: BeanInfo):BeanInfo={
-    cache.put(bi.clazz,bi)
+  def update(bi: BeanInfo): BeanInfo = {
+    cache.put(bi.clazz, bi)
     bi
   }
 
@@ -52,10 +52,13 @@ class BeanInfoCache {
     */
   def load(clazz: Class[_]): BeanInfo = {
     var exist = cache.get(clazz)
-    if(null!=exist) return exist
+    if (null != exist) return exist
     val ci = BeanInfoLoader.load(clazz)
-    cache.put(clazz,ci)
+    cache.put(clazz, ci)
     ci
   }
 
+  def clear(): Unit = cache.clear()
+
+  def size: Int = cache.size()
 }

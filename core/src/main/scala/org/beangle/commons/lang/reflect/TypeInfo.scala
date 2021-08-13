@@ -32,7 +32,9 @@ sealed trait TypeInfo {
 
   def args: ArraySeq[TypeInfo]
 
-  def isOptional: Boolean = clazz == classOf[Option[_]]
+  final def isOptional: Boolean = clazz == classOf[Option[_]]
+
+  final  def isIterable:Boolean = TypeInfo.isIterableType(clazz)
 
   override def toString: String = name
 }

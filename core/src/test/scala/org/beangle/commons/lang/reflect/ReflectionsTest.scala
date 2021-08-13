@@ -19,12 +19,11 @@ package org.beangle.commons.lang.reflect
 
 import org.beangle.commons.bean.Factory
 import org.beangle.commons.jndi.JndiDataSourceFactory
+import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.annotation.description
-import org.beangle.commons.lang.testbean.{ Book, TestChild2Bean }
-import org.beangle.commons.lang.testbean.Entity
-
-import org.scalatest.matchers.should.Matchers
+import org.beangle.commons.lang.testbean.{Book, Entity, TestChild2Bean}
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 import javax.sql.DataSource
 
@@ -48,7 +47,7 @@ class ReflectionsTest extends AnyFunSpec with Matchers {
       assert(null == Reflections.getAnnotation(method2, classOf[description]))
     }
     it("getTraitParamType") {
-      val atypes = Reflections.getGenericParamTypes(classOf[C],  Set(classOf[A[_]]))
+      val atypes = Reflections.getGenericParamTypes(classOf[C], Set(classOf[A[_]]))
       assert(atypes.size == 1)
       assert(atypes.get("T").isDefined)
 
@@ -60,6 +59,10 @@ class ReflectionsTest extends AnyFunSpec with Matchers {
       val a: String = Reflections.newInstance("java.lang.String")
       assert(a.length == 0)
     }
+    it("getInstance") {
+      val a = Reflections.getInstance[Co.type]("org.beangle.commons.lang.reflect.Co$")
+      assert(a.isInstanceOf[Co.type])
+    }
   }
 }
 
@@ -68,3 +71,5 @@ trait A[T]
 trait B[T1] extends A[T1]
 
 class C extends B[Integer]
+
+object Co

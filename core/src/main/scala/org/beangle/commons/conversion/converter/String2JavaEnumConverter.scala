@@ -18,16 +18,18 @@
 package org.beangle.commons.conversion.converter
 
 import org.beangle.commons.conversion.Converter
-import org.beangle.commons.lang.{ ClassLoaders, Numbers }
-import scala.reflect.{Enum=> ScalaEnum}
+import org.beangle.commons.lang.reflect.Reflections
+import org.beangle.commons.lang.{ClassLoaders, Numbers}
+
+import scala.reflect.Enum as ScalaEnum
 
 /**
- * Convert String to Enumeration.
- *
- * @author chaostone
- * @since 3.2.0
- */
-object String2EnumConverter extends StringConverterFactory[String, Enum[_]] {
+  * Convert String to Enumeration.
+  *
+  * @author chaostone
+  * @since 3.2.0
+  */
+object String2JavaEnumConverter extends StringConverterFactory[String, Enum[_]] {
 
   private class EnumConverter[T <: Enum[_]](val enumType: Class[_]) extends Converter[String, T] {
     def enumValueOf[T <: Enum[T]](cls: Class[_], str: String): T =
@@ -48,31 +50,35 @@ object String2EnumConverter extends StringConverterFactory[String, Enum[_]] {
   }
 }
 
-end String2EnumConverter
+end String2JavaEnumConverter
 
-object String2ScalaEnumConverter extends StringConverterFactory[String,  ScalaEnum] {
+object String2ScalaEnumConverter extends StringConverterFactory[String, ScalaEnum] {
 
-  private class EnumConverter[T <: ScalaEnum](e: AnyRef) extends Converter[String, T] {
-    private val fromOrdinalMethod=e.getClass.getMethod("fromOrdinal",classOf[Int])
-    private val valueOfMethod=e.getClass.getMethod("valueOf",classOf[String])
+  class EnumConverter[T](e: AnyRef) extends Converter[String, T] {
+    private val fromOrdinalMethod = e.getClass.getMethod("fromOrdinal", classOf[Int])
+    private val valueOfMethod = e.getClass.getMethod("valueOf", classOf[String])
 
     override def apply(input: String): T = {
       val result =
-        if (Numbers.isDigits(input)) fromOrdinalMethod.invoke(e,Numbers.toInt(input))
-        else valueOfMethod.invoke(e,input)
+        if (Numbers.isDigits(input)) fromOrdinalMethod.invoke(e, Numbers.toInt(input))
+        else valueOfMethod.invoke(e, input)
       result.asInstanceOf[T]
     }
+
+    def apply(input: Int): T = fromOrdinalMethod.invoke(e, input).asInstanceOf[T]
   }
 
   override def getConverter[T <: ScalaEnum](targetType: Class[T]): Option[Converter[String, T]] = {
     val converter = super.getConverter(targetType)
     if (converter.isEmpty) {
-      val enm = ClassLoaders.load(targetType.getName() +"$").getDeclaredField("MODULE$").get(null)
-      val enumconverter = new EnumConverter(enm)
+      val enumconverter = newConverter(targetType).asInstanceOf[Converter[String, T]]
       register(targetType, enumconverter)
       Some(enumconverter)
-    }
-    else
-      converter
+    } else converter
+  }
+
+  def newConverter(targetType: Class[_]): EnumConverter[AnyRef] = {
+    val enm = Reflections.getInstance[AnyRef](targetType.getName)
+    new EnumConverter(enm)
   }
 }

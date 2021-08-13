@@ -46,7 +46,7 @@ class DefaultConversion extends AbstractGenericConversion {
 
   addConverter(String2HourMinuteConverter)
 
-  addConverter(String2EnumConverter)
+  addConverter(String2JavaEnumConverter)
 
   addConverter(String2ScalaEnumConverter)
 

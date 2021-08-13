@@ -28,7 +28,7 @@ import scala.reflect.ClassTag
 
 object Reflections {
 
-  def newInstance[T](clazz: Class[T]): T =
+  def newInstance[T](clazz: Class[T]): T = {
     try
       clazz.getDeclaredConstructor().newInstance()
     catch {
@@ -36,28 +36,30 @@ object Reflections {
         Throwables.propagate(e)
         Objects.default(clazz)
     }
+  }
 
-  def newInstance[T](className: String, classLoader: ClassLoader = null): T =
-    ClassLoaders.load(className, classLoader).getDeclaredConstructor().newInstance().asInstanceOf[T]
+  def newInstance[T](className: String): T = newInstance(className, null)
 
-  def getInstance[T: ClassTag](name: String)(implicit manifest: Manifest[T]): T = {
-    var moduleClass = ClassLoaders.load(name)
-    if (!manifest.runtimeClass.isAssignableFrom(moduleClass))
-      ClassLoaders.get(name + "$") match {
-        case Some(clazz) => moduleClass = clazz
-        case None => throw new RuntimeException(name + " is not a module")
-      }
-    if (moduleClass.getConstructors.length > 0)
-      moduleClass.getDeclaredConstructor().newInstance().asInstanceOf[T]
-    else
-      moduleClass.getDeclaredField("MODULE$").get(null).asInstanceOf[T]
+  def newInstance[T](className: String, classLoader: ClassLoader): T ={
+    newInstance(ClassLoaders.load(className, classLoader).asInstanceOf[Class[T]])
+  }
+
+  def getInstance[T](name: String) : T = {
+    val companionClass = if name.endsWith("$") then name else name + "$"
+    ClassLoaders.get(companionClass) match {
+      case Some(clazz) =>
+        if clazz.getConstructors.length > 0 then newInstance(clazz).asInstanceOf[T]
+        else clazz.getDeclaredField("MODULE$").get(null).asInstanceOf[T]
+      case None =>
+        newInstance(ClassLoaders.load(name).asInstanceOf[Class[T]])
+    }
   }
 
   /**
     * Find parameter types of given class's interface or superclass
     */
   def getGenericParamTypes(clazz: Class[_], expected: Class[_]): collection.Map[String, Class[_]] = {
-    if !expected.isAssignableFrom(clazz) then  Map.empty else  getGenericParamTypes(clazz,Set(expected))
+    if !expected.isAssignableFrom(clazz) then Map.empty else getGenericParamTypes(clazz, Set(expected))
   }
 
   def getCollectionParamTypes(clazz: Class[_]): ArraySeq[TypeInfo] = {

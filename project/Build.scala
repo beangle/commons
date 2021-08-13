@@ -2,19 +2,13 @@ import sbt.Keys._
 import sbt._
 
 object BuildSettings {
-  val buildOrganization = "org.beangle.commons"
-  val buildVersion = "5.2.5-SNAPSHOT"
   val buildScalaVersion = "3.0.1"
 
   val commonSettings = Seq(
-    organization := buildOrganization,
     organizationName  := "The Beangle Software",
     licenses += ("GNU Lesser General Public License version 3", new URL("http://www.gnu.org/licenses/lgpl-3.0.txt")),
     startYear := Some(2005),
-    version := buildVersion,
     scalaVersion := buildScalaVersion,
-    scalacOptions := Seq("-encoding", "UTF-8", "-feature", "-unchecked", "-deprecation"
-      , "-language:implicitConversions", "-Xtarget:11", "-Xfatal-warnings"),
     crossPaths := true,
 
     publishMavenStyle := true,
