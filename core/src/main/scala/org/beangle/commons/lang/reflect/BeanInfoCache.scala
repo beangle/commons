@@ -26,20 +26,11 @@ class BeanInfoCache {
     */
   private var cache = new IdentityCache[Class[_], BeanInfo]
 
-  /**
-    * Get ClassInfo from cache or load it by type.
-    */
-  def get(clazz: Class[_]): Option[BeanInfo] = {
-    var exist = cache.get(clazz)
-    if null == exist then None else Some(exist)
-  }
-
   inline def of(inline clazzes: Class[_]*): List[BeanInfo] = ${BeanInfoDigger.digInto('clazzes, 'this)}
 
   inline def of[T](clazz: Class[T]): BeanInfo = ${BeanInfoDigger.digInto('clazz, 'this);}
 
   /** register classInfo
-    *
     * @param bi
     */
   def update(bi: BeanInfo): BeanInfo = {
@@ -50,13 +41,15 @@ class BeanInfoCache {
   /**
     * Load ClassInfo using reflections
     */
-  def load(clazz: Class[_]): BeanInfo = {
+  def get(clazz: Class[_]): BeanInfo = {
     var exist = cache.get(clazz)
     if (null != exist) return exist
     val ci = BeanInfoLoader.load(clazz)
     cache.put(clazz, ci)
     ci
   }
+
+  def contains(clazz: Class[_]): Boolean = cache.contains(clazz)
 
   def clear(): Unit = cache.clear()
 

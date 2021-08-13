@@ -32,15 +32,9 @@ object BeanInfos {
   /**
     * Get ClassInfo from cache or load it by type.
     */
-  def get(clazz: Class[_]): Option[BeanInfo] = cache.get(clazz)
+  def get(clazz: Class[_]): BeanInfo = cache.get(clazz)
 
   inline def of(inline clazzes:Class[_]*):List[BeanInfo] = ${BeanInfoDigger.digInto('clazzes,'cache)}
 
   inline def of[T](clazz:Class[T]): BeanInfo = ${ BeanInfoDigger.digInto('clazz,'cache);}
-
-  /**
-   * Load ClassInfo using reflections
-   */
-  def load(clazz: Class[_]): BeanInfo = cache.load(clazz)
-
 }

@@ -87,13 +87,13 @@ class Properties( conversion: Conversion) extends Logging {
     copy(bean, propertyName, value, this.conversion)
 
   def isWriteable(bean: AnyRef, name: String): Boolean =
-    BeanInfos.load(bean.getClass).getSetter(name).isDefined
+    BeanInfos.get(bean.getClass).getSetter(name).isDefined
 
   def getType(clazz: Class[_], name: String): Class[_] =
-    BeanInfos.load(clazz).getPropertyType(name).orNull
+    BeanInfos.get(clazz).getPropertyType(name).orNull
 
   def writables(clazz: Class[_]): Set[String] =
-    BeanInfos.load(clazz).writables.map(_.name).toSet
+    BeanInfos.get(clazz).writables.map(_.name).toSet
 
   private def copy(bean: AnyRef, propertyName: String, value: Any, conversion: Conversion): Any = {
     var result: Any = bean
@@ -125,7 +125,7 @@ class Properties( conversion: Conversion) extends Logging {
     else getSimpleProperty(result, name)
 
   private def getSimpleProperty(bean: Any, name: String): Any =
-    BeanInfos.load(bean.getClass).getGetter(name) match {
+    BeanInfos.get(bean.getClass).getGetter(name) match {
       case Some(method) => method.invoke(bean)
       case _ =>
         logger.error("Cannot find " + Strings.capitalize(name) + " Getter in " + bean.getClass)
@@ -159,7 +159,7 @@ class Properties( conversion: Conversion) extends Logging {
   }
 
   private def copySimpleProperty(bean: Any, name: String, value: Any, conversion: Conversion): Any = {
-    val manifest = BeanInfos.load(bean.getClass)
+    val manifest = BeanInfos.get(bean.getClass)
     manifest.getSetter(name) match {
       case Some(method) =>
         val p = manifest.properties(name)
@@ -224,7 +224,7 @@ class Properties( conversion: Conversion) extends Logging {
     val key = getMappedKey(name, bean)
     val resolvedName = resolver.getProperty(name)
     val rs = if (resolvedName != null && resolvedName.length() >= 0) getSimpleProperty(bean, resolvedName) else bean
-    val typeInfo = BeanInfos.load(bean.getClass).getPropertyTypeInfo(resolvedName).get
+    val typeInfo = BeanInfos.get(bean.getClass).getPropertyTypeInfo(resolvedName).get
     val key1 = conversion.convert(key, typeInfo.args.head.clazz)
     val value1 = conversion.convert(value, typeInfo.args.tail.head.clazz)
     setMapped(rs, key1, value1)

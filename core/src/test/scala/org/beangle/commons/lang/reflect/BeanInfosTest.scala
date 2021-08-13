@@ -35,7 +35,7 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
 
   describe("BeanInfos") {
     it("transient persisted property") {
-      val mis = BeanInfos.load(classOf[NumIdBean[_]]).getMethods("persisted")
+      val mis = BeanInfos.get(classOf[NumIdBean[_]]).getMethods("persisted")
       assert(mis.size == 1)
       val mi = mis.head
       val anns = mi.method.getAnnotations
@@ -43,57 +43,57 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
     }
 
     it("find real template parameter") {
-      assert(BeanInfos.load(classOf[Book]).getPropertyType("id") == Some(classOf[java.lang.Long]))
-      assert(BeanInfos.load(classOf[BookPrimitiveId]).getPropertyType("id") == Some(classOf[Long]))
-      assert(BeanInfos.load(classOf[BookStore]).getPropertyType("id") == Some(classOf[String]))
-      assert(BeanInfos.load(classOf[Author]).getPropertyType("id") == Some(classOf[Integer]))
+      assert(BeanInfos.get(classOf[Book]).getPropertyType("id") == Some(classOf[java.lang.Long]))
+      assert(BeanInfos.get(classOf[BookPrimitiveId]).getPropertyType("id") == Some(classOf[Long]))
+      assert(BeanInfos.get(classOf[BookStore]).getPropertyType("id") == Some(classOf[String]))
+      assert(BeanInfos.get(classOf[Author]).getPropertyType("id") == Some(classOf[Integer]))
     }
 
     it("ignore normal read property") {
-      assert(BeanInfos.load(classOf[Book]).getGetter("empty").isDefined)
+      assert(BeanInfos.get(classOf[Book]).getGetter("empty").isDefined)
     }
 
     it("Can get iterface methods") {
       val method = classOf[NumIdBean[_]].getMethod("name")
       assert(Modifier.isAbstract(method.getModifiers))
-      assert(BeanInfos.load(classOf[NumIdBean[_]]).properties.size == 3)
+      assert(BeanInfos.get(classOf[NumIdBean[_]]).properties.size == 3)
 
-      assert(BeanInfos.load(classOf[Entity[_]]).properties.size == 3)
-      assert(BeanInfos.load(classOf[Entity[_]]).properties("persisted").isTransient)
-      assert(BeanInfos.load(classOf[Entity[_]]).properties("id").isTransient)
+      assert(BeanInfos.get(classOf[Entity[_]]).properties.size == 3)
+      assert(BeanInfos.get(classOf[Entity[_]]).properties("persisted").isTransient)
+      assert(BeanInfos.get(classOf[Entity[_]]).properties("id").isTransient)
     }
 
     it("Have correct virtual getter") {
-      val empty = BeanInfos.load(classOf[Book]).properties.get("empty")
+      val empty = BeanInfos.get(classOf[Book]).properties.get("empty")
       assert(empty.isDefined)
       assert(empty.get.isTransient)
     }
 
     it("Have correct trait fields (template generic) type") {
-      val t = BeanInfos.load(classOf[Department]).properties("parent")
+      val t = BeanInfos.get(classOf[Department]).properties("parent")
       val typeinfo = t.typeinfo
       assert(typeinfo.isInstanceOf[IterableType])
       assert(typeinfo.asInstanceOf[IterableType].elementType.clazz == classOf[Department])
       assert(typeinfo.asInstanceOf[IterableType].isOptional)
     }
     it("find option inner type") {
-      val t = BeanInfos.load(classOf[Author]).properties("age")
+      val t = BeanInfos.get(classOf[Author]).properties("age")
       val typeinfo = t.typeinfo
       assert(typeinfo.isOptional)
       assert(typeinfo.asInstanceOf[IterableType].elementType.clazz == classOf[Int])
     }
     it("find escaped key method") {
-      val t = BeanInfos.load(classOf[Author]).properties("type")
+      val t = BeanInfos.get(classOf[Author]).properties("type")
       assert(t.getter.isDefined)
     }
     it("find list author") {
-      val t = BeanInfos.load(classOf[Book]).properties("authors")
+      val t = BeanInfos.get(classOf[Book]).properties("authors")
       val typeinfo = t.typeinfo
       assert(typeinfo.isInstanceOf[IterableType])
       assert(typeinfo.asInstanceOf[IterableType].elementType.clazz == classOf[Author])
     }
     it("find primitives") {
-      val bm = BeanInfos.load(classOf[Book])
+      val bm = BeanInfos.get(classOf[Book])
       val typeinfo = bm.properties("versions").typeinfo
       assert(typeinfo.isInstanceOf[IterableType])
       assert(typeinfo.asInstanceOf[IterableType].elementType.clazz == classOf[Int])
@@ -108,7 +108,7 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
     }
 
     it("find correct get") {
-      val t = BeanInfos.load(classOf[Menu])
+      val t = BeanInfos.get(classOf[Menu])
       val getter = t.properties("id").getter
       assert(getter.isDefined)
       getter foreach { g =>
@@ -117,7 +117,7 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
     }
 
     it("find correct constructor info") {
-      val t = BeanInfos.load(classOf[BigBookStore])
+      val t = BeanInfos.get(classOf[BigBookStore])
       assert(t.ctors.nonEmpty)
       val ctor = t.ctors.head
       assert(2 == ctor.parameters.size)
