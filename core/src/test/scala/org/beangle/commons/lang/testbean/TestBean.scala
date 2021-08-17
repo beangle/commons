@@ -17,11 +17,11 @@
 
 package org.beangle.commons.lang.testbean
 
-import java.beans.Transient
-
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.annotation.description
+
+import java.beans.Transient
 
 class TestBean {
 
@@ -40,13 +40,13 @@ class TestBean {
   var parent: Option[TestBean] = None
 
   def methodWithManyArguments(
-    i: Int,
-    f: Float,
-    I: java.lang.Integer,
-    F: java.lang.Float,
-    c: TestBean,
-    c1: TestBean,
-    c2: TestBean): String = "test"
+                               i: Int,
+                               f: Float,
+                               I: java.lang.Integer,
+                               F: java.lang.Float,
+                               c: TestBean,
+                               c1: TestBean,
+                               c2: TestBean): String = "test"
 
   @description("method1")
   def method1(a: Long): Unit = {
@@ -58,10 +58,12 @@ class TestChildBean extends TestBean {
 
   }
 }
+
 class TestChild2Bean extends TestChildBean {
   override def method1(a: Long): Unit = {
 
   }
+
   override def method2(a: Long): Unit = {
 
   }
@@ -79,9 +81,10 @@ class Dog extends Animal {
 
 trait Entity[ID] {
   def id: ID
+
   /**
-   * Return true if persisted
-   */
+    * Return true if persisted
+    */
   @Transient
   def persisted: Boolean = id != null
 
@@ -107,6 +110,7 @@ class Book extends NumIdBean[java.lang.Long] {
 
   var versionSales: Map[Int, java.lang.Integer] = _
   var versionSales2: java.util.Map[Int, java.lang.Integer] = _
+
   def isEmpty = false
 
   var authors: List[Author] = _
@@ -160,4 +164,14 @@ class Menu {
 
   def getId(): Long =
     id
+}
+
+case class Loader(name: String) {
+  def load[T](clazz: Class[T]): T = {
+    clazz.getDeclaredConstructor().newInstance().asInstanceOf[T]
+  }
+}
+
+class Nnn {
+  final val constantInt = "xxxxx"
 }

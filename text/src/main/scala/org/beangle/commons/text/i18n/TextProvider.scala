@@ -15,20 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.lang
+package org.beangle.commons.text.i18n
 
-import org.beangle.commons.conversion.converter.String2ScalaEnumConverter
-import org.beangle.commons.lang.time.WeekDay
-import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.matchers.should.Matchers
+/**
+ * @author chaostone
+ */
+trait TextProvider {
+  /**
+   * Gets a message based on a message key, or null if no message is found.
+   */
+  def apply(key: String): Option[String]
 
-class EnumsTest extends AnyFunSpec with Matchers {
-
-  describe("Enums") {
-    it("get") {
-      assert(Enums.get(classOf[WeekDay], "Sun").contains(WeekDay.Sun))
-      assert(Enums.isEnum(classOf[WeekDay]))
-    }
-  }
-
+  /**
+   * Gets a message based on a key using the supplied obj, as defined in
+   * java.text.MessageFormat, or, if the message is not found, a
+   * supplied default value is returned.
+   */
+  def apply(key: String, defaultValue: String, obj: Any*): String
 }

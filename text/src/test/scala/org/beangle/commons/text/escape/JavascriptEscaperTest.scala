@@ -15,20 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.lang
+package org.beangle.commons.text.escape
 
-import org.beangle.commons.conversion.converter.String2ScalaEnumConverter
-import org.beangle.commons.lang.time.WeekDay
+import org.beangle.commons.lang.ClassLoaders
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class EnumsTest extends AnyFunSpec with Matchers {
+import java.util.Locale
 
-  describe("Enums") {
-    it("get") {
-      assert(Enums.get(classOf[WeekDay], "Sun").contains(WeekDay.Sun))
-      assert(Enums.isEnum(classOf[WeekDay]))
+class JavascriptEscaperTest extends AnyFunSpec with Matchers {
+
+  describe("JavasciptEscaper") {
+    it("Escape") {
+      println(JavascriptEscaper.escape("beangl'dd",false))
+      println(XmlEscaper.escape("<td>"))
     }
   }
-
 }

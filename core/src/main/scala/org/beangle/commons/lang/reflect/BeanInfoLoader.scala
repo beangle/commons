@@ -51,6 +51,7 @@ object BeanInfoLoader {
 //        Option(cache.get(clazz.getSuperclass))
 //      else
 //        None
+    val isCase=TypeInfo.isCaseClass(clazz)
     val getters = new mutable.HashMap[String, Getter]
     val setters = new mutable.HashMap[String, Setter]
     val fields = new mutable.HashMap[String, Field]
@@ -63,25 +64,13 @@ object BeanInfoLoader {
       nextClass.getDeclaredFields foreach { f => fields += (f.getName -> f) }
       (0 until declaredMethods.length) foreach { i =>
         val method = declaredMethods(i)
-        processMethod(method,getters,setters,methods,paramTypes)
+        processMethod(isCase,method,getters,setters,methods,paramTypes)
       }
       navIterface(nextClass, accessed, getters, setters, methods,paramTypes)
 
       val nextType = nextClass.getGenericSuperclass
       nextClass = nextClass.getSuperclass
       paramTypes = deduceParamTypes(nextClass, nextType, paramTypes)
-    }
-    // organize setter and getter
-    val allprops = getters.keySet ++ setters.keySet
-    val properties = Collections.newMap[String, BeanInfo.PropertyInfo]
-    allprops foreach { p =>
-      val getter = getters.get(p)
-      val setter = setters.get(p)
-      val typeinfo = if getter.isEmpty then setter.get.parameterTypes(0) else getter.get.returnType
-      val isTransientAnnoted = fields.get(p).map(x=> Modifier.isTransient(x.getModifiers)).getOrElse(false)
-      val isTransient = BeanInfo.Builder.isTransient(isTransientAnnoted,setter.isDefined)
-      val pd = BeanInfo.PropertyInfo(p, typeinfo, getter.map(x => x.method), setter.map(x => x.method),isTransient)
-      properties.put(p, pd)
     }
 
     //find default constructor parameters
@@ -100,6 +89,7 @@ object BeanInfoLoader {
 
     // find constructor with arguments
     val ctors = Collections.newBuffer[BeanInfo.ConstructorInfo]
+    val pCtorParamNames =Collections.newSet[String]
     var i=0
     clazz.getConstructors foreach { ctor =>
       val params = new mutable.ArrayBuffer[ParamInfo](ctor.getParameterCount)
@@ -107,11 +97,26 @@ object BeanInfoLoader {
       if(i==0 && defaultConstructorParams.nonEmpty) {
         defaultConstructorParams foreach { case (i, v) =>
           params(i) = params(i).copy(defaultValue = Some(v))
+          pCtorParamNames += params(i).name
         }
       }
       i+=1
       ctors += BeanInfo.ConstructorInfo(ArraySeq.from(params))
     }
+
+    // organize setter and getter
+    val allprops = getters.keySet ++ setters.keySet
+    val properties = Collections.newMap[String, BeanInfo.PropertyInfo]
+    allprops foreach { p =>
+      val getter = getters.get(p)
+      val setter = setters.get(p)
+      val typeinfo = if getter.isEmpty then setter.get.parameterTypes(0) else getter.get.returnType
+      val isTransientAnnoted = fields.get(p).map(x=> Modifier.isTransient(x.getModifiers)).getOrElse(false)
+      val isTransient = BeanInfo.Builder.isTransient(isTransientAnnoted,setter.isDefined,pCtorParamNames.contains(p))
+      val pd = BeanInfo.PropertyInfo(p, typeinfo, getter.map(x => x.method), setter.map(x => x.method),isTransient)
+      properties.put(p, pd)
+    }
+
     // change accessible for none public class
     if (!Modifier.isPublic(clazz.getModifiers))
       properties foreach { case (k, v) =>
@@ -125,7 +130,8 @@ object BeanInfoLoader {
     getters: mutable.HashMap[String, Getter], setters: mutable.HashMap[String, Setter],
     methods: mutable.HashSet[MethodInfo],
     paramTypes: collection.Map[String, Class[_]]): Unit = {
-    if (null == clazz || classOf[AnyRef] == clazz) return ;
+    if (null == clazz || classOf[AnyRef] == clazz) return
+    val isCase=TypeInfo.isCaseClass(clazz)
     val interfaceTypes = clazz.getGenericInterfaces
     (0 until interfaceTypes.length) foreach { i =>
       val interface = interfaceTypes(i) match{
@@ -138,17 +144,18 @@ object BeanInfoLoader {
         val declaredMethods = interface.getDeclaredMethods
         (0 until declaredMethods.length) foreach { i =>
           val method = declaredMethods(i)
-          processMethod(method,getters,setters,methods,interfaceParamTypes)
+          processMethod(isCase,method,getters,setters,methods,interfaceParamTypes)
         }
         navIterface(interface, accessed, getters, setters,methods, paramTypes)
       }
     }
   }
 
-  private def processMethod(method:Method,getters: mutable.HashMap[String, Getter], setters: mutable.HashMap[String, Setter],
+  private def processMethod(isCase: Boolean,method:Method,getters: mutable.HashMap[String, Getter],
+                            setters: mutable.HashMap[String, Setter],
                             methods: mutable.HashSet[MethodInfo],
                             paramTypes: collection.Map[String, Class[_]]):Unit={
-    if(BeanInfo.Builder.isFineMethod(method,false)){
+    if(BeanInfo.Builder.isFineMethod(isCase,method,false)){
       BeanInfo.Builder.findAccessor(method) match {
         case Some(Tuple2(readable, name)) =>
           if (readable) {
@@ -182,12 +189,6 @@ object BeanInfoLoader {
     if TypeInfo.isIterableType(clazz) then
       if clazz.isArray then
         TypeInfo.get(clazz, clazz.getComponentType)
-      else if clazz == classOf[Option[_]] then
-        val innerType = typ match {
-          case pt: ParameterizedType => if (pt.getActualTypeArguments.length == 1) typeAt(pt, 0) else classOf[AnyRef]
-          case c: Class[_] => classOf[AnyRef]
-        }
-        TypeInfo.get(innerType, optional = true)
       else
         typ match {
           case pt: ParameterizedType =>
@@ -197,6 +198,12 @@ object BeanInfoLoader {
           case c: Class[_] =>   TypeInfo.get(clazz,false)
           case _ => TypeInfo.get(clazz, classOf[Any], classOf[Any])
         }
+    else if clazz == classOf[Option[_]] then
+      val innerType = typ match {
+        case pt: ParameterizedType => if (pt.getActualTypeArguments.length == 1) typeAt(pt, 0) else classOf[AnyRef]
+        case c: Class[_] => classOf[AnyRef]
+      }
+      TypeInfo.get(innerType, optional = true)
     else
       TypeInfo.get(clazz)
   }

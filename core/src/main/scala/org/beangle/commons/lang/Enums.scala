@@ -20,26 +20,31 @@ package org.beangle.commons.lang
 import org.beangle.commons.lang.reflect.Reflections
 
 /**
- * Create Enumeration value
+  * Create Enumeration value
   *
   * @since 3.1
- */
+  */
 object Enums {
 
   /**
-   * Returns an optional enum constant for the given type, using {@link Enum#valueOf}. If the
-   * constant does not exist, {@link Option#none} is returned. A common use case is for parsing
-   * user input or falling back to a default enum constant. For example,
-   * {@code Enums.get(Country.class, countryInput).getOrElse(Country.DEFAULT);}
-   *
-   * @since 3.1
-   */
-  def get[T <: _root_.scala.reflect.Enum](enumClass: Class[T], value: String): Option[T] =
+    * Returns an optional enum constant for the given type, using {@link Enum# valueOf}. If the
+    * constant does not exist, {@link Option# none} is returned. A common use case is for parsing
+    * user input or falling back to a default enum constant. For example,
+    * {@code Enums.get(Country.class, countryInput).getOrElse(Country.DEFAULT);}
+    *
+    * @since 3.1
+    */
+  def get[T <: _root_.scala.reflect.Enum](enumClass: Class[T], value: String): Option[T] = {
     try {
       println(enumClass)
       val e = Reflections.getInstance[AnyRef](enumClass.getName)
-      Some(enumClass.getMethod("valueOf",classOf[String]).invoke(e,value).asInstanceOf[T])
+      Some(enumClass.getMethod("valueOf", classOf[String]).invoke(e, value).asInstanceOf[T])
     } catch {
       case iae: IllegalArgumentException => None
     }
+  }
+
+  def isEnum(clazz: Class[_]): Boolean = {
+    classOf[_root_.scala.reflect.Enum].isAssignableFrom(clazz)
+  }
 }

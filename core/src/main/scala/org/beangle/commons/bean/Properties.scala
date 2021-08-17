@@ -93,7 +93,7 @@ class Properties( conversion: Conversion) extends Logging {
     BeanInfos.get(clazz).getPropertyType(name).orNull
 
   def writables(clazz: Class[_]): Set[String] =
-    BeanInfos.get(clazz).writables.map(_.name).toSet
+    BeanInfos.get(clazz).writables.keySet
 
   private def copy(bean: AnyRef, propertyName: String, value: Any, conversion: Conversion): Any = {
     var result: Any = bean

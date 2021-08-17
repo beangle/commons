@@ -72,15 +72,15 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
     it("Have correct trait fields (template generic) type") {
       val t = BeanInfos.get(classOf[Department]).properties("parent")
       val typeinfo = t.typeinfo
-      assert(typeinfo.isInstanceOf[IterableType])
-      assert(typeinfo.asInstanceOf[IterableType].elementType.clazz == classOf[Department])
-      assert(typeinfo.asInstanceOf[IterableType].isOptional)
+      assert(typeinfo.isInstanceOf[OptionType])
+      assert(typeinfo.asInstanceOf[OptionType].elementType.clazz == classOf[Department])
+      assert(typeinfo.asInstanceOf[OptionType].isOptional)
     }
     it("find option inner type") {
       val t = BeanInfos.get(classOf[Author]).properties("age")
       val typeinfo = t.typeinfo
       assert(typeinfo.isOptional)
-      assert(typeinfo.asInstanceOf[IterableType].elementType.clazz == classOf[Int])
+      assert(typeinfo.asInstanceOf[OptionType].elementType.clazz == classOf[Int])
     }
     it("find escaped key method") {
       val t = BeanInfos.get(classOf[Author]).properties("type")
@@ -129,6 +129,7 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
 
       val p = t.properties("properties")
       assert(p.clazz == classOf[java.util.Properties])
+      assert(p.typeinfo.isIterable)
       assert(p.typeinfo.asInstanceOf[IterableType].isMap)
       assert(p.typeinfo.asInstanceOf[IterableType].args == List(get(classOf[Object]), get(classOf[Object])))
 
@@ -144,6 +145,12 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
 
       val p3 = t.properties("tempName")
       assert(p3.isTransient)
+    }
+    it("get generic method"){
+      val t = BeanInfos.of(classOf[Loader])
+      assert(t.properties.contains("name"))
+      assert(!t.properties("name").isTransient)
+      //println(t)
     }
   }
 }

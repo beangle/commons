@@ -2,7 +2,7 @@ import Dependencies._
 import BuildSettings._
 
 ThisBuild / organization := "org.beangle.commons"
-ThisBuild / version := "5.2.5-SNAPSHOT"
+ThisBuild / version := "5.2.5"
 ThisBuild / scmInfo := Some(
   ScmInfo(
     url("https://github.com/beangle/commons"),

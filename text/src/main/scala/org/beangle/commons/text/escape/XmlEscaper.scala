@@ -15,20 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.lang
+package org.beangle.commons.text.escape
 
-import org.beangle.commons.conversion.converter.String2ScalaEnumConverter
-import org.beangle.commons.lang.time.WeekDay
-import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.matchers.should.Matchers
+object XmlEscaper {
+  private val targets = Map('<' -> "&lt;", '>' -> "&gt;")
 
-class EnumsTest extends AnyFunSpec with Matchers {
-
-  describe("Enums") {
-    it("get") {
-      assert(Enums.get(classOf[WeekDay], "Sun").contains(WeekDay.Sun))
-      assert(Enums.isEnum(classOf[WeekDay]))
+  def escape(str: String): String = {
+    val ln = str.length
+    var sb: StringBuilder = null
+    val keys = targets.keySet
+    (0 until ln).find(i => keys.contains(str.charAt(i))) match {
+      case Some(firstMatchIdx) =>
+        val sb = new StringBuilder(str.substring(0, firstMatchIdx))
+        (0 until ln) foreach { i =>
+          val c = str.charAt(i)
+          sb.append(targets.getOrElse(c, c))
+        }
+        sb.mkString
+      case None => str
     }
   }
-
 }

@@ -49,7 +49,7 @@ class MapConverter(val conversion: DefaultConversion = DefaultConversion.Instanc
   /**
    * convert.
    */
-  def convert[T: ClassTag](datas: Array[_], clazz: Class[T]): Array[T] = {
+  def convert[T](datas: Array[_], clazz: Class[T]): Array[T] = {
     if (null == datas) return null
     val newDatas = java.lang.reflect.Array.newInstance(clazz, datas.size).asInstanceOf[Array[T]]
     for (i <- 0 until datas.length) newDatas(i) = convert(datas(i), clazz).getOrElse(Objects.default(clazz))

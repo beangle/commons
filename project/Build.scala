@@ -9,6 +9,7 @@ object BuildSettings {
     licenses += ("GNU Lesser General Public License version 3", new URL("http://www.gnu.org/licenses/lgpl-3.0.txt")),
     startYear := Some(2005),
     scalaVersion := buildScalaVersion,
+    scalacOptions := Seq("-Xtarget:11","-deprecation","-feature"),
     crossPaths := true,
 
     publishMavenStyle := true,

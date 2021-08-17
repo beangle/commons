@@ -72,7 +72,7 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
   private def addMemberBody(t:Expr[BeanInfo.Builder]): List[Expr[_]] = {
     val fields = new mutable.ArrayBuffer[FieldExpr]
     val methods= new mutable.ArrayBuffer[MethodExpr]()
-    val superBases= Set("scala.Any","scala.Matchable","java.lang.Object")
+    val superBases= Set("scala.Any","scala.Matchable","java.lang.Object","scala.Equals","scala.Product","java.io.Serializable")
     for(bc <- typeRepr.baseClasses if !superBases.contains(bc.fullName)){
       val base=typeRepr.baseType(bc)
       var params=Map.empty[String,TypeRepr]
@@ -136,12 +136,12 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     var tpe = typeRepr
     var args:List[Expr[TypeInfo]]=List.empty
     tpe match{
-      case d:TypeRef =>  if(tpe.typeSymbol.flags.is(Flags.Param)) tpe = params(tpe.typeSymbol.name)
+      case d:TypeRef =>  if(tpe.typeSymbol.flags.is(Flags.Param) && params.contains(tpe.typeSymbol.name)) tpe = params(tpe.typeSymbol.name)
       case c:AppliedType=>  args = resolveParamTypes(c,params)
       case d:AnnotatedType=> tpe = d.underlying
+      case c:ConstantType=>
       case _=>throw new RuntimeException("Unspported type :" +tpe)
     }
-    (tpe,args)
     if args.isEmpty then '{TypeInfo.get(${classOf(tpe)})}
     else '{TypeInfo.get(${classOf(tpe)},${Expr.ofList(args)})}
   }
@@ -165,11 +165,11 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     a.args foreach { arg =>
       arg match{
         case d:TypeRef =>
-          val argType = if arg.typeSymbol.flags.is(Flags.Param) then ctx(arg.typeSymbol.name) else d
+          val argType = if arg.typeSymbol.flags.is(Flags.Param) && ctx.contains(arg.typeSymbol.name) then ctx(arg.typeSymbol.name) else d
           params += '{TypeInfo.get(${classOf(argType)})}
-        case c:AppliedType=> {
+        case c:AppliedType=>
           params += '{TypeInfo.get(${classOf(c)},${Expr.ofList(resolveParamTypes(c,ctx))})}
-        }
+        case tb:TypeBounds => '{TypeInfo.get(${classOf(tb)})}
       }
       i+=1
     }
