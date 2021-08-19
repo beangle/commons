@@ -19,6 +19,7 @@ package org.beangle.commons.lang.reflect
 import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
 import BeanInfo.*
+import BeanInfo.Builder.ParamInfo2
 import scala.quoted.*
 
 object BeanInfoDigger{
@@ -66,8 +67,9 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
   def classOf(tpe: TypeRepr):Expr[Class[?]] =
     Literal(ClassOfConstant(tpe)).asExpr.asInstanceOf[Expr[Class[?]]]
 
-  case class FieldExpr(name:String,typeinfo:Expr[TypeInfo],transnt:Boolean,defaultValue:Option[Expr[Any]]=None)
-  case class MethodExpr(name:String,rt:Expr[TypeInfo],params:Seq[FieldExpr],asField:Boolean)
+  case class FieldExpr(name:String,typeinfo:Expr[AnyRef],transnt:Boolean,defaultValue:Option[Expr[Any]]=None)
+  case class ParamExpr(name:String,typeinfo:Expr[AnyRef],defaultValue:Option[Expr[Any]]=None)
+  case class MethodExpr(name:String,rt:Expr[Any],params:Seq[ParamExpr],asField:Boolean)
 
   private def addMemberBody(t:Expr[BeanInfo.Builder]): List[Expr[_]] = {
     val fields = new mutable.ArrayBuffer[FieldExpr]
@@ -92,9 +94,13 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       base.typeSymbol.declaredMethods foreach{  mm=>
         val defdef =mm.tree.asInstanceOf[DefDef]
         val rtType = resolveType(defdef.returnTpt.tpe,params)
-        val paramList= resolveDefParams(defdef,params,Map.empty)
-        if(!defdef.name.contains("$") ){
-          methods += MethodExpr(defdef.name,rtType,paramList.toList,defdef.termParamss.isEmpty)
+        val paramList = resolveDefParams(defdef,params,Map.empty)
+        val isFieldReader = paramList.isEmpty && fieldNames.contains(defdef.name)
+        val isPublic = !defdef.symbol.flags.is(Flags.Protected) && !defdef.symbol.flags.is(Flags.Private)
+        if(!isFieldReader && isPublic){
+          if(!defdef.name.contains("$") && !defdef.name.endsWith("_=")){
+            methods += MethodExpr(defdef.name,rtType,paramList.toList,defdef.termParamss.isEmpty)
+          }
         }
       }
     }
@@ -110,15 +116,13 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       i += 1
       resolveDefParams(defdef,Map.empty,if i==1 then ctorDefaults else Map.empty)
     }
-
     val members = new mutable.ArrayBuffer[Expr[_]]()
     members ++= ctors.map{ m=>
       val paramInfos = m.map{ p=>
-        if(p.defaultValue.isEmpty) '{ParamInfo(${Expr(p.name)},${p.typeinfo},None)}
-        else '{ParamInfo(${Expr(p.name)},${p.typeinfo},Some(${p.defaultValue.get}))}
+        if(p.defaultValue.isEmpty) '{ParamInfo2(${Expr(p.name)},${p.typeinfo},None)}
+        else '{ParamInfo2(${Expr(p.name)},${p.typeinfo},Some(${p.defaultValue.get}))}
       }
-      val paramList = Expr.ofList(paramInfos)
-      '{${t}.addCtor(${paramList})}
+      '{${t}.addCtor(Array(${Varargs(paramInfos)}:_*))}
     }
     val transnts = fields.toList.filter(_.transnt).map(x=>Expr(x.name))
     if(transnts.nonEmpty){
@@ -129,17 +133,20 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     }
     members ++= methods.map { x =>
       val paramInfos = x.params.map{ p=>
-        if(p.defaultValue.isEmpty) '{ParamInfo(${Expr(p.name)},${p.typeinfo},None)}
-        else '{ParamInfo(${Expr(p.name)},${p.typeinfo},Some(${p.defaultValue.get}))}
+        if(p.defaultValue.isEmpty) '{ParamInfo2(${Expr(p.name)},${p.typeinfo},None)}
+        else '{ParamInfo2(${Expr(p.name)},${p.typeinfo},Some(${p.defaultValue.get}))}
       }
-      val paramList = Expr.ofList(paramInfos)
-      '{${t}.addMethod(${Expr(x.name)},${x.rt},${paramList},${Expr(x.asField)})}
+      if paramInfos.isEmpty then
+        '{${t}.addMethod(${Expr(x.name)},${x.rt},${Expr(x.asField)})}
+      else
+        '{${t}.addMethod(${Expr(x.name)},${x.rt},Array(${Varargs(paramInfos)}:_*),${Expr(x.asField)})}
     }
     members.toList
   }
-  def resolveType(typeRepr:TypeRepr,params:Map[String,TypeRepr]):Expr[TypeInfo]={
+
+  def resolveType(typeRepr:TypeRepr,params:Map[String,TypeRepr]):Expr[AnyRef]={
     var tpe = typeRepr
-    var args:List[Expr[TypeInfo]]=List.empty
+    var args:List[Expr[AnyRef]]=List.empty
     tpe match{
       case d:TypeRef =>  if(tpe.typeSymbol.flags.is(Flags.Param) && params.contains(tpe.typeSymbol.name)) tpe = params(tpe.typeSymbol.name)
       case c:AppliedType=>  args = resolveParamTypes(c,params)
@@ -147,8 +154,8 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       case c:ConstantType=>
       case _=>throw new RuntimeException("Unspported type :" +tpe)
     }
-    if args.isEmpty then '{TypeInfo.get(${classOf(tpe)})}
-    else '{TypeInfo.get(${classOf(tpe)},${Expr.ofList(args)})}
+    if args.isEmpty then classOf(tpe)
+    else '{Array(${classOf(tpe)},Array(${Varargs(args)}:_*))}
   }
 
   def resolveClassTypes(a:AppliedType,ctx:Map[String,TypeRepr]=Map.empty):Map[String,TypeRepr]={
@@ -163,18 +170,18 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     params.toMap
   }
 
-  def resolveParamTypes(a:AppliedType,ctx:Map[String,TypeRepr]=Map.empty):List[Expr[TypeInfo]]={
+  def resolveParamTypes(a:AppliedType,ctx:Map[String,TypeRepr]=Map.empty):List[Expr[AnyRef]]={
     val mts = a.typeSymbol.memberTypes
     var i=0
-    val params = new mutable.ArrayBuffer[Expr[TypeInfo]]
+    val params = new mutable.ArrayBuffer[Expr[AnyRef]]
     a.args foreach { arg =>
       arg match{
         case d:TypeRef =>
           val argType = if arg.typeSymbol.flags.is(Flags.Param) && ctx.contains(arg.typeSymbol.name) then ctx(arg.typeSymbol.name) else d
-          params += '{TypeInfo.get(${classOf(argType)})}
+          params += classOf(argType)
         case c:AppliedType=>
-          params += '{TypeInfo.get(${classOf(c)},${Expr.ofList(resolveParamTypes(c,ctx))})}
-        case tb:TypeBounds => '{TypeInfo.get(${classOf(tb)})}
+          params += '{Array(${classOf(c)},Array(${Varargs(resolveParamTypes(c,ctx))}:_*))}
+        case tb:TypeBounds => classOf(tb)
       }
       i+=1
     }
@@ -195,15 +202,15 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     }
   }
 
-  def resolveDefParams(defdef:DefDef,typeParams:Map[String,TypeRepr],defaults:Map[Int,Expr[Any]]): List[FieldExpr] ={
-    val paramList=new mutable.ArrayBuffer[FieldExpr]
+  def resolveDefParams(defdef:DefDef,typeParams:Map[String,TypeRepr],defaults:Map[Int,Expr[Any]]): List[ParamExpr] ={
+    val paramList=new mutable.ArrayBuffer[ParamExpr]
     defdef.paramss foreach { a =>
       a match {
         case TermParamClause(ps: List[ValDef])=>
           var i=0
           paramList ++= ps.map{vl =>
             i+=1
-            FieldExpr(vl.name,resolveType(vl.tpt.tpe,typeParams),false,defaults.get(i))
+            ParamExpr(vl.name,resolveType(vl.tpt.tpe,typeParams),defaults.get(i))
           }
         case _=>
       }

@@ -21,8 +21,11 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import org.beangle.commons.lang.testbean.*
 import org.beangle.commons.collection.Properties
+
 import java.lang.reflect.Modifier
 import org.beangle.commons.lang.reflect.TypeInfo.*
+
+import scala.collection.immutable.ArraySeq
 
 class BeanInfosTest extends AnyFunSpec with Matchers {
   BeanInfos.of(classOf[Book])
@@ -99,11 +102,11 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
 
       val typeinfo2 = bm.properties("versionSales").typeinfo
       assert(typeinfo2.asInstanceOf[IterableType].isMap)
-      assert(typeinfo2.asInstanceOf[IterableType].args == List(get(classOf[Int]), get(classOf[Integer])))
+      assert(typeinfo2.asInstanceOf[IterableType].args == ArraySeq(get(classOf[Int]), get(classOf[Integer])))
 
       val typeinfo3 = bm.properties("versionSales2").typeinfo
       assert(typeinfo3.asInstanceOf[IterableType].isMap)
-      assert(typeinfo3.asInstanceOf[IterableType].args == List(get(classOf[Int]), get(classOf[Integer])))
+      assert(typeinfo3.asInstanceOf[IterableType].args == ArraySeq(get(classOf[Int]), get(classOf[Integer])))
     }
 
     it("find correct get") {
@@ -124,7 +127,7 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
       assert(ctor.parameters.head.typeinfo.asInstanceOf[IterableType].elementType.clazz == classOf[Department])
 
       assert(ctor.parameters(1).typeinfo.isInstanceOf[IterableType])
-      assert(ctor.parameters(1).typeinfo.asInstanceOf[IterableType].args == List(get(classOf[String]), get(classOf[Book])))
+      assert(ctor.parameters(1).typeinfo.asInstanceOf[IterableType].args == ArraySeq(get(classOf[String]), get(classOf[Book])))
 
       val p = t.properties("properties")
       assert(p.clazz == classOf[java.util.Properties])

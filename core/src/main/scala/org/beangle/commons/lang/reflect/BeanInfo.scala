@@ -18,6 +18,7 @@
 package org.beangle.commons.lang.reflect
 
 import org.beangle.commons.collection.Collections
+import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.Strings.*
 import org.beangle.commons.lang.reflect.BeanInfo.*
 import org.beangle.commons.logging.Logging
@@ -65,7 +66,7 @@ object BeanInfo extends Logging {
       */
     def isOver(o: MethodInfo): Boolean = {
       if o != this && o.method.getName == this.method.getName && o.parameters.size == this.parameters.size then
-        //primary type over Object,but Object.isAssignableFrom(Int) is false
+      //primary type over Object,but Object.isAssignableFrom(Int) is false
         if o.method.getReturnType == classOf[AnyRef] || o.method.getReturnType.isAssignableFrom(this.method.getReturnType) then
           val ps = o.method.getParameterTypes
           val paramTypeMatch = (0 until parameters.length).forall { i => ps(i) == classOf[AnyRef] || ps(i).isAssignableFrom(parameters(i).typeinfo.clazz) }
@@ -112,7 +113,7 @@ object BeanInfo extends Logging {
       val name = method.getName
       val ignored = BeanInfo.ignores.contains(name) || isCaseMethod(isCase, name)
       val modifierNice = !Modifier.isStatic(modifiers) && Modifier.isPublic(modifiers)
-      !ignored && modifierNice && !(name.contains("$") && !name.contains("_$eq") || name.startsWith("_"))
+      !ignored && modifierNice && !(name.contains("$") && !name.endsWith("_$eq") || name.startsWith("_"))
         && (!method.isBridge || allowBridge)
     }
 
@@ -178,6 +179,13 @@ object BeanInfo extends Logging {
     private def lower(name: String): String = {
       if (name.length > 1 && isUpperCase(name.charAt(1))) name else uncapitalize(name)
     }
+
+    case class ParamInfo2(name: String, typeinfo: Any, defaultValue: Option[Any]){
+      def toParamInfo:ParamInfo={
+        ParamInfo(name,TypeInfo.convert(typeinfo),defaultValue)
+      }
+    }
+
   }
 
   import Builder.*
@@ -196,23 +204,37 @@ object BeanInfo extends Logging {
 
     private val transnts = new mutable.HashSet[String]
 
-    def addTransients(names:List[String]):Unit= transnts ++= names
+    def addTransients(names: List[String]): Unit = transnts ++= names
 
-    def addField(name: String, typeinfo: TypeInfo): Unit = {
-      fieldInfos.put(name, typeinfo)
+    def addField(name: String, ti: Any): Unit = {
+      val typeinfo =  TypeInfo.convert(ti)
+      fieldInfos.put(name,typeinfo)
       //for scala macro quoted api doesn't provider field read method
-      addMethod(name, typeinfo, List.empty, false)
+      val sameNames = methodInfos.getOrElseUpdate(name, new mutable.ArrayBuffer[(TypeInfo, ArraySeq[ParamInfo])])
+      sameNames += Tuple2(typeinfo, ArraySeq.empty)
     }
 
-    def addMethod(name: String, returnTypeInfo: TypeInfo, paramInfos: collection.Seq[ParamInfo], asField: Boolean = false): Unit = {
+    def addMethod(name: String, returnTypeInfo: Any, asField: Boolean): Unit = {
+      addMethod(name,returnTypeInfo,Array.empty,asField)
+    }
+
+    def addMethod(name: String, returnTypeInfo: Any, paramInfos: Array[ParamInfo2], asField: Boolean = false): Unit = {
       val jvmName = replace(name, "=", "$eq")
       val sameNames = methodInfos.getOrElseUpdate(jvmName, new mutable.ArrayBuffer[(TypeInfo, ArraySeq[ParamInfo])])
-      sameNames += Tuple2(returnTypeInfo, ArraySeq.from(paramInfos))
-      if (asField) fieldInfos.put(getPropertyName(jvmName, true), returnTypeInfo)
+      val realReturnTypeInfo = TypeInfo.convert(returnTypeInfo)
+      sameNames += Tuple2(realReturnTypeInfo, ArraySeq.from(paramInfos.map(_.toParamInfo)))
+      if (asField) fieldInfos.put(getPropertyName(jvmName, true), realReturnTypeInfo)
     }
 
-    def addCtor(paramInfos: collection.Seq[ParamInfo]): Unit = {
-      ctorInfos.addOne(ArraySeq.from(paramInfos))
+    def addCtor(paramInfos: Array[ParamInfo2]): Unit = {
+       ctorInfos.addOne(ArraySeq.from(paramInfos.map(_.toParamInfo)))
+    }
+
+    private def registerMethod(methods: mutable.HashMap[String, mutable.Buffer[MethodInfo]], method: Method,
+                             returnType: TypeInfo, parameters: ArraySeq[ParamInfo]): Unit = {
+      val methodInfo = MethodInfo(method, returnType, parameters)
+      val sameNames = methods.getOrElseUpdate(method.getName, Collections.newBuffer[MethodInfo])
+      sameNames += methodInfo
     }
 
     def build(): BeanInfo = {
@@ -221,17 +243,29 @@ object BeanInfo extends Logging {
       val methods = new mutable.HashMap[String, mutable.Buffer[MethodInfo]]
       val isCase = TypeInfo.isCaseClass(clazz)
       clazz.getMethods foreach { method =>
-        if (isFineMethod(isCase, method, true) && methodInfos.contains(method.getName)) {
+        if (isFineMethod(isCase, method, true)) {
           findAccessor(method) foreach { (readable, name) =>
             if (readable) then getters.put(name, method) else setters.put(name, method)
           }
-          methodInfos(method.getName).find(isSignatureMatchable(method, _)) match {
-            case Some(mi) =>
-              val methodInfo = MethodInfo(method, mi._1, mi._2)
-              val sameNames = methods.getOrElseUpdate(method.getName, Collections.newBuffer[MethodInfo])
-              sameNames += methodInfo
+          val methodName = method.getName
+          methodInfos.get(methodName) match {
+            case Some(ml) =>
+              ml.find(isSignatureMatchable(method, _)) match {
+                case Some(mi) => registerMethod(methods, method, mi._1, mi._2)
+                case None =>
+                  logger.error("cannot find method info of " + methodName + " and candinate is " + methodInfos(methodName))
+              }
             case None =>
-              logger.error("cannot find method info of " + method.getName + " and candinate is " + methodInfos(method.getName))
+              if (methodName.endsWith("_$eq")) {
+                val fieldName = Strings.substringBefore(methodName, "_$eq")
+                fieldInfos.get(fieldName) foreach { field =>
+                  registerMethod(methods, method, TypeInfo.UnitType, ArraySeq(ParamInfo(fieldName, field, None)))
+                }
+              } else {
+                fieldInfos.get(methodName) foreach { field =>
+                  registerMethod(methods, method, field, ArraySeq.empty[ParamInfo])
+                }
+              }
           }
         }
       }
