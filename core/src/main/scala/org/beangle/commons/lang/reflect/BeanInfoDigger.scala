@@ -87,12 +87,13 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
         val transnt = mm.annotations exists(x => x.show.toLowerCase.contains("transient"))
         fields += FieldExpr(mm.name,resolveType(tpe,params),transnt)
       }
+      val fieldNames=fields.map(_.name).toSet
 
       base.typeSymbol.declaredMethods foreach{  mm=>
         val defdef =mm.tree.asInstanceOf[DefDef]
         val rtType = resolveType(defdef.returnTpt.tpe,params)
         val paramList= resolveDefParams(defdef,params,Map.empty)
-        if(!defdef.name.contains("$")){
+        if(!defdef.name.contains("$") ){
           methods += MethodExpr(defdef.name,rtType,paramList.toList,defdef.termParamss.isEmpty)
         }
       }
@@ -119,8 +120,12 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       val paramList = Expr.ofList(paramInfos)
       '{${t}.addCtor(${paramList})}
     }
+    val transnts = fields.toList.filter(_.transnt).map(x=>Expr(x.name))
+    if(transnts.nonEmpty){
+      members += '{${t}.addTransients(${Expr.ofList(transnts)})}
+    }
     members ++= fields.toList.map { x =>
-      '{${t}.addField(${Expr(x.name)},${x.typeinfo},${Expr(x.transnt)})}
+      '{${t}.addField(${Expr(x.name)},${x.typeinfo})}
     }
     members ++= methods.map { x =>
       val paramInfos = x.params.map{ p=>

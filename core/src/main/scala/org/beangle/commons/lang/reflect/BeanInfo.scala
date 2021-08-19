@@ -58,6 +58,24 @@ object BeanInfo extends Logging {
 
     override def compare(o: MethodInfo): Int = this.method.getName.compareTo(o.method.getName)
 
+    /** check this method if is perferred over given method
+      *
+      * @param o
+      * @return
+      */
+    def isOver(o: MethodInfo): Boolean = {
+      if o != this && o.method.getName == this.method.getName && o.parameters.size == this.parameters.size then
+        //primary type over Object,but Object.isAssignableFrom(Int) is false
+        if o.method.getReturnType == classOf[AnyRef] || o.method.getReturnType.isAssignableFrom(this.method.getReturnType) then
+          val ps = o.method.getParameterTypes
+          val paramTypeMatch = (0 until parameters.length).forall { i => ps(i) == classOf[AnyRef] || ps(i).isAssignableFrom(parameters(i).typeinfo.clazz) }
+          if paramTypeMatch then
+            o.method.isBridge || o.method.getDeclaringClass.isAssignableFrom(this.method.getDeclaringClass)
+          else false
+        else false
+      else false
+    }
+
     override def toString(): String = {
       val params = parameters.map(x => x.name + ": " + x.typeinfo).mkString(",")
       s"def ${method.getName}(${params}): ${returnType}"
@@ -85,14 +103,14 @@ object BeanInfo extends Logging {
       if transientAnnotated then true else !usedInPrimaryCtor && !hasSetter
     }
 
-    def isCaseMethod(isCase: Boolean,name:String): Boolean = {
+    def isCaseMethod(isCase: Boolean, name: String): Boolean = {
       isCase && caseIgnores.contains(name)
     }
 
-    def isFineMethod(isCase:Boolean,method: Method, allowBridge: Boolean = false): Boolean = {
+    def isFineMethod(isCase: Boolean, method: Method, allowBridge: Boolean = false): Boolean = {
       val modifiers = method.getModifiers
       val name = method.getName
-      val ignored = BeanInfo.ignores.contains(name) || isCaseMethod(isCase,name)
+      val ignored = BeanInfo.ignores.contains(name) || isCaseMethod(isCase, name)
       val modifierNice = !Modifier.isStatic(modifiers) && Modifier.isPublic(modifiers)
       !ignored && modifierNice && !(name.contains("$") && !name.contains("_$eq") || name.startsWith("_"))
         && (!method.isBridge || allowBridge)
@@ -133,6 +151,30 @@ object BeanInfo extends Logging {
       }
     }
 
+    /** filter bridge method and superclass method with same name and compatible signature
+      *
+      * @param methods
+      * @return
+      */
+    def filterSameNames(methods: Iterable[MethodInfo]): collection.Seq[MethodInfo] = {
+      if (methods.size == 1) {
+        methods.toSeq
+      } else {
+        val result = Collections.newBuffer[MethodInfo]
+        val paramSizeMap = methods.groupBy(_.parameters.size)
+        paramSizeMap.values foreach { ml =>
+          val reminded = Collections.newBuffer(ml)
+          ml foreach { mi =>
+            reminded.find(x => x.isOver(mi)) foreach { finded =>
+              reminded -= mi
+            }
+          }
+          result ++= reminded
+        }
+        result
+      }
+    }
+
     private def lower(name: String): String = {
       if (name.length > 1 && isUpperCase(name.charAt(1))) name else uncapitalize(name)
     }
@@ -154,9 +196,10 @@ object BeanInfo extends Logging {
 
     private val transnts = new mutable.HashSet[String]
 
-    def addField(name: String, typeinfo: TypeInfo, transnt: Boolean): Unit = {
+    def addTransients(names:List[String]):Unit= transnts ++= names
+
+    def addField(name: String, typeinfo: TypeInfo): Unit = {
       fieldInfos.put(name, typeinfo)
-      if (transnt) transnts += name
       //for scala macro quoted api doesn't provider field read method
       addMethod(name, typeinfo, List.empty, false)
     }
@@ -194,14 +237,9 @@ object BeanInfo extends Logging {
       }
       // make buffer to list and filter duplicated bridge methods
       val filterMethods = methods.map { case (x, sameNames) =>
-        val partition = sameNames.partition(_.method.isBridge)
-        if partition._1.isEmpty then (x, ArraySeq.from(sameNames)) else {
-          val nb = partition._2
-          partition._1 foreach { mi =>
-            if !nb.exists(nbmi => isSignatureMatchable(mi.method, (nbmi.returnType, nbmi.parameters))) then nb += mi
-          }
-          (x, ArraySeq.from(nb))
-        }
+        val nb = filterSameNames(sameNames)
+        if (getters.contains(x) && nb.size == 1) getters.put(x, nb.head.method)
+        (x, ArraySeq.from(nb))
       }
       val pCtorParamNames = if ctorInfos.isEmpty then Set.empty else ctorInfos.head.map(_.name).toSet
       // organize setter and getter
@@ -212,6 +250,7 @@ object BeanInfo extends Logging {
           val setter = setters.get(p)
           val isTransient = Builder.isTransient(transnts.contains(p), setter.isDefined, pCtorParamNames.contains(p))
           val pd = BeanInfo.PropertyInfo(p, fieldInfo, getter, setter, isTransient)
+          //validProperty(clazz,pd)
           properties.put(p, pd)
         }
       }
@@ -223,6 +262,11 @@ object BeanInfo extends Logging {
     }
   }
 
+  def validProperty(holderClass: Class[_], pi: BeanInfo.PropertyInfo): Unit = {
+    val propertyClazz = pi.typeinfo.clazz
+    pi.getter foreach { g => require(g.getReturnType == propertyClazz, s"${holderClass.getName}.${pi.name}'s type is ${propertyClazz.getName},but get method return ${g.getReturnType.getName}") }
+    pi.setter foreach { g => require(g.getParameterTypes()(0) == propertyClazz, s"${holderClass.getName}.${pi.name}'s type is ${propertyClazz.getName},but set method need ${g.getParameterTypes()(0).getName}") }
+  }
 }
 
 case class BeanInfo(clazz: Class[_], ctors: ArraySeq[ConstructorInfo], properties: Map[String, PropertyInfo], methods: Map[String, ArraySeq[MethodInfo]]) {

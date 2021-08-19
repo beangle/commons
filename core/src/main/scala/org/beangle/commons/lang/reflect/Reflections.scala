@@ -65,7 +65,11 @@ object Reflections {
   def getCollectionParamTypes(clazz: Class[_]): ArraySeq[TypeInfo] = {
     val collections: Set[Class[_]] = Set(classOf[mutable.Seq[_]], classOf[immutable.Seq[_]], classOf[java.util.Collection[_]])
     val types = getGenericParamTypes(clazz, collections)
-    if types.isEmpty then ArraySeq(TypeInfo.AnyRefType) else ArraySeq(TypeInfo.get(types.head._2, false))
+    if types.isEmpty then ArraySeq(TypeInfo.AnyRefType)
+    else {
+      if types.head._2==clazz then ArraySeq(TypeInfo.GeneralType(clazz))
+      else ArraySeq(TypeInfo.get(types.head._2, false))
+    }
   }
 
   def getMapParamTypes(clazz: Class[_]): ArraySeq[TypeInfo] = {

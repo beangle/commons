@@ -37,4 +37,6 @@ object BeanInfos {
   inline def of(inline clazzes:Class[_]*):List[BeanInfo] = ${BeanInfoDigger.digInto('clazzes,'cache)}
 
   inline def of[T](clazz:Class[T]): BeanInfo = ${ BeanInfoDigger.digInto('clazz,'cache);}
+
+  def cached(clazz:Class[_]):Boolean = cache.contains(clazz)
 }

@@ -17,7 +17,6 @@
 
 package org.beangle.commons.lang.reflect
 
-import org.beangle.commons.lang.testbean.NumIdBean
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import org.beangle.commons.lang.testbean.*
@@ -146,11 +145,15 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
       val p3 = t.properties("tempName")
       assert(p3.isTransient)
     }
-    it("get generic method"){
+    it("get case class method"){
       val t = BeanInfos.of(classOf[Loader])
       assert(t.properties.contains("name"))
       assert(!t.properties("name").isTransient)
-      //println(t)
+    }
+    it("get generic method"){
+      val t = BeanInfos.of(classOf[LongFactory])
+      assert(t.properties.contains("result"))
+      assert(t.properties("result").getter.get.getReturnType == classOf[Long])
     }
   }
 }

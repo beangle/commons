@@ -172,6 +172,14 @@ case class Loader(name: String) {
   }
 }
 
-class Nnn {
-  final val constantInt = "xxxxx"
+trait Factory[T] {
+  def result:T
+}
+
+class LongFactory extends Factory[Long]{
+  def result:Long=9L
+}
+
+class Textbook extends NumIdBean[java.lang.Long]{
+  def name:String ="textbook"
 }
