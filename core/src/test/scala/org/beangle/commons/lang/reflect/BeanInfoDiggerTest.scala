@@ -35,9 +35,10 @@ class BeanInfoDiggerTest extends AnyFunSpec with Matchers {
       val a = new AA
       a.title()
       a.id = 3L
-      println(BeanInfos.of(classOf[R]))
-      println(BeanInfos.of(classOf[AA],classOf[TT]))
-      println(BeanInfos.get(classOf[TT]))
+//      println(BeanInfos.of(classOf[R]))
+//      println(BeanInfos.of(classOf[AA],classOf[TT]))
+//      println(BeanInfos.get(classOf[TT]))
+      println(BeanInfos.of(classOf[LongFactory]))
     }
   }
 }

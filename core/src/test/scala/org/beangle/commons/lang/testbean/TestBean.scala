@@ -19,7 +19,8 @@ package org.beangle.commons.lang.testbean
 
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.annotation.description
+import org.beangle.commons.lang.annotation.{description, noreflect}
+import org.beangle.commons.logging.Logging
 
 import java.beans.Transient
 
@@ -176,8 +177,11 @@ trait Factory[T] {
   def result:T
 }
 
-class LongFactory extends Factory[Long]{
+class LongFactory extends Factory[Long] with Logging{
   def result:Long=9L
+
+  @noreflect
+  val typeName:String =getClass.getName
 }
 
 class Textbook extends NumIdBean[java.lang.Long]{

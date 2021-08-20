@@ -16,10 +16,11 @@
  */
 
 package org.beangle.commons.lang.reflect
+import org.beangle.commons.lang.annotation.noreflect
 import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
 import BeanInfo.*
-import BeanInfo.Builder.ParamInfo2
+import BeanInfo.Builder.ParamHolder
 import scala.quoted.*
 
 object BeanInfoDigger{
@@ -59,12 +60,12 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
 
   def dig(): Expr[BeanInfo] = {
     '{
-    val b = new BeanInfo.Builder(${classOf(typeRepr)})
+    val b = new BeanInfo.Builder(${typeOf(typeRepr)})
     ${Expr.block(addMemberBody('b),'b)}.build()
     }
   }
 
-  def classOf(tpe: TypeRepr):Expr[Class[?]] =
+  def typeOf(tpe: TypeRepr):Expr[Class[?]] =
     Literal(ClassOfConstant(tpe)).asExpr.asInstanceOf[Expr[Class[?]]]
 
   case class FieldExpr(name:String,typeinfo:Expr[AnyRef],transnt:Boolean,defaultValue:Option[Expr[Any]]=None)
@@ -87,7 +88,9 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       base.typeSymbol.declaredFields foreach{ mm=>
         val tpe=mm.tree.asInstanceOf[ValDef].tpt.tpe
         val transnt = mm.annotations exists(x => x.show.toLowerCase.contains("transient"))
-        fields += FieldExpr(mm.name,resolveType(tpe,params),transnt)
+        val noreflect = mm.hasAnnotation(Symbol.classSymbol(classOf[noreflect].getName))
+        val isPublic = !mm.flags.is(Flags.Protected) && !mm.flags.is(Flags.Private)
+        if isPublic && !noreflect then fields += FieldExpr(mm.name,resolveType(tpe,params),transnt)
       }
       val fieldNames=fields.map(_.name).toSet
 
@@ -119,8 +122,8 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     val members = new mutable.ArrayBuffer[Expr[_]]()
     members ++= ctors.map{ m=>
       val paramInfos = m.map{ p=>
-        if(p.defaultValue.isEmpty) '{ParamInfo2(${Expr(p.name)},${p.typeinfo},None)}
-        else '{ParamInfo2(${Expr(p.name)},${p.typeinfo},Some(${p.defaultValue.get}))}
+        if(p.defaultValue.isEmpty) '{new ParamHolder(${Expr(p.name)},${p.typeinfo})}
+        else '{new ParamHolder(${Expr(p.name)},${p.typeinfo},Some(${p.defaultValue.get}))}
       }
       '{${t}.addCtor(Array(${Varargs(paramInfos)}:_*))}
     }
@@ -133,13 +136,13 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     }
     members ++= methods.map { x =>
       val paramInfos = x.params.map{ p=>
-        if(p.defaultValue.isEmpty) '{ParamInfo2(${Expr(p.name)},${p.typeinfo},None)}
-        else '{ParamInfo2(${Expr(p.name)},${p.typeinfo},Some(${p.defaultValue.get}))}
+        if(p.defaultValue.isEmpty) '{new ParamHolder(${Expr(p.name)},${p.typeinfo})}
+        else '{new ParamHolder(${Expr(p.name)},${p.typeinfo},Some(${p.defaultValue.get}))}
       }
       if paramInfos.isEmpty then
         '{${t}.addMethod(${Expr(x.name)},${x.rt},${Expr(x.asField)})}
       else
-        '{${t}.addMethod(${Expr(x.name)},${x.rt},Array(${Varargs(paramInfos)}:_*),${Expr(x.asField)})}
+        '{${t}.addMethod(${Expr(x.name)},${x.rt},Array(${Varargs(paramInfos)}:_*))}
     }
     members.toList
   }
@@ -154,8 +157,8 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       case c:ConstantType=>
       case _=>throw new RuntimeException("Unspported type :" +tpe)
     }
-    if args.isEmpty then classOf(tpe)
-    else '{Array(${classOf(tpe)},Array(${Varargs(args)}:_*))}
+    if args.isEmpty then typeOf(tpe)
+    else '{Array(${typeOf(tpe)},Array(${Varargs(args)}:_*))}
   }
 
   def resolveClassTypes(a:AppliedType,ctx:Map[String,TypeRepr]=Map.empty):Map[String,TypeRepr]={
@@ -178,10 +181,10 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       arg match{
         case d:TypeRef =>
           val argType = if arg.typeSymbol.flags.is(Flags.Param) && ctx.contains(arg.typeSymbol.name) then ctx(arg.typeSymbol.name) else d
-          params += classOf(argType)
+          params += typeOf(argType)
         case c:AppliedType=>
-          params += '{Array(${classOf(c)},Array(${Varargs(resolveParamTypes(c,ctx))}:_*))}
-        case tb:TypeBounds => classOf(tb)
+          params += '{Array(${typeOf(c)},Array(${Varargs(resolveParamTypes(c,ctx))}:_*))}
+        case tb:TypeBounds => typeOf(tb)
       }
       i+=1
     }
