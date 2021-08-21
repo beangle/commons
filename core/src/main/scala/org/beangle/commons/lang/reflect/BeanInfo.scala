@@ -118,7 +118,7 @@ object BeanInfo extends Logging {
 
     def isFineMethodName(name:String):Boolean={
       if name.startsWith("_") then false
-      else if name.endsWith("_$seq") then !name.substring(0,name.length-4).contains("$")
+      else if name.endsWith("_$eq") then !name.substring(0,name.length-4).contains("$")
       else !name.contains("$")
     }
 
