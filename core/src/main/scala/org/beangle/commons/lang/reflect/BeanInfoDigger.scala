@@ -17,10 +17,13 @@
 
 package org.beangle.commons.lang.reflect
 import org.beangle.commons.lang.annotation.noreflect
+
 import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
 import BeanInfo.*
 import BeanInfo.Builder.ParamHolder
+import org.beangle.commons.lang.Strings
+
 import scala.quoted.*
 
 object BeanInfoDigger{
@@ -86,11 +89,12 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
 
       //Some fields declared in primary constructor will by ignored due to missing public access methods.
       base.typeSymbol.declaredFields foreach{ mm=>
-        val tpe=mm.tree.asInstanceOf[ValDef].tpt.tpe
+        val tpe = mm.tree.asInstanceOf[ValDef].tpt.tpe
         val transnt = mm.annotations exists(x => x.show.toLowerCase.contains("transient"))
         val noreflect = mm.hasAnnotation(Symbol.classSymbol(classOf[noreflect].getName))
         val isPublic = !mm.flags.is(Flags.Protected) && !mm.flags.is(Flags.Private)
-        if isPublic && !noreflect then fields += FieldExpr(mm.name,resolveType(tpe,params),transnt)
+        val isInnerType = mm.name == Strings.substringBetween(mm.tree.show,"this.",".type")
+        if isPublic && !noreflect  && !isInnerType then fields += FieldExpr(mm.name,resolveType(tpe,params),transnt)
       }
       val fieldNames=fields.map(_.name).toSet
 

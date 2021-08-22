@@ -182,6 +182,10 @@ class LongFactory extends Factory[Long] with Logging{
 
   @noreflect
   val typeName:String =getClass.getName
+
+  class Inner{
+    var name:String=_
+  }
 }
 
 class Textbook extends NumIdBean[java.lang.Long]{
