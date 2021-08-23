@@ -21,9 +21,10 @@ import org.beangle.commons.lang.annotation.noreflect
 import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
 import BeanInfo.*
-import BeanInfo.Builder.ParamHolder
+import BeanInfo.Builder.{ParamHolder, getPropertyName}
 import org.beangle.commons.lang.Strings
 
+import java.lang.reflect.Method
 import scala.quoted.*
 
 object BeanInfoDigger{
@@ -71,13 +72,49 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
   def typeOf(tpe: TypeRepr):Expr[Class[?]] =
     Literal(ClassOfConstant(tpe)).asExpr.asInstanceOf[Expr[Class[?]]]
 
-  case class FieldExpr(name:String,typeinfo:Expr[AnyRef],transnt:Boolean,defaultValue:Option[Expr[Any]]=None)
+  case class FieldExpr(name:String,typeinfo:Expr[AnyRef],transntAnnotated:Boolean,hasGet:Boolean,hasSet:Boolean,defaultValue:Option[Expr[Any]]=None) {
+    def transnt(constructParamNames:Set[String]):Boolean= BeanInfo.Builder.isTransient(transntAnnotated, hasSet,constructParamNames.contains(name))
+  }
   case class ParamExpr(name:String,typeinfo:Expr[AnyRef],defaultValue:Option[Expr[Any]]=None)
   case class MethodExpr(name:String,rt:Expr[Any],params:Seq[ParamExpr],asField:Boolean)
 
+  def findAccessor(m: DefDef): Option[Tuple2[Boolean, String]] = {
+    val name = m.name
+    var paramSize=0
+    m.paramss foreach { a =>
+      a match {
+        case TermParamClause(ps: List[ValDef])=>
+          paramSize += ps.size
+        case _=>
+      }
+    }
+    if (0 == paramSize && m.returnTpt.tpe.typeSymbol != Symbol.classSymbol(classOf[Unit].getName)) {
+      Some((true, getPropertyName(name, true)))
+    } else if (1 == paramSize) {
+      val propertyName = getPropertyName(name, false)
+      if (null != propertyName && !propertyName.contains("$")) Some((false, propertyName)) else None
+    } else None
+  }
+
   private def addMemberBody(t:Expr[BeanInfo.Builder]): List[Expr[_]] = {
-    val fields = new mutable.ArrayBuffer[FieldExpr]
+    val fieldMap = new mutable.HashMap[String,FieldExpr]
     val methods= new mutable.ArrayBuffer[MethodExpr]()
+
+    val typeSymbol = typeRepr.typeSymbol
+    val isScalaClass= !typeSymbol.flags.is(Flags.JavaDefined)
+    val ctorDeclarations = typeSymbol.declarations.filter(_.isClassConstructor).toBuffer
+    ctorDeclarations -= typeSymbol.primaryConstructor
+    // dotty will add this(x01:Unit) method in java class as primary constructor,we ignore it.
+    if isScalaClass then ctorDeclarations.prepend(typeSymbol.primaryConstructor)
+
+    val ctorDefaults = resolveCtorDefaults(typeSymbol)
+    var i=0
+    val ctors = ctorDeclarations.map{ s =>
+      val defdef = s.tree.asInstanceOf[DefDef]
+      i += 1
+      resolveDefParams(defdef,Map.empty,if i==1 then ctorDefaults else Map.empty)
+    }
+
     val superBases= Set("scala.Any","scala.Matchable","java.lang.Object","scala.Equals","scala.Product","java.io.Serializable")
     for(bc <- typeRepr.baseClasses if !superBases.contains(bc.fullName)){
       val base=typeRepr.baseType(bc)
@@ -88,41 +125,41 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       }
 
       //Some fields declared in primary constructor will by ignored due to missing public access methods.
+      //So we discover declared fields,they may appear in that collection.
       base.typeSymbol.declaredFields foreach{ mm=>
         val tpe = mm.tree.asInstanceOf[ValDef].tpt.tpe
         val transnt = mm.annotations exists(x => x.show.toLowerCase.contains("transient"))
         val noreflect = mm.hasAnnotation(Symbol.classSymbol(classOf[noreflect].getName))
         val isPublic = !mm.flags.is(Flags.Protected) && !mm.flags.is(Flags.Private)
         val isInnerType = mm.name == Strings.substringBetween(mm.tree.show,"this.",".type")
-        if isPublic && !noreflect  && !isInnerType then fields += FieldExpr(mm.name,resolveType(tpe,params),transnt)
+        val isNormal= !mm.name.contains("$")
+        if isPublic && isNormal && !noreflect  && !isInnerType then fieldMap.put(mm.name, FieldExpr(mm.name,resolveType(tpe,params),transnt,true,true))
       }
-      val fieldNames=fields.map(_.name).toSet
 
       base.typeSymbol.declaredMethods foreach{  mm=>
         val defdef =mm.tree.asInstanceOf[DefDef]
         val rtType = resolveType(defdef.returnTpt.tpe,params)
         val paramList = resolveDefParams(defdef,params,Map.empty)
-        val isFieldReader = paramList.isEmpty && fieldNames.contains(defdef.name)
         val isPublic = !defdef.symbol.flags.is(Flags.Protected) && !defdef.symbol.flags.is(Flags.Private)
-        if(!isFieldReader && isPublic){
-          if(!defdef.name.contains("$") && !defdef.name.endsWith("_=")){
-            methods += MethodExpr(defdef.name,rtType,paramList.toList,defdef.termParamss.isEmpty)
+        if(isPublic){
+          this.findAccessor(defdef)match {
+            case Some(readable, name) =>
+              fieldMap.get(name) match{
+                case Some(fx)=> if readable then fieldMap.put(name,fx.copy(hasGet=true)) else fieldMap.put(name,fx.copy(hasSet=true))
+                case None =>
+                  val transnt = defdef.symbol.annotations exists(x => x.show.toLowerCase.contains("transient"))
+                  val fe = if (readable) then FieldExpr(name,rtType,transnt,true,false) else FieldExpr(name,paramList.head.typeinfo,transnt,false,true)
+                  fieldMap.put(name,fe)
+              }
+            case None=>
+              if(!defdef.name.contains("$") && !defdef.name.endsWith("_=")){
+                methods += MethodExpr(defdef.name,rtType,paramList.toList,defdef.termParamss.isEmpty)
+              }
           }
         }
       }
     }
 
-    val typeSymbol = typeRepr.typeSymbol
-    val ctorDeclarations = typeSymbol.declarations.filter(_.isClassConstructor).toBuffer
-    ctorDeclarations -= typeSymbol.primaryConstructor
-    ctorDeclarations.prepend(typeSymbol.primaryConstructor)
-    val ctorDefaults = resolveCtorDefaults(typeSymbol)
-    var i=0
-    val ctors = ctorDeclarations.map{ s =>
-      val defdef = s.tree.asInstanceOf[DefDef]
-      i += 1
-      resolveDefParams(defdef,Map.empty,if i==1 then ctorDefaults else Map.empty)
-    }
     val members = new mutable.ArrayBuffer[Expr[_]]()
     members ++= ctors.map{ m=>
       val paramInfos = m.map{ p=>
@@ -131,11 +168,17 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       }
       '{${t}.addCtor(Array(${Varargs(paramInfos)}:_*))}
     }
-    val transnts = fields.toList.filter(_.transnt).map(x=>Expr(x.name))
+
+    val primaryCtorParamNames=   ctors.headOption match{
+      case Some(ctor)=> ctor.map(_.name).toSet
+      case None=> Set.empty
+    }
+
+    val transnts = fieldMap.values.filter(x=>x.transnt(primaryCtorParamNames)).map(x=>Expr(x.name)).toList
     if(transnts.nonEmpty){
       members += '{${t}.addTransients(${Expr.ofList(transnts)})}
     }
-    members ++= fields.toList.map { x =>
+    members ++= fieldMap.values.map { x =>
       '{${t}.addField(${Expr(x.name)},${x.typeinfo})}
     }
     members ++= methods.map { x =>

@@ -158,5 +158,9 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
       assert(t.properties.contains("result"))
       assert(t.properties("result").getter.get.getReturnType == classOf[Long])
     }
+    it("get java bean methods"){
+      val t = BeanInfos.of(classOf[TestJavaBean])
+      println(t)
+    }
   }
 }

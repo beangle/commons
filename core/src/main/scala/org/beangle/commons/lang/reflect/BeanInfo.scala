@@ -153,6 +153,7 @@ object BeanInfo extends Logging {
       } else {
         if (name.startsWith("set") && name.length > 3 && isUpperCase(name.charAt(3))) lower(name.substring(3))
         else if (name.endsWith("_$eq")) substringBefore(name, "_$eq")
+        else if (name.endsWith("_=")) substringBefore(name, "_=")
         else null
       }
     }
@@ -338,7 +339,7 @@ case class BeanInfo(clazz: Class[_], ctors: ArraySeq[ConstructorInfo], propertie
   override def toString: String = {
     val sb = new mutable.ArrayBuffer[String]
     val isCase = TypeInfo.isCaseClass(clazz)
-    val fieldInCtor = ctors.head.parameters.map(_.name).toSet
+    val fieldInCtor = if ctors.isEmpty then Set.empty else ctors.head.parameters.map(_.name).toSet
     if (ctors.isEmpty) {
       sb += s"class ${clazz.getName} {"
     } else {
