@@ -27,8 +27,8 @@ public class TestJavaBean {
         return _name;
     }
 
-    public void setName(String n) {
-        this._name = n;
-    }
+//    public void setName(String n) {
+//        this._name = n;
+//    }
 
 }

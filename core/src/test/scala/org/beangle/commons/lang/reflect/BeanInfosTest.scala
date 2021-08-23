@@ -160,7 +160,7 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
     }
     it("get java bean methods"){
       val t = BeanInfos.of(classOf[TestJavaBean])
-      println(t)
+      assert(t.properties("name").isTransient)
     }
   }
 }
