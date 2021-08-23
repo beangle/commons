@@ -26,6 +26,8 @@ object WeekDay {
   def of(date: LocalDate): WeekDay = fromOrdinal(date.getDayOfWeek.getValue - 1)
 
   def of(id:Int):WeekDay = fromOrdinal(id - 1)
+
+  def fromId(id:Int):WeekDay = fromOrdinal(id - 1)
 }
 
 /**

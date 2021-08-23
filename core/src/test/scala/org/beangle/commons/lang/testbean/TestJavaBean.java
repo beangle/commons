@@ -23,12 +23,12 @@ public class TestJavaBean {
 
     private String _name;
 
-    public String getName() {
-        return _name;
-    }
-
-//    public void setName(String n) {
-//        this._name = n;
+//    public String getName() {
+//        return _name;
 //    }
+
+    public void setName(String n) {
+        this._name = n;
+    }
 
 }

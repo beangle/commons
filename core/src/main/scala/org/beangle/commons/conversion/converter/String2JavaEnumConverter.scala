@@ -21,6 +21,7 @@ import org.beangle.commons.conversion.Converter
 import org.beangle.commons.lang.reflect.Reflections
 import org.beangle.commons.lang.{ClassLoaders, Numbers}
 
+import java.lang.reflect.Method
 import scala.reflect.Enum as ScalaEnum
 
 /**
@@ -54,8 +55,16 @@ end String2JavaEnumConverter
 
 object String2ScalaEnumConverter extends StringConverterFactory[String, ScalaEnum] {
 
+  private def getFromOrdinalMethod(clz:Class[_]):Method={
+    try{
+      clz.getMethod("fromId",classOf[Int])
+    }catch{
+      case e:Throwable=>
+        clz.getMethod("fromOrdinal",classOf[Int])
+    }
+  }
   class EnumConverter[T](e: AnyRef) extends Converter[String, T] {
-    private val fromOrdinalMethod = e.getClass.getMethod("fromOrdinal", classOf[Int])
+    private val fromOrdinalMethod = getFromOrdinalMethod(e.getClass)
     private val valueOfMethod = e.getClass.getMethod("valueOf", classOf[String])
 
     override def apply(input: String): T = {
