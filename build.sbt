@@ -1,5 +1,4 @@
-import Dependencies._
-import BuildSettings._
+import org.beangle.bom.sbt.BeangleBom._
 
 ThisBuild / organization := "org.beangle.commons"
 ThisBuild / version := "5.2.5"
@@ -22,6 +21,8 @@ ThisBuild / developers := List(
 ThisBuild / description := "The Beangle Commons Library"
 ThisBuild / homepage := Some(url("http://beangle.github.io/commons/index.html"))
 
+val commonDeps = Seq(Slf4j, LogbackClassic, LogbackCore, Scalatest)
+
 lazy val root = (project in file("."))
   .settings()
   .aggregate(core,text,csv,dbf,commons_file)
@@ -29,36 +30,36 @@ lazy val root = (project in file("."))
 lazy val core = (project in file("core"))
   .settings(
     name := "beangle-commons-core",
-    commonSettings,
-    libraryDependencies ++= (commonDeps)
+    CommonSettings,
+    libraryDependencies ++= commonDeps
   )
 
 lazy val text = (project in file("text"))
   .settings(
     name := "beangle-commons-text",
-    commonSettings,
-    libraryDependencies ++= (commonDeps)
+    CommonSettings,
+    libraryDependencies ++= commonDeps
   ).dependsOn(core)
 
 lazy val csv = (project in file("csv"))
   .settings(
     name := "beangle-commons-csv",
-    commonSettings,
-    libraryDependencies ++= (commonDeps)
+    CommonSettings,
+    libraryDependencies ++= commonDeps
   ).dependsOn(core)
 
 lazy val dbf = (project in file("dbf"))
   .settings(
     name := "beangle-commons-dbf",
-    commonSettings,
-    libraryDependencies ++= (commonDeps)
+    CommonSettings,
+    libraryDependencies ++= commonDeps
   ).dependsOn(core)
 
 lazy val commons_file = (project in file("file"))
   .settings(
     name := "beangle-commons-file",
-    commonSettings,
-    libraryDependencies ++= (commonDeps ++ Seq(commonsCompress))
+    CommonSettings,
+    libraryDependencies ++= (commonDeps ++ Seq(ApacheCommonsCompress))
   ).dependsOn(core)
 
 publish / skip := true
