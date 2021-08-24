@@ -15,27 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.conversion.converter
-import org.beangle.commons.conversion.impl.DefaultConversion
-import org.beangle.commons.lang.testbean.TestEnum
-import org.beangle.commons.lang.time.WeekDay
+package org.beangle.commons.lang.annotation
 
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.funspec.AnyFunSpec
+import scala.annotation.StaticAnnotation
 
-/**
+/** Ignore field when using reflection
  * @author chaostone
- * @since 3.0.0
+ * @since 3.0.2
  */
-
-class EnumConverterTest extends AnyFunSpec with Matchers {
-
-  describe("EnumConverter") {
-    it("Convert Enum") {
-      println(TestEnum.Private.getClass)
-      assert(null != DefaultConversion.Instance.convert("Private", classOf[TestEnum]))
-      assert(null != DefaultConversion.Instance.convert("Sun", classOf[WeekDay]))
-      assert(WeekDay.Sat == DefaultConversion.Instance.convert("6", classOf[WeekDay]))
-    }
-  }
-}
+class noreflect extends StaticAnnotation

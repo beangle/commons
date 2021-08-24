@@ -15,27 +15,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.conversion.converter
-import org.beangle.commons.conversion.impl.DefaultConversion
-import org.beangle.commons.lang.testbean.TestEnum
-import org.beangle.commons.lang.time.WeekDay
+package org.beangle.commons.lang.reflect
+import org.beangle.commons.lang.reflect.BeanInfos
 
+import java.beans.{BeanInfo, Transient}
+import org.beangle.commons.lang.testbean.*
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.beangle.commons.lang.testbean
+import org.beangle.commons.collection.Properties
 
-/**
- * @author chaostone
- * @since 3.0.0
- */
+import java.lang.reflect.Modifier
+import org.beangle.commons.lang.reflect.TypeInfo
 
-class EnumConverterTest extends AnyFunSpec with Matchers {
+class BeanInfoDiggerTest extends AnyFunSpec with Matchers {
 
-  describe("EnumConverter") {
-    it("Convert Enum") {
-      println(TestEnum.Private.getClass)
-      assert(null != DefaultConversion.Instance.convert("Private", classOf[TestEnum]))
-      assert(null != DefaultConversion.Instance.convert("Sun", classOf[WeekDay]))
-      assert(WeekDay.Sat == DefaultConversion.Instance.convert("6", classOf[WeekDay]))
+  describe("BeanInfoDigger") {
+    it("dig") {
+      val a = new AA
+      a.title()
+      a.id = 3L
+//      println(BeanInfos.of(classOf[R]))
+//      println(BeanInfos.of(classOf[AA],classOf[TT]))
+//      println(BeanInfos.get(classOf[TT]))
+      println(BeanInfos.of(classOf[LongFactory]))
     }
   }
 }

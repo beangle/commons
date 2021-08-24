@@ -27,9 +27,10 @@ import org.beangle.commons.lang.{ClassLoaders, Strings}
 
 import scala.collection.mutable
 import scala.collection.immutable.ArraySeq
-import scala.reflect._
+import scala.reflect.*
 import org.beangle.commons.lang.reflect.BeanInfo
 import org.beangle.commons.lang.reflect.BeanInfo.*
+import org.beangle.commons.lang.reflect.BeanInfo.Builder.filterSameNames
 
 /** Load ClassInfo using reflection
   *
@@ -40,17 +41,18 @@ object BeanInfoLoader {
   private case class Setter(method: Method, parameterTypes: Array[TypeInfo])
 
   /**
-   * Load BeanManifest using reflections
-   */
-  def load(clazz: Class[_] ): BeanInfo = {
+    * Load BeanInfo using reflections
+    */
+  def load(clazz: Class[_]): BeanInfo = {
     val className = clazz.getName
     if (className.startsWith("java.") || className.startsWith("scala."))
       throw new RuntimeException("Cannot reflect class:" + clazz.getName)
     val originBeanInfo: Option[BeanInfo] = None
-//      if (className.contains("$$") && className.startsWith(clazz.getSuperclass.getName))
-//        Option(cache.get(clazz.getSuperclass))
-//      else
-//        None
+    //      if (className.contains("$$") && className.startsWith(clazz.getSuperclass.getName))
+    //        Option(cache.get(clazz.getSuperclass))
+    //      else
+    //        None
+    val isCase = TypeInfo.isCaseClass(clazz)
     val getters = new mutable.HashMap[String, Getter]
     val setters = new mutable.HashMap[String, Setter]
     val fields = new mutable.HashMap[String, Field]
@@ -63,29 +65,17 @@ object BeanInfoLoader {
       nextClass.getDeclaredFields foreach { f => fields += (f.getName -> f) }
       (0 until declaredMethods.length) foreach { i =>
         val method = declaredMethods(i)
-        processMethod(method,getters,setters,methods,paramTypes)
+        processMethod(isCase, method, getters, setters, methods, paramTypes)
       }
-      navIterface(nextClass, accessed, getters, setters, methods,paramTypes)
+      navIterface(nextClass, accessed, getters, setters, methods, paramTypes)
 
       val nextType = nextClass.getGenericSuperclass
       nextClass = nextClass.getSuperclass
       paramTypes = deduceParamTypes(nextClass, nextType, paramTypes)
     }
-    // organize setter and getter
-    val allprops = getters.keySet ++ setters.keySet
-    val properties = Collections.newMap[String, BeanInfo.PropertyInfo]
-    allprops foreach { p =>
-      val getter = getters.get(p)
-      val setter = setters.get(p)
-      val typeinfo = if getter.isEmpty then setter.get.parameterTypes(0) else getter.get.returnType
-      val isTransientAnnoted = fields.get(p).map(x=> Modifier.isTransient(x.getModifiers)).getOrElse(false)
-      val isTransient = BeanInfo.Builder.isTransient(isTransientAnnoted,setter.isDefined)
-      val pd = BeanInfo.PropertyInfo(p, typeinfo, getter.map(x => x.method), setter.map(x => x.method),isTransient)
-      properties.put(p, pd)
-    }
 
     //find default constructor parameters
-    val defaultConstructorParams: Map[Int, Any] =
+    val defaultCtorParamValues: Map[Int, Any] =
       ClassLoaders.get(clazz.getName + "$") match {
         case Some(oclazz) =>
           val osinglton = oclazz.getDeclaredField("MODULE$").get(null)
@@ -100,36 +90,61 @@ object BeanInfoLoader {
 
     // find constructor with arguments
     val ctors = Collections.newBuffer[BeanInfo.ConstructorInfo]
-    var i=0
+    var pCtorParamNames :Set[String] =Set.empty
+    var i = 0
     clazz.getConstructors foreach { ctor =>
       val params = new mutable.ArrayBuffer[ParamInfo](ctor.getParameterCount)
-      ctor.getParameters foreach {p => params += ParamInfo(p.getName,typeof(p.getType,p.getParameterizedType, paramTypes),None) }
-      if(i==0 && defaultConstructorParams.nonEmpty) {
-        defaultConstructorParams foreach { case (i, v) =>
-          params(i) = params(i).copy(defaultValue = Some(v))
+      ctor.getParameters foreach { p => params += ParamInfo(p.getName, typeof(p.getType, p.getParameterizedType, paramTypes), None) }
+      if (i == 0) {
+        pCtorParamNames = params.map(_.name).toSet
+        if (defaultCtorParamValues.nonEmpty) {
+          defaultCtorParamValues foreach { case (i, v) =>
+            params(i-1) = params(i-1).copy(defaultValue = Some(v)) // for default values were 1 based.
+          }
         }
+        i += 1
+        ctors += BeanInfo.ConstructorInfo(ArraySeq.from(params))
       }
-      i+=1
-      ctors += BeanInfo.ConstructorInfo(ArraySeq.from(params))
     }
+
+    // make buffer to list and filter duplicated bridge methods
+    val filterMethods = methods.groupBy(_.method.getName).map { case (x, sameNames) =>
+      val nb = Builder.filterSameNames(sameNames)
+      if (getters.contains(x) && nb.size == 1) getters.put(x, getters(x).copy(method = nb.head.method))
+      (x, ArraySeq.from(nb))
+    }
+    // organize setter and getter
+    val allprops = getters.keySet ++ setters.keySet
+    val properties = Collections.newMap[String, BeanInfo.PropertyInfo]
+    allprops foreach { p =>
+      val getter = getters.get(p)
+      val setter = setters.get(p)
+      val typeinfo = if getter.isEmpty then setter.get.parameterTypes(0) else getter.get.returnType
+      val isTransientAnnoted = fields.get(p).map(x => Modifier.isTransient(x.getModifiers)).getOrElse(false)
+      val isTransient = BeanInfo.Builder.isTransient(isTransientAnnoted, setter.isDefined, pCtorParamNames.contains(p))
+      val pd = BeanInfo.PropertyInfo(p, typeinfo, getter.map(x => x.method), setter.map(x => x.method), isTransient)
+      properties.put(p, pd)
+    }
+
     // change accessible for none public class
     if (!Modifier.isPublic(clazz.getModifiers))
       properties foreach { case (k, v) =>
-          v.getter.foreach { m => m.setAccessible(true) }
-          v.setter.foreach { m => m.setAccessible(true) }
+        v.getter.foreach { m => m.setAccessible(true) }
+        v.setter.foreach { m => m.setAccessible(true) }
       }
-    new BeanInfo(clazz,ArraySeq.from(ctors),properties.toMap, ArraySeq.from(methods).groupBy(_.method.getName) )
+    new BeanInfo(clazz, ArraySeq.from(ctors), properties.toMap, filterMethods)
   }
 
   private def navIterface(clazz: Class[_], accessed: mutable.HashSet[Class[_]],
-    getters: mutable.HashMap[String, Getter], setters: mutable.HashMap[String, Setter],
-    methods: mutable.HashSet[MethodInfo],
-    paramTypes: collection.Map[String, Class[_]]): Unit = {
-    if (null == clazz || classOf[AnyRef] == clazz) return ;
+                          getters: mutable.HashMap[String, Getter], setters: mutable.HashMap[String, Setter],
+                          methods: mutable.HashSet[MethodInfo],
+                          paramTypes: collection.Map[String, Class[_]]): Unit = {
+    if (null == clazz || classOf[AnyRef] == clazz) return
+    val isCase = TypeInfo.isCaseClass(clazz)
     val interfaceTypes = clazz.getGenericInterfaces
     (0 until interfaceTypes.length) foreach { i =>
-      val interface = interfaceTypes(i) match{
-        case pt: ParameterizedType =>  pt.getRawType.asInstanceOf[Class[_]]
+      val interface = interfaceTypes(i) match {
+        case pt: ParameterizedType => pt.getRawType.asInstanceOf[Class[_]]
         case c: Class[_] => c
       }
       if (!accessed.contains(interface)) {
@@ -138,65 +153,66 @@ object BeanInfoLoader {
         val declaredMethods = interface.getDeclaredMethods
         (0 until declaredMethods.length) foreach { i =>
           val method = declaredMethods(i)
-          processMethod(method,getters,setters,methods,interfaceParamTypes)
+          processMethod(isCase, method, getters, setters, methods, interfaceParamTypes)
         }
-        navIterface(interface, accessed, getters, setters,methods, paramTypes)
+        navIterface(interface, accessed, getters, setters, methods, paramTypes)
       }
     }
   }
 
-  private def processMethod(method:Method,getters: mutable.HashMap[String, Getter], setters: mutable.HashMap[String, Setter],
+  private def processMethod(isCase: Boolean, method: Method, getters: mutable.HashMap[String, Getter],
+                            setters: mutable.HashMap[String, Setter],
                             methods: mutable.HashSet[MethodInfo],
-                            paramTypes: collection.Map[String, Class[_]]):Unit={
-    if(BeanInfo.Builder.isFineMethod(method,false)){
+                            paramTypes: collection.Map[String, Class[_]]): Unit = {
+    if (BeanInfo.Builder.isFineMethod(isCase, method, false)) {
       BeanInfo.Builder.findAccessor(method) match {
         case Some(Tuple2(readable, name)) =>
           if (readable) {
-            val puttable = getters.get(name).forall(x => isJavaBeanGetter(x.method))//FIXME
+            val puttable = getters.get(name).forall(x => isJavaBeanGetter(x.method)) //FIXME
             if (puttable)
-              getters.put(name, Getter(method, typeof(method.getReturnType,method.getGenericReturnType, paramTypes)))
+              getters.put(name, Getter(method, typeof(method.getReturnType, method.getGenericReturnType, paramTypes)))
           } else {
             val types = method.getGenericParameterTypes
             val clazzes = method.getParameterTypes
             val paramsTypes = new Array[TypeInfo](types.length)
-            (0 until types.length) foreach { j => paramsTypes(j) = typeof(clazzes(j),types(j), paramTypes) }
+            (0 until types.length) foreach { j => paramsTypes(j) = typeof(clazzes(j), types(j), paramTypes) }
             setters.put(name, Setter(method, paramsTypes))
           }
         case None =>
       }
       val types = method.getGenericParameterTypes
       val params = new mutable.ArrayBuffer[ParamInfo](types.length)
-      method.getParameters foreach {p => params += ParamInfo(p.getName,typeof(p.getType,p.getParameterizedType, paramTypes),None) }
-      methods.add(MethodInfo(method,  typeof(method.getReturnType,method.getGenericReturnType, paramTypes),ArraySeq.from(params)))
+      method.getParameters foreach { p => params += ParamInfo(p.getName, typeof(p.getType, p.getParameterizedType, paramTypes), None) }
+      methods.add(MethodInfo(method, typeof(method.getReturnType, method.getGenericReturnType, paramTypes), ArraySeq.from(params)))
     }
   }
 
   private def isJavaBeanGetter(method: Method): Boolean = {
     val name = method.getName
-    if (name.startsWith("get") && name.length > 3 && isUpperCase(name.charAt(3))) { true }
-    else if (name.startsWith("is") && name.length > 2 && isUpperCase(name.charAt(2))) { true }
-    else { false }
+    if name.startsWith("get") && name.length > 3 && isUpperCase(name.charAt(3)) then true
+    else if name.startsWith("is") && name.length > 2 && isUpperCase(name.charAt(2)) then true
+    else false
   }
 
-  def typeof(clazz: Class[_], typ: java.lang.reflect.Type,paramTypes: collection.Map[String, Class[_]]): TypeInfo = {
+  def typeof(clazz: Class[_], typ: java.lang.reflect.Type, paramTypes: collection.Map[String, Class[_]]): TypeInfo = {
     if TypeInfo.isIterableType(clazz) then
       if clazz.isArray then
         TypeInfo.get(clazz, clazz.getComponentType)
-      else if clazz == classOf[Option[_]] then
-        val innerType = typ match {
-          case pt: ParameterizedType => if (pt.getActualTypeArguments.length == 1) typeAt(pt, 0) else classOf[AnyRef]
-          case c: Class[_] => classOf[AnyRef]
-        }
-        TypeInfo.get(innerType, optional = true)
       else
         typ match {
           case pt: ParameterizedType =>
             if (pt.getActualTypeArguments.length == 1) TypeInfo.get(clazz, typeAt(pt, 0))
             else TypeInfo.get(clazz, typeAt(pt, 0), typeAt(pt, 1))
-          case tv: TypeVariable[_] =>  TypeInfo.get(paramTypes.getOrElse(tv.getName, classOf[AnyRef]))
-          case c: Class[_] =>   TypeInfo.get(clazz,false)
+          case tv: TypeVariable[_] => TypeInfo.get(paramTypes.getOrElse(tv.getName, classOf[AnyRef]))
+          case c: Class[_] => TypeInfo.get(clazz, false)
           case _ => TypeInfo.get(clazz, classOf[Any], classOf[Any])
         }
+    else if clazz == classOf[Option[_]] then
+      val innerType = typ match {
+        case pt: ParameterizedType => if (pt.getActualTypeArguments.length == 1) typeAt(pt, 0) else classOf[AnyRef]
+        case c: Class[_] => classOf[AnyRef]
+      }
+      TypeInfo.get(innerType, optional = true)
     else
       TypeInfo.get(clazz)
   }

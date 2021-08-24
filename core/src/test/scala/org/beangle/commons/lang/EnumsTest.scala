@@ -15,17 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.lang.n2
-import scala.quoted.*
-import org.beangle.commons.lang.reflect.BeanInfos
-import org.beangle.commons.lang.reflect.BeanInfo
-object B{
-  inline def method1[T](clazz:Class[T]): String = ${ a('clazz);}
+package org.beangle.commons.lang
 
-  def a[T](ec:Expr[Class[T]])(implicit qctx: Quotes, ttype: scala.quoted.Type[T]):Expr[String]={
-    '{
-       println(BeanInfo.of(${ec}))
-       ${ec}.toString
-     }
+import org.beangle.commons.conversion.converter.String2ScalaEnumConverter
+import org.beangle.commons.lang.time.WeekDay
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+
+class EnumsTest extends AnyFunSpec with Matchers {
+
+  describe("Enums") {
+    it("get") {
+      assert(Enums.get(classOf[WeekDay], "Sun").contains(WeekDay.Sun))
+      assert(Enums.isEnum(classOf[WeekDay]))
+    }
   }
+
 }

@@ -15,27 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.conversion.converter
-import org.beangle.commons.conversion.impl.DefaultConversion
-import org.beangle.commons.lang.testbean.TestEnum
-import org.beangle.commons.lang.time.WeekDay
+package org.beangle.commons.text.escape
 
-import org.scalatest.matchers.should.Matchers
+import org.beangle.commons.lang.ClassLoaders
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-/**
- * @author chaostone
- * @since 3.0.0
- */
+import java.util.Locale
 
-class EnumConverterTest extends AnyFunSpec with Matchers {
+class JavascriptEscaperTest extends AnyFunSpec with Matchers {
 
-  describe("EnumConverter") {
-    it("Convert Enum") {
-      println(TestEnum.Private.getClass)
-      assert(null != DefaultConversion.Instance.convert("Private", classOf[TestEnum]))
-      assert(null != DefaultConversion.Instance.convert("Sun", classOf[WeekDay]))
-      assert(WeekDay.Sat == DefaultConversion.Instance.convert("6", classOf[WeekDay]))
+  describe("JavasciptEscaper") {
+    it("Escape") {
+      println(JavascriptEscaper.escape("beangl'dd",false))
+      println(XmlEscaper.escape("<td>"))
     }
   }
 }

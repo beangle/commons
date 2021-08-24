@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.lang.n2
+package org.beangle.commons.lang.testbean
 import org.beangle.commons.lang.reflect.BeanInfos
 
-import java.beans.Transient
+import java.beans.{BeanInfo, Transient}
 
 trait R{
   def title():String={
@@ -43,7 +43,7 @@ class Ap[T, V, S] extends R {
   }
 }
 
-class A (myId:Long=2) extends Ap[Long, String, Long]{
+class AA (myId:Long=2) extends Ap[Long, String, Long]{
   def this(myIdString:String)={
     this(myIdString.toLong)
   }
@@ -59,15 +59,5 @@ class A (myId:Long=2) extends Ap[Long, String, Long]{
     None
   }
 }
-
-object A {
-  def main(args: Array[String]): Unit = {
-    val a = new A
-    a.title()
-    a.id = 3L
-    println(B.method1(classOf[A]))
-  }
-}
-
 
 class TT(val name:String="x")

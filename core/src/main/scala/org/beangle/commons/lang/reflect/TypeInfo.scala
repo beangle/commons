@@ -22,7 +22,7 @@ import org.beangle.commons.lang.Strings.{capitalize, replace}
 
 import java.lang.reflect.{Constructor, Method, ParameterizedType}
 import scala.collection.immutable.ArraySeq
-import scala.collection.{mutable,immutable}
+import scala.collection.{immutable, mutable}
 import scala.language.existentials
 
 sealed trait TypeInfo {
@@ -32,7 +32,9 @@ sealed trait TypeInfo {
 
   def args: ArraySeq[TypeInfo]
 
-  def isOptional: Boolean = clazz == classOf[Option[_]]
+  final def isOptional: Boolean = clazz == classOf[Option[_]]
+
+  final def isIterable: Boolean = TypeInfo.isIterableType(clazz)
 
   override def toString: String = name
 }
@@ -40,13 +42,12 @@ sealed trait TypeInfo {
 object TypeInfo {
 
   def isCollectionType(clazz: Class[_]): Boolean = {
-    !classOf[collection.Map[_, _]].isAssignableFrom(clazz) && classOf[collection.Iterable[_]].isAssignableFrom(clazz) ||
-      classOf[java.util.Collection[_]].isAssignableFrom(clazz) ||
-      clazz.isArray
+    !isMapType(clazz) && classOf[collection.Iterable[_]].isAssignableFrom(clazz) ||
+      classOf[java.util.Collection[_]].isAssignableFrom(clazz) || clazz.isArray
   }
 
   def isIterableType(clazz: Class[_]): Boolean = {
-    isCollectionType(clazz) || isMapType(clazz) || clazz.isArray || clazz == classOf[Option[_]]
+    isMapType(clazz) || isCollectionType(clazz)
   }
 
   def isMapType(clazz: Class[_]): Boolean = {
@@ -70,43 +71,86 @@ object TypeInfo {
     else scalaTypeName(clazz) + args.map(_.name).mkString("[", ",", "]")
   }
 
+  def isCaseClass(clazz:Class[_]):Boolean={
+    classOf[Product].isAssignableFrom(clazz) && !clazz.getName.startsWith("Tuple")
+  }
+
   val AnyRefType = GeneralType(classOf[AnyRef])
+  val UnitType = GeneralType(classOf[Unit])
 
   var cache: Map[String, TypeInfo] = Map.empty
 
   cache += (AnyRefType.name, AnyRefType)
+  cache += (UnitType.name, UnitType)
 
   def get(clazz: Class[_]): TypeInfo = {
     get(clazz, false)
   }
 
   def get(clazz: Class[_], optional: Boolean): TypeInfo = {
-    val args :ArraySeq[TypeInfo]=
-      if clazz.isArray then  ArraySeq(get(clazz.getComponentType,false))
-      else if isCollectionType(clazz) then  Reflections.getCollectionParamTypes(clazz)
+    val args: ArraySeq[TypeInfo] =
+      if clazz.isArray then ArraySeq(get(clazz.getComponentType, false))
+      else if isCollectionType(clazz) then Reflections.getCollectionParamTypes(clazz)
       else if isMapType(clazz) then Reflections.getMapParamTypes(clazz)
       else ArraySeq.empty
 
-    val typeinfo = get(clazz,args)
-    if(optional) get(classOf[Option[_]],List(typeinfo)) else typeinfo
+    val typeinfo = get(clazz, args)
+    if (optional) get(classOf[Option[_]], List(typeinfo)) else typeinfo
   }
 
   def get(clazz: Class[_], first: Class[_], tails: Class[_]*): TypeInfo = {
     get(clazz, GeneralType(first) :: tails.map(GeneralType(_)).toList)
   }
 
-  def get(clazz: Class[_], args: collection.Seq[TypeInfo]): TypeInfo = {
+  def get(clazz: Class[_], args:Array[TypeInfo]): TypeInfo = {
+    get(clazz,ArraySeq.from(args))
+  }
+
+  def get(clazz: Class[_], args:collection.Seq[TypeInfo]): TypeInfo = {
     val name = typeName(clazz, args)
     cache.get(name) match {
       case Some(ti) => ti
       case None =>
-        val newInfo = if isIterableType(clazz) then IterableType(clazz, ArraySeq.from(args)) else GeneralType(clazz, ArraySeq.from(args))
-        cache += (name, newInfo);
+        val typeArgs=ArraySeq.from(args)
+        val newInfo =
+          if clazz == classOf[Option[_]] then OptionType(args.head)
+          else if isIterableType(clazz) then IterableType(clazz,typeArgs )
+          else GeneralType(clazz, ArraySeq.from(args))
+        cache += (name, newInfo)
         newInfo
     }
   }
 
+  def stringz(obj:Any):String={
+    obj match{
+      case clz:Class[_] => clz.toString
+      case d:Array[_]=>
+        d.map(x=> stringz(x)).mkString("[",",","]")
+    }
+  }
+
+  def convert(obj:Any):TypeInfo={
+    obj match{
+      case clz:Class[_]=> TypeInfo.get(clz,false)
+      case a:Array[Any]=>
+        val clz = a(0)
+
+        val argsClz = a(1).asInstanceOf[Array[_]]
+        val argsInfo = Array.ofDim[TypeInfo](argsClz.length)
+        (0 until argsClz.length) foreach{i=>
+          argsInfo(i) = convert(argsClz(i))
+        }
+        TypeInfo.get(clz.asInstanceOf[Class[_]],argsInfo)
+    }
+  }
+
   case class GeneralType(clazz: Class[_], args: ArraySeq[TypeInfo] = ArraySeq.empty) extends TypeInfo
+
+  case class OptionType(elementType: TypeInfo) extends TypeInfo {
+    def clazz = classOf[Option[_]]
+
+    def args = ArraySeq(elementType)
+  }
 
   case class IterableType(clazz: Class[_], args: ArraySeq[TypeInfo]) extends TypeInfo {
     def isSet: Boolean = {

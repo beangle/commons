@@ -17,26 +17,41 @@
 
 package org.beangle.commons.lang.reflect
 
-import java.lang.reflect.{Method, Modifier, ParameterizedType, TypeVariable}
 import org.beangle.commons.collection.IdentityCache
-import org.beangle.commons.lang.reflect.Reflections.deduceParamTypes
 
-import scala.collection.mutable
-import scala.collection.immutable.ArraySeq
-import scala.quoted.*
-
-object BeanInfos {
-
-  val cache = new BeanInfoCache
+class BeanInfoCache {
 
   /**
-    * Get ClassInfo from cache or load it by type.
+    * class info cache
     */
-  def get(clazz: Class[_]): BeanInfo = cache.get(clazz)
+  private var cache = new IdentityCache[Class[_], BeanInfo]
 
-  inline def of(inline clazzes:Class[_]*):List[BeanInfo] = ${BeanInfoDigger.digInto('clazzes,'cache)}
+  inline def of(inline clazzes: Class[_]*): List[BeanInfo] = ${BeanInfoDigger.digInto('clazzes, 'this)}
 
-  inline def of[T](clazz:Class[T]): BeanInfo = ${ BeanInfoDigger.digInto('clazz,'cache);}
+  inline def of[T](clazz: Class[T]): BeanInfo = ${BeanInfoDigger.digInto('clazz, 'this);}
 
-  def cached(clazz:Class[_]):Boolean = cache.contains(clazz)
+  /** register classInfo
+    * @param bi
+    */
+  def update(bi: BeanInfo): BeanInfo = {
+    cache.put(bi.clazz, bi)
+    bi
+  }
+
+  /**
+    * Load ClassInfo using reflections
+    */
+  def get(clazz: Class[_]): BeanInfo = {
+    var exist = cache.get(clazz)
+    if (null != exist) return exist
+    val ci = BeanInfoLoader.load(clazz)
+    cache.put(clazz, ci)
+    ci
+  }
+
+  def contains(clazz: Class[_]): Boolean = cache.contains(clazz)
+
+  def clear(): Unit = cache.clear()
+
+  def size: Int = cache.size()
 }

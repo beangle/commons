@@ -15,27 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.conversion.converter
-import org.beangle.commons.conversion.impl.DefaultConversion
-import org.beangle.commons.lang.testbean.TestEnum
-import org.beangle.commons.lang.time.WeekDay
-
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.funspec.AnyFunSpec
+package org.beangle.commons.text.i18n
 
 /**
  * @author chaostone
- * @since 3.0.0
  */
+trait TextProvider {
+  /**
+   * Gets a message based on a message key, or null if no message is found.
+   */
+  def apply(key: String): Option[String]
 
-class EnumConverterTest extends AnyFunSpec with Matchers {
-
-  describe("EnumConverter") {
-    it("Convert Enum") {
-      println(TestEnum.Private.getClass)
-      assert(null != DefaultConversion.Instance.convert("Private", classOf[TestEnum]))
-      assert(null != DefaultConversion.Instance.convert("Sun", classOf[WeekDay]))
-      assert(WeekDay.Sat == DefaultConversion.Instance.convert("6", classOf[WeekDay]))
-    }
-  }
+  /**
+   * Gets a message based on a key using the supplied obj, as defined in
+   * java.text.MessageFormat, or, if the message is not found, a
+   * supplied default value is returned.
+   */
+  def apply(key: String, defaultValue: String, obj: Any*): String
 }

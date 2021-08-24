@@ -25,10 +25,10 @@ import org.scalatest.funspec.AnyFunSpec
 
 class PropertiesTest extends AnyFunSpec with Matchers {
 
-  BeanInfos.register(classOf[TestBean])
+  BeanInfos.of(classOf[TestBean])
   describe("Properties") {
     it("Get or Set property") {
-      BeanInfos.load(classOf[TestBean]).properties("javaMap")
+      BeanInfos.get(classOf[TestBean]).properties("javaMap")
       val bean = new TestBean
       Properties.set(bean, "intValue", 2)
       bean.intValue should be(2)
@@ -39,7 +39,7 @@ class PropertiesTest extends AnyFunSpec with Matchers {
     }
 
     it("get option nested value") {
-      BeanInfos.load(classOf[TestBean]).properties("javaMap")
+      BeanInfos.get(classOf[TestBean]).properties("javaMap")
       val bean = new TestBean
       var parent = new TestBean
       parent.id = 2
@@ -70,7 +70,7 @@ class PropertiesTest extends AnyFunSpec with Matchers {
     }
 
     it("get set option[primitives]") {
-      BeanInfos.load(classOf[TestBean]).properties("javaMap")
+      BeanInfos.get(classOf[TestBean]).properties("javaMap")
       val bean = new TestBean
       var parent = new TestBean
 

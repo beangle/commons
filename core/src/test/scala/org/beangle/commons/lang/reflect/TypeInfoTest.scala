@@ -42,5 +42,12 @@ class TypeInfoTest extends AnyFunSpec with Matchers {
       assert("org.beangle.commons.lang.reflect.Props[java.lang.Long,String]" == TypeInfo.get(classOf[Props]).name)
       assert("org.beangle.commons.lang.reflect.D[String]" == TypeInfo.get(classOf[D]).name)
     }
+    it("convert"){
+      val ti =  TypeInfo.convert(Array(classOf[Map[_,_]],Array(Array(classOf[List[_]],Array(classOf[Int])),classOf[String])))
+      assert("Map[List[Int],String]" == ti.toString)
+      val t2 =  TypeInfo.convert(Array(classOf[Map[_,_]],Array(classOf[Int],classOf[String])))
+      assert("Map[Int,String]" == t2.toString)
+
+    }
   }
 }
