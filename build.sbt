@@ -1,7 +1,7 @@
 import org.beangle.bom.sbt.BeangleBom._
 
 ThisBuild / organization := "org.beangle.commons"
-ThisBuild / version := "5.2.5"
+ThisBuild / version := "5.2.6-SNAPSHOT"
 ThisBuild / scmInfo := Some(
   ScmInfo(
     url("https://github.com/beangle/commons"),
