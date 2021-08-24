@@ -75,7 +75,7 @@ object BeanInfoLoader {
     }
 
     //find default constructor parameters
-    val defaultConstructorParams: Map[Int, Any] =
+    val defaultCtorParamValues: Map[Int, Any] =
       ClassLoaders.get(clazz.getName + "$") match {
         case Some(oclazz) =>
           val osinglton = oclazz.getDeclaredField("MODULE$").get(null)
@@ -90,19 +90,21 @@ object BeanInfoLoader {
 
     // find constructor with arguments
     val ctors = Collections.newBuffer[BeanInfo.ConstructorInfo]
-    val pCtorParamNames = Collections.newSet[String]
+    var pCtorParamNames :Set[String] =Set.empty
     var i = 0
     clazz.getConstructors foreach { ctor =>
       val params = new mutable.ArrayBuffer[ParamInfo](ctor.getParameterCount)
       ctor.getParameters foreach { p => params += ParamInfo(p.getName, typeof(p.getType, p.getParameterizedType, paramTypes), None) }
-      if (i == 0 && defaultConstructorParams.nonEmpty) {
-        defaultConstructorParams foreach { case (i, v) =>
-          params(i) = params(i).copy(defaultValue = Some(v))
-          pCtorParamNames += params(i).name
+      if (i == 0) {
+        pCtorParamNames = params.map(_.name).toSet
+        if (defaultCtorParamValues.nonEmpty) {
+          defaultCtorParamValues foreach { case (i, v) =>
+            params(i-1) = params(i-1).copy(defaultValue = Some(v)) // for default values were 1 based.
+          }
         }
+        i += 1
+        ctors += BeanInfo.ConstructorInfo(ArraySeq.from(params))
       }
-      i += 1
-      ctors += BeanInfo.ConstructorInfo(ArraySeq.from(params))
     }
 
     // make buffer to list and filter duplicated bridge methods

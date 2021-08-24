@@ -161,6 +161,9 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
     it("get java bean methods"){
       val t = BeanInfos.of(classOf[TestJavaBean])
       assert(!t.properties("name").isTransient)
+
+      val t2 = BeanInfos.get(classOf[TT])
+      assert(!t2.properties("name").isTransient)
     }
   }
 }
