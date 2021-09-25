@@ -17,14 +17,27 @@
 
 package org.beangle.commons
 
-//FIXME using package.scala
-object BeangleVersion {
+import java.net.URL
 
+object Version {
   def name = "Beangle Scala Development Toolkit"
 
-  def version = "5.2.3"
+  def version: String = findBundleVersion(Version.getClass)
 
-  def major = 5
-
-  def minor = 2
+  def findBundleVersion(clazz: Class[_]): String = {
+    val className = "/" + clazz.getName().replace(".", "/") + ".class"
+    val classPath = clazz.getResource(className).toString
+    if (classPath.startsWith("jar")) {
+      val manifestPath = classPath.replace(className, "/META-INF/MANIFEST.MF")
+      val manifest = new java.util.jar.Manifest(new URL(manifestPath).openStream)
+      val attr = manifest.getMainAttributes
+      var version = attr.getValue("Bundle-Version")
+      if (null == version) {
+        version = attr.getValue("Implementation-Version")
+      }
+      if (null == version) "UNKNOWN" else version
+    } else {
+      "SNAPSHOT"
+    }
+  }
 }
