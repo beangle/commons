@@ -210,7 +210,7 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
 
   def resolveClassTypes(a:AppliedType,ctx:Map[String,TypeRepr]=Map.empty):Map[String,TypeRepr]={
     val params=new mutable.HashMap[String,TypeRepr]
-    val mts = a.typeSymbol.typeMembers
+    val mts = a.typeSymbol.memberTypes
     var i=0
     a.args foreach { arg =>
       val argType =  if(arg.typeSymbol.flags.is(Flags.Param)) then ctx(arg.typeSymbol.name)else arg
@@ -221,7 +221,7 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
   }
 
   def resolveParamTypes(a:AppliedType,ctx:Map[String,TypeRepr]=Map.empty):List[Expr[AnyRef]]={
-    val mts = a.typeSymbol.typeMembers
+    val mts = a.typeSymbol.memberTypes
     var i=0
     val params = new mutable.ArrayBuffer[Expr[AnyRef]]
     a.args foreach { arg =>
