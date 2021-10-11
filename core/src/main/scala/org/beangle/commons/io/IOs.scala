@@ -17,13 +17,13 @@
 
 package org.beangle.commons.io
 
-import java.io._
-import java.net.URL
-import java.nio.charset.Charset
-import java.{ util => ju }
-
 import org.beangle.commons.lang.Charsets.UTF_8
 import org.beangle.commons.logging.Logging
+
+import java.io.*
+import java.net.URL
+import java.nio.charset.Charset
+import java.util as ju
 
 object IOs extends Logging {
 
@@ -31,14 +31,13 @@ object IOs extends Logging {
 
   private val eof = -1
 
-  /**
-   * Copy bytes from a <code>InputStream</code> to an <code>OutputStream</code>.
-   *
-   * @param input  the <code>InputStream</code> to read from
-   * @param output the <code>OutputStream</code> to write to
-   * @return the number of bytes copied
-   * @since 3.1
-   */
+  /** Copy bytes from a <code>InputStream</code> to an <code>OutputStream</code>.
+    *
+    * @param input  the <code>InputStream</code> to read from
+    * @param output the <code>OutputStream</code> to write to
+    * @return the number of bytes copied
+    * @since 3.1
+    */
   def copy(input: InputStream, output: OutputStream): Long = {
     val buffer = new Array[Byte](defaultBufferSize)
     var count = 0
@@ -52,6 +51,12 @@ object IOs extends Logging {
     count
   }
 
+  def readBytes(input: InputStream): Array[Byte] = {
+    val baos = new ByteArrayOutputStream
+    copy(input, baos)
+    baos.toByteArray
+  }
+
   def write(data: String, output: OutputStream, charset: Charset = null): Unit =
     if (data != null)
       if (charset == null)
@@ -59,14 +64,13 @@ object IOs extends Logging {
       else
         output.write(data.getBytes(charset))
 
-  /**
-   * Copy chars from a <code>Reader</code> to a <code>Writer</code>.
-   *
-   * @param input  the <code>Reader</code> to read from
-   * @param output the <code>Writer</code> to write to
-   * @return the number of characters copied
-   * @since 3.1
-   */
+  /** Copy chars from a <code>Reader</code> to a <code>Writer</code>.
+    *
+    * @param input  the <code>Reader</code> to read from
+    * @param output the <code>Writer</code> to write to
+    * @return the number of characters copied
+    * @since 3.1
+    */
   def copy(input: Reader, output: Writer): Long = {
     val buffer = new Array[Char](defaultBufferSize)
     var count = 0
@@ -80,10 +84,9 @@ object IOs extends Logging {
     count
   }
 
-  /**
-   * Get the contents of a <code>Reader</code> as a list of Strings,
-   * one entry per line.
-   */
+  /** Get the contents of a <code>Reader</code> as a list of Strings,
+    * one entry per line.
+    */
   def readLines(input: Reader): List[String] = {
     val reader = toBufferedReader(input)
     val list = new collection.mutable.ListBuffer[String]
@@ -104,9 +107,8 @@ object IOs extends Logging {
     } finally
       close(input)
 
-  /**
-   * Read key value properties
-   */
+  /** Read key value properties
+    */
   def readProperties(url: URL): Map[String, String] =
     if (null == url)
       Map.empty
@@ -119,9 +121,8 @@ object IOs extends Logging {
           Map.empty
       }
 
-  /**
-   * Read key value properties
-   */
+  /** Read key value properties
+    */
   def readProperties(input: InputStream, charset: Charset = UTF_8): Map[String, String] =
     if (null == input)
       Map.empty
@@ -138,9 +139,8 @@ object IOs extends Logging {
       texts.toMap
     }
 
-  /**
-   * Read Java key value properties by url
-   */
+  /** Read Java key value properties by url
+    */
   def readJavaProperties(url: URL): Map[String, String] =
     if (null == url)
       Map.empty
@@ -153,9 +153,8 @@ object IOs extends Logging {
           Map.empty
       }
 
-  /**
-   * Read java key value properties
-   */
+  /** Read java key value properties
+    */
   def readJavaProperties(input: InputStream): Map[String, String] =
     if (null == input)
       Map.empty
@@ -163,17 +162,16 @@ object IOs extends Logging {
       val properties = new ju.Properties()
       properties.load(input)
       close(input)
-      import scala.jdk.CollectionConverters._
+      import scala.jdk.CollectionConverters.*
       properties.asScala.toMap
     }
 
   def readLines(input: InputStream, charset: Charset = UTF_8): List[String] =
     readLines(new InputStreamReader(input, charset))
 
-  /**
-   * Close many objects quitely.
-   * swallow any exception.
-   */
+  /** Close many objects quitely.
+    * swallow any exception.
+    */
   def close(objs: AutoCloseable*): Unit =
     objs foreach { obj =>
       try
