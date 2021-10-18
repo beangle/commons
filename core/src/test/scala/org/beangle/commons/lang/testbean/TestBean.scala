@@ -183,6 +183,11 @@ class LongFactory extends Factory[Long] with Logging{
   @noreflect
   val typeName:String =getClass.getName
 
+  def doSomeThing():String={
+    println("slow operation")
+    "ok"
+  }
+
   class Inner{
     var name:String=_
   }

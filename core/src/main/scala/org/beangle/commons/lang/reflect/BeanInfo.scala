@@ -116,9 +116,9 @@ object BeanInfo extends Logging {
       !ignored && modifierNice && isFineMethodName(name) && (!method.isBridge || allowBridge)
     }
 
-    def isFineMethodName(name:String):Boolean={
+    def isFineMethodName(name: String): Boolean = {
       if name.startsWith("_") then false
-      else if name.endsWith("_$eq") then !name.substring(0,name.length-4).contains("$")
+      else if name.endsWith("_$eq") then !name.substring(0, name.length - 4).contains("$")
       else !name.contains("$")
     }
 
@@ -186,12 +186,13 @@ object BeanInfo extends Logging {
       if (name.length > 1 && isUpperCase(name.charAt(1))) name else uncapitalize(name)
     }
 
-    class ParamHolder(name: String, typeinfo: Any, defaultValue: Option[Any]){
-      def this(name:String,typeInfo: Any)={
-        this(name,typeInfo,None)
+    class ParamHolder(name: String, typeinfo: Any, defaultValue: Option[Any]) {
+      def this(name: String, typeInfo: Any) = {
+        this(name, typeInfo, None)
       }
-      def toParamInfo:ParamInfo={
-        ParamInfo(name,TypeInfo.convert(typeinfo),defaultValue)
+
+      def toParamInfo: ParamInfo = {
+        ParamInfo(name, TypeInfo.convert(typeinfo), defaultValue)
       }
     }
 
@@ -216,8 +217,8 @@ object BeanInfo extends Logging {
     def addTransients(names: List[String]): Unit = transnts ++= names
 
     def addField(name: String, ti: Any): Unit = {
-      val typeinfo =  TypeInfo.convert(ti)
-      fieldInfos.put(name,typeinfo)
+      val typeinfo = TypeInfo.convert(ti)
+      fieldInfos.put(name, typeinfo)
       //for scala macro quoted api doesn't provider field read method
       val sameNames = methodInfos.getOrElseUpdate(name, new mutable.ArrayBuffer[(TypeInfo, ArraySeq[ParamInfo])])
       sameNames += Tuple2(typeinfo, ArraySeq.empty)
@@ -225,7 +226,7 @@ object BeanInfo extends Logging {
 
     def addMethod(name: String, returnTypeInfo: Any, asField: Boolean): Unit = {
       val realReturnTypeInfo = TypeInfo.convert(returnTypeInfo)
-      registerMethod(name,realReturnTypeInfo,ArraySeq.empty)
+      registerMethod(name, realReturnTypeInfo, ArraySeq.empty)
       if (asField) {
         fieldInfos.put(getPropertyName(name, true), realReturnTypeInfo)
       }
@@ -234,20 +235,20 @@ object BeanInfo extends Logging {
     def addMethod(name: String, returnTypeInfo: Any, paramInfos: Array[ParamHolder]): Unit = {
       val jvmName = replace(name, "=", "$eq")
       val realReturnTypeInfo = TypeInfo.convert(returnTypeInfo)
-      registerMethod(jvmName,realReturnTypeInfo,ArraySeq.from(paramInfos.map(_.toParamInfo)))
+      registerMethod(jvmName, realReturnTypeInfo, ArraySeq.from(paramInfos.map(_.toParamInfo)))
     }
 
-    private def registerMethod(name:String,returnTypeInfo:TypeInfo,paramInfos:ArraySeq[ParamInfo]):Unit={
+    private def registerMethod(name: String, returnTypeInfo: TypeInfo, paramInfos: ArraySeq[ParamInfo]): Unit = {
       val sameNames = methodInfos.getOrElseUpdate(name, new mutable.ArrayBuffer[(TypeInfo, ArraySeq[ParamInfo])])
-      sameNames += Tuple2(returnTypeInfo,paramInfos)
+      sameNames += Tuple2(returnTypeInfo, paramInfos)
     }
 
     def addCtor(paramInfos: Array[ParamHolder]): Unit = {
-       ctorInfos.addOne(ArraySeq.from(paramInfos.map(_.toParamInfo)))
+      ctorInfos.addOne(ArraySeq.from(paramInfos.map(_.toParamInfo)))
     }
 
-    private def registerInto(methods: mutable.HashMap[String, mutable.Buffer[MethodInfo]], method: Method,
-                             returnType: TypeInfo, parameters: ArraySeq[ParamInfo]): Unit = {
+    private def registerMethodInfo(methods: mutable.HashMap[String, mutable.Buffer[MethodInfo]], method: Method,
+                                   returnType: TypeInfo, parameters: ArraySeq[ParamInfo]): Unit = {
       val methodInfo = MethodInfo(method, returnType, parameters)
       val sameNames = methods.getOrElseUpdate(method.getName, Collections.newBuffer[MethodInfo])
       sameNames += methodInfo
@@ -261,25 +262,23 @@ object BeanInfo extends Logging {
       clazz.getMethods foreach { method =>
         if (isFineMethod(isCase, method, true)) {
           findAccessor(method) foreach { (readable, name) =>
-            if (readable) then getters.put(name, method) else setters.put(name, method)
+            if readable then getters.put(name, method) else setters.put(name, method)
           }
           val methodName = method.getName
           methodInfos.get(methodName) match {
             case Some(ml) =>
-              ml.find(isSignatureMatchable(method, _)) match {
-                case Some(mi) => registerInto(methods, method, mi._1, mi._2)
-                case None =>
-                  logger.error("cannot find method info of " + methodName + " and candinate is " + methodInfos(methodName))
+              ml.find(isSignatureMatchable(method, _)) foreach { mi =>
+                registerMethodInfo(methods, method, mi._1, mi._2)
               }
             case None =>
               if (methodName.endsWith("_$eq")) {
                 val fieldName = Strings.substringBefore(methodName, "_$eq")
                 fieldInfos.get(fieldName) foreach { field =>
-                  registerInto(methods, method, TypeInfo.UnitType, ArraySeq(ParamInfo(fieldName, field, None)))
+                  registerMethodInfo(methods, method, TypeInfo.UnitType, ArraySeq(ParamInfo(fieldName, field, None)))
                 }
               } else {
                 fieldInfos.get(methodName) foreach { field =>
-                  registerInto(methods, method, field, ArraySeq.empty[ParamInfo])
+                  registerMethodInfo(methods, method, field, ArraySeq.empty[ParamInfo])
                 }
               }
           }

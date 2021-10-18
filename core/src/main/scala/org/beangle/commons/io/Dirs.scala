@@ -17,35 +17,32 @@
 
 package org.beangle.commons.io
 
+import org.beangle.commons.io.Files./
+
 import java.io.File
 import java.nio.file.Paths
 
-import org.beangle.commons.io.Files./
-
 object Dirs {
 
-  def on(path: String): Dirs =
-    new Dirs(new File(path))
+  def on(path: String): Dirs = new Dirs(new File(path))
 
-  def on(file: File): Dirs =
-    new Dirs(file)
+  def on(file: File): Dirs = new Dirs(file)
 
-  def on(file: File, child: String): Dirs =
-    new Dirs(new File(file, child))
+  def on(file: File, child: String): Dirs = new Dirs(new File(file, child))
 
-  def delete(file: File): Unit =
-    if (isLink(file))
+  def delete(file: File): Unit = {
+    if isLink(file) then
       file.delete()
-    else if (file.exists())
+    else if file.exists() then
       remove(file)
+  }
 
-  def isLink(file: File): Boolean =
-    java.nio.file.Files.isSymbolicLink(file.toPath)
+  def isLink(file: File): Boolean = java.nio.file.Files.isSymbolicLink(file.toPath)
 
-  private def remove(file: File): Unit =
-    if (file.exists())
-      if (file.isDirectory)
-        if (file.list().length == 0 || isLink(file))
+  private def remove(file: File): Unit = {
+    if file.exists() then
+      if file.isDirectory then
+        if file.list().length == 0 || isLink(file) then
           file.delete()
         else {
           //list all the directory contents
@@ -58,11 +55,12 @@ object Dirs {
           }
           if (file.list().length == 0) file.delete()
         }
-      else
-        file.delete()
+      else file.delete()
+  }
 }
 
 class Dirs(val pwd: File) {
+  require(pwd.exists() && pwd.isDirectory)
 
   def rename(newName: String): Dirs = {
     val dest = new File(pwd.getParentFile.getAbsolutePath + / + newName)
