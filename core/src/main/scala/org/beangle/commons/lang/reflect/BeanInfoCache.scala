@@ -42,7 +42,7 @@ class BeanInfoCache {
     * Load ClassInfo using reflections
     */
   def get(clazz: Class[_]): BeanInfo = {
-    var exist = cache.get(clazz)
+    val exist = cache.get(clazz)
     if (null != exist) return exist
     val ci = BeanInfoLoader.load(clazz)
     cache.put(clazz, ci)

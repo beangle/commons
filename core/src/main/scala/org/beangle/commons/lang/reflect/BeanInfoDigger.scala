@@ -88,7 +88,7 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
         case _=>
       }
     }
-    if (0 == paramSize && m.returnTpt.tpe.typeSymbol != Symbol.classSymbol(classOf[Unit].getName)) {
+    if (m.paramss.isEmpty && m.returnTpt.tpe.typeSymbol != Symbol.classSymbol(classOf[Unit].getName)) {
       Some((true, getPropertyName(name, true)))
     } else if (1 == paramSize) {
       val propertyName = getPropertyName(name, false)
@@ -148,7 +148,7 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
                 case Some(fx)=> if readable then fieldMap.put(name,fx.copy(hasGet=true)) else fieldMap.put(name,fx.copy(hasSet=true))
                 case None =>
                   val transnt = defdef.symbol.annotations exists(x => x.show.toLowerCase.contains("transient"))
-                  val fe = if (readable) then FieldExpr(name,rtType,transnt,true,false) else FieldExpr(name,paramList.head.typeinfo,transnt,false,true)
+                  val fe = if readable then FieldExpr(name,rtType,transnt,true,false) else FieldExpr(name,paramList.head.typeinfo,transnt,false,true)
                   fieldMap.put(name,fe)
               }
             case None=>
