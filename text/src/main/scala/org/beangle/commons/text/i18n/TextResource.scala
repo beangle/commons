@@ -19,6 +19,17 @@ package org.beangle.commons.text.i18n
 
 import java.util.Locale
 
+object TextResource{
+
+  object Empty extends TextResource {
+    def apply(key: String): Option[String] = Some(key)
+
+    def apply(key: String, defaultValue: String, obj: Any*): String = key
+
+    def locale: Locale = null
+  }
+
+}
 /**
  * TextResource interface.
  *
