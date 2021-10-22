@@ -60,7 +60,11 @@ object Dirs {
 }
 
 class Dirs(val pwd: File) {
-  require(pwd.exists() && pwd.isDirectory)
+  require(!pwd.exists() || pwd.isDirectory)
+
+  def exists(): Boolean = {
+    pwd.exists()
+  }
 
   def rename(newName: String): Dirs = {
     val dest = new File(pwd.getParentFile.getAbsolutePath + / + newName)
