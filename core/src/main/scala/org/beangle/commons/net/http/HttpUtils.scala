@@ -17,13 +17,14 @@
 
 package org.beangle.commons.net.http
 
+import org.beangle.commons.codec.binary.Base64
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Charsets
 import org.beangle.commons.logging.Logging
 
-import java.io.{ BufferedReader, ByteArrayOutputStream, InputStreamReader, OutputStreamWriter }
-import java.net.HttpURLConnection._
-import java.net.{ HttpURLConnection, URL, URLConnection }
+import java.io.{BufferedReader, ByteArrayOutputStream, InputStreamReader, OutputStreamWriter}
+import java.net.HttpURLConnection.*
+import java.net.{HttpURLConnection, URL, URLConnection}
 import java.nio.charset.Charset
 
 object HttpUtils extends Logging {
@@ -67,7 +68,16 @@ object HttpUtils extends Logging {
   }
 
   def getData(urlString: String, method: String = HttpMethods.GET): Response = {
-    val url = new URL(urlString)
+    getData(new URL(urlString), method, None)
+  }
+
+  def getData(url: URL, method: String, username: String, password: String): Response = {
+    getData(url, method, Some({ x =>
+      x.addRequestProperty("Authorization", "Basic " + Base64.encode(s"$username:$password".getBytes))
+    }))
+  }
+
+  def getData(url: URL, method: String, f: Option[(HttpURLConnection) => Unit]): Response = {
     var conn: HttpURLConnection = null
     try {
       conn = url.openConnection().asInstanceOf[HttpURLConnection]
@@ -77,6 +87,7 @@ object HttpUtils extends Logging {
       conn.setUseCaches(false)
       conn.setDoOutput(false)
       Https.noverify(conn)
+      f foreach (x => x(conn))
 
       if (conn.getResponseCode == HTTP_OK) {
         val bos = new ByteArrayOutputStream
@@ -92,10 +103,21 @@ object HttpUtils extends Logging {
       if (null != conn) conn.disconnect()
   }
 
-  def getText(urlString: String): Response =
-    getText(new URL(urlString), HttpMethods.GET, Charsets.UTF_8)
+  def getText(urlString: String): Response = {
+    getText(new URL(urlString), HttpMethods.GET, Charsets.UTF_8, None)
+  }
 
   def getText(url: URL, method: String, encoding: Charset): Response = {
+    getText(url, method, encoding, None)
+  }
+
+  def getText(url: URL, method: String, encoding: Charset, username: String, password: String): Response = {
+    getText(url, method, encoding, Some({ x =>
+      x.addRequestProperty("Authorization", "Basic " + Base64.encode(s"$username:$password".getBytes))
+    }))
+  }
+
+  def getText(url: URL, method: String, encoding: Charset, f: Option[(URLConnection) => Unit]): Response = {
     var conn: HttpURLConnection = null
     var in: BufferedReader = null
     try {
@@ -106,6 +128,7 @@ object HttpUtils extends Logging {
       conn.setDoOutput(false)
       conn.setUseCaches(false)
       Https.noverify(conn)
+      f foreach (x => x(conn))
       if (conn.getResponseCode == HTTP_OK) {
         in = new BufferedReader(new InputStreamReader(conn.getInputStream, encoding))
         var line: String = in.readLine()
@@ -128,12 +151,24 @@ object HttpUtils extends Logging {
     }
   }
 
+
   def invoke(url: URL, body: String, contentType: String): Response = {
+    invoke(url, body, contentType, None)
+  }
+
+  def invoke(url: URL, body: String, contentType: String, username: String, password: String): Response = {
+    invoke(url, body, contentType, Some({ x =>
+      x.addRequestProperty("Authorization", "Basic " + Base64.encode(s"$username:$password".getBytes))
+    }))
+  }
+
+  def invoke(url: URL, body: String, contentType: String, f: Option[(URLConnection) => Unit]): Response = {
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     Https.noverify(conn)
     conn.setDoOutput(true)
     conn.setRequestMethod(HttpMethods.POST)
     conn.setRequestProperty("Content-Type", contentType)
+    f foreach (x => x(conn))
     val os = conn.getOutputStream
     val osw = new OutputStreamWriter(os, "UTF-8")
     osw.write(body)
