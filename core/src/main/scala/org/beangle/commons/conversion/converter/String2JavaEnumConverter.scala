@@ -19,17 +19,17 @@ package org.beangle.commons.conversion.converter
 
 import org.beangle.commons.conversion.Converter
 import org.beangle.commons.lang.reflect.Reflections
-import org.beangle.commons.lang.{ClassLoaders, Numbers}
+import org.beangle.commons.lang.{ClassLoaders, Enums}
 
 import java.lang.reflect.Method
 import scala.reflect.Enum as ScalaEnum
 
 /**
-  * Convert String to Enumeration.
-  *
-  * @author chaostone
-  * @since 3.2.0
-  */
+ * Convert String to Enumeration.
+ *
+ * @author chaostone
+ * @since 3.2.0
+ */
 object String2JavaEnumConverter extends StringConverterFactory[String, Enum[_]] {
 
   private class EnumConverter[T <: Enum[_]](val enumType: Class[_]) extends Converter[String, T] {
@@ -55,26 +55,29 @@ end String2JavaEnumConverter
 
 object String2ScalaEnumConverter extends StringConverterFactory[String, ScalaEnum] {
 
-  private def getFromOrdinalMethod(clz:Class[_]):Method={
-    try{
-      clz.getMethod("fromId",classOf[Int])
-    }catch{
-      case e:Throwable=>
-        clz.getMethod("fromOrdinal",classOf[Int])
+  private def findIndexMethod(clazz: Class[_]): Method = {
+    try {
+      clazz.getMethod("id")
+    } catch {
+      case _: Throwable => clazz.getMethod("ordinal")
     }
   }
+
+  private def findValues(e: AnyRef): Map[String, AnyRef] = {
+    val values = Enums.values(e)
+    val idValues = Enums.toIdMaps(values).map(x => (x._1.toString, x._2))
+    val nameValues = values.map { v => (v.toString, v) }
+    idValues ++ nameValues
+  }
+
   class EnumConverter[T](e: AnyRef) extends Converter[String, T] {
-    private val fromOrdinalMethod = getFromOrdinalMethod(e.getClass)
-    private val valueOfMethod = e.getClass.getMethod("valueOf", classOf[String])
+    private val values = findValues(e)
 
     override def apply(input: String): T = {
-      val result =
-        if (Numbers.isDigits(input)) fromOrdinalMethod.invoke(e, Numbers.toInt(input))
-        else valueOfMethod.invoke(e, input)
-      result.asInstanceOf[T]
+      values(input).asInstanceOf[T]
     }
 
-    def apply(input: Int): T = fromOrdinalMethod.invoke(e, input).asInstanceOf[T]
+    def apply(input: Int): T = values(input.toString).asInstanceOf[T]
   }
 
   override def getConverter[T <: ScalaEnum](targetType: Class[T]): Option[Converter[String, T]] = {
