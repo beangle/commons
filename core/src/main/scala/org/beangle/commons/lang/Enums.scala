@@ -19,32 +19,64 @@ package org.beangle.commons.lang
 
 import org.beangle.commons.lang.reflect.Reflections
 
+import java.lang.reflect.Method
+
 /**
-  * Create Enumeration value
-  *
-  * @since 3.1
-  */
+ * Create Enumeration value
+ *
+ * @since 3.1
+ */
 object Enums {
 
   /**
-    * Returns an optional enum constant for the given type, using {@link Enum# valueOf}. If the
-    * constant does not exist, {@link Option# none} is returned. A common use case is for parsing
-    * user input or falling back to a default enum constant. For example,
-    * {@code Enums.get(Country.class, countryInput).getOrElse(Country.DEFAULT);}
-    *
-    * @since 3.1
-    */
+   * Returns an optional enum constant for the given type, using {@link Enum# valueOf}. If the
+   * constant does not exist, {@link Option# none} is returned. A common use case is for parsing
+   * user input or falling back to a default enum constant. For example,
+   * {@code Enums.get(Country.class, countryInput).getOrElse(Country.DEFAULT);}
+   *
+   * @since 3.1
+   */
   def get[T <: _root_.scala.reflect.Enum](enumClass: Class[T], value: String): Option[T] = {
     try {
-      println(enumClass)
       val e = Reflections.getInstance[AnyRef](enumClass.getName)
       Some(enumClass.getMethod("valueOf", classOf[String]).invoke(e, value).asInstanceOf[T])
     } catch {
-      case iae: IllegalArgumentException => None
+      case _: IllegalArgumentException => None
     }
+  }
+
+  def of[T <: _root_.scala.reflect.Enum](enumClass: Class[T], id: Int): Option[T] = {
+    val e = Reflections.getInstance[AnyRef](enumClass.getName)
+    toIdMaps(values(e)).get(id).asInstanceOf[Option[T]]
+  }
+
+  def id(e: AnyRef): Int = {
+    findIndexMethod(e.getClass).invoke(e).asInstanceOf[Int]
+  }
+
+  def values(e: AnyRef): Array[AnyRef] = {
+    e.getClass.getMethod("values").invoke(e).asInstanceOf[Array[AnyRef]]
+  }
+
+  def toIdMaps(vs: Array[AnyRef]): Map[Int, AnyRef] = {
+    val head = vs(0)
+    val idMethod = findIndexMethod(head.getClass)
+    vs.map { v => (idMethod.invoke(v).asInstanceOf[Int], v) }.toMap[Int, AnyRef]
   }
 
   def isEnum(clazz: Class[_]): Boolean = {
     classOf[_root_.scala.reflect.Enum].isAssignableFrom(clazz)
   }
+
+  private def findIndexMethod(clazz: Class[_]): Method = {
+    val method =
+      try {
+        clazz.getMethod("id")
+      } catch {
+        case _: Throwable => clazz.getMethod("ordinal")
+      }
+    method.setAccessible(true)
+    method
+  }
+
 }

@@ -26,8 +26,12 @@ class EnumsTest extends AnyFunSpec with Matchers {
 
   describe("Enums") {
     it("get") {
+      assert(String2ScalaEnumConverter.convert("7", classOf[WeekDay]) == WeekDay.Sun)
       assert(Enums.get(classOf[WeekDay], "Sun").contains(WeekDay.Sun))
       assert(Enums.isEnum(classOf[WeekDay]))
+      assert(Enums.of(classOf[WeekDay], 1).contains(WeekDay.Mon))
+
+      assert(Enums.id(WeekDay.Thu) == 4)
     }
   }
 

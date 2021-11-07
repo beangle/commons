@@ -27,7 +27,6 @@ object WeekDay {
 
   def of(id:Int):WeekDay = fromOrdinal(id - 1)
 
-  def fromId(id:Int):WeekDay = fromOrdinal(id - 1)
 }
 
 /**
