@@ -59,9 +59,11 @@ object Enums {
   }
 
   def toIdMaps(vs: Array[AnyRef]): Map[Int, AnyRef] = {
-    val head = vs(0)
-    val idMethod = findIndexMethod(head.getClass)
-    vs.map { v => (idMethod.invoke(v).asInstanceOf[Int], v) }.toMap[Int, AnyRef]
+    vs.map { v =>
+      val idMethod = findIndexMethod(v.getClass)
+      val o = idMethod.invoke(v).asInstanceOf[Number]
+      (o.intValue(), v)
+    }.toMap[Int, AnyRef]
   }
 
   def isEnum(clazz: Class[_]): Boolean = {

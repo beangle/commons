@@ -32,7 +32,6 @@ class EnumConverterTest extends AnyFunSpec with Matchers {
 
   describe("EnumConverter") {
     it("Convert Enum") {
-      println(TestEnum.Private.getClass)
       assert(null != DefaultConversion.Instance.convert("Private", classOf[TestEnum]))
       assert(null != DefaultConversion.Instance.convert("Sun", classOf[WeekDay]))
       assert(WeekDay.Sat == DefaultConversion.Instance.convert("6", classOf[WeekDay]))
