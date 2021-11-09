@@ -17,7 +17,8 @@
 
 package org.beangle.commons.lang.testbean
 
-enum TestEnum {
-
-  case Public,Protected,Private
+enum TestEnum(val name: String) {
+  case Public extends TestEnum("public")
+  case Protected extends TestEnum("protected")
+  case Private extends TestEnum("private")
 }
