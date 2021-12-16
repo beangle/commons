@@ -64,7 +64,7 @@ class PropertyOrdering(cmpStr: String) extends Ordering[Any] {
     var second = arg1
     if (index > -1) {
       first = first.asInstanceOf[Array[Any]](index)
-      second = first.asInstanceOf[Array[Any]](index)
+      second = second.asInstanceOf[Array[Any]](index)
     }
     if (Strings.isNotEmpty(name)) {
       first = Properties.get[Any](first, name)
