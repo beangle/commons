@@ -17,20 +17,20 @@
 
 package org.beangle.commons.lang.reflect
 
-import java.beans.Transient
-import java.lang.Character.isUpperCase
-import java.lang.reflect.{Field, Method, Modifier, ParameterizedType, TypeVariable}
 import org.beangle.commons.collection.{Collections, IdentityCache}
 import org.beangle.commons.lang.Strings.{substringBefore, uncapitalize}
-import org.beangle.commons.lang.reflect.Reflections.deduceParamTypes
-import org.beangle.commons.lang.{ClassLoaders, Strings}
-
-import scala.collection.mutable
-import scala.collection.immutable.ArraySeq
-import scala.reflect.*
 import org.beangle.commons.lang.reflect.BeanInfo
 import org.beangle.commons.lang.reflect.BeanInfo.*
 import org.beangle.commons.lang.reflect.BeanInfo.Builder.filterSameNames
+import org.beangle.commons.lang.reflect.Reflections.deduceParamTypes
+import org.beangle.commons.lang.{ClassLoaders, Strings}
+
+import java.beans.Transient
+import java.lang.Character.isUpperCase
+import java.lang.reflect.{Field, Method, Modifier, ParameterizedType, TypeVariable}
+import scala.collection.immutable.ArraySeq
+import scala.collection.mutable
+import scala.reflect.*
 
 /** Load ClassInfo using reflection
   *
@@ -90,7 +90,7 @@ object BeanInfoLoader {
 
     // find constructor with arguments
     val ctors = Collections.newBuffer[BeanInfo.ConstructorInfo]
-    var pCtorParamNames :Set[String] =Set.empty
+    var pCtorParamNames: Set[String] = Set.empty
     var i = 0
     clazz.getConstructors foreach { ctor =>
       val params = new mutable.ArrayBuffer[ParamInfo](ctor.getParameterCount)
@@ -99,7 +99,7 @@ object BeanInfoLoader {
         pCtorParamNames = params.map(_.name).toSet
         if (defaultCtorParamValues.nonEmpty) {
           defaultCtorParamValues foreach { case (i, v) =>
-            params(i-1) = params(i-1).copy(defaultValue = Some(v)) // for default values were 1 based.
+            params(i - 1) = params(i - 1).copy(defaultValue = Some(v)) // for default values were 1 based.
           }
         }
         i += 1

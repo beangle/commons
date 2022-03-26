@@ -151,7 +151,6 @@ object HttpUtils extends Logging {
     }
   }
 
-
   def invoke(url: URL, body: String, contentType: String): Response = {
     invoke(url, body, contentType, None)
   }

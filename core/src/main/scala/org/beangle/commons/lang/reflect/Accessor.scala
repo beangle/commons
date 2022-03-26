@@ -15,18 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons
+package org.beangle.commons.lang.reflect
 
-import org.beangle.commons.lang.BitStrings
-import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.matchers.should.Matchers
-import org.slf4j.Logger
+trait Accessor[T] {
 
-class VersionTest extends AnyFunSpec with Matchers {
+  def get(t: T, name: String): Any
 
-  describe("Version") {
-    it("find bundle version") {
-      Version.findBundleVersion(classOf[Logger]) should be ("2.0.0.alpha7")
-    }
-  }
+  def set(t: T, name: String, value: Any): Unit
 }

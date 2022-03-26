@@ -153,7 +153,7 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
               }
             case None=>
               if(!defdef.name.contains("$") && !defdef.name.endsWith("_=")){
-                methods += MethodExpr(defdef.name,rtType,paramList.toList,defdef.termParamss.isEmpty)
+                methods += MethodExpr(defdef.name,rtType,paramList,defdef.termParamss.isEmpty)
               }
           }
         }
