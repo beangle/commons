@@ -18,16 +18,16 @@
 package org.beangle.commons.conversion.impl
 
 /**
- * Generic Converter using in DefaultConversion
- * <p>
- * It's a SPI interface.
- *
- * @author chaostone
- * @since 3.2.0
- */
+  * Generic Converter using in DefaultConversion
+  * <p>
+  * It's a SPI interface.
+  *
+  * @author chaostone
+  * @since 3.2.0
+  */
 trait GenericConverter {
 
-  def getTypeinfo: Tuple2[Class[_], Class[_]]
+  def getTypeinfo: (Class[_], Class[_])
 
-  def convert(input: Any, targetType: Class[_]): Any
+  def convert[T](input: Any, targetType: Class[T]): T
 }

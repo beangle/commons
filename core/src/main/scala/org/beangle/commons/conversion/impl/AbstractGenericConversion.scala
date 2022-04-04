@@ -67,7 +67,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
   }
 
   override def addConverter(converter: Converter[_, _]): Unit = {
-    var key: Tuple2[Class[_], Class[_]] = null
+    var key: (Class[_], Class[_]) = null
     val defaultKey = (classOf[Any], classOf[Any])
     for (m <- converter.getClass.getMethods if m.getName == "apply" && Modifier.isPublic(m.getModifiers) && !m.isBridge())
       key = (m.getParameterTypes()(0), m.getReturnType)
@@ -136,7 +136,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
       if (superClass != null && superClass != classOf[AnyRef]) queue += superClass
       for (interfaceType <- cur.getInterfaces) addInterfaces(interfaceType, interfaces)
     }
-    var iter = interfaces.iterator
+    val iter = interfaces.iterator
     while (iter.hasNext) {
       val interfaceType = iter.next()
       val converter = converters.get(interfaceType).orNull

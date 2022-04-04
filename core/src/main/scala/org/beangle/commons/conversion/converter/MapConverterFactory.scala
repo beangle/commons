@@ -20,8 +20,8 @@ package org.beangle.commons.conversion.converter
 import org.beangle.commons.conversion.Converter
 import org.beangle.commons.conversion.impl.ConverterFactory
 
-import java.{ util => ju }
-import scala.collection.{ immutable, mutable }
+import java.util as ju
+import scala.collection.{immutable, mutable}
 
 object MapConverterFactory extends ConverterFactory[ju.Map[_, _], scala.collection.Map[_, _]] {
 
@@ -40,10 +40,9 @@ object MapConverterFactory extends ConverterFactory[ju.Map[_, _], scala.collecti
           case m: ju.Map[_, _] => asScala(m)
           case null => null.asInstanceOf[collection.Map[_, _]]
         }
-      if (immutable)
-        if (null == result) null else result.toMap
-      else
-        result
+      if immutable then
+        if null == result then null else result.toMap
+      else result
     }
   }
 }

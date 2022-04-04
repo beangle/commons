@@ -15,26 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.conversion.converter
+package org.beangle.commons.conversion.string
 
-import java.{ lang => jl }
+import org.beangle.commons.conversion.impl.ConverterFactory
+import org.beangle.commons.lang.{Objects, Strings}
 
-import org.beangle.commons.conversion.Converter
-import org.beangle.commons.lang.Strings
 /**
- * Convert String to Boolean.
- * <p>
- * Convert true,on,yes,Y,1 to Boolean.TRUE.<br>
- * Convert false,off,no,N,0,"" to Boolean.FALSE. <br>
- *
- * @author chaostone
- * @since 3.2.0
- */
-object String2BooleanConverter extends Converter[String, jl.Boolean] {
+  * String to Object
+  *
+  * @author chaostone
+  * @since 3.2.0
+  */
+class StringConverterFactory[S, R] extends ConverterFactory[S, R] {
 
-  private val trues = Set("true", "on", "Y", "1", "yes")
-
-  override def apply(input: String): jl.Boolean =
-    if (Strings.isEmpty(input)) false
-    else trues.contains(input.toLowerCase())
+  override def convert[T](input: Any, targetType: Class[T]): T = {
+    if Strings.isEmpty(input.asInstanceOf[String]) then null.asInstanceOf[T]
+    else super.convert(input, targetType)
+  }
 }

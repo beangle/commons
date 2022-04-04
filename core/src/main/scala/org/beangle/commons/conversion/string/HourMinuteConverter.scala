@@ -15,17 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.conversion.converter
+package org.beangle.commons.conversion.string
 
 import org.beangle.commons.conversion.Converter
-/**
- * Convert Object to String
- *
- * @author chaostone
- * @since 3.2.0
- */
-object Object2StringConverter extends Converter[AnyRef, String] {
+import org.beangle.commons.lang.Strings
+import org.beangle.commons.lang.time.HourMinute
 
-  override def apply(input: AnyRef): String =
-    if ((input == null)) "null" else input.toString
+object HourMinuteConverter extends Converter[String, HourMinute] {
+
+  override def apply(input: String): HourMinute = if Strings.isEmpty(input) then null else HourMinute.apply(input)
 }

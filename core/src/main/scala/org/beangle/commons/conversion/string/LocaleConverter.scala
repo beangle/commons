@@ -15,34 +15,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.conversion.converter
-
-import java.util.Locale
+package org.beangle.commons.conversion.string
 
 import org.beangle.commons.conversion.Converter
 import org.beangle.commons.lang.Strings
 
+import java.util.Locale
+
 /**
- * Convert String to Locale.
- *
- * @author chaostone
- * @since 3.2.0
- */
-object String2LocaleConverter extends Converter[String, Locale] {
+  * Convert String to Locale.
+  *
+  * @author chaostone
+  * @since 3.2.0
+  */
+object LocaleConverter extends Converter[String, Locale] {
 
   override def apply(localeString: String): Locale = {
-    if (Strings.isBlank(localeString)) return null
+    if Strings.isBlank(localeString) then return null
     var localeStr = localeString;
     var index = localeStr.indexOf('_')
-    if (index < 0) return new Locale(localeStr)
+    if index < 0 then return new Locale(localeStr)
     val language = localeStr.substring(0, index)
     if (index == localeStr.length) return new Locale(language)
 
     localeStr = localeStr.substring(index + 1)
     index = localeStr.indexOf('_')
-    if (index < 0) return new Locale(language, localeStr)
+    if index < 0 then return new Locale(language, localeStr)
     val country = localeStr.substring(0, index)
-    if (index == localeStr.length) return new Locale(language, country)
+    if index == localeStr.length then return new Locale(language, country)
     localeStr = localeStr.substring(index + 1)
     new Locale(language, country, localeStr)
   }

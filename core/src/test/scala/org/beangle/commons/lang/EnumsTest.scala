@@ -17,7 +17,7 @@
 
 package org.beangle.commons.lang
 
-import org.beangle.commons.conversion.converter.String2ScalaEnumConverter
+import org.beangle.commons.conversion.string.EnumConverter
 import org.beangle.commons.lang.time.WeekDay
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -26,7 +26,7 @@ class EnumsTest extends AnyFunSpec with Matchers {
 
   describe("Enums") {
     it("get") {
-      assert(String2ScalaEnumConverter.convert("7", classOf[WeekDay]) == WeekDay.Sun)
+      assert(EnumConverter.convert("7", classOf[WeekDay]) == WeekDay.Sun)
       assert(Enums.get(classOf[WeekDay], "Sun").contains(WeekDay.Sun))
       assert(Enums.isEnum(classOf[WeekDay]))
       assert(Enums.of(classOf[WeekDay], 1).contains(WeekDay.Mon))

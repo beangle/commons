@@ -18,7 +18,7 @@
 package org.beangle.commons.config.property
 
 import org.beangle.commons.bean.Initializing
-import org.beangle.commons.conversion.converter.String2BooleanConverter
+import org.beangle.commons.conversion.string.BooleanConverter
 import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.{ Numbers, Strings }
 
@@ -72,7 +72,7 @@ class MultiProviderPropertyConfig extends PropertyConfig with Initializing {
    */
   def getBoolean(name: String): Option[Boolean] =
     get(name) match {
-      case Some(value) => Some(String2BooleanConverter.apply(value.asInstanceOf[String]))
+      case Some(value) => Some(BooleanConverter.apply(value.asInstanceOf[String]))
       case _ => None
     }
 

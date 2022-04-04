@@ -24,4 +24,4 @@ package org.beangle.commons.conversion
  * @param <S> source
  * @param <T> target
  */
-trait Converter[S, +T] extends Function1[S, T]
+trait Converter[S, +T] extends ((S) => T)

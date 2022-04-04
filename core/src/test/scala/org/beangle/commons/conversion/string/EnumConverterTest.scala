@@ -15,26 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.conversion.converter
+package org.beangle.commons.conversion.string
 
-import java.sql.Time
-
-import org.scalatest.matchers.should.Matchers
+import org.beangle.commons.conversion.impl.DefaultConversion
+import org.beangle.commons.lang.testbean.TestEnum
+import org.beangle.commons.lang.time.WeekDay
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-import org.beangle.commons.lang.time.HourMinute
+/**
+ * @author chaostone
+ * @since 3.0.0
+ */
 
-class TimeConverterTest extends AnyFunSpec with Matchers {
+class EnumConverterTest extends AnyFunSpec with Matchers {
 
-  describe("TimeConverter") {
-    it("Convert String to time") {
-      String2TimeConverter("1234") should equal(Time.valueOf("12:34:00"))
-      String2TimeConverter("123400") should equal(Time.valueOf("12:34:00"))
-      String2TimeConverter("090619") should equal(Time.valueOf("09:06:19"))
-      String2TimeConverter("12:34") should equal(Time.valueOf("12:34:00"))
-      String2TimeConverter("12:34:00") should equal(Time.valueOf("12:34:00"))
-
-      String2HourMinuteConverter("12:34") should equal(new HourMinute(1234.toShort))
+  describe("EnumConverter") {
+    it("Convert Enum") {
+      assert(null != DefaultConversion.Instance.convert("Private", classOf[TestEnum]))
+      assert(null != DefaultConversion.Instance.convert("Sun", classOf[WeekDay]))
+      assert(WeekDay.Sat == DefaultConversion.Instance.convert("6", classOf[WeekDay]))
     }
   }
 }
