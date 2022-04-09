@@ -30,7 +30,7 @@ import org.scalatest.matchers.should.Matchers
 
 class EnumConverterTest extends AnyFunSpec with Matchers {
 
-  describe("EnumConverter") {
+  describe("EnumConverters") {
     it("Convert Enum") {
       assert(null != DefaultConversion.Instance.convert("Private", classOf[TestEnum]))
       assert(null != DefaultConversion.Instance.convert("Sun", classOf[WeekDay]))

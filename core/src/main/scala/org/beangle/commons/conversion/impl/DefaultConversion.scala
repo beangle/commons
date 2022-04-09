@@ -40,7 +40,7 @@ class DefaultConversion extends AbstractGenericConversion {
 
   addConverter(string.BooleanConverter)
 
-  addConverter(string.NumberConverter)
+  addConverter(string.NumberConverters)
 
   addConverter(string.DateConverter)
 
@@ -50,9 +50,9 @@ class DefaultConversion extends AbstractGenericConversion {
 
   addConverter(string.HourMinuteConverter)
 
-  addConverter(string.JavaEnumConverter)
+  addConverter(string.JavaEnumConverters)
 
-  addConverter(string.EnumConverter)
+  addConverter(string.EnumConverters)
 
   addConverter(string.LocaleConverter)
 
