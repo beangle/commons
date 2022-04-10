@@ -15,21 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.conversion.converter
+package org.beangle.commons.conversion.string
 
-import org.beangle.commons.conversion.impl.ConverterFactory
-import org.beangle.commons.lang.Strings
+import org.beangle.commons.conversion.impl.DefaultConversion
+import org.beangle.commons.lang.testbean.TestEnum
+import org.beangle.commons.lang.time.WeekDay
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 /**
- * String to Object
- *
  * @author chaostone
- * @since 3.2.0
+ * @since 3.0.0
  */
-class StringConverterFactory[S, R] extends ConverterFactory[S, R] {
 
-  override def convert(input: Any, targetType: Class[_]): Any = {
-    if (Strings.isEmpty(input.asInstanceOf[String])) return null
-    super.convert(input, targetType)
+class EnumConverterTest extends AnyFunSpec with Matchers {
+
+  describe("EnumConverters") {
+    it("Convert Enum") {
+      assert(null != DefaultConversion.Instance.convert("Private", classOf[TestEnum]))
+      assert(null != DefaultConversion.Instance.convert("Sun", classOf[WeekDay]))
+      assert(WeekDay.Sat == DefaultConversion.Instance.convert("6", classOf[WeekDay]))
+    }
   }
 }

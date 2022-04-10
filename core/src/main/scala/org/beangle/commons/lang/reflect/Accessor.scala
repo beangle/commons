@@ -15,10 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.conversion.impl
+package org.beangle.commons.lang.reflect
 
-object ConvertUtils {
+trait Accessor[T] {
 
-  def convert[T](value: Any, targetType: Class[T]): T =
-    DefaultConversion.Instance.convert(value, targetType)
+  def get(t: T, name: String): Any
+
+  def set(t: T, name: String, value: Any): Unit
 }

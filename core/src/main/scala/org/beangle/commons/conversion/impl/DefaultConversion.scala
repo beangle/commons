@@ -17,44 +17,48 @@
 
 package org.beangle.commons.conversion.impl
 
-import org.beangle.commons.conversion.converter._
+import org.beangle.commons.conversion.converter.*
+import org.beangle.commons.conversion.string
 
 object DefaultConversion {
 
   val Instance = new DefaultConversion()
+
+  def convert[T](value: Any, targetType: Class[T]): T = Instance.convert(value, targetType)
 }
 
 /**
- * Default Conversion implementation.
- * <p>
- * It register String to Boolean/Number/Date/Locale, Number to Number and Object to String buildin
- * converters.
- * @author chaostone
- * @since 3.2.0
- */
+  * Default Conversion implementation.
+  * <p>
+  * It register String to Boolean/Number/Date/Locale, Number to Number and Object to String buildin
+  * converters.
+  *
+  * @author chaostone
+  * @since 3.2.0
+  */
 class DefaultConversion extends AbstractGenericConversion {
 
-  addConverter(String2BooleanConverter)
+  addConverter(string.BooleanConverter)
 
-  addConverter(String2NumberConverter)
+  addConverter(string.NumberConverters)
 
-  addConverter(String2DateConverter)
+  addConverter(string.DateConverter)
 
-  addConverter(String2TemporalConverter)
+  addConverter(string.TemporalConverter)
 
-  addConverter(String2TimeConverter)
+  addConverter(string.TimeConverter)
 
-  addConverter(String2HourMinuteConverter)
+  addConverter(string.HourMinuteConverter)
 
-  addConverter(String2JavaEnumConverter)
+  addConverter(string.JavaEnumConverters)
 
-  addConverter(String2ScalaEnumConverter)
+  addConverter(string.EnumConverters)
 
-  addConverter(String2LocaleConverter)
+  addConverter(string.LocaleConverter)
+
+  addConverter(string.ToStringConverter)
 
   addConverter(Number2NumberConverter)
-
-  addConverter(Object2StringConverter)
 
   addConverter(IterableConverterFactory)
 }

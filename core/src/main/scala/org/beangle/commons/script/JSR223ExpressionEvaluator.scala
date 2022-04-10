@@ -22,15 +22,14 @@ import org.beangle.commons.script.{EvaluationException, ExpressionEvaluator}
 import javax.script.{ScriptEngine, ScriptEngineManager, SimpleBindings}
 
 class JSR223ExpressionEvaluator(engineName: String) extends ExpressionEvaluator {
-  var scriptEngine =  new ScriptEngineManager().getEngineByName(engineName)
+  var scriptEngine = new ScriptEngineManager().getEngineByName(engineName)
 
   def parse(exp: String): Unit = {}
 
   def eval(exp: String, root: AnyRef): AnyRef = {
     val ctx = new SimpleBindings
     root match {
-      case sm: collection.Map[String, Any] =>
-        sm foreach (x => ctx.put(x._1, x._2))
+      case sm: collection.Map[String, Any] => sm foreach (x => ctx.put(x._1, x._2))
       case jm: java.util.Map[String, Any] => ctx.putAll(jm)
       case _ => ctx.put("root", root)
     }

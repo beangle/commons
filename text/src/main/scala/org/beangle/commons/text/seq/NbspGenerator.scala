@@ -22,7 +22,7 @@ package org.beangle.commons.text.seq
  *
  * @author chaostone
  */
-class NbspGenerator {
+object NbspGenerator {
 
   /**
    * generator.

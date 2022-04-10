@@ -15,18 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.conversion.converter
+package org.beangle.commons.conversion.string
 
-import java.time.{ Instant, LocalDate, LocalDateTime, LocalTime }
-import java.{ util => ju }
-
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+
+import java.time.{Instant, LocalDate, LocalDateTime, LocalTime}
+import java.util as ju
 
 class DateConverterTest extends AnyFunSpec with Matchers {
 
   private def converToDate(dateStr: String, year: Int, month: Int, day: Int): Unit = {
-    val c = String2DateConverter.getConverter(classOf[ju.Date]).orNull
+    val c = DateConverter.getConverter(classOf[ju.Date]).orNull
     val date = c.apply(dateStr)
     val calendar = new ju.GregorianCalendar()
     calendar.setTime(date)
@@ -36,7 +36,7 @@ class DateConverterTest extends AnyFunSpec with Matchers {
   }
 
   private def converToDateX(dateStr: String, year: Int, month: Int, day: Int): Unit = {
-    val c = String2TemporalConverter.getConverter(classOf[java.time.LocalDate]).orNull
+    val c = TemporalConverter.getConverter(classOf[java.time.LocalDate]).orNull
     val date = c.apply(dateStr)
     date.getYear should be(year)
     date.getMonth.getValue should be(month)
@@ -55,7 +55,7 @@ class DateConverterTest extends AnyFunSpec with Matchers {
     }
 
     it("Convert String to Temporal") {
-      val c = String2TemporalConverter
+      val c = TemporalConverter
       val lc = c.getConverter(classOf[LocalDate])
       lc.isDefined should be(true)
       lc.get.apply("1980-09-09") should be equals LocalDate.parse("1980-09-09")

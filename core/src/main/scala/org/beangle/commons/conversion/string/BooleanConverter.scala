@@ -15,41 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.conversion.converter
-
-import java.sql.Time
+package org.beangle.commons.conversion.string
 
 import org.beangle.commons.conversion.Converter
 import org.beangle.commons.lang.Strings
 
+import java.lang as jl
+
 /**
- * Convert String to Time.
- * <p>
- * Convert HH:mm:ss to java.sql.Time<br>
- * Convert HH:mm to java.sql.Time<br>
- *
- * @author chaostone
- * @since 4.0.3
- */
-object String2TimeConverter extends Converter[String, Time] {
+  * Convert String to Boolean.
+  * <p>
+  * Convert true,on,yes,Y,1 to Boolean.TRUE.<br>
+  * Convert false,off,no,N,0,"" to Boolean.FALSE. <br>
+  *
+  * @author chaostone
+  * @since 3.2.0
+  */
+object BooleanConverter extends Converter[String, jl.Boolean] {
 
-  override def apply(input: String): Time =
-    if (Strings.isEmpty(input))
-      null
-    else
-      try
-        Time.valueOf(normalize(input))
-      catch {
-        case e: Exception => null
-      }
+  private val trues = Set("true", "on", "Y", "1", "yes", "t", "y", "是")
 
-  private def normalize(timeStr: String): String =
-    if (timeStr.length >= 8) timeStr
-    else {
-      val buf = new StringBuilder(timeStr)
-      if (buf.length <= 5) buf.append("00")
-      if (buf.charAt(2) != ':') buf.insert(2, ':')
-      if (buf.charAt(5) != ':') buf.insert(5, ':')
-      buf.toString
-    }
+  override def apply(input: String): jl.Boolean = {
+    if Strings.isEmpty(input) then false
+    else trues.contains(input.toLowerCase())
+  }
 }

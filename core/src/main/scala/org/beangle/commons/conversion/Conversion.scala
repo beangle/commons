@@ -16,20 +16,20 @@
  */
 
 package org.beangle.commons.conversion
-/**
- * convert a source to target type.
- *
- * @author chaostone
- * @since 3.2.0
- */
+
+/** Convert a source to target type.
+  *
+  * @author chaostone
+  * @since 3.2.0
+  */
 trait Conversion {
 
   /**
-   * Convert to target type.
-   * <ul>
-   * <li>convert null to null;
-   * <li>convert array to array ,when cannot find converter return targetType[0]
-   * </ul>
-   */
+    * Convert to target type.
+    * <ul>
+    * <li>convert null to null;
+    * <li>convert array to array ,when cannot find converter return targetType[0]
+    * </ul>
+    */
   def convert[T](source: Any, targetType: Class[T]): T
 }

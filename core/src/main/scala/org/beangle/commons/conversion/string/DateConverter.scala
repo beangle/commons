@@ -15,23 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.conversion.converter
-
-import java.util.Calendar._
-import java.{ util => ju }
+package org.beangle.commons.conversion.string
 
 import org.beangle.commons.conversion.Converter
 import org.beangle.commons.lang.Dates
 import org.beangle.commons.lang.Numbers.toInt
-import org.beangle.commons.lang.Strings._
+import org.beangle.commons.lang.Strings.*
+
+import java.util as ju
+import java.util.Calendar.*
 
 /**
- * DateConverter
- *
- * @author chaostone
- * @since 3.2.0
- */
-object String2DateConverter extends StringConverterFactory[String, ju.Date] {
+  * DateConverter
+  *
+  * @author chaostone
+  * @since 3.2.0
+  */
+object DateConverter extends StringConverterFactory[String, ju.Date] {
 
   register(classOf[ju.Date], new DateConverter())
 
@@ -40,8 +40,7 @@ object String2DateConverter extends StringConverterFactory[String, ju.Date] {
   private class DateConverter extends Converter[String, ju.Date] {
 
     override def apply(value: String): ju.Date = {
-      if (isEmpty(value))
-        return null
+      if isEmpty(value) then return null
       val dateStr = value
       val times = split(dateStr, " ")
       var badformat = false
@@ -59,8 +58,8 @@ object String2DateConverter extends StringConverterFactory[String, ju.Date] {
       }
       badformat ||= (dateElems(1) > 12 || dateElems(2) > 31)
 
-      if (badformat) null
-      else {
+      if badformat then null
+      else
         val gc = ju.Calendar.getInstance
         gc.set(YEAR, dateElems(0))
         gc.set(MONTH, dateElems(1) - 1)
@@ -73,12 +72,10 @@ object String2DateConverter extends StringConverterFactory[String, ju.Date] {
           if (timeElems.length > 2) gc.set(SECOND, toInt(timeElems(2)))
         }
         gc.getTime
-      }
     }
   }
 
   private class SqlDateConverter extends Converter[String, java.sql.Date] {
-    override def apply(input: String): java.sql.Date =
-      java.sql.Date.valueOf(Dates.normalize(input))
+    override def apply(input: String): java.sql.Date = java.sql.Date.valueOf(Dates.normalize(input))
   }
 }

@@ -23,21 +23,13 @@ import org.beangle.commons.lang.annotation.{description, noreflect}
 import org.beangle.commons.logging.Logging
 
 import java.beans.Transient
-
 class TestBean {
-
   var id: Int = _
-
   var name: String = _
-
   var intValue: Int = _
-
   var age: Option[Int] = _
-
   var javaMap: java.util.Map[Int, String] = _
-
   var testEnum: TestEnum = _
-
   var parent: Option[TestBean] = None
 
   def methodWithManyArguments(
@@ -174,25 +166,25 @@ case class Loader(name: String) {
 }
 
 trait Factory[T] {
-  def result:T
+  def result: T
 }
 
-class LongFactory extends Factory[Long] with Logging{
-  def result:Long=9L
+class LongFactory extends Factory[Long] with Logging {
+  def result: Long = 9L
 
   @noreflect
-  val typeName:String =getClass.getName
+  val typeName: String = getClass.getName
 
-  def doSomeThing():String={
+  def doSomeThing(): String = {
     println("slow operation")
     "ok"
   }
 
-  class Inner{
-    var name:String=_
+  class Inner {
+    var name: String = _
   }
 }
 
-class Textbook extends NumIdBean[java.lang.Long]{
-  def name:String ="textbook"
+class Textbook extends NumIdBean[java.lang.Long] {
+  def name: String = "textbook"
 }

@@ -27,8 +27,7 @@ import org.beangle.commons.lang.Objects
  */
 object NoneConverter extends GenericConverter {
 
-  override def convert(input: Any, targetType: Class[_]): Any =
-    Objects.default(targetType)
+  override def convert[T](input: Any, targetType: Class[T]): T =  Objects.default(targetType)
 
-  override def getTypeinfo: Tuple2[Class[_], Class[_]] = (classOf[AnyRef], classOf[AnyRef])
+  override def getTypeinfo: (Class[_], Class[_]) = (classOf[AnyRef], classOf[AnyRef])
 }

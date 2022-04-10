@@ -16,9 +16,11 @@
  */
 
 package org.beangle.commons
+
 import org.slf4j.LoggerFactory
 
 package object logging {
-  def getLogger(name: String) = new Logger(LoggerFactory.getLogger(name))
-  def getLogger(clazz: Class[_]) = new Logger(LoggerFactory.getLogger(clazz))
+  def getLogger(name: String): Logger = new Logger(LoggerFactory.getLogger(name))
+
+  def getLogger(clazz: Class[_]): Logger = new Logger(LoggerFactory.getLogger(clazz))
 }

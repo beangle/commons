@@ -24,7 +24,7 @@ class BeanInfoCache {
   /**
     * class info cache
     */
-  private var cache = new IdentityCache[Class[_], BeanInfo]
+  private val cache = new IdentityCache[Class[_], BeanInfo]
 
   inline def of(inline clazzes: Class[_]*): List[BeanInfo] = ${BeanInfoDigger.digInto('clazzes, 'this)}
 

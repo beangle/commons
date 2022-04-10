@@ -2,7 +2,7 @@ import org.beangle.parent.Dependencies._
 import org.beangle.parent.Settings._
 
 ThisBuild / organization := "org.beangle.commons"
-ThisBuild / version := "5.2.12"
+ThisBuild / version := "5.2.13"
 ThisBuild / scmInfo := Some(
   ScmInfo(
     url("https://github.com/beangle/commons"),
@@ -12,10 +12,10 @@ ThisBuild / scmInfo := Some(
 
 ThisBuild / developers := List(
   Developer(
-    id    = "chaostone",
-    name  = "Tihua Duan",
+    id = "chaostone",
+    name = "Tihua Duan",
     email = "duantihua@gmail.com",
-    url   = url("http://github.com/duantihua")
+    url = url("http://github.com/duantihua")
   )
 )
 
@@ -26,13 +26,14 @@ val commonDeps = Seq(slf4j, logback_classic, logback_core, scalatest)
 
 lazy val root = (project in file("."))
   .settings()
-  .aggregate(core,text,csv,dbf,commons_file)
+  .aggregate(core, text, csv, dbf, commons_file)
 
 lazy val core = (project in file("core"))
   .settings(
     name := "beangle-commons-core",
     common,
-    libraryDependencies ++= commonDeps
+    libraryDependencies ++= commonDeps,
+    libraryDependencies ++= Seq(scalaxml % "optional")
   )
 
 lazy val text = (project in file("text"))
