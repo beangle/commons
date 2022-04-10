@@ -26,7 +26,7 @@ val commonDeps = Seq(slf4j, logback_classic, logback_core, scalatest)
 
 lazy val root = (project in file("."))
   .settings()
-  .aggregate(core, text, csv, dbf, commons_file)
+  .aggregate(core, text, commons_file)
 
 lazy val core = (project in file("core"))
   .settings(
@@ -39,20 +39,6 @@ lazy val core = (project in file("core"))
 lazy val text = (project in file("text"))
   .settings(
     name := "beangle-commons-text",
-    common,
-    libraryDependencies ++= commonDeps
-  ).dependsOn(core)
-
-lazy val csv = (project in file("csv"))
-  .settings(
-    name := "beangle-commons-csv",
-    common,
-    libraryDependencies ++= commonDeps
-  ).dependsOn(core)
-
-lazy val dbf = (project in file("dbf"))
-  .settings(
-    name := "beangle-commons-dbf",
     common,
     libraryDependencies ++= commonDeps
   ).dependsOn(core)
