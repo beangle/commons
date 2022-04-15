@@ -20,12 +20,12 @@ package org.beangle.commons
 import java.net.URL
 
 object Version {
-  def name = "Beangle Scala Development Toolkit"
+  def name :String = "Beangle Scala Development Toolkit"
 
   def version: String = findBundleVersion(Version.getClass)
 
   def findBundleVersion(clazz: Class[_]): String = {
-    val className = "/" + clazz.getName().replace(".", "/") + ".class"
+    val className = "/" + clazz.getName.replace(".", "/") + ".class"
     val classPath = clazz.getResource(className).toString
     if (classPath.startsWith("jar")) {
       val manifestPath = classPath.replace(className, "/META-INF/MANIFEST.MF")
