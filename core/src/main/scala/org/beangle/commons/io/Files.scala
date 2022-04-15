@@ -17,12 +17,12 @@
 
 package org.beangle.commons.io
 
-import java.io._
+import org.beangle.commons.lang.Charsets.UTF_8
+
+import java.io.*
 import java.nio.channels.FileChannel
 import java.nio.charset.Charset
-import java.nio.file.{ Files => JFiles }
-
-import org.beangle.commons.lang.Charsets.UTF_8
+import java.nio.file.Files as JFiles
 
 object Files {
 
@@ -42,9 +42,9 @@ object Files {
     new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), charset))
 
   /**
-   * Reads the contents of a file into a String.
-   * The file is always closed.
-   */
+    * Reads the contents of a file into a String.
+    * The file is always closed.
+    */
   def readString(file: File, charset: Charset = UTF_8): String = {
     var in: InputStream = null
     try {
@@ -57,8 +57,8 @@ object Files {
   }
 
   /**
-   * Writes a String to a file creating the file if it does not exist.
-   */
+    * Writes a String to a file creating the file if it does not exist.
+    */
   def writeString(file: File, data: String, charset: Charset = UTF_8): Unit = {
     var out: OutputStream = null
     try {
@@ -89,36 +89,33 @@ object Files {
   }
 
   /**
-   * Reads the contents of a file line by line to a List of Strings.
-   * The file is always closed.
-   */
+    * Reads the contents of a file line by line to a List of Strings.
+    * The file is always closed.
+    */
   def readLines(file: File, charset: Charset = UTF_8): List[String] = {
     var in: InputStream = null
     try {
       in = new FileInputStream(file)
-      if (null == charset)
-        IOs.readLines(new InputStreamReader(in))
-      else {
-        val reader = new InputStreamReader(in, charset)
-        IOs.readLines(reader)
-      }
+      if null == charset then IOs.readLines(new InputStreamReader(in))
+      else IOs.readLines(new InputStreamReader(in, charset))
     } finally
       IOs.close(in)
   }
 
   /**
-   * Copies a file to a new location preserving the file date.
-   * <p>
-   * This method copies the contents of the specified source file to the specified destination file.
-   * The directory holding the destination file is created if it does not exist. If the destination
-   * file exists, then this method will overwrite it.
-   * <p>
-   * <strong>Note:</strong> This method tries to preserve the file's last modified date/times using
-   * {@link File#setLastModified(long)}, however it is not guaranteed that the operation will
-   * succeed. If the modification operation fails, no indication is provided.
-   * @param srcFile  an existing file to copy, must not be <code>null</code>
-   * @param destFile the new file, must not be <code>null</code>
-   */
+    * Copies a file to a new location preserving the file date.
+    * <p>
+    * This method copies the contents of the specified source file to the specified destination file.
+    * The directory holding the destination file is created if it does not exist. If the destination
+    * file exists, then this method will overwrite it.
+    * <p>
+    * <strong>Note:</strong> This method tries to preserve the file's last modified date/times using
+    * {@link File# setLastModified ( long )}, however it is not guaranteed that the operation will
+    * succeed. If the modification operation fails, no indication is provided.
+    *
+    * @param srcFile  an existing file to copy, must not be <code>null</code>
+    * @param destFile the new file, must not be <code>null</code>
+    */
   @throws[IOException]("if source or destination is invalid or an IO error occurs during copying")
   def copy(srcFile: File, destFile: File): Unit = {
     assert(null != srcFile)
@@ -160,30 +157,27 @@ object Files {
         pos += output.transferFrom(input, pos, count)
       }
     } finally {
-      IOs.close(output)
-      IOs.close(fos)
-      IOs.close(input)
-      IOs.close(fis)
+      IOs.close(output, fos, input, fis)
     }
     if (srcFile.length != destFile.length)
-      throw new IOException("Failed to copy full contents from '" + srcFile + "' to '" +
-        destFile +
-        "'")
-    if (preserveFileDate)
-      destFile.setLastModified(srcFile.lastModified())
+      throw new IOException("Failed to copy full contents from '" + srcFile + "' to '" + destFile + "'")
+    if preserveFileDate then destFile.setLastModified(srcFile.lastModified())
   }
 
-  def setReadOnly(file: File): Unit =
+  def setReadOnly(file: File): Unit = {
     if (file.exists() && file.canWrite)
       travel(file, x => x.setReadOnly())
+  }
 
-  def setWriteable(file: File): Unit =
+  def setWriteable(file: File): Unit = {
     if (file.exists() && !JFiles.isWritable(file.toPath))
       travel(file, x => x.setWritable(true))
+  }
 
-  def setExecutable(file: File): Unit =
+  def setExecutable(file: File): Unit = {
     if (file.exists() && !JFiles.isExecutable(file.toPath))
       travel(file, x => x.setExecutable(true))
+  }
 
   def travel(file: File, attributeSet: File => Unit): Unit = {
     attributeSet(file)
