@@ -19,41 +19,42 @@ package org.beangle.commons.lang
 
 import java.io.InputStream
 import java.net.URL
-import java.util.Enumeration
-
 import scala.collection.mutable
 
 /**
- * ClassLoaders
- * load class,stream
- */
+  * ClassLoaders
+  * load class,stream
+  */
 object ClassLoaders {
-  private val buildins = Map("Byte" -> classOf[Byte], "Boolean" -> classOf[Boolean], "Short" -> classOf[Short],
-    "Int" -> classOf[Int], "Integer" -> classOf[java.lang.Integer], "Long" -> classOf[Long], "Char" -> classOf[Char], "String" -> classOf[String],
-    "Float" -> classOf[Float], "Double" -> classOf[Double], "Option" -> classOf[Option[_]])
+  private val buildins = Map("byte" -> classOf[Byte], "Byte" -> classOf[Byte], "boolean" -> classOf[Boolean],
+    "Boolean" -> classOf[Boolean], "short" -> classOf[Short], "Short" -> classOf[Short],
+    "int" -> classOf[Int], "Int" -> classOf[Int], "long" -> classOf[Long], "Long" -> classOf[Long],
+    "char" -> classOf[Char], "Char" -> classOf[Char], "float" -> classOf[Float], "Float" -> classOf[Float],
+    "double" -> classOf[Double], "Double" -> classOf[Double], "Integer" -> classOf[Integer], "String" -> classOf[String],
+    "void" -> classOf[Unit], "Unit" -> classOf[Unit],
+    "Option" -> classOf[Option[_]])
 
   /**
-   * Return the default ClassLoader to use
-   * typically the thread context ClassLoader, if available; the ClassLoader that loaded the ClassLoaders
-   * class will be used as fallback.
-   * @return the default ClassLoader (never <code>null</code>)
-   */
+    * Return the default ClassLoader to use
+    * typically the thread context ClassLoader, if available; the ClassLoader that loaded the ClassLoaders
+    * class will be used as fallback.
+    *
+    * @return the default ClassLoader (never <code>null</code>)
+    */
   def defaultClassLoader: ClassLoader = {
-    var cl = try
-      Thread.currentThread().getContextClassLoader
-    catch {
-      case ex: Throwable => null
-    }
+    var cl =
+      try Thread.currentThread().getContextClassLoader
+      catch case _: Throwable => null
     if (cl == null) {
       cl = getClass.getClassLoader
-      if (null == cl) cl = ClassLoader.getSystemClassLoader()
+      if (null == cl) cl = ClassLoader.getSystemClassLoader
     }
     cl
   }
 
   /**
-   * Find class loader sequence
-   */
+    * Find class loader sequence
+    */
   private def loaders(callingClass: Class[_] = null): Seq[ClassLoader] = {
     val me = getClass.getClassLoader
     val threadCl = Thread.currentThread().getContextClassLoader
@@ -68,8 +69,8 @@ object ClassLoaders {
   }
 
   /**
-   * Load a given resource(Cannot start with slash /).
-   */
+    * Load a given resource(Cannot start with slash /).
+    */
   def getResource(resourceName: String, callingClass: Class[_] = null): Option[URL] = {
     var url: URL = null
     val iter = loaders(callingClass).iterator
@@ -79,11 +80,12 @@ object ClassLoaders {
   }
 
   /**
-   * Load list of resource(Cannot start with slash /).
-   * @return List of resources url or empty list.
-   */
+    * Load list of resource(Cannot start with slash /).
+    *
+    * @return List of resources url or empty list.
+    */
   def getResources(resourceName: String, callingClass: Class[_] = null): List[URL] = {
-    var em: Enumeration[URL] = null
+    var em: java.util.Enumeration[URL] = null
     val iter = loaders(callingClass).iterator
     while ((null == em || !em.hasMoreElements) && iter.hasNext)
       em = iter.next().getResources(resourceName)
@@ -94,27 +96,25 @@ object ClassLoaders {
   }
 
   /**
-   * This is a convenience method to load a resource as a stream.
-   *
-   * The algorithm used to find the resource is given in getResource()
-   */
+    * This is a convenience method to load a resource as a stream.
+    *
+    * The algorithm used to find the resource is given in getResource()
+    */
   def getResourceAsStream(resourceName: String, callingClass: Class[_] = null): Option[InputStream] =
     getResource(resourceName, callingClass).map { r => r.openStream() }
 
   def load(className: String, classLoader: ClassLoader = null): Class[_] = {
     val loader = if (classLoader == null) defaultClassLoader else classLoader
-    if (buildins.contains(className))
-      buildins(className)
-    else
-      loader.loadClass(if (className.contains(".")) className else "java.lang." + className)
+    if (buildins.contains(className)) buildins(className)
+    else loader.loadClass(className)
   }
 
   def get(className: String, classLoader: ClassLoader = null): Option[Class[_]] = {
     val loader = if (classLoader == null) defaultClassLoader else classLoader
-    if (buildins.contains(className))
+    if buildins.contains(className) then
       buildins.get(className)
-    else if (null != loader.getResource(Strings.replace(className, ".", "/") + ".class"))
-      Some(loader.loadClass(if (className.contains(".")) className else "java.lang." + className))
+    else if null != loader.getResource(Strings.replace(className, ".", "/") + ".class") then
+      Some(loader.loadClass(className))
     else
       None
   }
