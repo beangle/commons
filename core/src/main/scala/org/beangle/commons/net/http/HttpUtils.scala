@@ -37,17 +37,20 @@ object HttpUtils extends Logging {
     HTTP_NOT_FOUND -> "Not Found",
     HTTP_UNAUTHORIZED -> "Access denied")
 
-  def toString(httpCode: Int): String =
-    statusMap.getOrElse(httpCode, String.valueOf(httpCode))
+  def toString(httpCode: Int): String = statusMap.getOrElse(httpCode, String.valueOf(httpCode))
 
   def access(url: URL): ResourceStatus = {
-    val hc = followRedirect(url.openConnection(), "HEAD")
-    val rc = hc.getResponseCode
-    rc match {
-      case HTTP_OK =>
-        val supportRange = "bytes" == hc.getHeaderField("Accept-Ranges")
-        ResourceStatus(rc, hc.getURL, hc.getHeaderFieldLong("Content-Length", 0), hc.getLastModified, supportRange)
-      case _ => ResourceStatus(rc, hc.getURL, -1, -1, supportRange = false)
+    try {
+      val hc = followRedirect(url.openConnection(), "HEAD")
+      val rc = hc.getResponseCode
+      rc match {
+        case HTTP_OK =>
+          val supportRange = "bytes" == hc.getHeaderField("Accept-Ranges")
+          ResourceStatus(rc, hc.getURL, hc.getHeaderFieldLong("Content-Length", 0), hc.getLastModified, supportRange)
+        case _ => ResourceStatus(rc, hc.getURL, -1, -1, supportRange = false)
+      }
+    } catch {
+      case _: Exception => ResourceStatus(HTTP_NOT_FOUND, url, -1, -1, false)
     }
   }
 
