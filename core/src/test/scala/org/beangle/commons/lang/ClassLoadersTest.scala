@@ -29,6 +29,9 @@ class ClassLoadersTest  extends AnyFunSpec with Matchers {
       classOf[Unit] should be (ClassLoaders.load("void"))
       classOf[Unit] should be (ClassLoaders.load("Unit"))
       classOf[Integer] should be (ClassLoaders.load("Integer"))
+
+      ClassLoaders.getResource("/logback.xml").nonEmpty should be (true)
+      ClassLoaders.getResource("logback.xml").nonEmpty should be (true)
     }
   }
 

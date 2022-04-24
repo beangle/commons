@@ -29,7 +29,7 @@ import java.nio.charset.Charset
 
 object HttpUtils extends Logging {
 
-  private val Timeout = 15 * 1000
+  private val Timeout = 10 * 1000
 
   private val statusMap = Map(
     HTTP_OK -> "OK",
@@ -41,7 +41,7 @@ object HttpUtils extends Logging {
 
   def access(url: URL): ResourceStatus = {
     try {
-      val hc = followRedirect(url.openConnection(), "HEAD")
+      val hc = followRedirect(url.openConnection(), HttpMethods.HEAD)
       val rc = hc.getResponseCode
       rc match {
         case HTTP_OK =>
@@ -57,7 +57,7 @@ object HttpUtils extends Logging {
   @scala.annotation.tailrec
   def followRedirect(c: URLConnection, method: String): HttpURLConnection = {
     val conn = c.asInstanceOf[HttpURLConnection]
-    conn.setRequestMethod(method)
+    requestBy(conn, method)
     conn.setInstanceFollowRedirects(false)
     Https.noverify(conn)
     val rc = conn.getResponseCode
@@ -84,9 +84,7 @@ object HttpUtils extends Logging {
     var conn: HttpURLConnection = null
     try {
       conn = url.openConnection().asInstanceOf[HttpURLConnection]
-      conn.setConnectTimeout(Timeout)
-      conn.setReadTimeout(Timeout)
-      conn.setRequestMethod(method)
+      requestBy(conn, method)
       conn.setUseCaches(false)
       conn.setDoOutput(false)
       Https.noverify(conn)
@@ -125,9 +123,7 @@ object HttpUtils extends Logging {
     var in: BufferedReader = null
     try {
       conn = url.openConnection().asInstanceOf[HttpURLConnection]
-      conn.setConnectTimeout(Timeout)
-      conn.setReadTimeout(Timeout)
-      conn.setRequestMethod(method)
+      requestBy(conn, method)
       conn.setDoOutput(false)
       conn.setUseCaches(false)
       Https.noverify(conn)
@@ -168,7 +164,7 @@ object HttpUtils extends Logging {
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     Https.noverify(conn)
     conn.setDoOutput(true)
-    conn.setRequestMethod(HttpMethods.POST)
+    requestBy(conn, HttpMethods.POST)
     conn.setRequestProperty("Content-Type", contentType)
     f foreach (x => x(conn))
     val os = conn.getOutputStream
@@ -190,6 +186,13 @@ object HttpUtils extends Logging {
       if (null != conn) conn.disconnect()
   }
 
-  private[this] def report(url: URL, e: Exception): Unit =
-    logger.error("Cannot open url " + url, e)
+  private[this] def report(url: URL, e: Exception): Unit = {
+    logger.info("Cannot open url " + url + " " + e.getMessage)
+  }
+
+  private def requestBy(conn: HttpURLConnection, method: String): Unit = {
+    conn.setConnectTimeout(Timeout)
+    conn.setReadTimeout(Timeout)
+    conn.setRequestMethod(method)
+  }
 }

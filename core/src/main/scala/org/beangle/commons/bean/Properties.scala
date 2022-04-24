@@ -20,10 +20,10 @@ package org.beangle.commons.bean
 import org.beangle.commons.conversion.Conversion
 import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.reflect.{ BeanInfos, TypeInfo }
+import org.beangle.commons.lang.reflect.{BeanInfos, TypeInfo}
 import org.beangle.commons.logging.Logging
 
-import java.lang.reflect.{ Array => Jarray }
+import java.lang.reflect.Array as Jarray
 
 object Properties {
   private val Default = new Properties(DefaultConversion.Instance)
@@ -47,7 +47,7 @@ object Properties {
     Default.writables(clazz)
 }
 
-class Properties( conversion: Conversion) extends Logging {
+class Properties(conversion: Conversion) extends Logging {
 
   private val resolver = new PropertyNameResolver()
 
@@ -134,10 +134,8 @@ class Properties( conversion: Conversion) extends Logging {
 
   private def getPropertyOfMap(bean: Any, propertyName: String): Any = {
     var name = resolver.getProperty(propertyName)
-    if (name == null || name.length == 0)
-      name = resolver.getKey(propertyName)
-    else
-      name = propertyName
+    if name == null || name.isEmpty then name = resolver.getKey(propertyName)
+    else name = propertyName
     getMapped(bean, name)
   }
 
@@ -209,8 +207,8 @@ class Properties( conversion: Conversion) extends Logging {
 
   private def convert(value: Any, clazz: Class[_], typeInfo: TypeInfo, conversion: Conversion): Any =
     if (typeInfo.isOptional) {
-      if  null == value  then None
-      else if value.isInstanceOf[Option[_]]  then    value
+      if null == value then None
+      else if value.isInstanceOf[Option[_]] then value
       else if null != typeInfo then
         if (null == conversion) Option(value) else Option(conversion.convert(value, typeInfo.args.head.clazz))
       else Option(value)

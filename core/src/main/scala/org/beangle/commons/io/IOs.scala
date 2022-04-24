@@ -57,12 +57,11 @@ object IOs extends Logging {
     baos.toByteArray
   }
 
-  def write(data: String, output: OutputStream, charset: Charset = null): Unit =
-    if (data != null)
-      if (charset == null)
-        output.write(data.getBytes())
-      else
-        output.write(data.getBytes(charset))
+  def write(data: String, output: OutputStream, charset: Charset = null): Unit = {
+    if data != null then
+      if charset == null then output.write(data.getBytes())
+      else output.write(data.getBytes(charset))
+  }
 
   /** Copy chars from a <code>Reader</code> to a <code>Writer</code>.
     *
@@ -99,34 +98,32 @@ object IOs extends Logging {
     list.toList
   }
 
-  def readString(input: InputStream, charset: Charset = UTF_8): String =
+  def readString(input: InputStream, charset: Charset = UTF_8): String = {
     try {
       val sw = new StringBuilderWriter(16)
       copy(new InputStreamReader(input, charset), sw)
       sw.toString
     } finally
       close(input)
+  }
 
   /** Read key value properties
     */
-  def readProperties(url: URL): Map[String, String] =
-    if (null == url)
-      Map.empty
+  def readProperties(url: URL): Map[String, String] = {
+    if null == url then Map.empty
     else
-      try
-        readProperties(url.openStream())
-      catch {
-        case e: Exception =>
-          logger.error("load " + url + " error", e)
-          Map.empty
+      try readProperties(url.openStream())
+      catch case e: Exception => {
+        logger.info("load " + url + " error:" + e.getMessage)
+        Map.empty
       }
+  }
 
   /** Read key value properties
     */
-  def readProperties(input: InputStream, charset: Charset = UTF_8): Map[String, String] =
-    if (null == input)
-      Map.empty
-    else {
+  def readProperties(input: InputStream, charset: Charset = UTF_8): Map[String, String] = {
+    if null == input then Map.empty
+    else
       val texts = new collection.mutable.HashMap[String, String]
       val reader = new LineNumberReader(new InputStreamReader(input, charset))
       var line: String = reader.readLine
@@ -137,60 +134,57 @@ object IOs extends Logging {
       }
       close(input)
       texts.toMap
-    }
+  }
 
   /** Read Java key value properties by url
     */
-  def readJavaProperties(url: URL): Map[String, String] =
-    if (null == url)
-      Map.empty
+  def readJavaProperties(url: URL): Map[String, String] = {
+    if null == url then Map.empty
     else
-      try
-        readJavaProperties(url.openStream())
-      catch {
-        case e: Exception =>
-          logger.error("load " + url + " error", e)
-          Map.empty
+      try readJavaProperties(url.openStream())
+      catch case e: Exception => {
+        logger.info("load " + url + " error:" + e.getMessage)
+        Map.empty
       }
+  }
+
 
   /** Read java key value properties
     */
-  def readJavaProperties(input: InputStream): Map[String, String] =
-    if (null == input)
-      Map.empty
-    else {
+  def readJavaProperties(input: InputStream): Map[String, String] = {
+    if null == input then Map.empty
+    else
       val properties = new ju.Properties()
       properties.load(input)
       close(input)
       import scala.jdk.CollectionConverters.*
       properties.asScala.toMap
-    }
+  }
 
-  def readLines(input: InputStream, charset: Charset = UTF_8): List[String] =
+  def readLines(input: InputStream, charset: Charset = UTF_8): List[String] = {
     readLines(new InputStreamReader(input, charset))
+  }
 
   /** Close many objects quitely.
     * swallow any exception.
     */
-  def close(objs: AutoCloseable*): Unit =
+  def close(objs: AutoCloseable*): Unit = {
     objs foreach { obj =>
-      try
-        if (obj != null) obj.close()
-      catch {
-        case _: Exception =>
-      }
+      try if (obj != null) obj.close()
+      catch case _: Exception => {}
     }
+  }
 
-  def using[T <: AutoCloseable, R](res: T)(func: T => R): R =
-    try
-      func(res)
+  def using[T <: AutoCloseable, R](res: T)(func: T => R): R = {
+    try func(res)
     finally
-      if (res != null)
-        res.close()
+      if res != null then res.close()
+  }
 
-  private def toBufferedReader(reader: Reader): BufferedReader =
+  private def toBufferedReader(reader: Reader): BufferedReader = {
     reader match {
       case reader1: BufferedReader => reader1
       case _ => new BufferedReader(reader)
     }
+  }
 }
