@@ -72,10 +72,11 @@ object ClassLoaders {
     * Load a given resource(Cannot start with slash /).
     */
   def getResource(resourceName: String, callingClass: Class[_] = null): Option[URL] = {
+    val path = normalize(resourceName)
     var url: URL = null
     val iter = loaders(callingClass).iterator
     while (null == url && iter.hasNext)
-      url = iter.next().getResource(resourceName)
+      url = iter.next().getResource(path)
     Option(url)
   }
 
@@ -85,10 +86,10 @@ object ClassLoaders {
     * @return List of resources url or empty list.
     */
   def getResources(resourceName: String, callingClass: Class[_] = null): List[URL] = {
+    val path = normalize(resourceName)
     var em: java.util.Enumeration[URL] = null
     val iter = loaders(callingClass).iterator
-    while ((null == em || !em.hasMoreElements) && iter.hasNext)
-      em = iter.next().getResources(resourceName)
+    while ((null == em || !em.hasMoreElements) && iter.hasNext) em = iter.next().getResources(path)
 
     val urls = new mutable.ListBuffer[URL]
     while (null != em && em.hasMoreElements) urls += em.nextElement
@@ -100,8 +101,9 @@ object ClassLoaders {
     *
     * The algorithm used to find the resource is given in getResource()
     */
-  def getResourceAsStream(resourceName: String, callingClass: Class[_] = null): Option[InputStream] =
+  def getResourceAsStream(resourceName: String, callingClass: Class[_] = null): Option[InputStream] = {
     getResource(resourceName, callingClass).map { r => r.openStream() }
+  }
 
   def load(className: String, classLoader: ClassLoader = null): Class[_] = {
     val loader = if (classLoader == null) defaultClassLoader else classLoader
@@ -117,5 +119,9 @@ object ClassLoaders {
       Some(loader.loadClass(className))
     else
       None
+  }
+
+  private def normalize(resourceName: String): String = {
+    if resourceName.charAt(0) == '/' then resourceName.substring(1) else resourceName
   }
 }
