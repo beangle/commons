@@ -148,7 +148,6 @@ object IOs extends Logging {
       }
   }
 
-
   /** Read java key value properties
     */
   def readJavaProperties(input: InputStream): Map[String, String] = {

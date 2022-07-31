@@ -20,7 +20,8 @@ package org.beangle.commons.bean
 import org.beangle.commons.conversion.Conversion
 import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.reflect.{BeanInfos, TypeInfo}
+import org.beangle.commons.lang.reflect.TypeInfo.OptionType
+import org.beangle.commons.lang.reflect.{BeanInfo, BeanInfos, TypeInfo}
 import org.beangle.commons.logging.Logging
 
 import java.lang.reflect.Array as Jarray
@@ -36,6 +37,9 @@ object Properties {
 
   def copy(bean: AnyRef, propertyName: String, value: Any): Any =
     Default.copy(bean, propertyName, value)
+
+  def copy(bean: AnyRef, beanInfo: BeanInfo, propertyName: String, value: Any): Any =
+    Default.copy(bean, beanInfo, propertyName, value)
 
   def isWriteable(bean: AnyRef, name: String): Boolean =
     Default.isWriteable(bean, name)
@@ -53,7 +57,7 @@ class Properties(conversion: Conversion) extends Logging {
 
   @throws(classOf[NoSuchMethodException])
   def set(bean: AnyRef, propertyName: String, value: Any): Any =
-    copy(bean, propertyName, value, null)
+    copy(bean, BeanInfos.get(bean.getClass), propertyName, value, null)
 
   def get[T <: Any](inputBean: Any, propertyName: String): T = {
     var result = inputBean
@@ -84,7 +88,10 @@ class Properties(conversion: Conversion) extends Logging {
   }
 
   def copy(bean: AnyRef, propertyName: String, value: Any): Any =
-    copy(bean, propertyName, value, this.conversion)
+    copy(bean, BeanInfos.get(bean.getClass), propertyName, value, this.conversion)
+
+  def copy(bean: AnyRef, beanInfo: BeanInfo, propertyName: String, value: Any): Any =
+    copy(bean, beanInfo, propertyName, value, this.conversion)
 
   def isWriteable(bean: AnyRef, name: String): Boolean =
     BeanInfos.get(bean.getClass).getSetter(name).isDefined
@@ -95,14 +102,22 @@ class Properties(conversion: Conversion) extends Logging {
   def writables(clazz: Class[_]): Set[String] =
     BeanInfos.get(clazz).writables.keySet
 
-  private def copy(bean: AnyRef, propertyName: String, value: Any, conversion: Conversion): Any = {
+  private def copy(bean: AnyRef, beanInfo: BeanInfo, propertyName: String, value: Any, conversion: Conversion): Any = {
     var result: Any = bean
     var name = propertyName
+    var currentBeanInfo = beanInfo
     while (resolver.hasNested(name)) {
-      result = getDirectProperty(result, resolver.next(name))
+      val next = resolver.next(name)
+      result = getDirectProperty(result, next)
       if (null != result && result.isInstanceOf[Option[_]])
         result = result.asInstanceOf[Option[_]].orNull
       if (result == null) throw new RuntimeException("Null property value for '" + name + "' on bean class '" + bean.getClass + "'")
+      val nextTypeInfo = currentBeanInfo.getPropertyTypeInfo(next).get
+      val nextClazz = nextTypeInfo match {
+        case OptionType(elementType) => elementType.clazz
+        case _ => nextTypeInfo.clazz
+      }
+      currentBeanInfo = BeanInfos.get(nextClazz)
       name = resolver.remove(name)
     }
 
@@ -110,12 +125,12 @@ class Properties(conversion: Conversion) extends Logging {
       setPropertyOfMapBean(result, name, value)
       value
     } else if (resolver.isMapped(name)) {
-      copyMappedProperty(result, name, value)
+      copyMappedProperty(result, currentBeanInfo, name, value)
       value
-    } else if (resolver.isIndexed(name))
-      copyIndexedProperty(result, name, value, conversion)
-    else
-      copySimpleProperty(result, name, value, conversion)
+    } else if (resolver.isIndexed(name)) {
+      copyIndexedProperty(result, currentBeanInfo, name, value, conversion)
+    } else
+      copySimpleProperty(result, currentBeanInfo, name, value, conversion)
   }
 
   private def getDirectProperty(result: Any, name: String): Any =
@@ -156,11 +171,10 @@ class Properties(conversion: Conversion) extends Logging {
     if (value.getClass.isArray) Jarray.get(value, index) else getIndexed(value, index)
   }
 
-  private def copySimpleProperty(bean: Any, name: String, value: Any, conversion: Conversion): Any = {
-    val manifest = BeanInfos.get(bean.getClass)
-    manifest.getSetter(name) match {
+  private def copySimpleProperty(bean: Any, beanInfo: BeanInfo, name: String, value: Any, conversion: Conversion): Any = {
+    beanInfo.getSetter(name) match {
       case Some(method) =>
-        val p = manifest.properties(name)
+        val p = beanInfo.properties(name)
         val converted = convert(value, p.clazz, p.typeinfo, conversion)
         method.invoke(bean, converted.asInstanceOf[Object])
         converted
@@ -168,7 +182,7 @@ class Properties(conversion: Conversion) extends Logging {
     }
   }
 
-  private def copyIndexedProperty(bean: Any, name: String, value: Any, conversion: Conversion): Any = {
+  private def copyIndexedProperty(bean: Any, beanInfo: BeanInfo, name: String, value: Any, conversion: Conversion): Any = {
     var index = -1
     try
       index = resolver.getIndex(name)
@@ -218,11 +232,11 @@ class Properties(conversion: Conversion) extends Logging {
       conversion.convert(value, clazz)
     }
 
-  private def copyMappedProperty(bean: Any, name: String, value: Any): Unit = {
+  private def copyMappedProperty(bean: Any, beanInfo: BeanInfo, name: String, value: Any): Unit = {
     val key = getMappedKey(name, bean)
     val resolvedName = resolver.getProperty(name)
     val rs = if (resolvedName != null && resolvedName.length() >= 0) getSimpleProperty(bean, resolvedName) else bean
-    val typeInfo = BeanInfos.get(bean.getClass).getPropertyTypeInfo(resolvedName).get
+    val typeInfo = beanInfo.getPropertyTypeInfo(resolvedName).get
     val key1 = conversion.convert(key, typeInfo.args.head.clazz)
     val value1 = conversion.convert(value, typeInfo.args.tail.head.clazz)
     setMapped(rs, key1, value1)
