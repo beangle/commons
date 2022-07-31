@@ -56,8 +56,12 @@ class Properties(conversion: Conversion) extends Logging {
   private val resolver = new PropertyNameResolver()
 
   @throws(classOf[NoSuchMethodException])
-  def set(bean: AnyRef, propertyName: String, value: Any): Any =
-    copy(bean, BeanInfos.get(bean.getClass), propertyName, value, null)
+  def set(bean: AnyRef, propertyName: String, value: Any): Any = {
+    if isMapType(bean) then
+      copy(bean, null, propertyName, value, null)
+    else
+      copy(bean, BeanInfos.get(bean.getClass), propertyName, value, null)
+  }
 
   def get[T <: Any](inputBean: Any, propertyName: String): T = {
     var result = inputBean
@@ -133,11 +137,12 @@ class Properties(conversion: Conversion) extends Logging {
       copySimpleProperty(result, currentBeanInfo, name, value, conversion)
   }
 
-  private def getDirectProperty(result: Any, name: String): Any =
+  private def getDirectProperty(result: Any, name: String): Any = {
     if (isMapType(result)) getPropertyOfMap(result, name)
     else if (resolver.isMapped(name)) getMappedProperty(result, name)
     else if (resolver.isIndexed(name)) getIndexedProperty(result, name)
     else getSimpleProperty(result, name)
+  }
 
   private def getSimpleProperty(bean: Any, name: String): Any =
     BeanInfos.get(bean.getClass).getGetter(name) match {
