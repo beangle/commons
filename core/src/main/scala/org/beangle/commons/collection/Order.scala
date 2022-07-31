@@ -20,6 +20,7 @@ package org.beangle.commons.collection
 import org.beangle.commons.lang.Strings
 
 import scala.collection.mutable.ListBuffer
+
 /**
  * 排序
  *
@@ -72,19 +73,21 @@ object Order {
    * parse.
    */
   def parse(orderString: String): List[Order] =
-    if (Strings.isBlank(orderString))
-      List()
-    else {
+    if (Strings.isBlank(orderString)) {
+      List.empty
+    } else {
       val orders = new ListBuffer[Order]
       val orderStrs = Strings.split(orderString, ',')
       for (i <- 0 until orderStrs.length) {
         val originOrder = orderStrs(i)
         if (Strings.isNotBlank(originOrder)) {
           val order = originOrder.toLowerCase()
-          if (order.endsWith(" desc"))
+          if order.endsWith(" desc") then
             orders += new Order(orderStrs(i).substring(0, order.indexOf(" desc")).trim(), false)
-          else if (order.endsWith(" asc"))
+          else if order.endsWith(" asc") then
             orders += new Order(orderStrs(i).substring(0, order.indexOf(" asc")).trim(), true)
+          else if order.startsWith("-") then
+            orders += new Order(orderStrs(i).trim().substring(1), false)
           else
             orders += new Order(orderStrs(i).trim(), true)
         }

@@ -17,8 +17,8 @@
 
 package org.beangle.commons.collection
 
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 class OrderTest extends AnyFunSpec with Matchers {
 
@@ -29,6 +29,15 @@ class OrderTest extends AnyFunSpec with Matchers {
 
     it("ToString2") {
       Order.toSortString(List(Order("id", false), Order.asc("name"))) should equal("order by id desc,name")
+    }
+
+    it("Parse minus order") {
+      val orders = Order.parse("-std.code")
+      orders.size should be(1)
+      orders foreach { order =>
+        order.ascending should be(false)
+        order.property should equal("std.code")
+      }
     }
 
     it("ParserOrder") {
