@@ -1,35 +1,34 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.text.i18n
 
-import java.io.{InputStream, InputStreamReader, LineNumberReader}
+import java.io.{ InputStream, InputStreamReader, LineNumberReader }
 import java.nio.charset.Charset
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
 import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.{Charsets, ClassLoaders, Strings}
+import org.beangle.commons.lang.{ Charsets, ClassLoaders, Strings }
 import org.beangle.commons.lang.annotation.description
 
 /**
-  * @since 3.0.0
-  */
+ * @since 3.0.0
+ */
 @description("缺省TextBundle注册表")
 class DefaultTextBundleRegistry extends TextBundleRegistry {
 
@@ -39,9 +38,8 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
 
   var reloadable: Boolean = false
 
-  def addDefaults(bundleNames: String*): Unit = {
+  def addDefaults(bundleNames: String*): Unit =
     defaultBundleNames ++= bundleNames
-  }
 
   def load(locale: Locale, bundleName: String): TextBundle = {
     val localeBundles = caches.getOrElseUpdate(locale, new ConcurrentHashMap[String, TextBundle])
@@ -72,20 +70,18 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
           bundleName = Strings.substringBeforeLast(bundleName, ".") + ".package"
           resource = toDefaultResourceName(bundleName, locale)
           ClassLoaders.getResource(resource)
-        } else {
+        } else
           None
-        }
-      case url@Some(u) => url
+      case url @ Some(u) => url
     }
 
     url match {
       case None =>
         val defaultBundle = new DefaultTextBundle(locale, resource, Map.empty)
-        if (bundleName == bname) {
+        if (bundleName == bname)
           Map(bundleName -> defaultBundle)
-        } else {
+        else
           Map(bundleName -> defaultBundle, bname -> defaultBundle)
-        }
       case Some(url) =>
         val prefix = Strings.substringBeforeLast(bundleName, ".") + "."
         val bundles = readBundles(url.openStream).map {
@@ -93,17 +89,16 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
             if (name.length == 0) (bundleName, new DefaultTextBundle(locale, resource, values))
             else (prefix + name, new DefaultTextBundle(locale, resource, values))
         }
-        if (bundles.contains(bname)) {
+        if (bundles.contains(bname))
           bundles
-        } else {
+        else
           bundles ++ Map(bname -> new DefaultTextBundle(locale, resource, Map.empty))
-        }
     }
   }
 
   /**
-    * Load java properties bundle with iso-8859-1
-    */
+   * Load java properties bundle with iso-8859-1
+   */
   protected def loadJavaBundle(bundleName: String, locale: Locale): Option[TextBundle] = {
     val resource = toJavaResourceName(bundleName, locale)
     ClassLoaders.getResource(resource) match {
@@ -113,8 +108,8 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
   }
 
   /**
-    * java properties bundle name
-    */
+   * java properties bundle name
+   */
   protected def toJavaResourceName(bundleName: String, locale: Locale): String = {
     var fullName = bundleName
     val localeName = toLocaleStr(locale)
@@ -126,8 +121,8 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
   }
 
   /**
-    * Generater resource name like bundleName.zh_CN
-    */
+   * Generater resource name like bundleName.zh_CN
+   */
   protected def toDefaultResourceName(bundleName: String, locale: Locale): String = {
     val fullName = bundleName
     val localeName = toLocaleStr(locale)
@@ -139,8 +134,8 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
   }
 
   /**
-    * Convert locale to string with language_country[_variant]
-    */
+   * Convert locale to string with language_country[_variant]
+   */
   protected def toLocaleStr(locale: Locale): String = {
     if (locale == Locale.ROOT) return ""
     val language = locale.getLanguage
@@ -148,13 +143,12 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
     val variant = locale.getVariant
     if (language == "" && country == "" && variant == "") return ""
     val sb = new StringBuilder()
-    if (variant != "") {
+    if (variant != "")
       sb.append(language).append('_').append(country).append('_').append(variant)
-    } else if (country != "") {
+    else if (country != "")
       sb.append(language).append('_').append(country)
-    } else {
+    else
       sb.append(language)
-    }
     sb.toString
   }
 
@@ -177,10 +171,10 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
   }
 
   /**
-    * Read key value properties
-    * Group by Uppercased key,and default group
-    */
-  protected[i18n] def readBundles(input: InputStream, charset: Charset = Charsets.UTF_8): Map[String, Map[String, String]] = {
+   * Read key value properties
+   * Group by Uppercased key,and default group
+   */
+  protected[i18n] def readBundles(input: InputStream, charset: Charset = Charsets.UTF_8): Map[String, Map[String, String]] =
     if (null == input) Map.empty
     else {
       val defaults = ""
@@ -194,14 +188,12 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
           val value = line.substring(index + 1).trim()
           if (Character.isUpperCase(key.charAt(0))) {
             val dotIdx = key.indexOf('.')
-            if (-1 == dotIdx) {
+            if (-1 == dotIdx)
               texts.getOrElseUpdate(defaults, new collection.mutable.HashMap[String, String]).put(key, value)
-            } else {
+            else
               texts.getOrElseUpdate(key.substring(0, dotIdx), new collection.mutable.HashMap[String, String]).put(key.substring(dotIdx + 1), value)
-            }
-          } else {
+          } else
             texts.getOrElseUpdate(defaults, new collection.mutable.HashMap[String, String]).put(key, value)
-          }
         }
         line = reader.readLine()
       }
@@ -209,5 +201,4 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
       val results = texts.map { case (name, values) => (name, values.toMap) }
       results.toMap
     }
-  }
 }

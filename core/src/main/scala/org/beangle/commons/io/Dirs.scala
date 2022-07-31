@@ -1,60 +1,50 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.io
+
+import org.beangle.commons.io.Files./
 
 import java.io.File
 import java.nio.file.Paths
 
-import org.beangle.commons.io.Files./
-
 object Dirs {
 
-  def on(path: String): Dirs = {
-    new Dirs(new File(path))
-  }
+  def on(path: String): Dirs = new Dirs(new File(path))
 
-  def on(file: File): Dirs = {
-    new Dirs(file)
-  }
+  def on(file: File): Dirs = new Dirs(file)
 
-  def on(file: File, child: String): Dirs = {
-    new Dirs(new File(file, child))
-  }
+  def on(file: File, child: String): Dirs = new Dirs(new File(file, child))
 
   def delete(file: File): Unit = {
-    if (isLink(file)) {
+    if isLink(file) then
       file.delete()
-    } else if (file.exists()) {
+    else if file.exists() then
       remove(file)
-    }
   }
 
-  def isLink(file: File): Boolean = {
-    java.nio.file.Files.isSymbolicLink(file.toPath)
-  }
+  def isLink(file: File): Boolean = java.nio.file.Files.isSymbolicLink(file.toPath)
 
   private def remove(file: File): Unit = {
-    if (file.exists()) {
-      if (file.isDirectory) {
-        if (file.list().length == 0 || isLink(file)) {
+    if file.exists() then
+      if file.isDirectory then
+        if file.list().length == 0 || isLink(file) then
           file.delete()
-        } else {
+        else {
           //list all the directory contents
           val files = file.list()
           var i = 0
@@ -65,15 +55,14 @@ object Dirs {
           }
           if (file.list().length == 0) file.delete()
         }
-      } else {
-        file.delete()
-      }
-    }
+      else file.delete()
   }
-
 }
 
 class Dirs(val pwd: File) {
+  require(!pwd.exists() || pwd.isDirectory)
+
+  def exists: Boolean = pwd.exists()
 
   def rename(newName: String): Dirs = {
     val dest = new File(pwd.getParentFile.getAbsolutePath + / + newName)
@@ -89,23 +78,20 @@ class Dirs(val pwd: File) {
   }
 
   def mkdirs(children: String*): this.type = {
-    if (children.isEmpty) {
+    if (children.isEmpty)
       pwd.mkdirs()
-    } else {
+    else
       children foreach { child =>
         new File(pwd, child).mkdirs()
       }
-    }
     this
   }
 
-  def ls(): Seq[String] = {
+  def ls(): Seq[String] =
     pwd.list().toSeq
-  }
 
-  def cd(child: String): Dirs = {
+  def cd(child: String): Dirs =
     new Dirs(new File(pwd, child))
-  }
 
   def touch(child: String): this.type = {
     val file = new File(pwd, child)
@@ -116,13 +102,11 @@ class Dirs(val pwd: File) {
     this
   }
 
-  def ln(target: String): this.type = {
+  def ln(target: String): this.type =
     ln(new File(target))
-  }
 
-  def ln(target: File): this.type = {
+  def ln(target: File): this.type =
     ln(target, target.getName)
-  }
 
   def setReadOnly(): this.type = {
     Files.setReadOnly(pwd)
@@ -138,11 +122,10 @@ class Dirs(val pwd: File) {
     if (!target.exists()) throw new RuntimeException("Cannot find target " + target.getAbsolutePath)
     val link = new File(pwd, newName)
     if (java.nio.file.Files.isSymbolicLink(Paths.get(link.toURI))) link.delete()
-    if (link.exists()) {
+    if (link.exists())
       throw new RuntimeException("Cannot make link on existed file.")
-    } else {
+    else
       java.nio.file.Files.createSymbolicLink(Paths.get(link.toURI), Paths.get(target.toURI))
-    }
     this
   }
 

@@ -1,24 +1,23 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.text.replace
 
-import java.io.{File, FileOutputStream, FilenameFilter, OutputStreamWriter}
+import java.io.{ File, FileOutputStream, FilenameFilter, OutputStreamWriter }
 import java.nio.charset.Charset
 
 import org.beangle.commons.io.Files
@@ -28,7 +27,7 @@ import org.beangle.commons.logging.Logging
 
 import scala.collection.mutable
 
-object BatchReplaceMain extends Logging{
+object BatchReplaceMain extends Logging {
 
   /**
    * Usage:BatchReplaceMain dir patternfile encoding
@@ -44,18 +43,16 @@ object BatchReplaceMain extends Logging{
       return
     }
     val properties = args(1)
-    if (!new File(properties).exists()) {
+    if (!new File(properties).exists())
       logger.info(properties + " not valid file or directory")
-    }
     var charset: Charset = null
-    if (args.length >= 3) {
+    if (args.length >= 3)
       charset = Charset.forName(args(2))
-    }
     val lines = Files.readLines(new File(properties))
     val profiles = new mutable.HashMap[String, List[Replacer]]
 
     var profileName = ""
-    for (line <- lines if Strings.isNotEmpty(line)) {
+    for (line <- lines if Strings.isNotEmpty(line))
       if (-1 == line.indexOf('=')) {
         profileName = line
         profiles.put(line, Nil)
@@ -67,10 +64,9 @@ object BatchReplaceMain extends Logging{
         older = Strings.replace(older, "\\t", "\t")
         newer = Strings.replace(newer, "\\n", "\n")
         newer = Strings.replace(newer, "\\t", "\t")
-        val replacer:Replacer = if (older == "replacer") Reflections.newInstance(newer) else new PatternReplacer(older, newer)
+        val replacer: Replacer = if (older == "replacer") Reflections.newInstance(newer) else new PatternReplacer(older, newer)
         profiles.put(profileName, replacer :: profiles(profileName))
       }
-    }
     replaceFile(dir, profiles.toMap, charset)
   }
 
@@ -99,11 +95,9 @@ object BatchReplaceMain extends Logging{
           return false
         }
       })
-      if (null != subFiles) {
-        for (i <- 0 until subFiles.length) {
+      if (null != subFiles)
+        for (i <- 0 until subFiles.length)
           replaceFile(fileName + '/' + subFiles(i), profiles, charset)
-        }
-      }
     }
   }
 
@@ -114,7 +108,8 @@ object BatchReplaceMain extends Logging{
    */
   def writeToFile(str: String, fileName: String, charset: Charset): Unit = {
     var writer: OutputStreamWriter = null
-    writer = if (null == charset) new OutputStreamWriter(new FileOutputStream(fileName)) else new OutputStreamWriter(new FileOutputStream(fileName),
+    writer = if (null == charset) new OutputStreamWriter(new FileOutputStream(fileName)) else new OutputStreamWriter(
+      new FileOutputStream(fileName),
       charset.name())
     writer.write(str)
     writer.close()

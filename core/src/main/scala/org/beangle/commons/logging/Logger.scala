@@ -1,35 +1,33 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.logging
 
-import org.slf4j.{LoggerFactory, Logger => JLogger}
+import org.slf4j.{ LoggerFactory, Logger => JLogger }
 
 import scala.annotation.elidable
 import scala.annotation.elidable._
 
 /**
-  * Slf4j Logger delegate.
-  */
+ * Slf4j Logger delegate.
+ */
 object Logger {
-  def apply(clazz: Class[_]): Logger = {
+  def apply(clazz: Class[_]): Logger =
     new Logger(LoggerFactory getLogger clazz)
-  }
 
   sealed trait LevelLogger extends Any {
     def apply(msg: => String): Unit
@@ -43,36 +41,35 @@ object Logger {
     @inline def apply(msg: => String, t: Throwable): Unit = {}
   }
 
-  final class TraceLogger private[logging](val logger: JLogger) extends AnyVal with LevelLogger {
+  final class TraceLogger private[logging] (val logger: JLogger) extends AnyVal with LevelLogger {
     @inline def apply(msg: => String): Unit = logger.trace(msg)
 
     @inline def apply(msg: => String, t: Throwable): Unit = logger.trace(msg, t)
   }
 
-  final class DebugLogger private[logging](val logger: JLogger) extends AnyVal with LevelLogger {
+  final class DebugLogger private[logging] (val logger: JLogger) extends AnyVal with LevelLogger {
     @inline def apply(msg: => String): Unit = logger.debug(msg)
 
     @inline def apply(msg: => String, t: Throwable): Unit = logger.debug(msg, t)
   }
 
-  final class InfoLogger private[logging](val logger: JLogger) extends AnyVal with LevelLogger {
+  final class InfoLogger private[logging] (val logger: JLogger) extends AnyVal with LevelLogger {
     @inline def apply(msg: => String): Unit = logger.info(msg)
 
     @inline def apply(msg: => String, t: Throwable): Unit = logger.info(msg, t)
   }
 
-  final class WarnLogger private[logging](val logger: JLogger) extends AnyVal with LevelLogger {
+  final class WarnLogger private[logging] (val logger: JLogger) extends AnyVal with LevelLogger {
     @inline def apply(msg: => String): Unit = logger.warn(msg)
 
     @inline def apply(msg: => String, t: Throwable): Unit = logger.warn(msg, t)
   }
 
-  final class ErrorLogger private[logging](val logger: JLogger) extends AnyVal with LevelLogger {
+  final class ErrorLogger private[logging] (val logger: JLogger) extends AnyVal with LevelLogger {
     @inline def apply(msg: => String): Unit = logger.error(msg)
 
     @inline def apply(msg: => String, t: Throwable): Unit = logger.error(msg, t)
   }
-
 }
 
 final class Logger(val logger: JLogger) extends AnyVal {
@@ -126,5 +123,4 @@ final class Logger(val logger: JLogger) extends AnyVal {
   @inline def apply(lvl: Warn.type): LevelLogger = if (logger.isWarnEnabled) new WarnLogger(logger) else ZeroLogger
 
   @inline def apply(lvl: Error.type): LevelLogger = if (logger.isErrorEnabled) new ErrorLogger(logger) else ZeroLogger
-
 }

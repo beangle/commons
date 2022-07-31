@@ -1,27 +1,27 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.bean.orderings
 
 import org.beangle.commons.bean.Properties
-import org.beangle.commons.lang.{Numbers, Strings}
+import org.beangle.commons.lang.{ Numbers, Strings }
 
-/** 属性比较器
+/**
+ * 属性比较器
  * @author chaostone
  */
 class PropertyOrdering(cmpStr: String) extends Ordering[Any] {
@@ -40,16 +40,14 @@ class PropertyOrdering(cmpStr: String) extends Ordering[Any] {
 
   assert(Strings.isNotEmpty(cmpStr))
 
-  if (Strings.contains(cmpStr, ',')) {
+  if (Strings.contains(cmpStr, ','))
     throw new RuntimeException("PropertyOrdering don't support comma based order by. Use MultiPropertyOrdering instead.")
-  }
 
   if ('[' == name.charAt(0)) {
     index = Numbers.toInt(Strings.substringBetween(name, "[", "]"))
     name = Strings.substringAfter(name, "]")
-    if (name.length > 0 && '.' == name.charAt(0)) {
+    if (name.length > 0 && '.' == name.charAt(0))
       name = name.substring(1)
-    }
   }
 
   if (Strings.contains(name, ' ')) {
@@ -66,7 +64,7 @@ class PropertyOrdering(cmpStr: String) extends Ordering[Any] {
     var second = arg1
     if (index > -1) {
       first = first.asInstanceOf[Array[Any]](index)
-      second = first.asInstanceOf[Array[Any]](index)
+      second = second.asInstanceOf[Array[Any]](index)
     }
     if (Strings.isNotEmpty(name)) {
       first = Properties.get[Any](first, name)
@@ -79,17 +77,13 @@ class PropertyOrdering(cmpStr: String) extends Ordering[Any] {
 
       if (first != null && null == second) return if (asc && nullFirst) 1 else -1
 
-      if (first.isInstanceOf[String] || second.isInstanceOf[String]) {
+      if (first.isInstanceOf[String] || second.isInstanceOf[String])
         collatorOrdering.compare(first.toString, second.toString)
-      } else {
-        if (asc) {
-          first.asInstanceOf[Comparable[Any]].compareTo(second)
-        } else {
-          second.asInstanceOf[Comparable[Any]].compareTo(first)
-        }
-      }
-    } else {
+      else if (asc)
+        first.asInstanceOf[Comparable[Any]].compareTo(second)
+      else
+        second.asInstanceOf[Comparable[Any]].compareTo(first)
+    } else
       comparator.compare(first, second)
-    }
   }
 }

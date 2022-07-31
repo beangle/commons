@@ -1,26 +1,25 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.collection
 
-import java.{util => ju}
+import java.{ util => ju }
 
-import org.beangle.commons.bean.{Properties => BeanProperties}
+import org.beangle.commons.bean.{ Properties => BeanProperties }
 import org.beangle.commons.lang.functor.Predicate
 
 import scala.collection.mutable
@@ -40,13 +39,13 @@ object Collections {
   def isNotEmpty(coll: Iterable[_]): Boolean = null != coll && !coll.isEmpty
 
   def findFirstMatch[T](source: Iterable[T], candidates: Iterable[T]): Option[T] = {
-    val finded = if (isNotEmpty(source) && isNotEmpty(candidates)) {
+    val finded = if (isNotEmpty(source) && isNotEmpty(candidates))
       source match {
-        case set: Set[T] => candidates.find(c => set.contains(c))
-        case seq: Seq[T] => candidates.find(c => seq.contains(c))
+        case set: collection.Set[_] => candidates.find(c => set.asInstanceOf[collection.Set[T]].contains(c))
+        case seq: collection.Seq[_] => candidates.find(c => seq.asInstanceOf[collection.Seq[T]].contains(c))
         case _ => None
       }
-    } else None
+    else None
     finded
   }
 
@@ -55,9 +54,9 @@ object Collections {
    */
   def split[T](list: List[T], count: Int): List[List[T]] = {
     val subLists = new mutable.ListBuffer[List[T]]
-    if (list.size < count) {
+    if (list.size < count)
       subLists += list
-    } else {
+    else {
       var i = 0
       while (i < list.size) {
         var end = i + count
@@ -72,11 +71,10 @@ object Collections {
   /**
    * convertToMap.
    */
-  def convertToMap(coll: Seq[AnyRef], keyProperty: String): Map[_, _] = {
+  def convertToMap(coll: Seq[AnyRef], keyProperty: String): Map[_, _] =
     coll.map { obj =>
       (BeanProperties.get[Object](obj, keyProperty), obj)
     }.toMap
-  }
 
   /**
    * convertToMap.
@@ -155,9 +153,8 @@ object Collections {
     }
   }
 
-  def newBuffer[T]: collection.mutable.Buffer[T] = {
+  def newBuffer[T]: collection.mutable.Buffer[T] =
     new collection.mutable.ArrayBuffer[T]
-  }
 
   def newBuffer[T](t: Iterable[T]): collection.mutable.Buffer[T] = {
     val buffer = new collection.mutable.ArrayBuffer[T]
@@ -171,11 +168,9 @@ object Collections {
     buffer
   }
 
-  def newSet[T]: collection.mutable.Set[T] = {
+  def newSet[T]: collection.mutable.Set[T] =
     new collection.mutable.HashSet[T]
-  }
 
-  def newMap[K, V]: collection.mutable.Map[K, V] = {
+  def newMap[K, V]: collection.mutable.Map[K, V] =
     new collection.mutable.HashMap[K, V]
-  }
 }

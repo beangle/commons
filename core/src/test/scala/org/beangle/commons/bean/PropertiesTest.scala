@@ -1,36 +1,33 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.bean
 
 import org.beangle.commons.lang.reflect.BeanInfos
 import org.beangle.commons.lang.testbean.TestBean
-import org.junit.runner.RunWith
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatestplus.junit.JUnitRunner
+import org.scalatest.matchers.should.Matchers
 
-@RunWith(classOf[JUnitRunner])
 class PropertiesTest extends AnyFunSpec with Matchers {
 
+  BeanInfos.of(classOf[TestBean])
   describe("Properties") {
     it("Get or Set property") {
-      BeanInfos.forType(classOf[TestBean]).properties("javaMap")
+      BeanInfos.get(classOf[TestBean]).properties("javaMap")
       val bean = new TestBean
       Properties.set(bean, "intValue", 2)
       bean.intValue should be(2)
@@ -41,7 +38,7 @@ class PropertiesTest extends AnyFunSpec with Matchers {
     }
 
     it("get option nested value") {
-      BeanInfos.forType(classOf[TestBean]).properties("javaMap")
+      BeanInfos.get(classOf[TestBean]).properties("javaMap")
       val bean = new TestBean
       var parent = new TestBean
       parent.id = 2
@@ -49,11 +46,11 @@ class PropertiesTest extends AnyFunSpec with Matchers {
       assert(null == a)
       bean.parent = Some(parent)
       val b = Properties.get[Object](bean, "parent.id")
-      assert(2 == b)
+      assert(Integer.valueOf(2) == b)
 
       Properties.set(bean, "parent.id", 4)
       val c = Properties.get[Object](bean, "parent.id")
-      assert(4 == c)
+      assert(Integer.valueOf(4) == c)
 
       Properties.copy(bean, "parent", "")
       assert(Properties.get[Object](bean, "parent") == None)
@@ -72,7 +69,7 @@ class PropertiesTest extends AnyFunSpec with Matchers {
     }
 
     it("get set option[primitives]") {
-      BeanInfos.forType(classOf[TestBean]).properties("javaMap")
+      BeanInfos.get(classOf[TestBean]).properties("javaMap")
       val bean = new TestBean
       var parent = new TestBean
 

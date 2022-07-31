@@ -1,29 +1,28 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.io
 
 import java.io.File
 import java.lang.reflect.Method
-import java.net.{JarURLConnection, URL}
+import java.net.{ JarURLConnection, URL }
 import java.util.jar.JarFile
 
-import org.beangle.commons.lang.{ClassLoaders, Strings}
+import org.beangle.commons.lang.{ ClassLoaders, Strings }
 import org.beangle.commons.regex.AntPathPattern
 import org.beangle.commons.regex.AntPathPattern.isPattern
 
@@ -35,21 +34,19 @@ trait ResourceResolver {
 }
 
 object ResourcePatternResolver {
-  def getResources(locationPattern: String): List[URL] = {
+  def getResources(locationPattern: String): List[URL] =
     new ResourcePatternResolver().getResources(locationPattern)
-  }
 }
 
 class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResourceLoader) extends ResourceResolver {
 
-  private val equinoxResolveMethod: Method = {
-    try {
+  private val equinoxResolveMethod: Method =
+    try
       // Detect Equinox OSGi (e.g. on WebSphere 6.1)
       ClassLoaders.load("org.eclipse.core.runtime.FileLocator").getMethod("resolve", classOf[URL])
-    } catch {
+    catch {
       case _: Throwable => null
     }
-  }
   /**
    * Find all resources that match the given location pattern via the
    * Ant-style PathMatcher. Supports resources in jar files and zip files
@@ -66,11 +63,10 @@ class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResource
       val result = new collection.mutable.LinkedHashSet[URL]
       for (rootDir <- rootDirResources) {
         val rootUrl = resolve(rootDir)
-        if (Jars.isJarURL(rootUrl)) {
+        if (Jars.isJarURL(rootUrl))
           result ++= doFindJarResources(rootUrl, subPattern)
-        } else {
+        else
           result ++= doFindFileResources(rootUrl, subPattern)
-        }
       }
       result.toList
     } else {
@@ -82,9 +78,8 @@ class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResource
   protected def determineRootDir(location: String): String = {
     val prefixEnd = location.indexOf(":") + 1
     var rootDirEnd = location.length
-    while (rootDirEnd > prefixEnd && isPattern(location.substring(prefixEnd, rootDirEnd))) {
+    while (rootDirEnd > prefixEnd && isPattern(location.substring(prefixEnd, rootDirEnd)))
       rootDirEnd = location.lastIndexOf('/', rootDirEnd - 2) + 1
-    }
     if (rootDirEnd == 0) rootDirEnd = prefixEnd
     location.substring(0, rootDirEnd)
   }
@@ -95,11 +90,10 @@ class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResource
    * / "bundleentry:" URL and resolves it into a standard jar file URL that
    * can be traversed using Spring's standard jar file traversal algorithm.
    */
-  protected def resolve(url: URL): URL = {
-    if (equinoxResolveMethod != null && url.getProtocol.startsWith("bundle")) {
+  protected def resolve(url: URL): URL =
+    if (equinoxResolveMethod != null && url.getProtocol.startsWith("bundle"))
       equinoxResolveMethod.invoke(null, url).asInstanceOf[URL]
-    } else url
-  }
+    else url
 
   /**
    * Find all resources in jar files that match the given location pattern
@@ -143,16 +137,15 @@ class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResource
         }
       }
       return result
-    } finally {
+    } finally
       if (newJarFile) jarFile.close()
-    }
   }
 
   /**
    * Find all resources in the file system that match the given location pattern
    * via the Ant-style PathMatcher.
    */
-  protected def doFindFileResources(rootDirURL: URL, pattern: AntPathPattern): collection.Set[URL] = {
+  protected def doFindFileResources(rootDirURL: URL, pattern: AntPathPattern): collection.Set[URL] =
     try {
       val rootDir = new File(rootDirURL.toURI).getAbsoluteFile
       if (!rootDir.exists || !rootDir.isDirectory || !rootDir.canRead) return Set.empty
@@ -169,7 +162,6 @@ class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResource
     } catch {
       case _: Throwable => Set.empty
     }
-  }
 
   /**
    * Recursively retrieve files that match the given pattern,
@@ -180,9 +172,8 @@ class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResource
     if (dirContents == null) return
     for (content <- dirContents) {
       val currPath = Strings.replace(content.getAbsolutePath, File.separator, "/")
-      if (content.isDirectory && pattern.matchStart(currPath + "/")) {
+      if (content.isDirectory && pattern.matchStart(currPath + "/"))
         if (content.canRead) doRetrieveMatchingFiles(pattern, content, result)
-      }
       if (pattern.matches(currPath)) result.add(content)
     }
   }

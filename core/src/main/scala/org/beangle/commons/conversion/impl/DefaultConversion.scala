@@ -1,59 +1,64 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.conversion.impl
 
-import org.beangle.commons.conversion.converter._
+import org.beangle.commons.conversion.converter.*
+import org.beangle.commons.conversion.string
 
 object DefaultConversion {
 
   val Instance = new DefaultConversion()
+
+  def convert[T](value: Any, targetType: Class[T]): T = Instance.convert(value, targetType)
 }
+
 /**
- * Default Conversion implementation.
- * <p>
- * It register String to Boolean/Number/Date/Locale, Number to Number and Object to String buildin
- * converters.
- *
- * @author chaostone
- * @since 3.2.0
- */
+  * Default Conversion implementation.
+  * <p>
+  * It register String to Boolean/Number/Date/Locale, Number to Number and Object to String buildin
+  * converters.
+  *
+  * @author chaostone
+  * @since 3.2.0
+  */
 class DefaultConversion extends AbstractGenericConversion {
 
-  addConverter(String2BooleanConverter)
+  addConverter(string.BooleanConverter)
 
-  addConverter(new String2NumberConverter)
+  addConverter(string.NumberConverters)
 
-  addConverter(new String2DateConverter)
+  addConverter(string.DateConverter)
 
-  addConverter(new String2TemporalConverter)
+  addConverter(string.TemporalConverter)
 
-  addConverter(String2TimeConverter)
+  addConverter(string.TimeConverter)
 
-  addConverter(String2HourMinuteConverter)
+  addConverter(string.HourMinuteConverter)
 
-  addConverter(new String2EnumConverter)
+  addConverter(string.JavaEnumConverters)
 
-  addConverter(String2ScalaEnumConverter)
+  addConverter(string.EnumConverters)
 
-  addConverter(String2LocaleConverter)
+  addConverter(string.LocaleConverter)
 
-  addConverter(new Number2NumberConverter)
+  addConverter(string.ToStringConverter)
 
-  addConverter(Object2StringConverter)
+  addConverter(Number2NumberConverter)
+
+  addConverter(IterableConverterFactory)
 }

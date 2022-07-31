@@ -1,21 +1,20 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.collection
 
 import scala.reflect.ClassTag
@@ -47,9 +46,8 @@ final class FastStack[T: ClassTag](initialCapacity: Int = 16) {
     result
   }
 
-  def peek(): T = {
+  def peek(): T =
     if (pointer == 0) null.asInstanceOf[T] else stack(pointer - 1)
-  }
 
   def replace(value: T): T = {
     val result = stack(pointer - 1)
@@ -57,17 +55,14 @@ final class FastStack[T: ClassTag](initialCapacity: Int = 16) {
     result
   }
 
-  def size(): Int = {
+  def size(): Int =
     pointer
-  }
 
-  def isEmpty(): Boolean = {
+  def isEmpty(): Boolean =
     pointer == 0
-  }
 
-  def get(i: Int): T = {
+  def get(i: Int): T =
     stack(i)
-  }
 
   def toArray(): Array[T] = {
     val result = new Array[T](pointer)

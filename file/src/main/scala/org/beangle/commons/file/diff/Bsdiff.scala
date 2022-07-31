@@ -1,27 +1,26 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.file.diff
 
 import java.io._
 
 import org.apache.commons.compress.compressors.CompressorStreamFactory
-import org.beangle.commons.file.diff.bsdiff.{Format, Offset, SuffixSort}
+import org.beangle.commons.file.diff.bsdiff.{ Format, Offset, SuffixSort }
 import org.beangle.commons.io.Files
 
 /**
@@ -85,9 +84,9 @@ object Bsdiff {
           scsc += 1
         }
 
-        if (((len == oldScore) && (len != 0)) || (len > oldScore + 8)) {
+        if (((len == oldScore) && (len != 0)) || (len > oldScore + 8))
           running = false
-        } else {
+        else {
           if ((scan + lastOffset < oldBytes.length) && (oldBytes(scan + lastOffset) == newBytes(scan)))
             oldScore -= 1
           scan += 1
@@ -100,9 +99,8 @@ object Bsdiff {
         lenf = 0
         var i = 0
         while ((lastScan + i < scan) && (lastPos + i < oldBytes.length)) {
-          if (oldBytes(lastPos + i) == newBytes(lastScan + i)) {
+          if (oldBytes(lastPos + i) == newBytes(lastScan + i))
             s += 1
-          }
 
           i += 1
           if (s * 2 - i > Sf * 2 - lenf) {
@@ -118,9 +116,8 @@ object Bsdiff {
           var i = 1
           while ((scan >= lastScan + i) &&
             (position >= i)) {
-            if (oldBytes(position - i) == newBytes(scan - i)) {
+            if (oldBytes(position - i) == newBytes(scan - i))
               s += 1
-            }
             if (s * 2 - i > Sb * 2 - lenb) {
               Sb = s
               lenb = i
@@ -136,12 +133,10 @@ object Bsdiff {
           lens = 0
           var i = 0
           while (i < overlap) {
-            if (newBytes(lastScan + lenf - overlap + i) == oldBytes(lastPos + lenf - overlap + i)) {
+            if (newBytes(lastScan + lenf - overlap + i) == oldBytes(lastPos + lenf - overlap + i))
               s += 1
-            }
-            if (newBytes(scan - lenb + i) == oldBytes(position - lenb + i)) {
+            if (newBytes(scan - lenb + i) == oldBytes(position - lenb + i))
               s -= 1
-            }
             if (s > Ss) {
               Ss = s
               lens = i + 1
@@ -238,9 +233,8 @@ object Bsdiff {
         /* Add old data to diff string */
         var i = 0
         while (i < control.diffLength) {
-          if ((oldPointer + i >= 0) && oldPointer + i < old.length) {
+          if ((oldPointer + i >= 0) && oldPointer + i < old.length)
             output(newPointer + i) = (output(newPointer + i) + old(oldPointer + i)).asInstanceOf[Byte]
-          }
           i += 1
         }
 
@@ -255,7 +249,6 @@ object Bsdiff {
       }
 
       out.write(output)
-
     } finally {
       controlIn.close()
       dataIn.close()
@@ -307,9 +300,8 @@ object Bsdiff {
         /* Add old data to diff string */
         var i = 0
         while (i < diffLength) {
-          if ((oldPointer + i >= 0) && oldPointer + i < old.length) {
+          if ((oldPointer + i >= 0) && oldPointer + i < old.length)
             output(i) = (output(i) + old(oldPointer + i)).asInstanceOf[Byte]
-          }
           i += 1
         }
 
@@ -325,7 +317,6 @@ object Bsdiff {
       }
 
       out.close()
-
     } finally {
       controlIn.close()
       dataIn.close()
@@ -342,10 +333,9 @@ object Bsdiff {
   private def read(in: InputStream, dest: Array[Byte], off: Int, len: Int): Unit = {
     if (len == 0) return
     val read = in.read(dest, off, len)
-    if (read < len) {
+    if (read < len)
       throw new IOException("Corrupt patch bytes expected = " + len +
         " bytes read = " + read)
-    }
   }
   private def sort(input: Array[Byte]): Array[Int] = {
     val I = new Array[Int](input.length + 1)

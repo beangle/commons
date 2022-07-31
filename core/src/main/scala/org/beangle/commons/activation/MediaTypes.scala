@@ -1,43 +1,42 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.activation
 
 import java.net.URL
 
 import org.beangle.commons.config.Resources
 import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.ClassLoaders.{getResource, getResources}
+import org.beangle.commons.lang.ClassLoaders.{ getResource, getResources }
 import org.beangle.commons.lang.Strings
 
 /**
-  * @see https://www.iana.org/assignments/media-types/media-types.xhtml
-  * @see http://www.mime-type.net/
-  * @see https://www.sitepoint.com/mime-types-complete-list/
-  */
+ * @see https://www.iana.org/assignments/media-types/media-types.xhtml
+ * @see http://www.mime-type.net/
+ * @see https://www.sitepoint.com/mime-types-complete-list/
+ */
 object MediaTypes {
 
   val All = MediaType("*/*")
 
-  private val types: Map[String, MediaType] = {
-    buildTypes(new Resources(getResource("org/beangle/commons/activation/mime.types"),
+  private val types: Map[String, MediaType] =
+    buildTypes(new Resources(
+      getResource("org/beangle/commons/activation/mime.types"),
       getResources("META-INF/mime.types"), getResource("mime.types")))
-  }
 
   val ApplicationAtomXml: MediaType = types("application/atom+xml")
 
@@ -75,19 +74,18 @@ object MediaTypes {
 
   def buildTypes(resources: Resources): Map[String, MediaType] = {
     val buf = new collection.mutable.HashMap[String, MediaType]
-    if (null != resources) {
+    if (null != resources)
       resources.paths foreach { p =>
         buf ++= readMediaTypes(p)
       }
-    }
     buf.put("*/*", All)
     buf.toMap
   }
 
-  private def readMediaTypes(url: URL): Map[String, MediaType] = {
-    if (null == url) {
+  private def readMediaTypes(url: URL): Map[String, MediaType] =
+    if (null == url)
       Map.empty
-    } else {
+    else {
       val buf = new collection.mutable.HashMap[String, MediaType]
       IOs.readLines(url.openStream()) foreach { line =>
         if (Strings.isNotBlank(line) && !line.startsWith("#")) {
@@ -97,32 +95,28 @@ object MediaTypes {
           buf.put(mimetypeStr, mimetype)
 
           val exts = Strings.substringAfter(line, "exts").trim.substring(1)
-          if (Strings.isNotBlank(exts)) {
+          if (Strings.isNotBlank(exts))
             Strings.split(exts, ',') foreach { ext =>
               val extension = ext.trim
               val exists = buf.get(extension)
               assert(exists.isEmpty, s"exists $extension = " + exists.get + ", the newer is " + mimetype)
               buf.put(extension, mimetype)
             }
-          }
         }
       }
       buf.toMap
     }
-  }
 
-  def get(ext: String, defaultValue: MediaType): MediaType = {
+  def get(ext: String, defaultValue: MediaType): MediaType =
     types.getOrElse(ext, defaultValue)
-  }
 
-  def get(ext: String): Option[MediaType] = {
+  def get(ext: String): Option[MediaType] =
     types.get(ext)
-  }
 
-  def parse(str: String): Seq[MediaType] = {
-    if (null == str) {
+  def parse(str: String): Seq[MediaType] =
+    if (null == str)
       Seq.empty
-    } else {
+    else {
       val mimeTypes = new collection.mutable.ListBuffer[MediaType]
       Strings.split(str, ",") foreach { token =>
         val commaIndex = token.indexOf(";")
@@ -134,7 +128,6 @@ object MediaTypes {
       }
       mimeTypes.toList
     }
-  }
 }
 
 object MediaType {
@@ -142,12 +135,10 @@ object MediaType {
     val commaIndex = token.indexOf(";")
     val mimetype = if (commaIndex > -1) token.substring(0, commaIndex).trim else token.trim
     val slashIndex = token.indexOf("/")
-    if (-1 == slashIndex) {
+    if (-1 == slashIndex)
       new MediaType(mimetype)
-    }
-    else {
+    else
       new MediaType(mimetype.substring(0, slashIndex), mimetype.substring(slashIndex + 1))
-    }
   }
 }
 
@@ -156,7 +147,6 @@ class MediaType(val primaryType: String, val subType: String) {
     this(pt, "*")
   }
 
-  override def toString: String = {
+  override def toString: String =
     if (subType == "*") primaryType else primaryType + "/" + subType
-  }
 }

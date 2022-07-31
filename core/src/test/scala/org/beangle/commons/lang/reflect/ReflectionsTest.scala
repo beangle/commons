@@ -1,45 +1,41 @@
 /*
- * Beangle, Agile Development Scaffold and Toolkits.
- *
- * Copyright © 2005, The Beangle Software.
+ * Copyright (C) 2005, The Beangle Software.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.beangle.commons.lang.reflect
 
 import org.beangle.commons.bean.Factory
 import org.beangle.commons.jndi.JndiDataSourceFactory
+import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.annotation.description
-import org.beangle.commons.lang.testbean.{Book, TestChild2Bean}
-import org.beangle.commons.lang.testbean.Entity
-import org.junit.runner.RunWith
-import org.scalatest.matchers.should.Matchers
+import org.beangle.commons.lang.testbean.{Book, Entity, TestChild2Bean}
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatestplus.junit.JUnitRunner
-import org.scalatestplus.junit.JUnitRunner
+import org.scalatest.matchers.should.Matchers
+
 import javax.sql.DataSource
 
-@RunWith(classOf[JUnitRunner])
 class ReflectionsTest extends AnyFunSpec with Matchers {
 
   describe("Reflections") {
     it("getSuperClassParamType") {
-      val dataSourceType = Reflections.getGenericParamType(classOf[JndiDataSourceFactory], classOf[Factory[_]])
+      val dataSourceType = Reflections.getGenericParamTypes(classOf[JndiDataSourceFactory], classOf[Factory[_]])
       assert(dataSourceType.size == 1)
       assert(dataSourceType.values.head == classOf[DataSource])
 
-      val idType = Reflections.getGenericParamType(classOf[Book], classOf[Entity[_]])
+      val idType = Reflections.getGenericParamTypes(classOf[Book], classOf[Entity[_]])
       assert(idType.size == 1)
       assert(idType.values.head == classOf[java.lang.Long])
     }
@@ -51,17 +47,21 @@ class ReflectionsTest extends AnyFunSpec with Matchers {
       assert(null == Reflections.getAnnotation(method2, classOf[description]))
     }
     it("getTraitParamType") {
-      val atypes = Reflections.getGenericParamType(classOf[C], classOf[A[_]])
+      val atypes = Reflections.getGenericParamTypes(classOf[C], Set(classOf[A[_]]))
       assert(atypes.size == 1)
       assert(atypes.get("T").isDefined)
 
-      val btypes = Reflections.getGenericParamType(classOf[C], classOf[B[_]])
+      val btypes = Reflections.getGenericParamTypes(classOf[C], classOf[B[_]])
       assert(btypes.size == 1)
       assert(btypes.get("T1").isDefined)
     }
     it("newInstance") {
       val a: String = Reflections.newInstance("java.lang.String")
       assert(a.length == 0)
+    }
+    it("getInstance") {
+      val a = Reflections.getInstance[Co.type]("org.beangle.commons.lang.reflect.Co$")
+      assert(a.isInstanceOf[Co.type])
     }
   }
 }
@@ -71,3 +71,5 @@ trait A[T]
 trait B[T1] extends A[T1]
 
 class C extends B[Integer]
+
+object Co
