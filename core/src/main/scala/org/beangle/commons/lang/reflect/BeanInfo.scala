@@ -211,7 +211,7 @@ object BeanInfo extends Logging {
 
     private val transients = new mutable.HashSet[String]
 
-    def addTransients(names: List[String]): Unit = transients ++= names
+    def addTransients(names: Array[String]): Unit = transients ++= names
 
     def addField(name: String, ti: Any): Unit = {
       val typeinfo = TypeInfo.convert(ti)

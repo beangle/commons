@@ -76,6 +76,9 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
   case class ParamExpr(name:String,typeinfo:Expr[AnyRef],defaultValue:Option[Expr[Any]]=None)
   case class MethodExpr(name:String,rt:Expr[Any],params:Seq[ParamExpr],asField:Boolean)
 
+  def isNormal(name:String):Boolean={
+    !name.contains("$") && !name.startsWith("_")
+  }
   def findAccessor(m: DefDef): Option[(Boolean, String)] = {
     val name = m.name
     var paramSize = 0
@@ -85,15 +88,14 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
         case _=>
       }
     }
-    if name.contains("$") then
-      None
-    else
+    if isNormal(name) then
       if (m.paramss.isEmpty && m.returnTpt.tpe.typeSymbol != Symbol.classSymbol(classOf[Unit].getName)) {
         Some((true, getPropertyName(name, true)))
       } else if (1 == paramSize) {
         val propertyName = getPropertyName(name, false)
         if (null != propertyName) Some((false, propertyName)) else None
       } else None
+    else None
   }
 
   private def addMemberBody(t:Expr[BeanInfo.Builder]): List[Expr[_]] = {
@@ -116,10 +118,10 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
 
     val superBases= Set("scala.Any","scala.Matchable","java.lang.Object","scala.Equals","scala.Product","java.io.Serializable")
     for(bc <- typeRepr.baseClasses if !superBases.contains(bc.fullName)){
-      val base=typeRepr.baseType(bc)
-      var params=Map.empty[String,TypeRepr]
+      val base = typeRepr.baseType(bc)
+      var params = Map.empty[String,TypeRepr]
       base match{
-        case a:AppliedType=> params = resolveClassTypes(a)
+        case a:AppliedType => params = resolveClassTypes(a)
         case _=>
       }
 
@@ -131,8 +133,7 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
         val noreflect = mm.hasAnnotation(Symbol.classSymbol(classOf[noreflect].getName))
         val isPublic = !mm.flags.is(Flags.Protected) && !mm.flags.is(Flags.Private)
         val isInnerType = mm.name == Strings.substringBetween(mm.tree.show,"this.",".type")
-        val isNormal = !mm.name.contains("$") && !mm.name.startsWith("_")
-        if isPublic && isNormal && !noreflect  && !isInnerType then fieldMap.put(mm.name, FieldExpr(mm.name,resolveType(tpe,params),transnt,true,true))
+        if isPublic && isNormal(mm.name) && !noreflect  && !isInnerType then fieldMap.put(mm.name, FieldExpr(mm.name,resolveType(tpe,params),transnt,true,true))
       }
 
       base.typeSymbol.declaredMethods foreach{  mm=>
@@ -140,8 +141,7 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
         val rtType = resolveType(defdef.returnTpt.tpe,params)
         val isPublic = !defdef.symbol.flags.is(Flags.Protected) && !defdef.symbol.flags.is(Flags.Private)
         val ignored = isCaseClass && Set("productPrefix","productArity","productIterator","productElementNames").contains(defdef.name)
-        val isNormal = !defdef.name.contains("$") && !defdef.name.startsWith("_")
-        if(isPublic && isNormal && !ignored){
+        if(isPublic && isNormal(defdef.name) && !ignored){
           this.findAccessor(defdef) foreach {(readable, name) =>
             fieldMap.get(name) match {
               case Some(fx)=> if readable then fieldMap.put(name,fx.copy(hasGet=true)) else fieldMap.put(name,fx.copy(hasSet=true))
@@ -157,22 +157,24 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     }
 
     val members = new mutable.ArrayBuffer[Expr[_]]()
-    members ++= ctors.map{ m=>
-      val paramInfos = m.map{ p=>
-        if(p.defaultValue.isEmpty) '{new ParamHolder(${Expr(p.name)},${p.typeinfo})}
-        else '{new ParamHolder(${Expr(p.name)},${p.typeinfo},Some(${p.defaultValue.get}))}
+    if !(ctors.size == 1 && ctors.head.isEmpty) then
+      members ++= ctors.map{ m=>
+        val paramInfos = m.map{ p=>
+          if(p.defaultValue.isEmpty) '{new ParamHolder(${Expr(p.name)},${p.typeinfo})}
+          else '{new ParamHolder(${Expr(p.name)},${p.typeinfo},Some(${p.defaultValue.get}))}
+        }
+        '{${t}.addCtor(Array(${Varargs(paramInfos)}:_*))}
       }
-      '{${t}.addCtor(Array(${Varargs(paramInfos)}:_*))}
-    }
+    end if
 
-    val primaryCtorParamNames=   ctors.headOption match{
+    val primaryCtorParamNames = ctors.headOption match{
       case Some(ctor)=> ctor.map(_.name).toSet
       case None=> Set.empty
     }
 
     val transients = fieldMap.values.filter(x=>x.transnt(primaryCtorParamNames)).map(x=>Expr(x.name)).toList
     if(transients.nonEmpty){
-      members += '{${t}.addTransients(${Expr.ofList(transients)})}
+      members += '{${t}.addTransients(Array(${Varargs(transients)}:_*))}
     }
     members ++= fieldMap.values.map { x =>
       '{${t}.addField(${Expr(x.name)},${x.typeinfo})}
