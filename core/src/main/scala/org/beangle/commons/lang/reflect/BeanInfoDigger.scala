@@ -16,15 +16,14 @@
  */
 
 package org.beangle.commons.lang.reflect
-import org.beangle.commons.lang.annotation.noreflect
-
-import scala.collection.immutable.ArraySeq
-import scala.collection.mutable
-import BeanInfo.*
-import BeanInfo.Builder.{ParamHolder, getPropertyName}
 import org.beangle.commons.lang.Strings
+import org.beangle.commons.lang.annotation.noreflect
+import org.beangle.commons.lang.reflect.BeanInfo.*
+import org.beangle.commons.lang.reflect.BeanInfo.Builder.{ParamHolder, getPropertyName}
 
 import java.lang.reflect.Method
+import scala.collection.immutable.ArraySeq
+import scala.collection.mutable
 import scala.quoted.*
 
 object BeanInfoDigger{
@@ -60,7 +59,6 @@ object BeanInfoDigger{
 class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
   import q.reflect.*
   val typeRepr = trr.asInstanceOf[TypeRepr]
-  val symbol = typeRepr.typeSymbol
 
   def dig(): Expr[BeanInfo] = {
     '{
@@ -78,33 +76,34 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
   case class ParamExpr(name:String,typeinfo:Expr[AnyRef],defaultValue:Option[Expr[Any]]=None)
   case class MethodExpr(name:String,rt:Expr[Any],params:Seq[ParamExpr],asField:Boolean)
 
-  def findAccessor(m: DefDef): Option[Tuple2[Boolean, String]] = {
+  def findAccessor(m: DefDef): Option[(Boolean, String)] = {
     val name = m.name
-    var paramSize=0
+    var paramSize = 0
     m.paramss foreach { a =>
       a match {
-        case TermParamClause(ps: List[ValDef])=>
-          paramSize += ps.size
+        case TermParamClause(ps: List[ValDef])=>  paramSize += ps.size
         case _=>
       }
     }
-    if (m.paramss.isEmpty && m.returnTpt.tpe.typeSymbol != Symbol.classSymbol(classOf[Unit].getName)) {
-      Some((true, getPropertyName(name, true)))
-    } else if (1 == paramSize) {
-      val propertyName = getPropertyName(name, false)
-      if (null != propertyName && !propertyName.contains("$")) Some((false, propertyName)) else None
-    } else None
+    if name.contains("$") then
+      None
+    else
+      if (m.paramss.isEmpty && m.returnTpt.tpe.typeSymbol != Symbol.classSymbol(classOf[Unit].getName)) {
+        Some((true, getPropertyName(name, true)))
+      } else if (1 == paramSize) {
+        val propertyName = getPropertyName(name, false)
+        if (null != propertyName) Some((false, propertyName)) else None
+      } else None
   }
 
   private def addMemberBody(t:Expr[BeanInfo.Builder]): List[Expr[_]] = {
     val fieldMap = new mutable.HashMap[String,FieldExpr]
-    val methods= new mutable.ArrayBuffer[MethodExpr]()
-
     val typeSymbol = typeRepr.typeSymbol
-    val isScalaClass= !typeSymbol.flags.is(Flags.JavaDefined)
+    val isScalaClass = !typeSymbol.flags.is(Flags.JavaDefined)
+    val isCaseClass = typeRepr.typeSymbol.caseFields.nonEmpty
     val ctorDeclarations = typeSymbol.declarations.filter(_.isClassConstructor).toBuffer
+    // dotty will add this(x01:Unit) method in class as primary constructor,we ignore it.
     ctorDeclarations -= typeSymbol.primaryConstructor
-    // dotty will add this(x01:Unit) method in java class as primary constructor,we ignore it.
     if isScalaClass then ctorDeclarations.prepend(typeSymbol.primaryConstructor)
 
     val ctorDefaults = resolveCtorDefaults(typeSymbol)
@@ -132,29 +131,26 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
         val noreflect = mm.hasAnnotation(Symbol.classSymbol(classOf[noreflect].getName))
         val isPublic = !mm.flags.is(Flags.Protected) && !mm.flags.is(Flags.Private)
         val isInnerType = mm.name == Strings.substringBetween(mm.tree.show,"this.",".type")
-        val isNormal= !mm.name.contains("$")
+        val isNormal = !mm.name.contains("$") && !mm.name.startsWith("_")
         if isPublic && isNormal && !noreflect  && !isInnerType then fieldMap.put(mm.name, FieldExpr(mm.name,resolveType(tpe,params),transnt,true,true))
       }
 
       base.typeSymbol.declaredMethods foreach{  mm=>
         val defdef =mm.tree.asInstanceOf[DefDef]
         val rtType = resolveType(defdef.returnTpt.tpe,params)
-        val paramList = resolveDefParams(defdef,params,Map.empty)
         val isPublic = !defdef.symbol.flags.is(Flags.Protected) && !defdef.symbol.flags.is(Flags.Private)
-        if(isPublic){
-          this.findAccessor(defdef)match {
-            case Some(readable, name) =>
-              fieldMap.get(name) match{
-                case Some(fx)=> if readable then fieldMap.put(name,fx.copy(hasGet=true)) else fieldMap.put(name,fx.copy(hasSet=true))
-                case None =>
-                  val transnt = defdef.symbol.annotations exists(x => x.show.toLowerCase.contains("transient"))
-                  val fe = if readable then FieldExpr(name,rtType,transnt,true,false) else FieldExpr(name,paramList.head.typeinfo,transnt,false,true)
-                  fieldMap.put(name,fe)
-              }
-            case None=>
-              if(!defdef.name.contains("$") && !defdef.name.endsWith("_=")){
-                methods += MethodExpr(defdef.name,rtType,paramList,defdef.termParamss.isEmpty)
-              }
+        val ignored = isCaseClass && Set("productPrefix","productArity","productIterator","productElementNames").contains(defdef.name)
+        val isNormal = !defdef.name.contains("$") && !defdef.name.startsWith("_")
+        if(isPublic && isNormal && !ignored){
+          this.findAccessor(defdef) foreach {(readable, name) =>
+            fieldMap.get(name) match {
+              case Some(fx)=> if readable then fieldMap.put(name,fx.copy(hasGet=true)) else fieldMap.put(name,fx.copy(hasSet=true))
+              case None =>
+                val paramList = resolveDefParams(defdef,params,Map.empty)
+                val transnt = defdef.symbol.annotations exists(x => x.show.toLowerCase.contains("transient"))
+                val fe = if readable then FieldExpr(name,rtType,transnt,true,false) else FieldExpr(name,paramList.head.typeinfo,transnt,false,true)
+                fieldMap.put(name,fe)
+            }
           }
         }
       }
@@ -174,22 +170,12 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       case None=> Set.empty
     }
 
-    val transnts = fieldMap.values.filter(x=>x.transnt(primaryCtorParamNames)).map(x=>Expr(x.name)).toList
-    if(transnts.nonEmpty){
-      members += '{${t}.addTransients(${Expr.ofList(transnts)})}
+    val transients = fieldMap.values.filter(x=>x.transnt(primaryCtorParamNames)).map(x=>Expr(x.name)).toList
+    if(transients.nonEmpty){
+      members += '{${t}.addTransients(${Expr.ofList(transients)})}
     }
     members ++= fieldMap.values.map { x =>
       '{${t}.addField(${Expr(x.name)},${x.typeinfo})}
-    }
-    members ++= methods.map { x =>
-      val paramInfos = x.params.map{ p=>
-        if(p.defaultValue.isEmpty) '{new ParamHolder(${Expr(p.name)},${p.typeinfo})}
-        else '{new ParamHolder(${Expr(p.name)},${p.typeinfo},Some(${p.defaultValue.get}))}
-      }
-      if paramInfos.isEmpty then
-        '{${t}.addMethod(${Expr(x.name)},${x.rt},${Expr(x.asField)})}
-      else
-        '{${t}.addMethod(${Expr(x.name)},${x.rt},Array(${Varargs(paramInfos)}:_*))}
     }
     members.toList
   }

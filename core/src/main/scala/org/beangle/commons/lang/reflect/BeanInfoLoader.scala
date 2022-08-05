@@ -45,13 +45,8 @@ object BeanInfoLoader {
     */
   def load(clazz: Class[_]): BeanInfo = {
     val className = clazz.getName
-    if (className.startsWith("java.") || className.startsWith("scala."))
+    if (className.startsWith("java.") || className.startsWith("scala.") || className.contains("$$"))
       throw new RuntimeException("Cannot reflect class:" + clazz.getName)
-    val originBeanInfo: Option[BeanInfo] = None
-    //      if (className.contains("$$") && className.startsWith(clazz.getSuperclass.getName))
-    //        Option(cache.get(clazz.getSuperclass))
-    //      else
-    //        None
     val isCase = TypeInfo.isCaseClass(clazz)
     val getters = new mutable.HashMap[String, Getter]
     val setters = new mutable.HashMap[String, Setter]
@@ -108,10 +103,9 @@ object BeanInfoLoader {
     }
 
     // make buffer to list and filter duplicated bridge methods
-    val filterMethods = methods.groupBy(_.method.getName).map { case (x, sameNames) =>
+    methods.groupBy(_.method.getName).foreach { case (x, sameNames) =>
       val nb = Builder.filterSameNames(sameNames)
       if (getters.contains(x) && nb.size == 1) getters.put(x, getters(x).copy(method = nb.head.method))
-      (x, ArraySeq.from(nb))
     }
     // organize setter and getter
     val allprops = getters.keySet ++ setters.keySet
@@ -132,7 +126,7 @@ object BeanInfoLoader {
         v.getter.foreach { m => m.setAccessible(true) }
         v.setter.foreach { m => m.setAccessible(true) }
       }
-    new BeanInfo(clazz, ArraySeq.from(ctors), properties.toMap, filterMethods)
+    new BeanInfo(clazz, ArraySeq.from(ctors), properties.toMap)
   }
 
   private def navIterface(clazz: Class[_], accessed: mutable.HashSet[Class[_]],
@@ -169,7 +163,7 @@ object BeanInfoLoader {
         case Some(Tuple2(readable, name)) =>
           if (readable) {
             val puttable = getters.get(name).forall(x => isJavaBeanGetter(x.method)) //FIXME
-            if (puttable)
+            if puttable then
               getters.put(name, Getter(method, typeof(method.getReturnType, method.getGenericReturnType, paramTypes)))
           } else {
             val types = method.getGenericParameterTypes
@@ -178,12 +172,12 @@ object BeanInfoLoader {
             (0 until types.length) foreach { j => paramsTypes(j) = typeof(clazzes(j), types(j), paramTypes) }
             setters.put(name, Setter(method, paramsTypes))
           }
+          val types = method.getGenericParameterTypes
+          val params = new mutable.ArrayBuffer[ParamInfo](types.length)
+          method.getParameters foreach { p => params += ParamInfo(p.getName, typeof(p.getType, p.getParameterizedType, paramTypes), None) }
+          methods.add(MethodInfo(method, typeof(method.getReturnType, method.getGenericReturnType, paramTypes), ArraySeq.from(params)))
         case None =>
       }
-      val types = method.getGenericParameterTypes
-      val params = new mutable.ArrayBuffer[ParamInfo](types.length)
-      method.getParameters foreach { p => params += ParamInfo(p.getName, typeof(p.getType, p.getParameterizedType, paramTypes), None) }
-      methods.add(MethodInfo(method, typeof(method.getReturnType, method.getGenericReturnType, paramTypes), ArraySeq.from(params)))
     }
   }
 
@@ -204,7 +198,7 @@ object BeanInfoLoader {
             if (pt.getActualTypeArguments.length == 1) TypeInfo.get(clazz, typeAt(pt, 0))
             else TypeInfo.get(clazz, typeAt(pt, 0), typeAt(pt, 1))
           case tv: TypeVariable[_] => TypeInfo.get(paramTypes.getOrElse(tv.getName, classOf[AnyRef]))
-          case c: Class[_] => TypeInfo.get(clazz, false)
+          case _: Class[_] => TypeInfo.get(clazz, false)
           case _ => TypeInfo.get(clazz, classOf[Any], classOf[Any])
         }
     else if clazz == classOf[Option[_]] then
