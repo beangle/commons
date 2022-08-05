@@ -36,14 +36,6 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
   BeanInfos.of(classOf[Department])
 
   describe("BeanInfos") {
-    it("transient persisted property") {
-      val mis = BeanInfos.get(classOf[NumIdBean[_]]).getMethods("persisted")
-      assert(mis.size == 1)
-      val mi = mis.head
-      val anns = mi.method.getAnnotations
-      assert(null != anns && anns.length == 1)
-    }
-
     it("find real template parameter") {
       assert(BeanInfos.get(classOf[Book]).getPropertyType("id") == Some(classOf[java.lang.Long]))
       assert(BeanInfos.get(classOf[BookPrimitiveId]).getPropertyType("id") == Some(classOf[Long]))

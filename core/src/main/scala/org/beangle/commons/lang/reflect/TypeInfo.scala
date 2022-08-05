@@ -134,7 +134,6 @@ object TypeInfo {
       case clz:Class[_]=> TypeInfo.get(clz,false)
       case a:Array[Any]=>
         val clz = a(0)
-
         val argsClz = a(1).asInstanceOf[Array[_]]
         val argsInfo = Array.ofDim[TypeInfo](argsClz.length)
         (0 until argsClz.length) foreach{i=>
