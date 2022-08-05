@@ -20,11 +20,7 @@ package org.beangle.commons.xml
 import scala.xml.Node
 
 object NodeOps {
-
-  import scala.language.implicitConversions
-  @inline implicit def node2Ops(n: Node): NodeOps = {
-    new NodeOps(n)
-  }
+  given Conversion[Node,NodeOps] = new NodeOps(_)
 }
 
 final class NodeOps(val n: Node) extends AnyVal {
@@ -44,3 +40,4 @@ final class NodeOps(val n: Node) extends AnyVal {
   }
 
 }
+

@@ -97,9 +97,7 @@ object HttpUtils extends Logging {
       } else
         Response(conn.getResponseCode, conn.getResponseMessage)
     } catch {
-      case e: Exception =>
-        report(url, e)
-        Response(HTTP_NOT_FOUND, e.getMessage)
+      case e: Exception => error(conn, url, e)
     } finally
       if (null != conn) conn.disconnect()
   }
@@ -128,7 +126,7 @@ object HttpUtils extends Logging {
       conn.setUseCaches(false)
       Https.noverify(conn)
       f foreach (x => x(conn))
-      if (conn.getResponseCode == HTTP_OK) {
+      if conn.getResponseCode == HTTP_OK then
         in = new BufferedReader(new InputStreamReader(conn.getInputStream, encoding))
         var line: String = in.readLine()
         val sb = new StringBuilder(255)
@@ -138,29 +136,27 @@ object HttpUtils extends Logging {
           line = in.readLine()
         }
         Response(HTTP_OK, sb.toString)
-      } else
+      else
         Response(conn.getResponseCode, conn.getResponseMessage)
     } catch {
-      case e: Exception =>
-        report(url, e)
-        Response(HTTP_NOT_FOUND, e.getMessage)
+      case e: Exception => error(conn, url, e)
     } finally {
       if (null != in) in.close()
       if (null != conn) conn.disconnect()
     }
   }
 
-  def invoke(url: URL, body: String, contentType: String): Response = {
+  def invoke(url: URL, body: AnyRef, contentType: String): Response = {
     invoke(url, body, contentType, None)
   }
 
-  def invoke(url: URL, body: String, contentType: String, username: String, password: String): Response = {
+  def invoke(url: URL, body: AnyRef, contentType: String, username: String, password: String): Response = {
     invoke(url, body, contentType, Some({ x =>
       x.addRequestProperty("Authorization", "Basic " + Base64.encode(s"$username:$password".getBytes))
     }))
   }
 
-  def invoke(url: URL, body: String, contentType: String, f: Option[(URLConnection) => Unit]): Response = {
+  def invoke(url: URL, body: AnyRef, contentType: String, f: Option[(URLConnection) => Unit]): Response = {
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     Https.noverify(conn)
     conn.setDoOutput(true)
@@ -168,26 +164,28 @@ object HttpUtils extends Logging {
     conn.setRequestProperty("Content-Type", contentType)
     f foreach (x => x(conn))
     val os = conn.getOutputStream
-    val osw = new OutputStreamWriter(os, "UTF-8")
-    osw.write(body)
-    osw.flush()
-    osw.close()
+    body match {
+      case ba: Array[Byte] => os.write(ba)
+      case _ =>
+        val osw = new OutputStreamWriter(os, "UTF-8")
+        osw.write(body.toString)
+        osw.flush()
+        osw.close()
+    }
     os.close() //don't forget to close the OutputStream
     try {
       conn.connect()
-      //read the inputstream and print it
       val lines = IOs.readString(conn.getInputStream)
       Response(conn.getResponseCode, lines)
     } catch {
-      case e: Exception =>
-        report(url, e)
-        Response(HTTP_NOT_FOUND, conn.getResponseMessage)
+      case e: Exception => error(conn, url, e)
     } finally
       if (null != conn) conn.disconnect()
   }
 
-  private[this] def report(url: URL, e: Exception): Unit = {
+  private[this] def error(conn: HttpURLConnection, url: URL, e: Exception): Response = {
     logger.info("Cannot open url " + url + " " + e.getMessage)
+    Response(conn.getResponseCode, e.getMessage)
   }
 
   private def requestBy(conn: HttpURLConnection, method: String): Unit = {
