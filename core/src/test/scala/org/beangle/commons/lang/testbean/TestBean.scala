@@ -23,6 +23,7 @@ import org.beangle.commons.lang.annotation.{description, noreflect}
 import org.beangle.commons.logging.Logging
 
 import java.beans.Transient
+
 class TestBean {
   var id: Int = _
   var name: String = _
@@ -76,8 +77,8 @@ trait Entity[ID] {
   def id: ID
 
   /**
-    * Return true if persisted
-    */
+   * Return true if persisted
+   */
   @Transient
   def persisted: Boolean = id != null
 
@@ -155,14 +156,15 @@ class Department extends NumIdBean[Long] with Hierarchical[Department] {
 class Menu {
   var id: Long = _
 
-  def getId(): Long =
-    id
+  def getId: Long = id
+
+  def childrenCount(): Int = 0
+
+  def deepSize: Int = 1
 }
 
 case class Loader(name: String) {
-  def load[T](clazz: Class[T]): T = {
-    clazz.getDeclaredConstructor().newInstance().asInstanceOf[T]
-  }
+  def load[T](clazz: Class[T]): T = clazz.getDeclaredConstructor().newInstance()
 }
 
 trait Factory[T] {

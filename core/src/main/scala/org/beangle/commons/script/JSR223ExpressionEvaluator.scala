@@ -29,8 +29,13 @@ class JSR223ExpressionEvaluator(engineName: String) extends ExpressionEvaluator 
   def eval(exp: String, root: AnyRef): AnyRef = {
     val ctx = new SimpleBindings
     root match {
-      case sm: collection.Map[String, Any] => sm foreach (x => ctx.put(x._1, x._2))
-      case jm: java.util.Map[String, Any] => ctx.putAll(jm)
+      case sm: collection.Map[_, _] => sm foreach (x => ctx.put(x._1.toString, x._2))
+      case jm: java.util.Map[_, _] =>
+        val jmi = jm.entrySet().iterator()
+        while (jmi.hasNext) {
+          val i = jmi.next()
+          ctx.put(i.getKey.toString, i.getValue)
+        }
       case _ => ctx.put("root", root)
     }
     scriptEngine.eval(exp, ctx)

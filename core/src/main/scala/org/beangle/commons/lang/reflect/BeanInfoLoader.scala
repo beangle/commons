@@ -45,18 +45,13 @@ object BeanInfoLoader {
     */
   def load(clazz: Class[_]): BeanInfo = {
     val className = clazz.getName
-    if (className.startsWith("java.") || className.startsWith("scala."))
+    if (className.startsWith("java.") || className.startsWith("scala.") || className.contains("$$"))
       throw new RuntimeException("Cannot reflect class:" + clazz.getName)
-    val originBeanInfo: Option[BeanInfo] = None
-    //      if (className.contains("$$") && className.startsWith(clazz.getSuperclass.getName))
-    //        Option(cache.get(clazz.getSuperclass))
-    //      else
-    //        None
     val isCase = TypeInfo.isCaseClass(clazz)
     val getters = new mutable.HashMap[String, Getter]
     val setters = new mutable.HashMap[String, Setter]
     val fields = new mutable.HashMap[String, Field]
-    val methods = new mutable.HashSet[MethodInfo]
+    val accessMethods = new mutable.HashSet[MethodInfo]
     val accessed = new mutable.HashSet[Class[_]]
     var nextClass = clazz
     var paramTypes: collection.Map[String, Class[_]] = Map.empty
@@ -65,9 +60,9 @@ object BeanInfoLoader {
       nextClass.getDeclaredFields foreach { f => fields += (f.getName -> f) }
       (0 until declaredMethods.length) foreach { i =>
         val method = declaredMethods(i)
-        processMethod(isCase, method, getters, setters, methods, paramTypes)
+        processMethod(isCase, method, getters, setters, accessMethods, paramTypes)
       }
-      navIterface(nextClass, accessed, getters, setters, methods, paramTypes)
+      navIterface(nextClass, accessed, getters, setters, accessMethods, paramTypes)
 
       val nextType = nextClass.getGenericSuperclass
       nextClass = nextClass.getSuperclass
@@ -108,10 +103,9 @@ object BeanInfoLoader {
     }
 
     // make buffer to list and filter duplicated bridge methods
-    val filterMethods = methods.groupBy(_.method.getName).map { case (x, sameNames) =>
+    accessMethods.groupBy(_.method.getName).foreach { case (x, sameNames) =>
       val nb = Builder.filterSameNames(sameNames)
       if (getters.contains(x) && nb.size == 1) getters.put(x, getters(x).copy(method = nb.head.method))
-      (x, ArraySeq.from(nb))
     }
     // organize setter and getter
     val allprops = getters.keySet ++ setters.keySet
@@ -120,19 +114,33 @@ object BeanInfoLoader {
       val getter = getters.get(p)
       val setter = setters.get(p)
       val typeinfo = if getter.isEmpty then setter.get.parameterTypes(0) else getter.get.returnType
-      val isTransientAnnoted = fields.get(p).map(x => Modifier.isTransient(x.getModifiers)).getOrElse(false)
+      val isTransientAnnoted = fields.get(p).exists(x => Modifier.isTransient(x.getModifiers))
       val isTransient = BeanInfo.Builder.isTransient(isTransientAnnoted, setter.isDefined, pCtorParamNames.contains(p))
-      val pd = BeanInfo.PropertyInfo(p, typeinfo, getter.map(x => x.method), setter.map(x => x.method), isTransient)
+      val pd = BeanInfo.PropertyInfo(p, typeinfo, getter.map(_.method), setter.map(_.method), isTransient)
       properties.put(p, pd)
     }
 
     // change accessible for none public class
-    if (!Modifier.isPublic(clazz.getModifiers))
+    if  !Modifier.isPublic(clazz.getModifiers) then
       properties foreach { case (k, v) =>
         v.getter.foreach { m => m.setAccessible(true) }
         v.setter.foreach { m => m.setAccessible(true) }
       }
-    new BeanInfo(clazz, ArraySeq.from(ctors), properties.toMap, filterMethods)
+
+    //collect other non-access methods
+    val methods = new mutable.ArrayBuffer[Method]
+    clazz.getMethods foreach { method =>
+      if (Builder.isFineMethod(isCase, method, true)) {
+        var added = false
+        Builder.findAccessor(method) foreach { (_, name) =>
+          added = !properties.contains(name)
+        }
+        if !added then methods += method
+      }
+    }
+    val groupMethods = methods.groupBy(_.getName).map(x => (x._1, ArraySeq.from(x._2)))
+
+    new BeanInfo(clazz, ArraySeq.from(ctors), properties.toMap, groupMethods)
   }
 
   private def navIterface(clazz: Class[_], accessed: mutable.HashSet[Class[_]],
@@ -162,14 +170,14 @@ object BeanInfoLoader {
 
   private def processMethod(isCase: Boolean, method: Method, getters: mutable.HashMap[String, Getter],
                             setters: mutable.HashMap[String, Setter],
-                            methods: mutable.HashSet[MethodInfo],
+                            accessMethods: mutable.HashSet[MethodInfo],
                             paramTypes: collection.Map[String, Class[_]]): Unit = {
     if (BeanInfo.Builder.isFineMethod(isCase, method, false)) {
       BeanInfo.Builder.findAccessor(method) match {
         case Some(Tuple2(readable, name)) =>
           if (readable) {
             val puttable = getters.get(name).forall(x => isJavaBeanGetter(x.method)) //FIXME
-            if (puttable)
+            if puttable then
               getters.put(name, Getter(method, typeof(method.getReturnType, method.getGenericReturnType, paramTypes)))
           } else {
             val types = method.getGenericParameterTypes
@@ -178,12 +186,12 @@ object BeanInfoLoader {
             (0 until types.length) foreach { j => paramsTypes(j) = typeof(clazzes(j), types(j), paramTypes) }
             setters.put(name, Setter(method, paramsTypes))
           }
+          val types = method.getGenericParameterTypes
+          val params = new mutable.ArrayBuffer[ParamInfo](types.length)
+          method.getParameters foreach { p => params += ParamInfo(p.getName, typeof(p.getType, p.getParameterizedType, paramTypes), None) }
+          accessMethods.add(MethodInfo(method, typeof(method.getReturnType, method.getGenericReturnType, paramTypes), ArraySeq.from(params)))
         case None =>
       }
-      val types = method.getGenericParameterTypes
-      val params = new mutable.ArrayBuffer[ParamInfo](types.length)
-      method.getParameters foreach { p => params += ParamInfo(p.getName, typeof(p.getType, p.getParameterizedType, paramTypes), None) }
-      methods.add(MethodInfo(method, typeof(method.getReturnType, method.getGenericReturnType, paramTypes), ArraySeq.from(params)))
     }
   }
 
@@ -204,7 +212,7 @@ object BeanInfoLoader {
             if (pt.getActualTypeArguments.length == 1) TypeInfo.get(clazz, typeAt(pt, 0))
             else TypeInfo.get(clazz, typeAt(pt, 0), typeAt(pt, 1))
           case tv: TypeVariable[_] => TypeInfo.get(paramTypes.getOrElse(tv.getName, classOf[AnyRef]))
-          case c: Class[_] => TypeInfo.get(clazz, false)
+          case _: Class[_] => TypeInfo.get(clazz, false)
           case _ => TypeInfo.get(clazz, classOf[Any], classOf[Any])
         }
     else if clazz == classOf[Option[_]] then

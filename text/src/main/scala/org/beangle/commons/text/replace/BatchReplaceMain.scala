@@ -84,20 +84,19 @@ object BatchReplaceMain extends Logging {
       writeToFile(filecontent, fileName, charset)
     } else {
       val subFiles = file.list(new FilenameFilter() {
-
         def accept(dir: File, name: String): Boolean = {
-          if (dir.isDirectory) return true
-          var matched = false
-          for (key <- profiles.keySet) {
-            matched = name.endsWith(key)
-            if (matched) return true
-          }
-          return false
+          if dir.isDirectory then
+            true
+          else
+            var matched = false
+            for (key <- profiles.keySet if !matched) {
+              matched = name.endsWith(key)
+            }
+            matched
         }
       })
       if (null != subFiles)
-        for (i <- 0 until subFiles.length)
-          replaceFile(fileName + '/' + subFiles(i), profiles, charset)
+        for (i <- 0 until subFiles.length) replaceFile(fileName + '/' + subFiles(i), profiles, charset)
     }
   }
 
@@ -107,10 +106,9 @@ object BatchReplaceMain extends Logging {
    * </p>
    */
   def writeToFile(str: String, fileName: String, charset: Charset): Unit = {
-    var writer: OutputStreamWriter = null
-    writer = if (null == charset) new OutputStreamWriter(new FileOutputStream(fileName)) else new OutputStreamWriter(
-      new FileOutputStream(fileName),
-      charset.name())
+    val writer =
+      if null == charset then new OutputStreamWriter(new FileOutputStream(fileName))
+      else new OutputStreamWriter(new FileOutputStream(fileName),charset.name())
     writer.write(str)
     writer.close()
   }

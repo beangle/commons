@@ -162,13 +162,12 @@ object Strings {
    * @param start      the start index, negative starts at the string start
    * @return the index where the search char was found, -1 if not found
    */
-  private def indexOf(cs: CharSequence, searchChar: Int, start: Int): Int =
-    if (cs.isInstanceOf[String])
+  private def indexOf(cs: CharSequence, searchChar: Int, start: Int): Int = {
+    if cs.isInstanceOf[String] then
       cs.asInstanceOf[String].indexOf(searchChar, start)
-    else {
-      for (i <- (if (start < 0) 0 else start) until cs.length if cs.charAt(i) == searchChar) return i
-      -1
-    }
+    else
+      ((if (start < 0) 0 else start) until cs.length).find(cs.charAt(_) == searchChar).getOrElse(-1)
+  }
 
   /**
    * insert.
@@ -238,8 +237,7 @@ object Strings {
   def isBlank(cs: CharSequence): Boolean = {
     if ((cs eq null) || cs.length == 0) return true
     val strLen = cs.length
-    for (i <- 0 until strLen if Character.isWhitespace(cs.charAt(i)) == false) return false
-    true
+    !(0 until strLen).exists(i => !Character.isWhitespace(cs.charAt(i)))
   }
 
   /**
