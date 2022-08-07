@@ -82,11 +82,9 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
   def findAccessor(m: DefDef): Option[(Boolean, String)] = {
     val name = m.name
     var paramSize = 0
-    m.paramss foreach { a =>
-      a match {
-        case TermParamClause(ps: List[ValDef])=>  paramSize += ps.size
-        case _=>
-      }
+    m.paramss foreach {
+      case TermParamClause(ps: List[ValDef])=>  paramSize += ps.size
+      case _=>
     }
     if isNormal(name) then
       if (m.paramss.isEmpty && m.returnTpt.tpe.typeSymbol != Symbol.classSymbol(classOf[Unit].getName)) {
@@ -116,7 +114,7 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       resolveDefParams(defdef,Map.empty,if i==1 then ctorDefaults else Map.empty)
     }
 
-    val superBases= Set("scala.Any","scala.Matchable","java.lang.Object","scala.Equals","scala.Product","java.io.Serializable")
+    val superBases = Set("scala.Any","scala.Matchable","java.lang.Object","scala.Equals","scala.Product","java.io.Serializable")
     for(bc <- typeRepr.baseClasses if !superBases.contains(bc.fullName)){
       val base = typeRepr.baseType(bc)
       var params = Map.empty[String,TypeRepr]
@@ -155,7 +153,6 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
         }
       }
     }
-
     val members = new mutable.ArrayBuffer[Expr[_]]()
     if !(ctors.size == 1 && ctors.head.isEmpty) then
       members ++= ctors.map{ m=>
