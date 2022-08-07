@@ -61,22 +61,22 @@ class HierarchicalTextResource(clazz: Class[_], locale: ju.Locale, registry: Tex
     // check all interfaces class and package
     val interfaces = new collection.mutable.HashSet[Class[_]]
     collectInterfaces(clazz, interfaces)
-    for (ifc <- interfaces) {
+    for (ifc <- interfaces if msg == null) {
       msg = getClassMessage(ifc.getName(), key)
-      if (msg != null) return msg
     }
-    for (ifc <- interfaces) {
+    if (msg != null) return msg
+    for (ifc <- interfaces if msg == null) {
       msg = this.findPackageMessage(ifc.getName(), key, checked)
-      if (null != msg) return msg
     }
+    if (null != msg) return msg
 
     // traverse up hierarchy
-    if (clazz.isInterface())
-      for (ifc <- clazz.getInterfaces()) {
+    if (clazz.isInterface()){
+      for (ifc <- clazz.getInterfaces() if msg == null) {
         msg = findMessage(ifc, key, checked)
-        if (null != msg) return msg
       }
-    else {
+      if (null != msg) return msg
+    }else {
       val superClass = clazz.getSuperclass()
       if (!superClass.equals(classOf[Object]) && !clazz.isPrimitive()) {
         msg = findMessage(superClass, key, checked)

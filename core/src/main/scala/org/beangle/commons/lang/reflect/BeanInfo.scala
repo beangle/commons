@@ -172,9 +172,7 @@ object BeanInfo extends Logging {
         paramSizeMap.values foreach { ml =>
           val reminded = Collections.newBuffer(ml)
           ml foreach { mi =>
-            reminded.find(x => x.isOver(mi)) foreach { finded =>
-              reminded -= mi
-            }
+            reminded.find(x => x.isOver(mi)) foreach (_ => reminded -= mi)
           }
           result ++= reminded
         }
@@ -232,27 +230,29 @@ object BeanInfo extends Logging {
     def build(): BeanInfo = {
       val getters = new mutable.HashMap[String, Method]
       val setters = new mutable.HashMap[String, Method]
-      val methods = new mutable.HashMap[String, mutable.Buffer[MethodInfo]]
+      val accessMethods = new mutable.HashMap[String, mutable.Buffer[MethodInfo]] //getter and setter
+      val methods = new mutable.ArrayBuffer[Method]
       val isCase = TypeInfo.isCaseClass(clazz)
       clazz.getMethods foreach { method =>
         if (isFineMethod(isCase, method, true)) {
+          var added = false
           findAccessor(method) foreach { (readable, name) =>
-            if readable then
-              getters.put(name, method)
-              fieldInfos.get(name) foreach { field =>
-                registerMethodInfo(methods, method, field, ArraySeq.empty[ParamInfo])
-              }
-            else
-              setters.put(name, method)
-              fieldInfos.get(name) foreach { field =>
-                registerMethodInfo(methods, method, TypeInfo.UnitType, ArraySeq(ParamInfo(name, field, None)))
-              }
+            fieldInfos.get(name) foreach { field =>
+              added = true
+              if readable then
+                getters.put(name, method)
+                registerMethodInfo(accessMethods, method, field, ArraySeq.empty[ParamInfo])
+              else
+                setters.put(name, method)
+                registerMethodInfo(accessMethods, method, TypeInfo.UnitType, ArraySeq(ParamInfo(name, field, None)))
+            }
           }
+          if !added then methods += method
         }
       }
       val nonPublic = !Modifier.isPublic(clazz.getModifiers)
       // make buffer to list and filter duplicated bridge methods
-      methods.map { case (x, sameNames) =>
+      accessMethods.map { case (x, sameNames) =>
         val nb = filterSameNames(sameNames)
         if getters.contains(x) && nb.size == 1 then
           getters.put(x, nb.head.method)
@@ -275,7 +275,8 @@ object BeanInfo extends Logging {
 
       //process constructors,first is primary
       val ctors = ctorInfos map (ConstructorInfo(_))
-      BeanInfo(clazz, ArraySeq.from(ctors), properties.toMap)
+      val groupMethods = methods.groupBy(_.getName).map(x => (x._1, ArraySeq.from(x._2)))
+      BeanInfo(clazz, ArraySeq.from(ctors), properties.toMap, groupMethods)
     }
   }
 
@@ -286,7 +287,7 @@ object BeanInfo extends Logging {
   }
 }
 
-case class BeanInfo(clazz: Class[_], ctors: ArraySeq[ConstructorInfo], properties: Map[String, PropertyInfo]) {
+case class BeanInfo(clazz: Class[_], ctors: ArraySeq[ConstructorInfo], properties: Map[String, PropertyInfo], methods: collection.Map[String, ArraySeq[Method]]) {
 
   override def toString: String = {
     val sb = new mutable.ArrayBuffer[String]
@@ -331,11 +332,12 @@ case class BeanInfo(clazz: Class[_], ctors: ArraySeq[ConstructorInfo], propertie
       case None => None
     }
 
-  def getSetter(property: String): Option[Method] =
+  def getSetter(property: String): Option[Method] = {
     properties.get(property) match {
       case Some(p) => p.setter
       case None => None
     }
+  }
 
   def readables: Map[String, PropertyInfo] = properties.filter(x => x._2.readable)
 

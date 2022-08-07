@@ -17,14 +17,13 @@
 
 package org.beangle.commons.lang.reflect
 
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.funspec.AnyFunSpec
-import org.beangle.commons.lang.testbean.*
 import org.beangle.commons.collection.Properties
+import org.beangle.commons.lang.reflect.TypeInfo.*
+import org.beangle.commons.lang.testbean.*
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 import java.lang.reflect.Modifier
-import org.beangle.commons.lang.reflect.TypeInfo.*
-
 import scala.collection.immutable.ArraySeq
 
 class BeanInfosTest extends AnyFunSpec with Matchers {
@@ -34,6 +33,7 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
   BeanInfos.of(classOf[Author])
   BeanInfos.of(classOf[BigBookStore])
   BeanInfos.of(classOf[Department])
+  BeanInfos.of(classOf[Menu])
 
   describe("BeanInfos") {
     it("find real template parameter") {
@@ -108,6 +108,9 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
       getter foreach { g =>
         assert(g.getName == "id")
       }
+      assert(!t.properties.contains("childrenCount"))
+      assert(t.properties.contains("deepSize"))
+      assert(t.methods.size == 1)
     }
 
     it("find correct constructor info") {
@@ -140,17 +143,17 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
       val p3 = t.properties("tempName")
       assert(p3.isTransient)
     }
-    it("get case class method"){
+    it("get case class method") {
       val t = BeanInfos.of(classOf[Loader])
       assert(t.properties.contains("name"))
       assert(!t.properties("name").isTransient)
     }
-    it("get generic method"){
+    it("get generic method") {
       val t = BeanInfos.of(classOf[LongFactory])
       assert(t.properties.contains("result"))
       assert(t.properties("result").getter.get.getReturnType == classOf[Long])
     }
-    it("get java bean methods"){
+    it("get java bean methods") {
       val t = BeanInfos.of(classOf[TestJavaBean])
       assert(!t.properties("name").isTransient)
 
