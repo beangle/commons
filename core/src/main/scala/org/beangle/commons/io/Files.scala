@@ -118,8 +118,8 @@ object Files {
     */
   @throws[IOException]("if source or destination is invalid or an IO error occurs during copying")
   def copy(srcFile: File, destFile: File): Unit = {
-    assert(null != srcFile)
-    assert(null != destFile)
+    require(null != srcFile)
+    require(null != destFile)
     if (!srcFile.exists)
       throw new FileNotFoundException("Source '" + srcFile + "' does not exist")
     if (srcFile.isDirectory)

@@ -23,7 +23,7 @@ import java.text.Collator
  * Collator Ordering
  * @author chaostone
  */
-class CollatorOrdering(val asc: Boolean, val collator: Collator = Collator.getInstance) extends StringOrdering {
+class CollatorOrdering(val asc: Boolean, val collator: Collator = Collator.getInstance) extends Ordering[String] {
   /**
    * compare
    * @param what0 a String object.

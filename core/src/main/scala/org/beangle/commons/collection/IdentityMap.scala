@@ -17,14 +17,11 @@
 
 package org.beangle.commons.collection
 
-/**
- * Similar to java.util.IdentityHashMap,but using chaining bucket
- * But do not support null key and null value
- * (not thread safe)
- * @since 4.2.3
+/** Similar to java.util.IdentityHashMap,but using chaining bucket
+ * But do not support null key and null value(not thread safe)
  */
 final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
-  assert(capacity % 2 == 0)
+  require(capacity % 2 == 0)
 
   private val table = new Array[Entry[K, V]](capacity)
   private val mask = capacity - 1
@@ -47,6 +44,7 @@ final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
       i += 1
     }
   }
+
   def contains(key: K): Boolean =
     null != get(key)
 

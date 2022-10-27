@@ -38,7 +38,7 @@ class PropertyOrdering(cmpStr: String) extends Ordering[Any] {
 
   var collatorOrdering = new CollatorOrdering(asc)
 
-  assert(Strings.isNotEmpty(cmpStr))
+  require(Strings.isNotEmpty(cmpStr))
 
   if (Strings.contains(cmpStr, ','))
     throw new RuntimeException("PropertyOrdering don't support comma based order by. Use MultiPropertyOrdering instead.")
