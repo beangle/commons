@@ -15,28 +15,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.xml
+package org.beangle.commons.lang
 
-import scala.xml.Node
+import java.lang.management.{ManagementFactory, PlatformManagedObject}
 
-object NodeOps {
-  given Conversion[Node,NodeOps] = new NodeOps(_)
-}
-
-final class NodeOps(val n: Node) extends AnyVal {
-  @inline
-  def attr(name: String): String = {
-    (n \ s"@$name").text
+object JVM {
+  def isDebugMode: Boolean = {
+    val args = ManagementFactory.getRuntimeMXBean.getInputArguments
+    args.toString.indexOf("-agentlib:jdwp") > 0
   }
 
-  @inline
-  def name: String = {
-    (n \ s"@name").text
+  def isServerMode: Boolean = {
+    val name = System.getProperty("java.vm.name")
+    name.contains("Server VM")
   }
 
-  @inline
-  def get(name: String): Option[String] = {
-    (n \ s"@$name").map(_.text).headOption
+  def javaVersion: String = {
+    System.getProperty("java.specification.version", "99.0")
   }
 
+  def gcName: String = {
+    val cs = ManagementFactory.getGarbageCollectorMXBeans
+    if cs.isEmpty then "UNKOWN"
+    else
+      val ob = cs.get(0).getObjectName.toString
+      Strings.substringBetween(ob, "name=", " ")
+  }
 }
