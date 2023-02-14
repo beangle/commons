@@ -17,6 +17,7 @@
 
 package org.beangle.commons.lang
 
+import java.awt.GraphicsEnvironment
 import java.lang.management.{ManagementFactory, PlatformManagedObject}
 
 object JVM {
@@ -30,6 +31,10 @@ object JVM {
     name.contains("Server VM")
   }
 
+  def isHeadless: Boolean = {
+    GraphicsEnvironment.isHeadless
+  }
+
   def javaVersion: String = {
     System.getProperty("java.specification.version", "99.0")
   }
@@ -41,4 +46,5 @@ object JVM {
       val ob = cs.get(0).getObjectName.toString
       Strings.substringBetween(ob, "name=", " ")
   }
+
 }
