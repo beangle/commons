@@ -58,6 +58,8 @@ object MediaTypes {
 
   val ApplicationXlsx: MediaType = types("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
+  val ApplicationDocx: MediaType = types("application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+
   val ImageGif: MediaType = types("image/gif")
 
   val ImageJpeg: MediaType = types("image/jpeg")
