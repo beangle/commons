@@ -17,12 +17,12 @@
 
 package org.beangle.commons.activation
 
-import java.net.URL
-
 import org.beangle.commons.config.Resources
 import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.ClassLoaders.{ getResource, getResources }
+import org.beangle.commons.lang.ClassLoaders.{getResource, getResources}
 import org.beangle.commons.lang.Strings
+
+import java.net.URL
 
 /**
  * @see https://www.iana.org/assignments/media-types/media-types.xhtml
@@ -55,6 +55,8 @@ object MediaTypes {
   val ApplicationXml: MediaType = types("application/xml")
 
   val ApplicationPdf: MediaType = types("application/pdf")
+
+  val ApplicationZip: MediaType = types("application/zip")
 
   val ApplicationXlsx: MediaType = types("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
