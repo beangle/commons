@@ -22,6 +22,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 import java.sql.Time
+import java.time.{LocalDate, MonthDay, YearMonth}
 
 class TimeConverterTest extends AnyFunSpec with Matchers {
 
@@ -34,6 +35,14 @@ class TimeConverterTest extends AnyFunSpec with Matchers {
       TimeConverter("12:34:00") should equal(Time.valueOf("12:34:00"))
 
       HourMinuteConverter("12:34") should equal(new HourMinute(1234.toShort))
+
+      TemporalConverter.ToMonthDay("3.2") should equal(MonthDay.parse("--03-02"))
+      TemporalConverter.ToYearMonth("1923.3") should equal(YearMonth.parse("1923-03"))
+      TemporalConverter.ToYearMonth("1923.3.1") should equal(YearMonth.parse("1923-03"))
+      TemporalConverter.ToYearMonth("192303") should equal(YearMonth.parse("1923-03"))
+
+      TemporalConverter.ToLocalDate("19230302") should equal(LocalDate.parse("1923-03-02"))
+      TemporalConverter.ToLocalDate("1923.3.2") should equal(LocalDate.parse("1923-03-02"))
     }
   }
 }

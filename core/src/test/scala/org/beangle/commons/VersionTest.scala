@@ -26,7 +26,7 @@ class VersionTest extends AnyFunSpec with Matchers {
 
   describe("Version") {
     it("find bundle version") {
-      Version.findBundleVersion(classOf[Logger]) should be ("2.0.6")
+      Version.findBundleVersion(classOf[Logger]) should be ("2.0.7")
     }
   }
 }

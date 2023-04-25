@@ -18,75 +18,116 @@
 package org.beangle.commons.conversion.string
 
 import org.beangle.commons.conversion.Converter
-import org.beangle.commons.lang.Strings.isEmpty
+import org.beangle.commons.lang.Strings.{isEmpty, leftPad}
 import org.beangle.commons.lang.{Dates, Strings}
 
 import java.time.*
 import java.time.temporal.Temporal
 
 /**
-  * DateConverter
-  *
-  * @author chaostone
-  * @since 3.2.0
-  */
+ * DateConverter
+ *
+ * @author chaostone
+ * @since 3.2.0
+ */
 object TemporalConverter extends StringConverterFactory[String, Temporal] {
 
-  private object YearMonthConverter extends Converter[String, YearMonth] {
-    override def apply(value: String): YearMonth = {
-      if isEmpty(value) then null else YearMonth.parse(value)
+  object ToMonthDay extends Converter[String, MonthDay] {
+    override def apply(value: String): MonthDay = {
+      if isEmpty(value) then null else MonthDay.parse(normalizeMonthDay(value))
     }
   }
 
-  private object LocalDateConverter extends Converter[String, LocalDate] {
+  object ToYearMonth extends Converter[String, YearMonth] {
+    override def apply(value: String): YearMonth = {
+      if isEmpty(value) then null else YearMonth.parse(nomalizeYearMonth(value))
+    }
+  }
+
+  object ToLocalDate extends Converter[String, LocalDate] {
     override def apply(value: String): LocalDate = {
       if isEmpty(value) then null else LocalDate.parse(Dates.normalize(value))
     }
   }
 
-  private object LocalDateTimeConverter extends Converter[String, LocalDateTime] {
+  object ToLocalDateTime extends Converter[String, LocalDateTime] {
     override def apply(value: String): LocalDateTime = {
-      if isEmpty(value) then null else LocalDateTime.parse(normalize(value))
+      if isEmpty(value) then null else LocalDateTime.parse(normalizeDateTime(value))
     }
   }
 
-  private object ZonedDateTimeConverter extends Converter[String, ZonedDateTime] {
+  object ToZonedDateTime extends Converter[String, ZonedDateTime] {
     override def apply(value: String): ZonedDateTime = {
-      if isEmpty(value) then null else ZonedDateTime.parse(value)
+      if isEmpty(value) then null else ZonedDateTime.parse(normalizeDateTime(value))
     }
   }
 
-  private object TimeConverter extends Converter[String, LocalTime] {
+  object ToOffsetDateTime extends Converter[String, OffsetDateTime] {
+    override def apply(value: String): OffsetDateTime = {
+      if isEmpty(value) then null else OffsetDateTime.parse(normalizeDateTime(value))
+    }
+  }
+
+  object ToLocalTime extends Converter[String, LocalTime] {
     override def apply(value: String): LocalTime = {
       if isEmpty(value) then null else LocalTime.parse(value)
     }
   }
 
-  private object InstantConverter extends Converter[String, Instant] {
+  object ToInstant extends Converter[String, Instant] {
     override def apply(value: String): Instant = {
       if isEmpty(value) then return null
       if value.endsWith("Z") then Instant.parse(value)
-      else LocalDateTime.parse(normalize(value)).atZone(ZoneId.systemDefault).toInstant
+      else LocalDateTime.parse(normalizeDateTime(value)).atZone(ZoneId.systemDefault).toInstant
     }
   }
 
-  /**
-    * Change DateTime Format
-    * 1. YYYY-MM-DD HH:mm into YYYY-MM-DDTHH:mm:00
-    * 2. YYYY-MM-DD HH:mm:ss into YYYY-MM-DDTHH:mm:ss
-    */
-  def normalize(value: String): String = {
+  /** Change DateTime Format
+   *  - YYYY-MM-DD HH:mm into YYYY-MM-DDTHH:mm:00
+   *  - YYYY-MM-DD HH:mm:ss into YYYY-MM-DDTHH:mm:ss
+   */
+  def normalizeDateTime(value: String): String = {
     val v = if (value.length == 16) value + ":00" else value
     Strings.replace(v, " ", "T")
   }
 
-  register(classOf[LocalDate], LocalDateConverter)
+  /** Change YearMonth Format
+   *  - YYYY.M into YYYY-0M
+   *  - YYYY.MM into YYYY-MM
+   *  - YYYY-M into YYYY-0M
+   */
+  def nomalizeYearMonth(ym: String): String = {
+    val str = Strings.replace(ym, ".", "-")
+    if (str.contains("-")) {
+      val parts = splitDate(str)
+      parts(0) + "-" + parts(1)
+    } else {
+      val parts = splitDate(str.substring(0, 4) + "-" + str.substring(4))
+      parts(0) + "-" + parts(1)
+    }
+  }
 
-  register(classOf[LocalDateTime], LocalDateTimeConverter)
+  def normalizeMonthDay(md: String): String = {
+    var str = Strings.replace(md, ".", "-")
+    if str.startsWith("--") then str = str.substring(2)
+    val parts = splitDate(str)
+    "--" + parts(0) + "-" + parts(1)
+  }
 
-  register(classOf[LocalTime], TimeConverter)
+  private def splitDate(str: String): Array[String] = {
+    val parts = Strings.split(str, "-")
+    (0 until parts.length) foreach { i =>
+      parts(i) = leftPad(parts(i), 2, '0')
+    }
+    parts
+  }
 
-  register(classOf[Instant], InstantConverter)
-
-  register(classOf[YearMonth], YearMonthConverter)
+  register(classOf[LocalDate], ToLocalDate)
+  register(classOf[LocalDateTime], ToLocalDateTime)
+  register(classOf[ZonedDateTime], ToZonedDateTime)
+  register(classOf[OffsetDateTime], ToOffsetDateTime)
+  register(classOf[LocalTime], ToLocalTime)
+  register(classOf[Instant], ToInstant)
+  register(classOf[YearMonth], ToYearMonth)
+  register(classOf[MonthDay], ToMonthDay)
 }
