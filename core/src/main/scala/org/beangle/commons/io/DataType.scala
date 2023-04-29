@@ -20,7 +20,7 @@ package org.beangle.commons.io
 import org.beangle.commons.lang.{Numbers, Primitives}
 
 enum DataType {
-  case String, Boolean, Short, Integer, Long, Float, Double, Date, Time, DateTime, YearMonth, MonthDay, ZonedDateTime, Instant, Formula, Blank, Error
+  case String, Boolean, Short, Integer, Long, Float, Double, Date, Time, DateTime, YearMonth, MonthDay, OffsetDateTime, Instant, Formula, Blank, Error
 }
 
 object DataType {
@@ -45,8 +45,8 @@ object DataType {
     } else if (classOf[java.sql.Timestamp].isAssignableFrom(clz) || classOf[java.util.Date].isAssignableFrom(clz)
       || classOf[java.time.LocalDateTime].isAssignableFrom(clz)) {
       DateTime
-    } else if (classOf[java.time.ZonedDateTime].isAssignableFrom(clz)) {
-      ZonedDateTime
+    } else if (classOf[java.time.ZonedDateTime].isAssignableFrom(clz) || classOf[java.time.OffsetDateTime].isAssignableFrom(clz)) {
+      OffsetDateTime
     } else if (classOf[java.time.Instant].isAssignableFrom(clz)) {
       Instant
     } else if (classOf[java.time.YearMonth].isAssignableFrom(clz)) {

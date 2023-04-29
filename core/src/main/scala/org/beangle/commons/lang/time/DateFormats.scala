@@ -17,31 +17,33 @@
 
 package org.beangle.commons.lang.time
 
-import java.text._
+import java.text.*
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.{ Calendar, GregorianCalendar, SimpleTimeZone, TimeZone }
+import java.util as ju
 import java.util.regex.Pattern
-import java.{ util => ju }
+import java.util.{Calendar, GregorianCalendar, SimpleTimeZone, TimeZone}
 
 object DateFormats {
 
   /**
-   *  Preferred HTTP date format (RFC 1123).
-   *  @see https://www.ietf.org/rfc/rfc1123.txt
+   * Preferred HTTP date format (RFC 1123).
+   *
+   * @see https://www.ietf.org/rfc/rfc1123.txt
    */
   object Http {
     private val format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz")
     format.setTimeZone(TimeZone.getTimeZone("GMT"))
 
-    def format(date: ju.Date): String =
-      format.format(date)
+    def format(date: ju.Date): String = format.format(date)
 
-    def format(date: java.time.ZonedDateTime): String =
+    def format(date: java.time.ZonedDateTime): String = {
       date.format(DateTimeFormatter.RFC_1123_DATE_TIME)
+    }
 
-    def format(date: java.time.LocalDateTime): String =
+    def format(date: java.time.LocalDateTime): String = {
       date.atZone(ZoneId.of("GMT")).format(DateTimeFormatter.RFC_1123_DATE_TIME)
+    }
   }
 
   val RFC1123 = Http
@@ -60,6 +62,7 @@ object DateFormats {
    * upper or lower case 'Z' indicating UTC or a signed <code>hh:mm</code> offset.
    *
    * https://www.ietf.org/rfc/rfc3339.txt
+   *
    * @see www.hackcraft.net/web/datetime
    */
   private object Internet {
@@ -83,10 +86,10 @@ object DateFormats {
      * Our private parse utility that parses the string, clears the calendar,
      * and then sets the fields.
      *
-     * @param s  the string to parse
-     * @param cal  the calendar object to populate
+     * @param s   the string to parse
+     * @param cal the calendar object to populate
      * @throws IllegalArgumentException
-     *             if the string is not a valid RFC 3339 date/time string
+     * if the string is not a valid RFC 3339 date/time string
      */
     private def parse(s: String, cal: Calendar): Unit = {
       val m = pattern.matcher(s)
@@ -121,20 +124,21 @@ object DateFormats {
      * @param s the string to parse
      * @return the Calendar object
      * @throws IllegalArgumentException
-     *             if the string is not a valid RFC 3339 date/time string
+     * if the string is not a valid RFC 3339 date/time string
      */
     def parse(s: String): Calendar = {
       val cal = new GregorianCalendar()
       parse(s, cal);
       cal
     }
+
     /**
      * Converts the specified Calendar object to an RFC 3339 date/time string.
      * Unlike the toString methods for Date and long, no additional variant of
      * this method taking a time zone is provided since the time zone is built
      * into the Calendar object.
      *
-     * @param cal  the Calendar object
+     * @param cal the Calendar object
      * @return an RFC 3339 date/time string (does not include milliseconds)
      */
     def format(cal: Calendar): String = {
@@ -176,8 +180,8 @@ object DateFormats {
      * Converts the specified Date object to an RFC 3339 date/time string using
      * the specified time zone.
      *
-     * @param date  the Date object
-     * @param zone  the time zone to use
+     * @param date the Date object
+     * @param zone the time zone to use
      * @return an RFC 3339 date/time string (does not include milliseconds)
      */
     def format(date: ju.Date, zone: TimeZone): String = {
@@ -193,14 +197,15 @@ object DateFormats {
      */
     private val UTCZone = new SimpleTimeZone(0, "Z")
 
-    override def parse(source: String, pos: ParsePosition): ju.Date =
-      return InternetDateFormat.parse(source).getTime
+    override def parse(source: String, pos: ParsePosition): ju.Date = {
+      InternetDateFormat.parse(source).getTime
+    }
 
     override def parse(source: String): ju.Date =
       parse(source, null)
 
     override def format(date: ju.Date, toAppendTo: StringBuffer,
-      fieldPosition: FieldPosition): StringBuffer =
+                        fieldPosition: FieldPosition): StringBuffer =
       toAppendTo.append(InternetDateFormat.format(date, UTCZone))
   }
 
@@ -217,7 +222,7 @@ object DateFormats {
       parse(source, null)
 
     override def format(date: ju.Date, toAppendTo: StringBuffer,
-      fieldPosition: FieldPosition): StringBuffer =
+                        fieldPosition: FieldPosition): StringBuffer =
       toAppendTo.append(InternetDateFormat.format(date, GMTZone))
   }
 }

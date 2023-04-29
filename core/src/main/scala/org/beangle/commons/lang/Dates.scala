@@ -17,7 +17,7 @@
 
 package org.beangle.commons.lang
 
-import java.time.{ LocalDate, LocalDateTime, LocalTime }
+import java.time.{LocalDate, LocalDateTime, LocalTime}
 import java.util.Calendar
 
 /**
@@ -27,26 +27,23 @@ import java.util.Calendar
  */
 object Dates {
 
-  def today: LocalDate =
-    LocalDate.now()
+  def today: LocalDate = LocalDate.now()
 
-  def now: LocalDateTime =
-    LocalDateTime.now()
+  def now: LocalDateTime = LocalDateTime.now()
 
-  def toDate(cal: Calendar): LocalDate =
-    LocalDate.from(Calendar.getInstance.toInstant)
+  def toDate(cal: Calendar): LocalDate = LocalDate.from(Calendar.getInstance.toInstant)
 
-  def join(date: LocalDate, time: LocalTime): LocalDateTime =
-    LocalDateTime.of(date, time)
+  def join(date: LocalDate, time: LocalTime): LocalDateTime = LocalDateTime.of(date, time)
 
   /**
    * normalize.
    * change other formats to uniform one.
    * <p>
-   *    YYYYMMDD => YYYY-MM-DD
-   *    YYYY-M-D => YYYY-MM-DD
-   *    YYYY.MM.dd =>YYYY-MM-DD
+   * YYYYMMDD => YYYY-MM-DD
+   * YYYY-M-D => YYYY-MM-DD
+   * YYYY.MM.dd =>YYYY-MM-DD
    * </p>
+   *
    * @param dateStr a String object.
    * @return a String object.
    */
@@ -59,7 +56,9 @@ object Dates {
       dateBuf.toString
     } else if (dateStr.length >= 10) dateStr else if (dateStr.length < 8) throw new IllegalArgumentException() else {
       val value = dateStr.toCharArray()
-      val dayIndex = if (value(6) == '-') 7 else { if (value(7) == '-') 8 else -1 }
+      val dayIndex = if (value(6) == '-') 7 else {
+        if (value(7) == '-') 8 else -1
+      }
       if (dayIndex < 0) throw new IllegalArgumentException()
       val sb = new StringBuilder(10)
       sb.appendAll(value, 0, 5)
