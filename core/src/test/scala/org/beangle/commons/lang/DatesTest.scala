@@ -18,8 +18,7 @@
 package org.beangle.commons.lang
 
 import java.text.SimpleDateFormat
-import java.time.{ LocalDate, LocalTime }
-
+import java.time.{LocalDate, LocalDateTime, LocalTime}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 
@@ -31,16 +30,16 @@ class DatesTest extends AnyFunSpec with Matchers {
     it("join") {
       val date = LocalDate.parse("2014-09-09")
       val time = LocalTime.parse("09:09:10")
-      val datetime = Dates.join(date, time)
+      val datetime = LocalDateTime.of(date, time)
       datetime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss")) should equal("2014-09-09 09-09-10")
     }
 
     it("Normalize date string") {
-      Dates.normalize("1980-9-1") should equal("1980-09-01")
-      Dates.normalize("1980-09-1") should equal("1980-09-01")
-      Dates.normalize("1980-9-01") should equal("1980-09-01")
-      Dates.normalize("1980-09-01") should equal("1980-09-01")
-      Dates.normalize("1980.9.1") should equal("1980-09-01")
+      Dates.normalizeDate("1980-9-1") should equal("1980-09-01")
+      Dates.normalizeDate("1980-09-1") should equal("1980-09-01")
+      Dates.normalizeDate("1980-9-01") should equal("1980-09-01")
+      Dates.normalizeDate("1980-09-01") should equal("1980-09-01")
+      Dates.normalizeDate("1980.9.1") should equal("1980-09-01")
     }
   }
 }

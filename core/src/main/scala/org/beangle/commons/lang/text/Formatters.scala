@@ -57,13 +57,14 @@ object Formatters {
   private val JuDate = DateFormatter("yyyy-MM-dd")
   private val JuTime = DateFormatter("HH:mm:ss")
   private val JuDateTime = DateFormatter("yyyy-MM-dd HH:mm:ss")
-  private val JuCalenarDateTime = CalendarFormatter("yyyy-MM-dd HH:mm:ss")
+  private val JuCalendarDateTime = CalendarFormatter("yyyy-MM-dd HH:mm:ss")
   private val JtDate = TemporalFormatter("yyyy-MM-dd")
   private val JtTime = TemporalFormatter("HH:mm:ss")
   private val JtDateTime = TemporalFormatter("yyyy-MM-dd HH:mm:ss")
-  private val JtOffsetDateTime = TemporalFormatter("yyyy-MM-dd HH:MM:ss!Z")
+  private val JtOffsetDateTime = TemporalFormatter("yyyy-MM-dd HH:mm:ssXXX")
+  private val JtInstant = InstantFormatter("yyyy-MM-dd HH:mm:ssXXX")
   private val JtYearMonth = TemporalFormatter("yyyy-MM")
-  private val JtMonthDay = TemporalFormatter("--MM-dd")
+  private val JtMonthDay = TemporalFormatter("MM-dd")
 
   val Defaults: Map[Class[_], Formatter] =
     Map(classOf[jl.Boolean] -> ToStringFormatter, classOf[jl.Short] -> PlainNum,
@@ -76,18 +77,18 @@ object Formatters {
       classOf[java.sql.Timestamp] -> JuDateTime, classOf[java.time.LocalDateTime] -> JtDateTime,
       classOf[java.util.Date] -> JuDateTime,
       classOf[java.time.ZonedDateTime] -> JtOffsetDateTime, classOf[java.time.OffsetDateTime] -> JtOffsetDateTime,
-      classOf[java.time.Instant] -> JtOffsetDateTime,
+      classOf[java.time.Instant] -> JtInstant,
       classOf[java.time.YearMonth] -> JtYearMonth, classOf[java.time.MonthDay] -> JtMonthDay
     )
 
   def getDefault(clazz: Class[_]): Formatter = {
     val clz = Primitives.wrap(clazz)
-    defaults.get(clz) match {
+    Defaults.get(clz) match {
       case None =>
         if (classOf[java.sql.Date].isAssignableFrom(clz)) JuDate
         else if (classOf[java.util.Date].isAssignableFrom(clz)) JuDateTime
         else if (classOf[java.sql.Timestamp].isAssignableFrom(clz)) JuDateTime
-        else if (classOf[java.util.Calendar].isAssignableFrom(clz)) JuCalenarDateTime
+        else if (classOf[java.util.Calendar].isAssignableFrom(clz)) JuCalendarDateTime
         else if (classOf[java.sql.Time].isAssignableFrom(clz)) JuTime
         else ToStringFormatter
       case Some(p) => p

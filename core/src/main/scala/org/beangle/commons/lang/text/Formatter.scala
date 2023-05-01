@@ -19,8 +19,9 @@ package org.beangle.commons.lang.text
 
 import java.math.RoundingMode
 import java.text.{DecimalFormat, SimpleDateFormat}
+import java.time.{Instant, ZoneId, ZoneOffset}
 import java.time.format.DateTimeFormatter
-import java.time.temporal.Temporal
+import java.time.temporal.{Temporal, TemporalAccessor}
 import java.util.{Calendar, Date}
 
 trait Formatter {
@@ -62,6 +63,14 @@ class TemporalFormatter(pattern: String) extends Formatter {
   val df = DateTimeFormatter.ofPattern(pattern)
 
   override def format(obj: Any): String = {
-    df.format(obj.asInstanceOf[Temporal])
+    df.format(obj.asInstanceOf[TemporalAccessor])
   }
 }
+
+class InstantFormatter(pattern: String) extends TemporalFormatter(pattern) {
+  override def format(obj: Any): String = {
+    df.format(obj.asInstanceOf[Instant].atZone(ZoneId.systemDefault))
+  }
+}
+
+

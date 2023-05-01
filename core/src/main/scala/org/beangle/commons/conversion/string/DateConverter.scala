@@ -76,6 +76,6 @@ object DateConverter extends StringConverterFactory[String, ju.Date] {
   }
 
   private class SqlDateConverter extends Converter[String, java.sql.Date] {
-    override def apply(input: String): java.sql.Date = java.sql.Date.valueOf(Dates.normalize(input))
+    override def apply(input: String): java.sql.Date = java.sql.Date.valueOf(Dates.normalizeDate(input))
   }
 }

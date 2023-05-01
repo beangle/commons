@@ -17,12 +17,13 @@
 
 package org.beangle.commons.lang.text
 
+import org.beangle.commons.conversion.string.TemporalConverter
 import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.text.Formatters
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-import java.time.{Instant, LocalDate}
+import java.time.*
 import java.util.Date
 
 class FormatsTest extends AnyFunSpec with Matchers {
@@ -34,7 +35,7 @@ class FormatsTest extends AnyFunSpec with Matchers {
       Formatters.format(122323321L) should equal("122,323,321")
     }
     it("format java.util.*") {
-      val date = new Date(2030-1900,9-1,1,9,10,1)
+      val date = new Date(2030 - 1900, 9 - 1, 1, 9, 10, 1)
       val c = java.util.Calendar.getInstance()
       c.setTime(date)
 
@@ -47,9 +48,23 @@ class FormatsTest extends AnyFunSpec with Matchers {
     }
 
     it("format java.time.*") {
-      println(Formatters.format(Instant.now))
+      val dt = LocalDateTime.parse("2030-09-01T09:10:01")
+      val zdt = TemporalConverter.ToZonedDateTime("2030-09-01 09:10:01+08:00")
+      val odt = zdt.toOffsetDateTime
+      val i = odt.toInstant
+      val ym = YearMonth.parse("2030-09")
+      val md= MonthDay.parse("--09-01")
+
       Formatters.format(LocalDate.parse("2023-04-16")) should equal("2023-04-16")
-      Formatters.format(java.sql.Date.valueOf("2030-09-01")) should equal("2030-09-01")
+      Formatters.format(LocalTime.parse("09:10:01")) should equal("09:10:01")
+      Formatters.format(dt) should equal("2030-09-01 09:10:01")
+      Formatters.format(zdt) should equal("2030-09-01 09:10:01+08:00")
+      Formatters.format(odt) should equal("2030-09-01 09:10:01+08:00")
+      Formatters.format(i) should equal("2030-09-01 09:10:01+08:00")
+
+      Formatters.format(ym) should equal("2030-09")
+      Formatters.format(md) should equal("09-01")
+
     }
   }
 }
