@@ -64,7 +64,6 @@ class FormatsTest extends AnyFunSpec with Matchers {
 
       Formatters.format(ym) should equal("2030-09")
       Formatters.format(md) should equal("09-01")
-
     }
   }
 }

@@ -23,11 +23,17 @@ import org.beangle.commons.lang.{Options, Primitives, Strings}
 import java.math.RoundingMode
 import java.text.{DecimalFormat, SimpleDateFormat}
 import java.time.format.DateTimeFormatter
-import java.time.temporal.Temporal
+import java.time.temporal.{Temporal, TemporalAccessor}
 import java.{lang as jl, util as ju}
 
 object Formatters {
 
+  /** Format number or Dates
+   *
+   * @param obj
+   * @param pattern
+   * @return
+   */
   def format(obj: Any, pattern: String = ""): String = {
     val v = Options.unwrap(obj)
     if null == v then ""
@@ -44,10 +50,12 @@ object Formatters {
   private def buildFormatter(v: Any, pattern: String): Formatter = {
     v match {
       case n: Number => NumberFormatter(pattern)
-      case t: Temporal => TemporalFormatter(pattern)
+      case t: TemporalAccessor => TemporalFormatter(pattern)
       case d: ju.Date => DateFormatter(pattern)
       case c: ju.Calendar => DateFormatter(pattern)
-      case _ => ToStringFormatter
+      case _ =>
+        if Strings.isNotEmpty(pattern) then throw new RuntimeException(s"Cannot format ${v.getClass.getName} using $pattern")
+        else ToStringFormatter
     }
   }
 

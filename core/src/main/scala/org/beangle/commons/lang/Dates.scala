@@ -70,7 +70,8 @@ object Dates {
   def toInstant(value: String): Instant = {
     if isEmpty(value) then return null
     if value.endsWith("Z") then Instant.parse(value)
-    else OffsetDateTime.parse(Dates.normalizeDateTime(value)).toInstant
+    else if value.contains('+') then OffsetDateTime.parse(Dates.normalizeDateTime(value)).toInstant
+    else LocalDateTime.parse(Dates.normalizeDateTime(value)).atZone(ZoneId.systemDefault()).toInstant
   }
 
 
