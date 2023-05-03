@@ -17,7 +17,7 @@
 
 package org.beangle.commons.lang.reflect
 
-import org.beangle.commons.lang.{ClassLoaders, Objects, Throwables}
+import org.beangle.commons.lang.{ClassLoaders, Objects, Primitives, Throwables}
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.{Method, ParameterizedType, Type, TypeVariable}
@@ -29,9 +29,10 @@ import scala.reflect.ClassTag
 object Reflections {
 
   def newInstance[T](clazz: Class[T]): T = {
-    try
-      clazz.getDeclaredConstructor().newInstance()
-    catch {
+    try {
+      if clazz.getDeclaredConstructors.length == 0 then Primitives.default(clazz)
+      else clazz.getDeclaredConstructor().newInstance()
+    } catch {
       case e: Exception =>
         Throwables.propagate(e)
         Objects.default(clazz)
@@ -40,11 +41,11 @@ object Reflections {
 
   def newInstance[T](className: String): T = newInstance(className, null)
 
-  def newInstance[T](className: String, classLoader: ClassLoader): T ={
+  def newInstance[T](className: String, classLoader: ClassLoader): T = {
     newInstance(ClassLoaders.load(className, classLoader).asInstanceOf[Class[T]])
   }
 
-  def getInstance[T](name: String) : T = {
+  def getInstance[T](name: String): T = {
     val companionClass = if name.endsWith("$") then name else name + "$"
     ClassLoaders.get(companionClass) match {
       case Some(clazz) =>
@@ -56,8 +57,8 @@ object Reflections {
   }
 
   /**
-    * Find parameter types of given class's interface or superclass
-    */
+   * Find parameter types of given class's interface or superclass
+   */
   def getGenericParamTypes(clazz: Class[_], expected: Class[_]): collection.Map[String, Class[_]] = {
     if !expected.isAssignableFrom(clazz) then Map.empty else getGenericParamTypes(clazz, Set(expected))
   }
@@ -67,7 +68,7 @@ object Reflections {
     val types = getGenericParamTypes(clazz, collections)
     if types.isEmpty then ArraySeq(TypeInfo.AnyRefType)
     else {
-      if types.head._2==clazz then ArraySeq(TypeInfo.GeneralType(clazz))
+      if types.head._2 == clazz then ArraySeq(TypeInfo.GeneralType(clazz))
       else ArraySeq(TypeInfo.get(types.head._2, false))
     }
   }
@@ -147,8 +148,8 @@ object Reflections {
   }
 
   /**
-    * Find annotation in method declare class hierarchy
-    */
+   * Find annotation in method declare class hierarchy
+   */
   def getAnnotation[T <: Annotation](method: Method, clazz: Class[T]): Tuple2[T, Method] = {
     val ann = method.getAnnotation(clazz)
     if (null == ann) {
@@ -164,8 +165,8 @@ object Reflections {
   }
 
   /**
-    * 得到类和对应泛型的参数信息
-    */
+   * 得到类和对应泛型的参数信息
+   */
   def deduceParamTypes(clazz: Class[_], typ: java.lang.reflect.Type,
                        paramTypes: collection.Map[String, Class[_]]): collection.Map[String, Class[_]] = {
     typ match {
