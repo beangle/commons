@@ -18,6 +18,7 @@
 package org.beangle.commons.lang.reflect
 
 import org.beangle.commons.bean.Factory
+import org.beangle.commons.io.AbstractBinarySerializer
 import org.beangle.commons.jndi.JndiDataSourceFactory
 import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.annotation.description
@@ -58,6 +59,15 @@ class ReflectionsTest extends AnyFunSpec with Matchers {
     it("newInstance") {
       val a: String = Reflections.newInstance("java.lang.String")
       assert(a.length == 0)
+
+      val i: Int = Reflections.newInstance(classOf[Int])
+      assert(i == 0)
+
+      val n: Any = Reflections.newInstance(classOf[Serializable])
+      assert(n == null)
+
+      val b: Any = Reflections.newInstance(classOf[AbstractBinarySerializer])
+      assert(b == null)
     }
     it("getInstance") {
       val a = Reflections.getInstance[Co.type]("org.beangle.commons.lang.reflect.Co$")

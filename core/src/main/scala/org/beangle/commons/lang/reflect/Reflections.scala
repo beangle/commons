@@ -20,7 +20,7 @@ package org.beangle.commons.lang.reflect
 import org.beangle.commons.lang.{ClassLoaders, Objects, Primitives, Throwables}
 
 import java.lang.annotation.Annotation
-import java.lang.reflect.{Method, ParameterizedType, Type, TypeVariable}
+import java.lang.reflect.*
 import scala.collection.immutable.ArraySeq
 import scala.collection.{immutable, mutable}
 import scala.language.existentials
@@ -29,13 +29,15 @@ import scala.reflect.ClassTag
 object Reflections {
 
   def newInstance[T](clazz: Class[T]): T = {
-    try {
-      if clazz.getDeclaredConstructors.length == 0 then Primitives.default(clazz)
-      else clazz.getDeclaredConstructor().newInstance()
-    } catch {
-      case e: Exception =>
-        Throwables.propagate(e)
-        Objects.default(clazz)
+    if (clazz.isInterface || Modifier.isAbstract(clazz.getModifiers)) {
+      null.asInstanceOf[T]
+    } else {
+      try {
+        if clazz.getDeclaredConstructors.length == 0 then Primitives.default(clazz)
+        else clazz.getDeclaredConstructor().newInstance()
+      } catch {
+        case e: Exception => null.asInstanceOf[T]
+      }
     }
   }
 
