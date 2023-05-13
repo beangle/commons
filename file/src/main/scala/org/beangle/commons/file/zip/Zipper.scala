@@ -19,13 +19,22 @@ package org.beangle.commons.file.zip
 
 import org.apache.commons.compress.archivers.zip.{ZipArchiveEntry, ZipArchiveOutputStream}
 import org.apache.commons.compress.archivers.{ArchiveOutputStream, ArchiveStreamFactory}
-import org.beangle.commons.io.{Dirs, IOs}
 import org.beangle.commons.io.Files./
+import org.beangle.commons.io.{Dirs, IOs}
 
 import java.io.{File, FileInputStream, FileOutputStream}
 import java.util.zip.ZipInputStream
 
+/** Zipper Utility
+ *
+ */
 object Zipper {
+
+  /** Unzip zip file to folder
+   *
+   * @param zipFile
+   * @param folder
+   */
   def unzip(zipFile: File, folder: File): Unit = {
     val outputFolder = folder.getAbsolutePath
     val buffer = new Array[Byte](1024)
@@ -35,9 +44,8 @@ object Zipper {
     while (ze != null) {
       val fileName = ze.getName
       val newFile = new File(outputFolder + File.separator + fileName)
-      if (ze.isDirectory)
-        newFile.mkdirs()
-      else {
+      if ze.isDirectory then newFile.mkdirs()
+      else
         new File(newFile.getParent).mkdirs()
         val fos = new FileOutputStream(newFile)
         var len = zis.read(buffer)
@@ -46,30 +54,31 @@ object Zipper {
           len = zis.read(buffer)
         }
         fos.close()
-      }
       ze = zis.getNextEntry
     }
     zis.closeEntry()
     zis.close()
   }
 
+  /** Zip dir to zip
+   *
+   * @param dir
+   * @param zip
+   * @param encoding
+   */
   def zip(dir: File, zip: File, encoding: String = "utf-8"): Unit = {
     if (!dir.exists()) {
       println(s"${dir.getAbsolutePath} does not exists,zip process aborted.")
       return
     }
-    if (zip.exists()) {
-      zip.delete()
-    }
+    if zip.exists() then zip.delete()
 
     val fos = new FileOutputStream(zip)
     val zos = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP, fos)
     if (null != encoding) {
       zos.asInstanceOf[ZipArchiveOutputStream].setEncoding(encoding)
     }
-    Dirs.on(dir).ls() foreach { f =>
-      addFile(dir, new File(dir.getAbsolutePath + / + f), zos)
-    }
+    Dirs.on(dir).ls() foreach { f => addFile(dir, new File(dir.getAbsolutePath + / + f), zos) }
     zos.close()
   }
 
@@ -79,9 +88,8 @@ object Zipper {
         val currentFile = new File(dir.getAbsolutePath + / + a)
         var entryName = root.toURI.relativize(currentFile.toURI).getPath
         if (currentFile.isDirectory) {
-          if (!entryName.endsWith("/")) { //must be /,not platform dependency \
-            entryName = entryName + "/"
-          }
+          //must be /,not platform dependency \
+          if !entryName.endsWith("/") then entryName = entryName + "/"
           val entry = new ZipArchiveEntry(entryName)
           zos.putArchiveEntry(entry)
           addFile(root, currentFile, zos)

@@ -17,9 +17,9 @@
 
 package org.beangle.commons.text.seq
 
+import org.beangle.commons.lang.{Numbers, Strings}
+
 import java.util.Collections
-import org.beangle.commons.lang.Numbers
-import org.beangle.commons.lang.Strings
 
 /**
  * SeqPattern class.
@@ -42,9 +42,8 @@ class SeqPattern(val seqNumStyle: SeqNumStyle, val pattern: String) {
     var hasNext = true;
     while (hasNext && Strings.isNotEmpty(remainder)) {
       val p = Strings.substringBetween(remainder, "{", "}")
-      if (Strings.isEmpty(p))
-        hasNext = false
-      else if (Numbers.isDigits(p)) paramBuffer += Numbers.toInt(p)
+      if Strings.isEmpty(p) then hasNext = false
+      else if Numbers.isDigits(p) then paramBuffer += Numbers.toInt(p)
       remainder = Strings.substringAfter(remainder, "{" + p + "}")
     }
     val rs = paramBuffer.sorted

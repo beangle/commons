@@ -17,30 +17,28 @@
 
 package org.beangle.commons.file.text
 
-import java.io.{ File, FileInputStream, FileOutputStream }
-
-import org.beangle.commons.collection.Collections
-import org.beangle.commons.io.IOs
-import org.beangle.commons.io.Files./
-import org.beangle.commons.lang.{ Charsets, Strings }
 import org.beangle.commons.activation.MediaTypes
+import org.beangle.commons.collection.Collections
+import org.beangle.commons.io.Files./
+import org.beangle.commons.io.IOs
+import org.beangle.commons.lang.{Charsets, Strings}
+
+import java.io.{File, FileInputStream, FileOutputStream}
 
 object Formater {
   val LF = "\n"
   val CRLF = "\r\n"
 
   def format(formater: Formater, dir: File, ext: Option[String]): Unit =
-    if (dir.isFile)
+    if dir.isFile then
       ext match {
         case Some(f) =>
           if (dir.getName.endsWith(f)) formater.format(dir)
-        case None => {
+        case None =>
           val fileExt = Strings.substringAfterLast(dir.getName, ".")
-
           MediaTypes.get(fileExt) foreach { m =>
             if (m.primaryType == "text" || fileExt == "xml") formater.format(dir)
           }
-        }
       }
     else
       dir.list() foreach { childName =>
@@ -72,10 +70,12 @@ class FormaterBuilder {
     trimTrailingWhiteSpace = true
     this
   }
+
   def disableTrimTrailingWhiteSpace(): this.type = {
     trimTrailingWhiteSpace = false
     this
   }
+
   def enableTab2space(tablength: Int): this.type = {
     assert(1 <= tablength && tablength <= 8, "tablength should in [1,8]")
     this.tablength = tablength
