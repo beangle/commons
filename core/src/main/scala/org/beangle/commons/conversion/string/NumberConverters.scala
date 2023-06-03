@@ -22,8 +22,7 @@ import org.beangle.commons.lang.Numbers
 
 import java.{lang as jl, math as jm}
 
-/**
-  * Convert string to number.
+/** Convert string to number.
   *
   * @author chaostone
   * @since 3.2.0

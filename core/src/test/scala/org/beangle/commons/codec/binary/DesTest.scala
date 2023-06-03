@@ -17,8 +17,8 @@
 
 package org.beangle.commons.codec.binary
 
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 class DesTest extends AnyFunSpec with Matchers {
   describe("Des cbc") {

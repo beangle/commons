@@ -17,15 +17,14 @@
 
 package org.beangle.commons.lang
 
-import java.net.{ InetAddress, NetworkInterface, UnknownHostException }
-
+import java.net.{InetAddress, NetworkInterface, UnknownHostException}
 import scala.collection.mutable
-/**
- * System information
- *
- * @author chaostone
- * @since 3.0.2
- */
+
+/** System information
+  *
+  * @author chaostone
+  * @since 3.0.2
+  */
 object SystemInfo {
 
   private def sysProperties(): Map[String, String] = {
@@ -57,7 +56,7 @@ object SystemInfo {
 
   def tmpDir: String = System.getProperty("java.io.tmpdir")
 
-  def host = new Host()
+  def host: Host = new Host()
 
   class Host {
 
@@ -77,7 +76,7 @@ object SystemInfo {
           val networkInterface = e.nextElement()
           val name = networkInterface.getDisplayName
           val e2 = networkInterface.getInetAddresses
-          while (e2.hasMoreElements())
+          while (e2.hasMoreElements)
             addresses += (name -> (e2.nextElement().getHostAddress :: addresses.getOrElse(name, Nil)))
         }
       } catch {
@@ -89,15 +88,15 @@ object SystemInfo {
 
   class User(properties: Map[String, String]) {
 
-    val name = properties("user.name")
+    val name: String = properties("user.name")
 
-    val home = properties("user.home")
+    val home: String = properties("user.home")
 
-    val dir = properties("user.dir")
+    val dir: String = properties("user.dir")
 
-    val language = properties("user.language")
+    val language: String = properties("user.language")
 
-    val country = properties.get("user.country") match {
+    val country: String = properties.get("user.country") match {
       case Some(c) => c
       case _ => properties.get("user.region").orNull
     }

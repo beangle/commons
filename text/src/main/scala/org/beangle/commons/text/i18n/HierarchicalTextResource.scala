@@ -17,11 +17,10 @@
 
 package org.beangle.commons.text.i18n
 
-import java.{ util => ju }
-
-import scala.language.existentials
-
 import org.beangle.commons.lang.Strings.substringBeforeLast
+
+import java.util as ju
+import scala.language.existentials
 
 class HierarchicalTextResource(clazz: Class[_], locale: ju.Locale, registry: TextBundleRegistry, formater: TextFormater)
   extends DefaultTextResource(locale, registry, formater) {
@@ -31,20 +30,19 @@ class HierarchicalTextResource(clazz: Class[_], locale: ju.Locale, registry: Tex
     if (null == message) None else Some(message)
   }
 
-  /**
-   * <li>Look for message in aClass' class hierarchy.
-   * <ol>
-   * <li>Look for the message in a resource bundle for aClass</li>
-   * <li>If not found, look for the message in a resource bundle for any implemented interface</li>
-   * <li>If not found, traverse up the Class' hierarchy and repeat from the first sub-step</li>
-   * </ol>
-   * </li>
-   *
-   * @param clazz
-   * @param key
-   * @param checked
-   * @return
-   */
+  /** <li>Look for message in aClass' class hierarchy.
+    * <ol>
+    * <li>Look for the message in a resource bundle for aClass</li>
+    * <li>If not found, look for the message in a resource bundle for any implemented interface</li>
+    * <li>If not found, traverse up the Class' hierarchy and repeat from the first sub-step</li>
+    * </ol>
+    * </li>
+    *
+    * @param clazz
+    * @param key
+    * @param checked
+    * @return
+    */
   protected final def findMessage(clazz: Class[_], key: String, checked: collection.mutable.Set[String]): String = {
     val className = clazz.getName
 
@@ -71,12 +69,12 @@ class HierarchicalTextResource(clazz: Class[_], locale: ju.Locale, registry: Tex
     if (null != msg) return msg
 
     // traverse up hierarchy
-    if (clazz.isInterface()){
+    if (clazz.isInterface()) {
       for (ifc <- clazz.getInterfaces() if msg == null) {
         msg = findMessage(ifc, key, checked)
       }
       if (null != msg) return msg
-    }else {
+    } else {
       val superClass = clazz.getSuperclass()
       if (!superClass.equals(classOf[Object]) && !clazz.isPrimitive()) {
         msg = findMessage(superClass, key, checked)
@@ -108,15 +106,13 @@ class HierarchicalTextResource(clazz: Class[_], locale: ju.Locale, registry: Tex
     null
   }
 
-  /**
-   * Gets the message from the named resource bundle.
-   */
+  /** Gets the message from the named resource bundle.
+    */
   protected final def getPackageMessage(packageName: String, key: String): String =
     registry.load(locale, packageName + ".package").get(key).orNull
 
-  /**
-   * Gets the message from the named resource bundle.
-   */
+  /** Gets the message from the named resource bundle.
+    */
   protected final def getClassMessage(className: String, key: String): String =
     registry.load(locale, className).get(key).orNull
 }

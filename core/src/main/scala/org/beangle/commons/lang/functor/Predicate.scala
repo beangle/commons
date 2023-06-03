@@ -17,10 +17,9 @@
 
 package org.beangle.commons.lang.functor
 
-/**
- * Prediate
- *
- * @author chaostone
- * @since 3.2.0
- */
+/** Prediate
+  *
+  * @author chaostone
+  * @since 3.2.0
+  */
 trait Predicate[T] extends Function1[T, Boolean]

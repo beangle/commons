@@ -19,36 +19,31 @@ package org.beangle.commons.text.seq
 
 import scala.collection.mutable
 
-/**
- * MultiLevelSeqGenerator class.
- *
- * @author chaostone
- */
+/** MultiLevelSeqGenerator class.
+  *
+  * @author chaostone
+  */
 class MultiLevelSeqGenerator {
 
   private val patterns = new mutable.HashMap[Int, SeqPattern]
 
-  /**
-   * getPattern.
-   */
+  /** getPattern.
+    */
   def getPattern(level: Int): SeqPattern = patterns(level)
 
-  /**
-   * next.
-   */
+  /** next.
+    */
   def next(level: Int): String = getPattern(level).next()
 
-  /**
-   * add.
-   */
+  /** add.
+    */
   def add(style: SeqPattern): Unit = {
     style.generator = this
     patterns.put(style.level, style)
   }
 
-  /**
-   * reset.
-   */
+  /** reset.
+    */
   def reset(level: Int): Unit =
     getPattern(level).reset()
 }

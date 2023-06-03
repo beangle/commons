@@ -17,17 +17,17 @@
 
 package org.beangle.commons.text.i18n
 
+import org.beangle.commons.lang.annotation.description
+
 import java.text.MessageFormat
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
-import org.beangle.commons.lang.annotation.description
-/**
- * DefaultTextFormater with cache
- *
- * @author chaostone
- * @since 3.0.0
- */
+/** DefaultTextFormater with cache
+  *
+  * @author chaostone
+  * @since 3.0.0
+  */
 @description("缺省Text格式化")
 class DefaultTextFormater extends TextFormater {
 

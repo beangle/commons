@@ -23,10 +23,10 @@ import java.util.concurrent.TimeUnit.{MICROSECONDS, MILLISECONDS, NANOSECONDS, S
 object Stopwatch {
 
   /** Returns a string representation of the current elapsed time, choosing an
-   * appropriate unit and using the specified number of significant figures.
-   * For example, at the instant when {@code elapsedTime(NANOSECONDS)} would
-   * return {1234567}, {@code toString(4)} returns {@code "1.235 ms"}.
-   */
+    * appropriate unit and using the specified number of significant figures.
+    * For example, at the instant when {@code elapsedTime(NANOSECONDS)} would
+    * return {1234567}, {@code toString(4)} returns {@code "1.235 ms"}.
+    */
   def format(nanos: Long, significantDigits: Int): String = {
     val unit = chooseUnit(nanos)
     val value = nanos.toDouble / NANOSECONDS.convert(1, unit)
@@ -51,10 +51,10 @@ object Stopwatch {
 import org.beangle.commons.lang.time.Stopwatch.*
 
 /** Simple Stopwatch
- *
- * @author chaostone
- * @since 3.0.0
- */
+  *
+  * @author chaostone
+  * @since 3.0.0
+  */
 class Stopwatch(val ticker: Ticker = Ticker.systemTicker(), immediately: Boolean = false) {
 
   var running: Boolean = _
@@ -73,9 +73,9 @@ class Stopwatch(val ticker: Ticker = Ticker.systemTicker(), immediately: Boolean
   }
 
   /** Starts the stopwatch.
-   *
-   * @return this {@code Stopwatch} instance
-   */
+    *
+    * @return this {@code Stopwatch} instance
+    */
   def start(): Stopwatch = {
     !running
     running = true
@@ -84,10 +84,10 @@ class Stopwatch(val ticker: Ticker = Ticker.systemTicker(), immediately: Boolean
   }
 
   /** Stops the stopwatch. Future reads will return the fixed duration that had
-   * elapsed up to this point.
-   *
-   * @return this {@code Stopwatch} instance
-   */
+    * elapsed up to this point.
+    *
+    * @return this {@code Stopwatch} instance
+    */
   def stop(): Stopwatch = {
     val tick = ticker.read()
     running = false
@@ -96,10 +96,10 @@ class Stopwatch(val ticker: Ticker = Ticker.systemTicker(), immediately: Boolean
   }
 
   /** Sets the elapsed time for this stopwatch to zero,
-   * and places it in a stopped state.
-   *
-   * @return this {@code Stopwatch} instance
-   */
+    * and places it in a stopped state.
+    *
+    * @return this {@code Stopwatch} instance
+    */
   def reset(): Stopwatch = {
     elapsed = 0
     running = false
@@ -109,21 +109,21 @@ class Stopwatch(val ticker: Ticker = Ticker.systemTicker(), immediately: Boolean
   private def elapsedNanos: Long = if (running) ticker.read() - startTick + elapsed else elapsed
 
   /** Returns the current elapsed time shown on this stopwatch, expressed
-   * in the desired time unit, with any fraction rounded down.
-   * <p>
-   * Note that the overhead of measurement can be more than a microsecond, so it is generally not
-   * useful to specify {@link TimeUnit# NANOSECONDS} precision here.
-   */
+    * in the desired time unit, with any fraction rounded down.
+    * <p>
+    * Note that the overhead of measurement can be more than a microsecond, so it is generally not
+    * useful to specify {@link TimeUnit# NANOSECONDS} precision here.
+    */
   def elapsedTime(desiredUnit: TimeUnit): Long = desiredUnit.convert(elapsedNanos, NANOSECONDS)
 
   /** Returns the current elapsed time shown on this stopwatch, expressed
-   * in milliseconds, with any fraction rounded down. This is identical to
-   * {@code elapsedTime(TimeUnit.MILLISECONDS}.
-   */
+    * in milliseconds, with any fraction rounded down. This is identical to
+    * {@code elapsedTime(TimeUnit.MILLISECONDS}.
+    */
   def elapsedMillis: Long = elapsedTime(MILLISECONDS)
 
   /** Returns a string representation of the current elapsed time
-   * equivalent to {@code toString(4)} (four significant figures).
-   */
+    * equivalent to {@code toString(4)} (four significant figures).
+    */
   override def toString: String = format(elapsedNanos, 4)
 }

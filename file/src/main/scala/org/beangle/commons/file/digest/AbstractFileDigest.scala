@@ -17,10 +17,11 @@
 
 package org.beangle.commons.file.digest
 
-import java.io.{ File, FileInputStream }
-import java.security.MessageDigest
 import org.beangle.commons.codec.binary.Hex
 import org.beangle.commons.io.IOs
+
+import java.io.{File, FileInputStream}
+import java.security.MessageDigest
 
 abstract class AbstractFileDigest {
 

@@ -19,13 +19,12 @@ package org.beangle.commons.text.i18n
 
 import java.util.Locale
 
-/**
- * @author chaostone
- * @since 3.0.0
- */
+/** @author chaostone
+  * @since 3.0.0
+  */
 class DefaultTextBundle(val locale: Locale, val resource: String, texts: Map[String, String]) extends TextBundle {
 
   def get(key: String): Option[String] = texts.get(key)
 
-  override def toString(): String = resource
+  override def toString: String = resource
 }

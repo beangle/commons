@@ -17,7 +17,7 @@
 
 package org.beangle.commons.collection
 
-import java.{ util => ju }
+import java.util as ju
 
 object Wrappers {
 
@@ -26,7 +26,8 @@ object Wrappers {
 
     override def isEmpty: Boolean = underlying.isEmpty
 
-    import scala.jdk.CollectionConverters._
+    import scala.jdk.CollectionConverters.*
+
     override def iterator: Iterator[A] = underlying.iterator.asScala
 
     def apply(i: Int): A = underlying.get(i)

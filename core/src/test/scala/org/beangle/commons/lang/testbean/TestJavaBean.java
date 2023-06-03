@@ -19,7 +19,7 @@ package org.beangle.commons.lang.testbean;
 
 public class TestJavaBean {
 
-    public static final int TEST_INT=0;
+    public static final int TEST_INT = 0;
 
     private String _name;
 

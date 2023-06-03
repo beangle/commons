@@ -31,9 +31,8 @@ import scala.quoted.*
 
 object BeanInfo extends Logging {
 
-  /**
-   * Ignore java object and scala case class methods
-   */
+  /** Ignore java object and scala case class methods
+    */
   private val ignores = Set("hashCode", "toString", "wait", "clone", "equals", "getClass", "notify", "notifyAll") ++
     Set("apply", "unApply", "canEqual")
   private val caseIgnores = Set("productArity", "productIterator", "productPrefix", "productElement", "productElementName", "productElementNames", "copy")
@@ -60,10 +59,10 @@ object BeanInfo extends Logging {
     override def compare(o: MethodInfo): Int = this.method.getName.compareTo(o.method.getName)
 
     /** check this method if is perferred over given method
-     *
-     * @param o
-     * @return
-     */
+      *
+      * @param o
+      * @return
+      */
     def isOver(o: MethodInfo): Boolean = {
       if o != this && o.method.getName == this.method.getName && o.parameters.size == this.parameters.size then
       //primary type over Object,but Object.isAssignableFrom(Int) is false
@@ -77,7 +76,7 @@ object BeanInfo extends Logging {
       else false
     }
 
-    override def toString(): String = {
+    override def toString: String = {
       val params = parameters.map(x => x.name + ": " + x.typeinfo).mkString(",")
       s"def ${method.getName}(${params}): ${returnType}"
     }
@@ -91,7 +90,7 @@ object BeanInfo extends Logging {
   }
 
   case class ConstructorInfo(parameters: ArraySeq[ParamInfo]) {
-    override def toString(): String = {
+    override def toString: String = {
       val params = parameters.map { x =>
         x.name + ": " + x.typeinfo + (if x.defaultValue.nonEmpty then " = " + x.defaultValue.get.toString else "")
       }
@@ -133,7 +132,7 @@ object BeanInfo extends Logging {
     }
 
     /** Return this method is property read method (true,name) or write method(false,name) or None.
-     */
+      */
     def findAccessor(method: Method): Option[Tuple2[Boolean, String]] = {
       val name = method.getName
       val parameterTypes = method.getParameterTypes
@@ -159,10 +158,10 @@ object BeanInfo extends Logging {
     }
 
     /** filter bridge method and superclass method with same name and compatible signature
-     *
-     * @param methods
-     * @return
-     */
+      *
+      * @param methods
+      * @return
+      */
     def filterSameNames(methods: Iterable[MethodInfo]): collection.Seq[MethodInfo] = {
       if (methods.size == 1) {
         methods.toSeq
@@ -199,9 +198,9 @@ object BeanInfo extends Logging {
   import Builder.*
 
   /** ClassInfo Builder
-   *
-   * @param clazz
-   */
+    *
+    * @param clazz
+    */
   class Builder(val clazz: Class[_]) {
     private val fieldInfos = new mutable.HashMap[String, TypeInfo]
     //head will be primary constructor

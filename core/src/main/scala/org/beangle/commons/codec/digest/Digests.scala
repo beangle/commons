@@ -17,13 +17,13 @@
 
 package org.beangle.commons.codec.digest
 
+import org.beangle.commons.codec.binary.Hex
+import org.beangle.commons.lang.Charsets.*
+
 import java.security.MessageDigest
 
-import org.beangle.commons.codec.binary.Hex
-import org.beangle.commons.lang.Charsets._
-/**
- * Digest tools
- */
+/** Digest tools
+  */
 object Digests {
 
   def md5: MessageDigest = MessageDigest.getInstance("MD5")

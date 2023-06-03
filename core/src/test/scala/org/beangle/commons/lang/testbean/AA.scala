@@ -16,12 +16,13 @@
  */
 
 package org.beangle.commons.lang.testbean
+
 import org.beangle.commons.lang.reflect.BeanInfos
 
 import java.beans.{BeanInfo, Transient}
 
-trait R{
-  def title():String={
+trait R {
+  def title(): String = {
     "r title"
   }
 }
@@ -36,28 +37,29 @@ class Ap[T, V, S] extends R {
   var jobs: Map[String, S] = _
   var name2s: Set[E[T]] = _
   @Transient
-  var persisted: Boolean=_
+  var persisted: Boolean = _
 
   def findById(id: T): Option[Ap[T, V, S]] = {
     None
   }
 }
 
-class AA (myId:Long=2) extends Ap[Long, String, Long]{
-  def this(myIdString:String)={
+class AA(myId: Long = 2) extends Ap[Long, String, Long] {
+  def this(myIdString: String) = {
     this(myIdString.toLong)
   }
 
-  def processName(name:String):Unit={
+  def processName(name: String): Unit = {
     println("in process")
   }
-  def usingMyId(m:Int=2,n:String="test"):Unit={
+
+  def usingMyId(m: Int = 2, n: String = "test"): Unit = {
     println(myId)
   }
 
-  override def findById(id: Long): Option[Ap[Long,String,Long]] = {
+  override def findById(id: Long): Option[Ap[Long, String, Long]] = {
     None
   }
 }
 
-class TT(val name:String="x")
+class TT(val name: String = "x")

@@ -21,11 +21,10 @@ import org.beangle.commons.lang.{Numbers, Strings}
 
 import java.util.Collections
 
-/**
- * SeqPattern class.
- *
- * @author chaostone
- */
+/** SeqPattern class.
+  *
+  * @author chaostone
+  */
 class SeqPattern(val seqNumStyle: SeqNumStyle, val pattern: String) {
 
   var generator: MultiLevelSeqGenerator = _
@@ -51,22 +50,16 @@ class SeqPattern(val seqNumStyle: SeqNumStyle, val pattern: String) {
     rs.take(rs.size - 1).toList
   }
 
-  /**
-   * <p>
-   * curSeqText.
-   * </p>
-   *
-   * @return a String object.
-   */
+  /** curSeqText.
+    *
+    * @return a String object.
+    */
   def curSeqText(): String = seqNumStyle.build(seq)
 
-  /**
-   * <p>
-   * next.
-   * </p>
-   *
-   * @return a String object.
-   */
+  /** next.
+    *
+    * @return a String object.
+    */
   def next(): String = {
     seq += 1
     var text = pattern
@@ -75,11 +68,8 @@ class SeqPattern(val seqNumStyle: SeqNumStyle, val pattern: String) {
     Strings.replace(text, "{" + level + "}", seqNumStyle.build(seq))
   }
 
-  /**
-   * <p>
-   * reset.
-   * </p>
-   */
+  /** reset.
+    */
   def reset(): Unit =
     seq = 0
 }

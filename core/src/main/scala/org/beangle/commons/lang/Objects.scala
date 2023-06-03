@@ -24,8 +24,7 @@ object Objects {
   @inline
   def default[T](clazz: Class[T]): T = Primitives.default(clazz)
 
-  /**
-    * Compares two objects for equality, where either one or both objects may be {@code null}.
+  /** Compares two objects for equality, where either one or both objects may be {@code null}.
     *
     * <pre>
     * equals(null, null)                  = true
@@ -46,8 +45,7 @@ object Objects {
   @inline
   def equals(a: Any, b: Any): Boolean = (a == b)
 
-  /**
-    * Compares two object array for equality, where either one or both objects may be {@code null}.
+  /** Compares two object array for equality, where either one or both objects may be {@code null}.
     * Note:
     * Don't user Any[_],fo after type erase ,it has same signature with equals(a:Any,b:Any)
     */
@@ -58,11 +56,8 @@ object Objects {
     else !Range(0, a.length).exists(i => a(i) != b(i))
   }
 
-  /**
-    * <p>
-    * Gets the {@code toString} of an {@code Object} returning an empty string ("") if {@code null}
+  /** Gets the {@code toString} of an {@code Object} returning an empty string ("") if {@code null}
     * input.
-    * </p>
     *
     * <pre>
     * toString(null)         = ""
@@ -78,10 +73,7 @@ object Objects {
     */
   def toString(obj: AnyRef): String = if (null == obj) "" else obj.toString
 
-  /**
-    * <p>
-    * Returns a default value if the object passed is {@code null}.
-    * </p>
+  /** Returns a default value if the object passed is {@code null}.
     *
     * {{{
     * defaultIfNull(null, null)      = null
@@ -99,8 +91,7 @@ object Objects {
     */
   def defaultIfNull[T](value: T, defaultValue: T): T = if (value != null) value else defaultValue
 
-  /**
-    * Return a hex String form of an object's identity hash code.
+  /** Return a hex String form of an object's identity hash code.
     *
     * @param obj the object
     * @return the object's identity code in hex notation
@@ -111,8 +102,7 @@ object Objects {
 
   def compareBuilder: CompareBuilder = new CompareBuilder()
 
-  /**
-    * Creates an instance of {@link ToStringBuilder}.
+  /** Creates an instance of {@link ToStringBuilder}.
     * <p>
     * This is helpful for implementing {@code Object#toString()}. Specification by example:
     *
@@ -152,8 +142,7 @@ object Objects {
     */
   def toStringBuilder(self: AnyRef): ToStringBuilder = new ToStringBuilder(simpleName(self.getClass))
 
-  /**
-    * Creates an instance of [[ToStringBuilder]] in the same manner as
+  /** Creates an instance of [[ToStringBuilder]] in the same manner as
     * {@code toStringBuilder(AnyRef)}, but using the name of {@code clazz} instead of using
     * an instance's {@code Object#getClass()}.
     * <p>
@@ -162,8 +151,7 @@ object Objects {
     */
   def toStringBuilder(clazz: Class[_]): ToStringBuilder = new ToStringBuilder(simpleName(clazz))
 
-  /**
-    * Creates an instance of [[ToStringBuilder]] in the same manner as
+  /** Creates an instance of [[ToStringBuilder]] in the same manner as
     * {@code toStringBuilder(AnyRef)}, but using {@code className} instead
     * of using an class instance.
     *
@@ -171,8 +159,7 @@ object Objects {
     */
   def toStringBuilder(className: String): ToStringBuilder = new ToStringBuilder(className)
 
-  /**
-    * More readable than {@link Class# getSimpleName ( )}
+  /** More readable than {@link Class# getSimpleName ( )}
     */
   private def simpleName(clazz: Class[_]): String = {
     var name = clazz.getName
@@ -187,8 +174,7 @@ object Objects {
     name.substring(start + 1)
   }
 
-  /**
-    * Support class for Objects.toStringBuilder.
+  /** Support class for Objects.toStringBuilder.
     */
   class ToStringBuilder(val className: String) {
 
@@ -219,7 +205,7 @@ object Objects {
     /**
       * Returns a string in the format specified by {@link Objects# toStringBuilder ( Object )}.
       */
-    override def toString(): String = {
+    override def toString: String = {
       val builder = new StringBuilder(32).append(className).append('{')
       var needsSeparator = false
       for (valueHolder <- values if !omitnull || !valueHolder.isNull) {
@@ -233,8 +219,7 @@ object Objects {
     }
   }
 
-  /**
-    * Equals Builder
+  /** Equals Builder
     *
     * @author chaostone
     * @since 3.1.0
@@ -279,8 +264,7 @@ object Objects {
     def isEquals: Boolean = rs;
   }
 
-  /**
-    * Compare Builder
+  /** Compare Builder
     *
     * @since 4.2.4
     */

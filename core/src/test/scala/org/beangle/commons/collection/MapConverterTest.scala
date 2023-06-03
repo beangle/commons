@@ -17,10 +17,10 @@
 
 package org.beangle.commons.collection
 
-import java.time.LocalDate
-
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+
+import java.time.LocalDate
 
 class MapConverterTest extends AnyFunSpec with Matchers {
 

@@ -25,25 +25,24 @@ object WeekDay {
 
   def of(date: LocalDate): WeekDay = fromOrdinal(date.getDayOfWeek.getValue - 1)
 
-  def of(id:Int):WeekDay = fromOrdinal(id - 1)
+  def of(id: Int): WeekDay = fromOrdinal(id - 1)
 
 }
 
-/**
-  * 国家标准GBT 7408-2005
+/** 国家标准GBT 7408-2005
   */
 @beta
 enum WeekDay {
-  case Mon,Tue,Wed,Thu,Fri,Sat,Sun
+  case Mon, Tue, Wed, Thu, Fri, Sat, Sun
 
-  def id :Int = ordinal + 1
+  def id: Int = ordinal + 1
 
-  /**Java calendar Index
+  /** Java calendar Index
     */
   def index: Int =
     id match {
-     case 7 => 1
-     case _ => id + 1
+      case 7 => 1
+      case _ => id + 1
     }
 
   def previous: WeekDay = {
@@ -53,6 +52,6 @@ enum WeekDay {
 
   def next: WeekDay = {
     val nextDayId = this.id + 1
-    if (nextDayId > 7) WeekDay.Mon else WeekDay.of (this.id + 1)
+    if (nextDayId > 7) WeekDay.Mon else WeekDay.of(this.id + 1)
   }
 }

@@ -24,12 +24,11 @@ import org.beangle.commons.lang.{Dates, Strings}
 import java.time.*
 import java.time.temporal.Temporal
 
-/**
- * DateConverter
- *
- * @author chaostone
- * @since 3.2.0
- */
+/** DateConverter
+  *
+  * @author chaostone
+  * @since 3.2.0
+  */
 object TemporalConverter extends StringConverterFactory[String, Temporal] {
 
   object ToMonthDay extends Converter[String, MonthDay] {

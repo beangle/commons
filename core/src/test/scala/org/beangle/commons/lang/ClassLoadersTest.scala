@@ -20,18 +20,18 @@ package org.beangle.commons.lang
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class ClassLoadersTest  extends AnyFunSpec with Matchers {
+class ClassLoadersTest extends AnyFunSpec with Matchers {
 
   describe("ClassLoaders") {
     it("load primatives") {
-      classOf[Int] should be (ClassLoaders.load("Int"))
-      classOf[Int] should be (ClassLoaders.load("int"))
-      classOf[Unit] should be (ClassLoaders.load("void"))
-      classOf[Unit] should be (ClassLoaders.load("Unit"))
-      classOf[Integer] should be (ClassLoaders.load("Integer"))
+      classOf[Int] should be(ClassLoaders.load("Int"))
+      classOf[Int] should be(ClassLoaders.load("int"))
+      classOf[Unit] should be(ClassLoaders.load("void"))
+      classOf[Unit] should be(ClassLoaders.load("Unit"))
+      classOf[Integer] should be(ClassLoaders.load("Integer"))
 
-      ClassLoaders.getResource("/logback.xml").nonEmpty should be (true)
-      ClassLoaders.getResource("logback.xml").nonEmpty should be (true)
+      ClassLoaders.getResource("/logback.xml").nonEmpty should be(true)
+      ClassLoaders.getResource("logback.xml").nonEmpty should be(true)
     }
   }
 

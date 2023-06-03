@@ -18,12 +18,12 @@
 package org.beangle.commons.lang.reflect
 
 import org.beangle.commons.bean.Factory
+import org.beangle.commons.collection.Properties
 import org.beangle.commons.jndi.JndiDataSourceFactory
 import org.beangle.commons.lang.annotation.description
-import org.beangle.commons.lang.testbean.{ Book, Entity, TestChild2Bean,TestEnum }
+import org.beangle.commons.lang.testbean.{Book, Entity, TestChild2Bean, TestEnum}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.beangle.commons.collection.Properties
 
 import javax.sql.DataSource
 import scala.collection.mutable
@@ -35,17 +35,17 @@ class TypeInfoTest extends AnyFunSpec with Matchers {
       assert("scala.collection.mutable.Buffer[String]" == TypeInfo.get(classOf[mutable.Buffer[_]], classOf[String]).name)
       assert("scala.collection.mutable.HashMap[String,Int]" == TypeInfo.get(classOf[mutable.HashMap[_, _]], classOf[String], classOf[Int]).name)
 
-      assert("Array[Int]"== TypeInfo.get(classOf[Array[Int]],false).name)
-      assert("Option[Array[Int]]"== TypeInfo.get(classOf[Array[Int]],true).name)
+      assert("Array[Int]" == TypeInfo.get(classOf[Array[Int]], false).name)
+      assert("Option[Array[Int]]" == TypeInfo.get(classOf[Array[Int]], true).name)
       assert("org.beangle.commons.collection.Properties[String,Object]" == TypeInfo.get(classOf[Properties]).name)
 
       assert("org.beangle.commons.lang.reflect.Props[java.lang.Long,String]" == TypeInfo.get(classOf[Props]).name)
       assert("org.beangle.commons.lang.reflect.D[String]" == TypeInfo.get(classOf[D]).name)
     }
-    it("convert"){
-      val ti =  TypeInfo.convert(Array(classOf[Map[_,_]],Array(Array(classOf[List[_]],Array(classOf[Int])),classOf[String])))
+    it("convert") {
+      val ti = TypeInfo.convert(Array(classOf[Map[_, _]], Array(Array(classOf[List[_]], Array(classOf[Int])), classOf[String])))
       assert("Map[List[Int],String]" == ti.toString)
-      val t2 =  TypeInfo.convert(Array(classOf[Map[_,_]],Array(classOf[Int],classOf[String])))
+      val t2 = TypeInfo.convert(Array(classOf[Map[_, _]], Array(classOf[Int], classOf[String])))
       assert("Map[Int,String]" == t2.toString)
 
     }

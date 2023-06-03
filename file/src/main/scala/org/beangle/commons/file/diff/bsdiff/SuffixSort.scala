@@ -195,7 +195,7 @@ object SuffixSort {
   }
 
   def search(I: Array[Int], oldBytes: Array[Byte], oldOffset: Int, newBytes: Array[Byte], newOffset: Int,
-    start: Int, end: Int): SearchResult =
+             start: Int, end: Int): SearchResult =
 
     if (end - start < 2) {
       val x = matchlen(oldBytes, I(start), newBytes, newOffset)
@@ -221,7 +221,7 @@ object SuffixSort {
   }
 
   private def compareBytes(bytesA: Array[Byte], offsetA: Int,
-    bytesB: Array[Byte], offsetB: Int): Int = {
+                           bytesB: Array[Byte], offsetB: Int): Int = {
     val length = Math.min(bytesA.length - offsetA, bytesB.length - offsetB)
     var i, valA, valB = 0
     while (i < length && valA == valB) {

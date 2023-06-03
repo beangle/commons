@@ -17,20 +17,20 @@
 
 package org.beangle.commons.jndi
 
-import java.{ util => ju }
-
-import javax.naming.{ InitialContext, NameNotFoundException }
-import javax.sql.DataSource
 import org.beangle.commons.bean.Factory
 import org.beangle.commons.lang.annotation.description
+
+import java.util as ju
+import javax.naming.{InitialContext, NameNotFoundException}
+import javax.sql.DataSource
 
 object JndiObjectFactory {
   /** JNDI prefix used in a J2EE container */
   val containerPrefix = "java:comp/env/"
 }
-/**
- * JNDI Object Factory
- */
+
+/** JNDI Object Factory
+  */
 class JndiObjectFactory[T](val jndiName: String) extends Factory[T] {
 
   var resourceRef = true
@@ -40,17 +40,16 @@ class JndiObjectFactory[T](val jndiName: String) extends Factory[T] {
   override def result: T = {
     val ctx = new InitialContext
     val located = ctx.lookup(convertJndiName(jndiName))
-    if (null == located)
+    if null == located then
       throw new NameNotFoundException(s"JNDI object with [$jndiName] not found: JNDI implementation returned null")
     located.asInstanceOf[T]
   }
 
-  /**
-   * Convert the given JNDI name into the actual JNDI name to use.
-   * applies the "java:comp/env/" prefix if  resourceRef  is true
-   */
+  /** Convert the given JNDI name into the actual JNDI name to use.
+    * applies the "java:comp/env/" prefix if  resourceRef  is true
+    */
   protected def convertJndiName(jndiName: String): String = {
-    import JndiObjectFactory._
+    import JndiObjectFactory.*
     if (resourceRef && !jndiName.startsWith(containerPrefix) && jndiName.indexOf(':') == -1) containerPrefix + jndiName
     else jndiName
   }

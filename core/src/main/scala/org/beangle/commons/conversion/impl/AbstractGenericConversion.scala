@@ -17,28 +17,27 @@
 
 package org.beangle.commons.conversion.impl
 
-import java.lang.reflect.{ Array, Modifier }
+import org.beangle.commons.conversion.{Conversion, Converter, ConverterRegistry}
+import org.beangle.commons.lang.{Objects, Primitives}
 
-import org.beangle.commons.conversion.{ Conversion, Converter, ConverterRegistry }
-import org.beangle.commons.lang.{ Objects, Primitives }
-
-import scala.collection.{ concurrent, mutable }
+import java.lang.reflect.{Array, Modifier}
+import scala.collection.{concurrent, mutable}
 import scala.language.existentials
-/**
- * Generic Conversion Super class
- * It provider converter registry and converter search machanism.
- *
- * @author chaostone
- * @since 3.2.0
- */
+
+/** Generic Conversion Super class
+  * It provider converter registry and converter search machanism.
+  *
+  * @author chaostone
+  * @since 3.2.0
+  */
 abstract class AbstractGenericConversion extends Conversion with ConverterRegistry {
 
   val converters = new mutable.HashMap[Class[_], Map[Class[_], GenericConverter]]
 
   val cache = new concurrent.TrieMap[Tuple2[Class[_], Class[_]], GenericConverter]
-  /**
-   * Convert to target type.
-   */
+
+  /** Convert to target type.
+    */
   override def convert[T](source: Any, target: Class[T]): T = {
     if (null == source) return Objects.default(target)
     val sourceClazz = Primitives.wrap(source.getClass)
@@ -51,14 +50,12 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
       val targetObjClazz = targetClazz.getComponentType
       val targetObjType = Primitives.wrap(targetObjClazz)
       val converter = findConverter(sourceObjType, targetObjType)
-      if (null == converter)
-        Array.newInstance(targetObjClazz, 0).asInstanceOf[T]
-      else {
+      if null == converter then Array.newInstance(targetObjClazz, 0).asInstanceOf[T]
+      else
         val length = Array.getLength(source)
         val result = Array.newInstance(targetObjClazz, length).asInstanceOf[T]
         for (i <- 0 until length) Array.set(result, i, converter.convert(Array.get(source, i), targetObjType))
         result
-      }
     } else {
       val converter = findConverter(sourceClazz, targetClazz)
       val rs = converter.convert(source, targetClazz).asInstanceOf[T]
@@ -68,11 +65,10 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
 
   override def addConverter(converter: Converter[_, _]): Unit = {
     var key: (Class[_], Class[_]) = null
-    val defaultKey = (classOf[Any], classOf[Any])
     for (m <- converter.getClass.getMethods if m.getName == "apply" && Modifier.isPublic(m.getModifiers) && !m.isBridge())
       key = (m.getParameterTypes()(0), m.getReturnType)
     if (null == key) throw new IllegalArgumentException("Cannot find convert type pair " + converter.getClass)
-    val sourceType = key._1.asInstanceOf[Class[_]]
+    val sourceType = key._1
     val adapter = new ConverterAdapter(converter, key)
     converters.get(sourceType) match {
       case Some(existed) => converters += (sourceType -> (existed + (key._2 -> adapter)))
@@ -83,7 +79,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
 
   protected def addConverter(converter: GenericConverter): Unit = {
     val key = converter.getTypeinfo
-    val sourceType = key._1.asInstanceOf[Class[_]]
+    val sourceType = key._1
     converters.get(sourceType) match {
       case Some(existed) =>
         converters += (key._1 -> (existed + (key._2 -> converter)))
@@ -97,7 +93,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
     var converter = cache.get(key).orNull
     if (null == converter) converter = searchConverter(sourceType, targetType)
     if (null == converter) converter = NoneConverter
-    else cache.put(key.asInstanceOf[Tuple2[Class[_], Class[_]]], converter)
+    else cache.put(key, converter)
     converter
   }
 
@@ -113,7 +109,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
       if (superClass != null && superClass != classOf[AnyRef]) classQueue += superClass
       for (interfaceType <- currentClass.getInterfaces) addInterfaces(interfaceType, interfaces)
     }
-    var iter = interfaces.iterator
+    val iter = interfaces.iterator
     while (iter.hasNext) {
       val interfaceType = iter.next()
       val converter = getConverter(targetType, getConverters(interfaceType))

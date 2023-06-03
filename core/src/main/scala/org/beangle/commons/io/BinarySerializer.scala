@@ -17,13 +17,12 @@
 
 package org.beangle.commons.io
 
-import java.io._
+import org.beangle.commons.activation.{MediaType, MediaTypes}
 
-import org.beangle.commons.activation.{ MediaType, MediaTypes }
+import java.io.*
 
-/**
- * @author chaostone
- */
+/** @author chaostone
+  */
 trait BinarySerializer extends Serializer with Deserializer {
 
   override def mediaTypes: Seq[MediaType] =

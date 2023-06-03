@@ -19,11 +19,10 @@ package org.beangle.commons.config
 
 import java.net.URL
 
-/**
- * ConfigResource class.
- *
- * @author chaostone
- */
+/** ConfigResource class.
+  *
+  * @author chaostone
+  */
 class Resources(val global: Option[URL], val locals: List[URL], val user: Option[URL]) {
 
   def paths: List[URL] = {
@@ -34,8 +33,7 @@ class Resources(val global: Option[URL], val locals: List[URL], val user: Option
     all.toList
   }
 
-  def isEmpty: Boolean =
-    global.isEmpty && user.isEmpty && locals.isEmpty
+  def isEmpty: Boolean = global.isEmpty && user.isEmpty && locals.isEmpty
 
-  override def toString(): String = "{global:" + global + "  locals:" + locals + "  user:" + user + "}"
+  override def toString: String = "{global:" + global + "  locals:" + locals + "  user:" + user + "}"
 }

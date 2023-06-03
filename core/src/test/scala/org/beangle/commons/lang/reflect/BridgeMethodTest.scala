@@ -18,9 +18,8 @@
 package org.beangle.commons.lang.reflect
 
 import org.beangle.commons.lang.testbean.Dog
-
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 class BridgeMethodTest extends AnyFunSpec with Matchers {
 

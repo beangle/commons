@@ -17,20 +17,20 @@
 
 package org.beangle.commons.text.i18n
 
-import java.util.Locale
 import org.beangle.commons.lang.annotation.spi
-/**
- * TextResource provider
- *
- * @author chaostone
- */
+
+import java.util.Locale
+
+/** TextResource provider
+  *
+  * @author chaostone
+  */
 @spi
 trait TextResourceProvider {
 
-  /**
-   * Return text resource;
-   *
-   * @param locale default could be null.
-   */
+  /** Return text resource;
+    *
+    * @param locale default could be null.
+    */
   def getTextResource(locale: Locale): TextResource
 }

@@ -17,14 +17,14 @@
 
 package org.beangle.commons.lang.functor
 
+import org.beangle.commons.lang.Strings.*
+
 import java.util.Collection
 
-import org.beangle.commons.lang.Strings._
-/**
- * 有效整型判断谓词
- *
- * @author chaostone
- */
+/** 有效整型判断谓词
+  *
+  * @author chaostone
+  */
 class InRange(val floor: Int, val upper: Int) extends Predicate[Number] {
 
   def apply(value: Number): Boolean =

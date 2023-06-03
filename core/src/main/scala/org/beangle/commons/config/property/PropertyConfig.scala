@@ -17,7 +17,7 @@
 
 package org.beangle.commons.config.property
 
-import org.beangle.commons.config.property.PropertyConfig._
+import org.beangle.commons.config.property.PropertyConfig.*
 
 object PropertyConfig {
 
@@ -27,80 +27,55 @@ object PropertyConfig {
   }
 }
 
-/**
- * 系统属性
- *
- * @author chaostone
- */
+/** 系统属性
+  *
+  * @author chaostone
+  */
 trait PropertyConfig {
 
-  /**
-   * get.
-   */
+  /** get.
+    */
   def get(name: String): Option[Any]
 
-  /**
-   * set.
-   *
-   */
+  /** set.
+    *
+    */
   def set(name: String, value: Any): Unit
 
-  /**
-   * get.
-   */
+  /** get.
+    */
   def get[T](clazz: Class[T], name: String): Option[T]
 
-  /**
-   * <p>
-   * add.
-   * </p>
-   *
-   */
+  /** add.
+    */
   def add(properties: collection.Map[String, Any]): Unit
 
-  /**
-   * names.
-   */
+  /** names.
+    */
   def names: Set[String]
 
-  /**
-   * <p>
-   * addConfigListener.
-   * </p>
-   *
-   * @param listener a {@link org.beangle.commons.config.property.PropertyConfigListener} object.
-   */
+  /** addConfigListener.
+    * @param listener a {@link org.beangle.commons.config.property.PropertyConfigListener} object.
+    */
   def addListener(listener: PropertyConfigListener): Unit
 
-  /**
-   * <p>
-   * removeConfigListener.
-   * </p>
-   *
-   * @param listener a {@link org.beangle.commons.config.property.PropertyConfigListener} object.
-   */
+  /** RemoveConfigListener.
+    *
+    * @param listener a {@link org.beangle.commons.config.property.PropertyConfigListener} object.
+    */
   def removeListener(listener: PropertyConfigListener): Unit
 
-  /**
-   * <p>
-   * multicast.
-   * </p>
-   */
+  /** Multicast.
+    */
   def multicast(): Unit
 
-  /**
-   * <p>
-   * reload.
-   * </p>
-   */
+  /** Reload.
+    */
   def reload(): Unit
 
-  /**
-   * <p>
-   * addConfigProvider.
-   * </p>
-   *
-   * @param provider a {@link org.beangle.commons.config.property.PropertyConfig.Provider} object.
-   */
+  /** AddConfigProvider.
+    *
+    * @param provider a {@link org.beangle.commons.config.property.PropertyConfig.Provider} object.
+    */
   def addProvider(provider: Provider): Unit
 }

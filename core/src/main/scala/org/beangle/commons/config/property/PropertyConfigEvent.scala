@@ -18,11 +18,11 @@
 package org.beangle.commons.config.property
 
 import java.util.EventObject
-/**
- * PropertyConfigEvent class.
- *
- * @author chaostone
- */
+
+/** PropertyConfigEvent class.
+  *
+  * @author chaostone
+  */
 @SerialVersionUID(6125300646790912291L)
 class PropertyConfigEvent(config: PropertyConfig) extends EventObject(config) {
 

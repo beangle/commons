@@ -17,26 +17,25 @@
 
 package org.beangle.commons.text.inflector.rule
 
-import java.util.regex.Pattern
 import org.beangle.commons.text.inflector.Rule
 
-/**
- * SuffixInflectionRule class.
- *
- * @author chaostone
- */
+import java.util.regex.Pattern
+
+/** SuffixInflectionRule class.
+  *
+  * @author chaostone
+  */
 class SuffixInflectionRule(suffix: String, val singularSuffix: String, val pluralSuffix: String)
   extends Rule {
 
   private val regex = Pattern.compile("(?i).*" + suffix.substring(1) + "$")
 
-  /**
-   * Construct a rule for words with suffix <code>singularSuffix</code> which becomes
-   * <code>pluralSuffix</code> in the plural.
-   *
-   * @param singularSuffix the singular suffix, starting with a "-" character
-   * @param pluralSuffix the plural suffix, starting with a "-" character
-   */
+  /** Construct a rule for words with suffix <code>singularSuffix</code> which becomes
+    * <code>pluralSuffix</code> in the plural.
+    *
+    * @param singularSuffix the singular suffix, starting with a "-" character
+    * @param pluralSuffix   the plural suffix, starting with a "-" character
+    */
   def this(singularSuffix: String, pluralSuffix: String) = {
     this(singularSuffix, singularSuffix, pluralSuffix)
   }

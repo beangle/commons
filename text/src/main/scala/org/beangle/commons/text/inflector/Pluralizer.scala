@@ -17,20 +17,17 @@
 
 package org.beangle.commons.text.inflector
 
-/**
- * <code>Pluralizer</code> converts singular word forms to their plural forms.
- *
- * @author chaostone
- */
+/** <code>Pluralizer</code> converts singular word forms to their plural forms.
+  *
+  * @author chaostone
+  */
 trait Pluralizer {
 
-  /**
-   * pluralize.
-   */
+  /** pluralize.
+    */
   def pluralize(word: String): String
 
-  /**
-   * pluralize.
-   */
+  /** pluralize.
+    */
   def pluralize(word: String, number: Int): String
 }

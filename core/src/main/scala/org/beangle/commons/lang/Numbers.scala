@@ -22,11 +22,8 @@ import org.beangle.commons.lang.Strings.isEmpty
 import java.{lang as jl, math as jm}
 
 object Numbers {
-  /**
-    * <p>
-    * Convert a <code>String</code> to an <code>int</code>, returning a default value if the
+  /** Convert a <code>String</code> to an <code>int</code>, returning a default value if the
     * conversion fails.
-    * </p>
     * <p>
     * If the string is <code>null</code>, the default value is returned.
     * </p>
@@ -48,8 +45,7 @@ object Numbers {
     catch case nfe: NumberFormatException => defaultValue
   }
 
-  /**
-    * transform to int.
+  /** transform to int.
     *
     * @param ids an array of String objects.
     * @return an array of  int objects.
@@ -70,8 +66,7 @@ object Numbers {
     catch case nfe: NumberFormatException => defaultValue
   }
 
-  /**
-    * transformToLong.
+  /** transformToLong.
     *
     * @param ids an array of String objects.
     * @return an array of Long objects.
@@ -138,10 +133,7 @@ object Numbers {
     catch case nfe: NumberFormatException => defaultValue
   }
 
-  /**
-    * <p>
-    * Checks whether the <code>String</code> contains only digit characters.
-    * </p>
+  /** Checks whether the <code>String</code> contains only digit characters.
     * <p>
     * <code>Null</code> and empty String will return <code>false</code>.
     * </p>

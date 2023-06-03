@@ -16,14 +16,14 @@
  */
 
 package org.beangle.commons.lang.time
+
 import scala.collection.mutable
 
-/**
- * Timer Node in stack
- *
- * @author chaostone
- * @since 3.0.0
- */
+/** Timer Node in stack
+  *
+  * @author chaostone
+  * @since 3.0.0
+  */
 @SerialVersionUID(-6180672043920208784L)
 class TimerNode(val resource: String, var startTime: Long) extends Serializable {
 
@@ -39,9 +39,8 @@ class TimerNode(val resource: String, var startTime: Long) extends Serializable 
     this.totalTime
   }
 
-  /**
-   * Get a formatted string representing all the methods that took longer than a specified time.
-   */
+  /** Get a formatted string representing all the methods that took longer than a specified time.
+    */
   def getPrintable: String = getPrintable("")
 
   protected def getPrintable(indent: String): String = {

@@ -19,9 +19,8 @@ package org.beangle.commons.collection
 
 import scala.reflect.ClassTag
 
-/**
- * Array based Stack
- */
+/** Array based Stack
+  */
 final class FastStack[T: ClassTag](initialCapacity: Int = 16) {
 
   private var stack: Array[T] = new Array[T](initialCapacity)
@@ -70,7 +69,7 @@ final class FastStack[T: ClassTag](initialCapacity: Int = 16) {
     result
   }
 
-  override def toString(): String = {
+  override def toString: String = {
     val result = new StringBuffer("[")
     (0 until pointer) foreach { i =>
       if (i > 0) result.append(", ")

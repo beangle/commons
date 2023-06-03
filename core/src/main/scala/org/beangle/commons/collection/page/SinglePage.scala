@@ -17,21 +17,19 @@
 
 package org.beangle.commons.collection.page
 
-/**
- * 分页对象
- *
- * @author chaostone
- */
+/** 分页对象
+  *
+  * @author chaostone
+  */
 class SinglePage[E](val pageIndex: Int, val pageSize: Int, val totalItems: Int, val items: collection.Seq[E]) extends Page[E] {
 
-  def totalPages: Int =
-    if (totalItems < pageSize)
-      1
-    else {
+  def totalPages: Int = {
+    if totalItems < pageSize then 1
+    else
       val remainder = totalItems % pageSize
       val quotient = totalItems / pageSize
-      if ((0 == remainder)) quotient else (quotient + 1)
-    }
+      if (0 == remainder) quotient else quotient + 1
+  }
 
   def hasNext: Boolean = totalPages > pageIndex
 
@@ -43,8 +41,7 @@ class SinglePage[E](val pageIndex: Int, val pageSize: Int, val totalItems: Int, 
 
   def moveTo(pageIndex: Int): Page[E] = this
 
-  def apply(index: Int): E =
-    items(index)
+  def apply(index: Int): E = items(index)
 
   def length: Int = items.size
 

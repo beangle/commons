@@ -20,8 +20,7 @@ package org.beangle.commons.conversion.string
 import org.beangle.commons.conversion.impl.ConverterFactory
 import org.beangle.commons.lang.{Objects, Strings}
 
-/**
-  * String to Object
+/** String to Object
   *
   * @author chaostone
   * @since 3.2.0

@@ -26,15 +26,15 @@ import java.io.{File, FileInputStream, FileOutputStream}
 import java.util.zip.ZipInputStream
 
 /** Zipper Utility
- *
- */
+  *
+  */
 object Zipper {
 
   /** Unzip zip file to folder
-   *
-   * @param zipFile
-   * @param folder
-   */
+    *
+    * @param zipFile
+    * @param folder
+    */
   def unzip(zipFile: File, folder: File): Unit = {
     val outputFolder = folder.getAbsolutePath
     val buffer = new Array[Byte](1024)
@@ -61,11 +61,11 @@ object Zipper {
   }
 
   /** Zip dir to zip
-   *
-   * @param dir
-   * @param zip
-   * @param encoding
-   */
+    *
+    * @param dir
+    * @param zip
+    * @param encoding
+    */
   def zip(dir: File, zip: File, encoding: String = "utf-8"): Unit = {
     if (!dir.exists()) {
       println(s"${dir.getAbsolutePath} does not exists,zip process aborted.")

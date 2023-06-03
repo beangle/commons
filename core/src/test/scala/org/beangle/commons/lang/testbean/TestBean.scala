@@ -76,9 +76,8 @@ class Dog extends Animal {
 trait Entity[ID] {
   def id: ID
 
-  /**
-   * Return true if persisted
-   */
+  /** Return true if persisted
+    */
   @Transient
   def persisted: Boolean = id != null
 

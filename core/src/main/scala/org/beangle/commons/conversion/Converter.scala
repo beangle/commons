@@ -17,11 +17,10 @@
 
 package org.beangle.commons.conversion
 
-/**
- * Convert source to target
- *
- * @author chaostone
- * @param <S> source
- * @param <T> target
- */
-trait Converter[S, +T] extends ((S) => T)
+/** Convert source to target
+  *
+  * @author chaostone
+  * @param < S> source
+  * @param < T> target
+  */
+trait Converter[S, +T] extends (S => T)

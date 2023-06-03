@@ -21,44 +21,35 @@ import org.beangle.commons.lang.Strings
 
 import scala.collection.mutable.ListBuffer
 
-/**
- * 排序
- *
- * @author chaostone
- */
+/** 排序
+  *
+  * @author chaostone
+  */
 object Order {
-  /**
-   * Constant <code>OrderStr="orderBy"</code>
-   */
+  /** Constant <code>OrderStr="orderBy"</code>
+    */
   val OrderStr = "orderBy"
 
   def apply(property: String) = new Order(property, true)
 
   def apply(property: String, ascending: Boolean) = new Order(property, ascending)
 
-  /**
-   * <p>
-   * asc.
-   * </p>
-   *
-   * @param property a String object.
-   * @return a {@link org.beangle.commons.collection.Order} object.
-   */
+  /** Asc.
+    *
+    * @param property a String object.
+    * @return a {@link org.beangle.commons.collection.Order} object.
+    */
   def asc(property: String): Order = new Order(property, true)
 
-  /**
-   * <p>
-   * desc.
-   * </p>
-   *
-   * @param property a String object.
-   * @return a {@link org.beangle.commons.collection.Order} object.
-   */
+  /** Desc.
+    *
+    * @param property a String object.
+    * @return a {@link org.beangle.commons.collection.Order} object.
+    */
   def desc(property: String): Order = new Order(property, false)
 
-  /**
-   * toSortString.
-   */
+  /** toSortString.
+    */
   def toSortString(orders: List[Order]): String = {
     if (null == orders || orders.isEmpty) return ""
     val buf = new StringBuilder("order by ")
@@ -68,10 +59,8 @@ object Order {
     buf.substring(0, buf.length - 1).toString
   }
 
-  /**
-   * <p>
-   * parse.
-   */
+  /** parse order string.
+    */
   def parse(orderString: String): List[Order] =
     if (Strings.isBlank(orderString)) {
       List.empty
@@ -112,32 +101,25 @@ object Order {
   }
 }
 
-/**
- * 排序
- *
- * @author chaostone
- */
+/** 排序
+  *
+  * @author chaostone
+  */
 class Order(val property: String, val ascending: Boolean, val lowerCase: Boolean = false) {
 
-  /**
-   * <p>
-   * Constructor for Order.
-   * </p>
-   *
-   * @param property a String object.
-   */
+  /** Constructor for Order.
+    *
+    * @param property a String object.
+    */
   def this(property: String) = {
     this(Order.analysis(property)._1, Order.analysis(property)._2)
   }
 
-  /**
-   * <p>
-   * toString.
-   * </p>
-   *
-   * @return a String object.
-   */
-  override def toString(): String =
+  /** ToString.
+    *
+    * @return a String object.
+    */
+  override def toString: String =
     if (lowerCase) "lower(" + property + ") " + (if (ascending) "asc" else "desc")
     else property + " " + (if (ascending) "asc" else "desc")
 }

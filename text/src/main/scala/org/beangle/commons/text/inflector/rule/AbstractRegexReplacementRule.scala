@@ -17,21 +17,21 @@
 
 package org.beangle.commons.text.inflector.rule
 
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 import org.beangle.commons.text.inflector.Rule
+
+import java.util.regex.{Matcher, Pattern}
 
 object AbstractRegexReplacementRule {
 
-  /**
-   * <p>
-   * Form the disjunction of the given regular expression patterns. For example if patterns contains
-   * "a" and "b" then the disjunction is "(a|b)", that is, "a or b".
-   * </p>
-   *
-   * @param patterns  an array of regular expression patterns
-   * @return a pattern that matches if any of the input patterns match
-   */
+  /** Disjunction
+    * <p>
+    * Form the disjunction of the given regular expression patterns. For example if patterns contains
+    * "a" and "b" then the disjunction is "(a|b)", that is, "a or b".
+    * </p>
+    *
+    * @param patterns an array of regular expression patterns
+    * @return a pattern that matches if any of the input patterns match
+    */
   def disjunction(patterns: Array[String]): String = {
     var regex = ""
     for (i <- 0 until patterns.length) {
@@ -42,25 +42,25 @@ object AbstractRegexReplacementRule {
     "(?:" + regex + ")"
   }
 
-  /**
-   * <p>
-   * Form the disjunction of the given regular expression patterns. For example if patterns contains
-   * "a" and "b" then the disjunction is "(a|b)", that is, "a or b".
-   * </p>
-   *
-   * @param patterns  a set of regular expression patterns
-   * @return a pattern that matches if any of the input patterns match
-   */
+  /** disjunction
+    * <p>
+    * Form the disjunction of the given regular expression patterns. For example if patterns contains
+    * "a" and "b" then the disjunction is "(a|b)", that is, "a or b".
+    * </p>
+    *
+    * @param patterns a set of regular expression patterns
+    * @return a pattern that matches if any of the input patterns match
+    */
   def disjunction(patterns: Set[String]): String =
     disjunction(patterns.toArray)
 }
 
-import AbstractRegexReplacementRule._
-/**
- * Abstract AbstractRegexReplacementRule class.
- *
- * @author chaostone
- */
+import org.beangle.commons.text.inflector.rule.AbstractRegexReplacementRule.*
+
+/** Abstract AbstractRegexReplacementRule class.
+  *
+  * @author chaostone
+  */
 abstract class AbstractRegexReplacementRule(regex: String) extends Rule {
 
   private val pattern = Pattern.compile(regex)
@@ -74,8 +74,7 @@ abstract class AbstractRegexReplacementRule(regex: String) extends Rule {
     replace(matcher)
   }
 
-  /**
-   * Use the state in the given {@link Matcher} to perform a replacement.
-   */
+  /** Use the state in the given {@link Matcher} to perform a replacement.
+    */
   def replace(matcher: Matcher): String
 }

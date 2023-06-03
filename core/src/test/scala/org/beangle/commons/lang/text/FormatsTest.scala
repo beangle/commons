@@ -53,7 +53,7 @@ class FormatsTest extends AnyFunSpec with Matchers {
       val odt = zdt.toOffsetDateTime
       val i = odt.toInstant
       val ym = YearMonth.parse("2030-09")
-      val md= MonthDay.parse("--09-01")
+      val md = MonthDay.parse("--09-01")
 
       Formatters.format(LocalDate.parse("2023-04-16")) should equal("2023-04-16")
       Formatters.format(LocalTime.parse("09:10:01")) should equal("09:10:01")

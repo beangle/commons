@@ -17,8 +17,8 @@
 
 package org.beangle.commons.file.digest
 
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 import java.io.File
 

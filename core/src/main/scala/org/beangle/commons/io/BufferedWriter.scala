@@ -30,7 +30,7 @@ class BufferedWriter(out: Writer, bufferSize: Int = 8192) extends Writer {
   }
 
   private def flushBuffer(): Unit = {
-    if (pointer == 0) return ;
+    if (pointer == 0) return;
     out.write(buffer, 0, pointer);
     pointer = 0
   }

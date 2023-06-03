@@ -24,14 +24,13 @@ import org.beangle.commons.lang.Strings
 
 import java.net.URL
 
-/**
- * @see https://www.iana.org/assignments/media-types/media-types.xhtml
- * @see http://www.mime-type.net/
- * @see https://www.sitepoint.com/mime-types-complete-list/
- */
+/** @see https://www.iana.org/assignments/media-types/media-types.xhtml
+  * @see http://www.mime-type.net/
+  * @see https://www.sitepoint.com/mime-types-complete-list/
+  */
 object MediaTypes {
 
-  val All = MediaType("*/*")
+  val All: MediaType = MediaType("*/*")
 
   private val types: Map[String, MediaType] =
     buildTypes(new Resources(
@@ -86,10 +85,9 @@ object MediaTypes {
     buf.toMap
   }
 
-  private def readMediaTypes(url: URL): Map[String, MediaType] =
-    if (null == url)
-      Map.empty
-    else {
+  private def readMediaTypes(url: URL): Map[String, MediaType] = {
+    if null == url then Map.empty
+    else
       val buf = new collection.mutable.HashMap[String, MediaType]
       IOs.readLines(url.openStream()) foreach { line =>
         if (Strings.isNotBlank(line) && !line.startsWith("#")) {
@@ -109,7 +107,7 @@ object MediaTypes {
         }
       }
       buf.toMap
-    }
+  }
 
   def get(ext: String, defaultValue: MediaType): MediaType =
     types.getOrElse(ext, defaultValue)
@@ -117,10 +115,9 @@ object MediaTypes {
   def get(ext: String): Option[MediaType] =
     types.get(ext)
 
-  def parse(str: String): Seq[MediaType] =
-    if (null == str)
-      Seq.empty
-    else {
+  def parse(str: String): Seq[MediaType] = {
+    if null == str then Seq.empty
+    else
       val mimeTypes = new collection.mutable.ListBuffer[MediaType]
       Strings.split(str, ",") foreach { token =>
         val commaIndex = token.indexOf(";")
@@ -131,7 +128,7 @@ object MediaTypes {
         }
       }
       mimeTypes.toList
-    }
+  }
 }
 
 object MediaType {

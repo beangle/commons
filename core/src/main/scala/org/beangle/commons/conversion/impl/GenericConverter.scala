@@ -17,8 +17,7 @@
 
 package org.beangle.commons.conversion.impl
 
-/**
-  * Generic Converter using in DefaultConversion
+/** Generic Converter using in DefaultConversion
   * <p>
   * It's a SPI interface.
   *

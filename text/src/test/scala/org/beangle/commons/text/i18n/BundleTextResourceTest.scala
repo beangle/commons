@@ -17,12 +17,11 @@
 
 package org.beangle.commons.text.i18n
 
-import java.util.Locale
-
 import org.beangle.commons.lang.ClassLoaders
-
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+
+import java.util.Locale
 
 class BundleTextResourceTest extends AnyFunSpec with Matchers {
 

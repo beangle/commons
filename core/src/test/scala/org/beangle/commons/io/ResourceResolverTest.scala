@@ -17,18 +17,32 @@
 
 package org.beangle.commons.io
 
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 class ResourceResolverTest extends AnyFunSpec with Matchers {
   describe("ResourceResolver") {
     it("getResources") {
       val resolver = new ResourcePatternResolver
       val rs = resolver.getResources("META-INF/**/pom.properties")
-      assert(!rs.isEmpty)
+      assert(rs.nonEmpty)
 
       val rs1 = resolver.getResources("META-INF/maven/org.slf4j/slf4j-api/pom.properties")
-      assert(!rs1.isEmpty)
+      assert(rs1.nonEmpty)
+    }
+    it("version loader") {
+      val loader = new ResourceVersionLoader()
+      val resourceName = "org/beangle/commons/io/template.txt"
+      val version2 = loader.getResource(resourceName, "2")
+      version2.nonEmpty shouldBe (true)
+      val version3 = loader.getResource(resourceName, "3")
+      version3.nonEmpty shouldBe (true)
+      val version4 = loader.getResource(resourceName, "4")
+      assert(version3 == version4)
+
+      val version6 = loader.getResource(resourceName, "6")
+      assert(version6.nonEmpty)
+      assert(version6.get.getFile.contains("template.txt"))
     }
   }
 }

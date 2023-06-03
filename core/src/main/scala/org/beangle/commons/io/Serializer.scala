@@ -17,9 +17,9 @@
 
 package org.beangle.commons.io
 
-import java.io.OutputStream
-
 import org.beangle.commons.activation.MediaType
+
+import java.io.OutputStream
 
 trait Serializer {
 

@@ -17,10 +17,10 @@
 
 package org.beangle.commons.io
 
-import java.net.{ URI, URL, URLConnection }
-import java.util.jar.JarFile
-
 import org.beangle.commons.lang.Strings
+
+import java.net.{URI, URL, URLConnection}
+import java.util.jar.JarFile
 
 object Jars {
 
@@ -37,9 +37,8 @@ object Jars {
   def toURI(location: String): URI =
     new URI(Strings.replace(location, " ", "%20"));
 
-  /**
-   * Resolve the given jar file URL into a JarFile object.
-   */
+  /** Resolve the given jar file URL into a JarFile object.
+    */
   def getJarFile(jarFileUrl: String): JarFile =
     if (jarFileUrl.startsWith("file:"))
       new JarFile(Jars.toURI(jarFileUrl).getSchemeSpecificPart())

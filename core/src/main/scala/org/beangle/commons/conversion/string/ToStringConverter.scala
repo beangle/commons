@@ -19,8 +19,7 @@ package org.beangle.commons.conversion.string
 
 import org.beangle.commons.conversion.Converter
 
-/**
-  * Convert Object to String
+/** Convert Object to String
   *
   * @author chaostone
   * @since 3.2.0

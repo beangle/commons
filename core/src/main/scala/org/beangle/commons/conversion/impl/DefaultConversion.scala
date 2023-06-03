@@ -27,8 +27,7 @@ object DefaultConversion {
   def convert[T](value: Any, targetType: Class[T]): T = Instance.convert(value, targetType)
 }
 
-/**
-  * Default Conversion implementation.
+/** Default Conversion implementation.
   * <p>
   * It register String to Boolean/Number/Date/Locale, Number to Number and Object to String buildin
   * converters.

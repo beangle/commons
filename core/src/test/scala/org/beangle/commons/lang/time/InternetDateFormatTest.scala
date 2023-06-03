@@ -17,10 +17,10 @@
 
 package org.beangle.commons.lang.time
 
-import java.{ util => ju }
-
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+
+import java.util as ju
 
 class InternetDateFormatTest extends AnyFunSpec with Matchers {
   describe("InternetDateFormat") {

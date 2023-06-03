@@ -71,7 +71,7 @@ object TypeInfo {
     else scalaTypeName(clazz) + args.map(_.name).mkString("[", ",", "]")
   }
 
-  def isCaseClass(clazz:Class[_]):Boolean={
+  def isCaseClass(clazz: Class[_]): Boolean = {
     classOf[Product].isAssignableFrom(clazz) && !clazz.getName.startsWith("Tuple")
   }
 
@@ -102,44 +102,44 @@ object TypeInfo {
     get(clazz, GeneralType(first) :: tails.map(GeneralType(_)).toList)
   }
 
-  def get(clazz: Class[_], args:Array[TypeInfo]): TypeInfo = {
-    get(clazz,ArraySeq.from(args))
+  def get(clazz: Class[_], args: Array[TypeInfo]): TypeInfo = {
+    get(clazz, ArraySeq.from(args))
   }
 
-  def get(clazz: Class[_], args:collection.Seq[TypeInfo]): TypeInfo = {
+  def get(clazz: Class[_], args: collection.Seq[TypeInfo]): TypeInfo = {
     val name = typeName(clazz, args)
     cache.get(name) match {
       case Some(ti) => ti
       case None =>
-        val typeArgs=ArraySeq.from(args)
+        val typeArgs = ArraySeq.from(args)
         val newInfo =
           if clazz == classOf[Option[_]] then OptionType(args.head)
-          else if isIterableType(clazz) then IterableType(clazz,typeArgs )
+          else if isIterableType(clazz) then IterableType(clazz, typeArgs)
           else GeneralType(clazz, ArraySeq.from(args))
         cache += (name, newInfo)
         newInfo
     }
   }
 
-  def stringz(obj:Any):String={
-    obj match{
-      case clz:Class[_] => clz.toString
-      case d:Array[_]=>
-        d.map(x=> stringz(x)).mkString("[",",","]")
+  def stringz(obj: Any): String = {
+    obj match {
+      case clz: Class[_] => clz.toString
+      case d: Array[_] =>
+        d.map(x => stringz(x)).mkString("[", ",", "]")
     }
   }
 
-  def convert(obj:Any):TypeInfo={
-    obj match{
-      case clz:Class[_]=> TypeInfo.get(clz,false)
-      case a:Array[Any]=>
+  def convert(obj: Any): TypeInfo = {
+    obj match {
+      case clz: Class[_] => TypeInfo.get(clz, false)
+      case a: Array[Any] =>
         val clz = a(0)
         val argsClz = a(1).asInstanceOf[Array[_]]
         val argsInfo = Array.ofDim[TypeInfo](argsClz.length)
-        (0 until argsClz.length) foreach{i=>
+        (0 until argsClz.length) foreach { i =>
           argsInfo(i) = convert(argsClz(i))
         }
-        TypeInfo.get(clz.asInstanceOf[Class[_]],argsInfo)
+        TypeInfo.get(clz.asInstanceOf[Class[_]], argsInfo)
     }
   }
 

@@ -29,11 +29,11 @@ import java.{lang as jl, util as ju}
 object Formatters {
 
   /** Format number or Dates
-   *
-   * @param obj
-   * @param pattern
-   * @return
-   */
+    *
+    * @param obj
+    * @param pattern
+    * @return
+    */
   def format(obj: Any, pattern: String = ""): String = {
     val v = Options.unwrap(obj)
     if null == v then ""

@@ -16,10 +16,10 @@
  */
 
 package org.beangle.commons.conversion
-import org.beangle.commons.conversion.impl.DefaultConversion
 
-import org.scalatest.matchers.should.Matchers
+import org.beangle.commons.conversion.impl.DefaultConversion
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 class ConversionTest extends AnyFunSpec with Matchers {
 

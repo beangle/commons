@@ -17,10 +17,10 @@
 
 package org.beangle.commons.lang.time
 
-import java.time.LocalDate
-
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+
+import java.time.LocalDate
 
 class WeekTimeTest extends AnyFunSpec with Matchers {
   describe("WeekTime") {

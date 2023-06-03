@@ -19,26 +19,22 @@ package org.beangle.commons.text.i18n
 
 import java.util.Locale
 
-/**
- * TextBundle
- *
- * @author chaostone
- * @since 3.0.0
- */
+/** TextBundle
+  *
+  * @author chaostone
+  * @since 3.0.0
+  */
 trait TextBundle {
 
-  /**
-   * Gets a message based on a message key, or null if no message is found.
-   */
+  /** Gets a message based on a message key, or null if no message is found.
+    */
   def get(key: String): Option[String]
 
-  /**
-   * Returns the locale of this resource bundle.
-   */
+  /** Returns the locale of this resource bundle.
+    */
   def locale: Locale
 
-  /**
-   * Get the bundle resource path
-   */
+  /** Get the bundle resource path
+    */
   def resource: String
 }

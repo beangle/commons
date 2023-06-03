@@ -17,9 +17,9 @@
 
 package org.beangle.commons.collection
 
-import org.beangle.commons.bean.{ Properties => BeanProperties }
+import org.beangle.commons.bean.Properties as BeanProperties
 
-class Properties extends collection.mutable.Map[String, Any]{
+class Properties extends collection.mutable.Map[String, Any] {
 
   private[this] val data = Collections.newMap[String, Any]
 
@@ -44,9 +44,9 @@ class Properties extends collection.mutable.Map[String, Any]{
     }
   }
 
-  def add(attr: String, obj: Object, nestedAttrs: String*): Unit =
-    if (null != obj)
-      put(attr, new Properties(obj, nestedAttrs: _*))
+  def add(attr: String, obj: Object, nestedAttrs: String*): Unit = {
+    if null != obj then put(attr, new Properties(obj, nestedAttrs: _*))
+  }
 
   override def iterator: Iterator[(String, Any)] =
     data.iterator

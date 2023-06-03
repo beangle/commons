@@ -23,8 +23,7 @@ import org.beangle.commons.logging.Logging
 import java.io.IOException
 import java.net.URL
 
-/**
-  * Resource loader
+/** Resource loader
   *
   * @author chaostone
   * @since 3.3.0
@@ -67,8 +66,7 @@ class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader 
   }
 }
 
-/**
-  * Load resource by class loader.
+/** Load resource by class loader.
   */
 class ClasspathResourceLoader(val prefixes: List[String] = List("")) extends ResourceLoader {
 

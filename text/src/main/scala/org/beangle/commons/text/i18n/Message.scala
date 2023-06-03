@@ -17,23 +17,20 @@
 
 package org.beangle.commons.text.i18n
 
-/**
- * Message class.
- *
- * @author chaostone
- */
+/** Message class.
+  *
+  * @author chaostone
+  */
 class Message(val key: String, val params: List[Any]) {
 
-  /**
-   * Constructor for Message.
-   */
+  /** Constructor for Message.
+    */
   def this(key: String, objs: Array[Any]) = {
     this(key, objs.toList)
   }
 
-  /**
-   * Constructor for Message.
-   */
+  /** Constructor for Message.
+    */
   def this(key: String) = {
     this(key, List.empty)
   }

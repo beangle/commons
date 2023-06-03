@@ -22,8 +22,7 @@ import org.beangle.commons.lang.Strings
 
 import java.lang as jl
 
-/**
-  * Convert String to Boolean.
+/** Convert String to Boolean.
   * <p>
   * Convert true,on,yes,Y,1 to Boolean.TRUE.<br>
   * Convert false,off,no,N,0,"" to Boolean.FALSE. <br>

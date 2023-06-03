@@ -16,6 +16,7 @@
  */
 
 package org.beangle.commons.text.seq
+
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 

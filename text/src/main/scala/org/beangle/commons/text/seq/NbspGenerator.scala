@@ -17,19 +17,17 @@
 
 package org.beangle.commons.text.seq
 
-/**
- * NbspGenerator class.
- *
- * @author chaostone
- */
+/** NbspGenerator class.
+  *
+  * @author chaostone
+  */
 object NbspGenerator {
 
-  /**
-   * generator.
-   *
-   * @param repeat a int.
-   * @return a String object.
-   */
+  /** generator.
+    *
+    * @param repeat a int.
+    * @return a String object.
+    */
   def generator(repeat: Int): String = {
     val repeater = "&nbsp;"
     val returnval = new StringBuilder()

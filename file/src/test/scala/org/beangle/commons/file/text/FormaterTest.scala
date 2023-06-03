@@ -18,9 +18,8 @@
 package org.beangle.commons.file.text
 
 import org.beangle.commons.logging.Logging
-
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 class FormaterTest extends AnyFunSpec with Matchers with Logging {
 

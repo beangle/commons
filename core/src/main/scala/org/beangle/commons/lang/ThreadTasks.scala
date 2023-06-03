@@ -17,14 +17,12 @@
 
 package org.beangle.commons.lang
 
-/**
- * Start multiple thread simultaneously
- */
+/** Start multiple thread simultaneously
+  */
 object ThreadTasks {
 
-  /**
-   * Start collection of runnable
-   */
+  /** Start collection of runnable
+    */
   def start(runables: Iterator[Runnable]): Unit = {
     val tasks = new collection.mutable.ListBuffer[Thread]
     for (runable <- runables) {
@@ -40,9 +38,8 @@ object ThreadTasks {
       }
   }
 
-  /**
-   * Start runnable multiple
-   */
+  /** Start runnable multiple
+    */
   def start(runable: Runnable, threadPoolSize: Int, name: String = null): Unit = {
     val tasks = new collection.mutable.ListBuffer[Thread]
     var index = 0;

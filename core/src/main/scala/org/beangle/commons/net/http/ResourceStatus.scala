@@ -20,6 +20,5 @@ package org.beangle.commons.net.http
 import java.net.URL
 
 case class ResourceStatus(status: Int, target: URL, length: Long, lastModified: Long, supportRange: Boolean) {
-  def isOk: Boolean =
-    200 == status
+  def isOk: Boolean = 200 == status
 }

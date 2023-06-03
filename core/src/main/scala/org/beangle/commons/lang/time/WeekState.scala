@@ -41,9 +41,8 @@ object WeekState {
     of(weekIndecies)
 }
 
-/**
- * week index is 1 based.
- */
+/** week index is 1 based.
+  */
 @value
 class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
 
@@ -86,11 +85,11 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     (length - str.lastIndexOf('1') - 1, length - str.indexOf('1') - 1)
   }
 
-  /**
-   * how many weeks
-   * @see http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetTable
-   * @see http://www.geeksforgeeks.org/count-set-bits-in-an-integer/
-   */
+  /** how many weeks
+    *
+    * @see http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetTable
+    * @see http://www.geeksforgeeks.org/count-set-bits-in-an-integer/
+    */
   def size: Int = {
     var c = 0
     var n = this.value

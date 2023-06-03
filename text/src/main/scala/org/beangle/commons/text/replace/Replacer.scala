@@ -21,10 +21,9 @@ import java.util.regex.Pattern
 
 object Replacer {
 
-  /**
-   * process.
-   *
-   */
+  /** process.
+    *
+    */
   def process(input: String, replacers: List[Replacer]): String = {
     if (null eq input) return null
     var in = input
@@ -38,9 +37,8 @@ trait Replacer {
   def process(input: String): String
 }
 
-/**
- * Replace target with value on any input.
- */
+/** Replace target with value on any input.
+  */
 class PatternReplacer(key: String, var value: String) extends Replacer {
 
   var pattern: Pattern = Pattern.compile(key)
@@ -50,5 +48,5 @@ class PatternReplacer(key: String, var value: String) extends Replacer {
   def process(input: String): String =
     pattern.matcher(input).replaceAll(value)
 
-  override def toString(): String = target + "=" + value
+  override def toString: String = target + "=" + value
 }

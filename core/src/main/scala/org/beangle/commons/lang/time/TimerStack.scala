@@ -19,11 +19,11 @@ package org.beangle.commons.lang.time
 
 import java.util.Arrays
 
-/**
- * Record timer nodes
- * @author chaostone
- * @since 3.0.0
- */
+/** Record timer nodes
+  *
+  * @author chaostone
+  * @since 3.0.0
+  */
 class TimerStack(root: TimerNode, initCapacity: Int) {
 
   var index: Int = -1

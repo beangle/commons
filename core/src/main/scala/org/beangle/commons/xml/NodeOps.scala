@@ -20,7 +20,7 @@ package org.beangle.commons.xml
 import scala.xml.Node
 
 object NodeOps {
-  given Conversion[Node,NodeOps] = new NodeOps(_)
+  given Conversion[Node, NodeOps] = new NodeOps(_)
 }
 
 final class NodeOps(val n: Node) extends AnyVal {

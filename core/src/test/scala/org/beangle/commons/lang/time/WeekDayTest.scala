@@ -17,8 +17,7 @@
 
 package org.beangle.commons.lang.time
 
-import org.beangle.commons.lang.time.WeekDay.{ Mon, Sat, Sun, Wed }
-
+import org.beangle.commons.lang.time.WeekDay.{Mon, Sat, Sun, Wed}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 

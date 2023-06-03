@@ -16,9 +16,10 @@
  */
 
 package org.beangle.commons.lang.reflect
+
 import scala.collection.mutable
 
-class SpecialMap extends java.util.HashMap[java.lang.Long,String]
+class SpecialMap extends java.util.HashMap[java.lang.Long, String]
 
 class Props extends SpecialMap
 

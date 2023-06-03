@@ -26,11 +26,10 @@ import java.util.{Calendar, GregorianCalendar, SimpleTimeZone, TimeZone}
 
 object DateFormats {
 
-  /**
-   * Preferred HTTP date format (RFC 1123).
-   *
-   * @see https://www.ietf.org/rfc/rfc1123.txt
-   */
+  /** Preferred HTTP date format (RFC 1123).
+    *
+    * @see https://www.ietf.org/rfc/rfc1123.txt
+    */
   object Http {
     private val format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz")
     format.setTimeZone(TimeZone.getTimeZone("GMT"))
@@ -48,23 +47,22 @@ object DateFormats {
 
   val RFC1123 = Http
 
-  /**
-   * This object handles Internet date/time strings in accordance with RFC 3339. It
-   * provides methods to convert from Calendar to RFC 3339 format strings and to parse these strings back into
-   * the same constructs.
-   * Strings are parsed in accordance with the RFC 3339 format:
-   *
-   * <pre>
-   * YYYY-MM-DD(T|t|\s)hh:mm:ss[.ddd][tzd]
-   * </pre>
-   *
-   * The <code>tzd</code> represents the time zone designator and is either an
-   * upper or lower case 'Z' indicating UTC or a signed <code>hh:mm</code> offset.
-   *
-   * https://www.ietf.org/rfc/rfc3339.txt
-   *
-   * @see www.hackcraft.net/web/datetime
-   */
+  /** This object handles Internet date/time strings in accordance with RFC 3339. It
+    * provides methods to convert from Calendar to RFC 3339 format strings and to parse these strings back into
+    * the same constructs.
+    * Strings are parsed in accordance with the RFC 3339 format:
+    *
+    * <pre>
+    * YYYY-MM-DD(T|t|\s)hh:mm:ss[.ddd][tzd]
+    * </pre>
+    *
+    * The <code>tzd</code> represents the time zone designator and is either an
+    * upper or lower case 'Z' indicating UTC or a signed <code>hh:mm</code> offset.
+    *
+    * https://www.ietf.org/rfc/rfc3339.txt
+    *
+    * @see www.hackcraft.net/web/datetime
+    */
   private object Internet {
 
     val df2 = new DecimalFormat("00")
@@ -83,14 +81,14 @@ object DateFormats {
     }
 
     /**
-     * Our private parse utility that parses the string, clears the calendar,
-     * and then sets the fields.
-     *
-     * @param s   the string to parse
-     * @param cal the calendar object to populate
-     * @throws IllegalArgumentException
-     * if the string is not a valid RFC 3339 date/time string
-     */
+      * Our private parse utility that parses the string, clears the calendar,
+      * and then sets the fields.
+      *
+      * @param s   the string to parse
+      * @param cal the calendar object to populate
+      * @throws IllegalArgumentException
+      * if the string is not a valid RFC 3339 date/time string
+      */
     private def parse(s: String, cal: Calendar): Unit = {
       val m = pattern.matcher(s)
       if (!m.matches())
@@ -119,13 +117,13 @@ object DateFormats {
     }
 
     /**
-     * Parses an RFC 3339 date/time string to a Calendar object.
-     *
-     * @param s the string to parse
-     * @return the Calendar object
-     * @throws IllegalArgumentException
-     * if the string is not a valid RFC 3339 date/time string
-     */
+      * Parses an RFC 3339 date/time string to a Calendar object.
+      *
+      * @param s the string to parse
+      * @return the Calendar object
+      * @throws IllegalArgumentException
+      * if the string is not a valid RFC 3339 date/time string
+      */
     def parse(s: String): Calendar = {
       val cal = new GregorianCalendar()
       parse(s, cal);
@@ -133,14 +131,14 @@ object DateFormats {
     }
 
     /**
-     * Converts the specified Calendar object to an RFC 3339 date/time string.
-     * Unlike the toString methods for Date and long, no additional variant of
-     * this method taking a time zone is provided since the time zone is built
-     * into the Calendar object.
-     *
-     * @param cal the Calendar object
-     * @return an RFC 3339 date/time string (does not include milliseconds)
-     */
+      * Converts the specified Calendar object to an RFC 3339 date/time string.
+      * Unlike the toString methods for Date and long, no additional variant of
+      * this method taking a time zone is provided since the time zone is built
+      * into the Calendar object.
+      *
+      * @param cal the Calendar object
+      * @return an RFC 3339 date/time string (does not include milliseconds)
+      */
     def format(cal: Calendar): String = {
       val buf = new StringBuilder();
       buf.append(df4.format(cal.get(Calendar.YEAR)))
@@ -177,13 +175,13 @@ object DateFormats {
     }
 
     /**
-     * Converts the specified Date object to an RFC 3339 date/time string using
-     * the specified time zone.
-     *
-     * @param date the Date object
-     * @param zone the time zone to use
-     * @return an RFC 3339 date/time string (does not include milliseconds)
-     */
+      * Converts the specified Date object to an RFC 3339 date/time string using
+      * the specified time zone.
+      *
+      * @param date the Date object
+      * @param zone the time zone to use
+      * @return an RFC 3339 date/time string (does not include milliseconds)
+      */
     def format(date: ju.Date, zone: TimeZone): String = {
       val cal = new GregorianCalendar(zone)
       cal.setTime(date)
@@ -193,8 +191,8 @@ object DateFormats {
 
   object UTC extends DateFormat {
     /**
-     * A time zone with zero offset and no DST.
-     */
+      * A time zone with zero offset and no DST.
+      */
     private val UTCZone = new SimpleTimeZone(0, "Z")
 
     override def parse(source: String, pos: ParsePosition): ju.Date = {
@@ -211,8 +209,8 @@ object DateFormats {
 
   object GMT extends DateFormat {
     /**
-     * A time zone with zero offset and no DST.
-     */
+      * A time zone with zero offset and no DST.
+      */
     private val GMTZone = TimeZone.getTimeZone("GMT")
 
     override def parse(source: String, pos: ParsePosition): ju.Date =

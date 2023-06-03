@@ -21,15 +21,11 @@ import java.net.HttpURLConnection
 
 case class Response(status: Int, content: Any) {
 
-  def getText: String =
-    String.valueOf(content)
+  def getText: String = String.valueOf(content)
 
-  def isOk: Boolean =
-    status == HttpURLConnection.HTTP_OK
+  def isOk: Boolean = status == HttpURLConnection.HTTP_OK
 
-  def getOrElse(default: => String): String =
-    if (this.isOk)
-      String.valueOf(content)
-    else
-      default
+  def getOrElse(default: => String): String = {
+    if this.isOk then String.valueOf(content) else default
+  }
 }

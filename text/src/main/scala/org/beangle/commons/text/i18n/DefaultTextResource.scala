@@ -19,18 +19,16 @@ package org.beangle.commons.text.i18n
 
 import java.util.Locale
 
-/**
- * Abstract BundleTextResource class.
- *
- * @author chaostone
- */
+/** Abstract BundleTextResource class.
+  *
+  * @author chaostone
+  */
 class DefaultTextResource(val locale: Locale, protected val registry: TextBundleRegistry, protected val formater: TextFormater) extends TextResource {
 
   protected var keyAsDefault: Boolean = true
 
-  /**
-   * getText.
-   */
+  /** getText.
+    */
   def apply(key: String, defaultValue: String, args: Any*): String = {
     val text = get(key).getOrElse(if ((null eq defaultValue) && keyAsDefault) key else defaultValue)
     if ((null != text) && args.length > 0) formater.format(text, locale, args: _*)

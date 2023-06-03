@@ -19,20 +19,16 @@ package org.beangle.commons.config.property
 
 import java.util.EventListener
 
-/**
- * <p>
- * PropertyConfigListener interface.
- * </p>
- *
- * @author chaostone
- */
+/** PropertyConfigListener interface.
+  *
+  * @author chaostone
+  */
 trait PropertyConfigListener extends EventListener {
 
-  /**
-   * Handle an config event.
-   *
-   * @param event
-   *          the event to respond to
-   */
+  /** Handle an config event.
+    *
+    * @param event
+    * the event to respond to
+    */
   def onConfigEvent(event: PropertyConfigEvent): Unit
 }

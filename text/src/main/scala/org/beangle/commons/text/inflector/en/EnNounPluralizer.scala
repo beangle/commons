@@ -17,13 +17,12 @@
 
 package org.beangle.commons.text.inflector.en
 
+import org.beangle.commons.text.inflector.RuleBasedPluralizer
+import org.beangle.commons.text.inflector.rule.AbstractRegexReplacementRule.disjunction
+import org.beangle.commons.text.inflector.rule.*
+
 import java.util.Locale
 import java.util.regex.Matcher
-
-import org.beangle.commons.text.inflector.RuleBasedPluralizer
-import org.beangle.commons.text.inflector.rule.{ CategoryInflectionRule, IrregularMappingRule, RegexReplacementRule, SuffixInflectionRule }
-import org.beangle.commons.text.inflector.rule.AbstractRegexReplacementRule
-import org.beangle.commons.text.inflector.rule.AbstractRegexReplacementRule.disjunction
 
 object EnNounPluralizer extends RuleBasedPluralizer {
 

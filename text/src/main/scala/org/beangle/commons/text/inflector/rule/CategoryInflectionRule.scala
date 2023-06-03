@@ -19,11 +19,10 @@ package org.beangle.commons.text.inflector.rule
 
 import java.util.regex.Pattern
 
-/**
- * CategoryInflectionRule class.
- *
- * @author chaostone
- */
+/** CategoryInflectionRule class.
+  *
+  * @author chaostone
+  */
 class CategoryInflectionRule(words: Array[String], singularSuffix: String, pluralSuffix: String)
   extends SuffixInflectionRule(singularSuffix, pluralSuffix) {
 

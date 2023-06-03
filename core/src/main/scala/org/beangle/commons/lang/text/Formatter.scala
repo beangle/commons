@@ -19,9 +19,9 @@ package org.beangle.commons.lang.text
 
 import java.math.RoundingMode
 import java.text.{DecimalFormat, SimpleDateFormat}
-import java.time.{Instant, ZoneId, ZoneOffset}
 import java.time.format.DateTimeFormatter
 import java.time.temporal.{Temporal, TemporalAccessor}
+import java.time.{Instant, ZoneId, ZoneOffset}
 import java.util.{Calendar, Date}
 
 trait Formatter {
@@ -72,5 +72,3 @@ class InstantFormatter(pattern: String) extends TemporalFormatter(pattern) {
     df.format(obj.asInstanceOf[Instant].atZone(ZoneId.systemDefault))
   }
 }
-
-

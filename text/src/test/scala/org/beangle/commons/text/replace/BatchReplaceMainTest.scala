@@ -17,11 +17,11 @@
 
 package org.beangle.commons.text.replace
 
-import java.util.regex.Pattern
-
 import org.beangle.commons.logging.Logging
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+
+import java.util.regex.Pattern
 
 class BatchReplaceMainTest extends AnyFunSpec with Matchers with Logging {
   describe("BatchReplace") {

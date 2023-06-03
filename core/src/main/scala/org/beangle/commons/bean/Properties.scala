@@ -80,14 +80,10 @@ class Properties(conversion: Conversion) extends Logging {
       name = resolver.remove(name)
     }
     result =
-      if (isMapType(result))
-        getPropertyOfMap(result, name)
-      else if (resolver.isMapped(name))
-        getMappedProperty(result, name)
-      else if (resolver.isIndexed(name))
-        getIndexedProperty(result, name)
-      else
-        getSimpleProperty(result, name)
+      if (isMapType(result)) getPropertyOfMap(result, name)
+      else if (resolver.isMapped(name)) getMappedProperty(result, name)
+      else if (resolver.isIndexed(name)) getIndexedProperty(result, name)
+      else getSimpleProperty(result, name)
     result.asInstanceOf[T]
   }
 

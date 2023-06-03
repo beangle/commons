@@ -23,10 +23,9 @@ import org.beangle.commons.lang.time.WeekDay
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-/**
- * @author chaostone
- * @since 3.0.0
- */
+/** @author chaostone
+  * @since 3.0.0
+  */
 
 class EnumConverterTest extends AnyFunSpec with Matchers {
 

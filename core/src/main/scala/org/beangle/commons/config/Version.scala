@@ -17,14 +17,11 @@
 
 package org.beangle.commons.config
 
-/**
- * <p>
- * Version class.
- * </p>
- *
- * @author chaostone
- * @since 3.2.0
- */
+/** Version class.
+  *
+  * @author chaostone
+  * @since 3.2.0
+  */
 class Version {
 
   var name: String = _

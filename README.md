@@ -1,6 +1,8 @@
 # What is Beangle Commons?
 
-__Beangle Commons__ is a scala based enterprise software development suite, providing quick, based on conventions (Convention Over Configuration) scaffolding and toolkits. Efforts to streamline the project build, project development and standardized practices, the formation of easy management best practices.
+__Beangle Commons__ is a scala based enterprise software development suite, providing quick, based on conventions (
+Convention Over Configuration) scaffolding and toolkits. Efforts to streamline the project build, project development
+and standardized practices, the formation of easy management best practices.
 
 Beanlge Commons will use [Yourkit](http://www.yourkit.com) profile component performance.
 

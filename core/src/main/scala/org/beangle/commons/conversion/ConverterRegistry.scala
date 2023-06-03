@@ -17,12 +17,11 @@
 
 package org.beangle.commons.conversion
 
-/**
- * Converter Registry.
- *
- * @author chaostone
- * @since 3.2.0
- */
+/** Converter Registry.
+  *
+  * @author chaostone
+  * @since 3.2.0
+  */
 trait ConverterRegistry {
 
   def addConverter(converter: Converter[_, _]): Unit

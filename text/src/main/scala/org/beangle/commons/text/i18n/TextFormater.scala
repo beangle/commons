@@ -19,12 +19,11 @@ package org.beangle.commons.text.i18n
 
 import java.util.Locale
 
-/**
- * Text formater
- *
- * @author chaostone
- * @since 3.0.0
- */
+/** Text formater
+  *
+  * @author chaostone
+  * @since 3.0.0
+  */
 trait TextFormater {
 
   def format(text: String, locale: Locale, args: Any*): String

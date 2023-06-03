@@ -18,12 +18,12 @@
 package org.beangle.commons.bean.orderings
 
 import org.beangle.commons.bean.Properties
-import org.beangle.commons.lang.{ Numbers, Strings }
+import org.beangle.commons.lang.{Numbers, Strings}
 
-/**
- * 属性比较器
- * @author chaostone
- */
+/** 属性比较器
+  *
+  * @author chaostone
+  */
 class PropertyOrdering(cmpStr: String) extends Ordering[Any] {
 
   var name: String = cmpStr.trim()

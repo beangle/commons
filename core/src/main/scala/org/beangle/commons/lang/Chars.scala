@@ -19,22 +19,21 @@ package org.beangle.commons.lang
 
 object Chars {
 
-  /**
-   * Checks whether the character is ASCII 7 bit alphabetic.
-   *
-   * <pre>
-   * isAsciiAlpha('a')  = true
-   * isAsciiAlpha('A')  = true
-   * isAsciiAlpha('3')  = false
-   * isAsciiAlpha('-')  = false
-   * isAsciiAlpha('\n') = false
-   * isAsciiAlpha('&copy;') = false
-   * </pre>
-   *
-   * @param ch the character to check
-   * @return true if between 65 and 90 or 97 and 122 inclusive
-   * @since 3.0
-   */
+  /** Checks whether the character is ASCII 7 bit alphabetic.
+    *
+    * <pre>
+    * isAsciiAlpha('a')  = true
+    * isAsciiAlpha('A')  = true
+    * isAsciiAlpha('3')  = false
+    * isAsciiAlpha('-')  = false
+    * isAsciiAlpha('\n') = false
+    * isAsciiAlpha('&copy;') = false
+    * </pre>
+    *
+    * @param ch the character to check
+    * @return true if between 65 and 90 or 97 and 122 inclusive
+    * @since 3.0
+    */
   def isAsciiAlpha(ch: Char): Boolean = {
     (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')
   }

@@ -19,8 +19,7 @@ package org.beangle.commons.conversion.impl
 
 import org.beangle.commons.conversion.Converter
 
-/**
-  * Adapte a Converter to GenericConverter
+/** Adapte a Converter to GenericConverter
   *
   * @author chaostone
   * @since 3.2.0

@@ -17,7 +17,7 @@
 
 package org.beangle.commons.codec.binary
 
-import org.beangle.commons.codec.{ Decoder, Encoder }
+import org.beangle.commons.codec.{Decoder, Encoder}
 
 object Base64 {
   def encode(data: Array[Byte]): String =

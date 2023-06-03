@@ -54,11 +54,11 @@ object Page {
     def iterator: Iterator[Any] = Nil.iterator
   }
 }
-/**
- * 分页对象
- *
- * @author chaostone
- */
+
+/** 分页对象
+  *
+  * @author chaostone
+  */
 trait Page[E] extends collection.immutable.Seq[E] {
 
   def totalPages: Int

@@ -24,8 +24,7 @@ package org.beangle.commons.conversion
   */
 trait Conversion {
 
-  /**
-    * Convert to target type.
+  /** Convert to target type.
     * <ul>
     * <li>convert null to null;
     * <li>convert array to array ,when cannot find converter return targetType[0]

@@ -17,17 +17,13 @@
 
 package org.beangle.commons.text.seq
 
-/**
- * <p>
- * ArabicSeqStyle class.
- * </p>
- *
- * @author chaostone
- */
+/** ArabicSeqStyle class.
+  *
+  * @author chaostone
+  */
 class ArabicSeqStyle extends SeqNumStyle {
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc }
+    */
   def build(seq: Int): String = String.valueOf(seq)
 }

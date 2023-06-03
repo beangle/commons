@@ -17,12 +17,11 @@
 
 package org.beangle.commons.text.inflector.en
 
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-/**
- * @author chaostone
- */
+/** @author chaostone
+  */
 
 class EnNounPluralizerTest extends AnyFunSpec with Matchers {
   describe("EnNounPluralizer") {

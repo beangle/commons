@@ -19,55 +19,46 @@ package org.beangle.commons.event
 
 import scala.collection.mutable
 
-/**
- * EventListener interface.
- *
- * @author chaostone
- */
+/** EventListener interface.
+  *
+  * @author chaostone
+  */
 trait EventListener[E <: Event] extends java.util.EventListener {
 
-  /**
-   * Handle an application event.
-   */
+  /** Handle an application event.
+    */
   def onEvent(event: E): Unit
 
-  /**
-   * Determine whether this listener actually supports the given event type.
-   */
+  /** Determine whether this listener actually supports the given event type.
+    */
   def supportsEventType(eventType: Class[_ <: Event]): Boolean
 
-  /**
-   * Determine whether this listener actually supports the given source type.
-   */
+  /** Determine whether this listener actually supports the given source type.
+    */
   def supportsSourceType(sourceType: Class[_]): Boolean
 }
 
-/**
- * EventMulticaster interface.
- */
+/** EventMulticaster interface.
+  */
 trait EventMulticaster {
 
-  /**
-   * Add a listener to be notified of all events.
-   */
+  /** Add a listener to be notified of all events.
+    */
   def addListener(listener: EventListener[_]): Unit
 
-  /**
-   * Remove a listener from the notification list.
-   */
+  /** Remove a listener from the notification list.
+    */
   def removeListener(listener: EventListener[_]): Unit
 
-  /**
-   * Remove all listeners registered with this multicaster.
-   * <p>
-   * After a remove call, the multicaster will perform no action on event notification until new
-   * listeners are being registered.
-   */
+  /** Remove all listeners registered with this multicaster.
+    * <p>
+    * After a remove call, the multicaster will perform no action on event notification until new
+    * listeners are being registered.
+    */
   def removeAllListeners(): Unit
 
-  /**
-   * multicast.
-   */
+  /** multicast.
+    */
   def multicast(e: Event): Unit
 }
 
@@ -84,12 +75,12 @@ object DefaultEventMulticaster {
       this.eventType.hashCode * 29 + this.sourceType.hashCode
   }
 }
-/**
- * DefaultEventMulticaster class.
- */
+
+/** DefaultEventMulticaster class.
+  */
 class DefaultEventMulticaster extends EventMulticaster {
 
-  import DefaultEventMulticaster._
+  import DefaultEventMulticaster.*
 
   protected var listeners: List[EventListener[Event]] = Nil
 
@@ -110,9 +101,8 @@ class DefaultEventMulticaster extends EventMulticaster {
     listenerCache = Map.empty
   }
 
-  /**
-   * removeAllListeners.
-   */
+  /** removeAllListeners.
+    */
   def removeAllListeners(): Unit = {
     listeners = Nil
     listenerCache = Map.empty
@@ -135,9 +125,8 @@ class DefaultEventMulticaster extends EventMulticaster {
   }
 }
 
-/**
- * EventPublisher interface.
- */
+/** EventPublisher interface.
+  */
 trait EventPublisher {
 
   var multicaster: EventMulticaster = _

@@ -25,7 +25,7 @@ object Consoles {
     val scanner = new Scanner(System.in)
     var content: String = null
     var anwser = false
-    while ({
+    while ( {
       printImmediate(msg)
       content = Strings.trim(scanner.nextLine())
       anwser = yes.contains(content)
@@ -39,13 +39,12 @@ object Consoles {
     val scanner = new Scanner(System.in)
     var content: String = null
     var exit = false
-    while ({
+    while ( {
       printImmediate(prompt)
-      if (scanner.hasNextLine) {
+      if scanner.hasNextLine then
         content = Strings.trim(scanner.nextLine())
         exit = exits.contains(content)
-      } else
-        exit = true
+      else exit = true
       if (!exit) p(content)
       !exit
     })
@@ -57,7 +56,7 @@ object Consoles {
     var content: String = null
     val promptMsg = msg + (if (null != defaultStr) "(default " + defaultStr + ")" else "")
     var exit = false
-    while ({
+    while ( {
       printImmediate(promptMsg)
       if (scanner.hasNextLine) {
         content = scanner.nextLine()
@@ -76,17 +75,15 @@ object Consoles {
     var content: String = null
     val promptMsg = msg + (if (null != defaultStr) "(default " + defaultStr + ")" else "")
     var exit = false
-    while ({
+    while ( {
       printImmediate(promptMsg)
-      if (scanner.hasNextLine) {
+      if scanner.hasNextLine then
         content = scanner.nextLine()
         if (Strings.isEmpty(content)) content = defaultStr
         exit = (null != content)
-      } else
-        exit = true
+      else exit = true
       !exit
-    })
-      ()
+    }) ()
     content
   }
 

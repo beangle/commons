@@ -18,9 +18,8 @@
 package org.beangle.commons.conversion.converter
 
 import org.beangle.commons.conversion.impl.DefaultConversion
-
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 class DefaultConverterTest extends AnyFunSpec with Matchers {
 

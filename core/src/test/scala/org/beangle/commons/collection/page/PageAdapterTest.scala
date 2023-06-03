@@ -17,12 +17,11 @@
 
 package org.beangle.commons.collection.page
 
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-/**
- * @author zhouqi
- */
+/** @author zhouqi
+  */
 
 class PageAdapterTest extends AnyFunSpec with Matchers {
 

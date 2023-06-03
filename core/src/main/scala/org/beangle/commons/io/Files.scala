@@ -41,8 +41,7 @@ object Files {
   def stringWriter(file: File, charset: Charset = UTF_8): Writer =
     new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), charset))
 
-  /**
-    * Reads the contents of a file into a String.
+  /** Reads the contents of a file into a String.
     * The file is always closed.
     */
   def readString(file: File, charset: Charset = UTF_8): String = {
@@ -56,8 +55,7 @@ object Files {
       IOs.close(in)
   }
 
-  /**
-    * Writes a String to a file creating the file if it does not exist.
+  /** Writes a String to a file creating the file if it does not exist.
     */
   def writeString(file: File, data: String, charset: Charset = UTF_8): Unit = {
     var out: OutputStream = null
@@ -88,8 +86,7 @@ object Files {
     new FileOutputStream(file, append)
   }
 
-  /**
-    * Reads the contents of a file line by line to a List of Strings.
+  /** Reads the contents of a file line by line to a List of Strings.
     * The file is always closed.
     */
   def readLines(file: File, charset: Charset = UTF_8): List[String] = {
@@ -102,8 +99,7 @@ object Files {
       IOs.close(in)
   }
 
-  /**
-    * Copies a file to a new location preserving the file date.
+  /** Copies a file to a new location preserving the file date.
     * <p>
     * This method copies the contents of the specified source file to the specified destination file.
     * The directory holding the destination file is created if it does not exist. If the destination

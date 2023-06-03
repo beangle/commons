@@ -20,20 +20,16 @@ package org.beangle.commons.config.property
 import org.beangle.commons.config.Resources
 import org.beangle.commons.io.IOs
 
-/**
- * <p>
- * UrlPropertyConfigProvider class.
- * </p>
- *
- * @author chaostone
- */
+/** UrlPropertyConfigProvider class.
+  *
+  * @author chaostone
+  */
 class UrlPropertyConfigProvider extends PropertyConfig.Provider {
 
   var resources: Resources = _
 
-  /**
-   * getConfig.
-   */
+  /** getConfig.
+    */
   def getConfig: collection.Map[String, Any] = {
     val properties = new collection.mutable.HashMap[String, Any]
     resources.paths foreach { p =>

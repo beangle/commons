@@ -17,12 +17,12 @@
 
 package org.beangle.commons.lang
 
-import java.text.SimpleDateFormat
-import java.time.{LocalDate, LocalDateTime, LocalTime}
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
+import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalDateTime, LocalTime}
 
 class DatesTest extends AnyFunSpec with Matchers {
 

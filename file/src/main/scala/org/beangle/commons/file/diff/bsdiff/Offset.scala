@@ -17,27 +17,21 @@
 
 package org.beangle.commons.file.diff.bsdiff
 
-import java.io.DataInputStream
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
+import java.io.{DataInputStream, IOException, InputStream, OutputStream}
 
-/**
- * bsdiff encodes offsets (represented by the C off_t type) as 64-bit chunks.
- * In this implementation only 32-bit signed integers are supported, but the
- * additional encoding steps are left to illustrate the process (which, in Java,
- * would encode/decode a long primitive data type).
- */
+/** bsdiff encodes offsets (represented by the C off_t type) as 64-bit chunks.
+  * In this implementation only 32-bit signed integers are supported, but the
+  * additional encoding steps are left to illustrate the process (which, in Java,
+  * would encode/decode a long primitive data type).
+  */
 object Offset {
-  /**
-   * Size of a bsdiff-encoded offset, in bytes.
-   */
+  /** Size of a bsdiff-encoded offset, in bytes.
+    */
   val OFFSET_SIZE = 8
 
-  /**
-   * Reads a bsdiff-encoded offset (based on the C off_t type) from an
-   * {@link InputStream}.
-   */
+  /** Reads a bsdiff-encoded offset (based on the C off_t type) from an
+    * {@link InputStream}.
+    */
   def readOffset(in: InputStream): Int = {
     val buf = new Array[Byte](OFFSET_SIZE)
     val bytesRead = in.read(buf)
@@ -72,9 +66,8 @@ object Offset {
     return y
   }
 
-  /**
-   * Writes a bsdiff-encoded offset to an {@link OutputStream}.
-   */
+  /** Writes a bsdiff-encoded offset to an {@link OutputStream}.
+    */
   def writeOffset(value: Int, out: OutputStream): Unit = {
     val buf = new Array[Byte](OFFSET_SIZE)
     var y = 0

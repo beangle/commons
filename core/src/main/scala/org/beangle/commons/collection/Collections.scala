@@ -17,24 +17,21 @@
 
 package org.beangle.commons.collection
 
-import java.{ util => ju }
-
-import org.beangle.commons.bean.{ Properties => BeanProperties }
+import org.beangle.commons.bean.Properties as BeanProperties
 import org.beangle.commons.lang.functor.Predicate
 
+import java.util as ju
 import scala.collection.mutable
 
 object Collections {
 
-  /**
-   * Null-safe check if the specified collection is empty.
-   */
+  /** Null-safe check if the specified collection is empty.
+    */
   @inline
   def isEmpty(coll: Iterable[_]): Boolean = (coll == null || coll.isEmpty)
 
-  /**
-   * Null-safe check if the specified collection is not empty.
-   */
+  /** Null-safe check if the specified collection is not empty.
+    */
   @inline
   def isNotEmpty(coll: Iterable[_]): Boolean = null != coll && !coll.isEmpty
 
@@ -49,9 +46,8 @@ object Collections {
     finded
   }
 
-  /**
-   * 将一个集合按照固定大小查分成若干个集合。
-   */
+  /** 将一个集合按照固定大小查分成若干个集合。
+    */
   def split[T](list: List[T], count: Int): List[List[T]] = {
     val subLists = new mutable.ListBuffer[List[T]]
     if (list.size < count)
@@ -68,17 +64,15 @@ object Collections {
     subLists.toList
   }
 
-  /**
-   * convertToMap.
-   */
+  /** convertToMap.
+    */
   def convertToMap(coll: Seq[AnyRef], keyProperty: String): Map[_, _] =
     coll.map { obj =>
       (BeanProperties.get[Object](obj, keyProperty), obj)
     }.toMap
 
-  /**
-   * convertToMap.
-   */
+  /** convertToMap.
+    */
   def convertToMap(coll: Seq[AnyRef], keyProperty: String, valueProperty: String): Map[_, _] = {
     val map = new mutable.HashMap[Any, Any]
     coll foreach { obj =>

@@ -21,10 +21,10 @@ import org.beangle.commons.lang.Strings
 
 import scala.collection.mutable.ListBuffer
 
-/**
- * 多个属性的比较
- * @author chaostone
- */
+/** 多个属性的比较
+  *
+  * @author chaostone
+  */
 class MultiPropertyOrdering(propertyStr: String) extends Ordering[Any] {
 
   private val chain = buildChainOrdering(propertyStr)

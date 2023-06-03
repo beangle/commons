@@ -25,8 +25,7 @@ import org.beangle.commons.lang.Strings.*
 import java.util as ju
 import java.util.Calendar.*
 
-/**
-  * DateConverter
+/** DateConverter
   *
   * @author chaostone
   * @since 3.2.0

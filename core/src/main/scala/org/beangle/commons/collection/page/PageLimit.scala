@@ -20,31 +20,24 @@ package org.beangle.commons.collection.page
 object PageLimit {
   def apply(pageIndex: Int, pageSize: Int) = new PageLimit(pageIndex, pageSize)
 }
-/**
- * 查询分页限制
- *
- * @author chaostone
- */
+
+/** 查询分页限制
+  *
+  * @author chaostone
+  */
 class PageLimit(val pageIndex: Int, val pageSize: Int) extends Limit {
 
-  /**
-   * <p>
-   * isValid.
-   * </p>
-   *
-   * @return a boolean.
-   */
-  def isValid(): Boolean = pageIndex > 0 && pageSize > 0
+  /** isValid.
+    * @return a boolean.
+    */
+  def isValid: Boolean = pageIndex > 0 && pageSize > 0
 
-  /**
-   * <p>
-   * toString.
-   * </p>
-   *
-   * @see java.lang.Object#toString()
-   * @return a String object.
-   */
-  override def toString(): String =
+  /** toString
+    *
+    * @see java.lang.Object#toString()
+    * @return a String object.
+    */
+  override def toString: String =
     new StringBuilder().append("pageIndex:").append(pageIndex)
       .append(" pageSize:")
       .append(pageSize)

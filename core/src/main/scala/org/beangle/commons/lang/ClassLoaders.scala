@@ -21,8 +21,7 @@ import java.io.InputStream
 import java.net.URL
 import scala.collection.mutable
 
-/**
-  * ClassLoaders
+/** ClassLoaders
   * load class,stream
   */
 object ClassLoaders {
@@ -34,8 +33,7 @@ object ClassLoaders {
     "void" -> classOf[Unit], "Unit" -> classOf[Unit],
     "Option" -> classOf[Option[_]])
 
-  /**
-    * Return the default ClassLoader to use
+  /** Return the default ClassLoader to use
     * typically the thread context ClassLoader, if available; the ClassLoader that loaded the ClassLoaders
     * class will be used as fallback.
     *
@@ -52,8 +50,7 @@ object ClassLoaders {
     cl
   }
 
-  /**
-    * Find class loader sequence
+  /** Find class loader sequence
     */
   private def loaders(callingClass: Class[_] = null): Seq[ClassLoader] = {
     val me = getClass.getClassLoader
@@ -68,8 +65,7 @@ object ClassLoaders {
     else if (callCl == threadCl) List(threadCl, me) else List(threadCl, me, callCl)
   }
 
-  /**
-    * Load a given resource(Cannot start with slash /).
+  /** Load a given resource(Cannot start with slash /).
     */
   def getResource(resourceName: String, callingClass: Class[_] = null): Option[URL] = {
     val path = normalize(resourceName)
@@ -80,8 +76,7 @@ object ClassLoaders {
     Option(url)
   }
 
-  /**
-    * Load list of resource(Cannot start with slash /).
+  /** Load list of resource(Cannot start with slash /).
     *
     * @return List of resources url or empty list.
     */
@@ -96,8 +91,7 @@ object ClassLoaders {
     urls.toList
   }
 
-  /**
-    * This is a convenience method to load a resource as a stream.
+  /** This is a convenience method to load a resource as a stream.
     *
     * The algorithm used to find the resource is given in getResource()
     */
@@ -113,8 +107,7 @@ object ClassLoaders {
 
   def get(className: String, classLoader: ClassLoader = null): Option[Class[_]] = {
     val loader = if (classLoader == null) defaultClassLoader else classLoader
-    if buildins.contains(className) then
-      buildins.get(className)
+    if buildins.contains(className) then buildins.get(className)
     else if null != loader.getResource(Strings.replace(className, ".", "/") + ".class") then
       Some(loader.loadClass(className))
     else

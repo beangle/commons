@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  *
  * @author chaostone
  */
-@Target({ ElementType.TYPE })
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface component {
 

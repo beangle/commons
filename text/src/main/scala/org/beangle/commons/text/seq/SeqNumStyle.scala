@@ -17,35 +17,29 @@
 
 package org.beangle.commons.text.seq
 
-import SeqNumStyle._
+import org.beangle.commons.text.seq.SeqNumStyle.*
 
 object SeqNumStyle {
 
-  /**
-   * 中文数字
-   */
+  /** 中文数字
+    */
   val HANZI = new HanZiSeqStyle()
 
-  /**
-   * 数字
-   */
+  /** 数字
+    */
   val ARABIC = new ArabicSeqStyle()
 }
 
-/**
- * SeqNumStyle interface.
- *
- * @author chaostone
- */
+/** SeqNumStyle interface.
+  *
+  * @author chaostone
+  */
 trait SeqNumStyle {
 
-  /**
-   * <p>
-   * build.
-   * </p>
-   *
-   * @param seq a int.
-   * @return a String object.
-   */
+  /** build.
+    *
+    * @param seq a int.
+    * @return a String object.
+    */
   def build(seq: Int): String
 }

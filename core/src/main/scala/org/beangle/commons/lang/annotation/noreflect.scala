@@ -20,7 +20,8 @@ package org.beangle.commons.lang.annotation
 import scala.annotation.StaticAnnotation
 
 /** Ignore field when using reflection
- * @author chaostone
- * @since 3.0.2
- */
+  *
+  * @author chaostone
+  * @since 3.0.2
+  */
 class noreflect extends StaticAnnotation

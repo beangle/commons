@@ -19,22 +19,19 @@ package org.beangle.commons.collection.page
 
 object PagedSeq {
   private def calcMaxPageNo(pageSize: Int, total: Int): Int =
-    if (total <= pageSize)
-      1
-    else {
+    if total <= pageSize then 1
+    else
       val remainder = total % pageSize
       val quotient = total / pageSize
       if ((0 == remainder)) quotient else (quotient + 1)
-    }
 }
-import org.beangle.commons.collection.page.PagedSeq._
-/**
- * <p>
- * PagedSeq class.
- * </p>
- *
- * @author chaostone
- */
+
+import org.beangle.commons.collection.page.PagedSeq.*
+
+/** PagedSeq class.
+  *
+  * @author chaostone
+  */
 class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends Page[E]() {
 
   var page: Page[E] = _
@@ -47,61 +44,52 @@ class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends Page[E]() {
 
   this.next()
 
-  /**
-   * Constructor for PagedSeq
-   */
+  /** Constructor for PagedSeq
+    */
   def this(datas: Seq[E], pageSize: Int) = {
     this(datas, PageLimit(1, pageSize))
   }
 
-  /**
-   * getItems.
-   */
+  /** getItems.
+    */
   def items = page.items
 
-  /**
-   * iterator.
-   */
+  /** iterator.
+    */
   def iterator = page.iterator
 
-  /**
-   * size
-   */
+  /** size
+    */
   def length = page.length
 
   /**
-   *
-   */
+    *
+    */
   def apply(index: Int): E = page(index)
 
-  /**
-   * totalItems.
-   */
+  /** totalItems.
+    */
   def totalItems: Int = datas.size
 
-  /**
-   * hasNext.
-   */
+  /** hasNext.
+    */
   def hasNext: Boolean = pageIndex < totalPages
 
-  /**
-   * hasPrevious.
-   */
+  /** hasPrevious.
+    */
   def hasPrevious: Boolean = pageIndex > 1
 
-  /**
-   * next.
-   */
+  /** next.
+    */
   def next(): Page[E] = moveTo(pageIndex + 1)
 
-  /**
-   * previous.
-   */
+  /** previous.
+    */
   def previous(): Page[E] = moveTo(pageIndex - 1)
 
   /**
-   *
-   */
+    *
+    */
   def moveTo(pageIndex: Int): Page[E] = {
     if (pageIndex < 1) throw new RuntimeException("error pageIndex:" + pageIndex)
     this.pageIndex = pageIndex

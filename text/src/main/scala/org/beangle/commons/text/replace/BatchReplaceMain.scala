@@ -17,21 +17,19 @@
 
 package org.beangle.commons.text.replace
 
-import java.io.{ File, FileOutputStream, FilenameFilter, OutputStreamWriter }
-import java.nio.charset.Charset
-
 import org.beangle.commons.io.Files
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.reflect.Reflections
 import org.beangle.commons.logging.Logging
 
+import java.io.{File, FileOutputStream, FilenameFilter, OutputStreamWriter}
+import java.nio.charset.Charset
 import scala.collection.mutable
 
 object BatchReplaceMain extends Logging {
 
-  /**
-   * Usage:BatchReplaceMain dir patternfile encoding
-   */
+  /** Usage:BatchReplaceMain dir patternfile encoding
+    */
   def main(args: Array[String]): Unit = {
     if (args.length < 2) {
       logger.info("using BatchReplaceMain dir patternfile encoding")
@@ -70,15 +68,14 @@ object BatchReplaceMain extends Logging {
     replaceFile(dir, profiles.toMap, charset)
   }
 
-  /**
-   * replaceFile.
-   */
+  /** replaceFile.
+    */
   def replaceFile(fileName: String, profiles: Map[String, List[Replacer]], charset: Charset): Unit = {
     val file = new File(fileName)
     if (file.isFile && !file.isHidden) {
       val replacers = profiles.get(Strings.substringAfterLast(fileName, ".")).orNull
       if (null == replacers) return
-      logger.info("processing " + fileName)
+        logger.info("processing " + fileName)
       var filecontent = Files.readString(file, charset)
       filecontent = Replacer.process(filecontent, replacers)
       writeToFile(filecontent, fileName, charset)
@@ -100,15 +97,12 @@ object BatchReplaceMain extends Logging {
     }
   }
 
-  /**
-   * <p>
-   * writeToFile.
-   * </p>
-   */
+  /** writeToFile.
+    */
   def writeToFile(str: String, fileName: String, charset: Charset): Unit = {
     val writer =
       if null == charset then new OutputStreamWriter(new FileOutputStream(fileName))
-      else new OutputStreamWriter(new FileOutputStream(fileName),charset.name())
+      else new OutputStreamWriter(new FileOutputStream(fileName), charset.name())
     writer.write(str)
     writer.close()
   }

@@ -17,41 +17,34 @@
 
 package org.beangle.commons.script
 
-/**
- * 表达式执行器
- *
- * @author chaostone
- * @since 2012-03-05
- */
+/** 表达式执行器
+  *
+  * @author chaostone
+  * @since 2012-03-05
+  */
 trait ExpressionEvaluator {
 
-  /**
-   * Parse the expression
-   * @param exp
-   * @throws EvaluationException
-   */
+  /** Parse the expression
+    *
+    * @param exp
+    * @throws EvaluationException
+    */
   def parse(exp: String): Unit
 
-  /**
-   * <p>
-   * Eval a expression within context
-   * </p>
-   *
-   * @param exp a java's expression
-   * @param root params.
-   * @return evaluate result
-   */
+  /** Eval a expression within context
+    *
+    * @param exp  a java's expression
+    * @param root params.
+    * @return evaluate result
+    */
   def eval(exp: String, root: AnyRef): AnyRef
 
-  /**
-   * <p>
-   * Eval a expression within context,Return the given type
-   * </p>
-   *
-   * @param exp a java's expression
-   * @param root params.
-   * @param resultType What type of the result
-   * @return evaluate result
-   */
+  /** Eval a expression within context,Return the given type
+    *
+    * @param exp        a java's expression
+    * @param root       params.
+    * @param resultType What type of the result
+    * @return evaluate result
+    */
   def eval[T](exp: String, root: AnyRef, resultType: Class[T]): T
 }

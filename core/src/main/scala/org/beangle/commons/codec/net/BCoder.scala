@@ -17,58 +17,53 @@
 
 package org.beangle.commons.codec.net
 
-import java.nio.charset.Charset
-
 import org.beangle.commons.codec.binary.Base64
-import org.beangle.commons.codec.net.BCoder._
-import org.beangle.commons.codec.{ Decoder, Encoder }
+import org.beangle.commons.codec.net.BCoder.*
+import org.beangle.commons.codec.{Decoder, Encoder}
 import org.beangle.commons.lang.Charsets
+
+import java.nio.charset.Charset
 
 object BCoder {
 
-  /**
-   * Separator.
-   */
+  /** Separator.
+    */
   protected val Sep = '?'
 
-  /**
-   * Prefix
-   */
+  /** Prefix
+    */
   protected val Postfix = "?="
 
-  /**
-   * Postfix
-   */
+  /** Postfix
+    */
   protected val Prefix = "=?"
 }
 
-/**
- * <p>
- * Identical to the Base64 encoding defined by <a href="http://www.ietf.org/rfc/rfc1521.txt">RFC
- * 1521</a> and allows a character set to be specified.
- * </p>
- * <p>
- * <a href="http://www.ietf.org/rfc/rfc1522.txt">RFC 1522</a> describes techniques to allow the
- * encoding of non-ASCII text in various portions of a RFC 822 [2] message header, in a manner which
- * is unlikely to confuse existing message handling software.
- * </p>
- * @see <a href="http://www.ietf.org/rfc/rfc1522.txt">MIME (Multipurpose Internet Mail Extensions)
- *      Part Two: Message Header Extensions for Non-ASCII Text</a>
- * @author chaostone
- * @since 3.2.0
- */
+/** Identical to the Base64 encoding defined by <a href="http://www.ietf.org/rfc/rfc1521.txt">RFC
+  * 1521</a> and allows a character set to be specified.
+  * <p>
+  * <a href="http://www.ietf.org/rfc/rfc1522.txt">RFC 1522</a> describes techniques to allow the
+  * encoding of non-ASCII text in various portions of a RFC 822 [2] message header, in a manner which
+  * is unlikely to confuse existing message handling software.
+  * </p>
+  *
+  * @see <a href="http://www.ietf.org/rfc/rfc1522.txt">MIME (Multipurpose Internet Mail Extensions)
+  *      Part Two: Message Header Extensions for Non-ASCII Text</a>
+  * @author chaostone
+  * @since 3.2.0
+  */
 class BCoder(val charset: Charset = Charsets.UTF_8) extends Encoder[String, String] with Decoder[String, String] {
 
   protected def encoding: String = "B"
 
-  /**
-   * Encodes a string into its Base64 form using the default charset. Unsafe characters are escaped.
-   * @param value string to convert to Base64 form
-   * @return Base64 string
-   */
-  def encode(value: String): String =
-    if (value == null) null
-    else {
+  /** Encodes a string into its Base64 form using the default charset. Unsafe characters are escaped.
+    *
+    * @param value string to convert to Base64 form
+    * @return Base64 string
+    */
+  def encode(value: String): String = {
+    if value == null then null
+    else
       val buffer = new StringBuilder()
       buffer.append(Prefix)
       buffer.append(charset)
@@ -78,15 +73,15 @@ class BCoder(val charset: Charset = Charsets.UTF_8) extends Encoder[String, Stri
       buffer.append(new String(Base64.encode(value.getBytes(charset))))
       buffer.append(Postfix)
       buffer.toString
-    }
+  }
 
-  /**
-   * Decodes a Base64 string into its original form. Escaped characters are converted back to their
-   * original
-   * representation.
-   * @param text Base64 string to convert into its original form
-   * @return original string
-   */
+  /** Decodes a Base64 string into its original form. Escaped characters are converted back to their
+    * original
+    * representation.
+    *
+    * @param text Base64 string to convert into its original form
+    * @return original string
+    */
   def decode(text: String): String = {
     if (text == null)
       return null

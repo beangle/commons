@@ -21,16 +21,16 @@ import org.beangle.commons.collection.IdentityCache
 
 class BeanInfoCache {
 
-  /**
-    * class info cache
+  /** class info cache
     */
   private val cache = new IdentityCache[Class[_], BeanInfo]
 
-  inline def of(inline clazzes: Class[_]*): List[BeanInfo] = ${BeanInfoDigger.digInto('clazzes, 'this)}
+  inline def of(inline clazzes: Class[_]*): List[BeanInfo] = ${ BeanInfoDigger.digInto('clazzes, 'this) }
 
-  inline def of[T](clazz: Class[T]): BeanInfo = ${BeanInfoDigger.digInto('clazz, 'this);}
+  inline def of[T](clazz: Class[T]): BeanInfo = ${ BeanInfoDigger.digInto('clazz, 'this) ; }
 
   /** register classInfo
+    *
     * @param bi
     */
   def update(bi: BeanInfo): BeanInfo = {
@@ -38,8 +38,7 @@ class BeanInfoCache {
     bi
   }
 
-  /**
-    * Load ClassInfo using reflections
+  /** Load ClassInfo using reflections
     */
   def get(clazz: Class[_]): BeanInfo = {
     val exist = cache.get(clazz)

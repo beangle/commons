@@ -22,8 +22,7 @@ import org.beangle.commons.lang.Strings
 
 import java.sql.Time
 
-/**
-  * Convert String to Time.
+/** Convert String to Time.
   * <p>
   * Convert HH:mm:ss to java.sql.Time<br>
   * Convert HH:mm to java.sql.Time<br>

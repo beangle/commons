@@ -17,10 +17,9 @@
 
 package org.beangle.commons.io
 
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.funspec.AnyFunSpec
-
 import org.beangle.commons.lang.ClassLoaders
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 class IOsTest extends AnyFunSpec with Matchers {
   describe("IOs") {

@@ -17,8 +17,8 @@
 
 package org.beangle.commons.lang.time
 
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 class StopwatchTest extends AnyFunSpec with Matchers {
   describe("Stopwatch") {

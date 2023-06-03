@@ -17,26 +17,25 @@
 
 package org.beangle.commons.lang.reflect
 
-import java.lang.reflect.{Method, Modifier, ParameterizedType, TypeVariable}
 import org.beangle.commons.collection.IdentityCache
 import org.beangle.commons.lang.reflect.Reflections.deduceParamTypes
 
-import scala.collection.mutable
+import java.lang.reflect.{Method, Modifier, ParameterizedType, TypeVariable}
 import scala.collection.immutable.ArraySeq
+import scala.collection.mutable
 import scala.quoted.*
 
 object BeanInfos {
 
   val cache = new BeanInfoCache
 
-  /**
-    * Get ClassInfo from cache or load it by type.
+  /** Get ClassInfo from cache or load it by type.
     */
   def get(clazz: Class[_]): BeanInfo = cache.get(clazz)
 
-  inline def of(inline clazzes:Class[_]*):List[BeanInfo] = ${BeanInfoDigger.digInto('clazzes,'cache)}
+  inline def of(inline clazzes: Class[_]*): List[BeanInfo] = ${ BeanInfoDigger.digInto('clazzes, 'cache) }
 
-  inline def of[T](clazz:Class[T]): BeanInfo = ${ BeanInfoDigger.digInto('clazz,'cache);}
+  inline def of[T](clazz: Class[T]): BeanInfo = ${ BeanInfoDigger.digInto('clazz, 'cache) ; }
 
-  def cached(clazz:Class[_]):Boolean = cache.contains(clazz)
+  def cached(clazz: Class[_]): Boolean = cache.contains(clazz)
 }

@@ -19,32 +19,27 @@ package org.beangle.commons.text.i18n
 
 import java.util.Locale
 
-/**
- * TextBundleRegistry
- *
- * @author chaostone
- * @since 3.0.0
- */
+/** TextBundleRegistry
+  *
+  * @author chaostone
+  * @since 3.0.0
+  */
 trait TextBundleRegistry {
 
-  /**
-   * Load and cache bundle
-   */
+  /** Load and cache bundle
+    */
   def load(locale: Locale, bundleName: String): TextBundle
 
-  /**
-   * List locale bundles
-   */
+  /** List locale bundles
+    */
   def getBundles(locale: Locale): List[TextBundle]
 
-  /**
-   * Load and cache default bundles
-   */
+  /** Load and cache default bundles
+    */
   def addDefaults(bundleNames: String*): Unit
 
-  /**
-   * Get default locale message
-   */
+  /** Get default locale message
+    */
   def getDefaultText(key: String, locale: Locale): Option[String]
 
   def reloadable: Boolean

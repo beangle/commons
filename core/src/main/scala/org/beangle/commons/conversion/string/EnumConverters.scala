@@ -24,8 +24,7 @@ import org.beangle.commons.lang.{ClassLoaders, Enums}
 import java.lang.reflect.Method
 import scala.reflect.Enum as ScalaEnum
 
-/**
-  * Convert String to Enumeration.
+/** Convert String to Enumeration.
   *
   * @author chaostone
   * @since 3.2.0
@@ -34,6 +33,7 @@ object EnumConverters extends StringConverterFactory[String, ScalaEnum] {
 
   class EnumConverter[T](e: AnyRef) extends Converter[String, T] {
     private val values = findValues(e)
+
     override def apply(input: String): T = values(input).asInstanceOf[T]
   }
 

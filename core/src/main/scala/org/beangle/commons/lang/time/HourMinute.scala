@@ -20,11 +20,11 @@ package org.beangle.commons.lang.time
 import org.beangle.commons.lang.Numbers.toShort
 import org.beangle.commons.lang.annotation.value
 
-/**
- * Hour and minute of day
- * @version 4.0.5
- * @since 4.0.5
- */
+/** Hour and minute of day
+  *
+  * @version 4.0.5
+  * @since 4.0.5
+  */
 object HourMinute {
 
   val Zero = new HourMinute(0)
@@ -34,6 +34,7 @@ object HourMinute {
 
   def of(hour: Int, minute: Int): HourMinute =
     new HourMinute((hour * 100 + minute).asInstanceOf[Short])
+
   def of(time: java.time.LocalTime): HourMinute =
     of(time.getHour, time.getMinute)
 
@@ -47,15 +48,14 @@ object HourMinute {
   }
 }
 
-/**
- * 一天中的分钟时间，格式如23:33
- */
+/** 一天中的分钟时间，格式如23:33
+  */
 @value
 class HourMinute(val value: Short) extends Serializable with Ordered[HourMinute] {
 
   require(value <= 2400, s"Invalid time value $value,It should less than or equals 2400")
 
-  override def toString(): String = {
+  override def toString: String = {
     var time = String.valueOf(value)
     while (time.length < 4) time = "0" + time
     time.substring(0, 2) + ":" + time.substring(2, 4)

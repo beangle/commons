@@ -20,9 +20,9 @@ package org.beangle.commons.conversion.converter
 import org.beangle.commons.conversion.Converter
 import org.beangle.commons.conversion.impl.ConverterFactory
 
-import java.lang.{ Iterable => JIterable }
-import java.{ util => ju }
-import scala.collection.{ immutable, mutable }
+import java.lang.Iterable as JIterable
+import java.util as ju
+import scala.collection.{immutable, mutable}
 
 object IterableConverterFactory extends ConverterFactory[JIterable[_], scala.collection.Iterable[_]] {
 

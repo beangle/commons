@@ -19,7 +19,7 @@ package org.beangle.commons.text.i18n
 
 import java.util.Locale
 
-object TextResource{
+object TextResource {
 
   object Empty extends TextResource {
     def apply(key: String): Option[String] = Some(key)
@@ -30,35 +30,32 @@ object TextResource{
   }
 
 }
-/**
- * TextResource interface.
- *
- * @author chaostone
- */
+
+/** TextResource interface.
+  *
+  * @author chaostone
+  */
 trait TextResource {
 
-  /**
-   * Gets a message based on a message key, or null if no message is found.
-   *
-   * @param key the resource bundle key that is to be searched for
-   * @return the message as found in the resource bundle, or null if none is found.
-   */
+  /** Gets a message based on a message key, or null if no message is found.
+    *
+    * @param key the resource bundle key that is to be searched for
+    * @return the message as found in the resource bundle, or null if none is found.
+    */
   def apply(key: String): Option[String]
 
-  /**
-   * Gets a message based on a key using the supplied obj, as defined in
-   * {@link java.text.MessageFormat}, or, if the message is not found, a
-   * supplied default value is returned.
-   *
-   * @param key the resource bundle key that is to be searched for
-   * @param defaultValue the default value which will be returned if no message is found
-   * @param obj obj to be used in a {@link java.text.MessageFormat} message
-   * @return the message as found in the resource bundle, or defaultValue if none is found
-   */
+  /** Gets a message based on a key using the supplied obj, as defined in
+    * {@link java.text.MessageFormat}, or, if the message is not found, a
+    * supplied default value is returned.
+    *
+    * @param key          the resource bundle key that is to be searched for
+    * @param defaultValue the default value which will be returned if no message is found
+    * @param obj          obj to be used in a {@link java.text.MessageFormat} message
+    * @return the message as found in the resource bundle, or defaultValue if none is found
+    */
   def apply(key: String, defaultValue: String, obj: Any*): String
 
-  /**
-   * @return locale
-   */
+  /** @return locale
+    */
   def locale: Locale
 }

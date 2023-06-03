@@ -23,13 +23,11 @@ import org.beangle.commons.lang.time.HourMinute
 import java.time.*
 import java.util.Calendar
 
-/**
- * Dates class.
- *
- * @author chaostone
- */
+/** Dates class.
+  *
+  * @author chaostone
+  */
 object Dates {
-
 
   def today: LocalDate = LocalDate.now()
 
@@ -74,19 +72,17 @@ object Dates {
     else LocalDateTime.parse(Dates.normalizeDateTime(value)).atZone(ZoneId.systemDefault()).toInstant
   }
 
-
-  /**
-   * normalize.
-   * change other formats to uniform one.
-   * <p>
-   * YYYYMMDD => YYYY-MM-DD
-   * YYYY-M-D => YYYY-MM-DD
-   * YYYY.MM.dd =>YYYY-MM-DD
-   * </p>
-   *
-   * @param dateStr a String object.
-   * @return a String object.
-   */
+  /** normalize.
+    * change other formats to uniform one.
+    * <p>
+    * YYYYMMDD => YYYY-MM-DD
+    * YYYY-M-D => YYYY-MM-DD
+    * YYYY.MM.dd =>YYYY-MM-DD
+    * </p>
+    *
+    * @param dateStr a String object.
+    * @return a String object.
+    */
   def normalizeDate(str: String): String = {
     val dateStr = if (str.contains(".")) Strings.replace(str, ".", "-") else str
     if (!dateStr.contains("-")) {
@@ -109,19 +105,19 @@ object Dates {
   }
 
   /** Change DateTime Format
-   *  - YYYY-MM-DD HH:mm into YYYY-MM-DDTHH:mm:00
-   *  - YYYY-MM-DD HH:mm:ss into YYYY-MM-DDTHH:mm:ss
-   */
+    *  - YYYY-MM-DD HH:mm into YYYY-MM-DDTHH:mm:00
+    *  - YYYY-MM-DD HH:mm:ss into YYYY-MM-DDTHH:mm:ss
+    */
   def normalizeDateTime(value: String): String = {
     val v = if (value.length == 16) value + ":00" else value
     Strings.replace(v, " ", "T")
   }
 
   /** Change YearMonth Format
-   *  - YYYY.M into YYYY-0M
-   *  - YYYY.MM into YYYY-MM
-   *  - YYYY-M into YYYY-0M
-   */
+    *  - YYYY.M into YYYY-0M
+    *  - YYYY.MM into YYYY-MM
+    *  - YYYY-M into YYYY-0M
+    */
   def nomalizeYearMonth(ym: String): String = {
     val str = Strings.replace(ym, ".", "-")
     if (str.contains("-")) {
@@ -139,7 +135,6 @@ object Dates {
     val parts = splitDate(str)
     "--" + parts(0) + "-" + parts(1)
   }
-
 
   private def splitDate(str: String): Array[String] = {
     val parts = Strings.split(str, "-")

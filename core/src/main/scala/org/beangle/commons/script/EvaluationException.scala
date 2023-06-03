@@ -17,13 +17,9 @@
 
 package org.beangle.commons.script
 
-/**
- * <p>
- * EvaluationException class.
- * </p>
- *
- * @author chaostone
- */
+/** EvaluationException class.
+  *
+  * @author chaostone
+  */
 @SerialVersionUID(7366966661039007890L)
-class EvaluationException(message: String, cause: Throwable) extends RuntimeException(message, cause) {
-}
+class EvaluationException(message: String, cause: Throwable) extends RuntimeException(message, cause)

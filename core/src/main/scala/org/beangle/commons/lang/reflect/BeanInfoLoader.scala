@@ -40,8 +40,7 @@ object BeanInfoLoader {
 
   private case class Setter(method: Method, parameterTypes: Array[TypeInfo])
 
-  /**
-    * Load BeanInfo using reflections
+  /** Load BeanInfo using reflections
     */
   def load(clazz: Class[_]): BeanInfo = {
     val className = clazz.getName
@@ -121,7 +120,7 @@ object BeanInfoLoader {
     }
 
     // change accessible for none public class
-    if  !Modifier.isPublic(clazz.getModifiers) then
+    if !Modifier.isPublic(clazz.getModifiers) then
       properties foreach { case (k, v) =>
         v.getter.foreach { m => m.setAccessible(true) }
         v.setter.foreach { m => m.setAccessible(true) }

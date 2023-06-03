@@ -17,7 +17,7 @@
 
 package org.beangle.commons.io
 
-import java.io.{ InputStream, ObjectInputStream, ObjectOutputStream, OutputStream }
+import java.io.{InputStream, ObjectInputStream, ObjectOutputStream, OutputStream}
 
 trait ObjectSerializer {
 

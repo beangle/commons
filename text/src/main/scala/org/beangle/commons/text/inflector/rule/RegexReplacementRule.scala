@@ -19,11 +19,10 @@ package org.beangle.commons.text.inflector.rule
 
 import java.util.regex.Matcher
 
-/**
- * RegexReplacementRule class.
- *
- * @author chaostone
- */
+/** RegexReplacementRule class.
+  *
+  * @author chaostone
+  */
 class RegexReplacementRule(regex: String, val replacement: String) extends AbstractRegexReplacementRule(regex) {
 
   override def replace(matcher: Matcher): String = matcher.replaceFirst(replacement)

@@ -58,9 +58,8 @@ object Reflections {
     }
   }
 
-  /**
-   * Find parameter types of given class's interface or superclass
-   */
+  /** Find parameter types of given class's interface or superclass
+    */
   def getGenericParamTypes(clazz: Class[_], expected: Class[_]): collection.Map[String, Class[_]] = {
     if !expected.isAssignableFrom(clazz) then Map.empty else getGenericParamTypes(clazz, Set(expected))
   }
@@ -149,9 +148,8 @@ object Reflections {
     } else true
   }
 
-  /**
-   * Find annotation in method declare class hierarchy
-   */
+  /** Find annotation in method declare class hierarchy
+    */
   def getAnnotation[T <: Annotation](method: Method, clazz: Class[T]): Tuple2[T, Method] = {
     val ann = method.getAnnotation(clazz)
     if (null == ann) {
@@ -166,9 +164,8 @@ object Reflections {
     } else (ann, method)
   }
 
-  /**
-   * 得到类和对应泛型的参数信息
-   */
+  /** 得到类和对应泛型的参数信息
+    */
   def deduceParamTypes(clazz: Class[_], typ: java.lang.reflect.Type,
                        paramTypes: collection.Map[String, Class[_]]): collection.Map[String, Class[_]] = {
     typ match {

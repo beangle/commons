@@ -18,11 +18,11 @@
 package org.beangle.commons.text.inflector.rule
 
 import java.util.regex.Matcher
-/**
- * IrregularMappingRule class.
- *
- * @author chaostone
- */
+
+/** IrregularMappingRule class.
+  *
+  * @author chaostone
+  */
 class IrregularMappingRule(wordMappings: Map[String, String], regex: String)
   extends AbstractRegexReplacementRule(regex) {
 

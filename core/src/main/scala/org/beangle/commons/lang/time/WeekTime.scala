@@ -93,24 +93,25 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
       case _ => false
     }
 
-  /**
-   * 尝试合并两个时间
-   * @param w2   second weektime
-   * @return true if merged
-   */
+  /** 尝试合并两个时间
+    *
+    * @param w2 second weektime
+    * @return true if merged
+    */
   def merge(w2: WeekTime, minGap: Int): Boolean =
     if (mergeable(w2, minGap)) {
       doMerge(w2)
       true
     } else
       false
-  /**
-   * 判断合并两个时间是否可以
-   * 标准为 （weekState、weekday相等） 且 （相连时间 或 时间相交）
-   * 或者时间相等则可以合并周次
-   * @param w2   second weektime
-   * @return true if merged
-   */
+
+  /** 判断合并两个时间是否可以
+    * 标准为 （weekState、weekday相等） 且 （相连时间 或 时间相交）
+    * 或者时间相等则可以合并周次
+    *
+    * @param w2 second weektime
+    * @return true if merged
+    */
   def mergeable(w2: WeekTime, minGap: Int): Boolean =
     if (this.startOn == w2.startOn)
       if (this.weekstate == w2.weekstate)
@@ -123,10 +124,10 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
     else
       false
 
-  /**
-   * 将两时间进行合并，前提是这两时间可以合并
-   * @param w2 weektime
-   */
+  /** 将两时间进行合并，前提是这两时间可以合并
+    *
+    * @param w2 weektime
+    */
   private def doMerge(w2: WeekTime): Unit =
     if (this.weekstate == w2.weekstate) {
       if (w2.beginAt.value < this.beginAt.value)
@@ -139,12 +140,12 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
 
 object WeekTime {
 
-  /**
-   * 构造某个日期（beginAt, endAt必须是同一天，只是时间不同）的WeekTime
-   * @param beginAt beginAt
-   * @param endAt   endAt
-   * @return
-   */
+  /** 构造某个日期（beginAt, endAt必须是同一天，只是时间不同）的WeekTime
+    *
+    * @param beginAt beginAt
+    * @param endAt   endAt
+    * @return
+    */
   def of(startOn: LocalDate, beginAt: HourMinute, endAt: HourMinute): WeekTime = {
     val time = of(startOn)
     time.beginAt = beginAt
@@ -153,10 +154,10 @@ object WeekTime {
   }
 
   /**
-   *
-   * @param ld date
-   * @return
-   */
+    *
+    * @param ld date
+    * @return
+    */
   def of(ld: LocalDate): WeekTime = {
     val yearStartOn = getStartOn(ld.getYear, WeekDay.of(ld))
     val weektime = new WeekTime
@@ -165,12 +166,12 @@ object WeekTime {
     weektime
   }
 
-  /**
-   * 查询该年份第一个指定day的日期
-   * @param year    year
-   * @param weekday weekday
-   * @return 指定day的第一天
-   */
+  /** 查询该年份第一个指定day的日期
+    *
+    * @param year    year
+    * @param weekday weekday
+    * @return 指定day的第一天
+    */
   def getStartOn(year: Int, weekday: WeekDay): LocalDate = {
     var startDate = LocalDate.of(year, 1, 1)
     while (startDate.getDayOfWeek.getValue != weekday.id)

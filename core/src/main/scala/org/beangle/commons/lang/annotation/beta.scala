@@ -18,15 +18,15 @@
 package org.beangle.commons.lang.annotation
 
 import scala.annotation.StaticAnnotation
-/**
- * Signifies that a public API (public class, method or field) is subject to
- * incompatible changes, or even removal, in a future release. An API bearing
- * this annotation is exempt from any compatibility guarantees made by its
- * containing library. Note that the presence of this annotation implies nothing
- * about the quality or performance of the API in question, only the fact that
- * it is not "API-frozen."
- *
- * @author chaostone
- * @since 3.0.2
- */
+
+/** Signifies that a public API (public class, method or field) is subject to
+  * incompatible changes, or even removal, in a future release. An API bearing
+  * this annotation is exempt from any compatibility guarantees made by its
+  * containing library. Note that the presence of this annotation implies nothing
+  * about the quality or performance of the API in question, only the fact that
+  * it is not "API-frozen."
+  *
+  * @author chaostone
+  * @since 3.0.2
+  */
 class beta extends StaticAnnotation

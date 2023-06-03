@@ -20,7 +20,7 @@ package org.beangle.commons
 import java.net.URL
 
 object Version {
-  def name :String = "Beangle Scala Development Toolkit"
+  def name: String = "Beangle Scala Development Toolkit"
 
   def version: String = findBundleVersion(Version.getClass)
 
