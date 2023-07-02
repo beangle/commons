@@ -85,18 +85,18 @@ object BeanInfoLoader {
     // find constructor with arguments
     val ctors = Collections.newBuffer[BeanInfo.ConstructorInfo]
     var pCtorParamNames: Set[String] = Set.empty
-    var i = 0
+    var foundDefaultCtor = false
     clazz.getConstructors foreach { ctor =>
       val params = new mutable.ArrayBuffer[ParamInfo](ctor.getParameterCount)
       ctor.getParameters foreach { p => params += ParamInfo(p.getName, typeof(p.getType, p.getParameterizedType, paramTypes), None) }
-      if (i == 0) {
+      if (!foundDefaultCtor && defaultCtorParamValues.nonEmpty) {
         pCtorParamNames = params.map(_.name).toSet
-        if (defaultCtorParamValues.nonEmpty) {
-          defaultCtorParamValues foreach { case (i, v) =>
-            params(i - 1) = params(i - 1).copy(defaultValue = Some(v)) // for default values were 1 based.
+        if (defaultCtorParamValues.keys.max == params.length) {
+          foundDefaultCtor = true
+          defaultCtorParamValues foreach { case (idx, v) =>
+            params(idx - 1) = params(idx - 1).copy(defaultValue = Some(v)) // for default values were 1 based.
           }
         }
-        i += 1
         ctors += BeanInfo.ConstructorInfo(ArraySeq.from(params))
       }
     }
