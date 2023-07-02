@@ -26,7 +26,6 @@ import java.lang.reflect.Method
 import java.net.{JarURLConnection, URL}
 import java.util.jar.JarFile
 
-
 object ResourcePatternResolver {
   def getResources(locationPattern: String): List[URL] =
     new ResourcePatternResolver().getResources(locationPattern)

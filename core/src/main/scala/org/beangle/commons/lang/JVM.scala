@@ -41,7 +41,7 @@ object JVM {
 
   def gcName: String = {
     val cs = ManagementFactory.getGarbageCollectorMXBeans
-    if cs.isEmpty then "UNKOWN"
+    if cs.isEmpty then "UNKNOWN"
     else
       val ob = cs.get(0).getObjectName.toString
       Strings.substringBetween(ob, "name=", " ")
