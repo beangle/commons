@@ -97,8 +97,8 @@ object BeanInfoLoader {
             params(idx - 1) = params(idx - 1).copy(defaultValue = Some(v)) // for default values were 1 based.
           }
         }
-        ctors += BeanInfo.ConstructorInfo(ArraySeq.from(params))
       }
+      ctors += BeanInfo.ConstructorInfo(ArraySeq.from(params))
     }
 
     // make buffer to list and filter duplicated bridge methods

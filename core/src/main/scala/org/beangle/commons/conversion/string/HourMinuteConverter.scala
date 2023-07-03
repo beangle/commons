@@ -23,5 +23,7 @@ import org.beangle.commons.lang.time.HourMinute
 
 object HourMinuteConverter extends Converter[String, HourMinute] {
 
-  override def apply(input: String): HourMinute = if Strings.isEmpty(input) then null else HourMinute.apply(input)
+  override def apply(input: String): HourMinute = {
+    if Strings.isEmpty(input) then null else HourMinute.apply(input)
+  }
 }

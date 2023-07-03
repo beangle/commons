@@ -160,5 +160,9 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
       val t2 = BeanInfos.get(classOf[TT])
       assert(!t2.properties("name").isTransient)
     }
+    it("it get primary constructor") {
+      assert(BeanInfos.get(classOf[Course]).ctors.size == 2)
+      assert(BeanInfos.get(classOf[Room]).ctors.size == 1)
+    }
   }
 }

@@ -25,10 +25,10 @@ import java.lang.reflect.Method
 import scala.reflect.Enum as ScalaEnum
 
 /** Convert String to Enumeration.
-  *
-  * @author chaostone
-  * @since 3.2.0
-  */
+ *
+ * @author chaostone
+ * @since 3.2.0
+ */
 object EnumConverters extends StringConverterFactory[String, ScalaEnum] {
 
   class EnumConverter[T](e: AnyRef) extends Converter[String, T] {

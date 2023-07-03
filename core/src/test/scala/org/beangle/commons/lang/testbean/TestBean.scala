@@ -77,7 +77,7 @@ trait Entity[ID] {
   def id: ID
 
   /** Return true if persisted
-    */
+   */
   @Transient
   def persisted: Boolean = id != null
 
@@ -188,4 +188,16 @@ class LongFactory extends Factory[Long] with Logging {
 
 class Textbook extends NumIdBean[java.lang.Long] {
   def name: String = "textbook"
+}
+
+class Course(val id: Long) {
+  def this(id: String) = {
+    this(id.toLong)
+  }
+
+  var name: String = _
+}
+
+class Room(var id: Long = 0) {
+  var name: String = _
 }
