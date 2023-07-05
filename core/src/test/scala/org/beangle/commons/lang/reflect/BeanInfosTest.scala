@@ -18,6 +18,7 @@
 package org.beangle.commons.lang.reflect
 
 import org.beangle.commons.collection.Properties
+import org.beangle.commons.lang.Primitives
 import org.beangle.commons.lang.reflect.TypeInfo.*
 import org.beangle.commons.lang.testbean.*
 import org.scalatest.funspec.AnyFunSpec
@@ -163,6 +164,15 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
     it("it get primary constructor") {
       assert(BeanInfos.get(classOf[Course]).ctors.size == 2)
       assert(BeanInfos.get(classOf[Room]).ctors.size == 1)
+      val t = BeanInfos.get(classOf[Teacher])
+      assert(t.ctors.size == 2)
+      assert(t.ctors.exists(c=> c.parameters.exists(p=> p.defaultValue.nonEmpty)))
+      t.ctors.foreach { ct =>
+        val p = ct.parameters(2)
+        p.defaultValue foreach { dv =>
+          assert(Primitives.wrap(p.typeinfo.clazz).isAssignableFrom(dv.getClass))
+        }
+      }
     }
   }
 }

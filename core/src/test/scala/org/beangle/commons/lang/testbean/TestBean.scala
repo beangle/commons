@@ -201,3 +201,10 @@ class Course(val id: Long) {
 class Room(var id: Long = 0) {
   var name: String = _
 }
+
+class Teacher(var id:Long ,name:String,genderId:Int=1){
+
+  def this(id:Long,department: Department,genderId:String)={
+    this(id,"",genderId.toInt)
+  }
+}

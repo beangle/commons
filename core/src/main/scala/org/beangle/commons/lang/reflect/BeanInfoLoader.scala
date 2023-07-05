@@ -23,7 +23,7 @@ import org.beangle.commons.lang.reflect.BeanInfo
 import org.beangle.commons.lang.reflect.BeanInfo.*
 import org.beangle.commons.lang.reflect.BeanInfo.Builder.filterSameNames
 import org.beangle.commons.lang.reflect.Reflections.deduceParamTypes
-import org.beangle.commons.lang.{ClassLoaders, Strings}
+import org.beangle.commons.lang.{ClassLoaders, Primitives, Strings}
 
 import java.beans.Transient
 import java.lang.Character.isUpperCase
@@ -72,11 +72,11 @@ object BeanInfoLoader {
     val defaultCtorParamValues: Map[Int, Any] =
       ClassLoaders.get(clazz.getName + "$") match {
         case Some(oclazz) =>
-          val osinglton = oclazz.getDeclaredField("MODULE$").get(null)
+          val singleton = oclazz.getDeclaredField("MODULE$").get(null)
           val params = Collections.newMap[Int, Any]
           oclazz.getDeclaredMethods foreach { m =>
             val index = Strings.substringAfter(m.getName, "$lessinit$greater$default$")
-            if (Strings.isNotEmpty(index)) params.put(Integer.parseInt(index), m.invoke(osinglton))
+            if (Strings.isNotEmpty(index)) params.put(Integer.parseInt(index), m.invoke(singleton))
           }
           params.toMap
         case None => Map.empty
@@ -90,9 +90,9 @@ object BeanInfoLoader {
       val params = new mutable.ArrayBuffer[ParamInfo](ctor.getParameterCount)
       ctor.getParameters foreach { p => params += ParamInfo(p.getName, typeof(p.getType, p.getParameterizedType, paramTypes), None) }
       if (!foundDefaultCtor && defaultCtorParamValues.nonEmpty) {
-        pCtorParamNames = params.map(_.name).toSet
-        if (defaultCtorParamValues.keys.max == params.length) {
+        if (isDefaultParamMatched(defaultCtorParamValues, params)) {
           foundDefaultCtor = true
+          pCtorParamNames = params.map(_.name).toSet
           defaultCtorParamValues foreach { case (idx, v) =>
             params(idx - 1) = params(idx - 1).copy(defaultValue = Some(v)) // for default values were 1 based.
           }
@@ -140,6 +140,18 @@ object BeanInfoLoader {
     val groupMethods = methods.groupBy(_.getName).map(x => (x._1, ArraySeq.from(x._2)))
 
     new BeanInfo(clazz, ArraySeq.from(ctors), properties.toMap, groupMethods)
+  }
+
+  private def isDefaultParamMatched(defaultCtorParamValues: Map[Int, Any], params: collection.Seq[ParamInfo]): Boolean = {
+    defaultCtorParamValues.forall { case (idx, pv) =>
+      if ((idx - 1) < params.length) {
+        pv match
+          case null => true
+          case value => Primitives.wrap(params(idx - 1).typeinfo.clazz).isAssignableFrom(Primitives.wrap(value.getClass))
+      } else {
+        false
+      }
+    }
   }
 
   private def navIterface(clazz: Class[_], accessed: mutable.HashSet[Class[_]],
