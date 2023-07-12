@@ -20,76 +20,97 @@ package org.beangle.commons.lang.time
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.annotation.value
 
+enum WeekCycle {
+
+  case Continuous, Odd, Even, Random
+
+  def id: Int = ordinal + 1
+}
+
 object WeekState {
 
   val Zero = new WeekState(0L)
 
-  def apply(value: String): WeekState =
-    new WeekState(value)
+  def apply(raw: String): WeekState = new WeekState(raw)
 
-  def of(weekIndex: Int): WeekState =
-    new WeekState(1L << weekIndex)
-
-  def of(weekIndecies: Iterable[Int]): WeekState = {
+  /** Build a weekstate by cycle
+   *
+   * @param start start week 1 based
+   * @param weeks how may weeks
+   * @param cycle cycle type(1"连续周", 2"单周", 3"双周", 4"任意周")
+   * @return
+   */
+  def build(start: Int, weeks: Int, cycle: WeekCycle): WeekState = {
+    val maxWeek = start + weeks - 1
+    require(maxWeek <= 63, "Weekstate only support max week is 63")
     var v = 0L
-    for (index <- weekIndecies)
-      v |= (1L << index)
+    (0 until weeks).foreach { i =>
+      val add = cycle match
+        case WeekCycle.Odd => (start + i) % 2 == 1
+        case WeekCycle.Even => (start + i) % 2 == 0
+        case _ => true
+      if add then v |= 1L << (start + i)
+    }
     new WeekState(v)
   }
 
-  def of(weekIndecies: Int*): WeekState =
-    of(weekIndecies)
+  def of(weekIndex: Int): WeekState = new WeekState(1L << weekIndex)
+
+  def of(weekIndecies: Iterable[Int]): WeekState = {
+    var v = 0L
+    for (index <- weekIndecies) v |= (1L << index)
+    new WeekState(v)
+  }
+
+  def of(weekIndecies: Int*): WeekState = of(weekIndecies)
 }
 
-/** week index is 1 based.
-  */
+/** Assembly week in a long value.
+ * week index is 1 based.
+ */
 @value
 class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
 
-  def this(str: String) = {
-    this(if (Strings.isEmpty(str)) 0 else java.lang.Long.parseLong(str, 2))
+  def this(raw: String) = {
+    this(if (Strings.isEmpty(raw)) 0 else java.lang.Long.parseLong(raw, 2))
   }
 
-  override def compare(other: WeekState): Int =
+  override def compare(other: WeekState): Int = {
     if (this.value < other.value) -1
     else if (this.value == other.value) 0
     else 1
+  }
 
-  def |(other: WeekState): WeekState =
-    new WeekState(this.value | other.value)
+  def |(other: WeekState): WeekState = new WeekState(this.value | other.value)
 
-  def &(other: WeekState): WeekState =
-    new WeekState(this.value & other.value)
+  def &(other: WeekState): WeekState = new WeekState(this.value & other.value)
 
-  def ^(other: WeekState): WeekState =
-    new WeekState(this.value ^ other.value)
+  def ^(other: WeekState): WeekState = new WeekState(this.value ^ other.value)
 
-  def isOverlap(other: WeekState): Boolean =
-    (this.value & other.value) > 0
+  def isOverlap(other: WeekState): Boolean = (this.value & other.value) > 0
 
-  override def toString: String =
-    java.lang.Long.toBinaryString(value)
+  override def toString: String = java.lang.Long.toBinaryString(value)
 
-  override def equals(obj: Any): Boolean =
+  override def equals(obj: Any): Boolean = {
     obj match {
       case ws: WeekState => ws.value == this.value
       case _ => false
     }
+  }
 
-  override def hashCode: Int =
-    java.lang.Long.hashCode(value)
+  override def hashCode: Int = java.lang.Long.hashCode(value)
 
-  def span: Tuple2[Int, Int] = {
+  def span: (Int, Int) = {
     val str = toString
     val length = str.length
     (length - str.lastIndexOf('1') - 1, length - str.indexOf('1') - 1)
   }
 
   /** how many weeks
-    *
-    * @see http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetTable
-    * @see http://www.geeksforgeeks.org/count-set-bits-in-an-integer/
-    */
+   *
+   * @see http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetTable
+   * @see http://www.geeksforgeeks.org/count-set-bits-in-an-integer/
+   */
   def size: Int = {
     var c = 0
     var n = this.value
@@ -101,19 +122,19 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     c
   }
 
-  def last: Int =
-    if (value > 0) {
+  def last: Int = {
+    if value > 0 then
       val str = toString
       str.length - str.indexOf('1') - 1
-    } else
-      -1
+    else -1
+  }
 
-  def first: Int =
-    if (value > 0) {
+  def first: Int = {
+    if value > 0 then
       val str = toString
       str.length - str.lastIndexOf('1') - 1
-    } else
-      -1
+    else -1
+  }
 
   def weeks: List[Int] = {
     val weekstr = toString
@@ -126,6 +147,27 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     result.toList
   }
 
-  def isOccupied(week: Int): Boolean =
-    (value & (1L << week)) > 0
+  def contains(week: Int): Boolean = (value & (1L << week)) > 0
+
+  @deprecated("using contains", "5.5.5")
+  def isOccupied(week: Int): Boolean = (value & (1L << week)) > 0
+
+  def cycle: WeekCycle = {
+    val wl = this.weeks
+    if (wl.isEmpty) return WeekCycle.Continuous
+
+    val first = wl.head
+    val last = wl.last
+    if (last - first + 1 == wl.size) return WeekCycle.Continuous
+
+    var oddWeeks = 0
+    var evenWeeks = 0
+    wl foreach { i =>
+      if (i % 2 == 1) oddWeeks += 1
+      else if (i % 2 == 0) evenWeeks += 1
+    }
+    if (evenWeeks == 0) WeekCycle.Odd
+    else if (oddWeeks == 0) WeekCycle.Even
+    else WeekCycle.Random
+  }
 }

@@ -49,8 +49,8 @@ class WeekStateTest extends AnyFunSpec with Matchers {
     }
 
     it("is occupied") {
-      assert(WeekState("101100").isOccupied(2))
-      assert(!WeekState("101100").isOccupied(4))
+      assert(WeekState("101100").contains(2))
+      assert(!WeekState("101100").contains(4))
     }
 
     it("is serializable") {
@@ -70,6 +70,11 @@ class WeekStateTest extends AnyFunSpec with Matchers {
       assert(WeekState.of(1) == WeekState("10"))
       assert(WeekState.of(1, 2) == WeekState("110"))
       assert(WeekState.of(3, 4) == WeekState("11000"))
+    }
+    it("build") {
+      val w = WeekState.build(1, 8, WeekCycle.Even)
+      assert(w.cycle == WeekCycle.Even)
+      assert(w == WeekState("101010100"))
     }
 
   }
