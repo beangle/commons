@@ -24,8 +24,9 @@ import org.beangle.commons.logging.Logging
 
 import java.io.{BufferedReader, ByteArrayOutputStream, InputStreamReader, OutputStreamWriter}
 import java.net.HttpURLConnection.*
-import java.net.{HttpURLConnection, URL, URLConnection}
+import java.net.{HttpURLConnection, URL, URLConnection, URLEncoder}
 import java.nio.charset.Charset
+import scala.collection.mutable
 
 object HttpUtils extends Logging {
 
@@ -166,6 +167,16 @@ object HttpUtils extends Logging {
     val os = conn.getOutputStream
     body match {
       case ba: Array[Byte] => os.write(ba)
+      case params: collection.Map[String, Any] =>
+        val paramBuffer = new mutable.ArrayBuffer[String]
+        params foreach { e =>
+          if (e._2 != null) {
+            paramBuffer.addOne(e._1 + "=" + URLEncoder.encode(e._2.toString, Charsets.UTF_8))
+          }
+        }
+        val osw = new OutputStreamWriter(os, "UTF-8")
+        osw.write(paramBuffer.mkString("&"))
+        osw.close()
       case _ =>
         val osw = new OutputStreamWriter(os, "UTF-8")
         osw.write(body.toString)

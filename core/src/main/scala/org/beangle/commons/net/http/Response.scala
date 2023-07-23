@@ -21,7 +21,13 @@ import java.net.HttpURLConnection
 
 case class Response(status: Int, content: Any) {
 
-  def getText: String = String.valueOf(content)
+  def getText: String = {
+    content match {
+      case null => ""
+      case s: String => s
+      case bytes: Array[Byte] => new String(bytes)
+    }
+  }
 
   def isOk: Boolean = status == HttpURLConnection.HTTP_OK
 
