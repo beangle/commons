@@ -21,12 +21,11 @@ import org.beangle.commons.lang.Strings.{isEmpty, leftPad}
 import org.beangle.commons.lang.time.HourMinute
 
 import java.time.*
-import java.util.Calendar
 
 /** Dates class.
-  *
-  * @author chaostone
-  */
+ *
+ * @author chaostone
+ */
 object Dates {
 
   def today: LocalDate = LocalDate.now()
@@ -69,20 +68,23 @@ object Dates {
     if isEmpty(value) then return null
     if value.endsWith("Z") then Instant.parse(value)
     else if value.contains('+') then OffsetDateTime.parse(Dates.normalizeDateTime(value)).toInstant
-    else LocalDateTime.parse(Dates.normalizeDateTime(value)).atZone(ZoneId.systemDefault()).toInstant
+    else {
+      val text = Dates.normalizeDateTime(value)
+      LocalDateTime.parse(text).atZone(ZoneId.systemDefault()).toInstant
+    }
   }
 
   /** normalize.
-    * change other formats to uniform one.
-    * <p>
-    * YYYYMMDD => YYYY-MM-DD
-    * YYYY-M-D => YYYY-MM-DD
-    * YYYY.MM.dd =>YYYY-MM-DD
-    * </p>
-    *
-    * @param dateStr a String object.
-    * @return a String object.
-    */
+   * change other formats to uniform one.
+   * <p>
+   * YYYYMMDD => YYYY-MM-DD
+   * YYYY-M-D => YYYY-MM-DD
+   * YYYY.MM.dd =>YYYY-MM-DD
+   * </p>
+   *
+   * @param dateStr a String object.
+   * @return a String object.
+   */
   def normalizeDate(str: String): String = {
     val dateStr = if (str.contains(".")) Strings.replace(str, ".", "-") else str
     if (!dateStr.contains("-")) {
@@ -90,11 +92,15 @@ object Dates {
       dateBuf.insert("yyyyMM".length, '-')
       dateBuf.insert("yyyy".length, '-')
       dateBuf.toString
-    } else if (dateStr.length >= 10) dateStr else if (dateStr.length < 8) throw new IllegalArgumentException() else {
+    } else if (dateStr.length >= 10) {
+      dateStr
+    } else if (dateStr.length < 8) throw new IllegalArgumentException()
+    else {
       val value = dateStr.toCharArray
-      val dayIndex = if (value(6) == '-') 7 else {
-        if (value(7) == '-') 8 else -1
-      }
+      val dayIndex =
+        if (value(6) == '-') 7 else {
+          if (value(7) == '-') 8 else -1
+        }
       if (dayIndex < 0) throw new IllegalArgumentException()
       val sb = new StringBuilder(10)
       sb.appendAll(value, 0, 5)
@@ -105,19 +111,33 @@ object Dates {
   }
 
   /** Change DateTime Format
-    *  - YYYY-MM-DD HH:mm into YYYY-MM-DDTHH:mm:00
-    *  - YYYY-MM-DD HH:mm:ss into YYYY-MM-DDTHH:mm:ss
-    */
+   *  - YYYY-MM-DD HH:mm into YYYY-MM-DDTHH:mm:00
+   *  - YYYY-MM-DD HH:mm:ss into YYYY-MM-DDTHH:mm:ss
+   */
   def normalizeDateTime(value: String): String = {
-    val v = if (value.length == 16) value + ":00" else value
-    Strings.replace(v, " ", "T")
+    val v = Strings.replace(value, " ", "T")
+    val sepIdx = v.indexOf('T')
+    var hms: String = null
+    var date: String = null
+    if (sepIdx == -1) {
+      hms = "00:00:00"
+      date = v
+    } else {
+      hms = v.substring(sepIdx + 1)
+      date = v.substring(0, sepIdx)
+      val commaCount = Strings.count(hms, ':')
+      if (hms.isEmpty) hms = "00:00:00"
+      else if (commaCount == 0) hms += ":00:00"
+      else if (commaCount == 1) hms += ":00"
+    }
+    normalizeDate(date) + "T" + hms
   }
 
   /** Change YearMonth Format
-    *  - YYYY.M into YYYY-0M
-    *  - YYYY.MM into YYYY-MM
-    *  - YYYY-M into YYYY-0M
-    */
+   *  - YYYY.M into YYYY-0M
+   *  - YYYY.MM into YYYY-MM
+   *  - YYYY-M into YYYY-0M
+   */
   def nomalizeYearMonth(ym: String): String = {
     val str = Strings.replace(ym, ".", "-")
     if (str.contains("-")) {
