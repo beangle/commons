@@ -162,11 +162,13 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
       assert(!t2.properties("name").isTransient)
     }
     it("it get primary constructor") {
+      val a = BeanInfos.get(classOf[CaseT])
+      assert(!a.properties.head._2.isTransient)
       assert(BeanInfos.get(classOf[Course]).ctors.size == 2)
       assert(BeanInfos.get(classOf[Room]).ctors.size == 1)
       val t = BeanInfos.get(classOf[Teacher])
       assert(t.ctors.size == 2)
-      assert(t.ctors.exists(c=> c.parameters.exists(p=> p.defaultValue.nonEmpty)))
+      assert(t.ctors.exists(c => c.parameters.exists(p => p.defaultValue.nonEmpty)))
       t.ctors.foreach { ct =>
         val p = ct.parameters(2)
         p.defaultValue foreach { dv =>
@@ -176,3 +178,5 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
     }
   }
 }
+
+case class CaseT(name: String)

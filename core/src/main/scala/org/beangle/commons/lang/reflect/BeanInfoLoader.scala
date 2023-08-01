@@ -92,12 +92,12 @@ object BeanInfoLoader {
       if (!foundDefaultCtor && defaultCtorParamValues.nonEmpty) {
         if (isDefaultParamMatched(defaultCtorParamValues, params)) {
           foundDefaultCtor = true
-          pCtorParamNames = params.map(_.name).toSet
           defaultCtorParamValues foreach { case (idx, v) =>
             params(idx - 1) = params(idx - 1).copy(defaultValue = Some(v)) // for default values were 1 based.
           }
         }
       }
+      pCtorParamNames ++= params.map(_.name).toSet
       ctors += BeanInfo.ConstructorInfo(ArraySeq.from(params))
     }
 
