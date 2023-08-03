@@ -95,4 +95,33 @@ object Consoles {
     Console.print(msg)
     if (!msg.endsWith("\n")) Console.flush()
   }
+
+
+  enum Color(val id: Int) {
+    case Black extends Color(30)
+    case Red extends Color(31)
+    case Green extends Color(32)
+    case Yellow extends Color(33)
+    case Blue extends Color(34)
+    case Purple extends Color(35)
+    case Cyan extends Color(36)
+    case White extends Color(37)
+  }
+
+  def red(text: String): String = render(text, Color.Red)
+
+  def green(text: String): String = render(text, Color.Green)
+
+  def yellow(text: String): String = render(text, Color.Yellow)
+
+  def blue(text: String): String = render(text, Color.Blue)
+
+  def purple(text: String): String = render(text, Color.Purple)
+
+  def cyan(text: String): String = render(text, Color.Cyan)
+
+  def render(text: String, color: Color): String = {
+    s"\u001B[${color.id}m${text}\u001B[0m"
+  }
+
 }
