@@ -18,6 +18,7 @@
 package org.beangle.commons.lang
 
 import java.util.Scanner
+import scala.collection.mutable
 
 object Consoles {
 
@@ -96,7 +97,6 @@ object Consoles {
     if (!msg.endsWith("\n")) Console.flush()
   }
 
-
   enum Color(val id: Int) {
     case Black extends Color(30)
     case Red extends Color(31)
@@ -105,23 +105,65 @@ object Consoles {
     case Blue extends Color(34)
     case Purple extends Color(35)
     case Cyan extends Color(36)
-    case White extends Color(37)
+    case Gray extends Color(37)
   }
 
-  def red(text: String): String = render(text, Color.Red)
+  object ColorText {
 
-  def green(text: String): String = render(text, Color.Green)
+    def red(text: String): String = render(text, Color.Red)
 
-  def yellow(text: String): String = render(text, Color.Yellow)
+    def green(text: String): String = render(text, Color.Green)
 
-  def blue(text: String): String = render(text, Color.Blue)
+    def yellow(text: String): String = render(text, Color.Yellow)
 
-  def purple(text: String): String = render(text, Color.Purple)
+    def blue(text: String): String = render(text, Color.Blue)
 
-  def cyan(text: String): String = render(text, Color.Cyan)
+    def purple(text: String): String = render(text, Color.Purple)
 
-  def render(text: String, color: Color): String = {
-    s"\u001B[${color.id}m${text}\u001B[0m"
+    def cyan(text: String): String = render(text, Color.Cyan)
+
+    def gray(text: String): String = render(text, Color.Gray)
+
+    private def render(text: String, color: Color): String = {
+      s"\u001B[${color.id}m${text}\u001B[0m"
+    }
   }
 
+  class ColorText(val s: String) {
+    private val ansiSeq = new mutable.ArrayBuffer[Int]
+
+    def color(color: Color): ColorText = {
+      ansiSeq += color.id
+      this
+    }
+
+    def bold(): ColorText = {
+      ansiSeq += 1 // 1 Bold
+      this
+    }
+
+    def underlined(): ColorText = {
+      ansiSeq += 4 // underlined
+      this
+    }
+
+    def blinking(): ColorText = {
+      ansiSeq += 5
+      this
+    }
+
+    def background(color: Color): ColorText = {
+      ansiSeq += (color.id + 10)
+      this
+    }
+
+    def render(text: String): String = {
+      if ansiSeq.isEmpty then text
+      else s"\u001B[${ansiSeq.mkString(";")}m${text}\u001B[0m"
+    }
+
+    override def toString: String = render(s)
+  }
+
+  given Conversion[String, ColorText] = new ColorText(_)
 }

@@ -17,7 +17,6 @@
 
 package org.beangle.commons.lang.time
 
-
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.time.{HourMinute, WeekDay, WeekTime}
