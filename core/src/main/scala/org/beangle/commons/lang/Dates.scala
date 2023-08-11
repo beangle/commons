@@ -86,7 +86,8 @@ object Dates {
    * @return a String object.
    */
   def normalizeDate(str: String): String = {
-    val dateStr = if (str.contains(".")) Strings.replace(str, ".", "-") else str
+    var dateStr = if (str.contains(".")) Strings.replace(str, ".", "-") else str
+    dateStr = Strings.replace(dateStr, "/", "-")
     if (!dateStr.contains("-")) {
       val dateBuf = new StringBuilder(dateStr)
       dateBuf.insert("yyyyMM".length, '-')

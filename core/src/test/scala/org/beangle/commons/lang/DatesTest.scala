@@ -20,8 +20,8 @@ package org.beangle.commons.lang
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-import java.time.format.DateTimeFormatter
 import java.time.*
+import java.time.format.DateTimeFormatter
 
 class DatesTest extends AnyFunSpec with Matchers {
 
@@ -34,6 +34,7 @@ class DatesTest extends AnyFunSpec with Matchers {
     }
 
     it("Normalize date string") {
+      Dates.normalizeDate("1980/09/01") should equal("1980-09-01")
       Dates.normalizeDate("19800901") should equal("1980-09-01")
       Dates.normalizeDate("1980-9-1") should equal("1980-09-01")
       Dates.normalizeDate("1980-09-1") should equal("1980-09-01")
