@@ -167,11 +167,11 @@ object HttpUtils extends Logging {
     val os = conn.getOutputStream
     body match {
       case ba: Array[Byte] => os.write(ba)
-      case params: collection.Map[String, Any] =>
+      case params: collection.Map[_, _] =>
         val paramBuffer = new mutable.ArrayBuffer[String]
         params foreach { e =>
           if (e._2 != null) {
-            paramBuffer.addOne(e._1 + "=" + URLEncoder.encode(e._2.toString, Charsets.UTF_8))
+            paramBuffer.addOne(e._1.toString + "=" + URLEncoder.encode(e._2.toString, Charsets.UTF_8))
           }
         }
         val osw = new OutputStreamWriter(os, "UTF-8")

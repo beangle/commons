@@ -24,10 +24,9 @@ import org.beangle.commons.lang.reflect.BeanInfo.*
 import org.beangle.commons.logging.Logging
 
 import java.lang.Character.isUpperCase
-import java.lang.reflect.{Constructor, Field, Method, Modifier}
+import java.lang.reflect.{Method, Modifier}
 import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
-import scala.quoted.*
 
 object BeanInfo extends Logging {
 
@@ -45,9 +44,9 @@ object BeanInfo extends Logging {
     def readable: Boolean = getter.isDefined
 
     override def toString: String = {
-      if writable && readable then s"var ${name}: ${typeinfo} = _ "
-      else if readable then s"def ${name}: ${typeinfo}"
-      else s"def ${name}_=(x1: ${typeinfo})"
+      if writable && readable then s"var $name: $typeinfo = _ "
+      else if readable then s"def $name: $typeinfo"
+      else s"def ${name}_=(x1: $typeinfo)"
     }
   }
 
@@ -58,7 +57,7 @@ object BeanInfo extends Logging {
 
     override def compare(o: MethodInfo): Int = this.method.getName.compareTo(o.method.getName)
 
-    /** check this method if is perferred over given method
+    /** check this method if is preferred over given method
       *
       * @param o
       * @return
@@ -68,7 +67,7 @@ object BeanInfo extends Logging {
       //primary type over Object,but Object.isAssignableFrom(Int) is false
         if o.method.getReturnType == classOf[AnyRef] || o.method.getReturnType.isAssignableFrom(this.method.getReturnType) then
           val ps = o.method.getParameterTypes
-          val paramTypeMatch = (0 until parameters.length).forall { i => ps(i) == classOf[AnyRef] || ps(i).isAssignableFrom(parameters(i).typeinfo.clazz) }
+          val paramTypeMatch = parameters.indices.forall { i => ps(i) == classOf[AnyRef] || ps(i).isAssignableFrom(parameters(i).typeinfo.clazz) }
           if paramTypeMatch then
             o.method.isBridge || o.method.getDeclaringClass.isAssignableFrom(this.method.getDeclaringClass)
           else false
@@ -83,9 +82,9 @@ object BeanInfo extends Logging {
 
     def matches(args: Any*): Boolean = {
       if (parameters.length != args.length) return false
-      (0 until args.length).find { i =>
+      !(0 until args.length).exists { i =>
         null != args(i) && !parameters(i).typeinfo.clazz.isInstance(args(i))
-      }.isEmpty
+      }
     }
   }
 
@@ -251,7 +250,7 @@ object BeanInfo extends Logging {
       }
       val nonPublic = !Modifier.isPublic(clazz.getModifiers)
       // make buffer to list and filter duplicated bridge methods
-      accessMethods.map { case (x, sameNames) =>
+      accessMethods.foreach { case (x, sameNames) =>
         val nb = filterSameNames(sameNames)
         if getters.contains(x) && nb.size == 1 then
           getters.put(x, nb.head.method)
@@ -273,7 +272,7 @@ object BeanInfo extends Logging {
       }
 
       //process constructors,first is primary
-      val ctors = ctorInfos map (ConstructorInfo(_))
+      val ctors = ctorInfos map ConstructorInfo.apply
       val groupMethods = methods.groupBy(_.getName).map(x => (x._1, ArraySeq.from(x._2)))
       BeanInfo(clazz, ArraySeq.from(ctors), properties.toMap, groupMethods)
     }
@@ -313,23 +312,23 @@ case class BeanInfo(clazz: Class[_], ctors: ArraySeq[ConstructorInfo], propertie
     sb.mkString("\n")
   }
 
-  def getPropertyTypeInfo(property: String): Option[TypeInfo] =
+  def getPropertyTypeInfo(property: String): Option[TypeInfo] = {
     properties.get(property) match {
       case Some(p) => Some(p.typeinfo)
       case None => None
     }
+  }
 
-  def getPropertyType(property: String): Option[Class[_]] =
-    properties.get(property) match {
-      case Some(p) => Some(p.clazz)
-      case None => None
-    }
+  def getPropertyType(property: String): Option[Class[_]] = {
+    properties.get(property).map(_.clazz)
+  }
 
-  def getGetter(property: String): Option[Method] =
+  def getGetter(property: String): Option[Method] = {
     properties.get(property) match {
       case Some(p) => p.getter
       case None => None
     }
+  }
 
   def getSetter(property: String): Option[Method] = {
     properties.get(property) match {

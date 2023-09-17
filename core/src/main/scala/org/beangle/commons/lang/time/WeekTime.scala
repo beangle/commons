@@ -26,7 +26,6 @@ import java.time.LocalDate
 import scala.collection.mutable
 
 /** 循环时间 */
-@beta
 @component
 class WeekTime extends Ordered[WeekTime] with Serializable {
 

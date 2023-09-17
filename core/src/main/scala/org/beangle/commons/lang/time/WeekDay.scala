@@ -31,7 +31,6 @@ object WeekDay {
 
 /** 国家标准GBT 7408-2005
   */
-@beta
 enum WeekDay {
   case Mon, Tue, Wed, Thu, Fri, Sat, Sun
 

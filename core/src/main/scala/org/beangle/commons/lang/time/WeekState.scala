@@ -149,9 +149,6 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
 
   def contains(week: Int): Boolean = (value & (1L << week)) > 0
 
-  @deprecated("using contains", "5.5.5")
-  def isOccupied(week: Int): Boolean = (value & (1L << week)) > 0
-
   def cycle: WeekCycle = {
     val wl = this.weeks
     if (wl.isEmpty) return WeekCycle.Continuous

@@ -19,7 +19,6 @@ package org.beangle.commons.security
 
 import org.beangle.commons.lang.annotation.beta
 
-@beta
 trait Request {
 
   def resource: Any
