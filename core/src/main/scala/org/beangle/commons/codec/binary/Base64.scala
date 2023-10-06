@@ -19,96 +19,40 @@ package org.beangle.commons.codec.binary
 
 import org.beangle.commons.codec.{Decoder, Encoder}
 
+import java.io.{File, FileOutputStream, IOException}
+
 object Base64 {
-  def encode(data: Array[Byte]): String =
-    Base64Encoder.encode(data)
+  def encode(data: Array[Byte]): String = Base64Encoder.encode(data)
 
-  def decode(data: String): Array[Byte] =
-    Base64Decoder.decode(data)
+  def decode(data: String): Array[Byte] = Base64Decoder.decode(data)
 
-  def decode(data: Array[Char]): Array[Byte] =
-    Base64Decoder.decode(data)
+  def dump(data: String, file: File): Unit = {
+    var os: FileOutputStream = null
+    try {
+      os = new FileOutputStream(file)
+      os.write(decode(data))
+    } catch {
+      case e: IOException => e.printStackTrace()
+    } finally if (os != null) try {
+      os.flush()
+      os.close()
+    } catch {
+      case e: IOException =>
+    }
+  }
 }
 
 object Base64Encoder extends Encoder[Array[Byte], String] {
 
-  private val Alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".toCharArray()
-
   def encode(data: Array[Byte]): String = {
-    val out = new Array[Char](((data.length + 2) / 3) * 4)
-    var i = 0
-    var index = 0
-    while (i < data.length) {
-      var quad = false
-      var trip = false
-      var value = 0xff & data(i)
-      value <<= 8
-      if (i + 1 < data.length) {
-        value |= 0xff & data(i + 1)
-        trip = true
-      }
-      value <<= 8
-      if (i + 2 < data.length) {
-        value |= 0xff & data(i + 2)
-        quad = true
-      }
-      out(index + 3) = Alphabets(if (quad) value & 0x3f else 64)
-      value >>= 6
-      out(index + 2) = Alphabets(if (trip) value & 0x3f else 64)
-      value >>= 6
-      out(index + 1) = Alphabets(value & 0x3f)
-      value >>= 6
-      out(index + 0) = Alphabets(value & 0x3f)
-      i += 3
-      index += 4
-    }
-    new String(out)
+    new String(java.util.Base64.getEncoder.encode(data))
   }
 }
 
 object Base64Decoder extends Decoder[String, Array[Byte]] {
 
-  private val Codes = buildCodes()
-
-  def decode(pArray: String): Array[Byte] = decode(pArray.toCharArray())
-
-  def decode(data: Array[Char]): Array[Byte] = {
-    var tempLen = data.length
-    data.indices foreach { ix =>
-      if (data(ix) > '\u00ff' || Codes(data(ix)) < 0) tempLen -= 1
-    }
-    var len = (tempLen / 4) * 3
-    if (tempLen % 4 == 3) len += 2
-    if (tempLen % 4 == 2) len += 1
-    val out = new Array[Byte](len)
-    var shift = 0
-    var accum = 0
-    var index = 0
-    data.indices foreach { ix =>
-      val value = if (data(ix) <= '\u00ff') (Codes(data(ix))).toInt else -1
-      if (value >= 0) {
-        accum <<= 6
-        shift += 6
-        accum |= value
-        if (shift >= 8) {
-          shift -= 8
-          out(index) = (accum >> shift & 0xff).toByte
-          index += 1
-        }
-      }
-    }
-    if (index != out.length) throw new Error(s"Miscalculated data length (wrote $index instead of ${out.length})")
-    else out
+  def decode(str: String): Array[Byte] = {
+    java.util.Base64.getDecoder.decode(str)
   }
 
-  private def buildCodes(): Array[Byte] = {
-    val codes = new Array[Byte](256)
-    (0 until 256) foreach { i => codes(i) = -1 }
-    codes(43) = 62
-    codes(47) = 63
-    (48 to 57) foreach (i => codes(i) = ((52 + i) - 48).toByte)
-    (65 to 90) foreach (i => codes(i) = (i - 65).toByte)
-    (97 to 122) foreach (i => codes(i) = ((26 + i) - 97).toByte)
-    codes
-  }
 }

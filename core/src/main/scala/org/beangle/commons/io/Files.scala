@@ -18,6 +18,7 @@
 package org.beangle.commons.io
 
 import org.beangle.commons.lang.Charsets.UTF_8
+import org.beangle.commons.lang.Strings.replace
 
 import java.io.*
 import java.nio.channels.FileChannel
@@ -27,12 +28,25 @@ import java.nio.file.Files as JFiles
 object Files {
 
   private val copyBufferSize = 1024 * 1024 * 30
+  private val reservedChars = Array('/', '\\', ':', '*', '?', '"', '>', '<', '|', '\t', '\n')
 
   val / = File.separator
 
   private def fileName(name: String): String = {
-    import org.beangle.commons.lang.Strings.replace
     if (/ == "\\") replace(name, "/", "\\") else replace(name, "\\", "/")
+  }
+
+  /** 过滤不适合作为文件名的特殊字符
+   *
+   * @param name
+   * @return
+   */
+  def purify(name: String): String = {
+    var result = name
+    reservedChars foreach { c =>
+      result = result.replace(c, ' ')
+    }
+    result
   }
 
   @inline
@@ -42,8 +56,8 @@ object Files {
     new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), charset))
 
   /** Reads the contents of a file into a String.
-    * The file is always closed.
-    */
+   * The file is always closed.
+   */
   def readString(file: File, charset: Charset = UTF_8): String = {
     var in: InputStream = null
     try {
@@ -56,7 +70,7 @@ object Files {
   }
 
   /** Writes a String to a file creating the file if it does not exist.
-    */
+   */
   def writeString(file: File, data: String, charset: Charset = UTF_8): Unit = {
     var out: OutputStream = null
     try {
@@ -87,8 +101,8 @@ object Files {
   }
 
   /** Reads the contents of a file line by line to a List of Strings.
-    * The file is always closed.
-    */
+   * The file is always closed.
+   */
   def readLines(file: File, charset: Charset = UTF_8): List[String] = {
     var in: InputStream = null
     try {
@@ -100,18 +114,18 @@ object Files {
   }
 
   /** Copies a file to a new location preserving the file date.
-    * <p>
-    * This method copies the contents of the specified source file to the specified destination file.
-    * The directory holding the destination file is created if it does not exist. If the destination
-    * file exists, then this method will overwrite it.
-    * <p>
-    * <strong>Note:</strong> This method tries to preserve the file's last modified date/times using
-    * {@link File# setLastModified ( long )}, however it is not guaranteed that the operation will
-    * succeed. If the modification operation fails, no indication is provided.
-    *
-    * @param srcFile  an existing file to copy, must not be <code>null</code>
-    * @param destFile the new file, must not be <code>null</code>
-    */
+   * <p>
+   * This method copies the contents of the specified source file to the specified destination file.
+   * The directory holding the destination file is created if it does not exist. If the destination
+   * file exists, then this method will overwrite it.
+   * <p>
+   * <strong>Note:</strong> This method tries to preserve the file's last modified date/times using
+   * {@link File# setLastModified ( long )}, however it is not guaranteed that the operation will
+   * succeed. If the modification operation fails, no indication is provided.
+   *
+   * @param srcFile  an existing file to copy, must not be <code>null</code>
+   * @param destFile the new file, must not be <code>null</code>
+   */
   @throws[IOException]("if source or destination is invalid or an IO error occurs during copying")
   def copy(srcFile: File, destFile: File): Unit = {
     require(null != srcFile)
@@ -182,4 +196,16 @@ object Files {
         travel(child, attributeSet)
       }
   }
+
+  def remove(file: File): Unit = {
+    if file.isFile then file.delete()
+    Files.travel(file, f => f.delete())
+    file.delete()
+  }
+
+  def clear(file: File): Unit = {
+    if file.isFile then file.delete()
+    Files.travel(file, f => f.delete())
+  }
+
 }

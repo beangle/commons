@@ -99,6 +99,6 @@ class BCoder(val charset: Charset = Charsets.UTF_8) extends Encoder[String, Stri
     if (!encoding.equalsIgnoreCase(ec)) throw new IllegalArgumentException("This codec cannot decode " + ec + " encoded content")
     from = to + 1
     to = text.indexOf(Sep, from)
-    new String(Base64.decode(text.substring(from, to).toCharArray()), charset)
+    new String(Base64.decode(text.substring(from, to)), charset)
   }
 }

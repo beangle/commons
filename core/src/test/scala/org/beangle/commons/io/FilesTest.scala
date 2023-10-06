@@ -15,19 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.codec.binary
+package org.beangle.commons.io
 
+import org.beangle.commons.lang.ClassLoaders
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class Base64Test extends AnyFunSpec with Matchers {
-  describe("Base64") {
-    it("encode and decode") {
-      val data = "xtUkXCyc+OAdHqK1lJKubmnzGts="
-      val bytes = Base64.decode(data)
-      val newData = Base64.encode(bytes)
-
-      assert(data == newData)
+class FilesTest extends AnyFunSpec with Matchers {
+  describe("Files") {
+    it("purify") {
+      "英汉 汉英口译I.docx" should equal(Files.purify("英汉/汉英口译I.docx"))
     }
   }
 }

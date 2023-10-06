@@ -18,16 +18,11 @@
 package org.beangle.commons.lang.time
 
 import org.beangle.commons.collection.Collections
-import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.time.{HourMinute, WeekDay, WeekTime}
 import org.beangle.commons.lang.time.CycleTime.CycleTimeType.*
 import org.beangle.commons.lang.time.CycleTime.{CycleTimeType, ToWeekTimeBuilder}
 
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
 object CycleTime {
   enum CycleTimeType(val id: Int) {
@@ -78,6 +73,7 @@ object CycleTime {
      */
     def addRange(start: LocalDate, end: LocalDate, cycleType: CycleTimeType, count: Int = 1): Unit = {
       var startOn = start
+      require(count > 0, "count should great than 0.")
       while (!startOn.isAfter(end)) {
         add(startOn)
         cycleType match {

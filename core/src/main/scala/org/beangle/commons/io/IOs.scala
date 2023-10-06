@@ -32,12 +32,12 @@ object IOs extends Logging {
   private val eof = -1
 
   /** Copy bytes from a <code>InputStream</code> to an <code>OutputStream</code>.
-    *
-    * @param input  the <code>InputStream</code> to read from
-    * @param output the <code>OutputStream</code> to write to
-    * @return the number of bytes copied
-    * @since 3.1
-    */
+   *
+   * @param input  the <code>InputStream</code> to read from
+   * @param output the <code>OutputStream</code> to write to
+   * @return the number of bytes copied
+   * @since 3.1
+   */
   def copy(input: InputStream, output: OutputStream): Long = {
     val buffer = new Array[Byte](defaultBufferSize)
     var count = 0
@@ -64,12 +64,12 @@ object IOs extends Logging {
   }
 
   /** Copy chars from a <code>Reader</code> to a <code>Writer</code>.
-    *
-    * @param input  the <code>Reader</code> to read from
-    * @param output the <code>Writer</code> to write to
-    * @return the number of characters copied
-    * @since 3.1
-    */
+   *
+   * @param input  the <code>Reader</code> to read from
+   * @param output the <code>Writer</code> to write to
+   * @return the number of characters copied
+   * @since 3.1
+   */
   def copy(input: Reader, output: Writer): Long = {
     val buffer = new Array[Char](defaultBufferSize)
     var count = 0
@@ -84,8 +84,8 @@ object IOs extends Logging {
   }
 
   /** Get the contents of a <code>Reader</code> as a list of Strings,
-    * one entry per line.
-    */
+   * one entry per line.
+   */
   def readLines(input: Reader): List[String] = {
     val reader = toBufferedReader(input)
     val list = new collection.mutable.ListBuffer[String]
@@ -99,16 +99,18 @@ object IOs extends Logging {
   }
 
   def readString(input: InputStream, charset: Charset = UTF_8): String = {
-    try {
-      val sw = new StringBuilderWriter(16)
-      copy(new InputStreamReader(input, charset), sw)
-      sw.toString
-    } finally
-      close(input)
+    if (null == input) ""
+    else
+      try {
+        val sw = new StringBuilderWriter(16)
+        copy(new InputStreamReader(input, charset), sw)
+        sw.toString
+      } finally
+        close(input)
   }
 
   /** Read key value properties
-    */
+   */
   def readProperties(url: URL): Map[String, String] = {
     if null == url then Map.empty
     else
@@ -120,7 +122,7 @@ object IOs extends Logging {
   }
 
   /** Read key value properties
-    */
+   */
   def readProperties(input: InputStream, charset: Charset = UTF_8): Map[String, String] = {
     if null == input then Map.empty
     else
@@ -137,7 +139,7 @@ object IOs extends Logging {
   }
 
   /** Read Java key value properties by url
-    */
+   */
   def readJavaProperties(url: URL): Map[String, String] = {
     if null == url then Map.empty
     else
@@ -149,7 +151,7 @@ object IOs extends Logging {
   }
 
   /** Read java key value properties
-    */
+   */
   def readJavaProperties(input: InputStream): Map[String, String] = {
     if null == input then Map.empty
     else
@@ -165,8 +167,8 @@ object IOs extends Logging {
   }
 
   /** Close many objects quitely.
-    * swallow any exception.
-    */
+   * swallow any exception.
+   */
   def close(objs: AutoCloseable*): Unit = {
     objs foreach { obj =>
       try if (obj != null) obj.close()
