@@ -584,8 +584,9 @@ object Strings {
    * @param target a String object.
    * @return an array of String objects.
    */
-  def split(target: String): Array[String] =
+  def split(target: String): Array[String] = {
     split(target, Array(',', ';', '\r', '\n', ' '))
+  }
 
   /** Splits the provided text into an array, separator specified. This is an alternative to using
    * StringTokenizer.
@@ -613,13 +614,25 @@ object Strings {
     while (i < len) {
       if (chars(i) == separatorChar) {
         //ignore continue seperator
-        if (start < i) list += new String(chars, start, i - start)
+        if (start < i) addNonEmpty(list, chars, start, i)
         start = i + 1
       }
       i += 1
     }
-    if (start < i) list += new String(chars, start, i - start)
+    if (start < i) addNonEmpty(list, chars, start, i)
     list.toArray
+  }
+
+  private def addNonEmpty(buffer: mutable.Buffer[String], chars: Array[Char], start: Int, end: Int): Unit = {
+    var st = start
+    var ed = end
+    while (st < ed && (chars(st) & 0xff) <= ' ') {
+      st += 1
+    }
+    while (st < ed && (chars(ed - 1) & 0xff) <= ' ') {
+      ed -= 1
+    }
+    if (st < ed) buffer.addOne(new String(chars, st, ed - st))
   }
 
   /** split with separators
@@ -631,12 +644,14 @@ object Strings {
   def split(target: String, separatorChars: Array[Char]): Array[String] = {
     if (null == target) return new Array[String](0)
 
-    val sb = target.toCharArray
-    for (separator <- separatorChars if separator != ','; i <- 0 until sb.length if sb(i) == separator) sb(i) = ','
-    val targets = split(new String(sb), ',')
-    val list = new mutable.ListBuffer[String]
-    for (one <- targets if isNotBlank(one)) list += one.trim
-    list.toArray
+    if (separatorChars.length == 1) split(target, separatorChars(0))
+    else {
+      val first = separatorChars(0)
+      val all = separatorChars.toSet
+      val sb = target.toCharArray
+      for (i <- 0 until sb.length if all.contains(sb(i))) sb(i) = first
+      split(new String(sb), first)
+    }
   }
 
   /** Splits the provided text into an array, separators specified. This is an alternative to using

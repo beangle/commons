@@ -87,12 +87,13 @@ class StringsTest extends AnyFunSpec with Matchers {
 
     it("Split into array") {
       split("a.b.c.", '.') should equal(Array("a", "b", "c"))
-      split(".a..b.c", '.') should equal(Array("a", "b", "c"))
+      split(".a. .b. c", '.') should equal(Array("a", "b", "c"))
       split("a:b:c", '.') should equal(Array("a:b:c"))
       split("", null.asInstanceOf[String]) should equal(Array[String]())
       split("abc def", null.asInstanceOf[String]) should equal(Array("abc", "def"))
       split("abc def", " ") should equal(Array("abc", "def"))
       split("ab:cd:ef", ":") should equal(Array("ab", "cd", "ef"))
+      split(" ab  cd , ef;") should equal(Array("ab", "cd", "ef"))
     }
 
     it("Replace target with null or string") {
