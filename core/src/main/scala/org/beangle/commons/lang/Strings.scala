@@ -623,7 +623,7 @@ object Strings {
     list.toArray
   }
 
-  private def addNonEmpty(buffer: mutable.Buffer[String], chars: Array[Char], start: Int, end: Int): Unit = {
+  def addNonEmpty(buffer: mutable.Buffer[String], chars: Array[Char], start: Int, end: Int): Unit = {
     var st = start
     var ed = end
     while (st < ed && (chars(st) & 0xff) <= ' ') {
