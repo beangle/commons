@@ -58,7 +58,7 @@ class StringsTest extends AnyFunSpec with Matchers {
       isEqualSeq(first, second, ",") should be(true)
     }
 
-    it("MergeSeq merge to seprated seq by ,") {
+    it("MergeSeq merge to separated seq by ,") {
       val first = ",1,2,"
       val second = "3,"
       val third = ""
@@ -119,6 +119,9 @@ class StringsTest extends AnyFunSpec with Matchers {
       capitalize("") should be("")
       capitalize("Zbc") should be("Zbc")
       uncapitalize("Zbc") should be("zbc")
+    }
+    it("split non latin chars") {
+      split("账户,姓名") should be(Array("账户", "姓名"))
     }
   }
 }
