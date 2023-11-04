@@ -45,6 +45,7 @@ class DatesTest extends AnyFunSpec with Matchers {
     it("convert string to Instant") {
       val i = Dates.toDateTime("1980-09-01T00:00:00").atZone(ZoneId.systemDefault()).toInstant
       assert(i == Dates.toInstant("1980.9.1 00:00"))
+      assert(i == Dates.toInstant("1980-9-1 00:00"))
       assert(i == Dates.toInstant("1980.9.1"))
       assert(i == Dates.toInstant("1980.9.1T"))
       assert(i == Dates.toInstant("1980.9.1 00"))

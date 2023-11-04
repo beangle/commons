@@ -17,6 +17,7 @@
 
 package org.beangle.commons.bean
 
+import org.beangle.commons.collection.Collections
 import org.beangle.commons.conversion.Conversion
 import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.Strings
@@ -282,8 +283,26 @@ class Properties(conversion: Conversion) extends Logging {
   private def getMapped(bean: Any, key: Any): Any =
     bean match {
       case null => null
-      case s: collection.mutable.Map[_, _] => s.asInstanceOf[collection.mutable.Map[Any, _]].get(key).orNull
-      case x: java.util.Map[_, _] => x.get(key)
+      case s: collection.mutable.Map[Any, _] =>
+        if s.isEmpty then null
+        else s.get(conversion.convert(key, s.head._1.getClass)).orNull
+      case x: java.util.Map[_, _] =>
+        if x.isEmpty then null
+        else x.get(conversion.convert(key, x.keySet().iterator().next().getClass))
+      case i: Iterable[Any] =>
+        var sep = ", "
+        var ekey = key.toString
+        val sepIdx = ekey.indexOf('#')
+        if (sepIdx > 0) {
+          sep = ekey.substring(sepIdx + 1)
+          ekey = ekey.substring(0, sepIdx)
+        }
+        val nested = Collections.newBuffer[String]
+        i foreach { e =>
+          val v = this.get[Any](e, ekey)
+          if (null != v) nested.addOne(String.valueOf(v))
+        }
+        nested.mkString(sep)
       case _ => throw new RuntimeException("Don't support getMapped on " + bean.getClass)
     }
 

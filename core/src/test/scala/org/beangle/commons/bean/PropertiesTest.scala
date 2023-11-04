@@ -18,9 +18,11 @@
 package org.beangle.commons.bean
 
 import org.beangle.commons.lang.reflect.BeanInfos
-import org.beangle.commons.lang.testbean.TestBean
+import org.beangle.commons.lang.testbean.{Dog, TestBean}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+
+import java.util
 
 class PropertiesTest extends AnyFunSpec with Matchers {
 
@@ -40,7 +42,7 @@ class PropertiesTest extends AnyFunSpec with Matchers {
     it("get option nested value") {
       BeanInfos.get(classOf[TestBean]).properties("javaMap")
       val bean = new TestBean
-      var parent = new TestBean
+      val parent = new TestBean
       parent.id = 2
       val a = Properties.get[Object](bean, "parent.id")
       assert(null == a)
@@ -66,6 +68,12 @@ class PropertiesTest extends AnyFunSpec with Matchers {
 
       Properties.copy(bean, "parent", Some(parent))
       assert(Properties.get[Object](bean, "parent") == Some(parent))
+
+      bean.javaMap = new util.HashMap[Int, String]()
+      bean.javaMap.put(2, "second")
+      bean.titles = Array("CTO", "CFO", "CEO")
+      assert(Properties.get[Any](bean, "javaMap(2)") == "second")
+      assert(Properties.get[Any](bean, "titles[2]") == "CEO")
     }
 
     it("get set option[primitives]") {
@@ -74,10 +82,10 @@ class PropertiesTest extends AnyFunSpec with Matchers {
       var parent = new TestBean
 
       Properties.set(bean, "age", 4)
-      assert(bean.age == Some(4))
+      assert(bean.age.contains(4))
 
       Properties.set(bean, "age", null)
-      assert(bean.age == None)
+      assert(bean.age.isEmpty)
     }
     it("test scala map") {
       val p = new org.beangle.commons.collection.Properties("id" -> 1, "name" -> "mike")
@@ -94,6 +102,17 @@ class PropertiesTest extends AnyFunSpec with Matchers {
       assert(Properties.get[Any](p, "name") == "mike")
       Properties.set(p, "id", 2)
       assert(Properties.get[Any](p, "id") == 2)
+    }
+    it("get collection element property name") {
+      BeanInfos.get(classOf[TestBean]).properties("javaMap")
+      val bean = new TestBean
+      val dog1 = new Dog
+      dog1.name = "dog1"
+      val dog2 = new Dog
+      dog2.name = "dog2"
+      bean.dogs = Seq(dog1, dog2)
+      assert(Properties.get[Any](bean, "dogs(name# )") == "dog1 dog2")
+      assert(Properties.get[Any](bean, "dogs(name)") == "dog1, dog2")
     }
   }
 }

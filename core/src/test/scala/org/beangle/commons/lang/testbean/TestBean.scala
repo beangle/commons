@@ -30,7 +30,9 @@ class TestBean {
   var intValue: Int = _
   var age: Option[Int] = _
   var javaMap: java.util.Map[Int, String] = _
+  var titles: Array[String] = _
   var testEnum: TestEnum = _
+  var dogs: Iterable[Dog] = _
   var parent: Option[TestBean] = None
 
   def methodWithManyArguments(
@@ -69,6 +71,8 @@ trait Animal {
 }
 
 class Dog extends Animal {
+
+  var name: String = _
 
   def getAge(): java.lang.Integer = 0
 }
@@ -202,9 +206,9 @@ class Room(var id: Long = 0) {
   var name: String = _
 }
 
-class Teacher(var id:Long ,name:String,genderId:Int=1){
+class Teacher(var id: Long, name: String, genderId: Int = 1) {
 
-  def this(id:Long,department: Department,genderId:String)={
-    this(id,"",genderId.toInt)
+  def this(id: Long, department: Department, genderId: String) = {
+    this(id, "", genderId.toInt)
   }
 }

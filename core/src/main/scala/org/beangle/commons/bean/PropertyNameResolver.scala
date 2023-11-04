@@ -177,7 +177,7 @@ class PropertyNameResolver {
     * @return The next property expression
     */
   def next(expression: String): String = {
-    if (expression == null || expression.length == 0) return null
+    if (expression == null || expression.isEmpty) return null
 
     var indexed = false
     var mapped = false
@@ -203,7 +203,7 @@ class PropertyNameResolver {
     *         expression removed - null if there are no more expressions
     */
   def remove(expression: String): String = {
-    if (expression == null || expression.length == 0) return null
+    if (expression == null || expression.isEmpty) return null
 
     val property = next(expression)
     if (expression.length == property.length) return null
