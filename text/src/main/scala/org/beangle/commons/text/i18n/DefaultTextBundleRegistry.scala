@@ -17,21 +17,21 @@
 
 package org.beangle.commons.text.i18n
 
-import org.beangle.commons.io.IOs
+import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.annotation.description
 import org.beangle.commons.lang.{Charsets, ClassLoaders, Strings}
 
 import java.io.{InputStream, InputStreamReader, LineNumberReader}
 import java.nio.charset.Charset
+import java.util
 import java.util.Locale
-import java.util.concurrent.ConcurrentHashMap
 
 /** @since 3.0.0
-  */
+ */
 @description("缺省TextBundle注册表")
 class DefaultTextBundleRegistry extends TextBundleRegistry {
 
-  protected val caches = new collection.mutable.HashMap[Locale, ConcurrentHashMap[String, TextBundle]]
+  protected var caches: Map[Locale, Map[String, TextBundle]] = Map.empty
 
   protected val defaultBundleNames = new collection.mutable.ListBuffer[String]
 
@@ -41,97 +41,87 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
     defaultBundleNames ++= bundleNames
 
   def load(locale: Locale, bundleName: String): TextBundle = {
-    val localeBundles = caches.getOrElseUpdate(locale, new ConcurrentHashMap[String, TextBundle])
-    var bundle = localeBundles.get(bundleName)
-    if (null == bundle) {
-      loadJavaBundle(bundleName, locale) match {
-        case Some(b) => bundle = b
-        case None =>
-          loadNewBundle(bundleName, locale) foreach {
-            case (name, nested) =>
-              if (name == bundleName) bundle = nested
-              else localeBundles.put(name, nested)
-          }
-      }
-      localeBundles.put(bundleName, bundle)
+    if (reloadable) {
+      loadBundles(locale, bundleName).apply(bundleName)
+    } else {
+      val results = loadBundles(locale, bundleName)
+      caches.get(locale) match
+        case None => caches += (locale, results)
+        case Some(loaded) => caches += (locale, loaded ++ results)
+      results.apply(bundleName)
     }
-    if (reloadable) caches.clear()
-    bundle
   }
 
-  protected def loadNewBundle(bname: String, locale: Locale): Map[String, TextBundle] = {
-    var bundleName = bname
-    var resource = toDefaultResourceName(bundleName, locale)
-    val url = ClassLoaders.getResource(resource) match {
-      case None =>
-        val className = Strings.substringAfterLast(bundleName, ".")
-        if (className.length > 0 && Character.isUpperCase(className.charAt(0))) {
-          bundleName = Strings.substringBeforeLast(bundleName, ".") + ".package"
-          resource = toDefaultResourceName(bundleName, locale)
-          ClassLoaders.getResource(resource)
-        } else
-          None
-      case url@Some(u) => url
-    }
+  def loadBundles(locale: Locale, bundleName: String): Map[String, DefaultTextBundle] = {
+    val results = Collections.newMap[String, DefaultTextBundle]
+    val bundles = findBundles(locale, bundleName)
+    if (bundles.isEmpty) {
+      results.put(bundleName, new DefaultTextBundle(locale, bundleName, Map.empty))
+    } else {
+      val prefix = Strings.substringBeforeLast(bundleName, ".") + "."
 
-    url match {
-      case None =>
-        val defaultBundle = new DefaultTextBundle(locale, resource, Map.empty)
-        if (bundleName == bname)
-          Map(bundleName -> defaultBundle)
-        else
-          Map(bundleName -> defaultBundle, bname -> defaultBundle)
-      case Some(url) =>
-        val prefix = Strings.substringBeforeLast(bundleName, ".") + "."
-        val bundles = readBundles(url.openStream).map {
+      bundles foreach { b =>
+        readBundle(b._2) foreach {
           case (name, values) =>
-            if (name.length == 0) (bundleName, new DefaultTextBundle(locale, resource, values))
-            else (prefix + name, new DefaultTextBundle(locale, resource, values))
+            val key = if name.isEmpty then bundleName else prefix + name
+            results.get(key) match
+              case None => results.put(key, new DefaultTextBundle(locale, b._1, values))
+              case Some(existed) => results.put(key, existed.merge(new DefaultTextBundle(locale, b._1, values)))
         }
-        if (bundles.contains(bname))
-          bundles
-        else
-          bundles ++ Map(bname -> new DefaultTextBundle(locale, resource, Map.empty))
+        if !results.contains(bundleName) then
+          results.put(bundleName, new DefaultTextBundle(locale, bundleName, Map.empty))
+      }
+    }
+    results.toMap
+  }
+
+  protected def findBundles(locale: Locale, bundleName: String): collection.Seq[(String, InputStream)] = {
+    val inputs = Collections.newBuffer[(String, InputStream)]
+    val fullName = bundleName.replace('.', '/')
+    val localeName = toLocaleStr(locale)
+    if ("" == localeName){
+      //find java properties(utf-8)
+      ClassLoaders.getResource(s"${fullName}.properties") foreach { b =>
+        inputs.addOne((b.toString, b.openStream()))
+      }
+    }else{
+      //find java properties(utf-8)
+      ClassLoaders.getResource(s"${fullName}_${localeName}.properties") foreach { b =>
+        inputs.addOne((b.toString, b.openStream()))
+      }
+      //Generate name like bundleName.zh_CN
+      ClassLoaders.getResource(s"${fullName}.${localeName}") foreach { b =>
+        inputs.addOne((b.toString, b.openStream()))
+      }
+    }
+    inputs ++= loadExtra(locale, bundleName)
+    inputs
+  }
+
+  protected def loadExtra(locale: Locale, bundleName: String): collection.Seq[(String, InputStream)] = {
+    List.empty
+  }
+
+  def getBundles(locale: Locale): List[TextBundle] = {
+    caches.get(locale) match {
+      case Some(map) => map.values.toList
+      case None => List.empty
     }
   }
 
-  /** Load java properties bundle with iso-8859-1
-    */
-  protected def loadJavaBundle(bundleName: String, locale: Locale): Option[TextBundle] = {
-    val resource = toJavaResourceName(bundleName, locale)
-    ClassLoaders.getResource(resource) match {
-      case None => None
-      case Some(r) => Some(new DefaultTextBundle(locale, resource, IOs.readJavaProperties(r)))
+  def getDefaultText(key: String, locale: Locale): Option[String] = {
+    var msg: Option[String] = None
+    defaultBundleNames find { bundleName =>
+      val bundle = load(locale, bundleName)
+      msg = bundle.get(key)
+      None != msg
     }
-  }
-
-  /** java properties bundle name
-    */
-  protected def toJavaResourceName(bundleName: String, locale: Locale): String = {
-    var fullName = bundleName
-    val localeName = toLocaleStr(locale)
-    val suffix = "properties"
-    if ("" != localeName) fullName = fullName + "_" + localeName
-    val sb = new StringBuilder(fullName.length + 1 + suffix.length)
-    sb.append(fullName.replace('.', '/')).append('.').append(suffix)
-    sb.toString
-  }
-
-  /** Generater resource name like bundleName.zh_CN
-    */
-  protected def toDefaultResourceName(bundleName: String, locale: Locale): String = {
-    val fullName = bundleName
-    val localeName = toLocaleStr(locale)
-    val suffix = localeName
-    val sb = new StringBuilder(fullName.length + 1 + suffix.length)
-    sb.append(fullName.replace('.', '/'))
-    if ("" != suffix) sb.append('.').append(suffix)
-    sb.toString
+    msg
   }
 
   /** Convert locale to string with language_country[_variant]
-    */
-  protected def toLocaleStr(locale: Locale): String = {
+   */
+  private def toLocaleStr(locale: Locale): String = {
     if (locale == Locale.ROOT) return ""
     val language = locale.getLanguage
     val country = locale.getCountry
@@ -147,52 +137,33 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
     sb.toString
   }
 
-  def getBundles(locale: Locale): List[TextBundle] = {
-    import scala.jdk.CollectionConverters.*
-    caches.get(locale) match {
-      case Some(map) => map.values.asScala.toList
-      case None => List.empty
-    }
-  }
-
-  def getDefaultText(key: String, locale: Locale): Option[String] = {
-    var msg: Option[String] = None
-    defaultBundleNames find { bundleName =>
-      val bundle = load(locale, bundleName)
-      msg = bundle.get(key)
-      None != msg
-    }
-    msg
-  }
-
   /** Read key value properties
-    * Group by Uppercased key,and default group
-    */
-  protected[i18n] def readBundles(input: InputStream, charset: Charset = Charsets.UTF_8): Map[String, Map[String, String]] =
-    if (null == input) Map.empty
-    else {
-      val defaults = ""
-      val texts = new collection.mutable.HashMap[String, collection.mutable.HashMap[String, String]]
-      val reader = new LineNumberReader(new InputStreamReader(input, charset))
-      var line: String = reader.readLine
-      while (null != line) {
-        val index = line.indexOf('=')
-        if (index > 0 && index != line.length - 1) {
-          val key = line.substring(0, index).trim()
-          val value = line.substring(index + 1).trim()
-          if (Character.isUpperCase(key.charAt(0))) {
-            val dotIdx = key.indexOf('.')
-            if (-1 == dotIdx)
-              texts.getOrElseUpdate(defaults, new collection.mutable.HashMap[String, String]).put(key, value)
-            else
-              texts.getOrElseUpdate(key.substring(0, dotIdx), new collection.mutable.HashMap[String, String]).put(key.substring(dotIdx + 1), value)
-          } else
+   * Group by Uppercased key,and default group
+   */
+  protected def readBundle(input: InputStream, charset: Charset = Charsets.UTF_8): Map[String, Map[String, String]] = {
+    val defaults = ""
+    val texts = new collection.mutable.HashMap[String, collection.mutable.HashMap[String, String]]
+    val reader = new LineNumberReader(new InputStreamReader(input, charset))
+    var line: String = reader.readLine
+    while (null != line) {
+      val index = line.indexOf('=')
+      if (index > 0 && index != line.length - 1) {
+        val key = line.substring(0, index).trim()
+        val value = line.substring(index + 1).trim()
+        if (Character.isUpperCase(key.charAt(0))) {
+          val dotIdx = key.indexOf('.')
+          if (-1 == dotIdx)
             texts.getOrElseUpdate(defaults, new collection.mutable.HashMap[String, String]).put(key, value)
-        }
-        line = reader.readLine()
+          else
+            texts.getOrElseUpdate(key.substring(0, dotIdx), new collection.mutable.HashMap[String, String]).put(key.substring(dotIdx + 1), value)
+        } else
+          texts.getOrElseUpdate(defaults, new collection.mutable.HashMap[String, String]).put(key, value)
       }
-      if (!texts.contains(defaults)) texts.put(defaults, collection.mutable.HashMap.empty)
-      val results = texts.map { case (name, values) => (name, values.toMap) }
-      results.toMap
+      line = reader.readLine()
     }
+    if (!texts.contains(defaults)) texts.put(defaults, collection.mutable.HashMap.empty)
+    val results = texts.map { case (name, values) => (name, values.toMap) }
+    results.toMap
+  }
+
 }

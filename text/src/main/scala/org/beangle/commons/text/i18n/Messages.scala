@@ -25,10 +25,11 @@ object Messages {
 }
 
 class Messages(locale: Locale, val registry: TextBundleRegistry, val format: TextFormater) {
-  def get(clazz: Class[_], key: String): String =
-    if (key == "class") {
+  def get(clazz: Class[_], key: String): String = {
+    if key == "class" then
       val bundle = registry.load(locale, clazz.getPackage.getName + ".package")
       bundle.get(clazz.getSimpleName).orNull
-    } else
+    else
       new HierarchicalTextResource(clazz, locale, registry, format)(key).orNull
+  }
 }

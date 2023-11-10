@@ -48,15 +48,14 @@ class BundleTextResourceTest extends AnyFunSpec with Matchers {
     }
 
     it("read Bundles") {
-      val url = ClassLoaders.getResource("org/beangle/commons/text/i18n/package.zh_CN").get
-      val bundles = new DefaultTextBundleRegistry().readBundles(url.openStream)
+      val bundles = new DefaultTextBundleRegistry().loadBundles(Locale.SIMPLIFIED_CHINESE, "org.beangle.commons.text.i18n.package")
       assert(null != bundles)
-      assert(bundles.contains(""))
-      val thisMap = bundles("")
-      assert(thisMap.size == 2)
-      assert(bundles.contains("Country"))
-      val countryMap = bundles("Country")
-      assert(countryMap.size == 1)
+      assert(bundles.contains("org.beangle.commons.text.i18n.package"))
+      val thisMap = bundles("org.beangle.commons.text.i18n.package")
+      assert(thisMap.texts.size == 2)
+      assert(bundles.contains("org.beangle.commons.text.i18n.Country"))
+      val countryMap = bundles("org.beangle.commons.text.i18n.Country")
+      assert(countryMap.texts.size == 1)
     }
   }
 }

@@ -112,7 +112,7 @@ class PropertiesTest extends AnyFunSpec with Matchers {
       dog2.name = "dog2"
       bean.dogs = Seq(dog1, dog2)
       assert(Properties.get[Any](bean, "dogs(name# )") == "dog1 dog2")
-      assert(Properties.get[Any](bean, "dogs(name)") == "dog1, dog2")
+      assert(Properties.get[Any](bean, "dogs(name)") == "dog1,dog2")
     }
   }
 }

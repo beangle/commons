@@ -277,7 +277,7 @@ class Properties(conversion: Conversion) extends Logging {
       case null =>
       case s: collection.mutable.Map[_, _] => s.asInstanceOf[collection.mutable.Map[Any, Any]].put(key, value)
       case x: java.util.Map[_, _] => x.asInstanceOf[java.util.Map[Any, Any]].put(key, value)
-      case _ => throw new RuntimeException("Don't support setMaped on " + bean.getClass)
+      case _ => throw new RuntimeException("Don't support setMapped on " + bean.getClass)
     }
 
   private def getMapped(bean: Any, key: Any): Any =
@@ -290,7 +290,7 @@ class Properties(conversion: Conversion) extends Logging {
         if x.isEmpty then null
         else x.get(conversion.convert(key, x.keySet().iterator().next().getClass))
       case i: Iterable[Any] =>
-        var sep = ", "
+        var sep = ","
         var ekey = key.toString
         val sepIdx = ekey.indexOf('#')
         if (sepIdx > 0) {
