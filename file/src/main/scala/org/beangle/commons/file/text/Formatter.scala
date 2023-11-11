@@ -25,28 +25,28 @@ import org.beangle.commons.lang.{Charsets, Strings}
 
 import java.io.{File, FileInputStream, FileOutputStream}
 
-object Formater {
+object Formatter {
   val LF = "\n"
   val CRLF = "\r\n"
 
-  def format(formater: Formater, dir: File, ext: Option[String]): Unit =
+  def format(formatter: Formatter, dir: File, ext: Option[String]): Unit =
     if dir.isFile then
       ext match {
         case Some(f) =>
-          if (dir.getName.endsWith(f)) formater.format(dir)
+          if (dir.getName.endsWith(f)) formatter.format(dir)
         case None =>
           val fileExt = Strings.substringAfterLast(dir.getName, ".")
           MediaTypes.get(fileExt) foreach { m =>
-            if (m.primaryType == "text" || fileExt == "xml") formater.format(dir)
+            if (m.primaryType == "text" || fileExt == "xml") formatter.format(dir)
           }
       }
     else
       dir.list() foreach { childName =>
-        format(formater, new File(dir.getAbsolutePath + / + childName), ext)
+        format(formatter, new File(dir.getAbsolutePath + / + childName), ext)
       }
 }
 
-trait Formater {
+trait Formatter {
 
   def format(str: String): String
 
@@ -59,9 +59,9 @@ trait Formater {
   }
 }
 
-class FormaterBuilder {
+class FormatterBuilder {
   var tablength = 2
-  var eof = Formater.LF
+  var eof = Formatter.LF
   private var tab2space: Boolean = _
   private var trimTrailingWhiteSpace: Boolean = _
   private var fixLast: Boolean = _
@@ -94,20 +94,20 @@ class FormaterBuilder {
   }
 
   def fixcrlf(eof: String): this.type = {
-    assert(eof == Formater.LF || eof == Formater.CRLF)
+    assert(eof == Formatter.LF || eof == Formatter.CRLF)
     this.eof = eof
     this
   }
 
-  def build(): Formater = {
+  def build(): Formatter = {
     val processors = Collections.newBuffer[LineProcessor]
     if (tab2space) processors += new Tab2Space(tablength)
     if (trimTrailingWhiteSpace) processors += TrimTrailingWhiteSpace
-    new DefaultFormater(eof, processors.toList, fixLast)
+    new DefaultFormatter(eof, processors.toList, fixLast)
   }
 }
 
-class DefaultFormater(val eof: String = Formater.LF, lineProcessors: List[LineProcessor], val fixLast: Boolean) extends Formater {
+class DefaultFormatter(val eof: String = Formatter.LF, lineProcessors: List[LineProcessor], val fixLast: Boolean) extends Formatter {
 
   def format(str: String): String = {
     var fixlf = Strings.replace(str, "\r", "")

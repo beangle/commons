@@ -23,32 +23,31 @@ import java.text.MessageFormat
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
-/** DefaultTextFormater with cache
+/** DefaultTextFormatter with cache
   *
   * @author chaostone
   * @since 3.0.0
   */
 @description("缺省Text格式化")
-class DefaultTextFormater extends TextFormater {
+class DefaultTextFormatter extends TextFormatter {
 
-  protected val caches = new collection.mutable.HashMap[Locale, ConcurrentHashMap[String, MessageFormat]]
+  protected var caches: Map[Locale, Map[String, MessageFormat]] = Map.empty
 
   def format(text: String, locale: Locale, args: Any*): String = {
-    var localeCache = caches.get(locale).orNull
-    //double check
-    if (null eq localeCache)
-      caches.synchronized {
-        localeCache = caches.get(locale).orNull
-        if (null == localeCache) {
-          localeCache = new ConcurrentHashMap[String, MessageFormat]
-          caches.put(locale, localeCache)
-        }
-      }
-    var format = localeCache.get(text)
-    if (null == format) {
-      format = new MessageFormat(text)
-      localeCache.put(text, format)
-    }
+    val format =
+      caches.get(locale) match
+        case None =>
+          val f = new MessageFormat(text)
+          caches += (locale, Map(text -> f))
+          f
+        case Some(map) =>
+          map.get(text) match
+            case None =>
+              val f = new MessageFormat(text)
+              caches += (locale, map + (text -> f))
+              f
+            case Some(format) => format
+
     format.format(args.toArray)
   }
 }

@@ -17,7 +17,6 @@
 
 package org.beangle.commons.text.i18n
 
-import org.beangle.commons.lang.ClassLoaders
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -41,14 +40,14 @@ class BundleTextResourceTest extends AnyFunSpec with Matchers {
       assert(null != bundle3)
       bundle3.get("name") should equal(Some("名称"))
       bundle.get("hello.world") should equal(Some("你好"))
-      val tr = new DefaultTextResource(locale, registry, new DefaultTextFormater())
+      val tr = new DefaultTextResource(locale, registry, new DefaultTextFormatter())
       tr("hello.world") should equal(Some("你好"))
       tr("china") should equal(Some("中国"))
       tr("hello", "hello", "Jack") should equal("你好 Jack")
     }
 
     it("read Bundles") {
-      val bundles = new DefaultTextBundleRegistry().loadBundles(Locale.SIMPLIFIED_CHINESE, "org.beangle.commons.text.i18n.package")
+      val bundles = new DefaultTextBundleLoader().load(Locale.SIMPLIFIED_CHINESE, "org.beangle.commons.text.i18n.package")
       assert(null != bundles)
       assert(bundles.contains("org.beangle.commons.text.i18n.package"))
       val thisMap = bundles("org.beangle.commons.text.i18n.package")
@@ -56,6 +55,17 @@ class BundleTextResourceTest extends AnyFunSpec with Matchers {
       assert(bundles.contains("org.beangle.commons.text.i18n.Country"))
       val countryMap = bundles("org.beangle.commons.text.i18n.Country")
       assert(countryMap.texts.size == 1)
+    }
+    it("load class bundles") {
+      val loader = new DefaultTextBundleLoader()
+      val bundles = loader.load(Locale.SIMPLIFIED_CHINESE, "org.beangle.commons.text.i18n.Country")
+      assert(null != bundles)
+      assert(bundles.size == 2)
+      assert(bundles.contains("org.beangle.commons.text.i18n.Country"))
+      val thisMap = bundles("org.beangle.commons.text.i18n.Country")
+      assert(thisMap.texts.contains("name"))
+
+      assert(loader.load(Locale.SIMPLIFIED_CHINESE, "a.b").head._2.texts.isEmpty)
     }
   }
 }

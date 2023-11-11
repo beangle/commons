@@ -17,19 +17,17 @@
 
 package org.beangle.commons.text.i18n
 
+import org.beangle.commons.lang.annotation.spi
+
 import java.util.Locale
 
-/** @author chaostone
- * @since 3.0.0
- */
-class DefaultTextBundle(val locale: Locale, val resource: String, val texts: Map[String, String]) extends TextBundle {
+/** Text formatter
+  *
+  * @author chaostone
+  * @since 3.0.0
+  */
+@spi
+trait TextFormatter {
 
-  def get(key: String): Option[String] = texts.get(key)
-
-  override def toString: String = resource
-
-  def merge(second: DefaultTextBundle): DefaultTextBundle = {
-    val values = this.texts ++ second.texts
-    new DefaultTextBundle(this.locale, this.resource + ";" + second, values)
-  }
+  def format(text: String, locale: Locale, args: Any*): String
 }

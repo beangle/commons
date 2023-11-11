@@ -23,16 +23,15 @@ import java.util.Locale
   *
   * @author chaostone
   */
-class DefaultTextResource(val locale: Locale, protected val registry: TextBundleRegistry, protected val formater: TextFormater) extends TextResource {
+class DefaultTextResource(val locale: Locale, protected val registry: TextBundleRegistry, protected val formatter: TextFormatter) extends TextResource {
 
-  protected var keyAsDefault: Boolean = true
+  var keyAsDefault: Boolean = true
 
   /** getText.
     */
   def apply(key: String, defaultValue: String, args: Any*): String = {
     val text = get(key).getOrElse(if ((null eq defaultValue) && keyAsDefault) key else defaultValue)
-    if ((null != text) && args.length > 0) formater.format(text, locale, args: _*)
-    else text
+    if (null != text) && args.nonEmpty then formatter.format(text, locale, args: _*) else text
   }
 
   def apply(key: String): Option[String] = {
@@ -44,13 +43,8 @@ class DefaultTextResource(val locale: Locale, protected val registry: TextBundle
     var msg: Option[String] = None
     registry.getBundles(locale) find { bundle =>
       msg = bundle.get(key)
-      msg != None
+      msg.isDefined
     }
     msg
   }
-
-  def isKeyAsDefault(): Boolean = keyAsDefault
-
-  def setKeyAsDefault(keyAsDefault: Boolean): Unit =
-    this.keyAsDefault = keyAsDefault
 }

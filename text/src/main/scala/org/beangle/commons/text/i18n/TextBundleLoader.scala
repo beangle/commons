@@ -19,18 +19,12 @@ package org.beangle.commons.text.i18n
 
 import org.beangle.commons.lang.annotation.spi
 
+import java.io.InputStream
 import java.util.Locale
 
-/** TextResource provider
-  *
-  * @author chaostone
-  */
 @spi
-trait TextResourceProvider {
+trait TextBundleLoader {
+  def find(locale: Locale, bundleName: String): collection.Seq[(String, InputStream)]
 
-  /** Return text resource;
-    *
-    * @param locale default could be null.
-    */
-  def getTextResource(locale: Locale): TextResource
+  def load(locale: Locale, bundleName: String): Map[String, TextBundle]
 }

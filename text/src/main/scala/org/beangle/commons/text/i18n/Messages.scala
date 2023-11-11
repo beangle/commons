@@ -21,15 +21,15 @@ import java.util.Locale
 
 object Messages {
   def apply(locale: Locale): Messages =
-    new Messages(locale, new DefaultTextBundleRegistry(), new DefaultTextFormater())
+    new Messages(locale, new DefaultTextBundleRegistry(), new DefaultTextFormatter())
 }
 
-class Messages(locale: Locale, val registry: TextBundleRegistry, val format: TextFormater) {
+class Messages(locale: Locale, val registry: TextBundleRegistry, val format: TextFormatter) {
   def get(clazz: Class[_], key: String): String = {
     if key == "class" then
       val bundle = registry.load(locale, clazz.getPackage.getName + ".package")
       bundle.get(clazz.getSimpleName).orNull
     else
-      new HierarchicalTextResource(clazz, locale, registry, format)(key).orNull
+      new ClassTextFinder(locale, registry).find(clazz, key).orNull
   }
 }

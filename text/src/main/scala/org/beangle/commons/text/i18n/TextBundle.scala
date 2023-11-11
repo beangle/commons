@@ -24,17 +24,14 @@ import java.util.Locale
   * @author chaostone
   * @since 3.0.0
   */
-trait TextBundle {
+final class TextBundle(val locale: Locale, val resource: String, val texts: Map[String, String]) {
 
-  /** Gets a message based on a message key, or null if no message is found.
-    */
-  def get(key: String): Option[String]
+  def get(key: String): Option[String] = texts.get(key)
 
-  /** Returns the locale of this resource bundle.
-    */
-  def locale: Locale
+  override def toString: String = resource
 
-  /** Get the bundle resource path
-    */
-  def resource: String
+  def merge(second: TextBundle): TextBundle = {
+    val values = this.texts ++ second.texts
+    new TextBundle(this.locale, this.resource + ";" + second, values)
+  }
 }
