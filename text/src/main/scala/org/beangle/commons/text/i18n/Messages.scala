@@ -28,8 +28,8 @@ class Messages(locale: Locale, val registry: TextBundleRegistry, val format: Tex
   def get(clazz: Class[_], key: String): String = {
     if key == "class" then
       val bundle = registry.load(locale, clazz.getPackage.getName + ".package")
-      bundle.get(clazz.getSimpleName).orNull
+      bundle.get(clazz.getSimpleName).getOrElse(key)
     else
-      new ClassTextFinder(locale, registry).find(clazz, key).orNull
+      new ClassTextFinder(locale, registry).find(clazz, key).getOrElse(key)
   }
 }
