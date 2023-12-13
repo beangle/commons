@@ -17,7 +17,7 @@
 
 package org.beangle.commons.conversion.impl
 
-import org.beangle.commons.conversion.converter.*
+import org.beangle.commons.conversion.converter
 import org.beangle.commons.conversion.string
 
 object DefaultConversion {
@@ -57,7 +57,9 @@ class DefaultConversion extends AbstractGenericConversion {
 
   addConverter(string.ToStringConverter)
 
-  addConverter(Number2NumberConverter)
+  addConverter(converter.Number2NumberConverter)
 
-  addConverter(IterableConverterFactory)
+  addConverter(converter.IterableConverterFactory)
+
+  addConverter(converter.DateTimeConverterFactory)
 }
