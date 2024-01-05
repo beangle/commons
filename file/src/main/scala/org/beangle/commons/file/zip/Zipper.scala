@@ -20,7 +20,8 @@ package org.beangle.commons.file.zip
 import org.apache.commons.compress.archivers.ArchiveStreamFactory
 import org.apache.commons.compress.archivers.zip.{ZipArchiveEntry, ZipArchiveOutputStream}
 import org.beangle.commons.io.Files./
-import org.beangle.commons.io.{Dirs, IOs}
+import org.beangle.commons.io.{Dirs, Files, IOs}
+import org.beangle.commons.lang.Strings
 
 import java.io.{File, FileInputStream, FileOutputStream}
 import java.util.zip.ZipInputStream
@@ -75,17 +76,25 @@ object Zipper {
 
     val fos = new FileOutputStream(zip)
     val zos: ZipArchiveOutputStream = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP, fos)
-    if (null != encoding) {
-      zos.setEncoding(encoding)
-    }
+    if Strings.isNotEmpty(encoding) then zos.setEncoding(encoding)
     Dirs.on(dir).ls() foreach { f => addFile(dir, new File(dir.getAbsolutePath + / + f), zos) }
+    zos.close()
+  }
+
+  def zip(root: File, files: collection.Seq[File], zip: File, encoding: String): Unit = {
+    if zip.exists() then zip.delete()
+
+    val fos = new FileOutputStream(zip)
+    val zos: ZipArchiveOutputStream = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP, fos)
+    if Strings.isNotEmpty(encoding) then zos.setEncoding(encoding)
+    files foreach { f => addFile(root, f, zos) }
     zos.close()
   }
 
   private def addFile(root: File, dir: File, zos: ZipArchiveOutputStream): Unit = {
     if (dir.isDirectory) {
       Dirs.on(dir).ls() foreach { a =>
-        val currentFile = new File(dir.getAbsolutePath + / + a)
+        val currentFile = new File(dir.getAbsolutePath + Files./ + a)
         var entryName = root.toURI.relativize(currentFile.toURI).getPath
         if (currentFile.isDirectory) {
           //must be /,not platform dependency \
