@@ -35,7 +35,6 @@ object HourMinute {
 
   def of(time: java.time.LocalTime): HourMinute = of(time.getHour, time.getMinute)
 
-
   def convert(time: String): Short = {
     val index = time.indexOf(':')
     require(index == 2 && time.length == 5, "illegal time,it should with 00:00 format")
@@ -61,16 +60,13 @@ class HourMinute(val value: Short) extends Serializable with Ordered[HourMinute]
 
   def toLocalTime: java.time.LocalTime = java.time.LocalTime.of(hour, minute)
 
-
   override def compare(o: HourMinute): Int = this.value - o.value
-
 
   def hour: Int = value / 100
 
   def minute: Int = value % 100
 
   def interval(other: HourMinute): Int = Math.abs(this.minutes - other.minutes)
-
 
   def +(minutesDuration: Int): HourMinute = {
     var minutesValue = minutes + minutesDuration

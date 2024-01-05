@@ -17,13 +17,15 @@
 
 package org.beangle.commons.script
 
-import org.beangle.commons.script.{EvaluationException, ExpressionEvaluator}
-
 import javax.script.{ScriptEngine, ScriptEngineManager, SimpleBindings}
 
-class JSR223ExpressionEvaluator(engineName: String) extends ExpressionEvaluator {
-  var scriptEngine = new ScriptEngineManager().getEngineByName(engineName)
+object JSR223ExpressionEvaluator {
+  def apply(engineName: String): ExpressionEvaluator = {
+    new JSR223ExpressionEvaluator(new ScriptEngineManager().getEngineByName(engineName))
+  }
+}
 
+class JSR223ExpressionEvaluator(engine: ScriptEngine) extends ExpressionEvaluator {
   def parse(exp: String): Unit = {}
 
   def eval(exp: String, root: AnyRef): AnyRef = {
@@ -38,7 +40,7 @@ class JSR223ExpressionEvaluator(engineName: String) extends ExpressionEvaluator 
         }
       case _ => ctx.put("root", root)
     }
-    scriptEngine.eval(exp, ctx)
+    engine.eval(exp, ctx)
   }
 
   def eval[T](exp: String, root: AnyRef, resultType: Class[T]): T = {

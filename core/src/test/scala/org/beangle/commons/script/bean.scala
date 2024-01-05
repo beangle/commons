@@ -17,8 +17,4 @@
 
 package org.beangle.commons.script
 
-/** EvaluationException class.
-  *
-  * @author chaostone
-  */
-class EvaluationException(message: String, cause: Throwable) extends RuntimeException(message, cause)
+case class Depart(name: String, office: String)

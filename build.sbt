@@ -1,5 +1,6 @@
 import org.beangle.parent.Dependencies.*
 import org.beangle.parent.Settings.*
+import sbt.Keys.libraryDependencies
 
 ThisBuild / organization := "org.beangle.commons"
 ThisBuild / version := "5.6.8"
@@ -33,6 +34,7 @@ lazy val core = (project in file("core"))
     name := "beangle-commons-core",
     common,
     libraryDependencies ++= commonDeps,
+    libraryDependencies += jexl3 % "test",
     libraryDependencies ++= Seq(scalaxml % "optional")
   )
 

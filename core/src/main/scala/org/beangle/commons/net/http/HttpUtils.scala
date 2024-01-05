@@ -40,6 +40,14 @@ object HttpUtils extends Logging {
 
   def toString(httpCode: Int): String = statusMap.getOrElse(httpCode, String.valueOf(httpCode))
 
+  def isAlive(url: String): Boolean = {
+    access(url).isOk
+  }
+
+  def access(url: String): ResourceStatus = {
+    access(URI.create(url).toURL)
+  }
+
   def access(url: URL): ResourceStatus = {
     try {
       val hc = followRedirect(url.openConnection(), HttpMethods.HEAD)
