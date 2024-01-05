@@ -26,6 +26,7 @@ class InternetDateFormatTest extends AnyFunSpec with Matchers {
   describe("InternetDateFormat") {
     it("format") {
       val cal = ju.Calendar.getInstance
+      cal.set(2030, 9 - 1, 1, 9, 10, 1)
       cal.set(ju.Calendar.MILLISECOND, 0)
       val date = cal.getTime
       val utcString = DateFormats.UTC.format(date)
@@ -35,7 +36,7 @@ class InternetDateFormatTest extends AnyFunSpec with Matchers {
       assert(utcString == newDate)
 
       val gmtString = DateFormats.GMT.format(date)
-      println(gmtString)
+      assert(gmtString == "2030-09-01T01:10:01.000Z")
     }
     it("parse") {
       val s = "2014-12-17T04:37:15.230Z"

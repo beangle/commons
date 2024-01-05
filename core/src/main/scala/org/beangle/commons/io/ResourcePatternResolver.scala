@@ -42,9 +42,9 @@ class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResource
     }
 
   /** Find all resources that match the given location pattern via the
-    * Ant-style PathMatcher. Supports resources in jar files and zip files
-    * and in the file system.
-    */
+   * Ant-style PathMatcher. Supports resources in jar files and zip files
+   * and in the file system.
+   */
   override def getResources(locationPattern: String): List[URL] = {
     val location =
       if (locationPattern.startsWith(ClasspathAllUrlPrefix) || locationPattern.startsWith(ClasspathUrlPrefix)) Strings.substringAfter(locationPattern, ":")
@@ -76,18 +76,18 @@ class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResource
   }
 
   /** Resolve the specified resource for path matching.
-    * <p>The default implementation detects an Equinox OSGi "bundleresource:"
-    * / "bundleentry:" URL and resolves it into a standard jar file URL that
-    * can be traversed using Spring's standard jar file traversal algorithm.
-    */
+   * <p>The default implementation detects an Equinox OSGi "bundleresource:"
+   * / "bundleentry:" URL and resolves it into a standard jar file URL that
+   * can be traversed using Spring's standard jar file traversal algorithm.
+   */
   protected def resolve(url: URL): URL =
     if (equinoxResolveMethod != null && url.getProtocol.startsWith("bundle"))
       equinoxResolveMethod.invoke(null, url).asInstanceOf[URL]
     else url
 
   /** Find all resources in jar files that match the given location pattern
-    * via the Ant-style PathMatcher.
-    */
+   * via the Ant-style PathMatcher.
+   */
   protected def doFindJarResources(rootDirResource: URL, subPattern: AntPathPattern): collection.Set[URL] = {
     val con = rootDirResource.openConnection
     var jarFile: JarFile = null
@@ -130,8 +130,8 @@ class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResource
   }
 
   /** Find all resources in the file system that match the given location pattern
-    * via the Ant-style PathMatcher.
-    */
+   * via the Ant-style PathMatcher.
+   */
   protected def doFindFileResources(rootDirURL: URL, pattern: AntPathPattern): collection.Set[URL] =
     try {
       val rootDir = new File(rootDirURL.toURI).getAbsoluteFile
@@ -151,8 +151,8 @@ class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResource
     }
 
   /** Recursively retrieve files that match the given pattern,
-    * adding them to the given result list.
-    */
+   * adding them to the given result list.
+   */
   protected def doRetrieveMatchingFiles(pattern: AntPathPattern, dir: File, result: collection.mutable.Set[File]): Unit = {
     val dirContents = dir.listFiles
     if (dirContents != null)

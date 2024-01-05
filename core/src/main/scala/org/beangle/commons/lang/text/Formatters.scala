@@ -17,23 +17,19 @@
 
 package org.beangle.commons.lang.text
 
-import org.beangle.commons.lang.time.HourMinute
 import org.beangle.commons.lang.{Options, Primitives, Strings}
 
-import java.math.RoundingMode
-import java.text.{DecimalFormat, SimpleDateFormat}
-import java.time.format.DateTimeFormatter
-import java.time.temporal.{Temporal, TemporalAccessor}
+import java.time.temporal.TemporalAccessor
 import java.{lang as jl, util as ju}
 
 object Formatters {
 
   /** Format number or Dates
-    *
-    * @param obj
-    * @param pattern
-    * @return
-    */
+   *
+   * @param obj
+   * @param pattern
+   * @return
+   */
   def format(obj: Any, pattern: String = ""): String = {
     val v = Options.unwrap(obj)
     if null == v then ""

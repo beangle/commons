@@ -27,11 +27,19 @@ class FormatterTest extends AnyFunSpec with Matchers with Logging {
   describe("Formatter") {
     it("format") {
       val builder = new FormatterBuilder()
-      builder.enableTab2space(4).enableTrimTrailingWhiteSpace().insertFinalNewline()
+      builder.enableTab2space(2).enableTrimTrailingWhiteSpace().insertFinalNewline()
       val formatter = builder.build()
       val formated = formatter.format(lines)
-      logger.info(lines)
-      logger.info(formated)
+      val expected =
+        """package org.beangle.commons.file
+          |
+          |  /**
+          |
+          |   *  tab2space,fixcrlf,trim_trailing_whitespace,insert_final_newline{fixlast}
+          |   */
+          |package object text {
+          |""".stripMargin
+      assert(expected == formated)
     }
   }
 }

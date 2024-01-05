@@ -17,15 +17,10 @@
 
 package org.beangle.commons.lang.reflect
 
-import org.beangle.commons.collection.Properties
-import org.beangle.commons.lang.reflect.{BeanInfos, TypeInfo}
 import org.beangle.commons.lang.testbean
 import org.beangle.commons.lang.testbean.*
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-
-import java.beans.{BeanInfo, Transient}
-import java.lang.reflect.Modifier
 
 class BeanInfoDiggerTest extends AnyFunSpec with Matchers {
 
@@ -38,7 +33,11 @@ class BeanInfoDiggerTest extends AnyFunSpec with Matchers {
       //      println(BeanInfos.of(classOf[AA],classOf[TT]))
       //      println(BeanInfos.get(classOf[TT]))
       val d = BeanInfos.of(classOf[LongFactory])
-      println(d)
+      val expected =
+        """class org.beangle.commons.lang.testbean.LongFactory {
+          |  def result: Long
+          |}""".stripMargin
+      assert(d.toString == expected)
     }
   }
 }

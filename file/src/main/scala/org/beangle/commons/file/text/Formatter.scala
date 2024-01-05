@@ -77,7 +77,7 @@ class FormatterBuilder {
   }
 
   def enableTab2space(tablength: Int): this.type = {
-    assert(1 <= tablength && tablength <= 8, "tablength should in [1,8]")
+    assert(1 <= tablength && tablength <= 8, "tab length should in [1,8]")
     this.tablength = tablength
     tab2space = true
     this

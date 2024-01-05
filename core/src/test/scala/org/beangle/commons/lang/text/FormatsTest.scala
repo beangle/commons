@@ -18,13 +18,11 @@
 package org.beangle.commons.lang.text
 
 import org.beangle.commons.conversion.string.TemporalConverter
-import org.beangle.commons.lang.ClassLoaders
-import org.beangle.commons.lang.text.Formatters
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 import java.time.*
-import java.util.Date
+import java.util.Calendar
 
 class FormatsTest extends AnyFunSpec with Matchers {
   describe("Formats") {
@@ -35,7 +33,9 @@ class FormatsTest extends AnyFunSpec with Matchers {
       Formatters.format(122323321L) should equal("122,323,321")
     }
     it("format java.util.*") {
-      val date = new Date(2030 - 1900, 9 - 1, 1, 9, 10, 1)
+      val cal = Calendar.getInstance
+      cal.set(2030, 9 - 1, 1, 9, 10, 1)
+      val date = cal.getTime
       val c = java.util.Calendar.getInstance()
       c.setTime(date)
 

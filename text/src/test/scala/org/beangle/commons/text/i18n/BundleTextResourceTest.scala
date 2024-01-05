@@ -17,6 +17,7 @@
 
 package org.beangle.commons.text.i18n
 
+import org.beangle.commons.lang.Locales
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -32,7 +33,7 @@ class BundleTextResourceTest extends AnyFunSpec with Matchers {
     }
 
     it("Get text from bundle") {
-      val locale = new Locale("zh", "CN")
+      val locale = Locales.of("zh_CN")
       val registry = new DefaultTextBundleRegistry()
       val bundle = registry.load(locale, "message")
       val bundle3 = registry.load(locale, "org.beangle.commons.text.i18n.Country")

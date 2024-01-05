@@ -24,13 +24,6 @@ import scala.collection.mutable
 object RomanSeqStyle {
   // 支持的最大数字
   val MAX: Int = 99999
-
-  def main(args: Array[String]): Unit = {
-    val luomaSeqStyle = new RomanSeqStyle
-    for (i <- 0 until 100) {
-      println(luomaSeqStyle.build(i + 1))
-    }
-  }
 }
 
 /** 罗马数字风格的序列号

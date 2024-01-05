@@ -17,7 +17,7 @@
 
 package org.beangle.commons
 
-import java.net.URL
+import java.net.{URI, URL}
 
 object Version {
   def name: String = "Beangle Scala Development Toolkit"
@@ -29,7 +29,7 @@ object Version {
     val classPath = clazz.getResource(className).toString
     if (classPath.startsWith("jar")) {
       val manifestPath = classPath.replace(className, "/META-INF/MANIFEST.MF")
-      val manifest = new java.util.jar.Manifest(new URL(manifestPath).openStream)
+      val manifest = new java.util.jar.Manifest(URI.create(manifestPath).toURL.openStream)
       val attr = manifest.getMainAttributes
       var version = attr.getValue("Bundle-Version")
       if (null == version) {

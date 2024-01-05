@@ -22,9 +22,9 @@ import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Charsets
 import org.beangle.commons.logging.Logging
 
-import java.io.{BufferedReader, ByteArrayOutputStream, InputStreamReader, OutputStreamWriter}
+import java.io.*
+import java.net.*
 import java.net.HttpURLConnection.*
-import java.net.{HttpURLConnection, URL, URLConnection, URLEncoder}
 import java.nio.charset.Charset
 import scala.collection.mutable
 
@@ -66,13 +66,13 @@ object HttpUtils extends Logging {
       case HTTP_OK => conn
       case HTTP_MOVED_TEMP | HTTP_MOVED_PERM =>
         val newLoc = conn.getHeaderField("location")
-        followRedirect(new URL(newLoc).openConnection, method)
+        followRedirect(URI.create(newLoc).toURL.openConnection, method)
       case _ => conn
     }
   }
 
   def getData(urlString: String, method: String = HttpMethods.GET): Response = {
-    getData(new URL(urlString), method, None)
+    getData(URI.create(urlString).toURL, method, None)
   }
 
   def getData(url: URL, method: String, username: String, password: String): Response = {
@@ -104,7 +104,7 @@ object HttpUtils extends Logging {
   }
 
   def getText(urlString: String): Response = {
-    getText(new URL(urlString), HttpMethods.GET, Charsets.UTF_8, None)
+    getText(URI.create(urlString).toURL, HttpMethods.GET, Charsets.UTF_8, None)
   }
 
   def getText(url: URL, method: String, encoding: Charset): Response = {
@@ -192,6 +192,35 @@ object HttpUtils extends Logging {
       case e: Exception => error(conn, url, e)
     } finally
       if (null != conn) conn.disconnect()
+  }
+
+  def download(c: URLConnection, location: File): Unit = {
+    val conn = followRedirect(c, "GET")
+    var input: InputStream = null
+    var output: OutputStream = null
+    try {
+      val file = new File(location.toString + ".part")
+      file.delete()
+      val buffer = Array.ofDim[Byte](1024 * 4)
+      input = conn.getInputStream
+      output = new FileOutputStream(file)
+      var n = input.read(buffer)
+      while (-1 != n) {
+        output.write(buffer, 0, n)
+        n = input.read(buffer)
+      }
+      //先关闭文件读写，再改名
+      IOs.close(input, output)
+      input = null
+      output = null
+      file.renameTo(location)
+    } catch {
+      case e: Throwable =>
+        logger.warn(s"Cannot download file ${location}")
+    }
+    finally {
+      IOs.close(input, output)
+    }
   }
 
   private[this] def error(conn: HttpURLConnection, url: URL, e: Exception): Response = {

@@ -21,22 +21,20 @@ import org.beangle.commons.lang.Numbers.toShort
 import org.beangle.commons.lang.annotation.value
 
 /** Hour and minute of day
-  *
-  * @version 4.0.5
-  * @since 4.0.5
-  */
+ *
+ * @version 4.0.5
+ * @since 4.0.5
+ */
 object HourMinute {
 
   val Zero = new HourMinute(0)
 
-  def apply(time: String): HourMinute =
-    new HourMinute(convert(time))
+  def apply(time: String): HourMinute = new HourMinute(convert(time))
 
-  def of(hour: Int, minute: Int): HourMinute =
-    new HourMinute((hour * 100 + minute).asInstanceOf[Short])
+  def of(hour: Int, minute: Int): HourMinute = new HourMinute((hour * 100 + minute).asInstanceOf[Short])
 
-  def of(time: java.time.LocalTime): HourMinute =
-    of(time.getHour, time.getMinute)
+  def of(time: java.time.LocalTime): HourMinute = of(time.getHour, time.getMinute)
+
 
   def convert(time: String): Short = {
     val index = time.indexOf(':')
@@ -49,7 +47,7 @@ object HourMinute {
 }
 
 /** 一天中的分钟时间，格式如23:33
-  */
+ */
 @value
 class HourMinute(val value: Short) extends Serializable with Ordered[HourMinute] {
 
@@ -61,17 +59,18 @@ class HourMinute(val value: Short) extends Serializable with Ordered[HourMinute]
     time.substring(0, 2) + ":" + time.substring(2, 4)
   }
 
-  override def compare(o: HourMinute): Int =
-    this.value - o.value
+  def toLocalTime: java.time.LocalTime = java.time.LocalTime.of(hour, minute)
 
-  def hour: Int =
-    value / 100
 
-  def minute: Int =
-    value % 100
+  override def compare(o: HourMinute): Int = this.value - o.value
 
-  def interval(other: HourMinute): Int =
-    Math.abs(this.minutes - other.minutes)
+
+  def hour: Int = value / 100
+
+  def minute: Int = value % 100
+
+  def interval(other: HourMinute): Int = Math.abs(this.minutes - other.minutes)
+
 
   def +(minutesDuration: Int): HourMinute = {
     var minutesValue = minutes + minutesDuration
@@ -85,21 +84,18 @@ class HourMinute(val value: Short) extends Serializable with Ordered[HourMinute]
     new HourMinute(((minutesValue / 60) * 100 + minutesValue % 60).asInstanceOf[Short])
   }
 
-  def -(minutesDuration: Int): HourMinute =
-    this + (0 - minutesDuration)
+  def -(minutesDuration: Int): HourMinute = this + (0 - minutesDuration)
 
-  private def minutes: Int =
-    hour * 60 + minute
+  private def minutes: Int = hour * 60 + minute
 
-  def -(other: HourMinute): Short =
-    (this.minutes - other.minutes).asInstanceOf[Short]
+  def -(other: HourMinute): Short = (this.minutes - other.minutes).asInstanceOf[Short]
 
-  override def equals(obj: Any): Boolean =
+  override def equals(obj: Any): Boolean = {
     obj match {
       case hm: HourMinute => hm.value == this.value
       case _ => false
     }
+  }
 
-  override def hashCode: Int =
-    value
+  override def hashCode: Int = value
 }

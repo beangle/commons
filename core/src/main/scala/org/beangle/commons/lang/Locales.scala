@@ -21,23 +21,33 @@ import java.util.Locale
 
 object Locales {
 
-  def toLocale(localeStr: String): Locale = {
-    if (Strings.isBlank(localeStr) || ("_".equals(localeStr)))
-      return Locale.getDefault()
+  private var cache = Map("_" -> Locale.getDefault())
 
-    var index = localeStr.indexOf('_')
-    if (index < 0) return new Locale(localeStr)
+  @deprecated("using of method")
+  def toLocale(str: String) = {
+    of(str)
+  }
 
-    val language = localeStr.substring(0, index)
-    if (index == localeStr.length()) return new Locale(language)
+  def of(localeStr: String): Locale = {
+    if Strings.isBlank(localeStr) then
+      Locale.getDefault()
+    else
+      cache.get(localeStr) match {
+        case None =>
+          val n = parse(localeStr)
+          cache = cache + (localeStr -> n)
+          n
+        case Some(locale) => locale
+      }
+  }
 
-    val new_localeStr = localeStr.substring(index + 1)
-    index = new_localeStr.indexOf('_')
-    if (index < 0) return new Locale(language, new_localeStr)
-
-    val country = new_localeStr.substring(0, index)
-    if (index == new_localeStr.length()) return new Locale(language, country)
-
-    new Locale(language, country, new_localeStr.substring(index + 1))
+  private def parse(localeStr: String): Locale = {
+    val builder = new Locale.Builder
+    val parts = Strings.split(localeStr, Array('-', '_'))
+    parts.length match {
+      case 1 => builder.setLanguage(parts(0)).build()
+      case 2 => builder.setLanguage(parts(0)).setRegion(parts(1)).build()
+      case _ => builder.setLanguage(parts(0)).setRegion(parts(1)).setVariant(parts(2)).build()
+    }
   }
 }

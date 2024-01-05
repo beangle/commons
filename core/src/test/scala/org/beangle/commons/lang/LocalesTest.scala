@@ -20,12 +20,17 @@ package org.beangle.commons.lang
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
+import java.util.Locale
+
 class LocalesTest extends AnyFunSpec with Matchers {
 
   describe("Locales") {
     it("toLocale") {
-      assert(null != Locales.toLocale("zh"))
-      assert(null != Locales.toLocale("zh_CN"))
+      val zh = Locale.SIMPLIFIED_CHINESE
+      assert(Locale.getDefault() == Locales.of("_"))
+      assert(null != Locales.of("zh"))
+      assert(zh == Locales.of("zh-CN"))
+      assert(zh == Locales.of("zh_CN"))
     }
   }
 }

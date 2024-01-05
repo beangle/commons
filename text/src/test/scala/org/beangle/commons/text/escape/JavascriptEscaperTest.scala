@@ -17,18 +17,15 @@
 
 package org.beangle.commons.text.escape
 
-import org.beangle.commons.lang.ClassLoaders
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-
-import java.util.Locale
 
 class JavascriptEscaperTest extends AnyFunSpec with Matchers {
 
   describe("JavasciptEscaper") {
     it("Escape") {
-      println(JavascriptEscaper.escape("beangl'dd", false))
-      println(XmlEscaper.escape("<td>"))
+      assert("beangl\\'dd" == JavascriptEscaper.escape("beangl'dd", false))
+      assert("&lt;td&gt;" == XmlEscaper.escape("<td>"))
     }
   }
 }
