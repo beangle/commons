@@ -17,82 +17,107 @@
 
 package org.beangle.commons.regex
 
+import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.Strings
+import org.beangle.commons.regex.AntPathPattern.DefaultPattern
 
 import java.util.regex.Pattern
 
 object AntPathPattern {
 
-  def matches(pattern: String, path: String): Boolean =
-    new AntPathPattern(pattern).matches(path)
+  def matches(pattern: String, path: String): Boolean = new AntPathPattern(pattern).matches(path)
 
-  def matchStart(pattern: String, path: String): Boolean =
-    new AntPathPattern(pattern).matchStart(path)
+  def matchStart(pattern: String, path: String): Boolean = new AntPathPattern(pattern).matchStart(path)
 
-  def isPattern(path: String): Boolean =
+  def isPattern(path: String): Boolean = {
     (path.indexOf('*') != -1 || path.indexOf('?') != -1)
+  }
+
+  private val DefaultPattern = Pattern.compile("""\?|\*|\{((?:\{[^/]+?\}|[^/{}]|\\[{}])+?)\}""")
 }
 
 /** AntPattern implementation for Ant-style path patterns. Examples are provided below.
-  * <p>
-  * Part of this mapping code has been kindly borrowed from <a href="http://ant.apache.org">Apache
-  * Ant</a>.
-  * <p>
-  * The mapping matches URLs using the following rules:<br>
-  * <ul>
-  * <li>? matches one character</li>
-  * <li>* matches zero or more characters</li>
-  * <li>** matches zero or more 'directories' in a path</li>
-  * </ul>
-  * <p>
-  * Some examples:<br>
-  * <ul>
-  * <li><code>com/t?st.jsp</code> - matches <code>com/test.jsp</code> but also
-  * <code>com/tast.jsp</code> or <code>com/txst.jsp</code></li>
-  * <li><code>com/&#42;sp</code> - matches all <code>.jsp</code> files in the <code>com</code> directory</li>
-  * <li><code>org/beangle/&#42;&#42;/&#42;.jsp</code> - matches all <code>.jsp</code> files underneath
-  * <li><code>com/&#42;&#42;/test.jsp</code> - matches all <code>test.jsp</code> files underneath the <code>com</code> path</li>
-  * the <code>org/beangle</code> path</li>
-  * <li><code>org/&#42;&#42;/servlet/bla.jsp</code> - matches
-  * <code>org/beangle/servlet/bla.jsp</code> but also
-  * <code>org/beangle/testing/servlet/bla.jsp</code> and <code>org/servlet/bla.jsp</code></li>
-  * </ul>
-  *
-  * @author chaostone
-  * @since 3.1.0
-  */
+ * <p>
+ * Part of this mapping code has been kindly borrowed from <a href="http://ant.apache.org">Apache
+ * Ant</a>.
+ * <p>
+ * The mapping matches URLs using the following rules:<br>
+ * <ul>
+ * <li>? matches one character</li>
+ * <li>* matches zero or more characters</li>
+ * <li>** matches zero or more 'directories' in a path</li>
+ * </ul>
+ * <p>
+ * Some examples:<br>
+ * <ul>
+ * <li><code>com/t?st.jsp</code> - matches <code>com/test.jsp</code> but also
+ * <code>com/tast.jsp</code> or <code>com/txst.jsp</code></li>
+ * <li><code>com/&#42;sp</code> - matches all <code>.jsp</code> files in the <code>com</code> directory</li>
+ * <li><code>org/beangle/&#42;&#42;/&#42;.jsp</code> - matches all <code>.jsp</code> files underneath
+ * <li><code>com/&#42;&#42;/test.jsp</code> - matches all <code>test.jsp</code> files underneath the <code>com</code> path</li>
+ * the <code>org/beangle</code> path</li>
+ * <li><code>org/&#42;&#42;/servlet/bla.jsp</code> - matches
+ * <code>org/beangle/servlet/bla.jsp</code> but also
+ * <code>org/beangle/testing/servlet/bla.jsp</code> and <code>org/servlet/bla.jsp</code></li>
+ * </ul>
+ *
+ * @author chaostone
+ * @since 3.1.0
+ */
 class AntPathPattern(val text: String) {
 
-  val pattern: Pattern = Pattern.compile(preprocess(text))
+  private var pattern: Pattern = _
+  private var exactMatch: Boolean = _
+
+  var variables: List[String] = List.empty
+
+  preprocess(text, false)
 
   /** translate ant string to regex string
-    */
-  private def preprocess(ant: String): String = {
-    val sb = new StringBuilder()
-    val length = text.length
-    var i = 0
-    while (i < length) {
-      val c = text.charAt(i)
-      var substr = String.valueOf(c)
-      if (c == '.') substr = "\\." else if (c == '?') substr = "." else if (c == '*')
-        if (i + 1 < length) {
-          val next1 = text.charAt(i + 1)
-          if (next1 == '*') {
-            i += 1
-            var next2 = '\n'
-            if (i + 1 < length) next2 = text.charAt(i + 1)
-            if (next2 == '/') {
-              i += 1
-              substr = "(.*/)*"
-            } else
-              substr = "(.*)"
-          } else substr = "([^/]*?)"
-        } else
-          substr = "([^/]*?)"
-      sb.append(substr)
-      i += 1
+   */
+  def preprocess(pattern: String, caseSensitive: Boolean): Unit = {
+    val builder = new StringBuilder()
+    val matcher = DefaultPattern.matcher(pattern)
+    var end = 0
+    val vars = Collections.newBuffer[String]
+    while (matcher.find()) {
+      builder.append(quote(pattern, end, matcher.start()))
+      val matched = matcher.group()
+      if ("?".equals(matched)) {
+        builder.append('.')
+      } else if ("*".equals(matched)) {
+        builder.append(".*")
+      } else if (matched.startsWith("{") && matched.endsWith("}")) {
+        val colonIdx = matched.indexOf(':')
+        if (colonIdx == -1) {
+          if isRegex(matched) then
+            builder.append(s"(${matched.substring(1, matched.length - 1)})")
+          else
+            builder.append("((?s).*)")
+            vars.addOne(matcher.group(1))
+        } else {
+          val variablePattern = matched.substring(colonIdx + 1, matched.length() - 1)
+          builder.append('(').append(variablePattern).append(')')
+          val variableName = matched.substring(1, colonIdx)
+          vars.addOne(variableName)
+        }
+      }
+      end = matcher.end();
     }
-    sb.toString
+    this.variables = vars.toList
+    if (end == 0) {
+      this.exactMatch = true
+      this.pattern = null
+    } else {
+      this.exactMatch = false
+      builder.append(quote(pattern, end, pattern.length()))
+      this.pattern = Pattern.compile(builder.toString(),
+        Pattern.DOTALL | (if caseSensitive then 0 else Pattern.CASE_INSENSITIVE))
+    }
+  }
+
+  private def isRegex(p: String): Boolean = {
+    p.indexOf('*') > 0 || p.indexOf('.') > 0 || p.indexOf('+') > 0 || p.indexOf('[') > 0
   }
 
   override def hashCode(): Int = text.hashCode
@@ -102,15 +127,24 @@ class AntPathPattern(val text: String) {
     case _ => false
   }
 
-  def matches(path: String): Boolean =
-    pattern.matcher(path).matches()
-
-  def matchStart(path: String): Boolean = {
-    val m = pattern.matcher(path)
-    m.matches()
-    m.hitEnd()
+  def matches(path: String): Boolean = {
+    if exactMatch then text == path else pattern.matcher(path).matches()
   }
 
-  override def toString: String =
+  def matchStart(path: String): Boolean = {
+    if exactMatch then path.startsWith(text)
+    else
+      val m = pattern.matcher(path)
+      m.matches()
+      m.hitEnd()
+  }
+
+  private def quote(s: String, start: Int, end: Int): String = {
+    if start == end then ""
+    else Pattern.quote(s.substring(start, end));
+  }
+
+  override def toString: String = {
     Strings.concat("ant:[", text, "] regex:[", pattern.toString, "]")
+  }
 }

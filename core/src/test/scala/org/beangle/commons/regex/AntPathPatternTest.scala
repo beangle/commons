@@ -35,6 +35,8 @@ class AntPathPatternTest extends AnyFunSpec with Matchers {
       matches("org/**/servlet/bla.jsp", "org/servlet/bla.jsp")
       matches("org/**/servlet/bla.jsp", "org/anyservlet/bla.jsp")
       matches("org/**", "org/anyservlet/bla.jsp")
+      matches("org/{id:[0-9]+}", "org/s") should be(false)
+      matches("org/{[0-9]+}", "org/12323") should be(true)
 
       matchStart("org/**", "org/anyservlet/") should be(true)
       matchStart("org/**/*.jsp", "com/anyservlet") should be(false)
