@@ -15,12 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.lang
+package org.beangle.commons.concurrent
 
 /** Start multiple thread simultaneously
   */
-@deprecated("using Tasks")
-object ThreadTasks {
+object Tasks {
 
   /** Start collection of runnable
     */

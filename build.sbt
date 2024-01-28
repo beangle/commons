@@ -35,6 +35,7 @@ lazy val core = (project in file("core"))
     common,
     libraryDependencies ++= commonDeps,
     libraryDependencies += jexl3 % "test",
+    libraryDependencies += jcl_over_slf4j % "test",
     libraryDependencies ++= Seq(scalaxml % "optional")
   )
 
