@@ -35,6 +35,7 @@ object XmlNode {
 class XmlNode(val name: String) {
   private val attributes = Collections.newBuffer[(String, String)]
   private val children = Collections.newBuffer[XmlNode]
+  private var text: Option[String] = None
 
   def attr(key: String, value: String): this.type = {
     attributes += (key -> escape(value))
@@ -62,17 +63,36 @@ class XmlNode(val name: String) {
     buf.toString
   }
 
+  override def toString: String = {
+    val buf = new StringBuilder("\n")
+    appendXml(this, buf)
+    buf.toString
+  }
+
   private def appendXml(node: XmlNode, buf: mutable.StringBuilder): Unit = {
     buf ++= s"<${node.name}"
     node.attributes foreach { case (k, v) =>
       buf ++= s""" $k="$v""""
     }
-    if (node.children.isEmpty) {
-      buf ++= "/>\n"
-    } else {
-      buf ++= ">\n"
-      node.children foreach (appendXml(_, buf))
-      buf ++= s"</${node.name}>\n"
+    node.text match {
+      case None =>
+        if (node.children.isEmpty) {
+          buf ++= "/>\n"
+        } else {
+          buf ++= ">\n"
+          node.children foreach (appendXml(_, buf))
+          buf ++= s"</${node.name}>\n"
+        }
+      case Some(t) =>
+        buf ++= ">\n"
+        buf ++= s"<![CDATA[${t}]]>"
+        node.children foreach (appendXml(_, buf))
+        buf ++= s"</${node.name}>\n"
     }
+  }
+
+  def inner(text: String): this.type = {
+    this.text = Some(text)
+    this
   }
 }

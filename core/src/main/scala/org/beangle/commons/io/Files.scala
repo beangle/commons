@@ -19,6 +19,7 @@ package org.beangle.commons.io
 
 import org.beangle.commons.lang.Charsets.UTF_8
 import org.beangle.commons.lang.Strings.replace
+import org.beangle.commons.lang.SystemInfo
 
 import java.io.*
 import java.nio.channels.FileChannel
@@ -50,10 +51,25 @@ object Files {
   }
 
   @inline
-  def forName(name: String): File = new File(fileName(name))
+  def forName(name: String): File = new File(expandTilde(name))
 
-  def stringWriter(file: File, charset: Charset = UTF_8): Writer =
+  def forName(pwd: String, filePath: String): File = {
+    val path = expandTilde(filePath)
+    if / == "\\" && path.contains(":") then new File(path) //windows
+    else if / == "/" && path.charAt(0) == '/' then new File(path) //linux
+    else new File(pwd + / + path)
+  }
+
+  def expandTilde(path: String): String = {
+    val p = fileName(path)
+    if p.startsWith("~" + /) then SystemInfo.user.home + p.substring(1)
+    else if p.startsWith("~+") then SystemInfo.user.dir + p.substring(2)
+    else p
+  }
+
+  def stringWriter(file: File, charset: Charset = UTF_8): Writer = {
     new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), charset))
+  }
 
   /** Reads the contents of a file into a String.
    * The file is always closed.
