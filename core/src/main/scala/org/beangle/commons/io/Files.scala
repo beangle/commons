@@ -50,8 +50,7 @@ object Files {
     result
   }
 
-  @inline
-  def forName(name: String): File = new File(expandTilde(name))
+  def forName(name: String): File = new File(expandTilde(name)).getAbsoluteFile
 
   def forName(pwd: String, filePath: String): File = {
     val path = expandTilde(filePath)
