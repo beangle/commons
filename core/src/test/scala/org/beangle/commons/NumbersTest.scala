@@ -18,15 +18,24 @@
 package org.beangle.commons
 
 import org.beangle.commons.lang.Numbers
+import org.beangle.commons.lang.Numbers.*
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+
+import scala.runtime.stdLibPatches.Predef.assert
 
 class NumbersTest extends AnyFunSpec with Matchers {
 
   describe("Numbers") {
     it("isDigits") {
-      assert(Numbers.isDigits("23"))
-      assert(Numbers.isDigits("-23"))
+      assert(isDigits("23"))
+      assert(isDigits("-23"))
+
+      println(round(4.0153d,3))
+      assert(round(4.015d, 2).toString == "4.02") //3.14
+      assert(round(add(0.05, 0.01), 2).toString == "0.06")
+      assert(round(subtract(1.0, 0.42), 2).toString == "0.58")
+      assert(round(multiply(4.015, 100), 3).toString == "401.5")
     }
   }
 

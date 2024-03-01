@@ -19,6 +19,7 @@ package org.beangle.commons.lang
 
 import org.beangle.commons.lang.Strings.isEmpty
 
+import java.math.RoundingMode
 import java.{lang as jl, math as jm}
 
 object Numbers {
@@ -145,5 +146,40 @@ object Numbers {
     if isEmpty(str) then return false
     val start = if str.charAt(0) == '-' then 1 else 0
     (start until str.length).forall(i => Character.isDigit(str.charAt(i)))
+  }
+
+
+  def round(n: Float, scale: Int): Float = {
+    val b = jm.BigDecimal(java.lang.Float.toString(n))
+    b.setScale(scale, RoundingMode.HALF_UP).floatValue
+  }
+
+  def round(n: Double, scale: Int): Double = {
+    val b = jm.BigDecimal(jl.Double.toString(n))
+    b.setScale(scale, RoundingMode.HALF_UP).doubleValue
+  }
+
+  def add(v1: Double, v2: Double): Double = {
+    val b1 = jm.BigDecimal(jl.Double.toString(v1))
+    val b2 = jm.BigDecimal(jl.Double.toString(v2))
+    b1.add(b2).doubleValue
+  }
+
+  def subtract(v1: Double, v2: Double): Double = {
+    val b1 = jm.BigDecimal(jl.Double.toString(v1))
+    val b2 = jm.BigDecimal(jl.Double.toString(v2))
+    b1.subtract(b2).doubleValue
+  }
+
+  def multiply(v1: Double, v2: Double): Double = {
+    val b1 = jm.BigDecimal(jl.Double.toString(v1))
+    val b2 = jm.BigDecimal(jl.Double.toString(v2))
+    b1.multiply(b2).doubleValue
+  }
+
+  def divide(v1: Double, v2: Double, scale: Int = 10): Double = {
+    val b1 = jm.BigDecimal(jl.Double.toString(v1))
+    val b2 = jm.BigDecimal(jl.Double.toString(v2))
+    b1.divide(b2, scale, RoundingMode.HALF_UP).doubleValue
   }
 }
