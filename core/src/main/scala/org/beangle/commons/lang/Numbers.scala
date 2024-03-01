@@ -147,13 +147,6 @@ object Numbers {
     val start = if str.charAt(0) == '-' then 1 else 0
     (start until str.length).forall(i => Character.isDigit(str.charAt(i)))
   }
-
-
-  def round(n: Float, scale: Int): Float = {
-    val b = jm.BigDecimal(java.lang.Float.toString(n))
-    b.setScale(scale, RoundingMode.HALF_UP).floatValue
-  }
-
   def round(n: Double, scale: Int): Double = {
     val b = jm.BigDecimal(jl.Double.toString(n))
     b.setScale(scale, RoundingMode.HALF_UP).doubleValue
