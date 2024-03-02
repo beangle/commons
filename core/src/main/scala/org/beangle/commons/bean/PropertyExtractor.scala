@@ -23,7 +23,7 @@ trait PropertyExtractor {
 
 }
 
-object DefaultPropertyExtractor extends PropertyExtractor {
+class DefaultPropertyExtractor extends PropertyExtractor {
   override def get(target: Object, property: String): Any = {
     Properties.get[Any](target, property)
   }
