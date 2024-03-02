@@ -138,30 +138,25 @@ object Files {
    * {@link File# setLastModified ( long )}, however it is not guaranteed that the operation will
    * succeed. If the modification operation fails, no indication is provided.
    *
-   * @param srcFile  an existing file to copy, must not be <code>null</code>
-   * @param destFile the new file, must not be <code>null</code>
+   * @param src  an existing file to copy, must not be <code>null</code>
+   * @param dest the new file, must not be <code>null</code>
    */
   @throws[IOException]("if source or destination is invalid or an IO error occurs during copying")
-  def copy(srcFile: File, destFile: File): Unit = {
-    require(null != srcFile)
-    require(null != destFile)
-    if (!srcFile.exists)
-      throw new FileNotFoundException("Source '" + srcFile + "' does not exist")
-    if (srcFile.isDirectory)
-      throw new IOException("Source '" + srcFile + "' exists but is a directory")
-    if (srcFile.getCanonicalPath == destFile.getCanonicalPath)
-      throw new IOException("Source '" + srcFile + "' and destination '" + destFile +
-        "' are the same")
-    val parentFile = destFile.getParentFile
+  def copy(src: File, dest: File): Unit = {
+    require(null != src)
+    require(null != dest)
+    if !src.exists then throw new FileNotFoundException("Source '" + src + "' does not exist")
+    if src.isDirectory then throw new IOException("Source '" + src + "' exists but is a directory")
+    if src.getCanonicalPath == dest.getCanonicalPath then throw new IOException(s"Source '${src}' and destination '${dest}' are the same")
+    val parentFile = dest.getParentFile
     if (parentFile != null)
       if (!parentFile.mkdirs() && !parentFile.isDirectory)
         throw new IOException("Destination '" + parentFile + "' directory cannot be created")
-    if (destFile.exists()) {
-      if (destFile.isDirectory)
-        throw new IOException("Destination '" + destFile + "' exists but is a directory")
-      if (!destFile.canWrite) throw new IOException("Destination '" + destFile + "' exists but is read-only")
+    if (dest.exists()) {
+      if dest.isDirectory then throw new IOException("Destination '" + dest + "' exists but is a directory")
+      if !dest.canWrite then throw new IOException("Destination '" + dest + "' exists but is read-only")
     }
-    doCopy(srcFile, destFile, true)
+    doCopy(src, dest, true)
   }
 
   private def doCopy(srcFile: File, destFile: File, preserveFileDate: Boolean): Unit = {
