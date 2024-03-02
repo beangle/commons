@@ -23,10 +23,10 @@ object Tasks {
 
   /** Start collection of runnable
     */
-  def start(runables: Iterator[Runnable]): Unit = {
+  def start(runnables: Iterator[Runnable]): Unit = {
     val tasks = new collection.mutable.ListBuffer[Thread]
-    for (runable <- runables) {
-      val thread = new Thread(runable)
+    for (runnable <- runnables) {
+      val thread = new Thread(runnable)
       tasks += thread
       thread.start()
     }
@@ -40,11 +40,11 @@ object Tasks {
 
   /** Start runnable multiple
     */
-  def start(runable: Runnable, threadPoolSize: Int, name: String = null): Unit = {
+  def start(runnable: Runnable, threadPoolSize: Int, name: String = null): Unit = {
     val tasks = new collection.mutable.ListBuffer[Thread]
     var index = 0;
     while (index < threadPoolSize) {
-      val thread = if (null == name) new Thread(runable) else new Thread(runable, name + index)
+      val thread = if (null == name) new Thread(runnable) else new Thread(runnable, name + index)
       tasks += thread
       index += 1
       thread.start()
