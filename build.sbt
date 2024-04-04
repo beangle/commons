@@ -3,7 +3,7 @@ import org.beangle.parent.Settings.*
 import sbt.Keys.libraryDependencies
 
 ThisBuild / organization := "org.beangle.commons"
-ThisBuild / version := "5.6.15-SNAPSHOT"
+ThisBuild / version := "5.6.15"
 ThisBuild / scmInfo := Some(
   ScmInfo(
     url("https://github.com/beangle/commons"),
@@ -26,31 +26,12 @@ ThisBuild / homepage := Some(url("http://beangle.github.io/commons/index.html"))
 val commonDeps = Seq(slf4j, logback_classic % "test", logback_core % "test", scalatest)
 
 lazy val root = (project in file("."))
-  .settings()
-  .aggregate(core, text, commons_file)
-
-lazy val core = (project in file("core"))
   .settings(
-    name := "beangle-commons-core",
+    name := "beangle-commons",
     common,
     libraryDependencies ++= commonDeps,
     libraryDependencies += jexl3 % "test",
     libraryDependencies += jcl_over_slf4j % "test",
-    libraryDependencies ++= Seq(scalaxml % "optional")
+    libraryDependencies += scalaxml % "optional",
+    libraryDependencies += apache_commons_compress % "optional"
   )
-
-lazy val text = (project in file("text"))
-  .settings(
-    name := "beangle-commons-text",
-    common,
-    libraryDependencies ++= commonDeps
-  ).dependsOn(core)
-
-lazy val commons_file = (project in file("file"))
-  .settings(
-    name := "beangle-commons-file",
-    common,
-    libraryDependencies ++= (commonDeps ++ Seq(apache_commons_compress))
-  ).dependsOn(core)
-
-publish / skip := true
