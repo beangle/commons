@@ -26,30 +26,26 @@ import org.beangle.commons.lang.reflect.{BeanInfo, BeanInfos, TypeInfo}
 import org.beangle.commons.logging.Logging
 
 import java.lang.reflect.Array as Jarray
+import scala.reflect.ClassTag
 
 object Properties {
   private val Default = new Properties(DefaultConversion.Instance)
 
-  def set(bean: AnyRef, propertyName: String, value: Any): Any =
-    Default.set(bean, propertyName, value)
+  def set(bean: AnyRef, propertyName: String, value: Any): Any = Default.set(bean, propertyName, value)
 
-  def get[T <: Any](inputBean: Any, propertyName: String): T =
-    Default.get(inputBean, propertyName)
+  def get[T: ClassTag](inputBean: Any, propertyName: String): T = Default.get[T](inputBean, propertyName)
 
-  def copy(bean: AnyRef, propertyName: String, value: Any): Any =
-    Default.copy(bean, propertyName, value)
+  def copy(bean: AnyRef, propertyName: String, value: Any): Any = Default.copy(bean, propertyName, value)
 
-  def copy(bean: AnyRef, beanInfo: BeanInfo, propertyName: String, value: Any): Any =
+  def copy(bean: AnyRef, beanInfo: BeanInfo, propertyName: String, value: Any): Any = {
     Default.copy(bean, beanInfo, propertyName, value)
+  }
 
-  def isWriteable(bean: AnyRef, name: String): Boolean =
-    Default.isWriteable(bean, name)
+  def isWriteable(bean: AnyRef, name: String): Boolean = Default.isWriteable(bean, name)
 
-  def getType(clazz: Class[_], name: String): Class[_] =
-    Default.getType(clazz, name)
+  def getType(clazz: Class[_], name: String): Class[_] = Default.getType(clazz, name)
 
-  def writables(clazz: Class[_]): Set[String] =
-    Default.writables(clazz)
+  def writables(clazz: Class[_]): Set[String] = Default.writables(clazz)
 }
 
 class Properties(conversion: Conversion) extends Logging {
@@ -64,7 +60,7 @@ class Properties(conversion: Conversion) extends Logging {
       copy(bean, BeanInfos.get(bean.getClass), propertyName, value, null)
   }
 
-  def get[T <: Any](inputBean: Any, propertyName: String): T = {
+  def get[T: ClassTag](inputBean: Any, propertyName: String): T = {
     var result = inputBean
     var name = propertyName
     while (resolver.hasNested(name)) {
