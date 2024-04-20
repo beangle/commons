@@ -47,7 +47,7 @@ object Networks {
     ips.toSet
   }
 
-  def tryOpen(l: String): Option[URL] = {
+  def tryConnectURL(l: String): Option[URL] = {
     try {
       val rs = url(l)
       val conn = rs.openConnection
