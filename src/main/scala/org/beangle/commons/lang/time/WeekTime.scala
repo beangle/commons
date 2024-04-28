@@ -19,10 +19,8 @@ package org.beangle.commons.lang.time
 
 import org.beangle.commons.bean.component
 import org.beangle.commons.lang.Objects
-import org.beangle.commons.lang.annotation.beta
-import org.beangle.commons.lang.time.WeekDay
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import scala.collection.mutable
 
 /** 循环时间 */
@@ -49,17 +47,15 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
     this.weekstate = other.weekstate
   }
 
-  def dates: List[LocalDate] =
-    weekstate.weeks.map { x => startOn.plusWeeks(x - 1) }
+  def dates: List[LocalDate] = weekstate.weeks.map { x => startOn.plusWeeks(x - 1) }
 
-  def firstDay: LocalDate =
-    startOn.plusWeeks(weekstate.first - 1)
+  def firstDay: LocalDate = startOn.plusWeeks(weekstate.first - 1)
 
-  def lastDay: LocalDate =
-    startOn.plusWeeks(weekstate.last - 1)
+  def firstTime: LocalDateTime = firstDay.atTime(beginAt.toLocalTime)
 
-  def weekday: WeekDay =
-    WeekDay.of(startOn)
+  def lastDay: LocalDate = startOn.plusWeeks(weekstate.last - 1)
+
+  def weekday: WeekDay = WeekDay.of(startOn)
 
   def isOverlap(o: WeekTime): Boolean =
     startOn.equals(o.startOn) && weekstate.isOverlap(o.weekstate) & beginAt < o.endAt & o.beginAt < endAt
@@ -93,10 +89,10 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
     }
 
   /** 尝试合并两个时间
-    *
-    * @param w2 second weektime
-    * @return true if merged
-    */
+   *
+   * @param w2 second weektime
+   * @return true if merged
+   */
   def merge(w2: WeekTime, minGap: Int): Boolean =
     if (mergeable(w2, minGap)) {
       doMerge(w2)
@@ -105,12 +101,12 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
       false
 
   /** 判断合并两个时间是否可以
-    * 标准为 （weekState、weekday相等） 且 （相连时间 或 时间相交）
-    * 或者时间相等则可以合并周次
-    *
-    * @param w2 second weektime
-    * @return true if merged
-    */
+   * 标准为 （weekState、weekday相等） 且 （相连时间 或 时间相交）
+   * 或者时间相等则可以合并周次
+   *
+   * @param w2 second weektime
+   * @return true if merged
+   */
   def mergeable(w2: WeekTime, minGap: Int): Boolean =
     if (this.startOn == w2.startOn)
       if (this.weekstate == w2.weekstate)
@@ -124,9 +120,9 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
       false
 
   /** 将两时间进行合并，前提是这两时间可以合并
-    *
-    * @param w2 weektime
-    */
+   *
+   * @param w2 weektime
+   */
   private def doMerge(w2: WeekTime): Unit =
     if (this.weekstate == w2.weekstate) {
       if (w2.beginAt.value < this.beginAt.value)
@@ -140,11 +136,11 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
 object WeekTime {
 
   /** 构造某个日期（beginAt, endAt必须是同一天，只是时间不同）的WeekTime
-    *
-    * @param beginAt beginAt
-    * @param endAt   endAt
-    * @return
-    */
+   *
+   * @param beginAt beginAt
+   * @param endAt   endAt
+   * @return
+   */
   def of(startOn: LocalDate, beginAt: HourMinute, endAt: HourMinute): WeekTime = {
     val time = of(startOn)
     time.beginAt = beginAt
@@ -153,10 +149,10 @@ object WeekTime {
   }
 
   /**
-    *
-    * @param ld date
-    * @return
-    */
+   *
+   * @param ld date
+   * @return
+   */
   def of(ld: LocalDate): WeekTime = {
     val yearStartOn = getStartOn(ld.getYear, WeekDay.of(ld))
     val weektime = new WeekTime
@@ -166,11 +162,11 @@ object WeekTime {
   }
 
   /** 查询该年份第一个指定day的日期
-    *
-    * @param year    year
-    * @param weekday weekday
-    * @return 指定day的第一天
-    */
+   *
+   * @param year    year
+   * @param weekday weekday
+   * @return 指定day的第一天
+   */
   def getStartOn(year: Int, weekday: WeekDay): LocalDate = {
     var startDate = LocalDate.of(year, 1, 1)
     while (startDate.getDayOfWeek.getValue != weekday.id)
