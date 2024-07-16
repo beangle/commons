@@ -42,7 +42,7 @@ object Numbers {
    */
   def toInt(str: String, defaultValue: Int = 0): Int = {
     if (isEmpty(str)) return defaultValue
-    try Integer.parseInt(str)
+    try java.lang.Double.parseDouble(str).toInt
     catch case nfe: NumberFormatException => defaultValue
   }
 
@@ -147,6 +147,7 @@ object Numbers {
     val start = if str.charAt(0) == '-' then 1 else 0
     (start until str.length).forall(i => Character.isDigit(str.charAt(i)))
   }
+
   def round(n: Double, scale: Int): Double = {
     val b = jm.BigDecimal(jl.Double.toString(n))
     b.setScale(scale, RoundingMode.HALF_UP).doubleValue

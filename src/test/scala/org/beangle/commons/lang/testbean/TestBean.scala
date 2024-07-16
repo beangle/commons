@@ -19,7 +19,7 @@ package org.beangle.commons.lang.testbean
 
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.annotation.{description, noreflect}
+import org.beangle.commons.lang.annotation.{default_value, description, noreflect}
 import org.beangle.commons.logging.Logging
 
 import java.beans.Transient
@@ -27,6 +27,7 @@ import java.beans.Transient
 class TestBean {
   var id: Int = _
   var name: String = _
+  @default_value("1")
   var intValue: Int = _
   var age: Option[Int] = _
   var javaMap: java.util.Map[Int, String] = _
@@ -34,6 +35,7 @@ class TestBean {
   var testEnum: TestEnum = _
   var dogs: Iterable[Dog] = _
   var parent: Option[TestBean] = None
+  var tags: Map[String, String] = Map.empty
 
   def methodWithManyArguments(
                                i: Int,

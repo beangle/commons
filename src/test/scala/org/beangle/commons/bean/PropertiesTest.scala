@@ -33,10 +33,11 @@ class PropertiesTest extends AnyFunSpec with Matchers {
       val bean = new TestBean
       Properties.set(bean, "intValue", 2)
       bean.intValue should be(2)
-
+      bean.tags = Map("art" -> "artister", "music" -> "pop")
       bean.javaMap = new java.util.HashMap[Int, String]
       Properties.copy(bean, "javaMap(1)", "2")
       bean.javaMap.get(1) should be("2")
+      Properties.get[Any](bean, "tags(music)") should equal("pop")
     }
 
     it("get option nested value") {

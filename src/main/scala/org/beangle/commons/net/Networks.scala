@@ -19,6 +19,7 @@ package org.beangle.commons.net
 
 import org.beangle.commons.collection.Collections
 
+import java.io.IOException
 import java.net.*
 
 object Networks {
@@ -56,5 +57,13 @@ object Networks {
     } catch {
       case _: Throwable => None
     }
+  }
+
+  def isPortFree(port: Int): Boolean = {
+    try
+      new Socket("localhost", port).close()
+      false
+    catch
+      case e: IOException => true
   }
 }

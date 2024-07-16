@@ -15,40 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.lang.time
+package org.beangle.commons.lang.annotation;
 
-import java.time.LocalDate
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-object WeekDay {
+/** default value of field
+ *
+ * @author chaostone
+ */
+@Target({ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface default_value {
 
-  def of(date: LocalDate): WeekDay = fromOrdinal(date.getDayOfWeek.getValue - 1)
-
-  def of(id: Int): WeekDay = fromOrdinal(id - 1)
-
-}
-
-/** 国家标准GBT 7408-2005
-  */
-enum WeekDay {
-  case Mon, Tue, Wed, Thu, Fri, Sat, Sun
-
-  def id: Int = ordinal + 1
-
-  /** Java calendar Index
-    */
-  def index: Int =
-    id match {
-      case 7 => 1
-      case _ => id + 1
-    }
-
-  def previous: WeekDay = {
-    val preDayId = this.id - 1
-    if (preDayId <= 0) WeekDay.Sun else WeekDay.of(preDayId)
-  }
-
-  def next: WeekDay = {
-    val nextDayId = this.id + 1
-    if (nextDayId > 7) WeekDay.Mon else WeekDay.of(this.id + 1)
-  }
+  String value();
 }

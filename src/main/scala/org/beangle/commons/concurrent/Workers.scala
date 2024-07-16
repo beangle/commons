@@ -29,7 +29,7 @@ object Workers {
     loads.addAll(payloads.toSeq.asJava)
 
     val threads = if threadPoolSize <= 0 then Runtime.getRuntime.availableProcessors else threadPoolSize
-    Tasks.start(new Work(loads, job), threadPoolSize)
+    Tasks.start(new Work(loads, job), threads)
   }
 
   class Work[T](payloads: LinkedBlockingQueue[T], job: T => Unit) extends Runnable, Logging {
