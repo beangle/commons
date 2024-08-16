@@ -57,16 +57,17 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
 
   def weekday: WeekDay = WeekDay.of(startOn)
 
-  def isOverlap(o: WeekTime): Boolean =
+  def isOverlap(o: WeekTime): Boolean = {
     startOn.equals(o.startOn) && weekstate.isOverlap(o.weekstate) & beginAt < o.endAt & o.beginAt < endAt
+  }
 
-  override def compare(other: WeekTime): Int =
+  override def compare(other: WeekTime): Int = {
     Objects.compareBuilder.add(this.startOn, other.startOn)
       .add(this.beginAt, other.beginAt).add(this.endAt, other.endAt).add(this.weekstate, other.weekstate)
-      .toComparison()
+      .toComparison
+  }
 
-  override def toString: String =
-    s"[startOn:$startOn, beginAt:$beginAt endAt:$endAt weekstate:$weekstate]"
+  override def toString: String = s"[startOn:$startOn, beginAt:$beginAt endAt:$endAt weekstate:$weekstate]"
 
   override def hashCode(): Int = {
     val prime = 31

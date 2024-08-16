@@ -89,7 +89,24 @@ object Objects {
    * @return {@code object} if it is not {@code null}, defaultValue otherwise
    * @since 3.0
    */
+  @deprecated("using nvl instead")
   def defaultIfNull[T](value: T, defaultValue: T): T = if (value != null) value else defaultValue
+
+  /** 将传入的对象转换为非空值
+   * 如果传入的对象为null，则返回默认值
+   * {{{
+   * nvl(null, null)      = null
+   * nvl(null, "")        = ""
+   * nvl(null, "zz")      = "zz"
+   * nvl("abc", *)        = "abc"
+   * nvl(Boolean.TRUE, *) = Boolean.TRUE
+   * }}}
+   *
+   * @param s       需要检查的对象
+   * @param default 如果`s`为null时返回的默认值
+   * @return 转换后的非空值
+   */
+  def nvl[T](s: T, default: => T): T = if null == s then default else s
 
   /** Return a hex String form of an object's identity hash code.
    *
@@ -272,10 +289,8 @@ object Objects {
     var comparison: Int = _
 
     def add(lhs: Any, rhs: Any, ordering: Ordering[Any] = null): this.type = {
-      if (comparison != 0)
-        return this
-      if (lhs == rhs)
-        return this
+      if comparison != 0 then return this
+      if lhs == rhs then return this
       if (lhs == null) {
         comparison = -1
         return this
@@ -310,19 +325,9 @@ object Objects {
       }
     }
 
-    def toComparison(): Int = comparison
+    def toComparison: Int = comparison
 
     def build(): Int = comparison
   }
-
-
-  /** 将传入的对象转换为非空值
-   * 如果传入的对象为null，则返回默认值
-   *
-   * @param s       需要检查的对象
-   * @param default 如果`s`为null时返回的默认值
-   * @return 转换后的非空值
-   */
-  def nvl[T](s: T, default: => T): T = if null == s then default else s
 
 }

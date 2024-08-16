@@ -29,7 +29,14 @@ class ObjectsTest extends AnyFunSpec with Matchers {
       Objects.equals(Array(2), Array(2)) should be(false)
     }
     it("Compare object and array") {
-      Objects.compareBuilder.add(1, 2).toComparison() should be(-1)
+      Objects.compareBuilder.add(1, 2).toComparison should be(-1)
+    }
+    it("provider default value") {
+      Objects.nvl(null, "2") should equal("2")
+      Objects.nvl("3", "2") should equal("3")
+      Objects.nvl(null, null) should equal(null)
+      //test lazy evaluate
+      Objects.nvl("33", if (3 > 0) throw RuntimeException("should not be throw") else "44") should equal("33")
     }
   }
 }
