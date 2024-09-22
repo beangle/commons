@@ -37,7 +37,7 @@ object HourMinute {
 
   def convert(time: String): Short = {
     val index = time.indexOf(':')
-    require(index == 2 && time.length == 5, "illegal time,it should with 00:00 format")
+    require(index > 0 && time.length <= 5, "illegal time,it should with 00:00 format")
     require(
       (toShort(time.substring(0, index)) < 60 && toShort(time.substring(index + 1, index + 3)) < 60),
       s"illegal time $time,it should within 60:60.")

@@ -221,6 +221,7 @@ object HttpUtils extends Logging {
       IOs.close(input, output)
       input = null
       output = null
+      if (location.exists()) location.delete()
       file.renameTo(location)
     } catch {
       case e: Throwable =>

@@ -23,6 +23,10 @@ object Locales {
 
   private var cache = Map("_" -> Locale.getDefault())
 
+  def chinese: Locale = Locale.SIMPLIFIED_CHINESE
+
+  def us: Locale = Locale.US
+
   def of(localeStr: String): Locale = {
     if Strings.isBlank(localeStr) then
       Locale.getDefault()

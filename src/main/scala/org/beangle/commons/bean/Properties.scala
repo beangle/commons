@@ -279,7 +279,7 @@ class Properties(conversion: Conversion) extends Logging {
   private def getMapped(bean: Any, key: Any): Any =
     bean match {
       case null => null
-      case s: collection.Map[Any, _] =>
+      case s: collection.Map[_, _] =>
         if s.isEmpty then null
         else s.get(conversion.convert(key, s.head._1.getClass)).orNull
       case x: java.util.Map[_, _] =>
