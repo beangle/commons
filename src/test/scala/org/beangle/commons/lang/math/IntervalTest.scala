@@ -15,18 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons
+package org.beangle.commons.lang.math
 
-import org.beangle.commons.lang.BitStrings
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.slf4j.Logger
 
-class VersionTest extends AnyFunSpec with Matchers {
-
-  describe("Version") {
-    it("find bundle version") {
-      Version.findBundleVersion(classOf[Logger]) should be("2.0.15")
+class IntervalTest extends AnyFunSpec with Matchers {
+  describe("Interval") {
+    it("small") {
+      val i = SmallInterval(3, 4)
+      i.value should be(196612)
+      i.begin should be(3)
+      i.end should be(4)
+      i.toString should equal("3-4")
+    }
+    it("normal") {
+      val i = Interval(3, 4)
+      i.value should be(12884901892L)
+      i.begin should be(3)
+      i.end should be(4)
+      i.toString should equal("3-4")
     }
   }
 }

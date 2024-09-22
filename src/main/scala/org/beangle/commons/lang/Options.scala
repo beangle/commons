@@ -22,7 +22,7 @@ object Options {
   def unwrap(obj: Any): Any = {
     obj match
       case null => null
-      case o: Option[_] => o.getOrElse(null)
+      case o: Option[_] => o.orNull
       case _ => obj
   }
 }
