@@ -17,4 +17,7 @@
 
 package org.beangle.commons.script
 
-case class Depart(name: String, office: String)
+case class Depart(name: String, office: String) {
+  val staffs: List[String] = List("zhangsan", "lisi")
+  val honors: Map[String, String] = Map("sale" -> "champion", "r&d" -> "involution")
+}

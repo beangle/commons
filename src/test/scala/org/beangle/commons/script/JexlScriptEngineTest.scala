@@ -17,26 +17,22 @@
 
 package org.beangle.commons.script
 
-import org.apache.commons.jexl3.JexlBuilder
-import org.apache.commons.jexl3.introspection.JexlPermissions
-import org.apache.commons.jexl3.scripting.JexlScriptEngine
+import org.beangle.commons.lang.reflect.BeanInfos
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class JexlScriptEngineTest extends AnyFunSpec with Matchers {
 
   describe("JexlScriptEngine evaluate expression") {
-    val jexlBuilder = new JexlBuilder().cache(512).strict(true).silent(false)
-    jexlBuilder.permissions(JexlPermissions.RESTRICTED.compose("org.beangle.*"))
-    val jexl = jexlBuilder.create()
-    JexlScriptEngine.setInstance(jexl)
-    //    JexlScriptEngine.setPermissions(JexlPermissions.RESTRICTED.compose("org.beangle.*"))
-    val evaluator = JSR223ExpressionEvaluator("jexl3")
-
+    BeanInfos.of(classOf[Depart])
+    val evaluator = Jexl3.newEvaluator()
     val data = Map("depart" -> Depart("销售部", "三楼"), "score" -> 95)
-    assert("三楼" == evaluator.eval("depart.office()", data))
+    assert("三楼" == evaluator.eval("depart.office", data))
     val s = evaluator.eval("if (score >= 70) score else 70;", data)
     assert("95" == s.toString)
+    assert("2" == evaluator.eval("size(depart.staffs)", data).toString)
+    assert("zhangsan" == evaluator.eval("depart.staffs[0]", data))
+    assert("champion" == evaluator.eval("depart.honors['sale']", data))
   }
 
 }

@@ -30,8 +30,8 @@ lazy val root = (project in file("."))
     name := "beangle-commons",
     common,
     libraryDependencies ++= commonDeps,
-    libraryDependencies += jexl3 % "test",
-    libraryDependencies += jcl_over_slf4j % "test",
+    libraryDependencies += jexl3 % "optional",
+    libraryDependencies += jcl_over_slf4j % "optional",
     libraryDependencies += scalaxml % "optional",
     libraryDependencies += apache_commons_compress % "optional"
   )
