@@ -176,6 +176,12 @@ class BeanInfosTest extends AnyFunSpec with Matchers {
         }
       }
     }
+    it("test apply parent beaninfo agaist child object") {
+      val a = BeanInfos.of(classOf[Teacher])
+      val m = a.getGetter("skills")
+      assert(m.nonEmpty)
+      assert("teaching,research" == m.get.invoke(new Professor(1L)))
+    }
   }
 }
 

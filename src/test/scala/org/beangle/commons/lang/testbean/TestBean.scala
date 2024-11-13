@@ -210,7 +210,17 @@ class Room(var id: Long = 0) {
 
 class Teacher(var id: Long, name: String, genderId: Int = 1) {
 
+  var depart: String = _
+
   def this(id: Long, department: Department, genderId: String) = {
     this(id, "", genderId.toInt)
   }
+
+  def skills: String = {
+    "teaching"
+  }
+}
+
+class Professor(id: Long) extends Teacher(id, "professor", 2) {
+  override def skills: String = "teaching,research"
 }

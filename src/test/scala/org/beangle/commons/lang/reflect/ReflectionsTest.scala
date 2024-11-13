@@ -20,9 +20,8 @@ package org.beangle.commons.lang.reflect
 import org.beangle.commons.bean.Factory
 import org.beangle.commons.io.AbstractBinarySerializer
 import org.beangle.commons.jndi.JndiDataSourceFactory
-import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.annotation.description
-import org.beangle.commons.lang.testbean.{Book, Entity, TestChild2Bean}
+import org.beangle.commons.lang.testbean.{Book, Entity, Professor, TestChild2Bean}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -72,6 +71,13 @@ class ReflectionsTest extends AnyFunSpec with Matchers {
     it("getInstance") {
       val a = Reflections.getInstance[Co.type]("org.beangle.commons.lang.reflect.Co$")
       assert(a.isInstanceOf[Co.type])
+    }
+    it("getField") {
+      val p = new Professor(2L)
+      p.depart = "r&d"
+      val f = Reflections.getField(classOf[Professor], "depart")
+      assert(f.nonEmpty)
+      assert(f.get.get(p) == "r&d")
     }
   }
 }

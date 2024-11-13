@@ -22,7 +22,7 @@ import org.beangle.commons.collection.IdentityCache
 class BeanInfoCache {
 
   /** class info cache
-    */
+   */
   private val cache = new IdentityCache[Class[_], BeanInfo]
 
   inline def of(inline clazzes: Class[_]*): List[BeanInfo] = ${ BeanInfoDigger.digInto('clazzes, 'this) }
@@ -30,16 +30,22 @@ class BeanInfoCache {
   inline def of[T](clazz: Class[T]): BeanInfo = ${ BeanInfoDigger.digInto('clazz, 'this) ; }
 
   /** register classInfo
-    *
-    * @param bi
-    */
+   *
+   * @param bi
+   */
   def update(bi: BeanInfo): BeanInfo = {
     cache.put(bi.clazz, bi)
     bi
   }
 
+  def update(clazz: Class[_], bi: BeanInfo): BeanInfo = {
+    require(bi.clazz.isAssignableFrom(clazz), s"${clazz.getName} is not a subclass of ${bi.clazz.getName}")
+    cache.put(clazz, bi)
+    bi
+  }
+
   /** Load ClassInfo using reflections
-    */
+   */
   def get(clazz: Class[_]): BeanInfo = {
     val exist = cache.get(clazz)
     if (null != exist) return exist

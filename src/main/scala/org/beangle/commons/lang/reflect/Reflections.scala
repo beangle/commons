@@ -17,7 +17,7 @@
 
 package org.beangle.commons.lang.reflect
 
-import org.beangle.commons.lang.{ClassLoaders, Objects, Primitives, Throwables}
+import org.beangle.commons.lang.{ClassLoaders, Primitives}
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.*
@@ -41,6 +41,30 @@ object Reflections {
     }
   }
 
+  def getField(clazz: Class[_], name: String): Option[Field] = {
+    try {
+      Some(clazz.getField(name))
+    } catch {
+      case e: NoSuchFieldException =>
+        var superClass = clazz
+        var res: Option[Field] = None
+        while (res.isEmpty && null != superClass && superClass != classOf[AnyRef]) {
+          res = getDeclaredField(superClass, name)
+          superClass = superClass.getSuperclass
+        }
+        res
+    }
+  }
+
+  private def getDeclaredField(clazz: Class[_], name: String): Option[Field] = {
+    try {
+      val f = clazz.getDeclaredField(name)
+      f.setAccessible(true)
+      Some(f)
+    } catch
+      case e: NoSuchFieldException => None
+  }
+
   def newInstance[T](className: String): T = newInstance(className, null)
 
   def newInstance[T](className: String, classLoader: ClassLoader): T = {
@@ -59,7 +83,7 @@ object Reflections {
   }
 
   /** Find parameter types of given class's interface or superclass
-    */
+   */
   def getGenericParamTypes(clazz: Class[_], expected: Class[_]): collection.Map[String, Class[_]] = {
     if !expected.isAssignableFrom(clazz) then Map.empty else getGenericParamTypes(clazz, Set(expected))
   }
@@ -149,7 +173,7 @@ object Reflections {
   }
 
   /** Find annotation in method declare class hierarchy
-    */
+   */
   def getAnnotation[T <: Annotation](method: Method, clazz: Class[T]): Tuple2[T, Method] = {
     val ann = method.getAnnotation(clazz)
     if (null == ann) {
@@ -165,7 +189,7 @@ object Reflections {
   }
 
   /** 得到类和对应泛型的参数信息
-    */
+   */
   def deduceParamTypes(clazz: Class[_], typ: java.lang.reflect.Type,
                        paramTypes: collection.Map[String, Class[_]]): collection.Map[String, Class[_]] = {
     typ match {

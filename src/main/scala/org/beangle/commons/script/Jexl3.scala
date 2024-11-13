@@ -21,10 +21,8 @@ import org.apache.commons.jexl3.internal.introspection.Uberspect
 import org.apache.commons.jexl3.introspection.{JexlPermissions, JexlPropertyGet, JexlUberspect}
 import org.apache.commons.jexl3.scripting.JexlScriptEngine
 import org.apache.commons.jexl3.{JexlBuilder, JexlEngine, JexlException}
-import org.beangle.commons.bean.ProxyResolver
 import org.beangle.commons.lang.Options
 import org.beangle.commons.lang.reflect.BeanInfos
-import org.beangle.commons.script.{ExpressionEvaluator, JSR223ExpressionEvaluator}
 
 import java.lang.reflect.{InvocationTargetException, Method}
 import java.util as ju
@@ -32,10 +30,9 @@ import scala.jdk.javaapi.CollectionConverters.asJava
 
 object Jexl3 {
 
-  def newEvaluator(proxyResolver: ProxyResolver = null): ExpressionEvaluator = {
+  def newEvaluator(): ExpressionEvaluator = {
     val jexlBuilder = new JexlBuilder().cache(512).strict(true).silent(false)
     val uberspect = new ScalaJexlUberspect(JexlUberspect.JEXL_STRATEGY, JexlPermissions.UNRESTRICTED)
-    if null != proxyResolver then uberspect.proxyResolver = proxyResolver
     jexlBuilder.uberspect(uberspect)
     JexlScriptEngine.setInstance(jexlBuilder.create())
     JSR223ExpressionEvaluator("jexl3")
@@ -101,9 +98,7 @@ object Jexl3 {
     }
   }
 
-  private class ScalaJexlUberspect(sty: JexlUberspect.ResolverStrategy, perms: JexlPermissions) extends Uberspect(null, sty, perms) {
-
-    var proxyResolver: ProxyResolver = ProxyResolver.Null
+  class ScalaJexlUberspect(sty: JexlUberspect.ResolverStrategy, perms: JexlPermissions) extends Uberspect(null, sty, perms) {
 
     override def getPropertyGet(resolvers: ju.List[JexlUberspect.PropertyResolver], obj: AnyRef, identifier: AnyRef): JexlPropertyGet = {
       val get = super.getPropertyGet(resolvers, obj, identifier)
@@ -119,7 +114,7 @@ object Jexl3 {
     }
 
     private def buildPropertyGet(obj: AnyRef, property: String): JexlPropertyGet = {
-      val clazz = proxyResolver.targetClass(obj)
+      val clazz = obj.getClass
       if (BeanInfos.cached(clazz)) {
         val info = BeanInfos.get(clazz)
         info.getGetter(property) match

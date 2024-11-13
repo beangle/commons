@@ -17,15 +17,10 @@
 
 package org.beangle.commons.lang.reflect
 
-import org.beangle.commons.bean.Factory
 import org.beangle.commons.collection.Properties
-import org.beangle.commons.jndi.JndiDataSourceFactory
-import org.beangle.commons.lang.annotation.description
-import org.beangle.commons.lang.testbean.{Book, Entity, TestChild2Bean, TestEnum}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-import javax.sql.DataSource
 import scala.collection.mutable
 
 class TypeInfoTest extends AnyFunSpec with Matchers {
