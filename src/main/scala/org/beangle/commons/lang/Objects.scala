@@ -73,25 +73,6 @@ object Objects {
    */
   def toString(obj: AnyRef): String = if (null == obj) "" else obj.toString
 
-  /** Returns a default value if the object passed is {@code null}.
-   *
-   * {{{
-   * defaultIfNull(null, null)      = null
-   * defaultIfNull(null, "")        = ""
-   * defaultIfNull(null, "zz")      = "zz"
-   * defaultIfNull("abc", *)        = "abc"
-   * defaultIfNull(Boolean.TRUE, *) = Boolean.TRUE
-   * }}}
-   *
-   * @param <            T> the type of the object
-   * @param object       the {@code Object} to test, may be {@code null}
-   * @param defaultValue the default value to return, may be {@code null}
-   * @return {@code object} if it is not {@code null}, defaultValue otherwise
-   * @since 3.0
-   */
-  @deprecated("using nvl instead")
-  def defaultIfNull[T](value: T, defaultValue: T): T = if (value != null) value else defaultValue
-
   /** 将传入的对象转换为非空值
    * 如果传入的对象为null，则返回默认值
    * {{{

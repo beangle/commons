@@ -17,34 +17,65 @@
 
 package org.beangle.commons.script
 
+import javax.script.{ScriptEngine, ScriptEngineManager, SimpleBindings}
+
 /** 表达式执行器
-  *
-  * @author chaostone
-  * @since 2012-03-05
-  */
+ *
+ * @author chaostone
+ * @since 2012-03-05
+ */
 trait ExpressionEvaluator {
 
   /** Parse the expression
-    *
-    * @param exp
-    * @throws EvaluationException
-    */
+   *
+   * @param exp
+   * @throws EvaluationException
+   */
   def parse(exp: String): Unit
 
   /** Eval a expression within context
-    *
-    * @param exp  a java's expression
-    * @param root params.
-    * @return evaluate result
-    */
+   *
+   * @param exp  a java's expression
+   * @param root params.
+   * @return evaluate result
+   */
   def eval(exp: String, root: AnyRef): AnyRef
 
   /** Eval a expression within context,Return the given type
-    *
-    * @param exp        a java's expression
-    * @param root       params.
-    * @param resultType What type of the result
-    * @return evaluate result
-    */
+   *
+   * @param exp        a java's expression
+   * @param root       params.
+   * @param resultType What type of the result
+   * @return evaluate result
+   */
   def eval[T](exp: String, root: AnyRef, resultType: Class[T]): T
+}
+
+object ExpressionEvaluator {
+  def jsr223(engineName: String): ExpressionEvaluator = {
+    new JSR223ExpressionEvaluator(new ScriptEngineManager().getEngineByName(engineName))
+  }
+}
+
+class JSR223ExpressionEvaluator(engine: ScriptEngine) extends ExpressionEvaluator {
+  def parse(exp: String): Unit = {}
+
+  def eval(exp: String, root: AnyRef): AnyRef = {
+    val ctx = new SimpleBindings
+    root match {
+      case sm: collection.Map[_, _] => sm foreach (x => ctx.put(x._1.toString, x._2))
+      case jm: java.util.Map[_, _] =>
+        val jmi = jm.entrySet().iterator()
+        while (jmi.hasNext) {
+          val i = jmi.next()
+          ctx.put(i.getKey.toString, i.getValue)
+        }
+      case _ => ctx.put("root", root)
+    }
+    engine.eval(exp, ctx)
+  }
+
+  def eval[T](exp: String, root: AnyRef, resultType: Class[T]): T = {
+    eval(exp, root).asInstanceOf[T]
+  }
 }

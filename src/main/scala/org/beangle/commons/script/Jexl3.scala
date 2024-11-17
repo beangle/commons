@@ -35,7 +35,7 @@ object Jexl3 {
     val uberspect = new ScalaJexlUberspect(JexlUberspect.JEXL_STRATEGY, JexlPermissions.UNRESTRICTED)
     jexlBuilder.uberspect(uberspect)
     JexlScriptEngine.setInstance(jexlBuilder.create())
-    JSR223ExpressionEvaluator("jexl3")
+    ExpressionEvaluator.jsr223("jexl3")
   }
 
   private class SimplePropertyGet(val clazz: Class[_], val method: Method, val property: String) extends JexlPropertyGet {
