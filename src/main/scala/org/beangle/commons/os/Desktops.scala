@@ -39,7 +39,7 @@ object Desktops {
     if (osName.contains("windows")) {
       rt.exec(Array("rundll32", "url.dll,FileProtocolHandler", url))
     } else if (osName.contains("mac") || osName.contains("darwin")) {
-      Runtime.getRuntime.exec(Array("open", url))
+      rt.exec(Array("open", url))
     } else {
       val browsers = Array("xdg-open", "chromium", "google-chrome", "firefox", "konqueror", "netscape", "opera", "midori")
       var ok = false
