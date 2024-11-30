@@ -18,7 +18,7 @@
 package org.beangle.commons.lang
 
 import java.awt.GraphicsEnvironment
-import java.lang.management.{ManagementFactory, PlatformManagedObject}
+import java.lang.management.ManagementFactory
 
 object JVM {
   def isDebugMode: Boolean = {
@@ -47,4 +47,25 @@ object JVM {
       Strings.substringBetween(ob, "name=", " ")
   }
 
+  lazy val isGraal: Boolean = {
+    var result = false
+    try {
+      val nativeImageClazz = Class.forName("org.graalvm.nativeimage.ImageInfo")
+      result = java.lang.Boolean.TRUE.equals(nativeImageClazz.getMethod("inImageCode").invoke(null))
+    } catch {
+      case e: Exception => //ignore
+    }
+    result || System.getProperty("org.graalvm.nativeimage.imagecode") != null
+  }
+
+  lazy val isAgentActive: Boolean = {
+    val names = List("org.zeroturnaround.javarebel.Integration",
+      "org.zeroturnaround.javarebel.ReloaderFactory",
+      "org.hotswap.agent.HotswapAgent")
+    isActive(names, null) || isActive(names, JVM.getClass.getClassLoader) || isActive(names, ClassLoader.getSystemClassLoader)
+  }
+
+  private def isActive(classNames: List[String], loader: ClassLoader): Boolean = {
+    classNames.exists(className => ClassLoaders.exists(className, loader))
+  }
 }

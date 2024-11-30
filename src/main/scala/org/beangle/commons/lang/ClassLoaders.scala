@@ -17,13 +17,14 @@
 
 package org.beangle.commons.lang
 
-import java.io.InputStream
-import java.net.URL
+import java.io.{File, InputStream}
+import java.lang.management.ManagementFactory
+import java.net.{URL, URLClassLoader}
 import scala.collection.mutable
 
 /** ClassLoaders
-  * load class,stream
-  */
+ * load class,stream
+ */
 object ClassLoaders {
   private val buildins = Map("byte" -> classOf[Byte], "Byte" -> classOf[Byte], "boolean" -> classOf[Boolean],
     "Boolean" -> classOf[Boolean], "short" -> classOf[Short], "Short" -> classOf[Short],
@@ -34,11 +35,11 @@ object ClassLoaders {
     "Option" -> classOf[Option[_]])
 
   /** Return the default ClassLoader to use
-    * typically the thread context ClassLoader, if available; the ClassLoader that loaded the ClassLoaders
-    * class will be used as fallback.
-    *
-    * @return the default ClassLoader (never <code>null</code>)
-    */
+   * typically the thread context ClassLoader, if available; the ClassLoader that loaded the ClassLoaders
+   * class will be used as fallback.
+   *
+   * @return the default ClassLoader (never <code>null</code>)
+   */
   def defaultClassLoader: ClassLoader = {
     var cl =
       try Thread.currentThread().getContextClassLoader
@@ -51,7 +52,7 @@ object ClassLoaders {
   }
 
   /** Find class loader sequence
-    */
+   */
   private def loaders(callingClass: Class[_] = null): Seq[ClassLoader] = {
     val me = getClass.getClassLoader
     val threadCl = Thread.currentThread().getContextClassLoader
@@ -66,7 +67,7 @@ object ClassLoaders {
   }
 
   /** Load a given resource(Cannot start with slash /).
-    */
+   */
   def getResource(resourceName: String, callingClass: Class[_] = null): Option[URL] = {
     val path = normalize(resourceName)
     var url: URL = null
@@ -77,9 +78,9 @@ object ClassLoaders {
   }
 
   /** Load list of resource(Cannot start with slash /).
-    *
-    * @return List of resources url or empty list.
-    */
+   *
+   * @return List of resources url or empty list.
+   */
   def getResources(resourceName: String, callingClass: Class[_] = null): List[URL] = {
     val path = normalize(resourceName)
     var em: java.util.Enumeration[URL] = null
@@ -92,9 +93,9 @@ object ClassLoaders {
   }
 
   /** This is a convenience method to load a resource as a stream.
-    *
-    * The algorithm used to find the resource is given in getResource()
-    */
+   *
+   * The algorithm used to find the resource is given in getResource()
+   */
   def getResourceAsStream(resourceName: String, callingClass: Class[_] = null): Option[InputStream] = {
     getResource(resourceName, callingClass).map { r => r.openStream() }
   }
@@ -112,6 +113,28 @@ object ClassLoaders {
       Some(loader.loadClass(className))
     else
       None
+  }
+
+  def exists(className: String, classLoader: ClassLoader = null): Boolean = {
+    val loader = if (classLoader == null) defaultClassLoader else classLoader
+    if buildins.contains(className) then true
+    else {
+      try {
+        Class.forName(className, false, classLoader)
+        true
+      } catch {
+        case var8: Throwable => false
+      }
+    }
+  }
+
+  def urls(loader: ClassLoader): Seq[URL] = {
+    loader match
+      case ul: URLClassLoader => ul.getURLs.toIndexedSeq
+      case _ =>
+        ManagementFactory.getRuntimeMXBean.getClassPath.split(File.pathSeparator).toIndexedSeq.map { p =>
+          new File(p).toURI.toURL
+        }
   }
 
   private def normalize(resourceName: String): String = {
