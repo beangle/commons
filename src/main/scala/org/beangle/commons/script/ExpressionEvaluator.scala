@@ -52,6 +52,12 @@ trait ExpressionEvaluator {
 }
 
 object ExpressionEvaluator {
+  def get(engineName: String): ExpressionEvaluator = {
+    engineName match
+      case "jexl3" => Jexl3.newEvaluator()
+      case _ => jsr223(engineName)
+  }
+
   def jsr223(engineName: String): ExpressionEvaluator = {
     new JSR223ExpressionEvaluator(new ScriptEngineManager().getEngineByName(engineName))
   }

@@ -23,7 +23,7 @@ import scala.annotation.elidable
 import scala.annotation.elidable.*
 
 /** Slf4j Logger delegate.
-  */
+ */
 object Logger {
   def apply(clazz: Class[_]): Logger =
     new Logger(LoggerFactory getLogger clazz)
@@ -105,12 +105,14 @@ final class Logger(val logger: JLogger) extends AnyVal {
 
   import Logger.*
 
-  def apply(level: LogLevel): LevelLogger = level match {
-    case Trace => if (logger.isTraceEnabled) new TraceLogger(logger) else ZeroLogger
-    case Debug => if (logger.isDebugEnabled) new DebugLogger(logger) else ZeroLogger
-    case Info => if (logger.isInfoEnabled) new InfoLogger(logger) else ZeroLogger
-    case Warn => if (logger.isWarnEnabled) new WarnLogger(logger) else ZeroLogger
-    case Error => if (logger.isErrorEnabled) new ErrorLogger(logger) else ZeroLogger
+  def apply(level: LogLevel): LevelLogger = {
+    level match {
+      case Trace => if (logger.isTraceEnabled) new TraceLogger(logger) else ZeroLogger
+      case Debug => if (logger.isDebugEnabled) new DebugLogger(logger) else ZeroLogger
+      case Info => if (logger.isInfoEnabled) new InfoLogger(logger) else ZeroLogger
+      case Warn => if (logger.isWarnEnabled) new WarnLogger(logger) else ZeroLogger
+      case Error => if (logger.isErrorEnabled) new ErrorLogger(logger) else ZeroLogger
+    }
   }
 
   @inline def apply(lvl: Trace.type): LevelLogger = if (logger.isTraceEnabled) new TraceLogger(logger) else ZeroLogger

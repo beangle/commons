@@ -21,10 +21,10 @@ import java.net.{InetAddress, NetworkInterface, UnknownHostException}
 import scala.collection.mutable
 
 /** System information
-  *
-  * @author chaostone
-  * @since 3.0.2
-  */
+ *
+ * @author chaostone
+ * @since 3.0.2
+ */
 object SystemInfo {
 
   private def sysProperties(): Map[String, String] = {
@@ -172,5 +172,13 @@ object SystemInfo {
     val lineSeparator = properties("line.separator")
 
     val pathSeparator = properties("path.separator")
+
+    def isFreeBSD: Boolean = name.startsWith("FreeBSD")
+
+    def isLinux: Boolean = name.startsWith("Linux")
+
+    def isMac: Boolean = name.startsWith("Mac OS X")
+
+    def isWin: Boolean = name.startsWith("Windows")
   }
 }
