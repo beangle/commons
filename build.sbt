@@ -33,5 +33,6 @@ lazy val root = (project in file("."))
     libraryDependencies += jexl3 % "optional",
     libraryDependencies += jcl_over_slf4j % "optional",
     libraryDependencies += scalaxml % "optional",
-    libraryDependencies += apache_commons_compress % "optional"
+    libraryDependencies += apache_commons_compress % "optional",
+    libraryDependencies += "com.swoval" % "file-tree-views" % "2.1.12" % "optional"
   )
