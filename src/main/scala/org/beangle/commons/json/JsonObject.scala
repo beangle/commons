@@ -97,6 +97,13 @@ class JsonObject extends Iterable[(String, Any)] {
     map.get(key)
   }
 
+  def getString(key: String, defaultValue: String = ""): String = {
+    map.get(key) match {
+      case Some(s) => s.toString
+      case _ => defaultValue
+    }
+  }
+
   def contains(key: String): Boolean = {
     map.contains(key)
   }

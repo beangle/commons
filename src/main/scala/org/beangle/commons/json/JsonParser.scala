@@ -24,6 +24,14 @@ object JsonParser {
     val parser = new JsonParser(new java.io.StringReader(s))
     parser.parse()
   }
+
+  def parseObject(s: String): Any = {
+    parse(s).asInstanceOf[JsonObject]
+  }
+
+  def parseArray(s: String): Any = {
+    parse(s).asInstanceOf[JsonArray]
+  }
 }
 
 class JsonParser(reader: Reader) {
