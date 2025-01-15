@@ -17,6 +17,8 @@
 
 package org.beangle.commons.json
 
+import org.beangle.commons.lang.Strings
+
 import java.io.Reader
 
 object JsonParser {
@@ -25,12 +27,14 @@ object JsonParser {
     parser.parse()
   }
 
-  def parseObject(s: String): Any = {
-    parse(s).asInstanceOf[JsonObject]
+  def parseObject(s: String): JsonObject = {
+    if (Strings.isBlank(s)) new JsonObject()
+    else parse(s).asInstanceOf[JsonObject]
   }
 
-  def parseArray(s: String): Any = {
-    parse(s).asInstanceOf[JsonArray]
+  def parseArray(s: String): JsonArray = {
+    if (Strings.isBlank(s)) new JsonArray()
+    else parse(s).asInstanceOf[JsonArray]
   }
 }
 

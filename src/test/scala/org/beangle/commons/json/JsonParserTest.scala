@@ -17,6 +17,7 @@
 
 package org.beangle.commons.json
 
+import org.beangle.commons.json
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -39,6 +40,17 @@ class JsonParserTest extends AnyFunSpec with Matchers {
       val roles = a.query("roles").get.asInstanceOf[JsonArray]
       assert(roles.query("[0].name") == "role1")
       assert(roles.query("/1/name") == "role2")
+    }
+    it("parse") {
+      val result = JsonParser.parseObject(
+        """
+                {"accountLocked":false,"details":{"isRoot":false},"authorities":[1,2],"accountExpired":false,"description":"duan","principal":"abc","credentialExpired":false,"disabled":false}
+                """)
+      assert(result.get("authorities").orNull.isInstanceOf[Iterable[_]])
+      val a = """[{"roles":[],"scope":"Protected","name":"/config/home","title":"首页","id":94}]"""
+      val data = JsonParser.parseArray(a)
+      assert(null != data)
+      assert(data.head.asInstanceOf[JsonObject].values.isInstanceOf[collection.Map[_, _]])
     }
   }
 

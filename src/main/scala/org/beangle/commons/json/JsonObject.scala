@@ -17,8 +17,10 @@
 
 package org.beangle.commons.json
 
+import org.beangle.commons.conversion.string.TemporalConverter
 import org.beangle.commons.lang.Strings
 
+import java.time.{Instant, LocalDate, LocalDateTime}
 import scala.collection.mutable
 
 /** JSON object utilities.
@@ -69,6 +71,13 @@ object JsonObject {
 class JsonObject extends Iterable[(String, Any)] {
   private var map: Map[String, Any] = Map()
 
+  def this(v: Iterable[(String, Any)]) = {
+    this()
+    v foreach { x => add(x._1, x._2) }
+  }
+
+  def values: Map[String, Any] = map.toMap
+
   def query(path: String): Option[Any] = {
     val parts = if (path.charAt(0) == '/') Strings.split(path, "/") else Strings.split(path, ".")
     var i = 0
@@ -101,6 +110,77 @@ class JsonObject extends Iterable[(String, Any)] {
     map.get(key) match {
       case Some(s) => s.toString
       case _ => defaultValue
+    }
+  }
+
+  def getBoolean(key: String, defaultValue: Boolean = false): Boolean = {
+    map.get(key) match {
+      case Some(s) =>
+        s match
+          case i: Boolean => i
+          case n: Number => n.intValue() > 0
+          case s => s.toString.toBoolean
+      case _ => defaultValue
+    }
+  }
+
+  def getInt(key: String, defaultValue: Int = 0): Int = {
+    map.get(key) match {
+      case Some(s) =>
+        s match
+          case i: Int => i
+          case n: Number => n.intValue()
+          case s => s.toString.toInt
+      case _ => defaultValue
+    }
+  }
+
+  def getLong(key: String, defaultValue: Long = 0l): Long = {
+    map.get(key) match {
+      case Some(s) =>
+        s match
+          case i: Long => i
+          case n: Number => n.longValue()
+          case s => s.toString.toLong
+      case _ => defaultValue
+    }
+  }
+
+  def getDouble(key: String, defaultValue: Double = 0d): Double = {
+    map.get(key) match {
+      case Some(s) =>
+        s match
+          case n: Number => n.doubleValue()
+          case s => s.toString.toDouble
+      case _ => defaultValue
+    }
+  }
+
+  def getDate(key: String, defaultValue: LocalDate = null): LocalDate = {
+    map.get(key) match {
+      case Some(s) => TemporalConverter.convert(s.toString, classOf[LocalDate])
+      case _ => defaultValue
+    }
+  }
+
+  def getDateTime(key: String, defaultValue: LocalDateTime = null): LocalDateTime = {
+    map.get(key) match {
+      case Some(s) => TemporalConverter.convert(s.toString, classOf[LocalDateTime])
+      case _ => defaultValue
+    }
+  }
+
+  def getInstant(key: String, defaultValue: Instant = null): Instant = {
+    map.get(key) match {
+      case Some(s) => TemporalConverter.convert(s.toString, classOf[Instant])
+      case _ => defaultValue
+    }
+  }
+
+  def getObject(key: String, defaultValue: JsonObject = null): JsonObject = {
+    map.get(key) match {
+      case Some(s) => s.asInstanceOf[JsonObject]
+      case _ => if defaultValue == null then new JsonObject() else defaultValue
     }
   }
 

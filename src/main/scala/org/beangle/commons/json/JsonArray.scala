@@ -23,7 +23,8 @@ import scala.collection.mutable
 
 /** Represents a JSON array.
  */
-class JsonArray extends Iterable[Any] {
+class JsonArray extends collection.Seq[Any] {
+
   def this(v: Iterable[Any]) = {
     this()
     values.addAll(v)
@@ -33,10 +34,6 @@ class JsonArray extends Iterable[Any] {
 
   def add(value: Any): Unit = {
     values.addOne(value)
-  }
-
-  def contains(value: Any): Boolean = {
-    values.contains(value)
   }
 
   def get(i: Int): Option[Any] = {
@@ -95,6 +92,12 @@ class JsonArray extends Iterable[Any] {
   }
 
   override def iterator: Iterator[Any] = values.iterator
+
+  override def apply(i: Int): Any = {
+    values(i)
+  }
+
+  override def length: Int = values.length
 
   override def toString: String = toJson
 }
