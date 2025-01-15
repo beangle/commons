@@ -242,6 +242,12 @@ class JsonParser(reader: Reader) {
   }
 
   private def syntaxError(message: String): RuntimeException = {
-    throw new RuntimeException(message)
+    if (this.index < this.length) {
+      val len = Math.min(10, this.length - this.index)
+      val c = new String(this.buffer.slice(this.index, this.index + len))
+      throw new RuntimeException(message + " -- " + c)
+    } else {
+      throw new RuntimeException(message)
+    }
   }
 }
