@@ -27,6 +27,10 @@ import scala.collection.mutable
  */
 object JsonObject {
 
+  def apply(v: (String, Any)*): JsonObject = {
+    new JsonObject(v)
+  }
+
   def toLiteral(v: Any): String = {
     v match {
       case null => "null"

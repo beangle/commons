@@ -21,6 +21,13 @@ import org.beangle.commons.lang.{Numbers, Strings}
 
 import scala.collection.mutable
 
+object JsonArray {
+
+  def apply(v: Any*): JsonArray = {
+    new JsonArray(v)
+  }
+}
+
 /** Represents a JSON array.
  */
 class JsonArray extends collection.Seq[Any] {
