@@ -47,8 +47,6 @@ class DefaultConversion extends AbstractGenericConversion {
 
   addConverter(string.TimeConverter)
 
-  addConverter(string.HourMinuteConverter)
-
   addConverter(string.JavaEnumConverters)
 
   addConverter(string.EnumConverters)

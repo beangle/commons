@@ -17,6 +17,7 @@
 
 package org.beangle.commons.conversion.string
 
+import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.time.HourMinute
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -34,7 +35,7 @@ class TimeConverterTest extends AnyFunSpec with Matchers {
       TimeConverter("12:34") should equal(Time.valueOf("12:34:00"))
       TimeConverter("12:34:00") should equal(Time.valueOf("12:34:00"))
 
-      HourMinuteConverter("12:34") should equal(new HourMinute(1234.toShort))
+      DefaultConversion.Instance.convert("12:34", classOf[HourMinute]) should equal(new HourMinute(1234.toShort))
 
       TemporalConverter.ToMonthDay("3.2") should equal(MonthDay.parse("--03-02"))
       TemporalConverter.ToYearMonth("1923.3") should equal(YearMonth.parse("1923-03"))

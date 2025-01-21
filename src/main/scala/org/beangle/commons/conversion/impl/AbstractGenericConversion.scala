@@ -17,19 +17,20 @@
 
 package org.beangle.commons.conversion.impl
 
+import org.beangle.commons.conversion.converter.{CtorConverter, MethodConverter}
 import org.beangle.commons.conversion.{Conversion, Converter, ConverterRegistry}
-import org.beangle.commons.lang.{Objects, Primitives}
+import org.beangle.commons.lang.{Companions, Objects, Primitives}
 
 import java.lang.reflect.{Array, Modifier}
 import scala.collection.{concurrent, mutable}
 import scala.language.existentials
 
 /** Generic Conversion Super class
-  * It provider converter registry and converter search machanism.
-  *
-  * @author chaostone
-  * @since 3.2.0
-  */
+ * It provider converter registry and converter search machanism.
+ *
+ * @author chaostone
+ * @since 3.2.0
+ */
 abstract class AbstractGenericConversion extends Conversion with ConverterRegistry {
 
   val converters = new mutable.HashMap[Class[_], Map[Class[_], GenericConverter]]
@@ -37,7 +38,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
   val cache = new concurrent.TrieMap[Tuple2[Class[_], Class[_]], GenericConverter]
 
   /** Convert to target type.
-    */
+   */
   override def convert[T](source: Any, target: Class[T]): T = {
     if (null == source) return Objects.default(target)
     val sourceClazz = Primitives.wrap(source.getClass)
@@ -58,14 +59,14 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
         result
     } else {
       val converter = findConverter(sourceClazz, targetClazz)
-      val rs = converter.convert(source, targetClazz).asInstanceOf[T]
+      val rs = converter.convert(source, targetClazz)
       if (null == rs && target.isPrimitive) Objects.default(target) else rs
     }
   }
 
   override def addConverter(converter: Converter[_, _]): Unit = {
     var key: (Class[_], Class[_]) = null
-    for (m <- converter.getClass.getMethods if m.getName == "apply" && Modifier.isPublic(m.getModifiers) && !m.isBridge())
+    for (m <- converter.getClass.getMethods if m.getName == "apply" && Modifier.isPublic(m.getModifiers) && !m.isBridge)
       key = (m.getParameterTypes()(0), m.getReturnType)
     if (null == key) throw new IllegalArgumentException("Cannot find convert type pair " + converter.getClass)
     val sourceType = key._1
@@ -91,10 +92,36 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
   protected def findConverter(sourceType: Class[_], targetType: Class[_]): GenericConverter = {
     val key = (sourceType, targetType)
     var converter = cache.get(key).orNull
-    if (null == converter) converter = searchConverter(sourceType, targetType)
-    if (null == converter) converter = NoneConverter
-    else cache.put(key, converter)
+    if (null == converter) {
+      converter = searchConverter(sourceType, targetType)
+      if (null == converter) converter = findCtorConverter(sourceType, targetType)
+      if (null == converter) converter = NoneConverter
+      cache.put(key, converter)
+    }
     converter
+  }
+
+  def findCtorConverter(sourceType: Class[_], targetType: Class[_]): GenericConverter = {
+    val ctor = targetType.getConstructors.find { c =>
+      val pts = c.getParameterTypes
+      pts.length == 1 && pts.contains(sourceType)
+    }
+    ctor match
+      case None =>
+        Companions.getCompanion(targetType) match {
+          case None => null
+          case Some(ct) =>
+            try {
+              val nc = new MethodConverter(sourceType, targetType, ct, ct.getClass.getDeclaredMethod("apply", sourceType))
+              addConverter(nc)
+              nc
+            } catch
+              case e: Exception => null //ignore
+        }
+      case Some(ct) =>
+        val nc = new CtorConverter(sourceType, targetType, ct)
+        addConverter(nc)
+        nc
   }
 
   protected def searchConverter(sourceType: Class[_], targetType: Class[_]): GenericConverter = {
@@ -118,7 +145,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
     getConverter(targetType, getConverters(classOf[AnyRef]))
   }
 
-  private def getConverters(sourceType: Class[_]) = converters.get(sourceType).getOrElse(Map.empty)
+  private def getConverters(sourceType: Class[_]) = converters.getOrElse(sourceType, Map.empty)
 
   private def getConverter(targetType: Class[_], converters: Map[Class[_], GenericConverter]): GenericConverter = {
     val interfaces = new mutable.LinkedHashSet[Class[_]]

@@ -73,14 +73,16 @@ object JsonObject {
 /** Represents a JSON object.
  */
 class JsonObject extends Iterable[(String, Any)] {
-  private var map: Map[String, Any] = Map()
+  private var props: Map[String, Any] = Map()
 
   def this(v: Iterable[(String, Any)]) = {
     this()
     v foreach { x => add(x._1, x._2) }
   }
 
-  def values: Map[String, Any] = map.toMap
+  def keys: Iterable[String] = props.keys
+
+  def values: Map[String, Any] = props
 
   def query(path: String): Option[Any] = {
     val parts = if (path.charAt(0) == '/') Strings.split(path, "/") else Strings.split(path, ".")
@@ -91,34 +93,58 @@ class JsonObject extends Iterable[(String, Any)] {
       i += 1
       o match
         case null => o = null
-        case jo: JsonObject => o = jo.map.getOrElse(part, null)
+        case jo: JsonObject => o = jo.props.getOrElse(part, null)
         case ja: JsonArray => o = ja.get(Array(part))
         case _ => o = null
     }
     Option(o)
   }
 
-  def add(key: String, value: Any): Unit = {
+  def remove(key: String): JsonObject = {
+    props -= key
+    this
+  }
+
+  def add(key: String, value: Any): JsonObject = {
     if (value == null) {
-      map -= key
+      props -= key
     } else {
-      map += key -> value
+      props += key -> value
     }
+    this
+  }
+
+  def addAll(datas: collection.Map[String, Any]): JsonObject = {
+    datas foreach { case (k, v) =>
+      props += k -> v
+    }
+    this
+  }
+
+  def addAll(datas: JsonObject): JsonObject = {
+    datas.props foreach { case (k, v) =>
+      this.props += k -> v
+    }
+    this
+  }
+
+  def apply(key: String): Any = {
+    props(key)
   }
 
   def get(key: String): Option[Any] = {
-    map.get(key)
+    props.get(key)
   }
 
   def getString(key: String, defaultValue: String = ""): String = {
-    map.get(key) match {
+    props.get(key) match {
       case Some(s) => s.toString
       case _ => defaultValue
     }
   }
 
   def getBoolean(key: String, defaultValue: Boolean = false): Boolean = {
-    map.get(key) match {
+    props.get(key) match {
       case Some(s) =>
         s match
           case i: Boolean => i
@@ -129,7 +155,7 @@ class JsonObject extends Iterable[(String, Any)] {
   }
 
   def getInt(key: String, defaultValue: Int = 0): Int = {
-    map.get(key) match {
+    props.get(key) match {
       case Some(s) =>
         s match
           case i: Int => i
@@ -140,7 +166,7 @@ class JsonObject extends Iterable[(String, Any)] {
   }
 
   def getLong(key: String, defaultValue: Long = 0l): Long = {
-    map.get(key) match {
+    props.get(key) match {
       case Some(s) =>
         s match
           case i: Long => i
@@ -151,7 +177,7 @@ class JsonObject extends Iterable[(String, Any)] {
   }
 
   def getDouble(key: String, defaultValue: Double = 0d): Double = {
-    map.get(key) match {
+    props.get(key) match {
       case Some(s) =>
         s match
           case n: Number => n.doubleValue()
@@ -161,40 +187,47 @@ class JsonObject extends Iterable[(String, Any)] {
   }
 
   def getDate(key: String, defaultValue: LocalDate = null): LocalDate = {
-    map.get(key) match {
+    props.get(key) match {
       case Some(s) => TemporalConverter.convert(s.toString, classOf[LocalDate])
       case _ => defaultValue
     }
   }
 
   def getDateTime(key: String, defaultValue: LocalDateTime = null): LocalDateTime = {
-    map.get(key) match {
+    props.get(key) match {
       case Some(s) => TemporalConverter.convert(s.toString, classOf[LocalDateTime])
       case _ => defaultValue
     }
   }
 
   def getInstant(key: String, defaultValue: Instant = null): Instant = {
-    map.get(key) match {
+    props.get(key) match {
       case Some(s) => TemporalConverter.convert(s.toString, classOf[Instant])
       case _ => defaultValue
     }
   }
 
   def getObject(key: String, defaultValue: JsonObject = null): JsonObject = {
-    map.get(key) match {
+    props.get(key) match {
       case Some(s) => s.asInstanceOf[JsonObject]
       case _ => if defaultValue == null then new JsonObject() else defaultValue
     }
   }
 
+  def getArray(key: String): JsonArray = {
+    props.get(key) match {
+      case Some(s) => s.asInstanceOf[JsonArray]
+      case _ => new JsonArray
+    }
+  }
+
   def contains(key: String): Boolean = {
-    map.contains(key)
+    props.contains(key)
   }
 
   def toJson: String = {
     val sb = new StringBuilder("{")
-    map.foreach(kv => {
+    props.foreach(kv => {
       kv._2 match {
         case o: JsonObject => sb.append(kv._1).append(":").append(o.toJson)
         case a: JsonArray => sb.append(kv._1).append(":").append(a.toJson)
@@ -202,13 +235,11 @@ class JsonObject extends Iterable[(String, Any)] {
       }
       sb.append(",")
     })
-    if (map.nonEmpty) sb.deleteCharAt(sb.length - 1)
+    if (props.nonEmpty) sb.deleteCharAt(sb.length - 1)
     sb.append("}").toString()
   }
 
-  override def iterator: Iterator[(String, Any)] = map.iterator
+  override def iterator: Iterator[(String, Any)] = props.iterator
 
   override def toString: String = toJson
 }
-
-

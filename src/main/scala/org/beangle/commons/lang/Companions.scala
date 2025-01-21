@@ -15,15 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.conversion.string
+package org.beangle.commons.lang
 
-import org.beangle.commons.conversion.Converter
-import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.time.HourMinute
+object Companions {
 
-object HourMinuteConverter extends Converter[String, HourMinute] {
+  def getCompanionClass(clazz: Class[_]): Option[Class[_]] = {
+    val clazzName = clazz.getName
+    if clazzName.endsWith("$") then Some(clazz) else ClassLoaders.get(clazz.getName + "$")
+  }
 
-  override def apply(input: String): HourMinute = {
-    if Strings.isEmpty(input) then null else HourMinute.apply(input)
+  def getCompanion(clazz: Class[_]): Option[Any] = {
+    getCompanionClass(clazz) match
+      case None => None
+      case Some(ct) => Option(ct.getDeclaredField("MODULE$").get(null))
   }
 }

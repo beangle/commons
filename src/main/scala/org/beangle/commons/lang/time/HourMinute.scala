@@ -18,6 +18,7 @@
 package org.beangle.commons.lang.time
 
 import org.beangle.commons.lang.Numbers.toShort
+import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.annotation.value
 
 /** Hour and minute of day
@@ -29,7 +30,9 @@ object HourMinute {
 
   val Zero = new HourMinute(0)
 
-  def apply(time: String): HourMinute = new HourMinute(convert(time))
+  def apply(time: String): HourMinute = {
+    if Strings.isBlank(time) then Zero else new HourMinute(convert(time))
+  }
 
   def of(hour: Int, minute: Int): HourMinute = new HourMinute((hour * 100 + minute).asInstanceOf[Short])
 
