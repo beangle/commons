@@ -17,6 +17,7 @@
 
 package org.beangle.commons.json
 
+import org.beangle.commons.json.JsonArray.parseIndex
 import org.beangle.commons.lang.{Numbers, Strings}
 
 import scala.collection.mutable
@@ -25,6 +26,16 @@ object JsonArray {
 
   def apply(v: Any*): JsonArray = {
     new JsonArray(v)
+  }
+
+  protected[json] def parseIndex(part: String): Int = {
+    var index = -1
+    if (part.startsWith("[")) {
+      index = part.substring(1, part.length - 1).toInt
+    } else if (Numbers.isDigits(part)) {
+      index = part.toInt
+    }
+    index
   }
 }
 
@@ -60,12 +71,7 @@ class JsonArray extends collection.Seq[Any] {
       o match
         case jo: JsonObject => o = jo.get(part).orNull
         case ja: JsonArray =>
-          var index = -1
-          if (part.startsWith("[")) {
-            index = part.substring(1, part.length - 1).toInt
-          } else if (Numbers.isDigits(part)) {
-            index = part.toInt
-          }
+          val index = parseIndex(part)
           if (index > -1) {
             o = ja.get(index).orNull
           } else {
@@ -77,6 +83,23 @@ class JsonArray extends collection.Seq[Any] {
           }
     }
     o
+  }
+
+  /** 自动扩容，设置第I个元素的指
+   *
+   * @param i
+   * @param value
+   */
+  def set(i: Int, value: Any): Unit = {
+    require(i >= 0)
+    if (i < values.size) {
+      values(i) = value
+    } else {
+      for (j <- values.size until i + 1) {
+        values.addOne(null)
+      }
+      values(i) = value
+    }
   }
 
   def query(path: String): Any = {

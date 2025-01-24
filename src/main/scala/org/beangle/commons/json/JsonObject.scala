@@ -17,6 +17,8 @@
 
 package org.beangle.commons.json
 
+import org.beangle.commons.bean.DynamicBean
+import org.beangle.commons.collection.Collections
 import org.beangle.commons.conversion.string.TemporalConverter
 import org.beangle.commons.lang.Strings
 
@@ -72,17 +74,13 @@ object JsonObject {
 
 /** Represents a JSON object.
  */
-class JsonObject extends Iterable[(String, Any)] {
-  private var props: Map[String, Any] = Map()
+class JsonObject extends DynamicBean {
+  private val props: mutable.Map[String, Any] = Collections.newMap[String, Any]
 
   def this(v: Iterable[(String, Any)]) = {
     this()
     v foreach { x => add(x._1, x._2) }
   }
-
-  def keys: Iterable[String] = props.keys
-
-  def values: Map[String, Any] = props
 
   def query(path: String): Option[Any] = {
     val parts = if (path.charAt(0) == '/') Strings.split(path, "/") else Strings.split(path, ".")
@@ -92,7 +90,6 @@ class JsonObject extends Iterable[(String, Any)] {
       val part = parts(i)
       i += 1
       o match
-        case null => o = null
         case jo: JsonObject => o = jo.props.getOrElse(part, null)
         case ja: JsonArray => o = ja.get(Array(part))
         case _ => o = null
@@ -100,11 +97,77 @@ class JsonObject extends Iterable[(String, Any)] {
     Option(o)
   }
 
-  def remove(key: String): JsonObject = {
+  /** 根据路径更新或生成对象
+   *
+   * @param path
+   * @param value
+   * @return
+   */
+  def update(path: String, value: Any): JsonObject = {
+    val parts = if (path.charAt(0) == '/') Strings.split(path, "/") else Strings.split(path, ".")
+    var i = 0
+    var o: Any = this
+    while (o != null && i < parts.length - 1) {
+      val part = parts(i)
+      val nextIdx = JsonArray.parseIndex(parts(i + 1))
+      i += 1
+      o match
+        case jo: JsonObject =>
+          o = jo.props.getOrElseUpdate(part, if nextIdx > -1 then new JsonArray else new JsonObject)
+        case ja: JsonArray =>
+          val idx = JsonArray.parseIndex(part)
+          ja.get(idx) match
+            case None =>
+              o = if nextIdx > -1 then new JsonArray else new JsonObject
+              ja.set(idx, o)
+            case Some(a) => o = a
+        case _ => o = null
+    }
+    val cv = value match {
+      case i: Iterable[Any] => new JsonArray(i)
+      case a: Array[Any] => new JsonArray(a)
+      case v: Any => v
+    }
+    val last = parts(i)
+    o match
+      case jo: JsonObject => jo.add(last, cv)
+      case ja: JsonArray => ja.set(JsonArray.parseIndex(last), cv)
+
+    this
+  }
+
+  /** 删除keys
+   *
+   * @param keys
+   * @return
+   */
+  def remove(keys: String*): JsonObject = {
+    keys foreach { key =>
+      props -= key
+    }
+    this
+  }
+
+  override def -(key: String): collection.Map[String, Any] = {
     props -= key
     this
   }
 
+  override def -(key1: String, key2: String, keys: String*): collection.Map[String, Any] = {
+    props -= key1
+    props -= key2
+    keys foreach { key =>
+      props -= key
+    }
+    this
+  }
+
+  /** 添加直接属性
+   *
+   * @param key
+   * @param value
+   * @return
+   */
   def add(key: String, value: Any): JsonObject = {
     if (value == null) {
       props -= key
@@ -114,6 +177,11 @@ class JsonObject extends Iterable[(String, Any)] {
     this
   }
 
+  /** 批量添加属性
+   *
+   * @param datas
+   * @return
+   */
   def addAll(datas: collection.Map[String, Any]): JsonObject = {
     datas foreach { case (k, v) =>
       props += k -> v
@@ -128,11 +196,11 @@ class JsonObject extends Iterable[(String, Any)] {
     this
   }
 
-  def apply(key: String): Any = {
+  override def apply(key: String): Any = {
     props(key)
   }
 
-  def get(key: String): Option[Any] = {
+  override def get(key: String): Option[Any] = {
     props.get(key)
   }
 
@@ -221,25 +289,72 @@ class JsonObject extends Iterable[(String, Any)] {
     }
   }
 
-  def contains(key: String): Boolean = {
-    props.contains(key)
-  }
-
   def toJson: String = {
     val sb = new StringBuilder("{")
-    props.foreach(kv => {
+    props.foreach { kv =>
+      sb.append("\"").append(kv._1).append("\":")
       kv._2 match {
-        case o: JsonObject => sb.append(kv._1).append(":").append(o.toJson)
-        case a: JsonArray => sb.append(kv._1).append(":").append(a.toJson)
-        case _ => sb.append(kv._1).append(":").append(JsonObject.toLiteral(kv._2))
+        case o: JsonObject => sb.append(o.toJson)
+        case a: JsonArray => sb.append(a.toJson)
+        case _ => sb.append(JsonObject.toLiteral(kv._2))
       }
       sb.append(",")
-    })
+    }
     if (props.nonEmpty) sb.deleteCharAt(sb.length - 1)
     sb.append("}").toString()
   }
 
   override def iterator: Iterator[(String, Any)] = props.iterator
+
+  /**
+   * 检查当前JSON对象是否与目标JSON对象匹配
+   * 此方法用于深度比较两个JSON对象的结构和内容，以确定它们是否在结构上相等
+   *
+   * @param target 目标JSON对象，用于与当前对象进行比较
+   * @return 如果当前JSON对象与目标JSON对象匹配，则返回true；否则返回false
+   */
+  def isMatch(target: JsonObject): Boolean = {
+    // 遍历目标JSON对象的所有键，检查每个键值对是否与当前对象中的键值对匹配
+    target.keys.forall { k =>
+      // 获取目标JSON对象中键k对应的值
+      val t = target(k)
+      // 如果当前对象包含键k，则进行匹配检查
+      if this.contains(k) then
+        // 根据值的类型，进行不同的匹配逻辑
+        t match {
+          // 如果值是JsonObject类型，则递归调用isMatch方法进行深度匹配
+          case jo: JsonObject =>
+            this (k) match {
+              case sjo: JsonObject => sjo.isMatch(jo)
+              case _ => false
+            }
+          // 如果值是JsonArray类型，则调用isMatch方法比较数组内容
+          case ja: JsonArray =>
+            this (k) match {
+              case sja: JsonArray => isMatch(sja, ja)
+              case sjo: JsonObject => false
+              case v: Any => ja.contains(v)
+            }
+          // 如果值是其他类型，则直接比较值是否相等
+          case v: Any => this (k) == t
+        }
+      // 如果当前对象不包含键k，则返回false，表示不匹配
+      else false
+    }
+  }
+
+  private def isMatch(src: JsonArray, target: JsonArray): Boolean = {
+    if (src.size == target.size) {
+      src.indices.forall { i =>
+        val si = src(i)
+        val ti = target(i)
+        si match
+          case jo: JsonObject if ti.isInstanceOf[JsonObject] => jo.isMatch(ti.asInstanceOf[JsonObject])
+          case ja: JsonArray if ti.isInstanceOf[JsonArray] => isMatch(ja, ti.asInstanceOf[JsonArray])
+          case _ => si == ti
+      }
+    } else false
+  }
 
   override def toString: String = toJson
 }

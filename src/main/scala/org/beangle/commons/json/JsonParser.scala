@@ -17,26 +17,7 @@
 
 package org.beangle.commons.json
 
-import org.beangle.commons.lang.Strings
-
 import java.io.Reader
-
-object JsonParser {
-  def parse(s: String): Any = {
-    val parser = new JsonParser(new java.io.StringReader(s))
-    parser.parse()
-  }
-
-  def parseObject(s: String): JsonObject = {
-    if (Strings.isBlank(s)) new JsonObject()
-    else parse(s).asInstanceOf[JsonObject]
-  }
-
-  def parseArray(s: String): JsonArray = {
-    if (Strings.isBlank(s)) new JsonArray()
-    else parse(s).asInstanceOf[JsonArray]
-  }
-}
 
 class JsonParser(reader: Reader) {
   private var index = 1 //current index in the buffer

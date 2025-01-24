@@ -29,7 +29,7 @@ class JsonParserTest extends AnyFunSpec with Matchers {
         """{"admins":["admin1","admin2"],"roles":[{"id":1,"name":"role1"},{"id":1,"name":"role2"}],
           |"hostname":"openurp.edu.cn","org":{"code":"shcm","name":"上海电影学院","id":10278},"name":"urp",
           |"id":1085601,"title":"教学系统"}""".stripMargin
-      val a = JsonParser.parse(v).asInstanceOf[JsonObject]
+      val a = Json.parseObject(v)
       assert(a.query("/org/code").contains("shcm"))
       assert(a.query("admins.[1]").contains("admin2"))
       assert(a.query("/admins/32").isEmpty)
@@ -42,15 +42,24 @@ class JsonParserTest extends AnyFunSpec with Matchers {
       assert(roles.query("/1/name") == "role2")
     }
     it("parse") {
-      val result = JsonParser.parseObject(
+      val result = Json.parseObject(
         """
                 {"accountLocked":false,"details":{"isRoot":false},"authorities":[1,2],"accountExpired":false,"description":"duan","principal":"abc","credentialExpired":false,"disabled":false}
                 """)
       assert(result.get("authorities").orNull.isInstanceOf[Iterable[_]])
       val a = """[{"roles":[],"scope":"Protected","name":"/config/home","title":"首页","id":94}]"""
-      val data = JsonParser.parseArray(a)
+      val data = Json.parseArray(a)
       assert(null != data)
-      assert(data.head.asInstanceOf[JsonObject].values.isInstanceOf[collection.Map[_, _]])
+    }
+    it("isMatch") {
+      val src = Json.parseObject(""" {a:1,b:{d:1}} """)
+      val target = Json.parseObject(""" {a:[1,2],b:{d:[1,2]}} """)
+      assert(src.isMatch(target))
+    }
+    it("update") {
+      val data = new JsonObject()
+      data.update("jobs.[1].title", "Manager")
+      assert(data.query("jobs.[1].title").contains("Manager"))
     }
   }
 

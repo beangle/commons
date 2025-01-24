@@ -22,18 +22,18 @@ import org.beangle.commons.lang.reflect.Reflections
 import java.lang.reflect.Method
 
 /** Create Enumeration value
-  *
-  * @since 3.1
-  */
+ *
+ * @since 3.1
+ */
 object Enums {
 
   /** Returns an optional enum constant for the given type, using {@link Enum# valueOf}. If the
-    * constant does not exist, {@link Option# none} is returned. A common use case is for parsing
-    * user input or falling back to a default enum constant. For example,
-    * {@code Enums.get(Country.class, countryInput).getOrElse(Country.DEFAULT);}
-    *
-    * @since 3.1
-    */
+   * constant does not exist, {@link Option# none} is returned. A common use case is for parsing
+   * user input or falling back to a default enum constant. For example,
+   * {@code Enums.get(Country.class, countryInput).getOrElse(Country.DEFAULT);}
+   *
+   * @since 3.1
+   */
   def get[T <: _root_.scala.reflect.Enum](enumClass: Class[T], value: String): Option[T] = {
     try {
       val e = Reflections.getInstance[AnyRef](enumClass.getName)
@@ -65,7 +65,7 @@ object Enums {
   }
 
   def isEnum(clazz: Class[_]): Boolean = {
-    classOf[_root_.scala.reflect.Enum].isAssignableFrom(clazz)
+    classOf[_root_.scala.reflect.Enum].isAssignableFrom(clazz) || clazz.isEnum
   }
 
   private def findIndexMethod(clazz: Class[_]): Method = {

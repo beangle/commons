@@ -17,9 +17,9 @@
 
 package org.beangle.commons.collection
 
-import org.beangle.commons.bean.Properties as BeanProperties
+import org.beangle.commons.bean.{DynamicBean, Properties as BeanProperties}
 
-class Properties extends collection.mutable.Map[String, Any] {
+class Properties extends collection.mutable.Map[String, Any], DynamicBean {
 
   private[this] val data = Collections.newMap[String, Any]
 
