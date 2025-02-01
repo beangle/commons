@@ -22,7 +22,7 @@ import org.scalatest.matchers.should.Matchers
 
 import java.time.LocalDate
 
-class MapConverterTest extends AnyFunSpec with Matchers {
+class MapConverterTest extends AnyFunSpec, Matchers {
 
   val datas = Map[String, Any](("empty1", ""), ("empty2", null), ("empty3", List("")), ("empty4", Array.empty[String]), ("number2", List("2")))
 

@@ -20,7 +20,7 @@ package org.beangle.commons.csv
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class CsvTest extends AnyFunSpec with Matchers {
+class CsvTest extends AnyFunSpec, Matchers {
 
   describe("CsvFormat") {
     it("Format") {

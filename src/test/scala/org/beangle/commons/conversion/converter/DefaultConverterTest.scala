@@ -21,7 +21,7 @@ import org.beangle.commons.conversion.impl.DefaultConversion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class DefaultConverterTest extends AnyFunSpec with Matchers {
+class DefaultConverterTest extends AnyFunSpec, Matchers {
 
   describe("DefaultConversion") {
     it("Convert null") {

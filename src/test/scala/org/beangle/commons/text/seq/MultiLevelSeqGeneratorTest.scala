@@ -20,7 +20,7 @@ package org.beangle.commons.text.seq
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class MultiLevelSeqGeneratorTest extends AnyFunSpec with Matchers {
+class MultiLevelSeqGeneratorTest extends AnyFunSpec, Matchers {
 
   describe("MultiLevelSeqGenerator") {
     it("Generate multi level sequence") {

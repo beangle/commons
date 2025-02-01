@@ -24,10 +24,10 @@ import java.io.IOException
 import java.net.URL
 
 /** Resource loader
-  *
-  * @author chaostone
-  * @since 3.3.0
-  */
+ *
+ * @author chaostone
+ * @since 3.3.0
+ */
 trait ResourceLoader {
 
   def load(resourceName: String): Option[URL]
@@ -37,7 +37,7 @@ trait ResourceLoader {
   def load(names: Seq[String]): List[URL]
 }
 
-class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader with Logging {
+class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader, Logging {
 
   def this(loaderArray: ResourceLoader*) = {
     this(loaderArray.toList)
@@ -67,7 +67,7 @@ class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader 
 }
 
 /** Load resource by class loader.
-  */
+ */
 class ClasspathResourceLoader(val prefixes: List[String] = List("")) extends ResourceLoader {
 
   def this(prefixStr: String) = {

@@ -25,7 +25,7 @@ import org.scalatest.matchers.should.Matchers
 import java.sql.Time
 import java.time.{LocalDate, MonthDay, YearMonth}
 
-class TimeConverterTest extends AnyFunSpec with Matchers {
+class TimeConverterTest extends AnyFunSpec, Matchers {
 
   describe("TimeConverter") {
     it("Convert String to time") {

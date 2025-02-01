@@ -27,7 +27,7 @@ import org.scalatest.matchers.should.Matchers
 
 import javax.sql.DataSource
 
-class ReflectionsTest extends AnyFunSpec with Matchers {
+class ReflectionsTest extends AnyFunSpec, Matchers {
 
   describe("Reflections") {
     it("getSuperClassParamType") {

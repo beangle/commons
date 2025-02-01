@@ -20,7 +20,7 @@ package org.beangle.commons.codec.binary
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class DesTest extends AnyFunSpec with Matchers {
+class DesTest extends AnyFunSpec, Matchers {
   describe("Des cbc") {
     it("encode and decode") {
       var key = "ABCDEFGH"

@@ -20,7 +20,7 @@ package org.beangle.commons.text.escape
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class JavascriptEscaperTest extends AnyFunSpec with Matchers {
+class JavascriptEscaperTest extends AnyFunSpec, Matchers {
 
   describe("JavasciptEscaper") {
     it("Escape") {

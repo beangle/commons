@@ -21,7 +21,7 @@ import org.beangle.commons.lang.Strings.*
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class StringsTest extends AnyFunSpec with Matchers {
+class StringsTest extends AnyFunSpec, Matchers {
 
   describe("Strings") {
     it("Count target string") {

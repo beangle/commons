@@ -21,7 +21,7 @@ import org.beangle.commons.lang.ClassLoaders
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class FilesTest extends AnyFunSpec with Matchers {
+class FilesTest extends AnyFunSpec, Matchers {
   describe("Files") {
     it("purify") {
       "英汉 汉英口译I.docx" should equal(Files.purify("英汉/汉英口译I.docx"))

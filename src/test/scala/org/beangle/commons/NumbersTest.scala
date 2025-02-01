@@ -24,7 +24,7 @@ import org.scalatest.matchers.should.Matchers
 
 import scala.runtime.stdLibPatches.Predef.assert
 
-class NumbersTest extends AnyFunSpec with Matchers {
+class NumbersTest extends AnyFunSpec, Matchers {
 
   describe("Numbers") {
     it("isDigits") {

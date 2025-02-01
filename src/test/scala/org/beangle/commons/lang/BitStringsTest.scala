@@ -20,7 +20,7 @@ package org.beangle.commons.lang
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class BitStringsTest extends AnyFunSpec with Matchers {
+class BitStringsTest extends AnyFunSpec, Matchers {
 
   describe("BitStrings") {
     it("Calculate binary value of bit string") {

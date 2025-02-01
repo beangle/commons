@@ -23,7 +23,7 @@ import org.scalatest.matchers.should.Matchers
 import java.time.*
 import java.time.format.DateTimeFormatter
 
-class DatesTest extends AnyFunSpec with Matchers {
+class DatesTest extends AnyFunSpec, Matchers {
 
   describe("Dates") {
     it("join") {

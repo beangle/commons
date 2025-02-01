@@ -27,7 +27,7 @@ import org.scalatest.matchers.should.Matchers
 import java.lang.reflect.Modifier
 import scala.collection.immutable.ArraySeq
 
-class BeanInfosTest extends AnyFunSpec with Matchers {
+class BeanInfosTest extends AnyFunSpec, Matchers {
   BeanInfos.of(classOf[Book])
   BeanInfos.of(classOf[BookPrimitiveId])
   BeanInfos.of(classOf[BookStore])

@@ -28,6 +28,12 @@ object Networks {
 
   def uri(l: String): URI = URI.create(l)
 
+  def url(context: URL, path: String): URL = {
+    //context.toURI.resolve(path).toURL
+    //error when protocol is jar:file:/C/users/some/file.txt
+    new URL(context, path)
+  }
+
   def openURL(l: String): URLConnection = url(l).openConnection()
 
   def localIPs: Set[String] = {

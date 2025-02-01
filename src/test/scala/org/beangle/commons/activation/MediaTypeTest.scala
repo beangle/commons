@@ -22,7 +22,7 @@ import org.beangle.commons.lang.ClassLoaders.{getResource, getResources}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class MediaTypeTest extends AnyFunSpec with Matchers {
+class MediaTypeTest extends AnyFunSpec, Matchers {
   describe("MediaType") {
     it("load resource") {
       val resources = new Resources(

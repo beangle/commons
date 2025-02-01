@@ -21,7 +21,7 @@ import org.beangle.commons.json
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class JsonParserTest extends AnyFunSpec with Matchers {
+class JsonParserTest extends AnyFunSpec, Matchers {
 
   describe("JsonParser") {
     it("parse json ") {
@@ -54,7 +54,9 @@ class JsonParserTest extends AnyFunSpec with Matchers {
     it("isMatch") {
       val src = Json.parseObject(""" {a:1,b:{d:1}} """)
       val target = Json.parseObject(""" {a:[1,2],b:{d:[1,2]}} """)
+      val empty = Json.parseObject(""" {} """)
       assert(src.isMatch(target))
+      assert(src.isMatch(empty))
     }
     it("update") {
       val data = new JsonObject()

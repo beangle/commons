@@ -20,7 +20,7 @@ package org.beangle.commons.collection
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class OrderTest extends AnyFunSpec with Matchers {
+class OrderTest extends AnyFunSpec, Matchers {
 
   describe("Order") {
     it("ToString1") {

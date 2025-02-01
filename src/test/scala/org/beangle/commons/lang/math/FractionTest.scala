@@ -20,7 +20,7 @@ package org.beangle.commons.lang.math
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class FractionTest extends AnyFunSpec with Matchers {
+class FractionTest extends AnyFunSpec, Matchers {
   describe("Fraction") {
     it("small") {
       val i = SmallFraction(3, 4)

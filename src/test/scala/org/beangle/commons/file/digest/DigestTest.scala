@@ -22,7 +22,7 @@ import org.scalatest.matchers.should.Matchers
 
 import java.io.File
 
-class DigestTest extends AnyFunSpec with Matchers {
+class DigestTest extends AnyFunSpec, Matchers {
 
   val file = new File("/tmp/pgadmin4-2.0.dmg")
   if (file.exists())

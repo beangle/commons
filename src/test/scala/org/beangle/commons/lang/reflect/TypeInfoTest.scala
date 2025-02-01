@@ -23,7 +23,7 @@ import org.scalatest.matchers.should.Matchers
 
 import scala.collection.mutable
 
-class TypeInfoTest extends AnyFunSpec with Matchers {
+class TypeInfoTest extends AnyFunSpec, Matchers {
   describe("TypeInfo") {
     it("naming") {
       assert("Option[Int]" == TypeInfo.get(classOf[Int], true).name)

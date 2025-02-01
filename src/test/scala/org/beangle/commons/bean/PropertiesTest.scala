@@ -24,7 +24,7 @@ import org.scalatest.matchers.should.Matchers
 
 import java.util
 
-class PropertiesTest extends AnyFunSpec with Matchers {
+class PropertiesTest extends AnyFunSpec, Matchers {
 
   BeanInfos.of(classOf[TestBean])
   describe("Properties") {

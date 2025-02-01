@@ -20,7 +20,7 @@ package org.beangle.commons.lang
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class PrimitivesTest extends AnyFunSpec with Matchers {
+class PrimitivesTest extends AnyFunSpec, Matchers {
 
   describe("Primitives") {
     it("default") {

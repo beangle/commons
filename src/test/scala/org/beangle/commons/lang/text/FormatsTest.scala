@@ -24,7 +24,7 @@ import org.scalatest.matchers.should.Matchers
 import java.time.*
 import java.util.Calendar
 
-class FormatsTest extends AnyFunSpec with Matchers {
+class FormatsTest extends AnyFunSpec, Matchers {
   describe("Formats") {
     it("format number") {
       Formatters.format(123.121) should equal("123.12")

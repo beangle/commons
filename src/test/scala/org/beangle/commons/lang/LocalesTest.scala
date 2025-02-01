@@ -22,7 +22,7 @@ import org.scalatest.matchers.should.Matchers
 
 import java.util.Locale
 
-class LocalesTest extends AnyFunSpec with Matchers {
+class LocalesTest extends AnyFunSpec, Matchers {
 
   describe("Locales") {
     it("toLocale") {

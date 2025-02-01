@@ -21,7 +21,7 @@ import java.io.StringReader
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class CsvReaderTest extends AnyFunSpec with Matchers {
+class CsvReaderTest extends AnyFunSpec, Matchers {
 
   var reader: CsvReader = buildReader()
 

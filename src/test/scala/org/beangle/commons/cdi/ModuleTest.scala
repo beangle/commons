@@ -20,7 +20,7 @@ package org.beangle.commons.cdi
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class ModuleTest extends AnyFunSpec with Matchers {
+class ModuleTest extends AnyFunSpec, Matchers {
 
   describe("BindModule") {
     it("has corrent dev model detected.") {

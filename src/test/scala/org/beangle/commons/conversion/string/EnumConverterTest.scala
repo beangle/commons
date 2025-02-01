@@ -27,7 +27,7 @@ import org.scalatest.matchers.should.Matchers
   * @since 3.0.0
   */
 
-class EnumConverterTest extends AnyFunSpec with Matchers {
+class EnumConverterTest extends AnyFunSpec, Matchers {
 
   describe("EnumConverters") {
     it("Convert Enum") {

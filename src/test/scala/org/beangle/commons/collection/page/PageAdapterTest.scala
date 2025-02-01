@@ -23,7 +23,7 @@ import org.scalatest.matchers.should.Matchers
 /** @author zhouqi
   */
 
-class PageAdapterTest extends AnyFunSpec with Matchers {
+class PageAdapterTest extends AnyFunSpec, Matchers {
 
   describe("PagedSeq") {
     it("Move next or previous") {

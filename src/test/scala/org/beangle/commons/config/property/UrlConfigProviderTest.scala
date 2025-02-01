@@ -22,7 +22,7 @@ import org.beangle.commons.lang.ClassLoaders
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class UrlConfigProviderTest extends AnyFunSpec with Matchers {
+class UrlConfigProviderTest extends AnyFunSpec, Matchers {
 
   describe("UrlConfigProvider") {
     it("Get Property") {

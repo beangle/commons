@@ -23,7 +23,7 @@ import org.scalatest.matchers.should.Matchers
 import java.time.{Instant, LocalDate, LocalDateTime, LocalTime}
 import java.util as ju
 
-class DateConverterTest extends AnyFunSpec with Matchers {
+class DateConverterTest extends AnyFunSpec, Matchers {
 
   private def converToDate(dateStr: String, year: Int, month: Int, day: Int): Unit = {
     val c = DateConverter.getConverter(classOf[ju.Date]).orNull

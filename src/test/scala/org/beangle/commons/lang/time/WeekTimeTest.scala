@@ -22,7 +22,7 @@ import org.scalatest.matchers.should.Matchers
 
 import java.time.LocalDate
 
-class WeekTimeTest extends AnyFunSpec with Matchers {
+class WeekTimeTest extends AnyFunSpec, Matchers {
   describe("WeekTime") {
     it("firstDate ") {
       val wt = new WeekTime

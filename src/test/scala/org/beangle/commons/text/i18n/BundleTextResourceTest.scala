@@ -23,7 +23,7 @@ import org.scalatest.matchers.should.Matchers
 
 import java.util.Locale
 
-class BundleTextResourceTest extends AnyFunSpec with Matchers {
+class BundleTextResourceTest extends AnyFunSpec, Matchers {
 
   describe("TextBundle") {
     it("read message by class") {

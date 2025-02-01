@@ -23,7 +23,7 @@ import org.scalatest.matchers.should.Matchers
 
 import java.util.regex.Pattern
 
-class BatchReplaceMainTest extends AnyFunSpec with Matchers with Logging {
+class BatchReplaceMainTest extends AnyFunSpec, Matchers, Logging {
   describe("BatchReplace") {
     it("Test batch replace expression") {
       val clause = "<#include \"/template/head.ftl\"/>"

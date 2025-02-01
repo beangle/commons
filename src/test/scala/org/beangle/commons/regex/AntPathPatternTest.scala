@@ -21,7 +21,7 @@ import org.beangle.commons.regex.AntPathPattern.*
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class AntPathPatternTest extends AnyFunSpec with Matchers {
+class AntPathPatternTest extends AnyFunSpec, Matchers {
 
   describe("AntPathPattern") {
     it("Match ant pattern expression") {

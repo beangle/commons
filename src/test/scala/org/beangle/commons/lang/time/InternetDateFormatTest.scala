@@ -22,7 +22,7 @@ import org.scalatest.matchers.should.Matchers
 
 import java.util as ju
 
-class InternetDateFormatTest extends AnyFunSpec with Matchers {
+class InternetDateFormatTest extends AnyFunSpec, Matchers {
   describe("InternetDateFormat") {
     it("format") {
       val cal = ju.Calendar.getInstance

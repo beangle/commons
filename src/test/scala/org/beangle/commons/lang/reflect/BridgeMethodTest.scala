@@ -21,7 +21,7 @@ import org.beangle.commons.lang.testbean.Dog
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class BridgeMethodTest extends AnyFunSpec with Matchers {
+class BridgeMethodTest extends AnyFunSpec, Matchers {
 
   describe("Reflection class bridge method") {
     it("Find bridge methods") {

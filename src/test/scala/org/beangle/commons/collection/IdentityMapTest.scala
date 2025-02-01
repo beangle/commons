@@ -20,7 +20,7 @@ package org.beangle.commons.collection
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class IdentityMapTest extends AnyFunSpec with Matchers {
+class IdentityMapTest extends AnyFunSpec, Matchers {
 
   describe("IdentityMap") {
     it("put") {

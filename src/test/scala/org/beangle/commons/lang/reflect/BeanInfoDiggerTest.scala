@@ -22,7 +22,7 @@ import org.beangle.commons.lang.testbean.*
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class BeanInfoDiggerTest extends AnyFunSpec with Matchers {
+class BeanInfoDiggerTest extends AnyFunSpec, Matchers {
 
   describe("BeanInfoDigger") {
     it("dig") {

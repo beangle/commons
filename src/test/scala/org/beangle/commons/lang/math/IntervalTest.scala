@@ -20,7 +20,7 @@ package org.beangle.commons.lang.math
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class IntervalTest extends AnyFunSpec with Matchers {
+class IntervalTest extends AnyFunSpec, Matchers {
   describe("Interval") {
     it("small") {
       val i = SmallInterval(3, 4)

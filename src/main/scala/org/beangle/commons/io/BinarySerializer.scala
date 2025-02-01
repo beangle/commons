@@ -22,8 +22,8 @@ import org.beangle.commons.activation.{MediaType, MediaTypes}
 import java.io.*
 
 /** @author chaostone
-  */
-trait BinarySerializer extends Serializer with Deserializer {
+ */
+trait BinarySerializer extends Serializer, Deserializer {
 
   override def mediaTypes: Seq[MediaType] =
     List(MediaTypes.ApplicationOctetStream)

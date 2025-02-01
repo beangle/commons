@@ -20,7 +20,7 @@ package org.beangle.commons.codec.binary
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class Base64Test extends AnyFunSpec with Matchers {
+class Base64Test extends AnyFunSpec, Matchers {
   describe("Base64") {
     it("encode and decode") {
       val data = "xtUkXCyc+OAdHqK1lJKubmnzGts="

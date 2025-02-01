@@ -22,7 +22,7 @@ import org.scalatest.matchers.should.Matchers
 
 import java.util
 
-class IterableConverterTest extends AnyFunSpec with Matchers {
+class IterableConverterTest extends AnyFunSpec, Matchers {
 
   describe("Iterable Converter") {
     it("Convert java iterable to scala") {

@@ -23,7 +23,7 @@ import org.scalatest.matchers.should.Matchers
 import java.io.File
 import java.nio.charset.Charset
 
-class ReaderTest extends AnyFunSpec with Matchers {
+class ReaderTest extends AnyFunSpec, Matchers {
 
   describe("Reader") {
     it("readinfo") {

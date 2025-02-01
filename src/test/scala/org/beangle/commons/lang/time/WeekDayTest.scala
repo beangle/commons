@@ -23,7 +23,7 @@ import org.scalatest.matchers.should.Matchers
 
 import java.time.LocalDate
 
-class WeekDayTest extends AnyFunSpec with Matchers {
+class WeekDayTest extends AnyFunSpec, Matchers {
 
   describe("WeekDay") {
     it("id starts at Mon") {

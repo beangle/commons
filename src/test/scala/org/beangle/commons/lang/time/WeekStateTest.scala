@@ -20,7 +20,7 @@ package org.beangle.commons.lang.time
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class WeekStateTest extends AnyFunSpec with Matchers {
+class WeekStateTest extends AnyFunSpec, Matchers {
 
   describe("WeekState") {
     it("toString ") {

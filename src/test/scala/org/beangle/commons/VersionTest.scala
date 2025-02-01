@@ -22,7 +22,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.slf4j.Logger
 
-class VersionTest extends AnyFunSpec with Matchers {
+class VersionTest extends AnyFunSpec, Matchers {
 
   describe("Version") {
     it("find bundle version") {

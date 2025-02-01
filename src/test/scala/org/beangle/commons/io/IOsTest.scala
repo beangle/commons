@@ -21,7 +21,7 @@ import org.beangle.commons.lang.ClassLoaders
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class IOsTest extends AnyFunSpec with Matchers {
+class IOsTest extends AnyFunSpec, Matchers {
   describe("IOs") {
     it("dummy") {
     }

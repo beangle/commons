@@ -20,7 +20,7 @@ package org.beangle.commons.io
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class ResourceResolverTest extends AnyFunSpec with Matchers {
+class ResourceResolverTest extends AnyFunSpec, Matchers {
   describe("ResourceResolver") {
     it("getResources") {
       val resolver = new ResourcePatternResolver

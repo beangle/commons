@@ -20,7 +20,7 @@ package org.beangle.commons.text.seq
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class HanZiSeqStyleTest extends AnyFunSpec with Matchers {
+class HanZiSeqStyleTest extends AnyFunSpec, Matchers {
 
   describe("HanZiSeqStyle") {
     it("Build HanZi Sequence") {

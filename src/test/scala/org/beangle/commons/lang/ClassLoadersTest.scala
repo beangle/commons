@@ -20,7 +20,7 @@ package org.beangle.commons.lang
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class ClassLoadersTest extends AnyFunSpec with Matchers {
+class ClassLoadersTest extends AnyFunSpec, Matchers {
 
   describe("ClassLoaders") {
     it("load primatives") {

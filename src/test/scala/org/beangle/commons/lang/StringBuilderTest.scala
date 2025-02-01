@@ -20,7 +20,7 @@ package org.beangle.commons.lang
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class StringBuilderTest extends AnyFunSpec with Matchers {
+class StringBuilderTest extends AnyFunSpec, Matchers {
 
   describe("StringBuilder") {
     it("Contains") {

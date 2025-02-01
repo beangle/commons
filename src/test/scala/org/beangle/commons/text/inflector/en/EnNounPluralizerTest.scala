@@ -23,7 +23,7 @@ import org.scalatest.matchers.should.Matchers
 /** @author chaostone
   */
 
-class EnNounPluralizerTest extends AnyFunSpec with Matchers {
+class EnNounPluralizerTest extends AnyFunSpec, Matchers {
   describe("EnNounPluralizer") {
     it("pluralize") {
       assert("accounts" == EnNounPluralizer.pluralize("account"))

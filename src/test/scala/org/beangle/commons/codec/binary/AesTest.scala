@@ -22,7 +22,7 @@ import org.scalatest.matchers.should.Matchers
 
 import java.util.Arrays
 
-class AesTest extends AnyFunSpec with Matchers {
+class AesTest extends AnyFunSpec, Matchers {
   describe("AES") {
     it("ECB encode and decode") {
       var key = "8NONwyJtHesysWpM"

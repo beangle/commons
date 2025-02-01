@@ -27,7 +27,7 @@ import org.beangle.commons.lang.SystemInfo
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class CsvWriterTest extends AnyFunSpec with Matchers {
+class CsvWriterTest extends AnyFunSpec, Matchers {
 
   private def invokeWriter(args: Array[String]): String = {
     val sw = new StringWriter()

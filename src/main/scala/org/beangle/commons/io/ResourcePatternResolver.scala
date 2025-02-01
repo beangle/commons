@@ -18,6 +18,7 @@
 package org.beangle.commons.io
 
 import org.beangle.commons.lang.{ClassLoaders, Strings}
+import org.beangle.commons.net.Networks
 import org.beangle.commons.regex.AntPathPattern
 import org.beangle.commons.regex.AntPathPattern.isPattern
 
@@ -121,7 +122,7 @@ class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResource
         val entryPath = entry.getName
         if (entryPath.startsWith(rootEntryPath)) {
           val relativePath = entryPath.substring(rootEntryPath.length)
-          if (subPattern.matches(relativePath)) result.add(new URL(rootDirResource, relativePath))
+          if (subPattern.matches(relativePath)) result.add(Networks.url(rootDirResource, relativePath))
         }
       }
       result

@@ -21,7 +21,7 @@ import org.beangle.commons.lang.reflect.BeanInfos
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class JexlScriptEngineTest extends AnyFunSpec with Matchers {
+class JexlScriptEngineTest extends AnyFunSpec, Matchers {
 
   describe("JexlScriptEngine evaluate expression") {
     BeanInfos.of(classOf[Depart])

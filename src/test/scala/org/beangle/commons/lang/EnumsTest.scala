@@ -22,7 +22,7 @@ import org.beangle.commons.lang.time.WeekDay
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class EnumsTest extends AnyFunSpec with Matchers {
+class EnumsTest extends AnyFunSpec, Matchers {
 
   describe("Enums") {
     it("get") {
