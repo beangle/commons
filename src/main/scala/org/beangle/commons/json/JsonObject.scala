@@ -123,17 +123,23 @@ class JsonObject extends DynamicBean {
             case Some(a) => o = a
         case _ => o = null
     }
-    val cv = value match {
-      case i: Iterable[Any] => new JsonArray(i)
-      case a: Array[Any] => new JsonArray(a)
-      case v: Any => v
-    }
+    val cv = convert(value)
     val last = parts(i)
     o match
       case jo: JsonObject => jo.add(last, cv)
       case ja: JsonArray => ja.set(JsonArray.parseIndex(last), cv)
 
     this
+  }
+
+  private def convert(value: Any): Any = {
+    value match {
+      case jo: JsonObject => jo
+      case ja: JsonArray => ja
+      case i: Iterable[Any] => new JsonArray(i)
+      case a: Array[Any] => new JsonArray(a)
+      case v: Any => v
+    }
   }
 
   /** 删除keys
