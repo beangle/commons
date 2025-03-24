@@ -59,7 +59,9 @@ object ExpressionEvaluator {
   }
 
   def jsr223(engineName: String): ExpressionEvaluator = {
-    new JSR223ExpressionEvaluator(new ScriptEngineManager().getEngineByName(engineName))
+    val engine = new ScriptEngineManager().getEngineByName(engineName)
+    require(engine != null, s"Cannot find script engine named ${engineName}")
+    new JSR223ExpressionEvaluator(engine)
   }
 }
 
