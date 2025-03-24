@@ -40,6 +40,7 @@ class JexlScriptEngineTest extends AnyFunSpec, Matchers {
     jo.add("skills", JsonArray(JsonObject("name" -> "basketball"), JsonObject("name" -> "football")))
     assert(evaluator.eval("name", jo) == "Jack")
     assert(evaluator.eval("skills[0].name", jo) == "basketball")
+    assert(evaluator.eval("name=='Jack'", jo) == java.lang.Boolean.TRUE)
   }
 
 }
