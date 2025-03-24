@@ -17,6 +17,7 @@
 
 package org.beangle.commons.script
 
+import org.beangle.commons.json.{JsonArray, JsonObject}
 import org.beangle.commons.lang.reflect.BeanInfos
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -33,6 +34,12 @@ class JexlScriptEngineTest extends AnyFunSpec, Matchers {
     assert("2" == evaluator.eval("size(depart.staffs)", data).toString)
     assert("zhangsan" == evaluator.eval("depart.staffs[0]", data))
     assert("champion" == evaluator.eval("depart.honors['sale']", data))
+
+    val jo = new JsonObject()
+    jo.add("name", "Jack")
+    jo.add("skills", JsonArray(JsonObject("name" -> "basketball"), JsonObject("name" -> "football")))
+    assert(evaluator.eval("name", jo) == "Jack")
+    assert(evaluator.eval("skills[0].name", jo) == "basketball")
   }
 
 }
