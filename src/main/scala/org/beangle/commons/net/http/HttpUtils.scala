@@ -106,7 +106,7 @@ object HttpUtils extends Logging {
       } else
         Response(conn.getResponseCode, conn.getResponseMessage)
     } catch {
-      case e: Exception => error(conn, url, e)
+      case e: Exception => error(url, e)
     } finally
       if (null != conn) conn.disconnect()
   }
@@ -148,7 +148,7 @@ object HttpUtils extends Logging {
       else
         Response(conn.getResponseCode, conn.getResponseMessage)
     } catch {
-      case e: Exception => error(conn, url, e)
+      case e: Exception => error(url, e)
     } finally {
       if (null != in) in.close()
       if (null != conn) conn.disconnect()
@@ -197,7 +197,7 @@ object HttpUtils extends Logging {
       val lines = IOs.readString(conn.getInputStream)
       Response(conn.getResponseCode, lines)
     } catch {
-      case e: Exception => error(conn, url, e)
+      case e: Exception => error(url, e)
     } finally
       if (null != conn) conn.disconnect()
   }
@@ -232,9 +232,9 @@ object HttpUtils extends Logging {
     }
   }
 
-  private[this] def error(conn: HttpURLConnection, url: URL, e: Exception): Response = {
+  private[this] def error(url: URL, e: Exception): Response = {
     logger.info("Cannot open url " + url + " " + e.getMessage)
-    Response(conn.getResponseCode, e.getMessage)
+    Response(404, e.getMessage)
   }
 
   private def requestBy(conn: HttpURLConnection, method: String): Unit = {
