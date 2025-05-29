@@ -71,6 +71,10 @@ class WeekStateTest extends AnyFunSpec, Matchers {
       assert(WeekState.of(1, 2) == WeekState("110"))
       assert(WeekState.of(3, 4) == WeekState("11000"))
     }
+    it("valueOf") {
+      assert(WeekState.of(1, 2, 4, 5) == WeekState("1-2,4-5"))
+      assert(WeekState.of(1, 2, 4, 5) == WeekState("110110"))
+    }
     it("build") {
       val w = WeekState.build(1, 8, WeekCycle.Even)
       assert(w.cycle == WeekCycle.Even)

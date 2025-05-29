@@ -19,6 +19,7 @@ package org.beangle.commons.lang.time
 
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.annotation.value
+import org.beangle.commons.lang.math.IntSeg
 
 enum WeekCycle {
 
@@ -63,6 +64,24 @@ object WeekState {
   }
 
   def of(weekIndecies: Int*): WeekState = of(weekIndecies)
+
+  def valueOf(raw: String): Long = {
+    if Strings.isBlank(raw) then 0
+    else {
+      val str = raw.trim()
+      val chars = str.toCharArray
+      val bins = Set('0', '1')
+      val isBin = chars.forall(x => bins.contains(x))
+      if (isBin) {
+        java.lang.Long.parseLong(raw, 2)
+      } else {
+        var v = 0L
+        val nums = IntSeg.parse(str)
+        for (index <- nums) v |= (1L << index)
+        v
+      }
+    }
+  }
 }
 
 /** Assembly week in a long value.
@@ -72,7 +91,7 @@ object WeekState {
 class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
 
   def this(raw: String) = {
-    this(if (Strings.isEmpty(raw)) 0 else java.lang.Long.parseLong(raw, 2))
+    this(WeekState.valueOf(raw))
   }
 
   override def compare(other: WeekState): Int = {
@@ -90,6 +109,10 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
   def isOverlap(other: WeekState): Boolean = (this.value & other.value) > 0
 
   override def toString: String = java.lang.Long.toBinaryString(value)
+
+  def digest: String = {
+    IntSeg.digest(this.weeks)
+  }
 
   override def equals(obj: Any): Boolean = {
     obj match {
