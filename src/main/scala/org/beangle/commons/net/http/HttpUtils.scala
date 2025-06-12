@@ -141,8 +141,8 @@ object HttpUtils extends Logging {
         val sb = new StringBuilder(255)
         while (line != null) {
           sb.append(line)
-          sb.append("\n")
           line = in.readLine()
+          if (null != line) sb.append("\n")
         }
         Response(HTTP_OK, sb.toString)
       else
