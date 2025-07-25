@@ -194,8 +194,9 @@ object HttpUtils extends Logging {
     os.close() //don't forget to close the OutputStream
     try {
       conn.connect()
-      val lines = IOs.readString(conn.getInputStream)
-      Response(conn.getResponseCode, lines)
+      val bos = new ByteArrayOutputStream
+      IOs.copy(conn.getInputStream, bos)
+      Response(conn.getResponseCode, bos.toByteArray)
     } catch {
       case e: Exception => error(url, e)
     } finally

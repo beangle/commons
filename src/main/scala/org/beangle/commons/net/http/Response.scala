@@ -32,6 +32,6 @@ case class Response(status: Int, content: Any) {
   def isOk: Boolean = status == HttpURLConnection.HTTP_OK
 
   def getOrElse(default: => String): String = {
-    if this.isOk then String.valueOf(content) else default
+    if this.isOk then getText else default
   }
 }
