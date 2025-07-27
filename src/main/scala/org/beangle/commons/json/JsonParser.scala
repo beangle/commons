@@ -22,7 +22,8 @@ import java.io.Reader
 class JsonParser(reader: Reader) {
   private var index = 1 //current index in the buffer
   private var length = 0 // max length of buffer
-  private val buffer = new Array[Char](1024)
+  private var bufferSize = 1024 // size of the buffer
+  private val buffer = new Array[Char](bufferSize)
 
   /** Parse text into a json object or value
    *
@@ -223,7 +224,7 @@ class JsonParser(reader: Reader) {
   }
 
   private def end: Boolean = {
-    this.length < 0
+    this.length <= 0
   }
 
   private def back(): Unit = {
