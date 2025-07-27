@@ -123,5 +123,16 @@ class StringsTest extends AnyFunSpec, Matchers {
     it("split non latin chars") {
       split("账户,姓名") should be(Array("账户", "姓名"))
     }
+    it("keepSeqUnique"){
+      val seq = "1,2,3,4,5,6,7,8,9,10"
+      keepSeqUnique(seq) should be(seq)
+      keepSeqUnique("1,2,3,4,5,6,7,8,9,10,1") should be("1,2,3,4,5,6,7,8,9,10")
+      keepSeqUnique("1,,2,,3,,4,,5,,6,,7,,8,,9,,10") should be("1,2,3,4,5,6,7,8,9,10")
+    }
+    it("insert string at position") {
+      insert("123456", "x", 0) should be("x123456")
+      insert("123456", "x", 1) should be("1x23456")
+      insert("123456", "x", 6) should be("123456x")
+    }
   }
 }

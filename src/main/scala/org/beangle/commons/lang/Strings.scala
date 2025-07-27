@@ -177,7 +177,10 @@ object Strings {
     */
   def insert(str: String, c: String, pos: Int): String = {
     if (str.length < pos) return str
-    str.substring(0, pos - 1) + c + str.substring(pos)
+    if pos < 1 then c + str
+    else if pos < str.length then
+      (str.substring(0, pos) + c + str.substring(pos))
+    else str + c
   }
 
   /** replace [bigen,end] [1...end] with givenStr
@@ -342,15 +345,17 @@ object Strings {
     */
   def keepSeqUnique(keyString: String): String = {
     val keyList = split(keyString, ",").toList
-    val keys = keyList.toSet
-    val keyBuf = new StringBuilder()
+    val keys = Collections.newSet[String]
+    val newKeys = Collections.newBuffer[String]
     val iter = keyList.iterator
     while (iter.hasNext) {
       val key = iter.next()
-      if (!keys(key)) keyBuf.append(key)
-      if (iter.hasNext) keyBuf.append(',')
-    }
-    keyBuf.toString
+      if (!keys.contains(key)){
+        keys.add(key)
+        newKeys.addOne(key)
+      }
+     }
+    newKeys.mkString(",")
   }
 
   /** Left pad a String with a specified character.
@@ -435,7 +440,7 @@ object Strings {
     * @param delimiter a String object.
     * @return a String object.
     */
-  def mergeSeq(first: String, second: String, delimiter: String): String =
+  def mergeSeq(first: String, second: String, delimiter: String): String = {
     if (isNotEmpty(second) && isNotEmpty(first)) {
       val firstSeq = split(first, delimiter).toList
       val secondSeq = split(second, delimiter).toList
@@ -446,7 +451,7 @@ object Strings {
       buf.toString
     } else
       (if ((first == null)) "" else first) + (if ((second == null)) "" else second)
-
+  }
   /** removeWord.
     *
     * @param host a String object.
@@ -462,21 +467,11 @@ object Strings {
     * @param delimiter a String object.
     * @return a String object.
     */
-  def removeWord(host: String, word: String, delimiter: String): String =
-    if (host.indexOf(word) == -1)
-      host
-    else {
-      val beginIndex = host.indexOf(word)
-      val endIndex = beginIndex + word.length
-      if (beginIndex == 0) return host.substring(endIndex + 1)
-      if (endIndex == host.length)
-        host.substring(0, beginIndex - delimiter.length)
-      else {
-        val before = host.substring(0, beginIndex)
-        val after = host.substring(endIndex + 1)
-        before + after
-      }
-    }
+  def removeWord(host: String, word: String, delimiter: String): String = {
+    if host.indexOf(word) == -1 then host
+    else
+      split(host, delimiter).filterNot(_ == word).mkString(delimiter)
+  }
 
   /** Returns padding using the specified delimiter repeated to a given length.
     *
@@ -492,6 +487,9 @@ object Strings {
     * @see #repeat(String, int)
     */
   def repeat(ch: Char, repeat: Int): String = {
+    if (repeat <= 1) {
+      return if repeat <= 0 then "" else ch.toString
+    }
     val buf = new Array[Char](repeat)
     var i = repeat - 1
     while (i >= 0) {
@@ -521,8 +519,7 @@ object Strings {
   def repeat(str: String, repeat: Int): String = {
     if (str == null) return null
     if (repeat <= 1) {
-      repeat >= 0
-      return if ((repeat == 0)) "" else str
+      return if ((repeat <= 0)) "" else str
     }
     val len = str.length
     val longSize = len.toLong * repeat.toLong
