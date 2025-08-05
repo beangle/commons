@@ -205,6 +205,7 @@ object HttpUtils extends Logging {
 
   def download(c: URLConnection, location: File): Unit = {
     val conn = followRedirect(c, "GET")
+    location.getParentFile.mkdirs()
     var input: InputStream = null
     var output: OutputStream = null
     try {
