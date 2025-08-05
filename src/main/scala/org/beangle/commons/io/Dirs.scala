@@ -87,11 +87,14 @@ class Dirs(val pwd: File) {
     this
   }
 
-  def ls(): Seq[String] =
-    pwd.list().toSeq
+  def ls(): Seq[String] = {
+    val i = pwd.list()
+    if null == i then List.empty else i.toSeq
+  }
 
-  def cd(child: String): Dirs =
+  def cd(child: String): Dirs = {
     new Dirs(new File(pwd, child))
+  }
 
   def touch(child: String): this.type = {
     val file = new File(pwd, child)
@@ -102,11 +105,9 @@ class Dirs(val pwd: File) {
     this
   }
 
-  def ln(target: String): this.type =
-    ln(new File(target))
+  def ln(target: String): this.type = ln(new File(target))
 
-  def ln(target: File): this.type =
-    ln(target, target.getName)
+  def ln(target: File): this.type = ln(target, target.getName)
 
   def setReadOnly(): this.type = {
     Files.setReadOnly(pwd)
