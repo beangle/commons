@@ -30,6 +30,7 @@ class JsonParserTest extends AnyFunSpec, Matchers {
           |"hostname":"openurp.edu.cn","org":{"code":"shcm","name":"上海电影学院","id":10278},"name":"urp",
           |"id":1085601,"title":"教学系统"}""".stripMargin
       val a = Json.parseObject(v)
+      val bb = a.query("/org/code")
       assert(a.query("/org/code").contains("shcm"))
       assert(a.query("admins.[1]").contains("admin2"))
       assert(a.query("/admins/32").isEmpty)
@@ -38,9 +39,10 @@ class JsonParserTest extends AnyFunSpec, Matchers {
       assert(roleNames.nonEmpty)
       assert(roleNames.get.asInstanceOf[JsonArray].contains("role2"))
       val roles = a.query("roles").get.asInstanceOf[JsonArray]
-      assert(roles.query("[0].name") == "role1")
-      assert(roles.query("/1/name") == "role2")
+      assert(roles.query("[0].name").contains("role1"))
+      assert(roles.query("/1/name").contains("role2"))
     }
+
     it("parse") {
       val result = Json.parseObject(
         """

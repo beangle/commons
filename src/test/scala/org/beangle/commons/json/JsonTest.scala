@@ -17,16 +17,24 @@
 
 package org.beangle.commons.json
 
-object Null {
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-  override def equals(obj: Any): Boolean = {
-    obj match {
-      case null => true
-      case _ => obj == this
+class JsonTest extends AnyFunSpec, Matchers {
+
+  describe("Json") {
+    it("toJson") {
+      val json = JsonObject("id" -> 3L, "isManager" -> false, "salary" -> 6999,
+        "age" -> Some(30), "title" -> None, "weight" -> Integer.valueOf(180))
+      val result = json.toJson
+      assert(result.contains(""""id":"3"""))
+      assert(result.contains(""""weight":180"""))
+      assert(result.contains(""""isManager":false"""))
+      assert(result.contains(""""title":null"""))
+      assert(result.contains(""""age":3"""))
+
+      val b = Json.parseObject("""{"name":"课堂测验","percent":20.3,"count":5}""")
+      assert(b.toJson.contains(""""percent":20.3"""))
     }
   }
-
-  override def hashCode: Int = 0
-
-  override def toString: String = "null"
 }

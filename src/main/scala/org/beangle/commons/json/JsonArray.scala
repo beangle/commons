@@ -41,7 +41,7 @@ object JsonArray {
 
 /** Represents a JSON array.
  */
-class JsonArray extends collection.Seq[Any] {
+class JsonArray extends collection.Seq[Any], Json {
 
   def this(v: Iterable[Any]) = {
     this()
@@ -62,7 +62,12 @@ class JsonArray extends collection.Seq[Any] {
     }
   }
 
-  def get(paths: Array[String]): Any = {
+  def substractOne(value: Any): this.type = {
+    values.subtractOne(value)
+    this
+  }
+
+  def get(paths: Array[String]): Option[Any] = {
     var i = 0
     var o: Any = this
     while (o != null && i < paths.length) {
@@ -73,7 +78,7 @@ class JsonArray extends collection.Seq[Any] {
         case ja: JsonArray =>
           val index = parseIndex(part)
           if (index > -1) {
-            o = ja.get(index).orNull
+            o = if index >= ja.length then null else ja.get(index).orNull
           } else {
             o = new JsonArray(ja.values.map {
               case j: JsonObject => j.get(part).orNull
@@ -82,7 +87,7 @@ class JsonArray extends collection.Seq[Any] {
             }.filter(_ != null))
           }
     }
-    o
+    Option(o)
   }
 
   /** 自动扩容，设置第I个元素的指
@@ -102,12 +107,12 @@ class JsonArray extends collection.Seq[Any] {
     }
   }
 
-  def query(path: String): Any = {
+  override def query(path: String): Option[Any] = {
     val parts = if (path.charAt(0) == '/') Strings.split(path, "/") else Strings.split(path, ".")
     get(parts)
   }
 
-  def toJson: String = {
+  override def toJson: String = {
     val sb = new StringBuilder("[")
     values.foreach(v => {
       v match {
@@ -128,6 +133,8 @@ class JsonArray extends collection.Seq[Any] {
   }
 
   override def length: Int = values.length
+
+  override def value: Any = this
 
   override def toString: String = toJson
 }

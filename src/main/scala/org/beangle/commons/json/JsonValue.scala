@@ -17,16 +17,13 @@
 
 package org.beangle.commons.json
 
-object Null {
+case class JsonValue(value: Any) extends Json {
 
-  override def equals(obj: Any): Boolean = {
-    obj match {
-      case null => true
-      case _ => obj == this
-    }
+  def query(path: String): Option[Any] = {
+    None
   }
 
-  override def hashCode: Int = 0
+  override def toJson: String = value.toString
 
-  override def toString: String = "null"
+  override def toString: String = value.toString
 }

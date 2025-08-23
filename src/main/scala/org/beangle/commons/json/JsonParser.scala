@@ -29,7 +29,7 @@ class JsonParser(reader: Reader) {
    *
    * @return
    */
-  def parse(): Any = {
+  def parse(): Json = {
     try {
       val c = this.readChar()
       c match {
@@ -88,11 +88,16 @@ class JsonParser(reader: Reader) {
     new String(chars)
   }
 
-  private def readValue(char: Char): Any = {
+  /** read literal value
+   *
+   * @param char leading char
+   * @return
+   */
+  private def readValue(char: Char): JsonValue = {
     var string: String = null
     char match {
       case '"' | '\'' =>
-        return this.readString(char)
+        return JsonValue(this.readString(char))
       case _ =>
     }
     var c = char
@@ -104,7 +109,7 @@ class JsonParser(reader: Reader) {
     if (!this.end) this.back()
     string = sb.toString.trim
     if ("" == string) throw this.syntaxError("Missing value")
-    stringToValue(string)
+    JsonValue(literalToValue(string))
   }
 
   private def readString(quote: Char): String = {
@@ -159,7 +164,7 @@ class JsonParser(reader: Reader) {
       c = this.readChar() // The key is followed by ':'.
       if (c != ':') throw this.syntaxError("Expected a ':' after a key")
       if (key != null) {
-        val value = this.parse()
+        val value = this.parse().value
         if (value != null) jo.add(key, value)
       }
       // Pairs are separated by ','.
@@ -189,7 +194,7 @@ class JsonParser(reader: Reader) {
           ja.add(Null)
         } else {
           this.back()
-          ja.add(this.parse())
+          ja.add(this.parse().value)
         }
         this.readChar() match {
           case 0 => throw syntaxError("Expected a ',' or ']'")
@@ -206,7 +211,7 @@ class JsonParser(reader: Reader) {
     ja
   }
 
-  private def stringToValue(str: String): Any = {
+  private def literalToValue(str: String): Any = {
     if ("" == str) return str
     if ("true".equalsIgnoreCase(str)) return true
     if ("false".equalsIgnoreCase(str)) return false
@@ -214,9 +219,10 @@ class JsonParser(reader: Reader) {
     val initial = str.charAt(0)
     if ((initial >= '0' && initial <= '9') || initial == '-') {
       val isDecimal = str.indexOf('.') > -1 || str.indexOf('e') > -1 || str.indexOf('E') > -1 || "-0".equals(str)
-      try
-        if isDecimal then java.lang.Double.valueOf(str) else java.lang.Long.valueOf(str)
-      catch
+      try {
+        //如果是数字，则直接使用double和int表示，long型的会采用字符串表示
+        if isDecimal then java.lang.Double.valueOf(str) else java.lang.Integer.valueOf(str)
+      } catch
         case exception: Exception => str
     } else {
       str

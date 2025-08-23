@@ -37,12 +37,26 @@ object JsonObject {
     v match {
       case null => "null"
       case Null => "null"
-      case s: String => toString(s)
-      case _ => toString(v.toString)
+      case None => "null"
+      case Some(iv) => valueToLiteral(iv)
+      case _ => valueToLiteral(v)
     }
   }
 
-  def toString(s: String): String = {
+  private def valueToLiteral(v: Any): String = {
+    v match {
+      case s: String => escape(s)
+      case b: Boolean => b.toString
+      case s: Short => s.toString
+      case n: Int => n.toString
+      case f: Float => f.toString
+      case d: Double => d.toString
+      case l: Long => escape(l.toString)
+      case _ => escape(v.toString)
+    }
+  }
+
+  private def escape(s: String): String = {
     val length = s.length
     val text = s.toCharArray
     val sb = new StringBuilder()
@@ -74,7 +88,7 @@ object JsonObject {
 
 /** Represents a JSON object.
  */
-class JsonObject extends DynamicBean {
+class JsonObject extends DynamicBean, Json {
   private val props: mutable.Map[String, Any] = Collections.newMap[String, Any]
 
   def this(v: Iterable[(String, Any)]) = {
@@ -82,17 +96,17 @@ class JsonObject extends DynamicBean {
     v foreach { x => add(x._1, x._2) }
   }
 
-  def query(path: String): Option[Any] = {
+  override def query(path: String): Option[Any] = {
     val parts = if (path.charAt(0) == '/') Strings.split(path, "/") else Strings.split(path, ".")
     var i = 0
     var o: Any = this
     while (o != null && i < parts.length) {
       val part = parts(i)
       i += 1
-      o match
-        case jo: JsonObject => o = jo.props.getOrElse(part, null)
-        case ja: JsonArray => o = ja.get(Array(part))
-        case _ => o = null
+      o = o match
+        case jo: JsonObject => jo.props.getOrElse(part, null)
+        case ja: JsonArray => ja.get(Array(part)).orNull
+        case _ => null
     }
     Option(o)
   }
@@ -295,7 +309,7 @@ class JsonObject extends DynamicBean {
     }
   }
 
-  def toJson: String = {
+  override def toJson: String = {
     val sb = new StringBuilder("{")
     props.foreach { kv =>
       sb.append("\"").append(kv._1).append("\":")
@@ -361,6 +375,8 @@ class JsonObject extends DynamicBean {
       }
     } else false
   }
+
+  override def value: Any = this
 
   override def toString: String = toJson
 }

@@ -20,9 +20,13 @@ package org.beangle.commons.json
 import org.beangle.commons.lang.Strings
 
 object Json {
-  def parse(s: String): Any = {
-    val parser = new JsonParser(new java.io.StringReader(s))
-    parser.parse()
+  def parse(s: String): Json = {
+    if Strings.isBlank(s) then JsonValue("")
+    else new JsonParser(new java.io.StringReader(s)).parse()
+  }
+
+  def query(s: String, path: String): Option[Any] = {
+    parse(s).query(path)
   }
 
   def parseObject(s: String): JsonObject = {
@@ -44,4 +48,24 @@ object Json {
   def toJson(value: JsonArray): String = {
     value.toJson
   }
+
+  def empty(t: Class[_]): Json = {
+    if (t == classOf[JsonObject]) new JsonObject()
+    else if (t == classOf[JsonArray]) new JsonArray()
+    else JsonValue("")
+  }
+}
+
+trait Json {
+  /** Query object graph,using slash or dot seperate nested property,like
+   * [index]/property_name/property_name or [index].property_name.property_name
+   *
+   * @param path
+   * @return
+   */
+  def query(path: String): Option[Any]
+
+  def toJson:String
+
+  def value: Any
 }
