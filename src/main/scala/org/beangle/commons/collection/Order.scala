@@ -22,12 +22,12 @@ import org.beangle.commons.lang.Strings
 import scala.collection.mutable.ListBuffer
 
 /** 排序
-  *
-  * @author chaostone
-  */
+ *
+ * @author chaostone
+ */
 object Order {
   /** Constant <code>OrderStr="orderBy"</code>
-    */
+   */
   val OrderStr = "orderBy"
 
   def apply(property: String) = new Order(property, true)
@@ -35,21 +35,21 @@ object Order {
   def apply(property: String, ascending: Boolean) = new Order(property, ascending)
 
   /** Asc.
-    *
-    * @param property a String object.
-    * @return a {@link org.beangle.commons.collection.Order} object.
-    */
+   *
+   * @param property a String object.
+   * @return a {@link org.beangle.commons.collection.Order} object.
+   */
   def asc(property: String): Order = new Order(property, true)
 
   /** Desc.
-    *
-    * @param property a String object.
-    * @return a {@link org.beangle.commons.collection.Order} object.
-    */
+   *
+   * @param property a String object.
+   * @return a {@link org.beangle.commons.collection.Order} object.
+   */
   def desc(property: String): Order = new Order(property, false)
 
   /** toSortString.
-    */
+   */
   def toSortString(orders: List[Order]): String = {
     if (null == orders || orders.isEmpty) return ""
     val buf = new StringBuilder("order by ")
@@ -60,7 +60,7 @@ object Order {
   }
 
   /** parse order string.
-    */
+   */
   def parse(orderString: String): List[Order] =
     if (Strings.isBlank(orderString)) {
       List.empty
@@ -102,24 +102,26 @@ object Order {
 }
 
 /** 排序
-  *
-  * @author chaostone
-  */
+ *
+ * @author chaostone
+ */
 class Order(val property: String, val ascending: Boolean, val lowerCase: Boolean = false) {
 
   /** Constructor for Order.
-    *
-    * @param property a String object.
-    */
+   *
+   * @param property a String object.
+   */
   def this(property: String) = {
     this(Order.analysis(property)._1, Order.analysis(property)._2)
   }
 
   /** ToString.
-    *
-    * @return a String object.
-    */
-  override def toString: String =
+   *
+   * @return a String object.
+   */
+  override def toString: String = {
     if (lowerCase) "lower(" + property + ") " + (if (ascending) "asc" else "desc")
     else property + " " + (if (ascending) "asc" else "desc")
+  }
+
 }

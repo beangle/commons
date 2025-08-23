@@ -22,6 +22,7 @@ ThisBuild / developers := List(
 
 ThisBuild / description := "The Beangle Commons Library"
 ThisBuild / homepage := Some(url("http://beangle.github.io/commons/index.html"))
+ThisBuild / versionPolicyIntention := Compatibility.BinaryAndSourceCompatible
 
 val commonDeps = Seq(slf4j, logback_classic % "test", logback_core % "test", scalatest)
 
