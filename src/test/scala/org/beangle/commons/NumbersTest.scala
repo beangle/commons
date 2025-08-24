@@ -22,8 +22,6 @@ import org.beangle.commons.lang.Numbers.*
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-import scala.runtime.stdLibPatches.Predef.assert
-
 class NumbersTest extends AnyFunSpec, Matchers {
 
   describe("Numbers") {
