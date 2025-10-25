@@ -56,7 +56,7 @@ object Order {
     for (order <- orders)
       if (order.ascending) buf.append(order.property).append(',')
       else buf.append(order.property).append(" desc,")
-    buf.substring(0, buf.length - 1).toString
+    buf.substring(0, buf.length - 1)
   }
 
   /** parse order string.

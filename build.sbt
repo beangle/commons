@@ -3,7 +3,7 @@ import org.beangle.parent.Settings.*
 import sbt.Keys.libraryDependencies
 
 ThisBuild / organization := "org.beangle.commons"
-ThisBuild / version := "5.6.32-SNAPSHOT"
+ThisBuild / version := "5.6.32"
 ThisBuild / scmInfo := Some(
   ScmInfo(
     url("https://github.com/beangle/commons"),
@@ -22,7 +22,6 @@ ThisBuild / developers := List(
 
 ThisBuild / description := "The Beangle Commons Library"
 ThisBuild / homepage := Some(url("http://beangle.github.io/commons/index.html"))
-ThisBuild / versionPolicyIntention := Compatibility.BinaryAndSourceCompatible
 
 val commonDeps = Seq(slf4j, logback_classic % "test", logback_core % "test", scalatest)
 
