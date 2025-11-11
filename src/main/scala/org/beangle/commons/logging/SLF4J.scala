@@ -36,7 +36,7 @@ object SLF4J {
    */
   def enableLogbackDevConfig(): Unit = {
     if (EnvProfile.isDevMode) {
-      if (null == System.getProperty("logger.configurationFile")) {
+      if (null == System.getProperty("logback.configurationFile")) {
         val devFile = getClass.getResource("/logback-dev.xml")
         if null != devFile then refreshLogbackConfig(devFile.openStream())
       }
