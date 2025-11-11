@@ -23,7 +23,7 @@ ThisBuild / developers := List(
 ThisBuild / description := "The Beangle Commons Library"
 ThisBuild / homepage := Some(url("http://beangle.github.io/commons/index.html"))
 
-val commonDeps = Seq(slf4j, logback_classic % "test", logback_core % "test", scalatest)
+val commonDeps = Seq(slf4j, scalatest, logback_classic % "optional", logback_core % "optional")
 
 lazy val root = (project in file("."))
   .settings(
@@ -32,6 +32,7 @@ lazy val root = (project in file("."))
     libraryDependencies ++= commonDeps,
     libraryDependencies += jexl3 % "optional",
     libraryDependencies += jcl_over_slf4j % "optional",
+    libraryDependencies += jul_to_slf4j % "optional",
     libraryDependencies += scalaxml % "optional",
     libraryDependencies += apache_commons_compress % "optional",
     libraryDependencies += "com.swoval" % "file-tree-views" % "2.1.12" % "optional"

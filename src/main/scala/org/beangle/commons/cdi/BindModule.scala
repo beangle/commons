@@ -19,7 +19,6 @@ package org.beangle.commons.cdi
 
 import org.beangle.commons.cdi.Binding.*
 import org.beangle.commons.lang.reflect.*
-import org.beangle.commons.lang.{JVM, Strings}
 
 import java.util as ju
 import scala.quoted.*
@@ -192,9 +191,7 @@ abstract class BindModule {
   protected def binding(): Unit
 
   final def devEnabled: Boolean = {
-    val profiles = System.getProperty(BindRegistry.ProfileProperty)
-    val enabled = null != profiles && Strings.split(profiles, ",").toSet.contains("dev")
-    enabled || JVM.isDebugMode
+    EnvProfile.devEnabled
   }
 
   private def buildInnerReference(clazz: Class[_]): ReferenceValue = {
