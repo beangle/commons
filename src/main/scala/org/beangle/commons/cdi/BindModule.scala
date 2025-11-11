@@ -191,7 +191,7 @@ abstract class BindModule {
   protected def binding(): Unit
 
   final def devEnabled: Boolean = {
-    EnvProfile.devEnabled
+    EnvProfile.isDevMode
   }
 
   private def buildInnerReference(clazz: Class[_]): ReferenceValue = {

@@ -21,7 +21,7 @@ import org.beangle.commons.lang.{JVM, Strings}
 
 object EnvProfile {
 
-  final def devEnabled: Boolean = {
+  final def isDevMode: Boolean = {
     val profiles = System.getProperty(BindRegistry.ProfileProperty)
     val enabled = null != profiles && Strings.split(profiles, ",").toSet.contains("dev")
     enabled || JVM.isDebugMode

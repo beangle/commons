@@ -27,18 +27,18 @@ import org.slf4j.bridge.SLF4JBridgeHandler
 
 import java.io.InputStream
 
+/** SLF4J日志辅助类
+ */
 @beta
 object SLF4J {
 
-  /** 在开发环境中，启用logback-dev.xml(如果存在)
+  /** 在开发环境中，如果存在logback-dev.xml,则启用该配置
    */
   def enableLogbackDevConfig(): Unit = {
-    if (EnvProfile.devEnabled) {
+    if (EnvProfile.isDevMode) {
       if (null == System.getProperty("logger.configurationFile")) {
         val devFile = getClass.getResource("/logback-dev.xml")
-        if (null != devFile) {
-          reloadLogbackConfig(devFile.openStream())
-        }
+        if null != devFile then refreshLogbackConfig(devFile.openStream())
       }
     }
   }
@@ -48,7 +48,7 @@ object SLF4J {
    * @param is
    * @return
    */
-  def reloadLogbackConfig(is: InputStream): Boolean = {
+  def refreshLogbackConfig(is: InputStream): Boolean = {
     try {
       val lc = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
       lc.reset()
@@ -63,10 +63,13 @@ object SLF4J {
     }
   }
 
-  /** 显式安装java logging到slf4j的桥接
+  /** 显式安装jul到slf4j的桥接
+   * 将java.util.logging日志使用导流到SLF4J上
    */
   def installJul2Sfl4j(): Unit = {
-    SLF4JBridgeHandler.removeHandlersForRootLogger()
-    SLF4JBridgeHandler.install()
+    if (!SLF4JBridgeHandler.isInstalled) {
+      SLF4JBridgeHandler.removeHandlersForRootLogger()
+      SLF4JBridgeHandler.install()
+    }
   }
 }
