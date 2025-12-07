@@ -59,11 +59,23 @@ final class Logger(val logger: JLogger) extends AnyVal {
   }
 
   def info(msg: => String): Unit = {
-    if (logger.isInfoEnabled) logger.info(msg)
+    logger.info(msg)
   }
 
-  def info(msg: => String, t: => Throwable): Unit = {
-    if (logger.isInfoEnabled) logger.info(msg, t)
+  def warn(msg: => String): Unit = {
+    logger.warn(msg)
+  }
+
+  def warn(msg: => String, t: => Throwable): Unit = {
+    logger.warn(msg, t)
+  }
+
+  def error(msg: => String): Unit = {
+    logger.error(msg)
+  }
+
+  def error(msg: => String, t: => Throwable): Unit = {
+    logger.error(msg, t)
   }
 
 }
