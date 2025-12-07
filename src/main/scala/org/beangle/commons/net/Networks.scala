@@ -21,6 +21,7 @@ import org.beangle.commons.collection.Collections
 
 import java.io.IOException
 import java.net.*
+import scala.annotation.nowarn
 
 object Networks {
 
@@ -28,6 +29,7 @@ object Networks {
 
   def uri(l: String): URI = URI.create(l)
 
+  @nowarn
   def url(context: URL, path: String): URL = {
     //context.toURI.resolve(path).toURL
     //error when protocol is jar:file:/C/users/some/file.txt
