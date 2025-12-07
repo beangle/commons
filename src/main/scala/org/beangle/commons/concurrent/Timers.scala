@@ -17,16 +17,13 @@
 
 package org.beangle.commons.concurrent
 
-import org.beangle.commons.logging.Logging
-
 import java.util.{Timer, TimerTask}
 
-object Timers extends Logging {
+object Timers {
 
   def start(name: String, intervalSeconds: Int, tasks: Runnable*): Unit = {
-    logger.info(s"Starting $name Daemon,Running within every $intervalSeconds seconds.")
     val daemon = new Timers(tasks)
-    new Timer(s"$name Timers", true).schedule(daemon,
+    new Timer(s"$name", true).schedule(daemon,
       new java.util.Date(System.currentTimeMillis), intervalSeconds * 1000)
   }
 

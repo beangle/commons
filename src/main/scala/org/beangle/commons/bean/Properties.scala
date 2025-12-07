@@ -23,7 +23,6 @@ import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.reflect.TypeInfo.OptionType
 import org.beangle.commons.lang.reflect.{BeanInfo, BeanInfos, TypeInfo}
-import org.beangle.commons.logging.Logging
 
 import java.lang.reflect.Array as Jarray
 import scala.reflect.ClassTag
@@ -48,7 +47,7 @@ object Properties {
   def writables(clazz: Class[_]): Set[String] = Default.writables(clazz)
 }
 
-class Properties(conversion: Conversion) extends Logging {
+class Properties(conversion: Conversion) {
 
   private val resolver = new PropertyNameResolver()
 
@@ -140,9 +139,7 @@ class Properties(conversion: Conversion) extends Logging {
   private def getSimpleProperty(bean: Any, name: String): Any =
     BeanInfos.get(bean.getClass).getGetter(name) match {
       case Some(method) => method.invoke(bean)
-      case _ =>
-        logger.error("Cannot find " + Strings.capitalize(name) + " Getter in " + bean.getClass)
-        null
+      case _ => throw new RuntimeException("Cannot find " + Strings.capitalize(name) + " Getter in " + bean.getClass)
     }
 
   private def getPropertyOfMap(bean: Any, propertyName: String): Any = {

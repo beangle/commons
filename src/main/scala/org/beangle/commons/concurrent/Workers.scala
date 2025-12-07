@@ -17,8 +17,6 @@
 
 package org.beangle.commons.concurrent
 
-import org.beangle.commons.logging.Logging
-
 import java.util.concurrent.LinkedBlockingQueue
 
 object Workers {
@@ -32,7 +30,7 @@ object Workers {
     Tasks.start(new Work(loads, job), threads)
   }
 
-  class Work[T](payloads: LinkedBlockingQueue[T], job: T => Unit) extends Runnable, Logging {
+  class Work[T](payloads: LinkedBlockingQueue[T], job: T => Unit) extends Runnable {
 
     def run(): Unit = {
       while (!payloads.isEmpty) {
@@ -40,8 +38,7 @@ object Workers {
           val pk = payloads.poll()
           if (null != pk) job(pk)
         } catch {
-          case e: IndexOutOfBoundsException =>
-          case e: Exception => logger.error("Error in job execution.", e)
+          case e: Exception =>
         }
       }
     }

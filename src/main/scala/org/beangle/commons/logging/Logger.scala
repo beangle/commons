@@ -25,49 +25,8 @@ import scala.annotation.elidable.*
 /** Slf4j Logger delegate.
  */
 object Logger {
-  def apply(clazz: Class[_]): Logger =
+  def apply(clazz: Class[_]): Logger = {
     new Logger(LoggerFactory getLogger clazz)
-
-  sealed trait LevelLogger extends Any {
-    def apply(msg: => String): Unit
-
-    def apply(msg: => String, t: Throwable): Unit
-  }
-
-  private[logging] object ZeroLogger extends LevelLogger {
-    @inline def apply(msg: => String): Unit = {}
-
-    @inline def apply(msg: => String, t: Throwable): Unit = {}
-  }
-
-  final class TraceLogger private[logging](val logger: JLogger) extends AnyVal with LevelLogger {
-    @inline def apply(msg: => String): Unit = logger.trace(msg)
-
-    @inline def apply(msg: => String, t: Throwable): Unit = logger.trace(msg, t)
-  }
-
-  final class DebugLogger private[logging](val logger: JLogger) extends AnyVal with LevelLogger {
-    @inline def apply(msg: => String): Unit = logger.debug(msg)
-
-    @inline def apply(msg: => String, t: Throwable): Unit = logger.debug(msg, t)
-  }
-
-  final class InfoLogger private[logging](val logger: JLogger) extends AnyVal with LevelLogger {
-    @inline def apply(msg: => String): Unit = logger.info(msg)
-
-    @inline def apply(msg: => String, t: Throwable): Unit = logger.info(msg, t)
-  }
-
-  final class WarnLogger private[logging](val logger: JLogger) extends AnyVal with LevelLogger {
-    @inline def apply(msg: => String): Unit = logger.warn(msg)
-
-    @inline def apply(msg: => String, t: Throwable): Unit = logger.warn(msg, t)
-  }
-
-  final class ErrorLogger private[logging](val logger: JLogger) extends AnyVal with LevelLogger {
-    @inline def apply(msg: => String): Unit = logger.error(msg)
-
-    @inline def apply(msg: => String, t: Throwable): Unit = logger.error(msg, t)
   }
 }
 
@@ -80,48 +39,31 @@ final class Logger(val logger: JLogger) extends AnyVal {
   @inline def isWarnEnabled: Boolean = logger.isWarnEnabled
 
   @elidable(FINEST)
-  def trace(msg: => String): Unit = if (logger.isTraceEnabled) logger.trace(msg)
-
-  @elidable(FINEST)
-  def trace(msg: => String, t: => Throwable): Unit = if (logger.isTraceEnabled) logger.trace(msg, t)
-
-  @elidable(FINE)
-  def debug(msg: => String): Unit = if (logger.isDebugEnabled) logger.debug(msg)
-
-  @elidable(FINE)
-  def debug(msg: => String, t: => Throwable): Unit = if (logger.isDebugEnabled) logger.debug(msg, t)
-
-  def info(msg: => String): Unit = if (logger.isInfoEnabled) logger.info(msg)
-
-  def info(msg: => String, t: => Throwable): Unit = if (logger.isInfoEnabled) logger.info(msg, t)
-
-  def warn(msg: => String): Unit = if (logger.isWarnEnabled) logger.warn(msg)
-
-  def warn(msg: => String, t: => Throwable): Unit = if (logger.isWarnEnabled) logger.warn(msg, t)
-
-  def error(msg: => String): Unit = if (logger.isErrorEnabled) logger.error(msg)
-
-  def error(msg: => String, t: => Throwable): Unit = if (logger.isErrorEnabled) logger.error(msg, t)
-
-  import Logger.*
-
-  def apply(level: LogLevel): LevelLogger = {
-    level match {
-      case Trace => if (logger.isTraceEnabled) new TraceLogger(logger) else ZeroLogger
-      case Debug => if (logger.isDebugEnabled) new DebugLogger(logger) else ZeroLogger
-      case Info => if (logger.isInfoEnabled) new InfoLogger(logger) else ZeroLogger
-      case Warn => if (logger.isWarnEnabled) new WarnLogger(logger) else ZeroLogger
-      case Error => if (logger.isErrorEnabled) new ErrorLogger(logger) else ZeroLogger
-    }
+  def trace(msg: => String): Unit = {
+    if (logger.isTraceEnabled) logger.trace(msg)
   }
 
-  @inline def apply(lvl: Trace.type): LevelLogger = if (logger.isTraceEnabled) new TraceLogger(logger) else ZeroLogger
+  @elidable(FINEST)
+  def trace(msg: => String, t: => Throwable): Unit = {
+    if (logger.isTraceEnabled) logger.trace(msg, t)
+  }
 
-  @inline def apply(lvl: Debug.type): LevelLogger = if (logger.isDebugEnabled) new DebugLogger(logger) else ZeroLogger
+  @elidable(FINE)
+  def debug(msg: => String): Unit = {
+    if (logger.isDebugEnabled) logger.debug(msg)
+  }
 
-  @inline def apply(lvl: Info.type): LevelLogger = if (logger.isInfoEnabled) new InfoLogger(logger) else ZeroLogger
+  @elidable(FINE)
+  def debug(msg: => String, t: => Throwable): Unit = {
+    if (logger.isDebugEnabled) logger.debug(msg, t)
+  }
 
-  @inline def apply(lvl: Warn.type): LevelLogger = if (logger.isWarnEnabled) new WarnLogger(logger) else ZeroLogger
+  def info(msg: => String): Unit = {
+    if (logger.isInfoEnabled) logger.info(msg)
+  }
 
-  @inline def apply(lvl: Error.type): LevelLogger = if (logger.isErrorEnabled) new ErrorLogger(logger) else ZeroLogger
+  def info(msg: => String, t: => Throwable): Unit = {
+    if (logger.isInfoEnabled) logger.info(msg, t)
+  }
+
 }

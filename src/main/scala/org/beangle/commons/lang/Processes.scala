@@ -18,7 +18,6 @@
 package org.beangle.commons.lang
 
 import org.beangle.commons.io.IOs
-import org.beangle.commons.logging.Logging
 
 import java.io.{BufferedReader, InputStreamReader}
 import java.nio.file.{Files, Path, Paths}
@@ -26,7 +25,7 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.{CompletableFuture, TimeUnit, TimeoutException}
 import java.util.regex.{Matcher, Pattern}
 
-object Processes extends Logging {
+object Processes {
 
   val DefaultWaitSeconds = 60
 
@@ -67,16 +66,14 @@ object Processes extends Logging {
       Option(result)
     } else {
       if Processes.isExecutable(path) then Some(Paths.get(path).toAbsolutePath)
-      else
-        logger.error(s"${envName}:${path} is not an executable file.")
-        None
+      else None
     }
   }
 
   /** 关闭进程
    *
-   * @param process
-   * @param waitSeconds
+   * @param process process
+   * @param waitSeconds wait seconds
    */
   def close(process: Process, waitSeconds: Int = DefaultWaitSeconds): Int = {
     if (process != null && process.isAlive) {
@@ -130,11 +127,9 @@ object Processes extends Logging {
     catch {
       case e: TimeoutException =>
         close(readLineThread)
-        logger.debug("Failed while waiting for starting: Timeout expired! output: " + output.get)
         None
       case e: Exception =>
         close(readLineThread)
-        logger.error("Failed while waiting for starting.", e)
         None
     }
   }

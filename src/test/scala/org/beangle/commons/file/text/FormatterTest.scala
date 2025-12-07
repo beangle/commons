@@ -17,11 +17,10 @@
 
 package org.beangle.commons.file.text
 
-import org.beangle.commons.logging.Logging
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class FormatterTest extends AnyFunSpec, Matchers, Logging {
+class FormatterTest extends AnyFunSpec, Matchers {
 
   val lines = "package org.beangle.commons.file\r\n\r\n\t/**\r\n\n\n\n\n\n \t*\ttab2space,fixcrlf,trim_trailing_whitespace,insert_final_newline{fixlast}  \t  \r\n \t*/ \t\r\npackage object text {"
   describe("Formatter") {

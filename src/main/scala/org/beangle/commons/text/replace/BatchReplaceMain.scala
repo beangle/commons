@@ -20,29 +20,28 @@ package org.beangle.commons.text.replace
 import org.beangle.commons.io.Files
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.reflect.Reflections
-import org.beangle.commons.logging.Logging
 
 import java.io.{File, FileOutputStream, FilenameFilter, OutputStreamWriter}
 import java.nio.charset.Charset
 import scala.collection.mutable
 
-object BatchReplaceMain extends Logging {
+object BatchReplaceMain {
 
   /** Usage:BatchReplaceMain dir patternfile encoding
-    */
+   */
   def main(args: Array[String]): Unit = {
     if (args.length < 2) {
-      logger.info("using BatchReplaceMain dir patternfile encoding")
+      log("using BatchReplaceMain dir patternfile encoding")
       return
     }
     val dir = args(0)
     if (!new File(dir).exists()) {
-      logger.info(dir + " not a valid file or directory")
+      log(dir + " not a valid file or directory")
       return
     }
     val properties = args(1)
     if (!new File(properties).exists())
-      logger.info(properties + " not valid file or directory")
+      log(properties + " not valid file or directory")
     var charset: Charset = null
     if (args.length >= 3)
       charset = Charset.forName(args(2))
@@ -69,13 +68,13 @@ object BatchReplaceMain extends Logging {
   }
 
   /** replaceFile.
-    */
+   */
   def replaceFile(fileName: String, profiles: Map[String, List[Replacer]], charset: Charset): Unit = {
     val file = new File(fileName)
     if (file.isFile && !file.isHidden) {
       val replacers = profiles.get(Strings.substringAfterLast(fileName, ".")).orNull
       if (null == replacers) return
-        logger.info("processing " + fileName)
+      log("processing " + fileName)
       var filecontent = Files.readString(file, charset)
       filecontent = Replacer.process(filecontent, replacers)
       writeToFile(filecontent, fileName, charset)
@@ -98,12 +97,16 @@ object BatchReplaceMain extends Logging {
   }
 
   /** writeToFile.
-    */
+   */
   def writeToFile(str: String, fileName: String, charset: Charset): Unit = {
     val writer =
       if null == charset then new OutputStreamWriter(new FileOutputStream(fileName))
       else new OutputStreamWriter(new FileOutputStream(fileName), charset.name())
     writer.write(str)
     writer.close()
+  }
+
+  private def log(msg: String): Unit = {
+    println(msg)
   }
 }

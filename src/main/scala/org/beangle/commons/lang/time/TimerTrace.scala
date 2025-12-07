@@ -17,42 +17,40 @@
 
 package org.beangle.commons.lang.time
 
-import org.beangle.commons.logging.Logging
-
-object TimerTrace extends Logging {
+object TimerTrace {
 
   protected var curStack: ThreadLocal[TimerStack] = new ThreadLocal[TimerStack]()
 
   /** System property that controls whether this timer should be used or not. Set to "true" activates
-    * the timer. Set to "false" to disactivate.
-    */
+   * the timer. Set to "false" to disactivate.
+   */
   val ACTIVATE_PROPERTY = "beangle.profile.activate"
 
   /** System property that controls the min time, that if exceeded will cause a log (at INFO level)
-    * to be created.
-    */
+   * to be created.
+   */
   val MIN_TIME = "beangle.profile.mintime"
 
   /** Initialized in a static block, it can be changed at runtime by calling setActive(...)
-    */
+   */
   var active: Boolean = "true".equalsIgnoreCase(System.getProperty(ACTIVATE_PROPERTY))
 
   /** Get the min time for this profiling, it searches for a System property
-    * 'beangle.profile.mintime' and default to 0.
-    */
+   * 'beangle.profile.mintime' and default to 0.
+   */
   private var mintime: Int = _
 
-  try
+  try {
     mintime = Integer.parseInt(System.getProperty(MIN_TIME, "0"))
-  catch {
+  } catch {
     case _: NumberFormatException =>
   }
 
   /** Create and start a performance profiling with the <code>name</code> given. Deal with
-    * profile hierarchy automatically, so caller don't have to be concern about it.
-    *
-    * @param name profile name
-    */
+   * profile hierarchy automatically, so caller don't have to be concern about it.
+   *
+   * @param name profile name
+   */
   def start(name: String): Unit = {
     if (!active) return
     val root = new TimerNode(name, System.currentTimeMillis())
@@ -61,8 +59,8 @@ object TimerTrace extends Logging {
   }
 
   /** End a preformance profiling with the <code>name</code> given. Deal with
-    * profile hierarchy automatically, so caller don't have to be concern about it.
-    */
+   * profile hierarchy automatically, so caller don't have to be concern about it.
+   */
   def end(): Unit = {
     if (!active) return
     val stack = curStack.get
@@ -72,39 +70,31 @@ object TimerTrace extends Logging {
       val parent = stack.peek()
       val total = currentNode.end()
       if (parent == null) {
-        printTimes(currentNode)
         curStack.set(null)
       } else if (total > mintime) parent.children += currentNode
     }
   }
 
-  /** Do a log (at INFO level) of the time taken for this particular profiling.
-    *
-    * @param currentTimer profiling timer bean
-    */
-  private def printTimes(currentTimer: TimerNode): Unit =
-    logger.info(currentTimer.getPrintable)
-
   /** Get the min time for this profiling, it searches for a System property
-    * 'beangle.profile.mintime' and default to 0.
-    *
-    * @return long
-    */
+   * 'beangle.profile.mintime' and default to 0.
+   *
+   * @return long
+   */
   def getMinTime: Int = mintime
 
   /** Change mintime
-    *
-    * @param mintime
-    */
+   *
+   * @param mintime
+   */
   def setMinTime(mintime: Int): Unit = {
     System.setProperty(MIN_TIME, String.valueOf(mintime))
     TimerTrace.mintime = mintime
   }
 
   /** Turn profiling on or off.
-    *
-    * @param active
-    */
+   *
+   * @param active
+   */
   def setActive(active: Boolean): Unit = {
     if (active) System.setProperty(ACTIVATE_PROPERTY, "true") else System.clearProperty(ACTIVATE_PROPERTY)
     TimerTrace.active = active

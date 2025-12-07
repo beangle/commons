@@ -18,14 +18,13 @@
 package org.beangle.commons.io
 
 import org.beangle.commons.lang.Charsets.UTF_8
-import org.beangle.commons.logging.Logging
 
 import java.io.*
 import java.net.URL
 import java.nio.charset.Charset
 import java.util as ju
 
-object IOs extends Logging {
+object IOs {
 
   private val defaultBufferSize = 1024 * 4
 
@@ -113,12 +112,7 @@ object IOs extends Logging {
    */
   def readProperties(url: URL): Map[String, String] = {
     if null == url then Map.empty
-    else
-      try readProperties(url.openStream())
-      catch case e: Exception => {
-        logger.info("load " + url + " error:" + e.getMessage)
-        Map.empty
-      }
+    else readProperties(url.openStream())
   }
 
   /** Read key value properties
@@ -142,12 +136,7 @@ object IOs extends Logging {
    */
   def readJavaProperties(url: URL): Map[String, String] = {
     if null == url then Map.empty
-    else
-      try readJavaProperties(url.openStream())
-      catch case e: Exception => {
-        logger.info("load " + url + " error:" + e.getMessage)
-        Map.empty
-      }
+    else readJavaProperties(url.openStream())
   }
 
   /** Read java key value properties

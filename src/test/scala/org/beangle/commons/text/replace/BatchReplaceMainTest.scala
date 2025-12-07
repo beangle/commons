@@ -17,13 +17,12 @@
 
 package org.beangle.commons.text.replace
 
-import org.beangle.commons.logging.Logging
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 import java.util.regex.Pattern
 
-class BatchReplaceMainTest extends AnyFunSpec, Matchers, Logging {
+class BatchReplaceMainTest extends AnyFunSpec, Matchers {
   describe("BatchReplace") {
     it("Test batch replace expression") {
       val clause = "<#include \"/template/head.ftl\"/>"
@@ -54,6 +53,6 @@ class BatchReplaceMainTest extends AnyFunSpec, Matchers, Logging {
     }
 
     def debug(msg: Any): Unit =
-      logger.debug(String.valueOf(msg))
+      println(String.valueOf(msg))
   }
 }

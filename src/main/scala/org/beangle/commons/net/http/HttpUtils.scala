@@ -20,7 +20,6 @@ package org.beangle.commons.net.http
 import org.beangle.commons.codec.binary.Base64
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Charsets
-import org.beangle.commons.logging.Logging
 
 import java.io.*
 import java.net.*
@@ -28,7 +27,7 @@ import java.net.HttpURLConnection.*
 import java.nio.charset.Charset
 import scala.collection.mutable
 
-object HttpUtils extends Logging {
+object HttpUtils {
 
   private val Timeout = 10 * 1000
 
@@ -203,7 +202,7 @@ object HttpUtils extends Logging {
       if (null != conn) conn.disconnect()
   }
 
-  def download(c: URLConnection, location: File): Unit = {
+  def download(c: URLConnection, location: File): Boolean = {
     val conn = followRedirect(c, "GET")
     location.getParentFile.mkdirs()
     var input: InputStream = null
@@ -225,9 +224,9 @@ object HttpUtils extends Logging {
       output = null
       if (location.exists()) location.delete()
       file.renameTo(location)
+      true
     } catch {
-      case e: Throwable =>
-        logger.warn(s"Cannot download file ${location}")
+      case e: Throwable => false
     }
     finally {
       IOs.close(input, output)
@@ -235,7 +234,6 @@ object HttpUtils extends Logging {
   }
 
   private[this] def error(url: URL, e: Exception): Response = {
-    logger.info("Cannot open url " + url + " " + e.getMessage)
     Response(404, e.getMessage)
   }
 

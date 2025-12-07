@@ -20,7 +20,6 @@ package org.beangle.commons.lang.testbean
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.annotation.{default_value, description, noreflect}
-import org.beangle.commons.logging.Logging
 
 import java.beans.Transient
 
@@ -176,7 +175,7 @@ trait Factory[T] {
   def result: T
 }
 
-class LongFactory extends Factory[Long] with Logging {
+class LongFactory extends Factory[Long] {
   def result: Long = 9L
 
   @noreflect

@@ -18,20 +18,18 @@
 package org.beangle.commons.lang.reflect
 
 import org.beangle.commons.collection.Collections
-import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.Strings.*
 import org.beangle.commons.lang.reflect.BeanInfo.*
-import org.beangle.commons.logging.Logging
 
 import java.lang.Character.isUpperCase
 import java.lang.reflect.{Method, Modifier}
 import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
 
-object BeanInfo extends Logging {
+object BeanInfo {
 
   /** Ignore java object and scala case class methods
-    */
+   */
   private val ignores = Set("hashCode", "toString", "wait", "clone", "equals", "getClass", "notify", "notifyAll") ++
     Set("apply", "unApply", "canEqual")
   private val caseIgnores = Set("productArity", "productIterator", "productPrefix", "productElement", "productElementName", "productElementNames", "copy")
@@ -58,13 +56,13 @@ object BeanInfo extends Logging {
     override def compare(o: MethodInfo): Int = this.method.getName.compareTo(o.method.getName)
 
     /** check this method if is preferred over given method
-      *
-      * @param o
-      * @return
-      */
+     *
+     * @param o
+     * @return
+     */
     def isOver(o: MethodInfo): Boolean = {
       if o != this && o.method.getName == this.method.getName && o.parameters.size == this.parameters.size then
-      //primary type over Object,but Object.isAssignableFrom(Int) is false
+        //primary type over Object,but Object.isAssignableFrom(Int) is false
         if o.method.getReturnType == classOf[AnyRef] || o.method.getReturnType.isAssignableFrom(this.method.getReturnType) then
           val ps = o.method.getParameterTypes
           val paramTypeMatch = parameters.indices.forall { i => ps(i) == classOf[AnyRef] || ps(i).isAssignableFrom(parameters(i).typeinfo.clazz) }
@@ -131,7 +129,7 @@ object BeanInfo extends Logging {
     }
 
     /** Return this method is property read method (true,name) or write method(false,name) or None.
-      */
+     */
     def findAccessor(method: Method): Option[Tuple2[Boolean, String]] = {
       val name = method.getName
       val parameterTypes = method.getParameterTypes
@@ -157,10 +155,10 @@ object BeanInfo extends Logging {
     }
 
     /** filter bridge method and superclass method with same name and compatible signature
-      *
-      * @param methods
-      * @return
-      */
+     *
+     * @param methods
+     * @return
+     */
     def filterSameNames(methods: Iterable[MethodInfo]): collection.Seq[MethodInfo] = {
       if (methods.size == 1) {
         methods.toSeq
@@ -197,9 +195,9 @@ object BeanInfo extends Logging {
   import Builder.*
 
   /** ClassInfo Builder
-    *
-    * @param clazz
-    */
+   *
+   * @param clazz
+   */
   class Builder(val clazz: Class[_]) {
     private val fieldInfos = new mutable.HashMap[String, TypeInfo]
     //head will be primary constructor
