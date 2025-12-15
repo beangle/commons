@@ -17,8 +17,7 @@
 
 package org.beangle.commons.lang
 
-import java.net.{InetAddress, NetworkInterface, UnknownHostException}
-import scala.collection.mutable
+import java.util as ju
 
 /** System information
  *
@@ -27,150 +26,102 @@ import scala.collection.mutable
  */
 object SystemInfo {
 
-  private def sysProperties(): Map[String, String] = {
-    val origin = new mutable.HashMap[String, String]
-    val props = System.getProperties
-    val enumer = props.propertyNames
-    while (enumer.hasMoreElements()) {
-      val name = enumer.nextElement().asInstanceOf[String]
-      origin.put(name, props.getProperty(name))
-    }
-    origin.toMap
+  def properties: collection.Map[String, String] = {
+    import scala.jdk.javaapi.CollectionConverters.asScala
+    asScala(System.getProperties)
   }
 
-  val properties = sysProperties()
+  def os: Os = new Os(System.getProperties)
 
-  val os = new Os(properties)
+  def user: User = new User(System.getProperties)
 
-  val user = new User(properties)
+  def lang: Lang = new Lang(System.getProperties)
 
-  val java = new Java(properties)
+  def jvm: Jvm = new Jvm(System.getProperties)
 
-  val jvm = new Jvm(properties)
-
-  val javaSpec = new JavaSpec(properties)
-
-  val jvmSpec = new JvmSpec(properties)
-
-  val jre = new JavaRuntime(properties)
+  def jre: JavaRuntime = new JavaRuntime(System.getProperties)
 
   def tmpDir: String = System.getProperty("java.io.tmpdir")
 
-  def host: Host = new Host()
+  class User(props: ju.Properties) {
 
-  class Host {
+    def name: String = props.getProperty("user.name")
 
-    def hostname: String =
-      try
-        InetAddress.getLocalHost.getHostName
-      catch {
-        case e: UnknownHostException => "unknownhost"
-      }
+    def home: String = props.getProperty("user.home")
 
-    def addresses: Map[String, List[String]] = {
-      val addresses = new mutable.HashMap[String, List[String]]
+    /** work dir */
+    def dir: String = props.getProperty("user.dir")
 
-      try {
-        val e = NetworkInterface.getNetworkInterfaces
-        while (e.hasMoreElements) {
-          val networkInterface = e.nextElement()
-          val name = networkInterface.getDisplayName
-          val e2 = networkInterface.getInetAddresses
-          while (e2.hasMoreElements)
-            addresses += (name -> (e2.nextElement().getHostAddress :: addresses.getOrElse(name, Nil)))
-        }
-      } catch {
-        case e: Exception =>
-      }
-      addresses.toMap
+    def language: String = props.getProperty("user.language")
+
+    def country: String = {
+      props.getProperty("user.country", props.get("user.region").asInstanceOf[String])
     }
   }
 
-  class User(properties: Map[String, String]) {
+  class JavaRuntime(props: ju.Properties) {
 
-    val name: String = properties("user.name")
+    def name: String = props.getProperty("java.runtime.name")
 
-    val home: String = properties("user.home")
+    def version: String = props.getProperty("java.runtime.version")
 
-    val dir: String = properties("user.dir")
+    def home: String = props.getProperty("java.home")
 
-    val language: String = properties("user.language")
+    def classpath: String = props.getProperty("java.class.path")
 
-    val country: String = properties.get("user.country") match {
-      case Some(c) => c
-      case _ => properties.get("user.region").orNull
-    }
+    def classVersion: String = props.getProperty("java.class.version")
+
+    def libraryPath: String = props.getProperty("java.library.path")
+
+    def tmpDir: String = props.getProperty("java.io.tmpdir")
+
+    def fileEncoding: String = props.getProperty("file.encoding")
   }
 
-  class JavaRuntime(properties: Map[String, String]) {
+  class Jvm(props: ju.Properties) {
 
-    val name = properties("java.runtime.name")
+    def name: String = props.getProperty("java.vm.name")
 
-    val version = properties("java.runtime.version")
+    def version: String = props.getProperty("java.vm.version")
 
-    val home = properties("java.home")
+    def vendor: String = props.getProperty("java.vm.vendor")
 
-    val classpath = properties("java.class.path")
+    def info: String = props.getProperty("java.vm.info")
 
-    val classVersion = properties("java.class.version")
+    def specName: String = props.getProperty("java.vm.specification.name")
 
-    val libraryPath = properties("java.library.path")
+    def specVersion: String = props.getProperty("java.vm.specification.version")
 
-    val tmpDir = properties("java.io.tmpdir")
-
-    val fileEncoding = properties("file.encoding")
+    def spacVendor: String = props.getProperty("java.vm.specification.vendor")
   }
 
-  class JvmSpec(properties: Map[String, String]) {
+  class Lang(props: ju.Properties) {
 
-    val name = properties("java.vm.specification.name")
+    def version: String = props.getProperty("java.version")
 
-    val version = properties("java.vm.specification.version")
+    def vendor: String = props.getProperty("java.vendor")
 
-    val vendor = properties("java.vm.specification.vendor")
+    def vendorUrl: String = props.getProperty("java.vendor.url")
+
+    def specName: String = props.getProperty("java.specification.name")
+
+    def specVersion: String = props.getProperty("java.specification.version")
+
+    def specVendor: String = props.getProperty("java.specification.vendor")
   }
 
-  class JavaSpec(properties: Map[String, String]) {
+  class Os(props: ju.Properties) {
 
-    val name = properties("java.specification.name")
+    def name: String = props.getProperty("os.name")
 
-    val version = properties("java.specification.version")
+    def version: String = props.getProperty("os.version")
 
-    val vendor = properties("java.specification.vendor")
-  }
+    def arch: String = props.getProperty("os.arch")
 
-  class Jvm(properties: Map[String, String]) {
+    def fileSeparator: String = props.getProperty("file.separator")
 
-    val name = properties("java.vm.name")
+    def lineSeparator: String = props.getProperty("line.separator")
 
-    val version = properties("java.vm.version")
-
-    val vendor = properties("java.vm.vendor")
-
-    val info = properties("java.vm.info")
-  }
-
-  class Java(properties: Map[String, String]) {
-
-    val version = properties("java.version")
-
-    val vendor = properties("java.vendor")
-
-    val vendorUrl = properties("java.vendor.url")
-  }
-
-  class Os(properties: Map[String, String]) {
-
-    val name = properties("os.name")
-
-    val version = properties("os.version")
-
-    val arch = properties("os.arch")
-
-    val fileSeparator = properties("file.separator")
-
-    val lineSeparator = properties("line.separator")
-
-    val pathSeparator = properties("path.separator")
+    def pathSeparator: String = props.getProperty("path.separator")
   }
 }

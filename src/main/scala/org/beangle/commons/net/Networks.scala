@@ -38,16 +38,42 @@ object Networks {
 
   def openURL(l: String): URLConnection = url(l).openConnection()
 
-  def localIPs: Set[String] = {
+  def hostname: String = {
+    try
+      InetAddress.getLocalHost.getHostName
+    catch {
+      case e: UnknownHostException => "unknownhost"
+    }
+  }
+
+  def ipv4: Set[String] = {
+    addresses(1)
+  }
+
+  def ipv6: Set[String] = {
+    addresses(2)
+  }
+
+  def addresses(family: Int = 0): Set[String] = {
     val niEnum = NetworkInterface.getNetworkInterfaces
-    val ips = Collections.newBuffer[String]("127.0.0.1")
+    val ips = Collections.newBuffer[String]
+    family match {
+      case 1 => ips.addOne("127.0.0.0.1")
+      case 2 => ips.addOne("::1")
+      case _ => ips.addOne("127.0.0.0.1").addOne("::1")
+    }
     while (niEnum.hasMoreElements) {
       val ni = niEnum.nextElement()
       if (ni.isUp && !ni.isLoopback) {
         val ipEnum = ni.getInetAddresses
         while (ipEnum.hasMoreElements) {
           ipEnum.nextElement() match {
-            case ip: Inet4Address => ips += ip.getHostAddress
+            case ip: InetAddress =>
+              if (family == 1 && ip.isInstanceOf[Inet4Address] ||
+                family == 2 && ip.isInstanceOf[Inet6Address] ||
+                family == 0) {
+                ips += ip.getHostAddress
+              }
             case _ =>
           }
         }

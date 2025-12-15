@@ -17,7 +17,7 @@
 
 package org.beangle.commons.codec.binary
 
-import org.beangle.commons.cdi.PropertyProcessor
+import org.beangle.commons.cdi.{PBEPropertyResolver, PropertyResolver}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.must.Matchers
 
@@ -28,16 +28,15 @@ class PBETest extends AnyFunSpec, Matchers {
 
     it("encrypt and decrypt") {
       val pbe = PBEEncryptor.random(encryptKey)
-      println(pbe.encrypt(password))
       assert(password == pbe.decrypt("Rr/iQsiRlgm/QWpa17YYVZmEPbU0RoZ6F0f4OU3u5DM="))
     }
 
     it("PBEDecode process") {
       System.setProperty("jasypt.encryptor.password", encryptKey)
-      val decoder = PropertyProcessor.env()
-      val decryptedPwd = decoder.decrypt("ENC(Rr/iQsiRlgm/QWpa17YYVZmEPbU0RoZ6F0f4OU3u5DM=)")
+      val decoder = PBEPropertyResolver.jasypt()
+      val decryptedPwd = decoder.resolve("ENC(Rr/iQsiRlgm/QWpa17YYVZmEPbU0RoZ6F0f4OU3u5DM=)")
       assert(password == decryptedPwd)
-      assert("+some_test" == decoder.decrypt("+some_test"))
+      assert("+some_test" == decoder.resolve("+some_test"))
     }
 
     it("generate salt and iv") {

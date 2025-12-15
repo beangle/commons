@@ -59,6 +59,12 @@ object Files {
     else new File(pwd + / + path)
   }
 
+  /** 展开波浪线
+   * ~/表示用户目录，~+表示工作目录workdir
+   *
+   * @param path
+   * @return
+   */
   def expandTilde(path: String): String = {
     val p = fileName(path)
     if p.startsWith("~" + /) then SystemInfo.user.home + p.substring(1)
