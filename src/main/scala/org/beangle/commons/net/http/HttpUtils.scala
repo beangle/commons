@@ -65,8 +65,8 @@ object HttpUtils {
   @scala.annotation.tailrec
   def followRedirect(c: URLConnection, method: String): HttpURLConnection = {
     val conn = c.asInstanceOf[HttpURLConnection]
-    requestBy(conn, method)
     conn.setInstanceFollowRedirects(false)
+    requestBy(conn, method)
     Https.noverify(conn)
     val rc = conn.getResponseCode
     rc match {
@@ -92,12 +92,10 @@ object HttpUtils {
     var conn: HttpURLConnection = null
     try {
       conn = url.openConnection().asInstanceOf[HttpURLConnection]
-      requestBy(conn, method)
-      conn.setUseCaches(false)
       conn.setDoOutput(false)
-      Https.noverify(conn)
+      conn.setUseCaches(false)
       f foreach (x => x(conn))
-
+      conn = followRedirect(conn, method)
       if (conn.getResponseCode == HTTP_OK) {
         val bos = new ByteArrayOutputStream
         IOs.copy(conn.getInputStream, bos)
@@ -129,11 +127,10 @@ object HttpUtils {
     var in: BufferedReader = null
     try {
       conn = url.openConnection().asInstanceOf[HttpURLConnection]
-      requestBy(conn, method)
       conn.setDoOutput(false)
       conn.setUseCaches(false)
-      Https.noverify(conn)
       f foreach (x => x(conn))
+      conn = followRedirect(conn, method)
       if conn.getResponseCode == HTTP_OK then
         in = new BufferedReader(new InputStreamReader(conn.getInputStream, encoding))
         var line: String = in.readLine()
