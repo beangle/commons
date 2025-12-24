@@ -37,9 +37,10 @@ object WinCmd {
    * @return (exit code,output)
    */
   def exec(args: String*): (Int, collection.Seq[String]) = {
+    require(args.nonEmpty, "Need command")
     val newArgs = Collections.newBuffer[String]
     //如果是个绝对地址，则直接执行，不用放在cmd环境中执行。
-    if (!new File(args.head).exists()) {
+    if (!isFile(args.head)) {
       newArgs.addOne("cmd")
       newArgs.addOne("/c")
     }
@@ -121,5 +122,13 @@ object WinCmd {
       }
       paths.headOption
     }
+  }
+
+  /** 判断一个命令是否是个可执行文件
+   *
+   * @param command cmd
+   */
+  private def isFile(command: String): Boolean = {
+    (command.contains('/') || command.contains('\\')) && new File(command).exists()
   }
 }
