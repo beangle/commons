@@ -18,84 +18,64 @@
 package org.beangle.commons.os
 
 import org.beangle.commons.collection.Collections
-import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.{Processes, Strings}
+import org.beangle.commons.lang.{Charsets, Strings}
 
-import java.io.{BufferedReader, File, InputStreamReader}
 import java.nio.file.{Files, Path, Paths}
-import java.util.concurrent.{Executors, TimeUnit}
 import java.util.regex.Pattern
 
 /**
  * Window Command Utility
  */
-object WinCmd {
+object WinCmd extends Shell(Charsets.GBK) {
 
   /** Execute a command
    *
    * @param args command and args
    * @return (exit code,output)
    */
-  def exec(args: String*): (Int, collection.Seq[String]) = {
+  override def exec(args: String*): (Int, collection.Seq[String]) = {
     require(args.nonEmpty, "Need command")
-    val newArgs = Collections.newBuffer[String]
     //如果是个绝对地址，则直接执行，不用放在cmd环境中执行。
-    if (!isFile(args.head)) {
+    val newArgs = Collections.newBuffer[String]
+    if (!Shell.isFile(args.head)) {
       newArgs.addOne("cmd")
       newArgs.addOne("/c")
     }
     newArgs.addAll(args)
-    val processBuilder = new ProcessBuilder(newArgs.toSeq: _*)
-    processBuilder.redirectErrorStream(true)
-    val process = processBuilder.start()
-    val contents = Collections.newBuffer[String]
-
-    val executor = Executors.newSingleThreadExecutor
-    executor.submit(() => {
-      val inputStream = process.getInputStream
-      val reader = new BufferedReader(new InputStreamReader(inputStream, "GBK"))
-      val maxLine = 10000
-      try {
-        var line = reader.readLine
-        var lineNo = 1
-        while (line != null && lineNo <= maxLine) {
-          val path = line.trim
-          if (path.nonEmpty) contents.addOne(path)
-          line = reader.readLine
-          lineNo += 1
-        }
-        if (lineNo >= maxLine && null != line) {
-          contents.addOne("....")
-        }
-      } catch {
-        case e: Exception => contents.addOne(e.getMessage)
-      } finally {
-        IOs.close(inputStream, reader)
-      }
-    })
-
-    if (!process.waitFor(5, TimeUnit.SECONDS)) {
-      Processes.close(process)
-    }
-    executor.shutdown()
-    (process.exitValue(), contents)
+    execute(newArgs.toSeq: _*)
   }
 
-  def find(exename: String): Option[Path] = {
+  override def find(exename: String): Option[Path] = {
+    checkExeName(exename)
     findExeByWhere(exename).orElse(findExeFromRegistry(exename))
   }
 
+  override def killall(exename: String): Int = {
+    checkExeName(exename)
+    // /NH 隐藏表头，简化解析
+    val rs = execute("tasklist", "/FI", s"IMAGENAME eq $exename", "/NH")
+    val pids = rs._2.filter(_.startsWith(exename)).map(x => Strings.split(x, " ").apply(1).toInt)
+    kill(pids.toSeq: _*)
+    pids.size
+  }
+
+  override def kill(pids: Int*): Unit = {
+    for (pid <- pids) {
+      execute("taskkill", "/F", "/T", "/PID", pid.toString)
+    }
+  }
+
   private def findExeByWhere(exename: String): Option[Path] = {
-    val rs = exec("where", exename)
+    val rs = execute("where", exename)
     if (rs._1 > 0) {
       None
     } else {
       val outputs = rs._2
       val goods = outputs.filter { path =>
-        path.endsWith(exename) && !(path.contains("Temp")) && !path.contains("临时")
-      }
-      val file = Paths.get(goods.head)
-      Some(file).filter(x => Files.isRegularFile(x))
+        path.endsWith(exename) && !path.contains("Temp") && !path.contains("临时")
+      }.map(p => Paths.get(p))
+
+      goods.filter(p => Files.isRegularFile(p)).map(_.toRealPath()).headOption
     }
   }
 
@@ -124,11 +104,4 @@ object WinCmd {
     }
   }
 
-  /** 判断一个命令是否是个可执行文件
-   *
-   * @param command cmd
-   */
-  private def isFile(command: String): Boolean = {
-    (command.contains('/') || command.contains('\\')) && new File(command).exists()
-  }
 }

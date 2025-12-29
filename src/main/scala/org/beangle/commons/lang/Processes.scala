@@ -72,7 +72,7 @@ object Processes {
 
   /** 关闭进程
    *
-   * @param process process
+   * @param process     process
    * @param waitSeconds wait seconds
    */
   def close(process: Process, waitSeconds: Int = DefaultWaitSeconds): Int = {

@@ -22,27 +22,18 @@ import java.nio.charset.Charset
 object Charsets {
 
   /** US-ASCII: seven-bit ASCII, the Basic Latin block of the Unicode character set (ISO646-US).
-    */
+   */
   val US_ASCII: Charset = Charset.forName("US-ASCII")
 
-  /** ISO-8859-1: ISO Latin Alphabet Number 1 (ISO-LATIN-1).
-    */
+  /** ISO-8859-1: ISO Latin Alphabet Number 1 (ISO-LATIN-1). */
   val ISO_8859_1: Charset = Charset.forName("ISO-8859-1")
 
-  /** UTF-8: eight-bit UCS Transformation Format.
-    */
+  /** UTF-8: eight-bit UCS Transformation Format. */
   val UTF_8: Charset = Charset.forName("UTF-8")
 
-  /** UTF-16BE: sixteen-bit UCS Transformation Format, big-endian byte order.
-    */
-  val UTF_16BE: Charset = Charset.forName("UTF-16BE")
-
-  /** UTF-16LE: sixteen-bit UCS Transformation Format, little-endian byte order.
-    */
-  val UTF_16LE: Charset = Charset.forName("UTF-16LE")
-
-  /** UTF-16: sixteen-bit UCS Transformation Format, byte order identified by an optional
-    * byte-order-mark.
-    */
+  /** UTF-16: sixteen-bit UCS Transformation Format, byte order identified by an optional byte-order-mark. */
   val UTF_16: Charset = Charset.forName("UTF-16")
+
+  /** Chinese Internal Code Specification(Guo Biao Kuozhan) */
+  val GBK: Charset = Charset.forName("GBK")
 }

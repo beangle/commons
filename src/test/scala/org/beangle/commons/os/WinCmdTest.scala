@@ -30,6 +30,8 @@ class WinCmdTest extends AnyFunSpec, Matchers {
         rs._2 foreach println
       }
       WinCmd.exec("dir")._2 foreach println
+
+      WinCmd.killall("soffice.bin")
     }
   }
 }

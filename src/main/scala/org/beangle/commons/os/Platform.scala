@@ -19,6 +19,8 @@ package org.beangle.commons.os
 
 import org.beangle.commons.lang.SystemInfo
 
+/** Java 程序所运行的平台
+ */
 object Platform {
 
   val osName = SystemInfo.os.name
