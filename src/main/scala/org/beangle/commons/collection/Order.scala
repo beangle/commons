@@ -30,21 +30,24 @@ object Order {
    */
   val OrderStr = "orderBy"
 
-  def apply(property: String) = new Order(property, true)
-
-  def apply(property: String, ascending: Boolean) = new Order(property, ascending)
+  def apply(property: String): Order = {
+    require(!Strings.contains(property, ","), "use parse for multiple order")
+    parse(property).head
+  }
 
   /** Asc.
    *
    * @param property a String object.
-   * @return a {@link org.beangle.commons.collection.Order} object.
+   * @return a order object.
    */
-  def asc(property: String): Order = new Order(property, true)
+  def asc(property: String): Order = {
+    new Order(property, true)
+  }
 
   /** Desc.
    *
    * @param property a String object.
-   * @return a {@link org.beangle.commons.collection.Order} object.
+   * @return a order object.
    */
   def desc(property: String): Order = new Order(property, false)
 
@@ -67,7 +70,7 @@ object Order {
     } else {
       val orders = new ListBuffer[Order]
       val orderStrs = Strings.split(orderString, ',')
-      for (i <- 0 until orderStrs.length) {
+      for (i <- orderStrs.indices) {
         val originOrder = orderStrs(i)
         if (Strings.isNotBlank(originOrder)) {
           val order = originOrder.toLowerCase()
@@ -77,51 +80,28 @@ object Order {
             orders += new Order(orderStrs(i).substring(0, order.indexOf(" asc")).trim(), true)
           else if order.startsWith("-") then
             orders += new Order(orderStrs(i).trim().substring(1), false)
+          else if order.startsWith("+") then
+            orders += new Order(orderStrs(i).trim().substring(1), true)
           else
             orders += new Order(orderStrs(i).trim(), true)
         }
       }
       orders.toList
     }
-
-  private def analysis(orderStr: String): (String, Boolean) = {
-    if (Strings.contains(orderStr, ",")) throw new RuntimeException("user parser for multiorder")
-
-    var ascending = false
-    var property = orderStr
-    if (Strings.contains(property, " desc")) {
-      ascending = false
-      property = Strings.substringBefore(property, " desc")
-    } else {
-      property = if (Strings.contains(property, " asc")) Strings.substringBefore(property, " asc") else property
-      ascending = true
-    }
-    property = property.trim()
-    (property, ascending)
-  }
 }
 
 /** 排序
  *
  * @author chaostone
  */
-class Order(val property: String, val ascending: Boolean, val lowerCase: Boolean = false) {
-
-  /** Constructor for Order.
-   *
-   * @param property a String object.
-   */
-  def this(property: String) = {
-    this(Order.analysis(property)._1, Order.analysis(property)._2)
-  }
+case class Order(property: String, ascending: Boolean) {
 
   /** ToString.
    *
    * @return a String object.
    */
   override def toString: String = {
-    if (lowerCase) "lower(" + property + ") " + (if (ascending) "asc" else "desc")
-    else property + " " + (if (ascending) "asc" else "desc")
+    property + " " + (if (ascending) "asc" else "desc")
   }
 
 }
