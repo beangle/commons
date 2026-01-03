@@ -30,7 +30,7 @@ object JsonArray {
 
   protected[json] def parseIndex(part: String): Int = {
     var index = -1
-    if (part.startsWith("[")) {
+    if (part.charAt(0) == '[') {
       index = part.substring(1, part.length - 1).toInt
     } else if (Numbers.isDigits(part)) {
       index = part.toInt

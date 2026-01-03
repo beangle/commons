@@ -33,6 +33,8 @@ class JsonParserTest extends AnyFunSpec, Matchers {
       val bb = a.query("/org/code")
       assert(a.query("/org/code").contains("shcm"))
       assert(a.query("admins.[1]").contains("admin2"))
+      assert(a.query("admins[1]").contains("admin2"))
+      assert(a.query("/admins/1").contains("admin2"))
       assert(a.query("/admins/32").isEmpty)
       assert(a.query("/hostname/32").isEmpty)
       val roleNames = a.query("/roles/name")

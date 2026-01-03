@@ -97,7 +97,7 @@ class JsonObject extends DynamicBean, Json {
   }
 
   override def query(path: String): Option[Any] = {
-    val parts = if (path.charAt(0) == '/') Strings.split(path, "/") else Strings.split(path, ".")
+    val parts = splitPath(path)
     var i = 0
     var o: Any = this
     while (o != null && i < parts.length) {
@@ -118,7 +118,7 @@ class JsonObject extends DynamicBean, Json {
    * @return
    */
   def update(path: String, value: Any): JsonObject = {
-    val parts = if (path.charAt(0) == '/') Strings.split(path, "/") else Strings.split(path, ".")
+    val parts = splitPath(path)
     var i = 0
     var o: Any = this
     while (o != null && i < parts.length - 1) {
@@ -144,6 +144,27 @@ class JsonObject extends DynamicBean, Json {
       case ja: JsonArray => ja.set(JsonArray.parseIndex(last), cv)
 
     this
+  }
+
+  /** 将查询路径转换成属性数组
+   *  /a/b/3/c 转换成[a,b,3,c]
+   *  a.b[3].c 转换成[a,b,[3],c]
+   * @param path
+   * @return
+   */
+  private def splitPath(path: String): Array[String] = {
+    if path.charAt(0) == '/' then
+      Strings.split(path, "/")
+    else {
+      Strings.split(path, ".").flatMap { p =>
+        val idx = p.indexOf('[')
+        if (idx > 0 && p.charAt(p.length - 1) == ']') {
+          Array(p.substring(0, idx), p.substring(idx))
+        } else {
+          Array(p)
+        }
+      }
+    }
   }
 
   private def convert(value: Any): Any = {

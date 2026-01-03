@@ -22,7 +22,8 @@ object Null {
   override def equals(obj: Any): Boolean = {
     obj match {
       case null => true
-      case _ => obj == this
+      case o: AnyRef => o eq this
+      case a: Any => false
     }
   }
 
