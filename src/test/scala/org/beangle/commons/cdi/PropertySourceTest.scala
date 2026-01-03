@@ -15,25 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.codec.binary
+package org.beangle.commons.cdi
 
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.matchers.must.Matchers
+import org.scalatest.matchers.should.Matchers
 
-class PBETest extends AnyFunSpec, Matchers {
+class PropertySourceTest extends AnyFunSpec, Matchers {
   val encryptKey = "beangle"
   val password = "bZoTxh)foA"
-  describe("PBE") {
 
-    it("encrypt and decrypt") {
-      val pbe = PBEEncryptor.random(encryptKey)
-      assert(password == pbe.decrypt("Rr/iQsiRlgm/QWpa17YYVZmEPbU0RoZ6F0f4OU3u5DM="))
-    }
+  describe("PropertySourc") {
 
-    it("generate salt and iv") {
-      val rs = PBEEncryptor.generateSaltAndIv(PBEEncryptor.DefaultAlgorithm)
-      assert(rs._1 != null)
-      assert(rs._2 != null)
+    it("PBEDecode process") {
+      System.setProperty("jasypt.encryptor.password", encryptKey)
+      //      var password = System.getenv("JASYPT_ENCRYPTOR_PASSWORD")
+      //      if (null == password) {
+      //        password = System.getProperty("jasypt.encryptor.password")
+      //      }
+      val decoder = PropertySource.pbe(encryptKey)
+      val decryptedPwd = decoder.process("password", "ENC(Rr/iQsiRlgm/QWpa17YYVZmEPbU0RoZ6F0f4OU3u5DM=)")
+      assert(password == decryptedPwd)
+      assert("+some_test" == decoder.process("key", "+some_test"))
     }
   }
+
 }

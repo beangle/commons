@@ -31,6 +31,11 @@ object SystemInfo {
     asScala(System.getProperties)
   }
 
+  def env: collection.Map[String, String] = {
+    import scala.jdk.javaapi.CollectionConverters.asScala
+    asScala(System.getenv())
+  }
+
   def os: Os = new Os(System.getProperties)
 
   def user: User = new User(System.getProperties)

@@ -30,7 +30,6 @@ object BindModule {
   def bind(clazzesExpr: Expr[Seq[Class[_]]],
            binder: Expr[Binding], wiredEagerly: Expr[Boolean])
           (implicit quotes: Quotes): Expr[DefinitionBinder] = {
-    import quotes.reflect.*
     '{
       ${ BeanInfoDigger.digInto(clazzesExpr, '{ BeanInfos.cache }) }
       ${ binder }.bind(${ clazzesExpr }: _*).wiredEagerly(${ wiredEagerly })
@@ -43,7 +42,6 @@ object BindModule {
   def bind[T: Type](beanName: Expr[String], clazz: Expr[Class[T]],
                     binder: Expr[Binding], wiredEagerly: Expr[Boolean])
                    (implicit quotes: Quotes): Expr[DefinitionBinder] = {
-    import quotes.reflect.*
     '{
       ${ BeanInfoDigger.digInto(clazz, '{ BeanInfos.cache }) }
       ${ binder }.bind(${ beanName }, ${ clazz }).wiredEagerly(${ wiredEagerly })
@@ -56,7 +54,6 @@ object BindModule {
   def bean[T: Type](clazz: Expr[Class[T]],
                     binder: Expr[Binding], wiredEagerly: Expr[Boolean])
                    (implicit quotes: Quotes): Expr[Definition] = {
-    import quotes.reflect.*
     '{
       ${ BeanInfoDigger.digInto(clazz, '{ BeanInfos.cache }) }
       ${ binder }.bind(${ binder }.newInnerBeanName(${ clazz }), ${ clazz }).head.wiredEagerly(${ wiredEagerly })
@@ -116,8 +113,13 @@ abstract class BindModule {
 
   final def ? = InjectPlaceHolder
 
-  final def $(s: String, defaultValue: String = null): PropertyPlaceHolder = {
-    PropertyPlaceHolder(s, defaultValue)
+  final def $(s: String): PropertyPlaceHolder = {
+    if (PropertyPlaceHolder.hasVariable(s)) {
+      PropertyPlaceHolder(s)
+    } else {
+      val v = Variable(s)
+      PropertyPlaceHolder(PropertyPlaceHolder.Prefix + v.name + PropertyPlaceHolder.Suffix, Set(v))
+    }
   }
 
   /**

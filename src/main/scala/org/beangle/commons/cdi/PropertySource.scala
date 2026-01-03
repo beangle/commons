@@ -17,7 +17,91 @@
 
 package org.beangle.commons.cdi
 
+import org.beangle.commons.codec.binary.PBEEncryptor
+import org.beangle.commons.lang.{Strings, SystemInfo}
+
+object PropertySource {
+
+  trait Processor {
+    def process(key: String, value: String): String
+  }
+
+  /** 提供一组Property属性和处理器
+   */
+  trait Provider {
+
+    def properties: collection.Map[String, String]
+
+    def processors: Seq[PropertySource.Processor] = Seq.empty
+  }
+
+  class SimpleSource(props: collection.Map[String, String]) extends PropertySource {
+    def contains(name: String): Boolean = {
+      props.contains(name)
+    }
+
+    def get(name: String): Option[String] = {
+      props.get(name)
+    }
+  }
+
+  def systemProperties: SimpleSource = {
+    new SimpleSource(SystemInfo.properties)
+  }
+
+  def systemEnv: SimpleSource = {
+    new SimpleSource(SystemInfo.env)
+  }
+
+  object NoneProcessor extends Processor {
+    override def process(key: String, value: String): String = value
+  }
+
+  /** 可以对属性值进行解密的Processor
+   * 使用类似jasypt的方式进行解密
+   */
+  def pbe(password: String): PropertySource.Processor = {
+    require(Strings.isNotEmpty(password))
+    PBEProcessor(PBEEncryptor.random(password))
+  }
+
+  /** 可以对属性值进行解密的Processor
+   *
+   * @param encryptor pbe解密类
+   */
+  class PBEProcessor(encryptor: PBEEncryptor) extends PropertySource.Processor {
+
+    private val head = "ENC("
+    private val tail = ")"
+
+    override def process(key: String, value: String): String = {
+      if (null == value) {
+        null
+      } else {
+        if (value.startsWith(head) && value.endsWith(tail)) {
+          val msg = Strings.substringBetween(value, head, tail)
+          encryptor.decrypt(msg)
+        } else {
+          value
+        }
+      }
+    }
+
+    def encrypt(message: String): String = {
+      require(null != message)
+      head + encryptor.encrypt(message) + tail
+    }
+  }
+
+}
+
 trait PropertySource {
 
-  def properties: collection.Map[String, String]
+  def contains(name: String): Boolean
+
+  def get(name: String): Option[String]
+
+  def get(name: String, defaultValue: String): String = {
+    get(name).getOrElse(defaultValue)
+  }
 }

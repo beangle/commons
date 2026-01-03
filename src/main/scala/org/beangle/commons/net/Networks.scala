@@ -67,14 +67,11 @@ object Networks {
       if (ni.isUp && !ni.isLoopback) {
         val ipEnum = ni.getInetAddresses
         while (ipEnum.hasMoreElements) {
-          ipEnum.nextElement() match {
-            case ip: InetAddress =>
-              if (family == 1 && ip.isInstanceOf[Inet4Address] ||
-                family == 2 && ip.isInstanceOf[Inet6Address] ||
-                family == 0) {
-                ips += ip.getHostAddress
-              }
-            case _ =>
+          val ip = ipEnum.nextElement()
+          if (family == 1 && ip.isInstanceOf[Inet4Address] ||
+            family == 2 && ip.isInstanceOf[Inet6Address] ||
+            family == 0) {
+            ips += ip.getHostAddress
           }
         }
       }
@@ -99,5 +96,22 @@ object Networks {
       false
     catch
       case e: IOException => true
+  }
+
+  /** 获取一定数量的空余端口
+   *
+   * @param startPort 开始端口
+   * @param portCount 端口数量
+   * @return
+   */
+  def nextFreePorts(startPort: Int, portCount: Int): Seq[Int] = {
+    require(portCount >= 1 && portCount <= 100, s"${portCount} is to small or too big")
+    val ports = Collections.newBuffer[Int]
+    var port = startPort
+    while (ports.size < portCount) {
+      if Networks.isPortFree(port) then ports.addOne(port)
+      port += 1
+    }
+    ports.toSeq
   }
 }

@@ -33,7 +33,50 @@ object Binding {
 
   object InjectPlaceHolder
 
-  case class PropertyPlaceHolder(name: String, defaultValue: String)
+  object Variable {
+    def apply(name: String): Variable = {
+      val commaIdx = name.indexOf(':')
+      if (commaIdx > 0 && commaIdx < name.length - 1) {
+        Variable(name.substring(0, commaIdx), Some(name.substring(commaIdx + 1)))
+      } else {
+        Variable(name, None)
+      }
+    }
+  }
+
+  object PropertyPlaceHolder {
+    val Prefix: String = "${"
+    val Suffix: String = "}"
+
+    def hasVariable(pattern: String): Boolean = {
+      val startIdx = pattern.indexOf(Prefix)
+      if (startIdx > -1) {
+        val endIdx = pattern.indexOf(Suffix, startIdx)
+        endIdx - startIdx > 2
+      } else {
+        false
+      }
+    }
+
+    def apply(pattern: String): PropertyPlaceHolder = {
+      var n = pattern
+      val variables = Collections.newSet[Variable]
+      while
+        val v = Strings.substringBetween(n, Prefix, Suffix)
+        val hasVar = Strings.isNotBlank(v)
+        if (hasVar) {
+          variables.addOne(Variable(v))
+          n = Strings.replace(n, Prefix + v + Suffix, "")
+        }
+        hasVar
+      do {}
+      PropertyPlaceHolder(pattern, variables.toSet)
+    }
+  }
+
+  case class Variable(name: String, defaultValue: Option[String])
+
+  case class PropertyPlaceHolder(pattern: String, variables: Set[Variable])
 
   /**
    * Bean Definition
