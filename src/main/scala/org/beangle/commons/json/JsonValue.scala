@@ -17,11 +17,13 @@
 
 package org.beangle.commons.json
 
-case class JsonValue(value: Any) extends Json {
+final case class JsonValue(value: Any) extends Json {
 
-  def query(path: String): Option[Any] = {
-    None
-  }
+  override def query(path: String): Option[Any] = None
+
+  override def get(property: String): Option[Any] = None
+
+  override def children: Iterable[Json] = List.empty
 
   override def toJson: String = value.toString
 

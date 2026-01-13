@@ -43,15 +43,20 @@ object JsonArray {
  */
 class JsonArray extends collection.Seq[Any], Json {
 
+  private val values = new mutable.ArrayBuffer[Any]
+
   def this(v: Iterable[Any]) = {
     this()
     values.addAll(v)
   }
 
-  private val values = new mutable.ArrayBuffer[Any]
 
   def add(value: Any): Unit = {
     values.addOne(value)
+  }
+
+  override def get(property: String): Option[Any] = {
+    get(parseIndex(property))
   }
 
   def get(i: Int): Option[Any] = {
@@ -130,6 +135,14 @@ class JsonArray extends collection.Seq[Any], Json {
 
   override def apply(i: Int): Any = {
     values(i)
+  }
+
+  override def children: Iterable[Json] = {
+    values.map {
+      case jo: JsonObject => jo
+      case ja: JsonArray => ja
+      case v => JsonValue(v)
+    }
   }
 
   override def length: Int = values.length

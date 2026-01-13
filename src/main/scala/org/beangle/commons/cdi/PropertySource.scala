@@ -18,7 +18,7 @@
 package org.beangle.commons.cdi
 
 import org.beangle.commons.codec.binary.PBEEncryptor
-import org.beangle.commons.lang.{Strings, SystemInfo}
+import org.beangle.commons.lang.Strings
 
 object PropertySource {
 
@@ -45,20 +45,11 @@ object PropertySource {
     }
   }
 
-  def systemProperties: SimpleSource = {
-    new SimpleSource(SystemInfo.properties)
-  }
-
-  def systemEnv: SimpleSource = {
-    new SimpleSource(SystemInfo.env)
-  }
-
   object NoneProcessor extends Processor {
     override def process(key: String, value: String): String = value
   }
 
   /** 可以对属性值进行解密的Processor
-   * 使用类似jasypt的方式进行解密
    */
   def pbe(password: String): PropertySource.Processor = {
     require(Strings.isNotEmpty(password))

@@ -17,8 +17,7 @@
 
 package org.beangle.commons.conversion.impl
 
-import org.beangle.commons.conversion.converter
-import org.beangle.commons.conversion.string
+import org.beangle.commons.conversion.{converter, string}
 
 object DefaultConversion {
 
@@ -28,13 +27,13 @@ object DefaultConversion {
 }
 
 /** Default Conversion implementation.
-  * <p>
-  * It register String to Boolean/Number/Date/Locale, Number to Number and Object to String buildin
-  * converters.
-  *
-  * @author chaostone
-  * @since 3.2.0
-  */
+ * <p>
+ * It register String to Boolean/Number/Date/Locale, Number to Number and Object to String buildin
+ * converters.
+ *
+ * @author chaostone
+ * @since 3.2.0
+ */
 class DefaultConversion extends AbstractGenericConversion {
 
   addConverter(string.BooleanConverter)
@@ -54,6 +53,8 @@ class DefaultConversion extends AbstractGenericConversion {
   addConverter(string.LocaleConverter)
 
   addConverter(string.ToStringConverter)
+
+  addConverter(string.JsonConverter)
 
   addConverter(converter.Number2NumberConverter)
 

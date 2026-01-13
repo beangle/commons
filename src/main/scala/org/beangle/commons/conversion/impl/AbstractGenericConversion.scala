@@ -35,7 +35,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
 
   val converters = new mutable.HashMap[Class[_], Map[Class[_], GenericConverter]]
 
-  val cache = new concurrent.TrieMap[Tuple2[Class[_], Class[_]], GenericConverter]
+  val cache = new concurrent.TrieMap[(Class[_], Class[_]), GenericConverter]
 
   /** Convert to target type.
    */

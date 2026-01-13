@@ -23,7 +23,7 @@ ThisBuild / developers := List(
 ThisBuild / description := "The Beangle Commons Library"
 ThisBuild / homepage := Some(url("http://beangle.github.io/commons/index.html"))
 
-val commonDeps = Seq(slf4j, scalatest, logback_classic % "optional", logback_core % "optional")
+val commonDeps = Seq(slf4j % "optional", scalatest, logback_classic % "optional", logback_core % "optional")
 
 lazy val root = (project in file("."))
   .settings(

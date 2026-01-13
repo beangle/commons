@@ -111,6 +111,13 @@ class JsonObject extends DynamicBean, Json {
     Option(o)
   }
 
+  override def children: Iterable[Json] = {
+    props.values.map {
+      case jo: JsonObject => jo
+      case ja: JsonArray => ja
+      case v => JsonValue(v)
+    }
+  }
   /** 根据路径更新或生成对象
    *
    * @param path

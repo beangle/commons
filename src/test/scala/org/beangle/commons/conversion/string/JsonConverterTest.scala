@@ -15,24 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.cdi
+package org.beangle.commons.conversion.string
 
+import org.beangle.commons.json.{JsonArray, JsonObject}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class PropertySourceTest extends AnyFunSpec, Matchers {
-  val encryptKey = "beangle"
-  val password = "bZoTxh)foA"
+class JsonConverterTest extends AnyFunSpec, Matchers {
+  describe("JsonConverter") {
+    it("Convert String to ju.date") {
+      val converter = JsonConverter.getConverter(classOf[JsonObject]).orNull
+      val json = converter.apply("""{"id":1,"name":"firefox"}""")
+      assert(json.contains("name"))
 
-  describe("PropertySourc") {
+      val aConverter = JsonConverter.getConverter(classOf[JsonArray]).orNull
+      val array = aConverter.apply("""[{"id":1,"name":"firefox"}]""")
+      assert(array.size == 1)
 
-    it("PBEDecode process") {
-      System.setProperty("beangle.encryptor.password", encryptKey)
-      val decoder = PropertySource.pbe(encryptKey)
-      val decryptedPwd = decoder.process("password", "ENC(Rr/iQsiRlgm/QWpa17YYVZmEPbU0RoZ6F0f4OU3u5DM=)")
-      assert(password == decryptedPwd)
-      assert("+some_test" == decoder.process("key", "+some_test"))
     }
   }
-
 }

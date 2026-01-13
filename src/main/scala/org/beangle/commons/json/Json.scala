@@ -49,10 +49,12 @@ object Json {
     value.toJson
   }
 
-  def empty(t: Class[_]): Json = {
-    if (t == classOf[JsonObject]) new JsonObject()
-    else if (t == classOf[JsonArray]) new JsonArray()
-    else JsonValue("")
+  def emptyObject: JsonObject = {
+    new JsonObject()
+  }
+
+  def emptyArray: JsonArray = {
+    new JsonArray()
   }
 }
 
@@ -60,12 +62,42 @@ trait Json {
   /** Query object graph,using slash or dot seperate nested property,like
    * [index]/property_name/property_name or [index].property_name.property_name
    *
-   * @param path
+   * @param path query path
    * @return
    */
   def query(path: String): Option[Any]
 
-  def toJson:String
+  /** Get Property
+   *
+   * @param property name
+   * @return
+   */
+  def get(property: String): Option[Any]
+
+  /** 该节点的下级节点
+   *
+   * @return
+   */
+  def children: Iterable[Json]
+
+  /** Navigate property
+   *
+   * @param path property
+   * @return
+   */
+  def \(property: String): Json = {
+    get(property) match {
+      case None => Json.emptyObject
+      case Some(o) =>
+        o match {
+          case jo: JsonObject => jo
+          case ja: JsonArray => ja
+          case _ => JsonValue(o)
+        }
+    }
+  }
+
+  def toJson: String
 
   def value: Any
 }
