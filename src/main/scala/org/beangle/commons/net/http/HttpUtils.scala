@@ -219,9 +219,9 @@ object HttpUtils {
     Https.noverify(conn)
     conn.setDoOutput(true)
     requestBy(conn, HttpMethods.POST)
-    payload.authorization foreach { auth => conn.setRequestProperty("a", auth) }
     payload.headers foreach { (k, v) => conn.addRequestProperty(k, v.toString) }
-    conn.setRequestProperty("Content-Type", payload.contentType.toString)
+    payload.authorization foreach { auth => conn.setRequestProperty("Authorization", auth) }
+    conn.setRequestProperty("Content-Type", payload.contentType)
 
     val os = conn.getOutputStream
     payload.body match {
