@@ -19,6 +19,7 @@ package org.beangle.commons.net.http
 
 import org.beangle.commons.codec.binary.Base64
 import org.beangle.commons.io.IOs
+import org.beangle.commons.json.Json
 import org.beangle.commons.lang.Charsets
 
 import java.io.*
@@ -161,7 +162,7 @@ object HttpUtils {
     }))
   }
 
-  def invoke(url: URL, body: AnyRef, contentType: String, f: Option[(URLConnection) => Unit]): Response = {
+  def invoke(url: URL, body: AnyRef, contentType: String, f: Option[URLConnection => Unit]): Response = {
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     Https.noverify(conn)
     conn.setDoOutput(true)
@@ -172,20 +173,28 @@ object HttpUtils {
     body match {
       case ba: Array[Byte] => os.write(ba)
       case params: collection.Map[_, _] =>
-        val paramBuffer = new mutable.ArrayBuffer[String]
-        params foreach { e =>
-          if (e._2 != null) {
-            paramBuffer.addOne(e._1.toString + "=" + URLEncoder.encode(e._2.toString, Charsets.UTF_8))
-          }
+        if (contentType.startsWith("application/json")) {
+          writeBody(os, Json.toJson(params))
+        } else if (contentType.startsWith("application/x-www-form-urlencoded")) {
+          writeBody(os, encodeTuple(params))
+        } else {
+          throw new RuntimeException(s"Cannot convert map to content-type of $contentType")
         }
-        val osw = new OutputStreamWriter(os, "UTF-8")
-        osw.write(paramBuffer.mkString("&"))
-        osw.close()
-      case _ =>
-        val osw = new OutputStreamWriter(os, "UTF-8")
-        osw.write(body.toString)
-        osw.flush()
-        osw.close()
+      case list: Iterable[_] =>
+        if (contentType.startsWith("application/json")) {
+          writeBody(os, Json.toJson(list))
+        } else if (contentType.startsWith("application/x-www-form-urlencoded")) {
+          if (list.nonEmpty) {
+            if (list.head.isInstanceOf[(_, _)]) {
+              writeBody(os, encodeTuple(list.asInstanceOf[Iterable[(_, _)]]))
+            } else {
+              throw new RuntimeException(s"Cannot convert seq to content-type of $contentType")
+            }
+          }
+        } else {
+          throw new RuntimeException(s"Cannot convert seq to content-type of $contentType")
+        }
+      case _ => writeBody(os, body.toString)
     }
     os.close() //don't forget to close the OutputStream
     try {
@@ -197,6 +206,23 @@ object HttpUtils {
       case e: Exception => error(url, e)
     } finally
       if (null != conn) conn.disconnect()
+  }
+
+  private def writeBody(os: OutputStream, payload: String): Unit = {
+    val osw = new OutputStreamWriter(os, "UTF-8")
+    osw.write(payload)
+    osw.flush()
+    osw.close()
+  }
+
+  private def encodeTuple(params: Iterable[(_, _)]): String = {
+    val paramBuffer = new mutable.ArrayBuffer[String]
+    params foreach { e =>
+      if (e._2 != null) {
+        paramBuffer.addOne(e._1.toString + "=" + URLEncoder.encode(e._2.toString, Charsets.UTF_8))
+      }
+    }
+    paramBuffer.mkString("&")
   }
 
   def download(c: URLConnection, location: File): Boolean = {

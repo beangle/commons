@@ -20,7 +20,7 @@ package org.beangle.commons.json
 import org.beangle.commons.bean.DynamicBean
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.conversion.string.TemporalConverter
-import org.beangle.commons.lang.Strings
+import org.beangle.commons.lang.{Options, Strings}
 
 import java.time.{Instant, LocalDate, LocalDateTime}
 import scala.collection.mutable
@@ -33,56 +33,9 @@ object JsonObject {
     new JsonObject(v)
   }
 
+  @deprecated("Using Json.toLiteral", "5.7.1")
   def toLiteral(v: Any): String = {
-    v match {
-      case null => "null"
-      case Null => "null"
-      case None => "null"
-      case Some(iv) => valueToLiteral(iv)
-      case _ => valueToLiteral(v)
-    }
-  }
-
-  private def valueToLiteral(v: Any): String = {
-    v match {
-      case s: String => escape(s)
-      case b: Boolean => b.toString
-      case s: Short => s.toString
-      case n: Int => n.toString
-      case f: Float => f.toString
-      case d: Double => d.toString
-      case l: Long => escape(l.toString)
-      case _ => escape(v.toString)
-    }
-  }
-
-  private def escape(s: String): String = {
-    val length = s.length
-    val text = s.toCharArray
-    val sb = new StringBuilder()
-    sb.append('\"')
-    (0 until length) foreach { i =>
-      val c = text(i)
-      c match {
-        case '"' => sb.append("\\\"")
-        case '\\' => sb.append("\\\\")
-        case '\b' => sb.append("\\b")
-        case '\f' => sb.append("\\f")
-        case '\n' => sb.append("\\n")
-        case '\r' => sb.append("\\r")
-        case '\t' => sb.append("\\t")
-        case _ =>
-          if (c > 0x1f) {
-            sb.append(c)
-          } else {
-            sb.append("\\u")
-            val hex = "000" + Integer.toHexString(c)
-            sb.append(hex.substring(hex.length() - 4))
-          }
-      }
-    }
-    sb.append('\"')
-    sb.toString()
+    Json.toLiteral(v)
   }
 }
 
@@ -118,6 +71,7 @@ class JsonObject extends DynamicBean, Json {
       case v => JsonValue(v)
     }
   }
+
   /** 根据路径更新或生成对象
    *
    * @param path
@@ -154,8 +108,9 @@ class JsonObject extends DynamicBean, Json {
   }
 
   /** 将查询路径转换成属性数组
-   *  /a/b/3/c 转换成[a,b,3,c]
-   *  a.b[3].c 转换成[a,b,[3],c]
+   * /a/b/3/c 转换成[a,b,3,c]
+   * a.b[3].c 转换成[a,b,[3],c]
+   *
    * @param path
    * @return
    */
@@ -341,10 +296,10 @@ class JsonObject extends DynamicBean, Json {
     val sb = new StringBuilder("{")
     props.foreach { kv =>
       sb.append("\"").append(kv._1).append("\":")
-      kv._2 match {
+      Options.unwrap(kv._2) match {
         case o: JsonObject => sb.append(o.toJson)
         case a: JsonArray => sb.append(a.toJson)
-        case _ => sb.append(JsonObject.toLiteral(kv._2))
+        case v => sb.append(Json.toLiteral(v))
       }
       sb.append(",")
     }

@@ -18,7 +18,7 @@
 package org.beangle.commons.json
 
 import org.beangle.commons.json.JsonArray.parseIndex
-import org.beangle.commons.lang.{Numbers, Strings}
+import org.beangle.commons.lang.{Numbers, Options, Strings}
 
 import scala.collection.mutable
 
@@ -120,10 +120,10 @@ class JsonArray extends collection.Seq[Any], Json {
   override def toJson: String = {
     val sb = new StringBuilder("[")
     values.foreach(v => {
-      v match {
+      Options.unwrap(v) match {
         case o: JsonObject => sb.append(o.toJson)
         case a: JsonArray => sb.append(a.toJson)
-        case _ => sb.append(JsonObject.toLiteral(v))
+        case v1 => sb.append(Json.toLiteral(v1))
       }
       sb.append(",")
     })

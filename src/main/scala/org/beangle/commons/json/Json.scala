@@ -17,9 +17,10 @@
 
 package org.beangle.commons.json
 
-import org.beangle.commons.lang.Strings
+import org.beangle.commons.lang.{Options, Strings}
 
 object Json {
+
   def parse(s: String): Json = {
     if Strings.isBlank(s) then JsonValue("")
     else new JsonParser(new java.io.StringReader(s)).parse()
@@ -37,8 +38,21 @@ object Json {
     if Strings.isBlank(s) then new JsonArray() else parse(s).asInstanceOf[JsonArray]
   }
 
-  def toJson(datas: collection.Map[String, Any]): String = {
-    if (datas.isEmpty) "" else new JsonObject(datas).toJson
+  def toJson(datas: collection.Map[_, _]): String = {
+    if (datas.isEmpty) return "{}"
+    val sb = new StringBuilder("{")
+    val kvs = datas.filter(_._1.isInstanceOf[String])
+    kvs.foreach { kv =>
+      sb.append("\"").append(kv._1.toString).append("\":")
+      Options.unwrap(kv._2) match {
+        case map: collection.Map[_, _] => sb.append(toJson(map))
+        case seq: collection.Seq[_] => sb.append(toJson(seq))
+        case v => sb.append(toLiteral(v))
+      }
+      sb.append(",")
+    }
+    if (kvs.nonEmpty) sb.deleteCharAt(sb.length - 1)
+    sb.append("}").toString
   }
 
   def toJson(value: JsonObject): String = {
@@ -49,12 +63,78 @@ object Json {
     value.toJson
   }
 
+  def toJson(data: Iterable[_]): String = {
+    val sb = new StringBuilder("[")
+    for (li <- data) {
+      Options.unwrap(li) match {
+        case map: collection.Map[_, _] => sb.append(toJson(map))
+        case seq: collection.Seq[_] => sb.append(toJson(seq))
+        case _ => sb.append(toLiteral(li))
+      }
+      sb.append(",")
+    }
+    if (data.nonEmpty) sb.deleteCharAt(sb.length - 1)
+    sb.append("]").toString
+  }
+
   def emptyObject: JsonObject = {
     new JsonObject()
   }
 
   def emptyArray: JsonArray = {
     new JsonArray()
+  }
+
+  def toLiteral(v: Any): String = {
+    v match {
+      case null => "null"
+      case Null => "null"
+      case None => "null"
+      case Some(iv) => valueToLiteral(iv)
+      case _ => valueToLiteral(v)
+    }
+  }
+
+  private def valueToLiteral(v: Any): String = {
+    v match {
+      case s: String => Json.escape(s)
+      case b: Boolean => b.toString
+      case s: Short => s.toString
+      case n: Int => n.toString
+      case f: Float => f.toString
+      case d: Double => d.toString
+      case l: Long => Json.escape(l.toString)
+      case _ => Json.escape(v.toString)
+    }
+  }
+
+  def escape(s: String): String = {
+    val length = s.length
+    val text = s.toCharArray
+    val sb = new StringBuilder()
+    sb.append('\"')
+    (0 until length) foreach { i =>
+      val c = text(i)
+      c match {
+        case '"' => sb.append("\\\"")
+        case '\\' => sb.append("\\\\")
+        case '\b' => sb.append("\\b")
+        case '\f' => sb.append("\\f")
+        case '\n' => sb.append("\\n")
+        case '\r' => sb.append("\\r")
+        case '\t' => sb.append("\\t")
+        case _ =>
+          if (c > 0x1f) {
+            sb.append(c)
+          } else {
+            sb.append("\\u")
+            val hex = "000" + Integer.toHexString(c)
+            sb.append(hex.substring(hex.length() - 4))
+          }
+      }
+    }
+    sb.append('\"')
+    sb.toString()
   }
 }
 

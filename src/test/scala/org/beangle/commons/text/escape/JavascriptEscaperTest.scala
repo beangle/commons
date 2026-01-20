@@ -25,6 +25,7 @@ class JavascriptEscaperTest extends AnyFunSpec, Matchers {
   describe("JavasciptEscaper") {
     it("Escape") {
       assert("beangl\\'dd" == JavascriptEscaper.escape("beangl'dd", false))
+      assert("beangl'dd" == JavascriptEscaper.escape("beangl'dd", true))
       assert("&lt;td&gt;" == XmlEscaper.escape("<td>"))
     }
   }

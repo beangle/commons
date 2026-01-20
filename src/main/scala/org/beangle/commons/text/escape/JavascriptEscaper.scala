@@ -18,14 +18,20 @@
 package org.beangle.commons.text.escape
 
 /** Escape javascript
-  * borrow from freemarker.template.utility.StringUtil
-  */
+ * borrow from freemarker.template.utility.StringUtil
+ */
 object JavascriptEscaper {
 
   private val NO_ESC = 0
   private val ESC_HEXA = 1
   private val ESC_BACKSLASH = 3
 
+  /** 给出转义字符串形式
+   *
+   * @param s    given string value
+   * @param json 是否是json，json中允许出现单引号，javascript则进行反斜线转义
+   * @return
+   */
   def escape(s: String, json: Boolean): String = {
     val ln = s.length
     var sb: StringBuilder = null
