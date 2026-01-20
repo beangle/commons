@@ -17,6 +17,7 @@
 
 package org.beangle.commons.net.http
 
+import org.beangle.commons.activation.MediaTypes
 import org.beangle.commons.codec.binary.Base64
 import org.beangle.commons.io.IOs
 import org.beangle.commons.json.Json
@@ -38,7 +39,34 @@ object HttpUtils {
     HTTP_NOT_FOUND -> "Not Found",
     HTTP_UNAUTHORIZED -> "Access denied")
 
-  def toString(httpCode: Int): String = statusMap.getOrElse(httpCode, String.valueOf(httpCode))
+  final class Payload(val body: Any, val contentType: String) {
+    protected[http] val headers = new mutable.HashMap[String, Any]
+    protected[http] var authorization: Option[String] = None
+
+    def addHeader(name: String, value: String): Payload = {
+      headers.put(name, value)
+      this
+    }
+
+    def authBasic(username: String, password: String): Payload = {
+      this.authorization = Some("Basic " + Base64.encode(s"$username:$password".getBytes))
+      this
+    }
+
+    def authBearer(token: String): Payload = {
+      this.authorization = Some(s"Bearer $token")
+      this
+    }
+
+    def accept(acceptType: String): Payload = {
+      headers.put("Accept", acceptType)
+      this
+    }
+  }
+
+  def toString(httpCode: Int): String = {
+    statusMap.getOrElse(httpCode, String.valueOf(httpCode))
+  }
 
   def isAlive(url: String): Boolean = {
     access(url).isOk
@@ -89,7 +117,7 @@ object HttpUtils {
     }))
   }
 
-  def getData(url: URL, method: String, f: Option[(HttpURLConnection) => Unit]): Response = {
+  def getData(url: URL, method: String, f: Option[HttpURLConnection => Unit]): Response = {
     var conn: HttpURLConnection = null
     try {
       conn = url.openConnection().asInstanceOf[HttpURLConnection]
@@ -153,13 +181,12 @@ object HttpUtils {
   }
 
   def invoke(url: URL, body: AnyRef, contentType: String): Response = {
-    invoke(url, body, contentType, None)
+    invoke(url, payload(body, contentType))
   }
 
+  @deprecated("using invoke by payload", "4.7.1")
   def invoke(url: URL, body: AnyRef, contentType: String, username: String, password: String): Response = {
-    invoke(url, body, contentType, Some({ x =>
-      x.addRequestProperty("Authorization", "Basic " + Base64.encode(s"$username:$password".getBytes))
-    }))
+    invoke(url, payload(body, contentType).authBasic(username, password))
   }
 
   def invoke(url: URL, body: AnyRef, contentType: String, f: Option[URLConnection => Unit]): Response = {
@@ -169,32 +196,11 @@ object HttpUtils {
     requestBy(conn, HttpMethods.POST)
     conn.setRequestProperty("Content-Type", contentType)
     f foreach (x => x(conn))
+
     val os = conn.getOutputStream
-    body match {
+    payload(body, contentType).body match {
       case ba: Array[Byte] => os.write(ba)
-      case params: collection.Map[_, _] =>
-        if (contentType.startsWith("application/json")) {
-          writeBody(os, Json.toJson(params))
-        } else if (contentType.startsWith("application/x-www-form-urlencoded")) {
-          writeBody(os, encodeTuple(params))
-        } else {
-          throw new RuntimeException(s"Cannot convert map to content-type of $contentType")
-        }
-      case list: Iterable[_] =>
-        if (contentType.startsWith("application/json")) {
-          writeBody(os, Json.toJson(list))
-        } else if (contentType.startsWith("application/x-www-form-urlencoded")) {
-          if (list.nonEmpty) {
-            if (list.head.isInstanceOf[(_, _)]) {
-              writeBody(os, encodeTuple(list.asInstanceOf[Iterable[(_, _)]]))
-            } else {
-              throw new RuntimeException(s"Cannot convert seq to content-type of $contentType")
-            }
-          }
-        } else {
-          throw new RuntimeException(s"Cannot convert seq to content-type of $contentType")
-        }
-      case _ => writeBody(os, body.toString)
+      case v => writeBody(os, v.toString)
     }
     os.close() //don't forget to close the OutputStream
     try {
@@ -208,21 +214,30 @@ object HttpUtils {
       if (null != conn) conn.disconnect()
   }
 
-  private def writeBody(os: OutputStream, payload: String): Unit = {
-    val osw = new OutputStreamWriter(os, "UTF-8")
-    osw.write(payload)
-    osw.flush()
-    osw.close()
-  }
+  def invoke(url: URL, payload: Payload): Response = {
+    val conn = url.openConnection.asInstanceOf[HttpURLConnection]
+    Https.noverify(conn)
+    conn.setDoOutput(true)
+    requestBy(conn, HttpMethods.POST)
+    payload.authorization foreach { auth => conn.setRequestProperty("a", auth) }
+    payload.headers foreach { (k, v) => conn.addRequestProperty(k, v.toString) }
+    conn.setRequestProperty("Content-Type", payload.contentType.toString)
 
-  private def encodeTuple(params: Iterable[(_, _)]): String = {
-    val paramBuffer = new mutable.ArrayBuffer[String]
-    params foreach { e =>
-      if (e._2 != null) {
-        paramBuffer.addOne(e._1.toString + "=" + URLEncoder.encode(e._2.toString, Charsets.UTF_8))
-      }
+    val os = conn.getOutputStream
+    payload.body match {
+      case ba: Array[Byte] => os.write(ba)
+      case v => writeBody(os, v.toString)
     }
-    paramBuffer.mkString("&")
+    os.close() //don't forget to close the OutputStream
+    try {
+      conn.connect()
+      val bos = new ByteArrayOutputStream
+      IOs.copy(conn.getInputStream, bos)
+      Response(conn.getResponseCode, bos.toByteArray)
+    } catch {
+      case e: Exception => error(url, e)
+    } finally
+      if (null != conn) conn.disconnect()
   }
 
   def download(c: URLConnection, location: File): Boolean = {
@@ -265,4 +280,71 @@ object HttpUtils {
     conn.setReadTimeout(Timeout)
     conn.setRequestMethod(method)
   }
+
+  /** Convert any data to payload
+   *
+   * @param data        body data
+   * @param contentType content-type string
+   * @return
+   */
+  def payload(data: Any, contentType: String): Payload = {
+    if contentType.startsWith("application/json") then asJson(data)
+    else if contentType.startsWith("application/x-www-form-urlencoded") then asForm(data)
+    else new Payload(data, contentType)
+  }
+
+  /** Convert data to Json Payload
+   *
+   * @param data body
+   * @return
+   */
+  def asJson(data: Any): Payload = {
+    require(null != data, "body cannot be empty")
+    val newBody = data match {
+      case params: collection.Map[_, _] => Json.toJson(params)
+      case list: Iterable[_] => Json.toJson(list)
+      case str: String => str
+      case _ => Json.toLiteral(data)
+    }
+    new Payload(newBody, MediaTypes.ApplicationJson.toString)
+  }
+
+  /** Convert data to Payload
+   *
+   * @param data body
+   * @return
+   */
+  def asForm(data: Any): Payload = {
+    require(null != data, "body cannot be empty")
+    val newBody = data match {
+      case params: collection.Map[_, _] => encodeTuple(params)
+      case list: Iterable[_] =>
+        if (list.nonEmpty) {
+          if list.head.isInstanceOf[(_, _)] then encodeTuple(list.asInstanceOf[Iterable[(_, _)]]) else ""
+        } else {
+          ""
+        }
+      case str: String => str
+      case _ => data.toString
+    }
+    new Payload(newBody, MediaTypes.ApplicationFormUrlencoded.toString)
+  }
+
+  private def writeBody(os: OutputStream, payload: String): Unit = {
+    val osw = new OutputStreamWriter(os, "UTF-8")
+    osw.write(payload)
+    osw.flush()
+    osw.close()
+  }
+
+  private def encodeTuple(params: Iterable[(_, _)]): String = {
+    val paramBuffer = new mutable.ArrayBuffer[String]
+    params foreach { e =>
+      if (e._2 != null) {
+        paramBuffer.addOne(e._1.toString + "=" + URLEncoder.encode(e._2.toString, Charsets.UTF_8))
+      }
+    }
+    paramBuffer.mkString("&")
+  }
+
 }

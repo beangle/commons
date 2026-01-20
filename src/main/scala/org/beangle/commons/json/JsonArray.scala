@@ -50,7 +50,6 @@ class JsonArray extends collection.Seq[Any], Json {
     values.addAll(v)
   }
 
-
   def add(value: Any): Unit = {
     values.addOne(value)
   }
