@@ -19,11 +19,10 @@ package org.beangle.commons.net.ws
 
 import org.beangle.commons.activation.{MediaType, MediaTypes}
 import org.beangle.commons.codec.binary.Base64
-import org.beangle.commons.json.Json
 import org.beangle.commons.lang.Strings.split
 import org.beangle.commons.lang.{Charsets, Strings}
 import org.beangle.commons.net.Networks
-import org.beangle.commons.net.http.{HttpMethods, HttpUtils, Response}
+import org.beangle.commons.net.http.{HttpMethods, HttpUtils, Request, Response}
 
 import java.net.{URL, URLEncoder}
 import scala.collection.mutable
@@ -61,6 +60,7 @@ class RestRequest(val target: String, client: RestClient) {
   }
 
   def path(uri: String, variables: Any*): RestRequest = {
+    require(uri.startsWith("/"), "uri should starts with /")
     val parts = this.parse(uri)
     var resolved = uri
     require(parts.length == variables.size, "path variable number not matched.")
@@ -91,51 +91,47 @@ class RestRequest(val target: String, client: RestClient) {
   }
 
   def post(body: Any, contentType: String): Response = {
-    val load = HttpUtils.payload(body, contentType)
-    headers foreach { h => load.header(h._1, h._2) }
-    authorization foreach { str => load.auth(str) }
+    val load = Request.build(body, contentType)
+    load.headers(this.headers).auth(this.authorization)
     HttpUtils.invoke(buildURL(), HttpMethods.POST, load, Some({ c =>
       c.setConnectTimeout(client.connectTimeout)
       c.setReadTimeout(client.readTimeout)
     }))
   }
 
-  def postJson(jsonStr: String): Response = {
-    this.post(jsonStr, MediaTypes.ApplicationJson.toString)
-  }
-
-  def postJson(json: Json): Response = {
-    this.post(json.toString, MediaTypes.ApplicationJson.toString)
+  def postJson(json: Any): Response = {
+    val load = Request.asJson(json)
+    this.post(load.body, MediaTypes.ApplicationJson.toString)
   }
 
   def postForm(params: (String, Any)*): Response = {
-    val load = HttpUtils.asForm(params)
+    val load = Request.asForm(params)
     this.post(load, load.contentType)
   }
 
   def delete(): Response = {
-    val load = HttpUtils.payload("", "application/json")
-    headers foreach { h => load.header(h._1, h._2) }
-    authorization foreach { str => load.auth(str) }
+    val load = Request.build("", "application/json")
+    load.headers(this.headers).auth(this.authorization)
     HttpUtils.delete(buildURL(), load)
   }
 
   def put(body: Any, contentType: String): Response = {
-    val load = HttpUtils.payload(body, contentType)
-    headers foreach { h => load.header(h._1, h._2) }
-    authorization foreach { str => load.auth(str) }
+    val load = Request.build(body, contentType)
+    load.headers(this.headers).auth(this.authorization)
+
     HttpUtils.invoke(buildURL(), HttpMethods.PUT, load, Some({ c =>
       c.setConnectTimeout(client.connectTimeout)
       c.setReadTimeout(client.readTimeout)
     }))
   }
 
-  def putJson(json: Json): Response = {
-    this.put(json.toString, MediaTypes.ApplicationJson.toString)
+  def putJson(json: Any): Response = {
+    val load = Request.asJson(json)
+    this.put(load.body, MediaTypes.ApplicationJson.toString)
   }
 
   def putForm(params: (String, Any)*): Response = {
-    val load = HttpUtils.asForm(params)
+    val load = Request.asForm(params)
     this.put(load.body, load.contentType)
   }
 
