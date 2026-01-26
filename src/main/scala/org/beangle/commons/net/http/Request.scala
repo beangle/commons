@@ -83,21 +83,22 @@ object Request {
       val crlf = "\r\n"
       val dash2 = "--"
       val boundary = "*****" + UUID.randomUUID() + "****"
-      val contentType = s"multipart/form-data; boundary=$boundary"
 
       val text = new StringBuilder
+      val boundaryStart = dash2 + boundary + crlf
       formFields foreach { case (k, v) =>
-        text.append(dash2).append(boundary).append(crlf)
-        text.append(s"""Content-Disposition: form-data; name="${k}"""")
-        text.append(crlf).append(crlf) //without contenttype using crlf
+        text.append(boundaryStart)
+        text.append(s"""Content-Disposition: form-data; name="${k}"""").append(crlf)
+        text.append(crlf) //字段元信息和值之间需要增加一个换行符
         text.append(v).append(crlf);
       }
       val ins = Collections.newBuffer[InputStream]
       ins.addOne(toStream(text))
 
+      //每个文件包含边界符号+文件头+文件二进制
       fileFields foreach { case (name, (fileName, is)) =>
         val meta = new StringBuilder
-        meta.append(dash2).append(boundary).append(crlf)
+        meta.append(boundaryStart)
         if (Strings.isNotEmpty(fileName)) {
           meta.append(s"""Content-Disposition: form-data; name="${name}"; filename="${Files.purify(fileName)}"""")
         } else {
@@ -105,6 +106,7 @@ object Request {
         }
         meta.append(crlf)
         meta.append("Content-Type:application/octet-stream").append(crlf)
+        meta.append(crlf) //字段元信息和字节流之间需要增加一个换行符
         ins.addOne(toStream(meta))
         ins.addOne(is)
         ins.addOne(toStream(crlf))
