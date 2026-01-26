@@ -20,7 +20,6 @@ package org.beangle.commons.io
 import org.beangle.commons.lang.Strings.{split, substringAfter, substringBetween}
 
 import java.net.URL
-import scala.util.boundary.break
 
 object ResourceVersionLoader {
   def getResource(resourceName: String, version: String): Option[URL] = {

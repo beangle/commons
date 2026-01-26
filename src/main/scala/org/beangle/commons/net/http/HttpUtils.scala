@@ -19,14 +19,16 @@ package org.beangle.commons.net.http
 
 import org.beangle.commons.activation.MediaTypes
 import org.beangle.commons.codec.binary.Base64
-import org.beangle.commons.io.IOs
+import org.beangle.commons.collection.Collections
+import org.beangle.commons.io.{Files, IOs}
 import org.beangle.commons.json.Json
-import org.beangle.commons.lang.Charsets
+import org.beangle.commons.lang.{Charsets, Strings}
 
 import java.io.*
 import java.net.*
 import java.net.HttpURLConnection.*
 import java.nio.charset.Charset
+import java.util.UUID
 import scala.collection.mutable
 
 object HttpUtils {
@@ -43,17 +45,22 @@ object HttpUtils {
     protected[http] val headers = new mutable.HashMap[String, Any]
     protected[http] var authorization: Option[String] = None
 
-    def addHeader(name: String, value: String): Payload = {
+    def header(name: String, value: String): Payload = {
       headers.put(name, value)
       this
     }
 
-    def authBasic(username: String, password: String): Payload = {
+    def auth(str: String): Payload = {
+      this.authorization = Some(str)
+      this
+    }
+
+    def auth(username: String, password: String): Payload = {
       this.authorization = Some("Basic " + Base64.encode(s"$username:$password".getBytes))
       this
     }
 
-    def authBearer(token: String): Payload = {
+    def bearer(token: String): Payload = {
       this.authorization = Some(s"Bearer $token")
       this
     }
@@ -107,24 +114,19 @@ object HttpUtils {
     }
   }
 
-  def getData(urlString: String, method: String = HttpMethods.GET): Response = {
-    getData(URI.create(urlString).toURL, method, None)
+  def getData(urlString: String): Response = {
+    getData(URI.create(urlString).toURL, None)
   }
 
-  def getData(url: URL, method: String, username: String, password: String): Response = {
-    getData(url, method, Some({ x =>
-      x.addRequestProperty("Authorization", "Basic " + Base64.encode(s"$username:$password".getBytes))
-    }))
-  }
-
-  def getData(url: URL, method: String, f: Option[HttpURLConnection => Unit]): Response = {
+  def getData(url: URL, f: Option[HttpURLConnection => Unit]): Response = {
     var conn: HttpURLConnection = null
     try {
       conn = url.openConnection().asInstanceOf[HttpURLConnection]
       conn.setDoOutput(false)
       conn.setUseCaches(false)
+      conn.setRequestMethod(HttpMethods.GET)
       f foreach (x => x(conn))
-      conn = followRedirect(conn, method)
+      conn = followRedirect(conn, HttpMethods.GET)
       if (conn.getResponseCode == HTTP_OK) {
         val bos = new ByteArrayOutputStream
         IOs.copy(conn.getInputStream, bos)
@@ -138,20 +140,14 @@ object HttpUtils {
   }
 
   def getText(urlString: String): Response = {
-    getText(URI.create(urlString).toURL, HttpMethods.GET, Charsets.UTF_8, None)
+    getText(URI.create(urlString).toURL, Charsets.UTF_8, None)
   }
 
-  def getText(url: URL, method: String, encoding: Charset): Response = {
-    getText(url, method, encoding, None)
+  def getText(url: URL, encoding: Charset): Response = {
+    getText(url, encoding, None)
   }
 
-  def getText(url: URL, method: String, encoding: Charset, username: String, password: String): Response = {
-    getText(url, method, encoding, Some({ x =>
-      x.addRequestProperty("Authorization", "Basic " + Base64.encode(s"$username:$password".getBytes))
-    }))
-  }
-
-  def getText(url: URL, method: String, encoding: Charset, f: Option[(URLConnection) => Unit]): Response = {
+  def getText(url: URL, encoding: Charset, f: Option[URLConnection => Unit]): Response = {
     var conn: HttpURLConnection = null
     var in: BufferedReader = null
     try {
@@ -159,7 +155,7 @@ object HttpUtils {
       conn.setDoOutput(false)
       conn.setUseCaches(false)
       f foreach (x => x(conn))
-      conn = followRedirect(conn, method)
+      conn = followRedirect(conn, HttpMethods.GET)
       if conn.getResponseCode == HTTP_OK then
         in = new BufferedReader(new InputStreamReader(conn.getInputStream, encoding))
         var line: String = in.readLine()
@@ -180,29 +176,24 @@ object HttpUtils {
     }
   }
 
-  def invoke(url: URL, body: AnyRef, contentType: String): Response = {
-    invoke(url, payload(body, contentType))
+  def post(url: URL, body: AnyRef, contentType: String): Response = {
+    invoke(url, HttpMethods.POST, payload(body, contentType), None)
   }
 
-  @deprecated("using invoke by payload", "4.7.1")
-  def invoke(url: URL, body: AnyRef, contentType: String, username: String, password: String): Response = {
-    invoke(url, payload(body, contentType).authBasic(username, password))
+  def post(url: URL, payload: Payload): Response = {
+    invoke(url, HttpMethods.POST, payload, None)
   }
 
-  def invoke(url: URL, body: AnyRef, contentType: String, f: Option[URLConnection => Unit]): Response = {
+  def put(url: URL, payload: Payload): Response = {
+    invoke(url, HttpMethods.PUT, payload, None)
+  }
+
+  def delete(url: URL, payload: Payload): Response = {
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     Https.noverify(conn)
-    conn.setDoOutput(true)
-    requestBy(conn, HttpMethods.POST)
-    conn.setRequestProperty("Content-Type", contentType)
-    f foreach (x => x(conn))
-
-    val os = conn.getOutputStream
-    payload(body, contentType).body match {
-      case ba: Array[Byte] => os.write(ba)
-      case v => writeBody(os, v.toString)
-    }
-    os.close() //don't forget to close the OutputStream
+    requestBy(conn, HttpMethods.DELETE)
+    payload.headers foreach { (k, v) => conn.addRequestProperty(k, v.toString) }
+    payload.authorization foreach { auth => conn.setRequestProperty("Authorization", auth) }
     try {
       conn.connect()
       val bos = new ByteArrayOutputStream
@@ -214,18 +205,21 @@ object HttpUtils {
       if (null != conn) conn.disconnect()
   }
 
-  def invoke(url: URL, payload: Payload): Response = {
+  def invoke(url: URL, method: String, payload: Payload, f: Option[URLConnection => Unit]): Response = {
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     Https.noverify(conn)
     conn.setDoOutput(true)
-    requestBy(conn, HttpMethods.POST)
+    require(HttpMethods.POST == method || HttpMethods.PUT == method, "Only support POST or PUT in invoke")
+    requestBy(conn, method)
+
     payload.headers foreach { (k, v) => conn.addRequestProperty(k, v.toString) }
     payload.authorization foreach { auth => conn.setRequestProperty("Authorization", auth) }
     conn.setRequestProperty("Content-Type", payload.contentType)
-
+    f foreach (x => x(conn))
     val os = conn.getOutputStream
     payload.body match {
       case ba: Array[Byte] => os.write(ba)
+      case is: InputStream => IOs.copy(is, os)
       case v => writeBody(os, v.toString)
     }
     os.close() //don't forget to close the OutputStream
@@ -316,18 +310,64 @@ object HttpUtils {
    */
   def asForm(data: Any): Payload = {
     require(null != data, "body cannot be empty")
-    val newBody = data match {
-      case params: collection.Map[_, _] => encodeTuple(params)
-      case list: Iterable[_] =>
-        if (list.nonEmpty) {
-          if list.head.isInstanceOf[(_, _)] then encodeTuple(list.asInstanceOf[Iterable[(_, _)]]) else ""
-        } else {
-          ""
-        }
-      case str: String => str
-      case _ => data.toString
+    val datas = data match {
+      case t: (_, _) => Seq(t)
+      case i: Iterable[_] => i.asInstanceOf[Iterable[(_, _)]]
+      case _ => throw new IllegalArgumentException(s"form data need tuple or tuples,${data.getClass.getName} not supported")
     }
-    new Payload(newBody, MediaTypes.ApplicationFormUrlencoded.toString)
+    val formFields = Collections.newBuffer[(String, Any)]
+    val fileFields = Collections.newBuffer[(String, (String, InputStream))]
+
+    datas foreach { case (k, v) =>
+      v match {
+        case f: File => fileFields.addOne(k.toString, (f.getName, new FileInputStream(f)))
+        case f: InputStream => fileFields.addOne(k.toString, ("", f))
+        case ispair: (_, _) =>
+          val fileName = ispair._1.toString
+          ispair._2 match {
+            case f: File => fileFields.addOne(k.toString, (fileName, new FileInputStream(f)))
+            case f: InputStream => fileFields.addOne(k.toString, (fileName, f))
+            case _ =>
+          }
+        case _ => formFields.addOne((k.toString, v))
+      }
+    }
+    if (fileFields.isEmpty) {
+      new Payload(encodeTuples(formFields), MediaTypes.ApplicationFormUrlencoded.toString)
+    } else {
+      val crlf = "\r\n"
+      val dash2 = "--"
+      val boundary = "*****" + UUID.randomUUID() + "****"
+      val contentType = s"multipart/form-data;boundary=$boundary"
+
+      val text = new StringBuilder
+      formFields foreach { case (k, v) =>
+        text.append(dash2).append(boundary).append(crlf)
+        text.append(s"""Content-Disposition: form-data; name="${k}"""")
+        text.append(crlf).append(crlf) //without contenttype using crlf
+        text.append(v).append(crlf);
+      }
+      val textIs = new ByteArrayInputStream(text.toString().getBytes())
+      val ins = Collections.newBuffer[InputStream]
+      ins.addOne(textIs)
+
+      fileFields foreach { case (name, (fileName, is)) =>
+        val meta = new StringBuilder
+        meta.append(dash2).append(boundary).append(crlf)
+        if (Strings.isNotEmpty(fileName)) {
+          meta.append(s"""Content-Disposition: form-data; name="${name}"; filename="${Files.purify(fileName)}"""")
+        } else {
+          meta.append(s"""Content-Disposition: form-data; name="${name}"""")
+        }
+        meta.append(crlf)
+        meta.append("Content-Type:application/octet-stream").append(crlf)
+        ins.addOne(new ByteArrayInputStream(meta.toString().getBytes()))
+        ins.addOne(is)
+        ins.addOne(new ByteArrayInputStream(crlf.getBytes))
+      }
+      ins.addOne(new ByteArrayInputStream((dash2 + boundary + dash2 + crlf).getBytes))
+      new Payload(IOs.pipeline(ins), "multipart/form-data; boundary=" + boundary)
+    }
   }
 
   private def writeBody(os: OutputStream, payload: String): Unit = {
@@ -337,11 +377,11 @@ object HttpUtils {
     osw.close()
   }
 
-  private def encodeTuple(params: Iterable[(_, _)]): String = {
+  private def encodeTuples(params: Iterable[(String, _)]): String = {
     val paramBuffer = new mutable.ArrayBuffer[String]
     params foreach { e =>
       if (e._2 != null) {
-        paramBuffer.addOne(e._1.toString + "=" + URLEncoder.encode(e._2.toString, Charsets.UTF_8))
+        paramBuffer.addOne(e._1 + "=" + URLEncoder.encode(e._2.toString, Charsets.UTF_8))
       }
     }
     paramBuffer.mkString("&")

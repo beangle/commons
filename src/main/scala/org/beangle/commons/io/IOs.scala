@@ -171,6 +171,10 @@ object IOs {
       if res != null then res.close()
   }
 
+  def pipeline(ins: Iterable[InputStream]): InputStream = {
+    new SequenceInputStream(scala.jdk.javaapi.CollectionConverters.asJavaEnumeration(ins.iterator))
+  }
+
   private def toBufferedReader(reader: Reader): BufferedReader = {
     reader match {
       case reader1: BufferedReader => reader1

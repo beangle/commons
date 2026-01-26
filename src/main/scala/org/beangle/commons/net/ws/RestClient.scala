@@ -15,26 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.net.http
+package org.beangle.commons.net.ws
 
-import org.beangle.commons.lang.Charsets
+object RestClient {
 
-import java.net.HttpURLConnection
+  private val DefaultClient = new RestClient
 
-case class Response(status: Int, content: Any) {
-
-  def getText: String = {
-    content match {
-      case null => ""
-      case s: String => s
-      case bytes: Array[Byte] => new String(bytes, Charsets.UTF_8)
-    }
+  def target(url: String): RestRequest = {
+    RestRequest(url, DefaultClient)
   }
+}
 
-  def isOk: Boolean = status == HttpURLConnection.HTTP_OK
-
-  def getOrElse(default: => String): String = {
-    if this.isOk then getText else default
-  }
-
+class RestClient {
+  var connectTimeout: Int = 5 * 1000
+  var readTimeout: Int = 10 * 1000
 }
