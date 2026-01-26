@@ -58,7 +58,7 @@ object HttpUtils {
       this
     }
 
-    def accept(acceptType: String): Payload = {
+    def request(acceptType: String): Payload = {
       headers.put("Accept", acceptType)
       this
     }
