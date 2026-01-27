@@ -26,9 +26,9 @@ class RestRequestTest extends AnyFunSpec, Matchers {
     it("resolve url") {
       val request = RestRequest("http://localhost:8080", new RestClient)
       request.path("/depart/{departId}/user/{id}/detail", 12, 345L).params("showPhoto" -> true)
-      request.buildURL().toString should equal("http://localhost:8080/depart/12/user/345/detail?showPhoto=true")
+      request.buildURI() should equal("http://localhost:8080/depart/12/user/345/detail?showPhoto=true")
 
-      val newUrl = request.path("/user/{id}/detail?enableCopy=1", 345L).params("banner" -> "某某信息系统").buildURL().toString
+      val newUrl = request.path("/user/{id}/detail?enableCopy=1", 345L).params("banner" -> "某某信息系统").buildURI()
       newUrl should equal("http://localhost:8080/user/345/detail?enableCopy=1&showPhoto=true&banner=%E6%9F%90%E6%9F%90%E4%BF%A1%E6%81%AF%E7%B3%BB%E7%BB%9F")
     }
   }

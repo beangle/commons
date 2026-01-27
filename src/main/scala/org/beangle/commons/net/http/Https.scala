@@ -17,22 +17,47 @@
 
 package org.beangle.commons.net.http
 
-import java.net.{HttpURLConnection, Socket}
+import java.net.Socket
+import java.net.http.HttpClient
+import java.net.http.HttpClient.Redirect
 import java.security.cert.X509Certificate
+import java.time.Duration
 import javax.net.ssl.*
 
 object Https {
 
-  def noverify(connection: HttpURLConnection): Unit =
-    connection match {
-      case conn: HttpsURLConnection =>
-        conn.setHostnameVerifier(TrustAllHosts)
-        val sslContext = SSLContext.getInstance("SSL", "SunJSSE");
-        sslContext.init(null, Array(NullTrustManager), new java.security.SecureRandom());
-        val ssf = sslContext.getSocketFactory()
-        conn.setSSLSocketFactory(ssf)
-      case _ =>
+  private val Timeout = Duration.ofSeconds(10)
+
+  def createDefaultClient(): HttpClient = {
+    HttpClient.newBuilder().connectTimeout(Timeout).followRedirects(Redirect.NORMAL).build()
+  }
+
+  def createTrustAllClient(): HttpClient = {
+    try {
+      val sslContext = SSLContext.getInstance("TLS")
+      sslContext.init(null, Array(NullTrustManager), new java.security.SecureRandom())
+      HttpClient.newBuilder.sslContext(sslContext)
+        .sslParameters(createWideOpenSslParams())
+        .connectTimeout(Timeout)
+        .followRedirects(Redirect.NORMAL)
+        .build()
+    } catch {
+      case e: Exception =>
+        throw new RuntimeException("创建忽略SSL校验的HttpClient失败", e)
     }
+  }
+
+  // 创建宽泛的SSLParameters：关闭主机名校验 + 支持所有常见SSL/TLS协议
+  private def createWideOpenSslParams() = {
+    val sslParams = new SSLParameters
+    //关闭主机名与证书域名的匹配校验（设为null即可）
+    sslParams.setEndpointIdentificationAlgorithm(null)
+    //支持所有常见SSL/TLS协议（包括部分旧协议，极致宽泛）
+    sslParams.setProtocols(Array[String]("TLSv1.3", "TLSv1.2", "TLSv1.1", "TLSv1", "SSLv3"))
+    // 可选：支持所有加密套件（进一步放宽）
+    sslParams.setCipherSuites(SSLContext.getDefault.getDefaultSSLParameters.getCipherSuites)
+    sslParams
+  }
 
   object NullTrustManager extends X509ExtendedTrustManager {
     override def checkClientTrusted(c: Array[X509Certificate], at: String): Unit = {
@@ -53,12 +78,7 @@ object Https {
     override def checkServerTrusted(c: Array[X509Certificate], s: String, socket: Socket): Unit = {
     }
 
-    override def getAcceptedIssuers(): Array[X509Certificate] =
-      null
+    override def getAcceptedIssuers: Array[X509Certificate] = Array.empty[X509Certificate]
   }
 
-  object TrustAllHosts extends HostnameVerifier {
-    def verify(arg0: String, arg1: SSLSession): Boolean =
-      true
-  }
 }

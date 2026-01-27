@@ -21,17 +21,16 @@ import org.beangle.commons.activation.{MediaType, MediaTypes}
 import org.beangle.commons.codec.binary.Base64
 import org.beangle.commons.lang.Strings.split
 import org.beangle.commons.lang.{Charsets, Strings}
-import org.beangle.commons.net.Networks
 import org.beangle.commons.net.http.{HttpMethods, HttpUtils, Request, Response}
 
-import java.net.{URL, URLEncoder}
+import java.net.URLEncoder
 import scala.collection.mutable
 
 class RestRequest(val target: String, client: RestClient) {
   protected val headers = new mutable.HashMap[String, String]
   protected var authorization: Option[String] = None
 
-  private var uri: String = ""
+  private var path: String = ""
   private val queryParams = new mutable.ArrayBuffer[(String, String)]
 
   def header(name: String, value: String): RestRequest = {
@@ -67,7 +66,7 @@ class RestRequest(val target: String, client: RestClient) {
     parts.zip(variables) foreach { case (k, v) =>
       resolved = Strings.replace(resolved, s"{$k}", v.toString)
     }
-    this.uri = resolved
+    this.path = resolved
     this
   }
 
@@ -82,21 +81,14 @@ class RestRequest(val target: String, client: RestClient) {
   }
 
   def get(): Response = {
-    HttpUtils.getData(buildURL(), Some({ c =>
-      headers foreach { h => c.addRequestProperty(h._1, h._2) }
-      authorization foreach { au => c.setRequestProperty("Authorization", au) }
-      c.setConnectTimeout(client.connectTimeout)
-      c.setReadTimeout(client.readTimeout)
-    }))
+    val request = Request.noBody
+    HttpUtils.getData(buildURI(), request.headers(this.headers).auth(this.authorization))
   }
 
   def post(body: Any, contentType: String): Response = {
-    val load = Request.build(body, contentType)
-    load.headers(this.headers).auth(this.authorization)
-    HttpUtils.invoke(buildURL(), HttpMethods.POST, load, Some({ c =>
-      c.setConnectTimeout(client.connectTimeout)
-      c.setReadTimeout(client.readTimeout)
-    }))
+    val req = Request.build(body, contentType)
+    req.headers(this.headers).auth(this.authorization)
+    HttpUtils.invoke(buildURI(), HttpMethods.POST, req)
   }
 
   def postJson(json: Any): Response = {
@@ -112,17 +104,13 @@ class RestRequest(val target: String, client: RestClient) {
   def delete(): Response = {
     val load = Request.build("", "application/json")
     load.headers(this.headers).auth(this.authorization)
-    HttpUtils.delete(buildURL(), load)
+    HttpUtils.delete(buildURI(), load)
   }
 
   def put(body: Any, contentType: String): Response = {
-    val load = Request.build(body, contentType)
-    load.headers(this.headers).auth(this.authorization)
-
-    HttpUtils.invoke(buildURL(), HttpMethods.PUT, load, Some({ c =>
-      c.setConnectTimeout(client.connectTimeout)
-      c.setReadTimeout(client.readTimeout)
-    }))
+    val req = Request.build(body, contentType)
+    req.headers(this.headers).auth(this.authorization)
+    HttpUtils.invoke(buildURI(), HttpMethods.PUT, req)
   }
 
   def putJson(json: Any): Response = {
@@ -135,9 +123,9 @@ class RestRequest(val target: String, client: RestClient) {
     this.put(load.body, load.contentType)
   }
 
-  protected[ws] def buildURL(): URL = {
-    val hasParam = uri.indexOf("?") > 0
-    val url = target + uri
+  protected[ws] def buildURI(): String = {
+    val hasParam = path.indexOf("?") > 0
+    val url = target + path
     val sb = new StringBuilder(url)
     queryParams foreach { case (k, v) =>
       sb.append("&")
@@ -148,7 +136,7 @@ class RestRequest(val target: String, client: RestClient) {
     if (!hasParam && queryParams.nonEmpty) {
       sb.setCharAt(url.length, '?')
     }
-    Networks.url(sb.mkString)
+    sb.mkString
   }
 
   /**

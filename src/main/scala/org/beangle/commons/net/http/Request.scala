@@ -44,7 +44,7 @@ object Request {
       case str: String => str
       case _ => Json.toLiteral(data)
     }
-    new Request(newBody, MediaTypes.ApplicationJson.toString)
+    new Request(Some(newBody), MediaTypes.ApplicationJson.toString)
   }
 
   /** Convert data to form Payload
@@ -78,7 +78,7 @@ object Request {
       }
     }
     if (fileFields.isEmpty) {
-      new Request(encodeTuples(formFields), MediaTypes.ApplicationFormUrlencoded.toString)
+      new Request(Some(encodeTuples(formFields)), MediaTypes.ApplicationFormUrlencoded.toString)
     } else {
       val crlf = "\r\n"
       val dash2 = "--"
@@ -112,7 +112,7 @@ object Request {
         ins.addOne(toStream(crlf))
       }
       ins.addOne(toStream(dash2 + boundary + dash2 + crlf))
-      new Request(IOs.pipeline(ins), "multipart/form-data; boundary=" + boundary)
+      new Request(Some(IOs.pipeline(ins)), "multipart/form-data; boundary=" + boundary)
     }
   }
 
@@ -123,9 +123,17 @@ object Request {
    * @return
    */
   def build(data: Any, contentType: String): Request = {
-    if contentType.startsWith("application/json") then asJson(data)
-    else if contentType.startsWith("application/x-www-form-urlencoded") then asForm(data)
-    else new Request(data, contentType)
+    if (null == data || data == None) {
+      new Request(None, contentType)
+    } else {
+      if contentType.startsWith("application/json") then asJson(data)
+      else if contentType.startsWith("application/x-www-form-urlencoded") then asForm(data)
+      else new Request(Option(data), contentType)
+    }
+  }
+
+  def noBody: Request = {
+    new Request(None, "application/json")
   }
 
   private def toStream(s: String): InputStream = {
@@ -147,7 +155,7 @@ object Request {
   }
 }
 
-final class Request(val body: Any, val contentType: String) {
+final class Request(val body: Option[Any], val contentType: String) {
   protected[http] val headers = new mutable.HashMap[String, Any]
   protected[http] var authorization: Option[String] = None
 

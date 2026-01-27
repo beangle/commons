@@ -18,16 +18,17 @@
 package org.beangle.commons.net.http
 
 import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.Charsets
+import org.beangle.commons.lang.{Charsets, Strings}
 
 import java.io.*
 import java.net.*
-import java.net.HttpURLConnection.*
+import java.net.HttpURLConnection.{HTTP_FORBIDDEN, HTTP_NOT_FOUND, HTTP_OK, HTTP_UNAUTHORIZED}
+import java.net.http.*
 import java.nio.charset.Charset
 
 object HttpUtils {
 
-  private val Timeout = 10 * 1000
+  private val client = createClient(java.lang.Boolean.getBoolean("beangle.https.trust-all"))
 
   private val statusMap = Map(
     HTTP_OK -> "OK",
@@ -35,207 +36,152 @@ object HttpUtils {
     HTTP_NOT_FOUND -> "Not Found",
     HTTP_UNAUTHORIZED -> "Access denied")
 
+  def createClient(trustAll: Boolean = false): HttpClient = {
+    if (trustAll) {
+      Https.createTrustAllClient()
+    } else {
+      Https.createDefaultClient()
+    }
+  }
+
   def toString(httpCode: Int): String = {
     statusMap.getOrElse(httpCode, String.valueOf(httpCode))
   }
 
-  def isAlive(url: String): Boolean = {
-    access(url).isOk
+  def isAlive(uri: String): Boolean = {
+    access(uri).isOk
   }
 
-  def access(url: String): ResourceStatus = {
-    access(URI.create(url).toURL)
-  }
-
-  def access(url: URL): ResourceStatus = {
+  def access(uri: String): ResourceStatus = {
+    val ouri = URI.create(uri)
     try {
-      val hc = followRedirect(url.openConnection(), HttpMethods.HEAD)
-      val rc = hc.getResponseCode
+      val request = HttpRequest.newBuilder(ouri)
+        .method(HttpMethods.HEAD, HttpRequest.BodyPublishers.noBody())
+        .build()
+      val response = client.send(request, HttpResponse.BodyHandlers.discarding())
+      val rc = response.statusCode()
       rc match {
         case HTTP_OK =>
-          val supportRange = "bytes" == hc.getHeaderField("Accept-Ranges")
-          ResourceStatus(rc, hc.getURL, hc.getHeaderFieldLong("Content-Length", 0), hc.getLastModified, supportRange)
-        case _ => ResourceStatus(rc, hc.getURL, -1, -1, supportRange = false)
+          val supportRange = "bytes" == response.headers().firstValue("Accept-Ranges").orElse(null)
+          val contentLength = response.headers().firstValueAsLong("Content-Length").orElse(0L)
+          val lastModified = response.headers().firstValueAsLong("Last-Modified").orElse(-1L)
+          ResourceStatus(rc, ouri, contentLength, lastModified, supportRange)
+        case _ => ResourceStatus(rc, ouri, -1, -1, supportRange = false)
       }
     } catch {
-      case _: Exception => ResourceStatus(HTTP_NOT_FOUND, url, -1, -1, false)
+      case _: Exception => ResourceStatus(HTTP_NOT_FOUND, ouri, -1, -1, false)
     }
   }
 
-  @scala.annotation.tailrec
-  def followRedirect(c: URLConnection, method: String): HttpURLConnection = {
-    val conn = c.asInstanceOf[HttpURLConnection]
-    conn.setInstanceFollowRedirects(false)
-    setup(conn, method)
-    val rc = conn.getResponseCode
-    rc match {
-      case HTTP_OK => conn
-      case HTTP_MOVED_TEMP | HTTP_MOVED_PERM =>
-        val newLoc = conn.getHeaderField("location")
-        followRedirect(URI.create(newLoc).toURL.openConnection, method)
-      case _ => conn
+
+  def getData(uri: String): Response = {
+    getData(uri, Request.noBody)
+  }
+
+  def getData(uri: String, request: Request): Response = {
+    try {
+      val builder = HttpRequest.newBuilder(URI.create(uri)).method(HttpMethods.GET, HttpRequest.BodyPublishers.noBody())
+      val response = client.send(setup(builder, request), HttpResponse.BodyHandlers.ofByteArray())
+      val statusCode = response.statusCode()
+      Response(statusCode, response.body())
+    } catch {
+      case e: Exception => error(uri, e)
     }
   }
 
-  def getData(urlString: String): Response = {
-    getData(URI.create(urlString).toURL, None)
+  def getText(uri: String): Response = {
+    getText(uri, Charsets.UTF_8, Request.noBody)
   }
 
-  def getData(url: URL, f: Option[HttpURLConnection => Unit]): Response = {
-    var conn: HttpURLConnection = null
+  def getText(uri: String, encoding: Charset): Response = {
+    getText(uri, encoding, Request.noBody)
+  }
+
+  def getText(uri: String, encoding: Charset, request: Request): Response = {
     try {
-      conn = url.openConnection().asInstanceOf[HttpURLConnection]
-      conn.setDoOutput(false)
-      conn.setUseCaches(false)
-      conn.setRequestMethod(HttpMethods.GET)
-      f foreach (x => x(conn))
-      conn = followRedirect(conn, HttpMethods.GET)
-      if (conn.getResponseCode == HTTP_OK) {
-        val bos = new ByteArrayOutputStream
-        IOs.copy(conn.getInputStream, bos)
-        Response(conn.getResponseCode, bos.toByteArray)
-      } else
-        Response(conn.getResponseCode, conn.getResponseMessage)
+      val builder = HttpRequest.newBuilder(URI.create(uri)).method(HttpMethods.GET, HttpRequest.BodyPublishers.noBody())
+      val res = client.send(setup(builder, request), HttpResponse.BodyHandlers.ofString(encoding))
+      Response(res.statusCode(), res.body())
     } catch {
-      case e: Exception => error(url, e)
-    } finally
-      if (null != conn) conn.disconnect()
-  }
-
-  def getText(urlString: String): Response = {
-    getText(URI.create(urlString).toURL, Charsets.UTF_8, None)
-  }
-
-  def getText(url: URL, encoding: Charset): Response = {
-    getText(url, encoding, None)
-  }
-
-  def getText(url: URL, encoding: Charset, f: Option[URLConnection => Unit]): Response = {
-    var conn: HttpURLConnection = null
-    var in: BufferedReader = null
-    try {
-      conn = url.openConnection().asInstanceOf[HttpURLConnection]
-      conn.setDoOutput(false)
-      conn.setUseCaches(false)
-      f foreach (x => x(conn))
-      conn = followRedirect(conn, HttpMethods.GET)
-      if conn.getResponseCode == HTTP_OK then
-        in = new BufferedReader(new InputStreamReader(conn.getInputStream, encoding))
-        var line: String = in.readLine()
-        val sb = new StringBuilder(255)
-        while (line != null) {
-          sb.append(line)
-          line = in.readLine()
-          if (null != line) sb.append("\n")
-        }
-        Response(HTTP_OK, sb.toString)
-      else
-        Response(conn.getResponseCode, conn.getResponseMessage)
-    } catch {
-      case e: Exception => error(url, e)
-    } finally {
-      if (null != in) in.close()
-      if (null != conn) conn.disconnect()
+      case e: Exception => error(uri, e)
     }
   }
 
-  def post(url: URL, body: AnyRef, contentType: String): Response = {
-    invoke(url, HttpMethods.POST, Request.build(body, contentType), None)
+  def post(uri: String, body: AnyRef, contentType: String): Response = {
+    invoke(uri, HttpMethods.POST, Request.build(body, contentType))
   }
 
-  def post(url: URL, request: Request): Response = {
-    invoke(url, HttpMethods.POST, request, None)
+  def post(uri: String, request: Request): Response = {
+    invoke(uri, HttpMethods.POST, request)
   }
 
-  def put(url: URL, request: Request): Response = {
-    invoke(url, HttpMethods.PUT, request, None)
+  def put(uri: String, request: Request): Response = {
+    invoke(uri, HttpMethods.PUT, request)
   }
 
-  def delete(url: URL, request: Request): Response = {
-    val conn = url.openConnection.asInstanceOf[HttpURLConnection]
-    setup(conn, HttpMethods.DELETE)
-    writeHeaders(conn, request)
+  def delete(uri: String, request: Request): Response = {
     try {
-      conn.connect()
-      val bos = new ByteArrayOutputStream
-      IOs.copy(conn.getInputStream, bos)
-      Response(conn.getResponseCode, bos.toByteArray)
+      val builder = HttpRequest.newBuilder(URI.create(uri)).method(HttpMethods.DELETE, HttpRequest.BodyPublishers.noBody())
+      val res = client.send(setup(builder, request), HttpResponse.BodyHandlers.ofByteArray())
+      Response(res.statusCode(), res.body())
     } catch {
-      case e: Exception => error(url, e)
-    } finally
-      if (null != conn) conn.disconnect()
+      case e: Exception => error(uri, e)
+    }
   }
 
-  def invoke(url: URL, method: String, request: Request, f: Option[URLConnection => Unit] = None): Response = {
-    val conn = url.openConnection.asInstanceOf[HttpURLConnection]
-    conn.setDoOutput(true)
+  def invoke(uri: String, method: String, request: Request): Response = {
     require(HttpMethods.POST == method || HttpMethods.PUT == method, "Only support POST or PUT in invoke")
-    setup(conn, method)
-    writeHeaders(conn, request)
-    f foreach (x => x(conn))
-    val os = conn.getOutputStream
-    request.body match {
-      case ba: Array[Byte] => os.write(ba)
-      case is: InputStream => IOs.copy(is, os)
-      case v => os.write(v.toString.getBytes(Charsets.UTF_8))
-    }
-    os.close() //don't forget to close the OutputStream
     try {
-      conn.connect()
-      val bos = new ByteArrayOutputStream
-      IOs.copy(conn.getInputStream, bos)
-      Response(conn.getResponseCode, bos.toByteArray)
+      val builder = HttpRequest.newBuilder(URI.create(uri))
+      request.body.map {
+        case ba: Array[Byte] => HttpRequest.BodyPublishers.ofByteArray(ba)
+        case is: InputStream => HttpRequest.BodyPublishers.ofInputStream(() => is)
+        case v => HttpRequest.BodyPublishers.ofString(v.toString, Charsets.UTF_8)
+      }.foreach(publisher => builder.method(method, publisher))
+
+      val res = client.send(setup(builder, request), HttpResponse.BodyHandlers.ofByteArray())
+      Response(res.statusCode(), res.body())
     } catch {
-      case e: Exception => error(url, e)
-    } finally
-      if (null != conn) conn.disconnect()
+      case e: Exception => error(uri, e)
+    }
   }
 
-  def download(c: URLConnection, location: File): Boolean = {
-    val conn = followRedirect(c, "GET")
-    location.getParentFile.mkdirs()
-    var input: InputStream = null
-    var output: OutputStream = null
+  def download(uri: String, location: File): Boolean = {
     try {
-      val file = new File(location.toString + ".part")
-      file.delete()
-      val buffer = Array.ofDim[Byte](1024 * 4)
-      input = conn.getInputStream
-      output = new FileOutputStream(file)
-      var n = input.read(buffer)
-      while (-1 != n) {
-        output.write(buffer, 0, n)
-        n = input.read(buffer)
+      val request = HttpRequest.newBuilder(URI.create(uri))
+        .method(HttpMethods.GET, HttpRequest.BodyPublishers.noBody())
+        .build()
+      val response = client.send(request, HttpResponse.BodyHandlers.ofInputStream())
+      if (response.statusCode() == HTTP_OK) {
+        location.getParentFile.mkdirs()
+        val file = new File(location.toString + ".part")
+        file.delete()
+        val output = new FileOutputStream(file)
+        IOs.copy(response.body(), output)
+        //先关闭文件读写，再改名
+        IOs.close(output)
+        if (location.exists()) location.delete()
+        file.renameTo(location)
+        true
+      } else {
+        false
       }
-      //先关闭文件读写，再改名
-      IOs.close(input, output)
-      input = null
-      output = null
-      if (location.exists()) location.delete()
-      file.renameTo(location)
-      true
     } catch {
       case e: Throwable => false
     }
-    finally {
-      IOs.close(input, output)
-    }
   }
 
-  private[this] def error(url: URL, e: Exception): Response = {
+  private[this] def error(uri: String, e: Exception): Response = {
     Response(404, e.getMessage)
   }
 
-  private def setup(conn: HttpURLConnection, method: String): Unit = {
-    conn.setConnectTimeout(Timeout)
-    conn.setReadTimeout(Timeout)
-    conn.setRequestMethod(method)
-    Https.noverify(conn)
+  private def setup(builder: HttpRequest.Builder, request: Request): HttpRequest = {
+    request.headers foreach { (k, v) => builder.header(k, v.toString) }
+    request.authorization foreach { auth => builder.header("Authorization", auth) }
+    if (request.body.nonEmpty && Strings.isNotBlank(request.contentType)) {
+      builder.header("Content-Type", request.contentType)
+    }
+    builder.build()
   }
 
-  private def writeHeaders(conn: HttpURLConnection, request: Request): Unit = {
-    request.headers foreach { (k, v) => conn.addRequestProperty(k, v.toString) }
-    request.authorization foreach { auth => conn.setRequestProperty("Authorization", auth) }
-    conn.setRequestProperty("Content-Type", request.contentType)
-  }
 }

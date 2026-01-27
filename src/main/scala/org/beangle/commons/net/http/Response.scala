@@ -19,8 +19,6 @@ package org.beangle.commons.net.http
 
 import org.beangle.commons.lang.Charsets
 
-import java.net.HttpURLConnection
-
 case class Response(status: Int, content: Any) {
 
   def getText: String = {
@@ -31,7 +29,9 @@ case class Response(status: Int, content: Any) {
     }
   }
 
-  def isOk: Boolean = status == HttpURLConnection.HTTP_OK
+  def isOk: Boolean = {
+    status == java.net.HttpURLConnection.HTTP_OK
+  }
 
   def getOrElse(default: => String): String = {
     if this.isOk then getText else default
