@@ -18,8 +18,8 @@
 package org.beangle.commons.lang.time
 
 import java.text.*
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.{ZoneId, ZonedDateTime}
 import java.util as ju
 import java.util.regex.Pattern
 import java.util.{Calendar, GregorianCalendar, SimpleTimeZone, TimeZone}
@@ -42,6 +42,10 @@ object DateFormats {
 
     def format(date: java.time.LocalDateTime): String = {
       date.atZone(ZoneId.of("GMT")).format(DateTimeFormatter.RFC_1123_DATE_TIME)
+    }
+
+    def parse(date: String): ZonedDateTime = {
+      ZonedDateTime.parse(date, DateTimeFormatter.RFC_1123_DATE_TIME)
     }
   }
 

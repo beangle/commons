@@ -18,11 +18,12 @@
 package org.beangle.commons.net.http
 
 import org.beangle.commons.io.IOs
+import org.beangle.commons.lang.time.DateFormats
 import org.beangle.commons.lang.{Charsets, Strings}
 
 import java.io.*
 import java.net.*
-import java.net.HttpURLConnection.{HTTP_FORBIDDEN, HTTP_NOT_FOUND, HTTP_OK, HTTP_UNAUTHORIZED}
+import java.net.HttpURLConnection.*
 import java.net.http.*
 import java.nio.charset.Charset
 
@@ -64,15 +65,34 @@ object HttpUtils {
         case HTTP_OK =>
           val supportRange = "bytes" == response.headers().firstValue("Accept-Ranges").orElse(null)
           val contentLength = response.headers().firstValueAsLong("Content-Length").orElse(0L)
-          val lastModified = response.headers().firstValueAsLong("Last-Modified").orElse(-1L)
+          val lm = response.headers().firstValue("Last-Modified").orElse("")
+          val lastModified = if Strings.isBlank(lm) then 0 else DateFormats.Http.parse(lm).toInstant.toEpochMilli
           ResourceStatus(rc, ouri, contentLength, lastModified, supportRange)
         case _ => ResourceStatus(rc, ouri, -1, -1, supportRange = false)
       }
     } catch {
-      case _: Exception => ResourceStatus(HTTP_NOT_FOUND, ouri, -1, -1, false)
+      case e: Exception =>
+        e.printStackTrace()
+        ResourceStatus(HTTP_NOT_FOUND, ouri, -1, -1, false)
     }
   }
 
+  @deprecated(since = "5.8.1")
+  @scala.annotation.tailrec
+  def followRedirect(c: URLConnection, method: String): HttpURLConnection = {
+    val conn = c.asInstanceOf[HttpURLConnection]
+    conn.setInstanceFollowRedirects(false)
+    conn.setRequestMethod(method)
+    conn.setConnectTimeout(10 * 1000)
+    val rc = conn.getResponseCode
+    rc match {
+      case HTTP_OK => conn
+      case HTTP_MOVED_TEMP | HTTP_MOVED_PERM =>
+        val newLoc = conn.getHeaderField("location")
+        followRedirect(URI.create(newLoc).toURL.openConnection, method)
+      case _ => conn
+    }
+  }
 
   def getData(uri: String): Response = {
     getData(uri, Request.noBody)

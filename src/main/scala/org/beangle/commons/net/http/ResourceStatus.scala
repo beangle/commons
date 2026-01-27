@@ -19,6 +19,14 @@ package org.beangle.commons.net.http
 
 import java.net.URI
 
+/** Resource status
+ *
+ * @param status
+ * @param target
+ * @param length
+ * @param lastModified milliseconds from 1970-01-01
+ * @param supportRange
+ */
 case class ResourceStatus(status: Int, target: URI, length: Long, lastModified: Long, supportRange: Boolean) {
   def isOk: Boolean = 200 == status
 }
