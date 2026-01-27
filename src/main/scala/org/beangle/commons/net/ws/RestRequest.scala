@@ -82,7 +82,7 @@ class RestRequest(val target: String, client: RestClient) {
 
   def get(): Response = {
     val request = Request.noBody
-    HttpUtils.getData(buildURI(), request.headers(this.headers).auth(this.authorization))
+    HttpUtils.get(buildURI(), request.headers(this.headers).auth(this.authorization))
   }
 
   def post(body: Any, contentType: String): Response = {

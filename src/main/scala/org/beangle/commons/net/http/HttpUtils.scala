@@ -25,7 +25,6 @@ import java.io.*
 import java.net.*
 import java.net.HttpURLConnection.*
 import java.net.http.*
-import java.nio.charset.Charset
 
 object HttpUtils {
 
@@ -71,9 +70,7 @@ object HttpUtils {
         case _ => ResourceStatus(rc, ouri, -1, -1, supportRange = false)
       }
     } catch {
-      case e: Exception =>
-        e.printStackTrace()
-        ResourceStatus(HTTP_NOT_FOUND, ouri, -1, -1, false)
+      case e: Exception => ResourceStatus(HTTP_NOT_FOUND, ouri, -1, -1, false)
     }
   }
 
@@ -94,33 +91,14 @@ object HttpUtils {
     }
   }
 
-  def getData(uri: String): Response = {
-    getData(uri, Request.noBody)
+  def get(uri: String): Response = {
+    get(uri, Request.noBody)
   }
 
-  def getData(uri: String, request: Request): Response = {
+  def get(uri: String, request: Request): Response = {
     try {
       val builder = HttpRequest.newBuilder(URI.create(uri)).method(HttpMethods.GET, HttpRequest.BodyPublishers.noBody())
-      val response = client.send(setup(builder, request), HttpResponse.BodyHandlers.ofByteArray())
-      val statusCode = response.statusCode()
-      Response(statusCode, response.body())
-    } catch {
-      case e: Exception => error(uri, e)
-    }
-  }
-
-  def getText(uri: String): Response = {
-    getText(uri, Charsets.UTF_8, Request.noBody)
-  }
-
-  def getText(uri: String, encoding: Charset): Response = {
-    getText(uri, encoding, Request.noBody)
-  }
-
-  def getText(uri: String, encoding: Charset, request: Request): Response = {
-    try {
-      val builder = HttpRequest.newBuilder(URI.create(uri)).method(HttpMethods.GET, HttpRequest.BodyPublishers.noBody())
-      val res = client.send(setup(builder, request), HttpResponse.BodyHandlers.ofString(encoding))
+      val res = client.send(setup(builder, request), HttpResponse.BodyHandlers.ofByteArray())
       Response(res.statusCode(), res.body())
     } catch {
       case e: Exception => error(uri, e)
