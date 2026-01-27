@@ -33,16 +33,16 @@ object WinCmd extends Shell(Charsets.GBK) {
    * @param args command and args
    * @return (exit code,output)
    */
-  override def exec(args: String*): (Int, collection.Seq[String]) = {
-    require(args.nonEmpty, "Need command")
+  override def exec(arg: String): (Int, collection.Seq[String]) = {
+    require(null != arg, "Need command")
     //如果是个绝对地址，则直接执行，不用放在cmd环境中执行。
-    val newArgs = Collections.newBuffer[String]
-    if (!Shell.isFile(args.head)) {
-      newArgs.addOne("cmd")
-      newArgs.addOne("/c")
+    val args = Collections.newBuffer[String]
+    if (!Shell.isFile(arg)) {
+      args.addOne("cmd")
+      args.addOne("/c")
     }
-    newArgs.addAll(args)
-    execute(newArgs.toSeq: _*)
+    args.addOne(arg)
+    execute(args.toSeq: _*)
   }
 
   override def find(exename: String): Option[Path] = {

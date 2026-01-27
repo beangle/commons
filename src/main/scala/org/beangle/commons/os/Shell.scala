@@ -102,7 +102,7 @@ abstract class Shell(charset: Charset = Charsets.UTF_8) {
     require(isValidFileName(exename), s"${exename} is not valid command file")
   }
 
-  def exec(args: String*): (Int, collection.Seq[String])
+  def exec(args: String): (Int, collection.Seq[String])
 
   /** find a execute file real path
    *

@@ -26,7 +26,7 @@ object LinuxBash extends Shell(Charsets.UTF_8) {
 
   override def find(exename: String): Option[Path] = {
     checkExeName(exename)
-    val rs = exec("where", exename)
+    val rs = execute("which", exename)
     if (rs._1 > 0) {
       None
     } else {
@@ -40,16 +40,16 @@ object LinuxBash extends Shell(Charsets.UTF_8) {
    * @param args command and args
    * @return (exit code,output)
    */
-  override def exec(args: String*): (Int, collection.Seq[String]) = {
-    require(args.nonEmpty, "Need command")
-    //如果是个绝对地址，则直接执行，不用放在cmd环境中执行。
-    val newArgs = Collections.newBuffer[String]
-    if (!Shell.isFile(args.head)) {
-      newArgs.addOne("bash")
-      newArgs.addOne("-c")
+  override def exec(arg: String): (Int, collection.Seq[String]) = {
+    require(null != arg, "Need command")
+    //如果是个绝对地址，则直接执行，不用放在shell环境中执行。
+    val args = Collections.newBuffer[String]
+    if (!Shell.isFile(arg)) {
+      args.addOne("sh")
+      args.addOne("-c")
     }
-    newArgs.addAll(args)
-    execute(newArgs.toSeq: _*)
+    args.addOne(arg)
+    execute(args.toSeq: _*)
   }
 
   override def killall(exename: String): Int = {
@@ -67,6 +67,6 @@ object LinuxBash extends Shell(Charsets.UTF_8) {
   }
 
   override def kill(pids: Int*): Unit = {
-    exec("kill", "-9", pids.mkString(" "))
+    execute("kill", "-9", pids.mkString(" "))
   }
 }
