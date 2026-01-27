@@ -29,6 +29,14 @@ case class Response(status: Int, content: Any) {
     }
   }
 
+  def getBytes: Array[Byte] = {
+    content match {
+      case null => Array.emptyByteArray
+      case s: String => s.getBytes(Charsets.UTF_8)
+      case bytes: Array[Byte] => bytes
+    }
+  }
+
   def isOk: Boolean = {
     status == java.net.HttpURLConnection.HTTP_OK
   }

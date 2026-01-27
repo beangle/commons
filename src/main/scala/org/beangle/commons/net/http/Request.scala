@@ -58,7 +58,8 @@ object Request {
     val datas = data match {
       case t: (_, _) => Seq(t)
       case i: Iterable[_] => i.asInstanceOf[Iterable[(_, _)]]
-      case _ => throw new IllegalArgumentException(s"form data need tuple or tuples,${data.getClass.getName} not supported")
+      case s: String => return new Request(Some(s), MediaTypes.ApplicationFormUrlencoded.toString)
+      case _ => throw new IllegalArgumentException(s"form data need to string/tuple/tuples,${data.getClass.getName} not supported")
     }
     val formFields = Collections.newBuffer[(String, Any)]
     val fileFields = Collections.newBuffer[(String, (String, InputStream))]
