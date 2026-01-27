@@ -27,7 +27,7 @@ class LinuxBashTest extends AnyFunSpec, Matchers {
       if (Platform.isLinux) {
         LinuxBash.find("soffice") foreach { p =>
           println(p)
-          val rs = WinCmd.exec(p.toAbsolutePath.toString.replace(".exe", ".com"), "--version")
+          val rs = LinuxBash.execute(p.toAbsolutePath.toString, "--version")
           rs._2 foreach println
         }
       }

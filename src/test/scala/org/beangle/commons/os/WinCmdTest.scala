@@ -27,7 +27,7 @@ class WinCmdTest extends AnyFunSpec, Matchers {
       if (Platform.isWin) {
         WinCmd.find("soffice.exe") foreach { p =>
           println(p)
-          val rs = WinCmd.exec(p.toAbsolutePath.toString.replace(".exe", ".com"), "--version")
+          val rs = WinCmd.execute(p.toAbsolutePath.toString.replace(".exe", ".com"), "--version")
           rs._2 foreach println
         }
         WinCmd.exec("dir")._2 foreach println
