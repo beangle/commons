@@ -34,7 +34,7 @@ class HttpTextBundleLoader(url: String, preload: Boolean = false) extends Defaul
     val path = s"${bundleName.replace('.', '/')}.${locale.toString}"
     if null == bundles then loadList()
     if (bundles.contains(path)) {
-      val res = HttpUtils.getText(getURL(path))
+      val res = HttpUtils.get(getURL(path))
       if (res.isOk) {
         List((bundleName + "@http", new ByteArrayInputStream(res.getText.getBytes(Charsets.UTF_8))))
       } else {
@@ -46,7 +46,7 @@ class HttpTextBundleLoader(url: String, preload: Boolean = false) extends Defaul
   }
 
   private def loadList(): Unit = {
-    val res = HttpUtils.getText(getURL("ls"))
+    val res = HttpUtils.get(getURL("ls"))
     this.bundles = if res.isOk then Strings.split(res.getText).toSet else Set.empty
   }
 
