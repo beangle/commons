@@ -36,5 +36,10 @@ class JsonTest extends AnyFunSpec, Matchers {
       val b = Json.parseObject("""{"name":"课堂测验","percent":20.3,"count":5}""")
       assert(b.toJson.contains(""""percent":20.3"""))
     }
+    it("update") {
+      val json = new JsonObject()
+      json.update("/query/term/std/0/skills/0/name", "Play Basketball")
+      json.toJson should equal("""{"query":{"term":{"std":[{"skills":[{"name":"Play Basketball"}]}]}}}""")
+    }
   }
 }

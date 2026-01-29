@@ -24,9 +24,21 @@ import org.beangle.commons.lang.{Charsets, Strings}
 import org.beangle.commons.net.http.{HttpMethods, HttpUtils, Request, Response}
 
 import java.net.URLEncoder
+import java.net.http.HttpClient
 import scala.collection.mutable
 
-class RestRequest(val target: String, client: RestClient) {
+object RestRequest {
+  def target(t: String): RestRequest = {
+    new RestRequest(t, HttpUtils.Default)
+  }
+
+  def target(t: String, client: HttpClient): RestRequest = {
+    new RestRequest(t, HttpUtils.withClient(client))
+  }
+}
+
+class RestRequest private(val target: String, private val httpUtils: HttpUtils) {
+  assert(!target.endsWith("/"), "Endpoint should not endwith /")
   protected val headers = new mutable.HashMap[String, String]
   protected var authorization: Option[String] = None
 
@@ -82,13 +94,13 @@ class RestRequest(val target: String, client: RestClient) {
 
   def get(): Response = {
     val request = Request.noBody
-    HttpUtils.get(buildURI(), request.headers(this.headers).auth(this.authorization))
+    httpUtils.get(buildURI(), request.headers(this.headers).auth(this.authorization))
   }
 
   def post(body: Any, contentType: String): Response = {
     val req = Request.build(body, contentType)
     req.headers(this.headers).auth(this.authorization)
-    HttpUtils.invoke(buildURI(), HttpMethods.POST, req)
+    httpUtils.invoke(buildURI(), HttpMethods.POST, req)
   }
 
   def postJson(json: Any): Response = {
@@ -104,13 +116,13 @@ class RestRequest(val target: String, client: RestClient) {
   def delete(): Response = {
     val load = Request.build("", "application/json")
     load.headers(this.headers).auth(this.authorization)
-    HttpUtils.delete(buildURI(), load)
+    httpUtils.delete(buildURI(), load)
   }
 
   def put(body: Any, contentType: String): Response = {
     val req = Request.build(body, contentType)
     req.headers(this.headers).auth(this.authorization)
-    HttpUtils.invoke(buildURI(), HttpMethods.PUT, req)
+    httpUtils.invoke(buildURI(), HttpMethods.PUT, req)
   }
 
   def putJson(json: Any): Response = {

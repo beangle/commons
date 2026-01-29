@@ -28,7 +28,7 @@ import java.net.http.*
 
 object HttpUtils {
 
-  private val client = createClient(java.lang.Boolean.getBoolean("beangle.https.trust-all"))
+  val Default = new HttpUtils(createClient(java.lang.Boolean.getBoolean("beangle.https.trust-all")))
 
   private val statusMap = Map(
     HTTP_OK -> "OK",
@@ -44,13 +44,56 @@ object HttpUtils {
     }
   }
 
+  def withClient(client: HttpClient): HttpUtils = {
+    new HttpUtils(client)
+  }
+
   def toString(httpCode: Int): String = {
     statusMap.getOrElse(httpCode, String.valueOf(httpCode))
   }
 
   def isAlive(uri: String): Boolean = {
-    access(uri).isOk
+    Default.access(uri).isOk
   }
+
+  def access(uri: String): ResourceStatus = {
+    Default.access(uri)
+  }
+
+  def get(uri: String): Response = {
+    Default.get(uri, Request.noBody)
+  }
+
+  def get(uri: String, request: Request): Response = {
+    Default.get(uri, request)
+  }
+
+  def post(uri: String, body: AnyRef, contentType: String): Response = {
+    Default.invoke(uri, HttpMethods.POST, Request.build(body, contentType))
+  }
+
+  def post(uri: String, request: Request): Response = {
+    Default.invoke(uri, HttpMethods.POST, request)
+  }
+
+  def put(uri: String, request: Request): Response = {
+    Default.invoke(uri, HttpMethods.PUT, request)
+  }
+
+  def delete(uri: String, request: Request): Response = {
+    Default.delete(uri, request)
+  }
+
+  def invoke(uri: String, method: String, request: Request): Response = {
+    Default.invoke(uri, method, request)
+  }
+
+  def download(uri: String, location: File): Boolean = {
+    Default.download(uri, location)
+  }
+}
+
+class HttpUtils private(private val client: HttpClient) {
 
   def access(uri: String): ResourceStatus = {
     val ouri = URI.create(uri)
@@ -74,27 +117,6 @@ object HttpUtils {
     }
   }
 
-  @deprecated(since = "5.8.1")
-  @scala.annotation.tailrec
-  def followRedirect(c: URLConnection, method: String): HttpURLConnection = {
-    val conn = c.asInstanceOf[HttpURLConnection]
-    conn.setInstanceFollowRedirects(false)
-    conn.setRequestMethod(method)
-    conn.setConnectTimeout(10 * 1000)
-    val rc = conn.getResponseCode
-    rc match {
-      case HTTP_OK => conn
-      case HTTP_MOVED_TEMP | HTTP_MOVED_PERM =>
-        val newLoc = conn.getHeaderField("location")
-        followRedirect(URI.create(newLoc).toURL.openConnection, method)
-      case _ => conn
-    }
-  }
-
-  def get(uri: String): Response = {
-    get(uri, Request.noBody)
-  }
-
   def get(uri: String, request: Request): Response = {
     try {
       val builder = HttpRequest.newBuilder(URI.create(uri)).method(HttpMethods.GET, HttpRequest.BodyPublishers.noBody())
@@ -105,18 +127,6 @@ object HttpUtils {
     }
   }
 
-  def post(uri: String, body: AnyRef, contentType: String): Response = {
-    invoke(uri, HttpMethods.POST, Request.build(body, contentType))
-  }
-
-  def post(uri: String, request: Request): Response = {
-    invoke(uri, HttpMethods.POST, request)
-  }
-
-  def put(uri: String, request: Request): Response = {
-    invoke(uri, HttpMethods.PUT, request)
-  }
-
   def delete(uri: String, request: Request): Response = {
     try {
       val builder = HttpRequest.newBuilder(URI.create(uri)).method(HttpMethods.DELETE, HttpRequest.BodyPublishers.noBody())
@@ -125,6 +135,14 @@ object HttpUtils {
     } catch {
       case e: Exception => error(uri, e)
     }
+  }
+
+  def post(uri: String, request: Request): Response = {
+    invoke(uri, HttpMethods.POST, request)
+  }
+
+  def put(uri: String, request: Request): Response = {
+    invoke(uri, HttpMethods.PUT, request)
   }
 
   def invoke(uri: String, method: String, request: Request): Response = {
@@ -181,5 +199,5 @@ object HttpUtils {
     }
     builder.build()
   }
-
 }
+
