@@ -59,7 +59,5 @@ class Reconfig {
 
   var definitions = Collections.newMap[String, Reconfig.Definition]
 
-  var properties = Collections.newMap[String, String]
-
   var ignoreMissing: Boolean = true
 }

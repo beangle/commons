@@ -56,6 +56,8 @@ class DefaultConversion extends AbstractGenericConversion {
 
   addConverter(string.JsonConverter)
 
+  addConverter(string.DurationConverter)
+
   addConverter(converter.Number2NumberConverter)
 
   addConverter(converter.IterableConverterFactory)

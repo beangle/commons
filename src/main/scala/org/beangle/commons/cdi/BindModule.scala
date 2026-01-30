@@ -18,6 +18,7 @@
 package org.beangle.commons.cdi
 
 import org.beangle.commons.cdi.Binding.*
+import org.beangle.commons.config.Enviroment
 import org.beangle.commons.lang.reflect.*
 
 import java.util as ju
@@ -193,7 +194,7 @@ abstract class BindModule {
   protected def binding(): Unit
 
   final def devEnabled: Boolean = {
-    EnvProfile.isDevMode
+    Enviroment.isDevMode
   }
 
   private def buildInnerReference(clazz: Class[_]): ReferenceValue = {

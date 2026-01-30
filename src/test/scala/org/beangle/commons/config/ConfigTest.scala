@@ -15,20 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.config.property
+package org.beangle.commons.config
 
-import java.util.EventListener
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-/** PropertyConfigListener interface.
-  *
-  * @author chaostone
-  */
-trait PropertyConfigListener extends EventListener {
+class ConfigTest extends AnyFunSpec, Matchers {
+  val encryptKey = "beangle"
+  val password = "bZoTxh)foA"
 
-  /** Handle an config event.
-    *
-    * @param event
-    * the event to respond to
-    */
-  def onConfigEvent(event: PropertyConfigEvent): Unit
+  describe("Config") {
+    it("PBEDecode process") {
+      System.setProperty("beangle.encryptor.password", encryptKey)
+      val decoder = Config.pbe(encryptKey)
+      val decryptedPwd = decoder.process("password", "ENC(Rr/iQsiRlgm/QWpa17YYVZmEPbU0RoZ6F0f4OU3u5DM=)")
+      assert(password == decryptedPwd)
+      assert("+some_test" == decoder.process("key", "+some_test"))
+    }
+  }
+
 }

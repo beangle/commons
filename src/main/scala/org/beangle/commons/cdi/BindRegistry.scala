@@ -17,10 +17,6 @@
 
 package org.beangle.commons.cdi
 
-object BindRegistry {
-  final val ProfileProperty = "beangle.cdi.profiles"
-}
-
 /**
  * BindRegistry interface.
  *

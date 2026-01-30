@@ -15,24 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.cdi
+package org.beangle.commons.logging
 
-import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.matchers.should.Matchers
+import java.net.URL
 
-class PropertySourceTest extends AnyFunSpec, Matchers {
-  val encryptKey = "beangle"
-  val password = "bZoTxh)foA"
+class LogConfig {
 
-  describe("PropertySourc") {
+  var configFile: URL = _
 
-    it("PBEDecode process") {
-      System.setProperty("beangle.encryptor.password", encryptKey)
-      val decoder = PropertySource.pbe(encryptKey)
-      val decryptedPwd = decoder.process("password", "ENC(Rr/iQsiRlgm/QWpa17YYVZmEPbU0RoZ6F0f4OU3u5DM=)")
-      assert(password == decryptedPwd)
-      assert("+some_test" == decoder.process("key", "+some_test"))
-    }
-  }
-
+  var levels: Map[String, String] = Map.empty
 }

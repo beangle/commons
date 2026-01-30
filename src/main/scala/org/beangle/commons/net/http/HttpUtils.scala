@@ -200,4 +200,3 @@ class HttpUtils private(private val client: HttpClient) {
     builder.build()
   }
 }
-

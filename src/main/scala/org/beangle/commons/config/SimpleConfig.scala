@@ -15,16 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.cdi
+package org.beangle.commons.config
 
-import org.beangle.commons.lang.{JVM, Strings}
+/** Simple K-V config
+ *
+ * @param props properties
+ */
+final class SimpleConfig(private val props: collection.Map[String, String]) extends AbstractMapConfig {
 
-object EnvProfile {
+  override def getValue(name: String, defaults: Any): Any = {
+    props.getOrElse(name, defaults)
+  }
 
-  final def isDevMode: Boolean = {
-    val profiles = System.getProperty(BindRegistry.ProfileProperty)
-    val enabled = null != profiles && Strings.split(profiles, ",").toSet.contains("dev")
-    enabled || JVM.isDebugMode
+  override def keysIterator: Iterator[String] = {
+    props.keysIterator
   }
 
 }

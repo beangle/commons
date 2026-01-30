@@ -17,9 +17,9 @@
 
 package org.beangle.commons.logging
 
-import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.classic.joran.JoranConfigurator
-import org.beangle.commons.cdi.EnvProfile
+import ch.qos.logback.classic.{Level, LoggerContext}
+import org.beangle.commons.config.Enviroment
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.annotation.beta
 import org.slf4j.LoggerFactory
@@ -27,35 +27,64 @@ import org.slf4j.bridge.SLF4JBridgeHandler
 
 import java.io.InputStream
 
-/** SLF4J日志辅助类
+/** Logback日志辅助类
  */
 @beta
-object SLF4J {
+object Logback {
 
   /** 在开发环境中，如果存在logback-dev.xml,则启用该配置
    */
-  def enableLogbackDevConfig(): Unit = {
-    if (EnvProfile.isDevMode) {
-      if (null == System.getProperty("logback.configurationFile")) {
-        val devFile = getClass.getResource("/logback-dev.xml")
-        if null != devFile then refreshLogbackConfig(devFile.openStream())
+  def configure(config: LogConfig): Unit = {
+    installJul2Sfl4j()
+    var configFile = config.configFile
+    if (null == configFile) {
+      if (Enviroment.isDevMode) {
+        if (null == System.getProperty("logback.configurationFile")) {
+          val devFile = getClass.getResource("/logback-dev.xml")
+          if null != devFile then configFile = devFile
+        }
       }
+    }
+    if (null != configFile) {
+      refreshConfig(configFile.openStream())
+    }
+    val factory = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
+    config.levels foreach { case (name, level) =>
+      changeLevel(factory, name, level)
+    }
+  }
+
+  def changeLevel(name: String, level: String): Boolean = {
+    val factory = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
+    changeLevel(factory, name, level)
+  }
+
+  private def changeLevel(factory: LoggerContext, name: String, level: String): Boolean = {
+    val loggerName = if name.equalsIgnoreCase("ROOT") then null else name
+    val logger = factory.getLogger(loggerName)
+    if null != logger then {
+      logger.setLevel(Level.valueOf(level))
+      true
+    } else {
+      false
     }
   }
 
   /** 重新加载logback配置
    *
-   * @param is
+   * @param is input stream
    * @return
    */
-  def refreshLogbackConfig(is: InputStream): Boolean = {
+  def refreshConfig(is: InputStream): LoggerContext = {
     try {
       val lc = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
       lc.reset()
+      lc.getStatusManager.clear()
+
       val configurator = new JoranConfigurator
       configurator.setContext(lc)
       configurator.doConfigure(is)
-      true
+      lc
     } catch {
       case e: Exception => throw new RuntimeException("重新加载 Logback 配置失败", e)
     } finally {

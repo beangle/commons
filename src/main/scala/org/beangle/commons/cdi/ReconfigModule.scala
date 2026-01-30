@@ -18,11 +18,7 @@
 package org.beangle.commons.cdi
 
 import org.beangle.commons.cdi.Binding.ReferenceValue
-import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.time.Stopwatch
-import org.beangle.commons.net.http.HttpUtils
 
-import java.net.URL
 import java.util as ju
 
 abstract class ReconfigModule {
@@ -44,16 +40,6 @@ abstract class ReconfigModule {
         val rd = new Reconfig.Definition(name, Reconfig.ReconfigType.Update, new Binding.Definition(name, null, null))
         cfg.definitions.put(name, rd)
         rd
-    }
-  }
-
-  protected final def updateProperty(name: String, value: String): Unit = {
-    this.cfg.properties.put(name, value)
-  }
-
-  protected final def updateProperties(entries: (String, String)*): Unit = {
-    entries foreach { case (k, v) =>
-      this.cfg.properties.put(k, v)
     }
   }
 
