@@ -80,9 +80,9 @@ object Config {
   object Empty extends Config {
     override def contains(name: String): Boolean = false
 
-    override def get(name: String, defaults: Any): Any = null
+    override def get(name: String, defaults: Any): Any = defaults
 
-    override def getValue(name: String, defaults: Any): Any = null
+    override def getValue(name: String, defaults: Any): Any = defaults
 
     override def keys(prefix: String): Iterable[String] = Seq.empty
 
@@ -121,7 +121,12 @@ trait Config {
     if (path.endsWith(".")) path else path + "."
   }
 
-  protected[config] final def convert(value: Any): Any = {
+  /** Wrap a java collection to scala
+   *
+   * @param value any value
+   * @return
+   */
+  protected[config] final def wrap(value: Any): Any = {
     value match {
       case l: ju.List[_] => asScala(l)
       case m: ju.Map[_, _] => asScala(m)
@@ -129,24 +134,28 @@ trait Config {
     }
   }
 
+  final def getString(name: String, defaultValue: String = ""): String = {
+    val value = getValue(name, null)
+    if (null == value) defaultValue else value.toString
+  }
+
   final def getInt(name: String, defaultValue: Int = 0): Int = {
-    val value = get(name, null)
+    val value = getValue(name, null)
     if (null == value) defaultValue else Numbers.toInt(name)
   }
 
   final def getLong(name: String, defaultValue: Long = 0): Long = {
-    val value = get(name, null)
+    val value = getValue(name, null)
     if (null == value) defaultValue else Numbers.toLong(name)
   }
 
   final def getDouble(name: String, defaultValue: Double = 0): Double = {
-    val value = get(name, null)
+    val value = getValue(name, null)
     if (null == value) defaultValue else Numbers.toDouble(name)
   }
 
-  //FIXME test duration
   final def getDuration(name: String, defaultValue: Duration = Duration.ZERO): Duration = {
-    val value = get(name, null)
+    val value = getValue(name, null)
     if (null == value) defaultValue else DurationConverter(name)
   }
 }

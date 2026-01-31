@@ -31,7 +31,7 @@ object ConfigFactory {
       if (null == v) {
         v = System.getenv(toEnvName(name))
       }
-      if v == null then defaults else v
+      if v == null then defaults else wrap(v)
     }
 
     private def toEnvName(name: String): String = {

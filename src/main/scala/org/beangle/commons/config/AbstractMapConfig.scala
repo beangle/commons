@@ -31,9 +31,9 @@ abstract class AbstractMapConfig extends Config {
       val p = prefixOf(name)
       val i = keysIterator.filter(_.startsWith(p))
       val map = i.map(x => (x, getValue(x, ""))).toMap
-      if map.isEmpty then defaults else convert(map)
+      if map.isEmpty then defaults else wrap(map)
     } else {
-      Some(value)
+      value
     }
   }
 
