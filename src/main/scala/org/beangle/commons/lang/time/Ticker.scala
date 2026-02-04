@@ -31,7 +31,7 @@ object Ticker {
   * @author chaostone
   * @since 3.0.0
   */
-abstract class Ticker() {
+abstract class Ticker {
 
   /** Returns the number of nanoseconds elapsed
     */

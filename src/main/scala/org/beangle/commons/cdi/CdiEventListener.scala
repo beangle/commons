@@ -17,18 +17,6 @@
 
 package org.beangle.commons.cdi
 
-import org.beangle.commons.bean.Initializing
-import org.beangle.commons.event.{DefaultEventMulticaster, EventListener}
-import org.beangle.commons.lang.annotation.description
+import org.beangle.commons.event.{Event, EventListener}
 
-@description("依据名称查找监听者的事件广播器")
-class BeanNamesEventMulticaster(listenerNames: Seq[String]) extends DefaultEventMulticaster, Initializing {
-
-  var container: Container = _
-
-  override def init(): Unit = {
-    listenerNames foreach { beanName =>
-      if (container.contains(beanName)) addListener(container.getBean[EventListener[_]](beanName).get)
-    }
-  }
-}
+trait CdiEventListener[E <: Event] extends EventListener[E]

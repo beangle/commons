@@ -20,33 +20,26 @@ package org.beangle.commons.event
 import java.util.EventObject
 
 /** Abstract Event class.
-  *
-  * @author chaostone
-  */
-@SerialVersionUID(6311495014194589511L)
-abstract class Event(src: Any) extends EventObject(src) {
-
-  /** System time when the event happened
-    */
-  val timestamp = System.currentTimeMillis()
-
-  /** event subject
-    */
-  var subject: String = _
-
-  /** event details
-    */
-  var detail: String = _
-
-  /** resource where the event happened
-    */
-  var resource: String = _
-}
+ *
+ * @author chaostone
+ */
+class Event(src: Any) extends EventObject(src)
 
 /** BusinessEvent
-  *
-  * @author chaostone
-  * @since 3.0.0
-  */
-@SerialVersionUID(5403398010560394996L)
-class BusinessEvent(source: AnyRef) extends Event(source)
+ *
+ * @author chaostone
+ * @since 3.0.0
+ */
+class BusinessEvent(source: AnyRef) extends Event(source) {
+  /** System time when the event happened */
+  val timestamp = System.currentTimeMillis()
+
+  /** event subject */
+  var subject: String = _
+
+  /** event details */
+  var detail: String = _
+
+  /** resource where the event happened */
+  var resource: String = _
+}

@@ -18,18 +18,28 @@
 package org.beangle.commons.text.escape
 
 object XmlEscaper {
-  private val targets = Map('<' -> "&lt;", '>' -> "&gt;")
+  private val textTargets = Map('<' -> "&lt;", '>' -> "&gt;", '&' -> "&amp;")
+
+  private val targets = textTargets ++ Map('"' -> "&quot;", '\'' -> "&apos")
 
   def escape(str: String): String = {
+    escape(str, targets)
+  }
+
+  def escapeText(str: String): String = {
+    escape(str, textTargets)
+  }
+
+  private def escape(str: String, esc: Map[Char, String]): String = {
     val ln = str.length
     var sb: StringBuilder = null
-    val keys = targets.keySet
+    val keys = esc.keySet
     (0 until ln).find(i => keys.contains(str.charAt(i))) match {
       case Some(firstMatchIdx) =>
         val sb = new StringBuilder(str.substring(0, firstMatchIdx))
-        (0 until ln) foreach { i =>
+        (firstMatchIdx until ln) foreach { i =>
           val c = str.charAt(i)
-          sb.append(targets.getOrElse(c, c))
+          sb.append(esc.getOrElse(c, c))
         }
         sb.mkString
       case None => str

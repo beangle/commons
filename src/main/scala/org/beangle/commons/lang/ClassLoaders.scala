@@ -55,15 +55,18 @@ object ClassLoaders {
    */
   private def loaders(callingClass: Class[_] = null): Seq[ClassLoader] = {
     val me = getClass.getClassLoader
-    val threadCl = Thread.currentThread().getContextClassLoader
-    val callCl = if (null == callingClass) null else callingClass.getClassLoader
-    if (null == callCl)
-      if (me == threadCl) List(threadCl) else List(threadCl, me)
-    else if (me == threadCl)
-      if (callCl == me) List(threadCl) else List(threadCl, callCl)
-    else if (callCl == me)
-      List(threadCl, me)
-    else if (callCl == threadCl) List(threadCl, me) else List(threadCl, me, callCl)
+    val tl = Thread.currentThread().getContextClassLoader
+    val cl = if (null == callingClass) null else callingClass.getClassLoader
+
+    if (null == cl) {
+      if (me eq tl) List(tl) else List(tl, me)
+    } else if (me eq tl) {
+      if (cl eq me) List(tl) else List(tl, cl)
+    } else if (me eq cl) {
+      List(tl, me)
+    } else {
+      if (cl == tl) List(tl, me) else List(tl, me, cl)
+    }
   }
 
   /** Load a given resource(Cannot start with slash /).

@@ -25,8 +25,7 @@ import java.io.*
  */
 trait BinarySerializer extends Serializer, Deserializer {
 
-  override def mediaTypes: Seq[MediaType] =
-    List(MediaTypes.ApplicationOctetStream)
+  override def mediaTypes: Seq[MediaType] = List(MediaTypes.stream)
 
   def registerClass(clazz: Class[_]): Unit
 

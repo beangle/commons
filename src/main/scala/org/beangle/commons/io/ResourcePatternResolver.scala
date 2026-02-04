@@ -23,24 +23,16 @@ import org.beangle.commons.regex.AntPathPattern
 import org.beangle.commons.regex.AntPathPattern.isPattern
 
 import java.io.File
-import java.lang.reflect.Method
 import java.net.{JarURLConnection, URL}
 import java.util.jar.JarFile
 
 object ResourcePatternResolver {
-  def getResources(locationPattern: String): List[URL] =
+  def getResources(locationPattern: String): List[URL] = {
     new ResourcePatternResolver().getResources(locationPattern)
+  }
 }
 
 class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResourceLoader) extends ResourceResolver {
-
-  private val equinoxResolveMethod: Method =
-    try
-      // Detect Equinox OSGi (e.g. on WebSphere 6.1)
-      ClassLoaders.load("org.eclipse.core.runtime.FileLocator").getMethod("resolve", classOf[URL])
-    catch {
-      case _: Throwable => null
-    }
 
   /** Find all resources that match the given location pattern via the
    * Ant-style PathMatcher. Supports resources in jar files and zip files
@@ -55,8 +47,7 @@ class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResource
       val subPattern = new AntPathPattern(locationPattern.substring(rootDirPath.length))
       val rootDirResources = getResources(rootDirPath)
       val result = new collection.mutable.LinkedHashSet[URL]
-      for (rootDir <- rootDirResources) {
-        val rootUrl = resolve(rootDir)
+      for (rootUrl <- rootDirResources) {
         if Jars.isJarURL(rootUrl) then result ++= doFindJarResources(rootUrl, subPattern)
         else result ++= doFindFileResources(rootUrl, subPattern)
       }
@@ -75,16 +66,6 @@ class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResource
     if (rootDirEnd == 0) rootDirEnd = prefixEnd
     location.substring(0, rootDirEnd)
   }
-
-  /** Resolve the specified resource for path matching.
-   * <p>The default implementation detects an Equinox OSGi "bundleresource:"
-   * / "bundleentry:" URL and resolves it into a standard jar file URL that
-   * can be traversed using Spring's standard jar file traversal algorithm.
-   */
-  protected def resolve(url: URL): URL =
-    if (equinoxResolveMethod != null && url.getProtocol.startsWith("bundle"))
-      equinoxResolveMethod.invoke(null, url).asInstanceOf[URL]
-    else url
 
   /** Find all resources in jar files that match the given location pattern
    * via the Ant-style PathMatcher.

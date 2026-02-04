@@ -17,7 +17,6 @@
 
 package org.beangle.commons.config
 
-import org.beangle.commons.cdi.Binding.PropertyPlaceHolder
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.{JVM, Strings}
 
@@ -95,7 +94,7 @@ class Enviroment {
     }
   }
 
-  def interpreter(holder: PropertyPlaceHolder): String = {
+  def interpreter(holder: PlaceHolder): String = {
     val values = holder.variables map { v =>
       if (resolving.contains(v.name)) {
         val path = resolving.addOne(v.name).mkString("->")
@@ -118,8 +117,8 @@ class Enviroment {
   private def process(key: String, value: String, config: Config): String = {
     var v = value
     if (!config.isResolved) {
-      if (PropertyPlaceHolder.hasVariable(value)) {
-        v = interpreter(PropertyPlaceHolder(value))
+      if (PlaceHolder.hasVariable(value)) {
+        v = interpreter(PlaceHolder(value))
       }
     }
     processors.foreach(x => v = x.process(key, v))

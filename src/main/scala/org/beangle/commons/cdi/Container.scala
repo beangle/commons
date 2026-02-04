@@ -17,6 +17,10 @@
 
 package org.beangle.commons.cdi
 
+import org.beangle.commons.concurrent.Locks
+
+import java.util.concurrent.locks.ReentrantReadWriteLock
+
 /**
  * Bean Container.
  *
@@ -27,55 +31,64 @@ trait Container {
 
   def id: String
 
-  def contains(key: Any): Boolean
+  def contains(key: String): Boolean
 
-  def getType(key: Any): Option[Class[_]]
+  def getType(key: String): Option[Class[_]]
 
-  def getDefinition(key: Any): Any
-
-  def getBean[T](key: Any): Option[T]
+  def getBean[T](key: String): Option[T]
 
   def getBean[T](clazz: Class[T]): Option[T]
 
   def getBeans[T](clazz: Class[T]): Map[String, T]
 
-  def keys: Set[_]
+  def beanTypes: collection.Map[String, Class[_]]
 
-  def parent: Option[Container]
-
+  def close(): Unit
 }
 
 object Container {
 
-  var Default: Option[Container] = None
-
+  private var Default: Option[Container] = None
   private var containers: Map[String, Container] = Map.empty
+  //有条件的读写控制，多个读者，单个写者，读不到等待
+  private val rwLock = new ReentrantReadWriteLock()
+  private val available = rwLock.writeLock().newCondition()
 
   def get(id: String): Container = {
-    Container.containers.getOrElse(id, Default.get)
+    Locks.withReadLock(rwLock) {
+      Container.containers.getOrElse(id, Default.get)
+    }
   }
 
   def register(c: Container): Unit = {
-    if (Default.isEmpty) Default = Some(c)
-    containers = containers + (c.id -> c)
+    assert(null != c.id)
+    Locks.withWriteLock(rwLock) {
+      if (c.id == "ROOT") Default = Some(c)
+      containers = containers + (c.id -> c)
+      available.signalAll()
+    }
   }
 
   def unregister(c: Container): Unit = {
-    containers -= c.id
-    if (Default.contains(c)) Default = None
+    Locks.withWriteLock(rwLock) {
+      containers -= c.id
+      if (Default.contains(c)) Default = None
+    }
+  }
+
+  def getOrAwait(id: String): Container = {
+    Locks.withReadLock(rwLock) {
+      Container.containers.get(id)
+    } match {
+      case Some(c) => c
+      case None =>
+        Locks.awaitCondition(rwLock.writeLock(), available)(Container.containers.contains(id)) {
+          Container.containers(id)
+        }
+    }
   }
 }
 
-trait ContainerAware {
-
-  def container: Container
-
-  def container_=(container: Container): Unit
-}
-
 trait ContainerListener {
-
   def onStarted(container: Container): Unit = {}
-
-  def onStopped(container: Container): Unit = {}
 }

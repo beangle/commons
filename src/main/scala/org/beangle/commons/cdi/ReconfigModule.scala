@@ -17,7 +17,7 @@
 
 package org.beangle.commons.cdi
 
-import org.beangle.commons.cdi.Binding.ReferenceValue
+import org.beangle.commons.cdi.Binder.Reference
 
 import java.util as ju
 
@@ -30,21 +30,20 @@ abstract class ReconfigModule {
     this.cfg = reconfig
     config()
     this.cfg.ignoreMissing = this.ignoreMissing
-
   }
 
   protected final def update(name: String): Reconfig.Definition = {
     cfg.definitions.get(name) match {
       case Some(d) => d
       case None =>
-        val rd = new Reconfig.Definition(name, Reconfig.ReconfigType.Update, new Binding.Definition(name, null, null))
+        val rd = new Reconfig.Definition(name, Reconfig.ReconfigType.Update)
         cfg.definitions.put(name, rd)
         rd
     }
   }
 
   protected final def remove(name: String): Unit = {
-    val rd = new Reconfig.Definition(name, Reconfig.ReconfigType.Remove, null)
+    val rd = new Reconfig.Definition(name, Reconfig.ReconfigType.Remove)
     this.cfg.definitions.put(name, rd)
   }
 
@@ -53,7 +52,7 @@ abstract class ReconfigModule {
   }
 
   protected final def listref(classes: Class[_]*): List[_] = {
-    classes.map(clazz => ReferenceValue(clazz.getName)).toList
+    classes.map(clazz => Reference(clazz.getName)).toList
   }
 
   protected final def set(datas: AnyRef*): Set[_] = {

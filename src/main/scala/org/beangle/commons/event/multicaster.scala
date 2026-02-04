@@ -17,48 +17,51 @@
 
 package org.beangle.commons.event
 
+import org.beangle.commons.concurrent.Locks
+
+import java.util.concurrent.locks.ReentrantLock
 import scala.collection.mutable
 
 /** EventListener interface.
-  *
-  * @author chaostone
-  */
+ *
+ * @author chaostone
+ */
 trait EventListener[E <: Event] extends java.util.EventListener {
 
   /** Handle an application event.
-    */
+   */
   def onEvent(event: E): Unit
 
   /** Determine whether this listener actually supports the given event type.
-    */
+   */
   def supportsEventType(eventType: Class[_ <: Event]): Boolean
 
   /** Determine whether this listener actually supports the given source type.
-    */
+   */
   def supportsSourceType(sourceType: Class[_]): Boolean
 }
 
 /** EventMulticaster interface.
-  */
+ */
 trait EventMulticaster {
 
   /** Add a listener to be notified of all events.
-    */
+   */
   def addListener(listener: EventListener[_]): Unit
 
   /** Remove a listener from the notification list.
-    */
+   */
   def removeListener(listener: EventListener[_]): Unit
 
   /** Remove all listeners registered with this multicaster.
-    * <p>
-    * After a remove call, the multicaster will perform no action on event notification until new
-    * listeners are being registered.
-    */
+   * <p>
+   * After a remove call, the multicaster will perform no action on event notification until new
+   * listeners are being registered.
+   */
   def removeAllListeners(): Unit
 
   /** multicast.
-    */
+   */
   def multicast(e: Event): Unit
 }
 
@@ -77,10 +80,12 @@ object DefaultEventMulticaster {
 }
 
 /** DefaultEventMulticaster class.
-  */
+ */
 class DefaultEventMulticaster extends EventMulticaster {
 
   import DefaultEventMulticaster.*
+
+  private val lock = new ReentrantLock
 
   protected var listeners: List[EventListener[Event]] = Nil
 
@@ -102,7 +107,7 @@ class DefaultEventMulticaster extends EventMulticaster {
   }
 
   /** removeAllListeners.
-    */
+   */
   def removeAllListeners(): Unit = {
     listeners = Nil
     listenerCache = Map.empty
@@ -111,22 +116,21 @@ class DefaultEventMulticaster extends EventMulticaster {
   private def getListeners(e: Event): List[EventListener[Event]] = {
     val key = new ListenerCacheKey(e.getClass, e.getSource.getClass)
     var adapted = listenerCache.get(key).orNull
-    if (null == adapted)
-      this.synchronized {
-        if (null == adapted) {
-          val newer = new mutable.ListBuffer[EventListener[Event]]
-          for (listener <- listeners if listener.supportsEventType(e.getClass) && listener.supportsSourceType(e.getSource.getClass))
-            newer += listener
-          adapted = newer.toList
-          listenerCache += (key -> adapted)
-        }
+    if (null == adapted) {
+      Locks.withLock(lock) {
+        val newer = new mutable.ListBuffer[EventListener[Event]]
+        for (listener <- listeners if listener.supportsEventType(e.getClass) && listener.supportsSourceType(e.getSource.getClass))
+          newer += listener
+        adapted = newer.toList
+        listenerCache += (key -> adapted)
       }
+    }
     adapted
   }
 }
 
 /** EventPublisher interface.
-  */
+ */
 trait EventPublisher {
 
   var multicaster: EventMulticaster = _

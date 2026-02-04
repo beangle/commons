@@ -44,7 +44,7 @@ object Request {
       case str: String => str
       case _ => Json.toLiteral(data)
     }
-    new Request(Some(newBody), MediaTypes.ApplicationJson.toString)
+    new Request(Some(newBody), MediaTypes.json.toString)
   }
 
   /** Convert data to form Payload
@@ -58,7 +58,7 @@ object Request {
     val datas = data match {
       case t: (_, _) => Seq(t)
       case i: Iterable[_] => i.asInstanceOf[Iterable[(_, _)]]
-      case s: String => return new Request(Some(s), MediaTypes.ApplicationFormUrlencoded.toString)
+      case s: String => return new Request(Some(s), MediaTypes.formUrlencoded.toString)
       case _ => throw new IllegalArgumentException(s"form data need to string/tuple/tuples,${data.getClass.getName} not supported")
     }
     val formFields = Collections.newBuffer[(String, Any)]
@@ -79,7 +79,7 @@ object Request {
       }
     }
     if (fileFields.isEmpty) {
-      new Request(Some(encodeTuples(formFields)), MediaTypes.ApplicationFormUrlencoded.toString)
+      new Request(Some(encodeTuples(formFields)), MediaTypes.formUrlencoded.toString)
     } else {
       val crlf = "\r\n"
       val dash2 = "--"
@@ -91,7 +91,7 @@ object Request {
         text.append(boundaryStart)
         text.append(s"""Content-Disposition: form-data; name="${k}"""").append(crlf)
         text.append(crlf) //字段元信息和值之间需要增加一个换行符
-        text.append(v).append(crlf);
+        text.append(v).append(crlf)
       }
       val ins = Collections.newBuffer[InputStream]
       ins.addOne(toStream(text))

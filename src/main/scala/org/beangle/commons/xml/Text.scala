@@ -15,25 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.config
+package org.beangle.commons.xml
 
-import java.net.URL
+class Text(private val value: String) extends Node {
 
-/** ConfigResource class.
-  *
-  * @author chaostone
-  */
-class Resources(val global: Option[URL], val locals: List[URL], val user: Option[URL]) {
+  override def label: String = ""
 
-  def paths: List[URL] = {
-    val all = new collection.mutable.ListBuffer[URL]
-    all ++= global
-    all ++= locals
-    all ++= user
-    all.toList
-  }
+  override def children: Iterable[Node] = List.empty
 
-  def isEmpty: Boolean = global.isEmpty && user.isEmpty && locals.isEmpty
+  override def get(name: String): Option[String] = None
 
-  override def toString: String = "{global:" + global + "  locals:" + locals + "  user:" + user + "}"
+  override def text: String = value
+
 }

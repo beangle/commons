@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beangle>
+  <ems app-name="platform-cas"/>
+  <cdi>
+    <module class="org.beangle.ems.app.dao.DaoModule"/>
+    <module class="org.beangle.ems.app.web.HibernateModule"/>
+    <module class="org.beangle.ems.app.web.DefaultModule"/>
+    <module class="org.beangle.ems.app.log.DefaultModule"/>
+    <module class="org.beangle.ems.app.cache.DefaultModule"/>
+    <module class="org.beangle.ems.cas.action.DefaultModule"/>
+    <module class="org.beangle.ems.cas.action.SmsModule"/>
+    <module class="org.beangle.ems.core.cas.DefaultModule"/>
+    <module class="org.beangle.ems.core.cas.TicketModule"/>
+    <module class="org.beangle.ems.core.cas.SessionModule"/>
+    <module class="org.beangle.ems.core.cas.DaoRealmModule"/>
+    <module class="org.beangle.ems.core.cas.CredentialModule"/>
+    <module class="org.beangle.ems.core.WebReconfigModule"/>
+    <module class="org.beangle.ems.core.user.service.DefaultModule"/>
+    <module class="org.beangle.ems.core.config.service.DefaultModule"/>
+    <module class="org.beangle.ems.core.security.service.DefaultModule"/>
+    <module class="org.beangle.webmvc.view.freemarker.DefaultModule"/>
+  </cdi>
+  <mvc>
+    <profile package="org.beangle.ems.cas.action">
+      <url path="/" style="seo" suffix=""/>
+      <interceptor name="web.Interceptor.security"/>
+      <interceptor name="web.Interceptor.hibernate"/>
+    </profile>
+    <profile package="org.beangle.ids.cas.web.action">
+      <url path="/" style="seo" suffix=""/>
+      <interceptor name="web.Interceptor.security"/>
+      <interceptor name="web.Interceptor.hibernate"/>
+    </profile>
+    <profile package="org.beangle.ids.cas.web.ws">
+      <url path="/" style="seo" suffix=""/>
+      <interceptor name="web.Interceptor.hibernate"/>
+    </profile>
+  </mvc>
+  <orm>
+    <mapping class="org.beangle.ems.core.oa.model.DefaultMapping"/>
+    <mapping class="org.beangle.ems.core.config.model.DefaultMapping"/>
+    <mapping class="org.beangle.ems.core.security.model.DefaultMapping"/>
+    <mapping class="org.beangle.ems.core.user.model.DefaultMapping"/>
+    <mapping class="org.beangle.ems.core.blob.model.DefaultMapping"/>
+    <mapping class="org.beangle.ems.core.log.model.DefaultMapping"/>
+    <naming>
+      <profile schema="ems" package="org.beangle.ems.core" pluralize="true">
+        <profile package="config" prefix="cfg_"/>
+        <profile package="user" prefix="usr_"/>
+        <profile package="oa" prefix="oa_"/>
+        <profile package="security" prefix="se_">
+          <annotation schema="log" prefix="ems_" pluralize="true" class="org.beangle.data.model.annotation.log"/>
+        </profile>
+        <profile package="blob" prefix="blb_"/>
+        <profile package="log" prefix="log_">
+          <annotation schema="log" prefix="ems_" pluralize="true" class="org.beangle.data.model.annotation.log"/>
+        </profile>
+        <profile package="job" prefix="jb_"/>
+      </profile>
+    </naming>
+  </orm>
+  <mvc>
+    <static>
+      <bundle name="local" version="default"/>
+      <bundle name="ems" version="4.11.0">
+        <module name="ems" js="js/ems.js"/>
+        <module css="css/nav.css" depends="adminlte,ems" name="ems-nav" js="js/nav.js"/>
+      </bundle>
+    </static>
+  </mvc>
+  <web>
+    <initializer class="org.beangle.config.web.WebAppInitializer"/>
+  </web>
+  <web>
+    <initializer class="org.beangle.webmvc.init.WebmvcInitializer"/>
+  </web>
+  <cdi>
+    <module class="org.beangle.webmvc.DefaultModule"/>
+    <module class="org.beangle.webmvc.ViewModule"/>
+    <module class="org.beangle.webmvc.DevModule"/>
+  </cdi>
+  <mvc>
+    <static>
+      <bundle name="jquery" version="3.6.0">
+        <module name="jquery" js="jquery.min.js"/>
+      </bundle>
+      <bundle name="requirejs" version="2.3.6">
+        <module name="requirejs" js="require.js"/>
+      </bundle>
+      <bundle name="popper.js" version="1.16.0">
+        <module name="popperjs" js="dist/umd/popper.js"/>
+      </bundle>
+      <bundle name="bootstrap" version="4.6.1">
+        <module css="css/bootstrap.min.css" name="bootstrap" js="js/bootstrap.bundle.min.js"/>
+      </bundle>
+      <bundle name="AdminLTE" version="3.2.0">
+        <module css="dist/css/adminlte.min.css" name="adminlte" js="dist/js/adminlte.min.js"/>
+      </bundle>
+      <bundle name="font-awesome" version="6.1.0">
+        <module css="css/all.min.css" name="font-awesome"/>
+      </bundle>
+      <bundle name="jquery-form" version="4.2.2">
+        <module name="jquery-form" js="jquery.form.min.js"/>
+      </bundle>
+      <bundle name="jquery-colorbox" version="1.6.4">
+        <module css="example1/colorbox.css" name="jquery-colorbox" js="jquery.colorbox-min.js"/>
+      </bundle>
+      <bundle name="chosen" version="1.8.7">
+        <module css="chosen.min.css" name="chosen" js="chosen.jquery.js"/>
+      </bundle>
+      <bundle name="jquery-ui" version="1.13.1">
+        <module css="jquery-ui.min.css" name="jquery-ui" js="jquery-ui.min.js"/>
+      </bundle>
+      <bundle name="bui" version="0.6.7">
+        <module name="beangle" js="js/beangle.js"/>
+        <module css="css/beangle-ui.css" name="bui" js="js/beangle-ui.js"/>
+        <module depends="chosen" name="bui-ajaxchosen" js="js/beangle-ui-ajaxchosen.js"/>
+        <module css="css/jquery.validity.css" name="jquery-validity" js="js/jquery-validity.js"/>
+        <module css="css/jquery.pstrength.css" name="jquery-pstrength" js="js/jquery-pstrength,jquery-pstrength_zh.js"/>
+        <module css="css/jquery.treetable.css" name="jquery-treetable" js="js/jquery-treetable.js"/>
+      </bundle>
+      <bundle name="my97" version="4.8.5">
+        <module name="my97" js="WdatePicker.js"/>
+      </bundle>
+      <bundle name="kindeditor" version="4.1.12">
+        <module css="themes/default/default.css" name="kindeditor" js="kindeditor-all-min,lang/zh-CN.js"/>
+      </bundle>
+      <bundle name="echarts" version="5.3.1">
+        <module name="echarts" js="dist/echarts.min.js"/>
+      </bundle>
+      <bundle name="virtual-keyboard" version="1.30.3"/>
+      <bundle name="cryptojs" version="3.1.2"/>
+      <bundle name="fullcalendar" version="5.10.2">
+        <module css="main.min.css" name="fullcalendar" js="main.min.js"/>
+        <module depends="fullcalendar" name="fullcalendar-locale" js="locales-all.min.js"/>
+      </bundle>
+      <bundle name="jsrender" version="1.0.2">
+        <module name="jsrender" js="jsrender.js"/>
+      </bundle>
+      <bundle name="pdfjs" version="1.9.426"/>
+    </static>
+  </mvc>
+  <cdi>
+    <module class="org.beangle.bui.DefaultModule"/>
+  </cdi>
+  <template>
+    <freemarker>
+      <props default="true">
+        <prop key="default_encoding">UTF-8</prop>
+        <prop key="number_format">0.##</prop>
+        <prop key="date_format">yyyy-MM-dd</prop>
+        <prop key="datetime_format">yyyy-MM-dd HH:mm:ss</prop>
+        <prop key="cache_storage">strong:250,soft:600</prop>
+        <prop key="template_update_delay">30m</prop>
+        <prop key="localized_lookup">false</prop>
+        <prop key="tag_syntax">square_bracket</prop>
+      </props>
+    </freemarker>
+  </template>
+</beangle>

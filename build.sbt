@@ -3,7 +3,7 @@ import org.beangle.parent.Settings.*
 import sbt.Keys.libraryDependencies
 
 ThisBuild / organization := "org.beangle.commons"
-ThisBuild / version := "5.8.3-SNAPSHOT"
+ThisBuild / version := "6.0.0-SNAPSHOT"
 ThisBuild / scmInfo := Some(
   ScmInfo(
     url("https://github.com/beangle/commons"),
@@ -32,7 +32,6 @@ lazy val root = (project in file("."))
     libraryDependencies ++= commonDeps,
     libraryDependencies += jexl3 % "optional",
     libraryDependencies += jul_to_slf4j % "optional",
-    libraryDependencies += scalaxml % "optional",
     libraryDependencies += apache_commons_compress % "optional",
     libraryDependencies += "com.swoval" % "file-tree-views" % "2.1.12" % "optional"
   )

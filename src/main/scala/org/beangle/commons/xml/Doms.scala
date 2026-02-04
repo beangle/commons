@@ -15,25 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons
+package org.beangle.commons.xml
 
-import org.beangle.commons.lang.Numbers.*
-import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.matchers.should.Matchers
+import org.beangle.commons.lang.Strings
+import org.w3c.dom.{Node, Element as XmlElement}
 
-class NumbersTest extends AnyFunSpec, Matchers {
+object Doms {
 
-  describe("Numbers") {
-    it("isDigits") {
-      assert(isDigits("23"))
-      assert(isDigits("-23"))
-
-      println(round(4.0153d, 3))
-      assert(round(4.015d, 2).toString == "4.02") //3.14
-      assert(round(add(0.05, 0.01), 2).toString == "0.06")
-      assert(round(subtract(1.0, 0.42), 2).toString == "0.58")
-      assert(round(multiply(4.015, 100), 3).toString == "401.5")
-    }
+  def isRootElement(elem: XmlElement): Boolean = {
+    elem.getParentNode != null && elem.getParentNode.getNodeType == Node.DOCUMENT_NODE
   }
 
+  def getTextValue(elem: XmlElement): Option[String] = {
+    val nl = elem.getChildNodes
+    var hasElement = false
+    for (i <- 0 until nl.getLength if !hasElement) {
+      hasElement = nl.item(i).getNodeType == Node.ELEMENT_NODE
+    }
+    if (hasElement) None else {
+      val tc = elem.getTextContent
+      if (Strings.isNotBlank(tc)) Some(tc.trim) else None
+    }
+  }
 }

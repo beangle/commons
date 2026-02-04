@@ -51,6 +51,34 @@ object DateFormats {
 
   val RFC1123 = Http
 
+  object UTC extends DateFormat {
+    /** A time zone with zero offset and no DST. */
+    private val UTCZone = new SimpleTimeZone(0, "Z")
+
+    override def parse(source: String, pos: ParsePosition): ju.Date = {
+      Internet.parse(source).getTime
+    }
+
+    override def parse(source: String): ju.Date = parse(source, null)
+
+    override def format(date: ju.Date, toAppendTo: StringBuffer,
+                        fieldPosition: FieldPosition): StringBuffer =
+      toAppendTo.append(Internet.format(date, UTCZone))
+  }
+
+  object GMT extends DateFormat {
+    /** A time zone with zero offset and no DST. */
+    private val GMTZone = TimeZone.getTimeZone("GMT")
+
+    override def parse(source: String, pos: ParsePosition): ju.Date = Internet.parse(source).getTime
+
+    override def parse(source: String): ju.Date = parse(source, null)
+
+    override def format(date: ju.Date, toAppendTo: StringBuffer, fieldPosition: FieldPosition): StringBuffer = {
+      toAppendTo.append(Internet.format(date, GMTZone))
+    }
+  }
+
   /** This object handles Internet date/time strings in accordance with RFC 3339. It
    * provides methods to convert from Calendar to RFC 3339 format strings and to parse these strings back into
    * the same constructs.
@@ -84,8 +112,7 @@ object DateFormats {
       Pattern.compile(re)
     }
 
-    /**
-     * Our private parse utility that parses the string, clears the calendar,
+    /** Our private parse utility that parses the string, clears the calendar,
      * and then sets the fields.
      *
      * @param s   the string to parse
@@ -120,8 +147,7 @@ object DateFormats {
       }
     }
 
-    /**
-     * Parses an RFC 3339 date/time string to a Calendar object.
+    /** Parses an RFC 3339 date/time string to a Calendar object.
      *
      * @param s the string to parse
      * @return the Calendar object
@@ -134,8 +160,7 @@ object DateFormats {
       cal
     }
 
-    /**
-     * Converts the specified Calendar object to an RFC 3339 date/time string.
+    /** Converts the specified Calendar object to an RFC 3339 date/time string.
      * Unlike the toString methods for Date and long, no additional variant of
      * this method taking a time zone is provided since the time zone is built
      * into the Calendar object.
@@ -178,8 +203,7 @@ object DateFormats {
       buf.toString
     }
 
-    /**
-     * Converts the specified Date object to an RFC 3339 date/time string using
+    /** Converts the specified Date object to an RFC 3339 date/time string using
      * the specified time zone.
      *
      * @param date the Date object
@@ -193,35 +217,4 @@ object DateFormats {
     }
   }
 
-  object UTC extends DateFormat {
-    /**
-     * A time zone with zero offset and no DST.
-     */
-    private val UTCZone = new SimpleTimeZone(0, "Z")
-
-    override def parse(source: String, pos: ParsePosition): ju.Date = {
-      InternetDateFormat.parse(source).getTime
-    }
-
-    override def parse(source: String): ju.Date = parse(source, null)
-
-    override def format(date: ju.Date, toAppendTo: StringBuffer,
-                        fieldPosition: FieldPosition): StringBuffer =
-      toAppendTo.append(InternetDateFormat.format(date, UTCZone))
-  }
-
-  object GMT extends DateFormat {
-    /**
-     * A time zone with zero offset and no DST.
-     */
-    private val GMTZone = TimeZone.getTimeZone("GMT")
-
-    override def parse(source: String, pos: ParsePosition): ju.Date = InternetDateFormat.parse(source).getTime
-
-    override def parse(source: String): ju.Date = parse(source, null)
-
-    override def format(date: ju.Date, toAppendTo: StringBuffer, fieldPosition: FieldPosition): StringBuffer = {
-      toAppendTo.append(InternetDateFormat.format(date, GMTZone))
-    }
-  }
 }

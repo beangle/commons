@@ -17,70 +17,64 @@
 
 package org.beangle.commons.activation
 
-import org.beangle.commons.config.Resources
-import org.beangle.commons.io.IOs
-import org.beangle.commons.lang.ClassLoaders.{getResource, getResources}
+import org.beangle.commons.io.{IOs, Resources}
 import org.beangle.commons.lang.Strings
 
 import java.net.URL
 
 /** @see https://www.iana.org/assignments/media-types/media-types.xhtml
-  * @see http://www.mime-type.net/
-  * @see https://www.sitepoint.com/mime-types-complete-list/
-  */
+ * @see  http://www.mime-type.net/
+ * @see  https://www.sitepoint.com/mime-types-complete-list/
+ */
 object MediaTypes {
 
   val All: MediaType = MediaType("*/*")
 
-  private val types: Map[String, MediaType] =
-    buildTypes(new Resources(
-      getResource("org/beangle/commons/activation/mime.types"),
-      getResources("META-INF/mime.types"), getResource("mime.types")))
+  private var registerTypes: Map[String, MediaType] = _
 
-  val ApplicationAtomXml: MediaType = types("application/atom+xml")
+  def atomXml: MediaType = as("application/atom+xml")
 
-  val ApplicationFormUrlencoded: MediaType = types("application/x-www-form-urlencoded")
+  def formUrlencoded: MediaType = as("application/x-www-form-urlencoded")
 
-  val ApplicationJson: MediaType = types("application/json")
+  def json: MediaType = as("application/json")
 
-  val ApplicationJsonApi: MediaType = types("application/vnd.api+json")
+  def jsonApi: MediaType = as("application/vnd.api+json")
 
-  val ApplicationJavascript: MediaType = types("application/javascript")
+  def javascript: MediaType = as("application/javascript")
 
-  val ApplicationOctetStream: MediaType = types("application/octet-stream")
+  def stream: MediaType = as("application/octet-stream")
 
-  val ApplicationXhtmlXml: MediaType = types("application/xhtml+xml")
+  def xhtmlXml: MediaType = as("application/xhtml+xml")
 
-  val ApplicationXml: MediaType = types("application/xml")
+  def xml: MediaType = as("application/xml")
 
-  val ApplicationPdf: MediaType = types("application/pdf")
+  def pdf: MediaType = as("application/pdf")
 
-  val ApplicationZip: MediaType = types("application/zip")
+  def zip: MediaType = as("application/zip")
 
-  val ApplicationXlsx: MediaType = types("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+  def xlsx: MediaType = as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-  val ApplicationDocx: MediaType = types("application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+  def docx: MediaType = as("application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
-  val ImageGif: MediaType = types("image/gif")
+  def gif: MediaType = as("image/gif")
 
-  val ImageJpeg: MediaType = types("image/jpeg")
+  def jpeg: MediaType = as("image/jpeg")
 
-  val ImagePng: MediaType = types("image/png")
+  def png: MediaType = as("image/png")
 
-  val MultipartFormData: MediaType = types("multipart/form-data")
+  def multipart: MediaType = as("multipart/form-data")
 
-  val TextHtml: MediaType = types("text/html")
+  def html: MediaType = as("text/html")
 
-  val TextPlain: MediaType = types("text/plain")
+  def text: MediaType = as("text/plain")
 
-  val TextCsv: MediaType = types("text/csv")
+  def csv: MediaType = as("text/csv")
 
-  def buildTypes(resources: Resources): Map[String, MediaType] = {
+  def buildTypes(paths: Iterable[URL]): Map[String, MediaType] = {
     val buf = new collection.mutable.HashMap[String, MediaType]
-    if (null != resources)
-      resources.paths foreach { p =>
-        buf ++= readMediaTypes(p)
-      }
+    paths foreach { p =>
+      buf ++= readMediaTypes(p)
+    }
     buf.put("*/*", All)
     buf.toMap
   }
@@ -109,11 +103,24 @@ object MediaTypes {
       buf.toMap
   }
 
-  def get(ext: String, defaultValue: MediaType): MediaType =
-    types.getOrElse(ext, defaultValue)
+  def getTypes: Map[String, MediaType] = {
+    if (registerTypes == null) {
+      this.registerTypes = buildTypes(Resources.load("org/beangle/commons/activation/mime.types,classpath*:META-INF/mime.types,mime.types"))
+    }
+    this.registerTypes
+  }
 
-  def get(ext: String): Option[MediaType] =
-    types.get(ext)
+  def as(fullName: String): MediaType = {
+    getTypes(fullName)
+  }
+
+  def get(ext: String, defaultValue: MediaType): MediaType = {
+    getTypes.getOrElse(ext, defaultValue)
+  }
+
+  def get(ext: String): Option[MediaType] = {
+    getTypes.get(ext)
+  }
 
   def parse(str: String): Seq[MediaType] = {
     if null == str then Seq.empty
@@ -122,7 +129,7 @@ object MediaTypes {
       Strings.split(str, ",") foreach { token =>
         val commaIndex = token.indexOf(";")
         val mimetype = if (commaIndex > -1) token.substring(0, commaIndex).trim else token.trim
-        types.get(mimetype) match {
+        getTypes.get(mimetype) match {
           case Some(mt) => mimeTypes += mt
           case None => MediaType(mimetype)
         }

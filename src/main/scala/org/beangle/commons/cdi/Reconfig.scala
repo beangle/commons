@@ -19,39 +19,44 @@ package org.beangle.commons.cdi
 
 import org.beangle.commons.collection.Collections
 
+import scala.collection.mutable
+
 object Reconfig {
-  class Definition(val name: String, var configType: ReconfigType, var definition: Binding.Definition) {
+  class Definition(val beanName: String, var configType: ReconfigType) {
+    var clazz: Option[Class[_]] = None
+    var properties: mutable.Map[String, Any] = Collections.newMap[String, Any]
+    var constructorArgs: mutable.Buffer[Any] = Collections.newBuffer[Any]
+    var primaryOf: Set[Class[_]] = Set.empty
 
     def setClass(clazz: Class[_]): this.type = {
-      definition.clazz = clazz
+      this.clazz = Some(clazz)
       this
     }
 
-    def primaryOf(clazz: Class[_]): Unit = {
-      configType = ReconfigType.Primary
-      definition.clazz = clazz
+    def primaryOf(clazz: Class[_]*): Unit = {
+      this.primaryOf = clazz.toSet
     }
 
     def set(property: String, value: AnyRef): Definition = {
-      definition.properties.put(property, value)
+      this.properties.put(property, value)
       this
     }
 
     def remove(property: String): Definition = {
-      definition.properties.remove(property)
-      definition.properties.put("-" + property, "--")
+      this.properties.remove(property)
+      this.properties.put("-" + property, "--")
       this
     }
 
     def merge(property: String, value: AnyRef): Definition = {
-      definition.properties.remove(property)
-      definition.properties.put("+" + property, value)
+      this.properties.remove(property)
+      this.properties.put("+" + property, value)
       this
     }
   }
 
   enum ReconfigType {
-    case Update, Remove, Primary
+    case Update, Remove
   }
 }
 

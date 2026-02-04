@@ -19,12 +19,21 @@ package org.beangle.commons.bean
 
 import org.beangle.commons.lang.reflect.Reflections
 
+object Factory {
+  def getObjectType(clazz: Class[_]): Class[_] = {
+    val objectTypes = Reflections.getGenericParamTypes(clazz, classOf[Factory[_]]).values
+    if (objectTypes.isEmpty) throw new RuntimeException(s"Cannot find factory object type of class ${clazz.getName}")
+    objectTypes.head
+  }
+}
+
 trait Factory[T] {
 
-  def result: T
+  def getObject: T
 
   def singleton: Boolean = true
 
-  def objectType: Class[T] =
+  def objectType: Class[T] = {
     Reflections.getGenericParamTypes(this.getClass, classOf[Factory[_]]).values.head.asInstanceOf[Class[T]]
+  }
 }

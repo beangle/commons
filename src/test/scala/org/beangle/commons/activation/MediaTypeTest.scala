@@ -17,7 +17,7 @@
 
 package org.beangle.commons.activation
 
-import org.beangle.commons.config.Resources
+import org.beangle.commons.io.Resources
 import org.beangle.commons.lang.ClassLoaders.{getResource, getResources}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -25,9 +25,7 @@ import org.scalatest.matchers.should.Matchers
 class MediaTypeTest extends AnyFunSpec, Matchers {
   describe("MediaType") {
     it("load resource") {
-      val resources = new Resources(
-        getResource("org/beangle/commons/activation/mime_test.types"),
-        getResources("META-INF/mime_test.types"), getResource("mime_test.types"))
+      val resources = Resources.load("org/beangle/commons/activation/mime_test.types,META-INF/mime_test.types,mime_test.types")
       val map = MediaTypes.buildTypes(resources)
       assert(map.size == 10)
       assert(map.get("xxx").isDefined)
@@ -48,7 +46,7 @@ class MediaTypeTest extends AnyFunSpec, Matchers {
       assert(all.contains(MediaTypes.All))
 
       val csv = MediaTypes.parse("text/csv").head
-      assert(MediaTypes.TextCsv == csv)
+      assert(MediaTypes.csv == csv)
 
     }
   }

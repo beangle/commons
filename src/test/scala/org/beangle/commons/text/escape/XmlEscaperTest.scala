@@ -15,28 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.xml
+package org.beangle.commons.text.escape
 
-import scala.xml.Node
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-object NodeOps {
-  given Conversion[Node, NodeOps] = new NodeOps(_)
-}
+class XmlEscaperTest extends AnyFunSpec, Matchers {
 
-final class NodeOps(val n: Node) extends AnyVal {
-  @inline
-  def attr(name: String): String = {
-    (n \ s"@$name").text
-  }
-
-  @inline
-  def name: String = {
-    (n \ s"@name").text
-  }
-
-  @inline
-  def get(name: String): Option[String] = {
-    (n \ s"@$name").map(_.text).headOption
+  describe("XmlEscaper") {
+    it("Escape") {
+      assert("""RSA key RSA key &lt;expired=&quot;2019-09-09&quot;&gt;""" == XmlEscaper.escape("""RSA key RSA key <expired="2019-09-09">"""))
+    }
   }
 
 }

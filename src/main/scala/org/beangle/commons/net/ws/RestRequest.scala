@@ -105,7 +105,7 @@ class RestRequest private(val target: String, private val httpUtils: HttpUtils) 
 
   def postJson(json: Any): Response = {
     val load = Request.asJson(json)
-    this.post(load.body, MediaTypes.ApplicationJson.toString)
+    this.post(load.body, MediaTypes.json.toString)
   }
 
   def postForm(params: (String, Any)*): Response = {
@@ -127,7 +127,7 @@ class RestRequest private(val target: String, private val httpUtils: HttpUtils) 
 
   def putJson(json: Any): Response = {
     val load = Request.asJson(json)
-    this.put(load.body, MediaTypes.ApplicationJson.toString)
+    this.put(load.body, MediaTypes.json.toString)
   }
 
   def putForm(params: (String, Any)*): Response = {

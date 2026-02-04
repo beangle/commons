@@ -17,10 +17,12 @@
 
 package org.beangle.commons.codec.binary
 
+import org.beangle.commons.concurrent.Locks
 import org.beangle.commons.lang.Charsets
 
 import java.security.SecureRandom
 import java.text.Normalizer
+import java.util.concurrent.locks.ReentrantLock
 import javax.crypto.spec.{IvParameterSpec, PBEKeySpec, PBEParameterSpec}
 import javax.crypto.{Cipher, SecretKey, SecretKeyFactory}
 
@@ -124,19 +126,16 @@ object PBEEncryptor {
    */
   class FixedPBEEncryptor(encryptor: Cipher, decryptor: Cipher) extends PBEEncryptor {
 
+    private val lock = new ReentrantLock
+
     override def encrypt(message: String): String = {
-      var encrypted: Array[Byte] = null
-      encryptor.synchronized {
-        encrypted = encryptor.doFinal(message.getBytes(Charsets.UTF_8))
-      }
+      val encrypted = Locks.withLock(lock)(encryptor.doFinal(message.getBytes(Charsets.UTF_8)))
       new String(java.util.Base64.getEncoder.encode(encrypted))
     }
 
     override def decrypt(message: String): String = {
       val encrypted = java.util.Base64.getDecoder.decode(message)
-      decryptor.synchronized {
-        new String(decryptor.doFinal(encrypted))
-      }
+      Locks.withLock(lock)(new String(decryptor.doFinal(encrypted)))
     }
   }
 
@@ -151,6 +150,7 @@ object PBEEncryptor {
   class RandomPBEEncryptor(encryptor: Cipher, decryptor: Cipher, key: SecretKey, saltSize: Int, ivSize: Int) extends PBEEncryptor {
 
     var iterations: Int = 1000
+    private val lock = new ReentrantLock
     private val random = SecureRandom.getInstance("SHA1PRNG")
 
     /** 对输入进行加密，返回格式为salt+iv+encrypted
@@ -163,7 +163,7 @@ object PBEEncryptor {
       val iv = randomBytes(ivSize)
       val parameter = buildParameter(salt, iv, iterations)
       var encrypted: Array[Byte] = null
-      this.encryptor.synchronized {
+      Locks.withLock(lock) {
         this.encryptor.init(Cipher.ENCRYPT_MODE, key, parameter)
         encrypted = this.encryptor.doFinal(message.getBytes(Charsets.UTF_8))
       }
@@ -185,7 +185,7 @@ object PBEEncryptor {
       val parameter = buildParameter(salt, iv, iterations)
 
       var decrypted: Array[Byte] = null
-      this.decryptor.synchronized {
+      Locks.withLock(lock) {
         this.decryptor.init(Cipher.DECRYPT_MODE, key, parameter)
         decrypted = this.decryptor.doFinal(msg)
       }
@@ -194,7 +194,7 @@ object PBEEncryptor {
 
     private def randomBytes(len: Int): Array[Byte] = {
       val buf = Array.ofDim[Byte](len)
-      this.random.synchronized {
+      Locks.withLock(lock) {
         this.random.nextBytes(buf)
       }
       buf

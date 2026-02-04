@@ -18,11 +18,11 @@
 package org.beangle.commons.concurrent
 
 /** Start multiple thread simultaneously
-  */
+ */
 object Tasks {
 
   /** Start collection of runnable
-    */
+   */
   def start(runnables: Iterator[Runnable]): Unit = {
     val tasks = new collection.mutable.ListBuffer[Thread]
     for (runnable <- runnables) {
@@ -30,16 +30,17 @@ object Tasks {
       tasks += thread
       thread.start()
     }
-    for (task <- tasks)
+    tasks.foreach { task =>
       try
         task.join()
       catch {
         case e: InterruptedException => e.printStackTrace()
       }
+    }
   }
 
   /** Start runnable multiple
-    */
+   */
   def start(runnable: Runnable, threadPoolSize: Int, name: String = null): Unit = {
     val tasks = new collection.mutable.ListBuffer[Thread]
     var index = 0;
@@ -49,11 +50,12 @@ object Tasks {
       index += 1
       thread.start()
     }
-    for (task <- tasks)
+    tasks.foreach { task =>
       try
         task.join()
       catch {
         case e: InterruptedException => e.printStackTrace()
       }
+    }
   }
 }

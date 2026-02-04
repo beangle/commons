@@ -30,14 +30,14 @@ object JndiObjectFactory {
 }
 
 /** JNDI Object Factory
-  */
+ */
 class JndiObjectFactory[T](val jndiName: String) extends Factory[T] {
 
   var resourceRef = true
 
   var environment: ju.Properties = _
 
-  override def result: T = {
+  override def getObject: T = {
     val ctx = new InitialContext
     val located = ctx.lookup(convertJndiName(jndiName))
     if null == located then
@@ -46,8 +46,8 @@ class JndiObjectFactory[T](val jndiName: String) extends Factory[T] {
   }
 
   /** Convert the given JNDI name into the actual JNDI name to use.
-    * applies the "java:comp/env/" prefix if  resourceRef  is true
-    */
+   * applies the "java:comp/env/" prefix if  resourceRef  is true
+   */
   protected def convertJndiName(jndiName: String): String = {
     import JndiObjectFactory.*
     if (resourceRef && !jndiName.startsWith(containerPrefix) && jndiName.indexOf(':') == -1) containerPrefix + jndiName

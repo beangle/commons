@@ -17,8 +17,8 @@
 
 package org.beangle.commons.cdi
 
-import org.beangle.commons.cdi.Binding.*
-import org.beangle.commons.config.Enviroment
+import org.beangle.commons.cdi.Binder.*
+import org.beangle.commons.config.{Enviroment, PlaceHolder}
 import org.beangle.commons.lang.reflect.*
 
 import java.util as ju
@@ -29,8 +29,8 @@ object BindModule {
    * bind class with a name.
    */
   def bind(clazzesExpr: Expr[Seq[Class[_]]],
-           binder: Expr[Binding], wiredEagerly: Expr[Boolean])
-          (implicit quotes: Quotes): Expr[DefinitionBinder] = {
+           binder: Expr[Binder], wiredEagerly: Expr[Boolean])
+          (implicit quotes: Quotes): Expr[BatchBinder] = {
     '{
       ${ BeanInfoDigger.digInto(clazzesExpr, '{ BeanInfos.cache }) }
       ${ binder }.bind(${ clazzesExpr }: _*).wiredEagerly(${ wiredEagerly })
@@ -41,8 +41,8 @@ object BindModule {
    * bind class with a name.
    */
   def bind[T: Type](beanName: Expr[String], clazz: Expr[Class[T]],
-                    binder: Expr[Binding], wiredEagerly: Expr[Boolean])
-                   (implicit quotes: Quotes): Expr[DefinitionBinder] = {
+                    binder: Expr[Binder], wiredEagerly: Expr[Boolean])
+                   (implicit quotes: Quotes): Expr[BatchBinder] = {
     '{
       ${ BeanInfoDigger.digInto(clazz, '{ BeanInfos.cache }) }
       ${ binder }.bind(${ beanName }, ${ clazz }).wiredEagerly(${ wiredEagerly })
@@ -53,7 +53,7 @@ object BindModule {
    * bind class with a name.
    */
   def bean[T: Type](clazz: Expr[Class[T]],
-                    binder: Expr[Binding], wiredEagerly: Expr[Boolean])
+                    binder: Expr[Binder], wiredEagerly: Expr[Boolean])
                    (implicit quotes: Quotes): Expr[Definition] = {
     '{
       ${ BeanInfoDigger.digInto(clazz, '{ BeanInfos.cache }) }
@@ -70,14 +70,14 @@ object BindModule {
  */
 abstract class BindModule {
 
-  protected var binder: Binding = _
+  private var binder: Binder = _
 
   private var wiredEagerly: Boolean = _
 
   /**
    * Getter for the field <code>config</code>.
    */
-  final def configure(binder: Binding): Unit = {
+  final def configure(binder: Binder): Unit = {
     this.binder = binder
     binding()
   }
@@ -89,14 +89,14 @@ abstract class BindModule {
   /**
    * bind class.
    */
-  protected inline def bind(inline classes: Class[_]*): DefinitionBinder = ${ BindModule.bind('classes, 'binder, 'wiredEagerly) }
+  protected inline def bind(inline classes: Class[_]*): BatchBinder = ${ BindModule.bind('classes, 'binder, 'wiredEagerly) }
 
   /**
    * Returns a reference definition based on Name;
    */
-  protected final def ref(name: String): ReferenceValue = ReferenceValue(name)
+  protected final def ref(name: String): Reference = Reference(name)
 
-  protected final def ref(clazz: Class[_]): ReferenceValue = ReferenceValue(clazz.getName)
+  protected final def ref(clazz: Class[_]): Injection[_] = Injection(clazz)
 
   /**
    * Return new map entry
@@ -108,18 +108,18 @@ abstract class BindModule {
    */
   protected inline def bean[T](clazz: Class[T]): Definition = ${ BindModule.bean('clazz, 'binder, 'wiredEagerly) }
 
-  final def inject[T](clazz: Class[T]): Injection[T] = {
+  protected final def inject[T](clazz: Class[T]): Injection[T] = {
     Injection(clazz)
   }
 
-  final def ? = InjectPlaceHolder
+  protected final def ? = InjectPlaceHolder
 
-  final def $(s: String): PropertyPlaceHolder = {
-    if (PropertyPlaceHolder.hasVariable(s)) {
-      PropertyPlaceHolder(s)
+  protected final def $(s: String): PlaceHolder = {
+    if (PlaceHolder.hasVariable(s)) {
+      PlaceHolder(s)
     } else {
       val v = Variable(s)
-      PropertyPlaceHolder(PropertyPlaceHolder.Prefix + v.name + PropertyPlaceHolder.Suffix, Set(v))
+      PlaceHolder(PlaceHolder.Prefix + v.name + PlaceHolder.Suffix, Set(v))
     }
   }
 
@@ -140,7 +140,7 @@ abstract class BindModule {
    * Generate a list reference property
    */
   protected final def listref(classes: Class[_]*): List[_] = {
-    classes.map(clazz => ReferenceValue(clazz.getName)).toList
+    classes.map(clazz => Injection(clazz)).toList
   }
 
   /**
@@ -178,13 +178,13 @@ abstract class BindModule {
   /**
    * bind class with a name.
    */
-  protected inline def bind[T](beanName: String, clazz: Class[T]): DefinitionBinder =
+  protected inline def bind[T](beanName: String, clazz: Class[T]): BatchBinder =
     ${ BindModule.bind('beanName, 'clazz, 'binder, 'wiredEagerly) }
 
   /**
    * bind singleton with a name.
    */
-  protected final def bind(beanName: String, singleton: AnyRef): Unit = {
+  protected final def bind(beanName: String, singleton: AnyRef): Singleton = {
     binder.bind(beanName, singleton)
   }
 
@@ -197,9 +197,21 @@ abstract class BindModule {
     Enviroment.isDevMode
   }
 
-  private def buildInnerReference(clazz: Class[_]): ReferenceValue = {
+  private def buildInnerReference(clazz: Class[_]): Reference = {
     val targetBean = binder.newInnerBeanName(clazz)
     binder.add(new Definition(targetBean, clazz, Scope.Singleton.name))
-    ReferenceValue(targetBean)
+    Reference(targetBean)
+  }
+
+  def missing(clazz: Class[_]): Condition = {
+    Condition.missing(clazz)
+  }
+
+  def hasProperty(name: String, value: String = ""): Condition = {
+    Condition.hasProperty(name, value)
+  }
+
+  def hasResource(path: String): Condition = {
+    Condition.hasResource(path)
   }
 }

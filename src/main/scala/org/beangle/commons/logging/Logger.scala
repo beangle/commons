@@ -30,7 +30,7 @@ object Logger {
   }
 }
 
-final class Logger(val logger: JLogger) extends AnyVal {
+class Logger(private val logger: JLogger) {
 
   @inline def isDebugEnabled: Boolean = logger.isDebugEnabled
 
@@ -58,23 +58,23 @@ final class Logger(val logger: JLogger) extends AnyVal {
     if (logger.isDebugEnabled) logger.debug(msg, t)
   }
 
-  def info(msg: => String): Unit = {
+  def info(msg: String): Unit = {
     logger.info(msg)
   }
 
-  def warn(msg: => String): Unit = {
+  def warn(msg: String): Unit = {
     logger.warn(msg)
   }
 
-  def warn(msg: => String, t: => Throwable): Unit = {
+  def warn(msg: String, t: Throwable): Unit = {
     logger.warn(msg, t)
   }
 
-  def error(msg: => String): Unit = {
+  def error(msg: String): Unit = {
     logger.error(msg)
   }
 
-  def error(msg: => String, t: => Throwable): Unit = {
+  def error(msg: String, t: Throwable): Unit = {
     logger.error(msg, t)
   }
 
