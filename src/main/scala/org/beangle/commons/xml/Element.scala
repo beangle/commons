@@ -51,6 +51,10 @@ class Element(val label: String) extends Node {
     attributes.get(name)
   }
 
+  override def attrs: collection.Map[String, String] = {
+    attributes
+  }
+
   def set(kvs: Iterable[(String, String)]): Unit = {
     attributes.addAll(kvs)
   }

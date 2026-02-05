@@ -23,6 +23,8 @@ trait Node {
 
   def label: String
 
+  def attrs: collection.Map[String, String]
+
   def children: Iterable[Node]
 
   def get(name: String): Option[String]

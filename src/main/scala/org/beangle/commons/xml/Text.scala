@@ -27,4 +27,6 @@ class Text(private val value: String) extends Node {
 
   override def text: String = value
 
+  override def attrs: collection.Map[String, String] = Map.empty
+
 }

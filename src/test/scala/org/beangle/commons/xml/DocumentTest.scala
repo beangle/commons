@@ -58,6 +58,18 @@ class DocumentTest extends AnyFunSpec, Matchers {
     it("get children") {
       (doc \ "_").nonEmpty should be(true)
     }
+    it("get deep path") {
+      (doc \ "template" \ "freemarker" \ "props") foreach { ps =>
+        val props = (ps \ "prop").map { p =>
+          val key = (p \ "@key").text
+          val value = p.text
+          (key, value)
+        }.toMap
+        val isDefault = "true" == (ps \ "@default").text
+        isDefault should be(true)
+        props.isEmpty should be(false)
+      }
+    }
   }
 
 }
