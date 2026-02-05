@@ -58,9 +58,9 @@ object Networks {
     val niEnum = NetworkInterface.getNetworkInterfaces
     val ips = Collections.newBuffer[String]
     family match {
-      case 1 => ips.addOne("127.0.0.0.1")
+      case 1 => ips.addOne("127.0.0.1")
       case 2 => ips.addOne("::1")
-      case _ => ips.addOne("127.0.0.0.1").addOne("::1")
+      case _ => ips.addOne("127.0.0.1").addOne("::1")
     }
     while (niEnum.hasMoreElements) {
       val ni = niEnum.nextElement()
