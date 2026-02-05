@@ -29,9 +29,6 @@ class BeanInfoDiggerTest extends AnyFunSpec, Matchers {
       val a = new AA
       a.title()
       a.id = 3L
-      //      println(BeanInfos.of(classOf[R]))
-      //      println(BeanInfos.of(classOf[AA],classOf[TT]))
-      //      println(BeanInfos.get(classOf[TT]))
       val d = BeanInfos.of(classOf[LongFactory])
       val expected =
         """class org.beangle.commons.lang.testbean.LongFactory {

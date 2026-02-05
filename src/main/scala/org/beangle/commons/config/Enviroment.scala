@@ -31,16 +31,18 @@ object Enviroment {
     env.addConfig(ConfigFactory.SystemProperties)
   }
 
-  final def isDevMode: Boolean = {
+  final def profiles: Set[String] = {
     val profiles = System.getProperty(ProfileKey)
-    val enabled = null != profiles && Strings.split(profiles, ",").toSet.contains("dev")
-    enabled || JVM.isDebugMode
+    val profileSet = if (null == profiles) Set.empty else Strings.split(profiles, ",").toSet
+    if JVM.isDebugMode then
+      if profileSet.contains("-dev") then profileSet else profileSet + "dev"
+    else
+      profileSet
   }
 
-  final def isTestMode: Boolean = {
-    val profiles = System.getProperty(ProfileKey)
-    null != profiles && Strings.split(profiles, ",").toSet.contains("test")
-  }
+  final def isDevMode: Boolean = profiles.contains("dev")
+
+  final def isTestMode: Boolean = profiles.contains("test")
 }
 
 /** System Enviroment

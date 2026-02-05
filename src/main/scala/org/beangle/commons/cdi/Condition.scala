@@ -36,6 +36,10 @@ object Condition {
     override def meet(registry: Binder.Registry): Boolean = {
       !registry.contains(beanClass)
     }
+
+    override def toString: String = {
+      s"Missing bean ${beanClass.getName}"
+    }
   }
 
   private abstract class EagerCondition extends Condition {
@@ -56,12 +60,16 @@ object Condition {
         v == value
       }
     }
+
+    override def toString: String = s"Has property ${name}"
   }
 
   private class HasResource(path: String) extends EagerCondition {
     protected override def evaluate(): Boolean = {
       ClassLoaders.getResource(path).nonEmpty
     }
+
+    override def toString: String = s"Has resource ${path}"
   }
 }
 

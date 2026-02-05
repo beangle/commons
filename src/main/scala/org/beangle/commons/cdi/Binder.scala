@@ -177,6 +177,8 @@ object Binder {
         this.constructorArgs = patch.constructorArgs
       }
     }
+
+    override def toString: String = s"$beanName@${clazz.getName}"
   }
 
   trait Registry {
@@ -326,7 +328,11 @@ object Binder {
     }
 
     def nowire(properties: String*): this.type = {
-      for (definition <- beans) definition.nowire(properties: _*)
+      if (properties.isEmpty) {
+        for (definition <- beans) definition.nowire("*")
+      } else {
+        for (definition <- beans) definition.nowire(properties: _*)
+      }
       this
     }
 

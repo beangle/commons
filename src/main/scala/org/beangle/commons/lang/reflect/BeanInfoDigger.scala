@@ -244,16 +244,14 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
 
   def resolveDefParams(defdef: DefDef, typeParams: Map[String, TypeRepr], defaults: Map[Int, Expr[Any]]): List[ParamExpr] = {
     val paramList = new mutable.ArrayBuffer[ParamExpr]
-    defdef.paramss foreach { a =>
-      a match {
-        case TermParamClause(ps: List[ValDef]) =>
-          var i = 0
-          paramList ++= ps.map { vl =>
-            i += 1
-            ParamExpr(vl.name, resolveType(vl.tpt.tpe, typeParams), defaults.get(i))
-          }
-        case _ =>
-      }
+    defdef.paramss foreach {
+      case TermParamClause(ps: List[ValDef]) =>
+        var i = 0
+        paramList ++= ps.map { vl =>
+          i += 1
+          ParamExpr(vl.name, resolveType(vl.tpt.tpe, typeParams), defaults.get(i))
+        }
+      case _ =>
     }
     paramList.toList
   }

@@ -67,15 +67,31 @@ class TestChild2Bean extends TestChildBean {
 }
 
 trait Animal {
+  def getAge: Number
 
-  def getAge(): Number
+  def name: String
 }
 
 class Dog extends Animal {
-
   var name: String = _
 
-  def getAge(): java.lang.Integer = 0
+  def getAge: java.lang.Integer = 0
+
+  def setColor(color: String): Unit = {
+
+  }
+
+  protected var character: String = _
+
+  protected def skills: String = {
+    "run"
+  }
+}
+
+class QiutianDog extends Dog {
+  protected override def skills: String = {
+    "run and guard"
+  }
 }
 
 trait Entity[ID] {

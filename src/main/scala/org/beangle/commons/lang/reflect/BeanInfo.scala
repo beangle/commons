@@ -34,7 +34,8 @@ object BeanInfo {
     Set("apply", "unApply", "canEqual")
   private val caseIgnores = Set("productArity", "productIterator", "productPrefix", "productElement", "productElementName", "productElementNames", "copy")
 
-  case class PropertyInfo(name: String, typeinfo: TypeInfo, getter: Option[Method], setter: Option[Method], isTransient: Boolean) {
+  class PropertyInfo(val name: String, val typeinfo: TypeInfo, val getter: Option[Method],
+                     val setter: Option[Method], val isTransient: Boolean) {
     def writable: Boolean = setter.isDefined
 
     def clazz: Class[_] = typeinfo.clazz
@@ -43,8 +44,8 @@ object BeanInfo {
 
     override def toString: String = {
       if writable && readable then s"var $name: $typeinfo = _ "
-      else if readable then s"def $name: $typeinfo"
-      else s"def ${name}_=(x1: $typeinfo)"
+      else if readable then s"def ${getter.get.getName}: $typeinfo"
+      else s"def ${setter.get.getName}(x1: $typeinfo)"
     }
   }
 
@@ -283,7 +284,8 @@ object BeanInfo {
   }
 }
 
-case class BeanInfo(clazz: Class[_], ctors: ArraySeq[ConstructorInfo], properties: Map[String, PropertyInfo], methods: collection.Map[String, ArraySeq[Method]]) {
+class BeanInfo(val clazz: Class[_], val ctors: ArraySeq[ConstructorInfo], val properties: Map[String, PropertyInfo],
+               val methods: collection.Map[String, ArraySeq[Method]]) {
 
   override def toString: String = {
     val sb = new mutable.ArrayBuffer[String]

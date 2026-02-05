@@ -17,7 +17,7 @@
 
 package org.beangle.commons.lang.reflect
 
-import org.beangle.commons.lang.testbean.Dog
+import org.beangle.commons.lang.testbean.{Dog, QiutianDog}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -25,9 +25,16 @@ class BridgeMethodTest extends AnyFunSpec, Matchers {
 
   describe("Reflection class bridge method") {
     it("Find bridge methods") {
-      for (m <- classOf[Dog].getMethods if m.getName == "getAge")
-        if (m.getReturnType == classOf[Number])
+      for (m <- classOf[Dog].getMethods if m.getName == "getAge") {
+        //因为这个方法的返回类型是父类的Number
+        if (m.getReturnType == classOf[Number]) {
           assert(m.isBridge)
+        }
+      }
+    }
+    it("Cannot find protected methods") {
+      val bi = BeanInfos.of(classOf[QiutianDog])
+      assert(!bi.properties.contains("skills"))
     }
   }
 }
