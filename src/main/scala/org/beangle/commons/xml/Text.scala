@@ -21,7 +21,7 @@ class Text(private val value: String) extends Node {
 
   override def label: String = ""
 
-  override def children: Iterable[Node] = List.empty
+  override def children: collection.Seq[Node] = List.empty
 
   override def get(name: String): Option[String] = None
 

@@ -25,17 +25,17 @@ trait Node {
 
   def attrs: collection.Map[String, String]
 
-  def children: Iterable[Node]
+  def children: collection.Seq[Node]
 
   def get(name: String): Option[String]
 
   def text: String
 
-  final def children(name: String): Iterable[Node] = {
+  final def children(name: String): collection.Seq[Node] = {
     children.filter(_.label == name)
   }
 
-  final def descendants(name: String): Iterable[Node] = {
+  final def descendants(name: String): collection.Seq[Node] = {
     val newNodes = Collections.newBuffer[Node]
     children.map { cn =>
       if (cn.label == name) {

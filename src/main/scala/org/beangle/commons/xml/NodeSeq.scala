@@ -25,8 +25,12 @@ object NodeSeq {
   }
 }
 
-class NodeSeq(elems: Iterable[Node]) extends Iterable[Node] {
+class NodeSeq(elems: collection.Seq[Node]) extends collection.Seq[Node] {
   override def iterator: Iterator[Node] = elems.iterator
+
+  override def apply(i: Int): Node = elems(i)
+
+  override def length: Int = elems.length
 
   def \\(name: String): NodeSeq = {
     if elems.isEmpty then this

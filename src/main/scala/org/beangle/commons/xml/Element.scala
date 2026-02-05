@@ -35,7 +35,7 @@ class Element(val label: String) extends Node {
   protected[xml] val childNodes = Collections.newBuffer[Element]
   protected[xml] var innerText: Option[String] = None
 
-  override def children: Iterable[Node] = {
+  override def children: collection.Seq[Node] = {
     childNodes
   }
 
