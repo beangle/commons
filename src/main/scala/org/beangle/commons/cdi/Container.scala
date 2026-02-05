@@ -45,7 +45,7 @@ trait Container {
 
   def close(): Unit
 
-  def underlying: Any
+  def underlying: AnyRef
 }
 
 object Container {
