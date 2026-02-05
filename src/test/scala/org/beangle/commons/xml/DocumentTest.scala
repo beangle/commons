@@ -70,6 +70,10 @@ class DocumentTest extends AnyFunSpec, Matchers {
         props.isEmpty should be(false)
       }
     }
+    it("get root") {
+      val beangle = (doc \\ "beangle")
+      beangle.size should equal(1)
+    }
   }
 
 }
