@@ -37,7 +37,6 @@ class NodeSeq(elems: collection.Seq[Node]) extends collection.Seq[Node] {
   /** 按照名称查询自身、孩子或子孙的节点
    * 和scala的xml模块不一样的地方包括：不支持查询下划线(_)模糊查询,不支持@属性查找
    */
-
   def \\(name: String): NodeSeq = {
     if elems.isEmpty then this
     else {

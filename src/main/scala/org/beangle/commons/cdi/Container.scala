@@ -44,6 +44,8 @@ trait Container {
   def beanTypes: collection.Map[String, Class[_]]
 
   def close(): Unit
+
+  def underlying: Any
 }
 
 object Container {
