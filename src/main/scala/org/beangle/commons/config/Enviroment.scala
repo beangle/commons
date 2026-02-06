@@ -76,7 +76,9 @@ class Enviroment {
       case None => Map.empty
       case Some(m) =>
         val prefixLength = (if (path.endsWith(".")) path else path + ".").length
-        m.asInstanceOf[collection.Map[String, String]].map(x => (x._1.substring(prefixLength), x._2)).toMap
+        val values = m.asInstanceOf[collection.Map[String, _]]
+        //防止底层作了类型转换
+        values.map(x => (x._1.substring(prefixLength), getValue(x._1).get.toString)).toMap
     }
   }
 
