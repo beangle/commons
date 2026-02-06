@@ -66,6 +66,20 @@ class Enviroment {
     }
   }
 
+  /** 查询内部的properties
+   *
+   * @param path path.to.properties
+   * @return
+   */
+  def getNestedProperties(path: String): Map[String, String] = {
+    getProperty(path) match {
+      case None => Map.empty
+      case Some(m) =>
+        val prefixLength = (if (path.endsWith(".")) path else path + ".").length
+        m.asInstanceOf[collection.Map[String, String]].map(x => (x._1.substring(prefixLength), x._2)).toMap
+    }
+  }
+
   /** 单纯的属性名称
    * 不是variable:defaultValue
    *
