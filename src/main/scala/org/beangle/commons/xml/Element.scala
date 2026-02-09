@@ -31,7 +31,7 @@ object Element {
 }
 
 class Element(val label: String) extends Node {
-  protected[xml] val attributes = Collections.newMap[String, String]
+  protected[xml] val attributes = new mutable.LinkedHashMap[String, String]
   protected[xml] val childNodes = Collections.newBuffer[Element]
   protected[xml] var innerText: Option[String] = None
 
