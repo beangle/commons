@@ -20,7 +20,7 @@ package org.beangle.commons.text.escape
 object XmlEscaper {
   private val textTargets = Map('<' -> "&lt;", '>' -> "&gt;", '&' -> "&amp;")
 
-  private val targets = textTargets ++ Map('"' -> "&quot;", '\'' -> "&apos")
+  private val targets = textTargets ++ Map('"' -> "&quot;", '\'' -> "&apos;")
 
   def escape(str: String): String = {
     escape(str, targets)
