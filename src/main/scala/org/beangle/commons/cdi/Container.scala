@@ -50,22 +50,26 @@ trait Container {
 
 object Container {
 
-  private var Default: Option[Container] = None
+  private var ROOT: Option[Container] = None
   private var containers: Map[String, Container] = Map.empty
   //有条件的读写控制，多个读者，单个写者，读不到等待
   private val rwLock = new ReentrantReadWriteLock()
   private val available = rwLock.writeLock().newCondition()
 
-  def get(id: String): Container = {
+  def root: Option[Container] = {
+    ROOT
+  }
+
+  def get(id: String): Option[Container] = {
     Locks.withReadLock(rwLock) {
-      Container.containers.getOrElse(id, Default.get)
+      Container.containers.get(id)
     }
   }
 
   def register(c: Container): Unit = {
     assert(null != c.id)
     Locks.withWriteLock(rwLock) {
-      if (c.id == "ROOT") Default = Some(c)
+      if (c.id == "ROOT") ROOT = Some(c)
       containers = containers + (c.id -> c)
       available.signalAll()
     }
@@ -74,7 +78,7 @@ object Container {
   def unregister(c: Container): Unit = {
     Locks.withWriteLock(rwLock) {
       containers -= c.id
-      if (Default.contains(c)) Default = None
+      if (ROOT.contains(c)) ROOT = None
     }
   }
 
