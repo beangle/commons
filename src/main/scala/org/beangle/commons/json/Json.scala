@@ -17,6 +17,7 @@
 
 package org.beangle.commons.json
 
+import org.beangle.commons.codec.binary.Base64
 import org.beangle.commons.lang.{Options, Strings}
 
 object Json {
@@ -104,6 +105,7 @@ object Json {
       case f: Float => f.toString
       case d: Double => d.toString
       case l: Long => Json.escape(l.toString)
+      case bs: Array[Byte] => s""""${Base64.encode(bs)}""""
       case _ => Json.escape(v.toString)
     }
   }

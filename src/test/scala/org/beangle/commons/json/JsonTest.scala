@@ -25,13 +25,14 @@ class JsonTest extends AnyFunSpec, Matchers {
   describe("Json") {
     it("toJson") {
       val json = JsonObject("id" -> 3L, "isManager" -> false, "salary" -> 6999,
-        "age" -> Some(30), "title" -> None, "weight" -> Integer.valueOf(180))
+        "age" -> Some(30), "title" -> None, "weight" -> Integer.valueOf(180), "photo" -> "this is a text photo".getBytes)
       val result = json.toJson
       assert(result.contains(""""id":"3"""))
       assert(result.contains(""""weight":180"""))
       assert(result.contains(""""isManager":false"""))
       assert(result.contains(""""title":null"""))
       assert(result.contains(""""age":3"""))
+      assert(result.contains(""""photo":"dGhpcyBpcyBhIHRleHQgcGhvdG8=""""))
 
       val b = Json.parseObject("""{"name":"课堂测验","percent":20.3,"count":5}""")
       assert(b.toJson.contains(""""percent":20.3"""))
