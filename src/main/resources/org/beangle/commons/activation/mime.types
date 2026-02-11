@@ -64,6 +64,7 @@ type=application/onenote                                                       e
 type=application/oxps                                                          exts=oxps
 type=application/patch-ops-error+xml                                           exts=xer
 type=application/pdf                                                           exts=pdf
+type=application/ofd                                                           exts=ofd
 type=application/pgp-encrypted                                                 exts=pgp
 type=application/pgp-signature                                                 exts=asc,sig
 type=application/pics-rules                                                    exts=prf

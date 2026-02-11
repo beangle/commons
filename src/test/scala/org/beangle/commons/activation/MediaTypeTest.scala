@@ -48,6 +48,9 @@ class MediaTypeTest extends AnyFunSpec, Matchers {
       val csv = MediaTypes.parse("text/csv").head
       assert(MediaTypes.csv == csv)
 
+      val ofd = MediaTypes.parse("application/ofd").head
+      assert(MediaTypes.ofd == ofd)
+
     }
   }
 }

@@ -50,6 +50,8 @@ object MediaTypes {
 
   def pdf: MediaType = as("application/pdf")
 
+  def ofd: MediaType = as("application/ofd")
+
   def zip: MediaType = as("application/zip")
 
   def xlsx: MediaType = as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
