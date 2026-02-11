@@ -93,10 +93,10 @@ object Reader {
     val lengthWidth = 8
     val decimalWidth = 8
 
-    var in = new DataInputStream(new BufferedInputStream(new FileInputStream(dbf)))
+    val in = new DataInputStream(new BufferedInputStream(new FileInputStream(dbf)))
     try {
-      var header = Header.read(in)
-      var sb = new StringBuilder(512)
+      val header = Header.read(in)
+      val sb = new StringBuilder(512)
       sb.append("Created at: ")
         .append(header.year).append('-').append(header.month)
         .append('-').append(header.day).append('\n')
@@ -142,33 +142,29 @@ class Reader(dataInput: DataInput, val header: Header) extends Closeable {
   private def skipToDataBeginning(): Unit = {
     // it might be required to jump to the start of records at times
     val dataStartIndex = header.headerSize - 32 * (header.fieldsCount + 1) - 1
-    if (dataStartIndex > 0)
-      dataInput.skipBytes(dataStartIndex)
+    if (dataStartIndex > 0) dataInput.skipBytes(dataStartIndex)
   }
 
-  def canSeek: Boolean =
+  def canSeek: Boolean = {
     dataInput.isInstanceOf[RandomAccessFile]
+  }
 
   /**
    * Attempt to seek to a specified record index. If successful the record can be read
-   * by calling {@link DbfReader# nextRecord ( )}.
+   * by calling  `DbfReader#nextRecord()` .
    *
    * @param n The zero-based record index.
    */
   def seekToRecord(n: Int): Unit = {
-    if (!canSeek)
-      throw new DbfException("Seeking is not supported.")
-    if (n < 0 || n >= header.numberOfRecords)
-      throw new DbfException(Strings.format(
-        "Record index out of range [0, %d]: %d",
-        header.numberOfRecords, n))
+    if (!canSeek) throw new DbfException("Seeking is not supported.")
+    if (n < 0 || n >= header.numberOfRecords) {
+      throw new DbfException(Strings.format("Record index out of range [0, %d]: %d", header.numberOfRecords, n))
+    }
     val position = header.headerSize + n * header.recordSize
-    try
+    try {
       dataInput.asInstanceOf[RandomAccessFile].seek(position)
-    catch {
-      case e: IOException =>
-        throw new DbfException(
-          Strings.format("Failed to seek to record %d of %d", n, header.numberOfRecords), e)
+    } catch {
+      case e: IOException => throw new DbfException(Strings.format("Failed to seek to record %d of %d", n, header.numberOfRecords), e)
     }
   }
 

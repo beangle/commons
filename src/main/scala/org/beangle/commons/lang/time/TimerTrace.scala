@@ -46,7 +46,7 @@ object TimerTrace {
     case _: NumberFormatException =>
   }
 
-  /** Create and start a performance profiling with the <code>name</code> given. Deal with
+  /** Create and start a performance profiling with the `name` given. Deal with
    * profile hierarchy automatically, so caller don't have to be concern about it.
    *
    * @param name profile name
@@ -58,7 +58,7 @@ object TimerTrace {
     if (null == stack) curStack.set(new TimerStack(root)) else stack.push(root)
   }
 
-  /** End a preformance profiling with the <code>name</code> given. Deal with
+  /** End a preformance profiling with the `name` given. Deal with
    * profile hierarchy automatically, so caller don't have to be concern about it.
    */
   def end(): Unit = {
@@ -102,6 +102,7 @@ object TimerTrace {
 
   def isActive: Boolean = active
 
-  def clear(): Unit =
+  def clear(): Unit = {
     curStack.set(null)
+  }
 }

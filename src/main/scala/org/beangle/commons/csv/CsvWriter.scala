@@ -17,17 +17,12 @@
 
 package org.beangle.commons.csv
 
-import org.beangle.commons.lang.Throwables
 import org.beangle.commons.csv.CsvWriter.*
+import org.beangle.commons.lang.Throwables
 
-import java.io.{Closeable, IOException, PrintWriter, Writer}
+import java.io.{Closeable, IOException, Writer}
 
 object CsvWriter {
-
-  /**
-   * Constant <code>InitialStringSize=128</code>
-   */
-  val InitialStringSize = 128
 
   /**
    * The Quote constant to use when you wish to suppress all quoting.
@@ -49,10 +44,14 @@ object CsvWriter {
  *
  * @author chaostone
  */
-class CsvWriter(val writer: Writer, val format: CsvFormat = new CsvFormat.Builder().escape(NoEscapeChar)
-  .build()) extends Closeable {
+class CsvWriter(val writer: Writer,
+                val format: CsvFormat = new CsvFormat.Builder().escape(NoEscapeChar).build()) extends Closeable {
 
-  private var lineEnd: String = "\n"
+  /**
+   * Constant `InitialStringSize=128`
+   */
+  private val InitialStringSize = 128
+  private val lineEnd: String = "\n"
 
   /**
    * write.
@@ -60,8 +59,7 @@ class CsvWriter(val writer: Writer, val format: CsvFormat = new CsvFormat.Builde
   def write(data: Any): Unit = {
     data match {
       case a: Array[_] => writeOne(a)
-      case lines: Iterable[_] =>
-        for (line <- lines) writeOne(line.asInstanceOf[Array[_]])
+      case lines: Iterable[_] => for (line <- lines) writeOne(line.asInstanceOf[Array[_]])
     }
   }
 
@@ -72,8 +70,7 @@ class CsvWriter(val writer: Writer, val format: CsvFormat = new CsvFormat.Builde
     if (nextLine == null) return
     val sb = new StringBuilder(InitialStringSize)
     for (i <- nextLine.indices) {
-      if (i != 0)
-        sb.append(format.defaultSeparator())
+      if (i != 0) sb.append(format.defaultSeparator())
       val nextElem = nextLine(i)
       if (null != nextElem) {
         val nextElement = nextElem.toString
@@ -89,35 +86,31 @@ class CsvWriter(val writer: Writer, val format: CsvFormat = new CsvFormat.Builde
   private def containsSpecialChar(line: String): Boolean =
     line.indexOf(format.delimiter) != -1 || line.indexOf(format.delimiter) != -1
 
-  /**
-   * processLine.
+  /** process line.
    *
    * @param nextElement a String object.
-   * @return a {@link java.lang.StringBuilder} object.
+   * @return a `StringBuilder` object.
    */
   protected def processLine(nextElement: String): StringBuilder = {
     val sb = new StringBuilder(InitialStringSize)
     for (j <- 0 until nextElement.length) {
       val nextChar = nextElement.charAt(j)
-      if (format.escape != NoEscapeChar && nextChar == format.delimiter)
+      if (format.escape != NoEscapeChar && nextChar == format.delimiter) {
         sb.append(format.escape).append(nextChar)
-      else if (format.escape != NoEscapeChar && nextChar == format.escape)
+      } else if (format.escape != NoEscapeChar && nextChar == format.escape) {
         sb.append(format.escape).append(nextChar)
-      else
+      } else {
         sb.append(nextChar)
+      }
     }
     sb
   }
 
-  /**
-   * flush.
-   */
+  /** flush. */
   def flush(): Unit =
     writer.flush()
 
-  /**
-   * close.
-   */
+  /** close. */
   def close(): Unit =
     try {
       flush()

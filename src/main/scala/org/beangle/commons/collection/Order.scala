@@ -26,7 +26,7 @@ import scala.collection.mutable.ListBuffer
  * @author chaostone
  */
 object Order {
-  /** Constant <code>OrderStr="orderBy"</code>
+  /** Constant `OrderStr="orderBy"`
    */
   val OrderStr = "orderBy"
 

@@ -27,10 +27,10 @@ import java.lang.reflect.Method
  */
 object Enums {
 
-  /** Returns an optional enum constant for the given type, using {@link Enum# valueOf}. If the
-   * constant does not exist, {@link Option# none} is returned. A common use case is for parsing
+  /** Returns an optional enum constant for the given type, using `Enum#valueOf`. If the
+   * constant does not exist, `Option.none` is returned. A common use case is for parsing
    * user input or falling back to a default enum constant. For example,
-   * {@code Enums.get(Country.class, countryInput).getOrElse(Country.DEFAULT);}
+   * `Enums.get(Country.class, countryInput).getOrElse(Country.DEFAULT);`
    *
    * @since 3.1
    */

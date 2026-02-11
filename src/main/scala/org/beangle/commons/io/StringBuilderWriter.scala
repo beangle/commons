@@ -19,12 +19,12 @@ package org.beangle.commons.io
 
 import java.io.Writer
 
-/** {@link Writer} implementation that outputs to a {@link StringBuilder}.
+/** A [[java.io.Writer]] implementation that outputs to a [[StringBuilder]].
  * <p>
- * <strong>NOTE:</strong> This implementation, as an alternative to
- * <code>java.io.StringWriter</code>, provides an single thread implementation for better performance.
- * For safe usage with multiple {@link Thread}s then
- * <code>java.io.StringWriter</code> should be used.
+ * <b>NOTE:</b> This implementation, as an alternative to
+ * [[java.io.StringWriter]], provides an single thread implementation for better performance.
+ * For safe usage with multiple `thread`s then
+ * [[java.io.StringWriter]] should be used.
  *
  * @author chaostone
  * @since 3.1
@@ -49,7 +49,7 @@ class StringBuilderWriter(val builder: StringBuilder) extends Writer, Serializab
     this
   }
 
-  /** Append a portion of a character sequence to the {@link StringBuilder}.
+  /** Append a portion of a character sequence to the [[StringBuilder]].
    */
   override def append(value: CharSequence, start: Int, end: Int): Writer = {
     builder.append(value, start, end)
@@ -66,19 +66,19 @@ class StringBuilderWriter(val builder: StringBuilder) extends Writer, Serializab
   override def flush(): Unit = {
   }
 
-  /** Write a String to the {@link StringBuilder}.
+  /** Write a String to the [[StringBuilder]].
    *
    * @param value The value to write
    */
   override def write(value: String): Unit =
     if (value != null) builder.append(value)
 
-  /** Write a portion of a character array to the {@link StringBuilder}.
+  /** Write a portion of a character array to the [[StringBuilder]].
    */
   override def write(value: Array[Char], offset: Int, length: Int): Unit =
     if (value != null) builder.appendAll(value, offset, length)
 
-  /** Returns {@link StringBuilder# toString ( )}.
+  /** Returns underling build.toString.
    */
   override def toString: String = builder.toString
 }

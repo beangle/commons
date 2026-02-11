@@ -18,18 +18,9 @@
 package org.beangle.commons.csv.internal
 
 import org.beangle.commons.csv.CsvFormat
-import org.beangle.commons.csv.internal.CsvParser.*
 
-import java.io.IOException
 import scala.collection.mutable
 
-object CsvParser {
-
-  /**
-   * Constant <code>InitialReadSize=128</code>
-   */
-  val InitialReadSize = 128
-}
 
 /**
  * A very simple CSV parser released under a commercial-friendly license. This
@@ -38,6 +29,10 @@ object CsvParser {
  * @author chaostone
  */
 class CsvParser(var format: CsvFormat) {
+  /**
+   * Constant `InitialReadSize=128`
+   */
+  private val InitialReadSize = 128
 
   private var pending: String = _
 

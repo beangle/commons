@@ -19,8 +19,8 @@ package org.beangle.commons.text.inflector
 
 import org.beangle.commons.text.inflector.RuleBasedPluralizer.*
 
-import java.util.{Collections, Locale}
-import java.util.regex.{Matcher, Pattern}
+import java.util.Locale
+import java.util.regex.Pattern
 
 object RuleBasedPluralizer {
 
@@ -33,87 +33,87 @@ object RuleBasedPluralizer {
 
   private val IDENTITY_PLURALIZER = new IdentityPluralizer()
 
-  private var pattern: Pattern = Pattern.compile("\\A(\\s*)(.+?)(\\s*)\\Z")
+  private val pattern: Pattern = Pattern.compile("\\A(\\s*)(.+?)(\\s*)\\Z")
 
-  private var pluPattern1: Pattern = Pattern.compile("^\\p{Lu}+$")
+  private val pluPattern1: Pattern = Pattern.compile("^\\p{Lu}+$")
 
-  private var pluPattern2: Pattern = Pattern.compile("^\\p{Lu}.*")
+  private val pluPattern2: Pattern = Pattern.compile("^\\p{Lu}.*")
 }
 
 /** RuleBasedPluralizer class.
-  *
-  * @author chaostone
-  */
+ *
+ * @author chaostone
+ */
 class RuleBasedPluralizer(var rules: List[Rule], var locale: Locale, var fallbackPluralizer: Pluralizer)
   extends Pluralizer {
 
   /** Constructs a pluralizer with an empty list of rules. Use the setters to configure.
-    */
+   */
   def this() = {
     this(List.empty, Locale.getDefault, null)
   }
 
-  /** Constructs a pluralizer that uses a list of rules then an identity {@link Pluralizer} if none
-    * of the rules match. This is useful to build your own {@link Pluralizer} from scratch.
-    *
-    * @param rules  the rules to apply in order
-    * @param locale the locale specifying the language of the pluralizer
-    */
+  /** Constructs a pluralizer that uses a list of rules then an identity `Pluralizer` if none
+   * of the rules match. This is useful to build your own `Pluralizer` from scratch.
+   *
+   * @param rules  the rules to apply in order
+   * @param locale the locale specifying the language of the pluralizer
+   */
   def this(rules: List[Rule], locale: Locale) = {
     this(rules, locale, IDENTITY_PLURALIZER)
   }
 
   /** Converts a noun or pronoun to its plural form.
-    * This method is equivalent to calling <code>pluralize(word, 2)</code>.
-    * The return value is not defined if this method is passed a plural form.
-    */
+   * This method is equivalent to calling `pluralize(word, 2)`.
+   * The return value is not defined if this method is passed a plural form.
+   */
   def pluralize(word: String): String = pluralize(word, 2)
 
   /** Converts a noun or pronoun to its plural form for the given number of instances. If
-    * <code>number</code> is 1, <code>word</code> is returned unchanged.
-    * The return value is not defined if this method is passed a plural form.
-    */
+   * `number` is 1, `word` is returned unchanged.
+   * The return value is not defined if this method is passed a plural form.
+   */
   def pluralize(word: String, number: Int): String = {
-    if (number == 1)
-      return word
+    if (number == 1) return word
     val matcher = pattern.matcher(word)
     if (matcher.matches()) {
       val pre = matcher.group(1)
       val trimmedWord = matcher.group(2)
       val post = matcher.group(3)
       val plural = pluralizeInternal(trimmedWord)
-      if (plural == null)
-        return fallbackPluralizer.pluralize(word, number)
+      if (plural == null) return fallbackPluralizer.pluralize(word, number)
       return pre + postProcess(trimmedWord, plural) + post
     }
     word
   }
 
   /** Goes through the rules in turn until a match is found at which point the rule is applied and
-    * the result returned. If no rule matches, returns <code>null</code>.
-    *
-    * @param word a singular noun
-    * @return the plural form of the noun, or <code>null</code> if no rule matches
-    */
+   * the result returned. If no rule matches, returns `null`.
+   *
+   * @param word a singular noun
+   * @return the plural form of the noun, or `null` if no rule matches
+   */
   protected def pluralizeInternal(word: String): String =
-    rules.find(_.applies(word)).map(_.apply(word)).getOrElse(null)
+    rules.find(_.applies(word)).map(_.apply(word)).orNull
 
-  /** Apply processing to <code>pluralizedWord</code>. This implementation ensures the case of the
-    * plural is consistent with the case of the input word.
-    * <p>
-    * If <code>trimmedWord</code> is all uppercase, then <code>pluralizedWord</code> is uppercased.
-    * If <code>trimmedWord</code> is titlecase, then <code>pluralizedWord</code> is titlecased.
-    * </p>
-    *
-    * @param trimmedWord    the input word, with leading and trailing whitespace removed
-    * @param pluralizedWord the pluralized word
-    * @return the <code>pluralizedWord</code> after processing
-    */
+  /** Apply processing to `pluralizedWord`. This implementation ensures the case of the
+   * plural is consistent with the case of the input word.
+   * <p>
+   * If `trimmedWord` is all uppercase, then `pluralizedWord` is uppercased.
+   * If `trimmedWord` is titlecase, then `pluralizedWord` is titlecased.
+   * </p>
+   *
+   * @param trimmedWord    the input word, with leading and trailing whitespace removed
+   * @param pluralizedWord the pluralized word
+   * @return the `pluralizedWord` after processing
+   */
   protected def postProcess(trimmedWord: String, pluralizedWord: String): String = {
-    if (pluPattern1.matcher(trimmedWord).matches())
-      return pluralizedWord.toUpperCase(locale)
-    else if (pluPattern2.matcher(trimmedWord).matches())
-      return pluralizedWord.substring(0, 1).toUpperCase(locale) + pluralizedWord.substring(1)
-    pluralizedWord
+    if (pluPattern1.matcher(trimmedWord).matches()) {
+      pluralizedWord.toUpperCase(locale)
+    } else if (pluPattern2.matcher(trimmedWord).matches()) {
+      pluralizedWord.substring(0, 1).toUpperCase(locale) + pluralizedWord.substring(1)
+    } else {
+      pluralizedWord
+    }
   }
 }

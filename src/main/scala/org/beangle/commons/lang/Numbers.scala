@@ -23,10 +23,10 @@ import java.math.RoundingMode
 import java.{lang as jl, math as jm}
 
 object Numbers {
-  /** Convert a <code>String</code> to an <code>int</code>, returning a default value if the
+  /** Convert a `String` to an `int`, returning a default value if the
    * conversion fails.
    * <p>
-   * If the string is <code>null</code>, the default value is returned.
+   * If the string is `null`, the default value is returned.
    * </p>
    *
    * <pre>
@@ -134,13 +134,13 @@ object Numbers {
     catch case nfe: NumberFormatException => defaultValue
   }
 
-  /** Checks whether the <code>String</code> contains only digit characters.
+  /** Checks whether the `String` contains only digit characters.
    * <p>
-   * <code>Null</code> and empty String will return <code>false</code>.
+   * `null` and empty String will return `false`.
    * </p>
    *
-   * @param str the <code>String</code> to check
-   * @return <code>true</code> if str contains only Unicode numeric
+   * @param str the `String` to check
+   * @return `true` if str contains only Unicode numeric
    */
   def isDigits(str: String): Boolean = {
     if isEmpty(str) then return false

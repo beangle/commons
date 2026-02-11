@@ -84,12 +84,10 @@ object DateFormats {
    * the same constructs.
    * Strings are parsed in accordance with the RFC 3339 format:
    *
-   * <pre>
-   * YYYY-MM-DD(T|t|\s)hh:mm:ss[.ddd][tzd]
-   * </pre>
+   * `YYYY-MM-DD(T|t|\s)hh:mm:ss[.ddd][tzd]`
    *
-   * The <code>tzd</code> represents the time zone designator and is either an
-   * upper or lower case 'Z' indicating UTC or a signed <code>hh:mm</code> offset.
+   * The `tzd` represents the time zone designator and is either an
+   * upper or lower case 'Z' indicating UTC or a signed `hh:mm` offset.
    *
    * https://www.ietf.org/rfc/rfc3339.txt
    *
@@ -102,7 +100,7 @@ object DateFormats {
     val df4 = new DecimalFormat("0000")
 
     /** The Regex pattern to match. */
-    val pattern = buildPattern()
+    private val pattern = buildPattern()
 
     private def buildPattern(): Pattern = {
       val reDate = "(\\d{4})-(\\d{2})-(\\d{2})"

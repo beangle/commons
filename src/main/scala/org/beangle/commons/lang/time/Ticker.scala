@@ -19,22 +19,21 @@ package org.beangle.commons.lang.time
 
 object Ticker {
 
-  /** A ticker that reads the current time using {@link System# nanoTime}.
-    */
+  /** A ticker that reads the current time using `System.nanoTime`.
+   */
   def systemTicker(): Ticker = defaultTicker
 
   private val defaultTicker = new SystemTicker
 }
 
 /** Time source generator
-  *
-  * @author chaostone
-  * @since 3.0.0
-  */
+ *
+ * @author chaostone
+ * @since 3.0.0
+ */
 abstract class Ticker {
 
-  /** Returns the number of nanoseconds elapsed
-    */
+  /** Returns the number of nanoseconds elapsed */
   def read(): Long
 }
 

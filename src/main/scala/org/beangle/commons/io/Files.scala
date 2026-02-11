@@ -135,17 +135,17 @@ object Files {
   }
 
   /** Copies a file to a new location preserving the file date.
-   * <p>
+   *
    * This method copies the contents of the specified source file to the specified destination file.
    * The directory holding the destination file is created if it does not exist. If the destination
    * file exists, then this method will overwrite it.
-   * <p>
-   * <strong>Note:</strong> This method tries to preserve the file's last modified date/times using
-   * {@link File# setLastModified ( long )}, however it is not guaranteed that the operation will
+   *
+   * <b>Note:</b> This method tries to preserve the file's last modified date/times using
+   * `File#setLastModified(long)`, however it is not guaranteed that the operation will
    * succeed. If the modification operation fails, no indication is provided.
    *
-   * @param src  an existing file to copy, must not be <code>null</code>
-   * @param dest the new file, must not be <code>null</code>
+   * @param src  an existing file to copy, must not be `null`
+   * @param dest the new file, must not be `null`
    */
   @throws[IOException]("if source or destination is invalid or an IO error occurs during copying")
   def copy(src: File, dest: File): Unit = {

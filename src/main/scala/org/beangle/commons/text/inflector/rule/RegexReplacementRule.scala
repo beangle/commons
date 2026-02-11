@@ -25,5 +25,7 @@ import java.util.regex.Matcher
   */
 class RegexReplacementRule(regex: String, val replacement: String) extends AbstractRegexReplacementRule(regex) {
 
-  override def replace(matcher: Matcher): String = matcher.replaceFirst(replacement)
+  override def replace(matcher: Matcher): String = {
+    matcher.replaceFirst(replacement)
+  }
 }

@@ -38,7 +38,7 @@ object ClassLoaders {
    * typically the thread context ClassLoader, if available; the ClassLoader that loaded the ClassLoaders
    * class will be used as fallback.
    *
-   * @return the default ClassLoader (never <code>null</code>)
+   * @return the default ClassLoader (never `null`)
    */
   def defaultClassLoader: ClassLoader = {
     var cl =

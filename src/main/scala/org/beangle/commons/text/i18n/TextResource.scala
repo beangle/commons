@@ -45,12 +45,12 @@ trait TextResource {
   def apply(key: String): Option[String]
 
   /** Gets a message based on a key using the supplied obj, as defined in
-    * {@link java.text.MessageFormat}, or, if the message is not found, a
+    * [[java.text.MessageFormat]], or, if the message is not found, a
     * supplied default value is returned.
     *
     * @param key          the resource bundle key that is to be searched for
     * @param defaultValue the default value which will be returned if no message is found
-    * @param obj          obj to be used in a {@link java.text.MessageFormat} message
+    * @param obj          obj to be used in a [[java.text.MessageFormat]] message
     * @return the message as found in the resource bundle, or defaultValue if none is found
     */
   def apply(key: String, defaultValue: String, obj: Any*): String

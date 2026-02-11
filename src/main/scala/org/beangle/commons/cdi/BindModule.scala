@@ -63,8 +63,7 @@ object BindModule {
 
 }
 
-/**
- * Abstract BindModule class.
+/** Abstract BindModule class.
  * The subclass can writed in /META-INF/beangle/cdi.xml
  * using modules=com.your.class
  */
@@ -75,7 +74,7 @@ abstract class BindModule {
   private var wiredEagerly: Boolean = _
 
   /**
-   * Getter for the field <code>config</code>.
+   * config module using binder
    */
   final def configure(binder: Binder): Unit = {
     this.binder = binder

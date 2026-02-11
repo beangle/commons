@@ -24,11 +24,11 @@ import org.beangle.commons.io.Files
 import java.io.*
 
 /** This module provides functionality for generating bsdiff patches from two
-  * source files (an old and new file).
-  *
-  * The algorithm based on bsdiff(http://www.daemonology.net/bsdiff/)
-  * and ported from https://github.com/malensek/jbsdiff
-  */
+ * source files (an old and new file).
+ *
+ * The algorithm based on bsdiff(http://www.daemonology.net/bsdiff/)
+ * and ported from https://github.com/malensek/jbsdiff
+ */
 object Bsdiff {
 
   def diff(oldFile: File, newFile: File, patchFile: File): Unit = {
@@ -191,12 +191,12 @@ object Bsdiff {
   }
 
   /** Using an old file and its accompanying patch, this method generates a new
-    * (updated) file and writes it to an {@link OutputStream}.
-    *
-    * @param old   the original ('old') state of the binary
-    * @param patch a binary patch file to apply to the old state
-    * @param out   an {@link OutputStream} to write the patched binary to
-    */
+   * (updated) file and writes it to an `OutputStream`.
+   *
+   * @param old   the original ('old') state of the binary
+   * @param patch a binary patch file to apply to the old state
+   * @param out   an `OutputStream` to write the patched binary to
+   */
   def patch(old: Array[Byte], patch: Array[Byte], out: OutputStream): Unit = {
     val headerIn = new ByteArrayInputStream(patch)
     val header = Offset.readHeader(headerIn)
@@ -322,17 +322,16 @@ object Bsdiff {
     }
   }
 
-  /** Reads data from an InputStream, and throws an {@link IOException} if
-    * fewer bytes were read than requested.  Since the lengths of data in a
-    * bsdiff patch are explicitly encoded in the control blocks, reading less
-    * than expected is an unrecoverable error.
-    */
+  /** Reads data from an InputStream, and throws an `IOException` if
+   * fewer bytes were read than requested.  Since the lengths of data in a
+   * bsdiff patch are explicitly encoded in the control blocks, reading less
+   * than expected is an unrecoverable error.
+   */
   private def read(in: InputStream, dest: Array[Byte], off: Int, len: Int): Unit = {
     if (len == 0) return
     val read = in.read(dest, off, len)
     if (read < len)
-      throw new IOException("Corrupt patch bytes expected = " + len +
-        " bytes read = " + read)
+      throw new IOException("Corrupt patch bytes expected = " + len + " bytes read = " + read)
   }
 
   private def sort(input: Array[Byte]): Array[Int] = {

@@ -21,27 +21,22 @@ import org.beangle.commons.text.seq.HanZiSeqStyle.*
 
 object HanZiSeqStyle {
 
-  /** Constant <code>MAX=99999</code>
-    */
+  /** Constant `MAX=99999` */
   val MAX = 99999
 
-  /** Constant <code>CHINESE_NAMES="{ 零, 一, 二, 三, 四, 五, 六, 七, 八, 九, 十 }"</code>
-    */
+  /** Constant `CHINESE_NAMES="{ 零, 一, 二, 三, 四, 五, 六, 七, 八, 九, 十 }"` */
   val CHINESE_NAMES = Array("零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十")
 
-  /** Constant <code>PRIORITIES="{ 十, 百, 千, 万 }"</code>
-    */
+  /** Constant `PRIORITIES="{ 十, 百, 千, 万 }"` */
   val PRIORITIES = Array("十", "百", "千", "万")
 }
 
 /** 汉字序列产生器
-  *
-  * @author chaostone,zhufengbin
-  */
+ *
+ * @author chaostone,zhufengbin
+ */
 class HanZiSeqStyle extends SeqNumStyle {
 
-  /** {@inheritDoc }
-    */
   def build(seq: Int): String = {
     if (seq > MAX)
       throw new RuntimeException("seq greate than " + MAX)
@@ -49,10 +44,10 @@ class HanZiSeqStyle extends SeqNumStyle {
   }
 
   /** buildText.
-    *
-    * @param str1 a String object.
-    * @return a String object.
-    */
+   *
+   * @param str1 a String object.
+   * @return a String object.
+   */
   def buildText(str1: String): String = {
     val sb = new StringBuilder()
     for (i <- 0 until str1.length) {
@@ -69,17 +64,17 @@ class HanZiSeqStyle extends SeqNumStyle {
   }
 
   /** basicOf.
-    *
-    * @param num a int.
-    * @return a String object.
-    */
+   *
+   * @param num a int.
+   * @return a String object.
+   */
   def basicOf(num: Int): String = CHINESE_NAMES(num)
 
   /** priorityOf.
-    *
-    * @param index a int.
-    * @return a String object.
-    */
+   *
+   * @param index a int.
+   * @return a String object.
+   */
   def priorityOf(index: Int): String = {
     if index < 2 then ""
     else PRIORITIES(index - 2)

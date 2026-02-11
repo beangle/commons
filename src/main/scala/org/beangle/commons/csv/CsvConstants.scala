@@ -20,22 +20,22 @@ package org.beangle.commons.csv
 object CsvConstants {
 
   /**
-   * Constant <code>Comma=','</code>
+   * Constant `Comma=','`
    */
   val Comma = ','
 
   /**
-   * Constant <code>Semicolon=';'</code>
+   * Constant `Semicolon=';'`
    */
   val Semicolon = ';'
 
   /**
-   * Constant <code>Quote='"'</code>
+   * Constant `Quote='"'`
    */
   val Quote = '"'
 
   /**
-   * Constant <code>Escape='\\'</code>
+   * Constant `Escape='\\'`
    */
   val Escape = '\\'
 }

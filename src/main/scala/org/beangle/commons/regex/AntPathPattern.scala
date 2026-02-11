@@ -38,29 +38,22 @@ object AntPathPattern {
 }
 
 /** AntPattern implementation for Ant-style path patterns. Examples are provided below.
- * <p>
- * Part of this mapping code has been kindly borrowed from <a href="http://ant.apache.org">Apache
- * Ant</a>.
- * <p>
- * The mapping matches URLs using the following rules:<br>
- * <ul>
- * <li>? matches one character</li>
- * <li>* matches zero or more characters</li>
- * <li>** matches zero or more 'directories' in a path</li>
- * </ul>
- * <p>
- * Some examples:<br>
- * <ul>
- * <li><code>com/t?st.jsp</code> - matches <code>com/test.jsp</code> but also
- * <code>com/tast.jsp</code> or <code>com/txst.jsp</code></li>
- * <li><code>com/&#42;sp</code> - matches all <code>.jsp</code> files in the <code>com</code> directory</li>
- * <li><code>org/beangle/&#42;&#42;/&#42;.jsp</code> - matches all <code>.jsp</code> files underneath
- * <li><code>com/&#42;&#42;/test.jsp</code> - matches all <code>test.jsp</code> files underneath the <code>com</code> path</li>
- * the <code>org/beangle</code> path</li>
- * <li><code>org/&#42;&#42;/servlet/bla.jsp</code> - matches
- * <code>org/beangle/servlet/bla.jsp</code> but also
- * <code>org/beangle/testing/servlet/bla.jsp</code> and <code>org/servlet/bla.jsp</code></li>
- * </ul>
+ *
+ * Part of this mapping code has been kindly borrowed from [Apache Ant](http://ant.apache.org).
+ *
+ * The mapping matches URLs using the following rules:
+ *
+ * - `?` matches one character
+ * - `*` matches zero or more characters
+ * - `**` matches zero or more 'directories' in a path
+ *
+ * Some examples:
+ *
+ * - com/t?st.jsp - matches com/test.jsp` but also `com/tast.jsp` or `com/txst.jsp`
+ * - com/&#42;sp - matches all `.jsp` files in the `com` directory
+ * - org/beangle/&#42;&#42;/&#42;.jsp - matches all `.jsp` files underneath
+ * - com/&#42;&#42;/test.jsp - matches all `test.jsp` files underneath the `com` path the `org/beangle` path
+ * - org/&#42;&#42;/servlet/bla.jsp - matches `org/beangle/servlet/bla.jsp` but also  org/beangle/testing/servlet/bla.jsp and `org/servlet/bla.jsp`
  *
  * @author chaostone
  * @since 3.1.0
@@ -148,7 +141,7 @@ class AntPathPattern(val text: String) {
   }
 
   override def toString: String = {
-    if null == pattern then s"ant:[${text}]"
+    if null == pattern then s"ant:[$text]"
     else Strings.concat("ant:[", text, "] regex:[", pattern.toString, "]")
   }
 }

@@ -24,24 +24,24 @@ import java.lang.Character.{toLowerCase, isLowerCase as isLower, isUpperCase as 
 import java.nio.charset.Charset
 import scala.collection.mutable
 
-/** Operations on String that are {@code null} safe.
+/** Operations on String that are `null` safe.
  *
  * @author chaostone 2005-11-15
  * @since 3.0
  */
 object Strings {
 
-  /** Constant <code>DELIMITER=","</code>
+  /** Constant `DELIMITER=","`
    */
   val DELIMITER = ","
 
-  private val Empty = ""
+  val Empty = ""
 
   private val Index_not_found = -1
 
   /** Capitalizes a String changing the first letter to title case as per
-   * {@link Character# toTitleCase ( char )}. No other letters are changed.
-   * For a word based algorithm, see returns {@code null}.
+   * `Character# toTitleCase(char)`. No other letters are changed.
+   * For a word based algorithm, see returns `null`.
    *
    * {{{
    * capitalize(null)  = null
@@ -51,17 +51,17 @@ object Strings {
    * }}}
    *
    * @param str the String to capitalize, may be null
-   * @return the capitalized String, { @code null} if null String input
+   * @return the capitalized String, `null` if null String input
    * @see #uncapitalize(String)
    * @since 2.0
    */
   def capitalize(str: String): String = {
-    if ((str eq null) || str.length == 0) return str
+    if ((str eq null) || str.isEmpty) return str
     val head = str.charAt(0)
     val upper = Character.toUpperCase(head)
-    if (upper == head)
+    if (upper == head) {
       str
-    else {
+    } else {
       val chars = str.toCharArray
       chars(0) = upper
       new String(chars)
@@ -75,9 +75,9 @@ object Strings {
    */
   def concat(seq: Any*): String = join(seq, null)
 
-  /** Checks if CharSequence contains a search CharSequence, handling {@code null}. This method uses
-   * {@link String# indexOf ( String )} if possible.
-   * A {@code null} CharSequence will return {@code false}.
+  /** Checks if CharSequence contains a search CharSequence, handling `null`. This method uses
+   * `String#indexOf(String)` if possible.
+   * A `null` CharSequence will return `false`.
    *
    * {{{
    * contains(null, *)     = false
@@ -91,16 +91,16 @@ object Strings {
    * @param seq       the CharSequence to check, may be null
    * @param searchSeq the CharSequence to find, may be null
    * @return true if the CharSequence contains the search CharSequence,
-   *         false if not or { @code null} string input
+   *         false if not or `null` string input
    */
   def contains(seq: CharSequence, searchSeq: CharSequence): Boolean = {
     if (seq == null || searchSeq == null) return false
     indexOf(seq, searchSeq, 0) >= 0
   }
 
-  /** Checks if CharSequence contains a search character, handling {@code null}. This method uses
-   * {@link String# indexOf ( int )} if possible.
-   * A {@code null} or empty ("") CharSequence will return {@code false}.
+  /** Checks if CharSequence contains a search character, handling `null`. This method uses
+   * `String#indexOf(int)` if possible.
+   * A `null` or empty ("") CharSequence will return `false`.
    *
    * {{{
    * contains(null, *)    = false
@@ -112,7 +112,7 @@ object Strings {
    * @param seq        the CharSequence to check, may be null
    * @param searchChar the character to find
    * @return true if the CharSequence contains the search character,
-   *         false if not or { @code null} string input
+   *         false if not or `null` string input
    * @since 2.0
    */
   def contains(seq: CharSequence, searchChar: Int): Boolean = {
@@ -148,15 +148,16 @@ object Strings {
     count
   }
 
-  /** Returns index of searchChar in cs with begin index {@code start}
+  /** Returns index of searchChar in cs with begin index `start`
    *
-   * @param searchChar
-   * @param start
+   * @param cs         char sequences
+   * @param searchChar search char
+   * @param start      start position
    */
   private def indexOf(cs: CharSequence, searchChar: CharSequence, start: Int): Int =
     cs.toString.indexOf(searchChar.toString, start)
 
-  /** Finds the first index in the {@code CharSequence} that matches the specified character.
+  /** Finds the first index in the `CharSequence` that matches the specified character.
    *
    * @param cs         the { @code CharSequence} to be processed, not null
    * @param searchChar the char to be searched for
@@ -181,7 +182,7 @@ object Strings {
     if (str.length < pos) return str
     if pos < 1 then c + str
     else if pos < str.length then
-      (str.substring(0, pos) + c + str.substring(pos))
+      str.substring(0, pos) + c + str.substring(pos)
     else str + c
   }
 
@@ -219,7 +220,7 @@ object Strings {
     val rs = Collections.intersection(split(first, ',').toList, split(second, ',').toList)
     val buf = new StringBuilder()
     rs foreach (ele => buf.append(delimiter).append(ele))
-    if (buf.length > 0) buf.append(delimiter)
+    if (buf.nonEmpty) buf.append(delimiter)
     buf.toString
   }
 
@@ -235,13 +236,13 @@ object Strings {
    *
    * @param cs
    * the CharSequence to check, may be null
-   * @return { @code true} if the CharSequence is null, empty or whitespace
+   * @return `true` if the CharSequence is null, empty or whitespace
    * @since 3.0
    */
   def isBlank(cs: CharSequence): Boolean = {
     if ((cs eq null) || cs.length == 0) return true
     val strLen = cs.length
-    !(0 until strLen).exists(i => !Character.isWhitespace(cs.charAt(i)))
+    (0 until strLen).forall(i => Character.isWhitespace(cs.charAt(i)))
   }
 
   /** Returns true is cs is null or cs.length equals 0.
@@ -281,7 +282,7 @@ object Strings {
    * }}}
    *
    * @param cs the CharSequence to check, may be null
-   * @return { @code true} if the CharSequence is not empty and not null and not whitespace
+   * @return `true` if the CharSequence is not empty and not null and not whitespace
    * @since 3.0
    */
   def isNotBlank(cs: CharSequence): Boolean = !isBlank(cs)
@@ -303,7 +304,7 @@ object Strings {
     else {
       val aim = new StringBuilder()
       for (one <- seq) {
-        if (null != delimiter && aim.length > 0) aim.append(delimiter)
+        if (null != delimiter && aim.nonEmpty) aim.append(delimiter)
         aim.append(one)
       }
       aim.toString
@@ -332,7 +333,7 @@ object Strings {
         seq(0)
       else {
         val aim = new StringBuilder()
-        (0 until seq.length) foreach { i =>
+        seq.indices foreach { i =>
           if (null != delimiter && i > 0) aim.append(delimiter)
           aim.append(seq(i))
         }
@@ -361,7 +362,7 @@ object Strings {
   }
 
   /** Left pad a String with a specified character.
-   * Pad to a size of {@code size}.
+   * Pad to a size of `size`.
    *
    * {{{
    * leftPad(null, *, *)     = null
@@ -375,7 +376,7 @@ object Strings {
    * @param str     the String to pad out, may be null
    * @param size    the size to pad to
    * @param padChar the character to pad with
-   * @return left padded String or original String if no padding is necessary, { @code null} if null
+   * @return left padded String or original String if no padding is necessary, `null` if null
    *         String input
    * @since 3.0
    */
@@ -387,7 +388,7 @@ object Strings {
   }
 
   /** Right pad a String with a specified character.
-   * The String is padded to the size of {@code size}.
+   * The String is padded to the size of `size`.
    *
    * {{{
    * rightPad(null, *, *)     = null
@@ -401,7 +402,7 @@ object Strings {
    * @param str     the String to pad out, may be null
    * @param size    the size to pad to
    * @param padChar the character to pad with
-   * @return right padded String or original String if no padding is necessary, { @code null} if null
+   * @return right padded String or original String if no padding is necessary, `null` if null
    *         String input
    * @since 3.0
    */
@@ -449,7 +450,7 @@ object Strings {
       val rs = Collections.union(firstSeq, secondSeq)
       val buf = new StringBuilder()
       for (ele <- rs) buf.append(delimiter).append(ele)
-      if (buf.length > 0) buf.append(delimiter)
+      if (buf.nonEmpty) buf.append(delimiter)
       buf.toString
     } else
       (if ((first == null)) "" else first) + (if ((second == null)) "" else second)
@@ -502,7 +503,7 @@ object Strings {
     new String(buf)
   }
 
-  /** Repeat a String {@code repeat} times to form a new String.
+  /** Repeat a String `repeat` times to form a new String.
    *
    * {{{
    * repeat(null, 2) = null
@@ -515,14 +516,14 @@ object Strings {
    *
    * @param str    the String to repeat, may be null
    * @param repeat number of times to repeat str, negative treated as zero
-   * @return a new String consisting of the original String repeated, { @code null} if null String
+   * @return a new String consisting of the original String repeated, `null` if null String
    *         input
    * @since 3.0
    */
   def repeat(str: String, repeat: Int): String = {
     if (str == null) return null
     if (repeat <= 1) {
-      return if ((repeat <= 0)) "" else str
+      return if (repeat <= 0) "" else str
     }
     val len = str.length
     val longSize = len.toLong * repeat.toLong
@@ -541,7 +542,7 @@ object Strings {
   }
 
   /** Replaces all occurrences of a String within another String.
-   * A {@code null} reference passed to this method is a no-op.
+   * A `null` reference passed to this method is a no-op.
    *
    * {{{
    * replace(null, *, *)        = null
@@ -557,7 +558,7 @@ object Strings {
    * @param text         text to search and replace in, may be null
    * @param searchString the String to search for, may be null
    * @param replacement  the String to replace it with, may be null
-   * @return the text with any replacements processed, { @code null} if null String input
+   * @return the text with any replacements processed, `null` if null String input
    */
   def replace(text: String, searchString: String, replacement: String): String = {
     if (isEmpty(text) || isEmpty(searchString) || replacement == null)
@@ -590,7 +591,7 @@ object Strings {
 
   /** Splits the provided text into an array, separator specified. This is an alternative to using
    * StringTokenizer.
-   * A {@code null} input String returns {@code null}.
+   * A `null` input String returns `null`.
    *
    * {{{
    * split(null, *)         = null
@@ -649,7 +650,7 @@ object Strings {
 
   /** Splits the provided text into an array, separators specified. This is an alternative to using
    * StringTokenizer.
-   * A {@code null} input String returns {@code null}. A {@code null} separatorChars splits on
+   * A `null` input String returns `null`. A `null` separatorChars splits on
    * whitespace.
    *
    * {{{
@@ -693,7 +694,7 @@ object Strings {
     if (isEmpty(numSeq)) return null
     val numArray = split(numSeq, ',')
     val numSet = new mutable.HashSet[Int]
-    (0 until numArray.length) foreach { i =>
+    numArray.indices foreach { i =>
       val num = numArray(i)
       if (num.contains("-")) {
         val termFromTo = split(num, '-')
@@ -715,21 +716,20 @@ object Strings {
   def splitToInt(ids: String): Seq[Int] =
     if (isEmpty(ids)) List.empty else Numbers.toInt(split(ids, ',')).toIndexedSeq
 
-  /** splitToLong.
-   *
-   */
-  def splitToLong(ids: String): Seq[Long] =
+  /** Split string to long seq */
+  def splitToLong(ids: String): Seq[Long] = {
     if (isEmpty(ids)) List.empty else Numbers.toLong(split(ids, ',')).toIndexedSeq
+  }
 
   /** Gets a substring from the specified String avoiding exceptions.
    *
-   * A negative start position can be used to start/end {@code n} characters from the end of the
+   * A negative start position can be used to start/end `n` characters from the end of the
    * String.
-   * The returned substring starts with the character in the {@code start} position and ends before
-   * the {@code end} position. All position counting is zero-based -- i.e., to start at the
-   * beginning of the string use {@code start = 0}. Negative start and end positions can be used to
+   * The returned substring starts with the character in the `start` position and ends before
+   * the `end` position. All position counting is zero-based -- i.e., to start at the
+   * beginning of the string use `start = 0`. Negative start and end positions can be used to
    * specify offsets relative to the end of the String.
-   * If {@code start} is not strictly to the left of {@code end}, "" is returned.
+   * If `start` is not strictly to the left of `end`, "" is returned.
    *
    * {{{
    * substring(null, *, *)    = null
@@ -748,7 +748,7 @@ object Strings {
    *                   count back from the end of the String by this many characters
    * @param endIndex   the position to end at (exclusive), negative means
    *                   count back from the end of the String by this many characters
-   * @return substring from start position to end position, { @code null} if null String input
+   * @return substring from start position to end position, `null` if null String input
    */
   def substring(str: String, startIndex: Int, endIndex: Int): String = {
     if (str == null) return null
@@ -789,7 +789,7 @@ object Strings {
     val rs = Collections.subtract(firstSeq, secondSeq)
     val buf = new StringBuilder()
     rs foreach { ele => buf.append(delimiter).append(ele) }
-    if (buf.length > 0) buf.append(delimiter)
+    if (buf.nonEmpty) buf.append(delimiter)
     buf.toString
   }
 
@@ -814,7 +814,7 @@ object Strings {
    */
   def unCamel(str: String, seperator: Char, lowercase: Boolean): String = {
     if (3 > str.length) return if (lowercase) str.toLowerCase else str
-    val ca = str.toCharArray()
+    val ca = str.toCharArray
     val build = new StringBuilder(ca.length + 5)
     build.append(if (lowercase) toLowerCase(ca(0)) else ca(0))
     var lower1 = isLower(ca(0))
@@ -844,8 +844,8 @@ object Strings {
   }
 
   /** Gets the substring before the first occurrence of a separator. The separator is not returned.
-   * A {@code null} string input will return {@code null}. An empty ("") string input will return
-   * the empty string. A {@code null} separator will return the input string.
+   * A `null` string input will return `null`. An empty ("") string input will return
+   * the empty string. A `null` separator will return the input string.
    * If nothing is found, the string input is returned.
    *
    * {{{
@@ -861,13 +861,13 @@ object Strings {
    *
    * @param str       the String to get a substring from, may be null
    * @param separator the String to search for, may be null
-   * @return the substring before the first occurrence of the separator, { @code null} if null String
+   * @return the substring before the first occurrence of the separator, `null` if null String
    *         input
    * @since 2.0
    */
   def substringBefore(str: String, separator: String): String = {
     if (isEmpty(str) || separator == null) return str
-    if (separator.length == 0) return Empty
+    if (separator.isEmpty) return Empty
     val pos = str.indexOf(separator)
     if (pos == Index_not_found) return str
 
@@ -875,9 +875,9 @@ object Strings {
   }
 
   /** Gets the substring after the first occurrence of a separator. The separator is not returned.
-   * A {@code null} string input will return {@code null}. An empty ("") string input will return
-   * the empty string. A {@code null} separator will return the empty string if the input string is
-   * not {@code null}.
+   * A `null` string input will return `null`. An empty ("") string input will return
+   * the empty string. A `null` separator will return the empty string if the input string is
+   * not `null`.
    * If nothing is found, the empty string is returned.
    *
    * {{{
@@ -893,7 +893,7 @@ object Strings {
    *
    * @param str       the String to get a substring from, may be null
    * @param separator the String to search for, may be null
-   * @return the substring after the first occurrence of the separator, { @code null} if null String
+   * @return the substring after the first occurrence of the separator, `null` if null String
    *         input
    * @since 2.0
    */
@@ -906,8 +906,8 @@ object Strings {
   }
 
   /** Gets the String that is nested in between two Strings. Only the first match is returned.
-   * A {@code null} input String returns {@code null}. A {@code null} open/close returns
-   * {@code null} (no match). An empty ("") open and close returns an empty string.
+   * A `null` input String returns `null`. A `null` open/close returns
+   * `null` (no match). An empty ("") open and close returns an empty string.
    *
    * {{{
    * substringBetween("wx[b]yz", "[", "]") = "b"
@@ -925,7 +925,7 @@ object Strings {
    * @param str   the String containing the substring, may be null
    * @param open  the String before the substring, may be null
    * @param close the String after the substring, may be null
-   * @return the substring, { @code null} if no match
+   * @return the substring, `null` if no match
    * @since 3.0
    */
   def substringBetween(str: String, open: String, close: String): String = {
@@ -939,8 +939,8 @@ object Strings {
   }
 
   /** Gets the substring before the last occurrence of a separator. The separator is not returned.
-   * A {@code null} string input will return {@code null}. An empty ("") string input will return
-   * the empty string. An empty or {@code null} separator will return the input string.
+   * A `null` string input will return `null`. An empty ("") string input will return
+   * the empty string. An empty or `null` separator will return the input string.
    * If nothing is found, the string input is returned.
    *
    * {{{
@@ -956,7 +956,7 @@ object Strings {
    *
    * @param str       the String to get a substring from, may be null
    * @param separator the String to search for, may be null
-   * @return the substring before the last occurrence of the separator, { @code null} if null String
+   * @return the substring before the last occurrence of the separator, `null` if null String
    *         input
    * @since 3.0
    */
@@ -968,9 +968,9 @@ object Strings {
   }
 
   /** Gets the substring after the last occurrence of a separator. The separator is not returned.
-   * A {@code null} string input will return {@code null}. An empty ("") string input will return
-   * the empty string. An empty or {@code null} separator will return the empty string if the input
-   * string is not {@code null}.
+   * A `null` string input will return `null`. An empty ("") string input will return
+   * the empty string. An empty or `null` separator will return the empty string if the input
+   * string is not `null`.
    * If nothing is found, the empty string is returned.
    *
    * {{{
@@ -987,7 +987,7 @@ object Strings {
    *
    * @param str       the String to get a substring from, may be null
    * @param separator the String to search for, may be null
-   * @return the substring after the last occurrence of the separator, { @code null} if null String
+   * @return the substring after the last occurrence of the separator, `null` if null String
    *         input
    * @since 3.0
    */
@@ -999,9 +999,9 @@ object Strings {
     str.substring(pos + separator.length)
   }
 
-  /** Removes control characters (char &lt;= 32) from both ends of this String, handling {@code null}
-   * by returning {@code null}.
-   * The String is trimmed using {@link String# trim ( )}. Trim removes start and end characters &lt;=
+  /** Removes control characters (char &lt;= 32) from both ends of this String, handling `null`
+   * by returning `null`.
+   * The String is trimmed using `String#trim()`. Trim removes start and end characters &lt;=
    * 32.
    *
    * {{{
@@ -1013,7 +1013,7 @@ object Strings {
    * }}}
    *
    * @param str the String to be trimmed, may be null
-   * @return the trimmed string, { @code null} if null String input
+   * @return the trimmed string, `null` if null String input
    * @since 3.0
    */
   def trim(str: String): String =
@@ -1031,11 +1031,11 @@ object Strings {
 
   /** Strips any of a set of characters from the end of a String.
    *
-   * <p>A <code>null</code> input String returns <code>null</code>.
+   * <p>A `null` input String returns `null`.
    * An empty string ("") input returns the empty string.</p>
    *
-   * <p>If the stripChars String is <code>null</code>, whitespace is
-   * stripped as defined by {@link Character# isWhitespace ( char )}.</p>
+   * <p>If the stripChars String is `null`, whitespace is
+   * stripped as defined by `Character#isWhitespace(char)`.</p>
    *
    * {{{
    * stripEnd(null, *)          = null
@@ -1047,10 +1047,10 @@ object Strings {
    *
    * @param str        the String to remove characters from, may be null
    * @param stripChars the characters to remove, null treated as whitespace
-   * @return the stripped String, <code>null</code> if null String input
+   * @return the stripped String, `null` if null String input
    */
   def stripEnd(str: String, stripChars: String): String =
-    if (str == null || str.length == 0 || null == stripChars || stripChars.length == 0)
+    if (str == null || str.isEmpty || null == stripChars || stripChars.isEmpty)
       str
     else {
       var end = str.length
@@ -1061,7 +1061,7 @@ object Strings {
 
   /** Uncapitalizes a String changing the first letter to title case as per
    * [[java.lang.Character#toLowerCase(char)]]. No other letters are changed.
-   * For a word based algorithm, see String returns {@code null}.
+   * For a word based algorithm, see String returns `null`.
    *
    * {{{
    * uncapitalize(null)  = null
@@ -1071,12 +1071,12 @@ object Strings {
    * }}}
    *
    * @param str the String to uncapitalize, may be null
-   * @return the uncapitalized String, { @code null} if null String input
+   * @return the uncapitalized String, `null` if null String input
    * @see #capitalize(String)
    * @since 3.0
    */
   def uncapitalize(str: String): String = {
-    if ((str eq null) || str.length == 0) return str
+    if ((str eq null) || str.isEmpty) return str
     val head = str.charAt(0)
     val lower = Character.toLowerCase(head)
     if (lower == head)
@@ -1089,7 +1089,7 @@ object Strings {
   }
 
   /** Returns either the passed in CharSequence, or if the CharSequence is whitespace, empty ("") or
-   * {@code null}, the value of {@code defaultStr}.
+   * `null`, the value of `defaultStr`.
    *
    * @param str
    * @param defaultStr
@@ -1113,7 +1113,7 @@ object Strings {
     var newoffset = offset
     if (newoffset > str.length()) newoffset = str.length
     if (str.length() - newoffset < maxWidth - 3) newoffset = str.length() - (maxWidth - 3)
-    var abrevMarker = "..."
+    val abrevMarker = "..."
     if (newoffset <= 4) return str.substring(0, maxWidth - 3) + abrevMarker
     if (maxWidth < 7) throw new IllegalArgumentException("Minimum abbreviation width with offset is 7")
 
@@ -1124,7 +1124,7 @@ object Strings {
   }
 
   /** Removes all occurrences of a character from within the source string.
-   * A {@code null} source string will return {@code null}. An empty ("") source string will return
+   * A `null` source string will return `null`. An empty ("") source string will return
    * the empty string.
    *
    * {{{
@@ -1136,7 +1136,7 @@ object Strings {
    *
    * @param str    the source String to search, may be null
    * @param remove the char to search for and remove, may be null
-   * @return the substring with the char removed if found, { @code null} if null String input
+   * @return the substring with the char removed if found, `null` if null String input
    */
   def remove(str: String, remove: Char): String = {
     if (isEmpty(str) || str.indexOf(remove) == -1)

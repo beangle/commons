@@ -205,7 +205,7 @@ class CsvWriterTest extends AnyFunSpec, Matchers {
       catch {
         case e: FileNotFoundException =>
       }
-      val fileContents = new StringBuilder(CsvWriter.InitialStringSize)
+      val fileContents = new StringBuilder(128)
       try {
         var ch = in.read()
         while (ch != -1) {

@@ -19,9 +19,7 @@ package org.beangle.commons.csv
 
 import org.beangle.commons.csv.internal.CsvParser
 
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.Reader
+import java.io.{BufferedReader, Reader}
 
 /**
  * CsvReader class.
@@ -36,59 +34,56 @@ class CsvReader(reader: Reader, format: CsvFormat) {
 
   private var skipLines: Int = 0
 
-  private var br: BufferedReader = new BufferedReader(reader)
+  private val br = new BufferedReader(reader)
 
-  private var parser: CsvParser = new CsvParser(format)
+  private val parser = new CsvParser(format)
 
   /**
    * Constructor for CsvReader.
-   * @param reader a {@link java.io.Reader} object.
+   *
+   * @param reader a [[java.io.Reader]] object.
    */
   def this(reader: Reader) = {
     this(reader, new CsvFormat.Builder().build())
   }
 
-  /**
-   * Reads the next line from the file.
+  /** Reads the next line from the file.
    *
    * @return the next line from the file without trailing newline
    */
-  private def getNextLine(): String = {
+  private def readNextLine(): String = {
     if (!this.linesSkiped) {
-      for (i <- 0 until skipLines)
-        br.readLine()
+      for (i <- 0 until skipLines) br.readLine()
       this.linesSkiped = true
     }
     val nextLine = br.readLine()
-    if (nextLine == null)
-      hasNext = false
+    if (nextLine == null) hasNext = false
     if (hasNext) nextLine else null
   }
 
-  /**
-   * readNext.
+  /** read next array of data
    *
    * @return an array of String objects.
    */
   def readNext(): Array[String] = {
     var result: Array[String] = null
-    while ({
-      val nextLine = getNextLine()
-      if (!hasNext)
+    while ( {
+      val nextLine = readNextLine()
+      if (!hasNext) {
         return result
+      }
       val r = parser.parseLineMulti(nextLine)
       if (r.length > 0)
-        if (result == null)
+        if (result == null) {
           result = r
-        else {
+        } else {
           val t = new Array[String](result.length + r.length)
           System.arraycopy(result, 0, t, 0, result.length)
           System.arraycopy(r, 0, t, result.length, r.length)
           result = t
         }
       parser.isPending
-    })
-      ()
+    }) ()
     result
   }
 }

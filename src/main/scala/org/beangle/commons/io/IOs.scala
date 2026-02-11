@@ -30,10 +30,10 @@ object IOs {
 
   private val eof = -1
 
-  /** Copy bytes from a <code>InputStream</code> to an <code>OutputStream</code>.
+  /** Copy bytes from a `InputStream` to an `OutputStream`.
    *
-   * @param input  the <code>InputStream</code> to read from
-   * @param output the <code>OutputStream</code> to write to
+   * @param input  the `InputStream` to read from
+   * @param output the `OutputStream` to write to
    * @return the number of bytes copied
    * @since 3.1
    */
@@ -62,10 +62,10 @@ object IOs {
       else output.write(data.getBytes(charset))
   }
 
-  /** Copy chars from a <code>Reader</code> to a <code>Writer</code>.
+  /** Copy chars from a `Reader` to a `Writer`.
    *
-   * @param input  the <code>Reader</code> to read from
-   * @param output the <code>Writer</code> to write to
+   * @param input  the `Reader` to read from
+   * @param output the `Writer` to write to
    * @return the number of characters copied
    * @since 3.1
    */
@@ -82,7 +82,7 @@ object IOs {
     count
   }
 
-  /** Get the contents of a <code>Reader</code> as a list of Strings,
+  /** Get the contents of a `Reader` as a list of Strings,
    * one entry per line.
    */
   def readLines(input: Reader): List[String] = {

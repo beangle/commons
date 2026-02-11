@@ -30,8 +30,8 @@ class SuffixInflectionRule(suffix: String, val singularSuffix: String, val plura
 
   private val regex = Pattern.compile("(?i).*" + suffix.substring(1) + "$")
 
-  /** Construct a rule for words with suffix <code>singularSuffix</code> which becomes
-    * <code>pluralSuffix</code> in the plural.
+  /** Construct a rule for words with suffix `singularSuffix` which becomes
+    * `pluralSuffix` in the plural.
     *
     * @param singularSuffix the singular suffix, starting with a "-" character
     * @param pluralSuffix   the plural suffix, starting with a "-" character

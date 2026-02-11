@@ -20,11 +20,11 @@ package org.beangle.commons.lang
 import scala.reflect.ClassTag
 
 /** Operations on arrays
-  * primitive arrays (like {@code int[]}) and primitive wrapper arrays (like
-  * {@code Integer[]}).
+  * primitive arrays (like `int[]`) and primitive wrapper arrays (like
+  * `Integer[]`).
   * <p>
-  * This class tries to handle {@code null} input gracefully. An exception will not be thrown for a
-  * {@code null} array input.
+  * This class tries to handle `null` input gracefully. An exception will not be thrown for a
+  * `null` array input.
   * </p>
   *
   * @author chaostone
@@ -32,10 +32,10 @@ import scala.reflect.ClassTag
   */
 object Arrays {
 
-  /** Checks if an array of Objects is empty or {@code null}.
+  /** Checks if an array of Objects is empty or `null`.
     *
     * @param array the array to test
-    * @return {@code true} if the array is empty or {@code null}
+    * @return `true` if the array is empty or `null`
     */
   def isEmpty(array: Array[_ <: Any]): Boolean = array == null || array.length == 0
 
@@ -57,7 +57,7 @@ object Arrays {
     * </p>
     * <p>
     * The component type of the subarray is always the same as that of the input array. Thus, if the
-    * input is an array of type {@code Date}, the following usage is envisaged:
+    * input is an array of type `Date`, the following usage is envisaged:
     * </p>
     *
     * <pre>

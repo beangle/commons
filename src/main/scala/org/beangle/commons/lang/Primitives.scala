@@ -53,15 +53,15 @@ object Primitives {
   def defaultLiteral[T](clazz: Class[T]): String =
     if (clazz.isPrimitive) defaultLiterals(clazz) else "null"
 
-  /** Returns {@code true} if {@code type} is one of the nine
-    * primitive-wrapper types, such as {@link Integer}.
+  /** Returns `true` if `type` is one of the nine
+    * primitive-wrapper types, such as Integer.
     *
     * @see Class#isPrimitive
     */
   def isWrapperType(clazz: Class[_]): Boolean = wrapperToPrimitives.contains(clazz)
 
-  /** Returns the corresponding wrapper type of {@code type} if it is a primitive
-    * type; otherwise returns {@code type} itself. Idempotent.
+  /** Returns the corresponding wrapper type of `type` if it is a primitive
+    * type; otherwise returns `type` itself. Idempotent.
     *
     * <pre>
     * wrap(int.class) == Integer.class
@@ -72,8 +72,8 @@ object Primitives {
   def wrap[T](clazz: Class[T]): Class[T] =
     if ((clazz.isPrimitive || (clazz eq classOf[Unit]))) primitiveToWrappers.get(clazz).get.asInstanceOf[Class[T]] else clazz
 
-  /** Returns the corresponding primitive type of {@code type} if it is a
-    * wrapper type; otherwise returns {@code type} itself. Idempotent.
+  /** Returns the corresponding primitive type of `type` if it is a
+    * wrapper type; otherwise returns `type` itself. Idempotent.
     *
     * <pre>
     * unwrap(Integer.class) == int.class

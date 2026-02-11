@@ -20,23 +20,20 @@ package org.beangle.commons.file.diff.bsdiff
 import java.io.{DataInputStream, IOException, InputStream, OutputStream}
 
 /** bsdiff encodes offsets (represented by the C off_t type) as 64-bit chunks.
-  * In this implementation only 32-bit signed integers are supported, but the
-  * additional encoding steps are left to illustrate the process (which, in Java,
-  * would encode/decode a long primitive data type).
-  */
+ * In this implementation only 32-bit signed integers are supported, but the
+ * additional encoding steps are left to illustrate the process (which, in Java,
+ * would encode/decode a long primitive data type).
+ */
 object Offset {
-  /** Size of a bsdiff-encoded offset, in bytes.
-    */
-  val OFFSET_SIZE = 8
+  /** Size of a bsdiff-encoded offset, in bytes. */
+  private val OFFSET_SIZE = 8
 
-  /** Reads a bsdiff-encoded offset (based on the C off_t type) from an
-    * {@link InputStream}.
-    */
+  /** Reads a bsdiff-encoded offset (based on the C off_t type) from an InputStream.
+   */
   def readOffset(in: InputStream): Int = {
     val buf = new Array[Byte](OFFSET_SIZE)
     val bytesRead = in.read(buf)
-    if (bytesRead < OFFSET_SIZE)
-      throw new IOException("Could not read offset.")
+    if (bytesRead < OFFSET_SIZE) throw new IOException("Could not read offset.")
 
     var y = 0
     y = buf(7) & 0x7F
@@ -56,18 +53,12 @@ object Offset {
     y += buf(0) & 0xFF
 
     /* An integer overflow occurred */
-    if (y < 0)
-      throw new IOException(
-        "Integer overflow: 64-bit offsets not supported.")
-
-    if ((buf(7) & 0x80) != 0)
-      y = -y
-
-    return y
+    if (y < 0) throw new IOException("Integer overflow: 64-bit offsets not supported.")
+    if ((buf(7) & 0x80) != 0) y = -y
+    y
   }
 
-  /** Writes a bsdiff-encoded offset to an {@link OutputStream}.
-    */
+  /** Writes a bsdiff-encoded offset to an OutputStream. */
   def writeOffset(value: Int, out: OutputStream): Unit = {
     val buf = new Array[Byte](OFFSET_SIZE)
     var y = 0
@@ -76,8 +67,9 @@ object Offset {
       y = -value
       /* Set the sign bit */
       buf(7) = (buf(7) | 0x80).asInstanceOf[Byte]
-    } else
+    } else {
       y = value
+    }
 
     buf(0) = (buf(0) | y % 256).asInstanceOf[Byte]
     y -= buf(0) & 0xFF
@@ -127,8 +119,7 @@ object Offset {
 
     headerIn.read(buf)
     val magic = new String(buf)
-    if (!"BSDIFF40".equals(magic))
-      throw new RuntimeException("Header missing magic number")
+    if (!"BSDIFF40".equals(magic)) throw new RuntimeException("Header missing magic number")
     Format.Header(readOffset(headerIn), readOffset(headerIn), readOffset(headerIn))
   }
 }

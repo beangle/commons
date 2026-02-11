@@ -24,7 +24,7 @@ object Objects {
   @inline
   def default[T](clazz: Class[T]): T = Primitives.default(clazz)
 
-  /** Compares two objects for equality, where either one or both objects may be {@code null}.
+  /** Compares two objects for equality, where either one or both objects may be `null`.
    *
    * <pre>
    * equals(null, null)                  = true
@@ -37,15 +37,17 @@ object Objects {
    * equals(Boolean.TRUE, Boolean.FALSE) = false
    * </pre>
    *
-   * @param a the first object, may be {@code null}
-   * @param b the second object, may be {@code null}
-   * @return {@code true} if the values of both objects are the same
+   * @param a the first object, may be `null`
+   * @param b the second object, may be `null`
+   * @return `true` if the values of both objects are the same
    * @since 3.0
    */
   @inline
-  def equals(a: Any, b: Any): Boolean = (a == b)
+  def equals(a: Any, b: Any): Boolean = {
+    a == b
+  }
 
-  /** Compares two object array for equality, where either one or both objects may be {@code null}.
+  /** Compares two object array for equality, where either one or both objects may be `null`.
    * Note:
    * Don't user Any[_],fo after type erase ,it has same signature with equals(a:Any,b:Any)
    */
@@ -56,7 +58,7 @@ object Objects {
     else !Range(0, a.length).exists(i => a(i) != b(i))
   }
 
-  /** Gets the {@code toString} of an {@code Object} returning an empty string ("") if {@code null}
+  /** Gets the `toString` of an `Object` returning an empty string ("") if `null`
    * input.
    *
    * <pre>
@@ -67,8 +69,8 @@ object Objects {
    * </pre>
    *
    * @see String#valueOf(Object)
-   * @param obj the Object to {@code toString}, may be null
-   * @return the passed in Object's toString, or nullStr if {@code null} input
+   * @param obj the Object to `toString`, may be null
+   * @return the passed in Object's toString, or nullStr if `null` input
    * @since 3.0
    */
   def toString(obj: AnyRef): String = if (null == obj) "" else obj.toString
@@ -100,14 +102,13 @@ object Objects {
 
   def compareBuilder: CompareBuilder = new CompareBuilder()
 
-  /** Creates an instance of {@link ToStringBuilder}.
+  /** Creates an instance of `ToStringBuilder`.
    * <p>
-   * This is helpful for implementing {@code Object#toString()}. Specification by example:
+   * This is helpful for implementing `Object#toString()`. Specification by example:
    *
    * {{{
    *   // Returns "ClassName{}"
-   *   Objects.toStringBuilder(this)
-   *       .toString();
+   *   Objects.toStringBuilder(this).toString();
    *
    *   // Returns "ClassName{x=1}"
    *   Objects.toStringBuilder(this)
@@ -134,15 +135,15 @@ object Objects {
    *       .toString();
    * }}}
    *
-   * @param self the object to generate the string for (typically {@code this}),
+   * @param self the object to generate the string for (typically `this`),
    *             used only for its class name
    * @since 3.1
    */
   def toStringBuilder(self: AnyRef): ToStringBuilder = new ToStringBuilder(simpleName(self.getClass))
 
   /** Creates an instance of [[ToStringBuilder]] in the same manner as
-   * {@code toStringBuilder(AnyRef)}, but using the name of {@code clazz} instead of using
-   * an instance's {@code Object#getClass()}.
+   * `toStringBuilder(AnyRef)`, but using the name of `clazz` instead of using
+   * an instance's `Object#getClass()`.
    * <p>
    *
    * @param clazz the Class of the instance
@@ -150,14 +151,13 @@ object Objects {
   def toStringBuilder(clazz: Class[_]): ToStringBuilder = new ToStringBuilder(simpleName(clazz))
 
   /** Creates an instance of [[ToStringBuilder]] in the same manner as
-   * {@code toStringBuilder(AnyRef)}, but using {@code className} instead
-   * of using an class instance.
+   * `toStringBuilder(AnyRef)`, but using `className` instead of using an class instance.
    *
    * @param className the name of the instance type
    */
   def toStringBuilder(className: String): ToStringBuilder = new ToStringBuilder(className)
 
-  /** More readable than {@link Class# getSimpleName ( )}
+  /** More readable than `Class#getSimpleName`
    */
   private def simpleName(clazz: Class[_]): String = {
     var name = clazz.getName
@@ -181,8 +181,7 @@ object Objects {
     private var omitnull: Boolean = false
 
     /**
-     * When called, the formatted output returned by {@link # toString ( )} will
-     * ignore {@code null} values.
+     * When called, the formatted output returned by `toString` will ignore `null` values.
      */
     def omitNull(): this.type = {
       omitnull = true
@@ -190,8 +189,8 @@ object Objects {
     }
 
     /**
-     * Adds a name/value pair to the formatted output in {@code name=value} format. If {@code value}
-     * is {@code null}, the string {@code "null"} is used, unless {@link Objects# omitNull ( )} is
+     * Adds a name/value pair to the formatted output in `name=value` format. If `value`
+     * is `null`, the string `null` is used, unless `Objects#omitNull()` is
      * called, in which case this
      * name/value pair will not be added.
      */
@@ -200,9 +199,7 @@ object Objects {
       this
     }
 
-    /**
-     * Returns a string in the format specified by {@link Objects# toStringBuilder ( Object )}.
-     */
+    /** Returns a string in the format specified by `Objects#toStringBuilder(Object)`. */
     override def toString: String = {
       val builder = new StringBuilder(32).append(className).append('{')
       var needsSeparator = false
@@ -259,7 +256,7 @@ object Objects {
       this
     }
 
-    def isEquals: Boolean = rs;
+    def isEquals: Boolean = rs
   }
 
   /** Compare Builder
@@ -267,7 +264,7 @@ object Objects {
    * @since 4.2.4
    */
   class CompareBuilder {
-    var comparison: Int = _
+    private var comparison: Int = _
 
     def add(lhs: Any, rhs: Any, ordering: Ordering[Any] = null): this.type = {
       if comparison != 0 then return this
