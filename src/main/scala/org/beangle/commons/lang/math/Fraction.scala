@@ -19,28 +19,34 @@ package org.beangle.commons.lang.math
 
 import org.beangle.commons.lang.annotation.value
 
+/** Fraction factory (begin:end packed as Long). */
 object Fraction {
 
+  /** Creates Fraction from begin and end (inclusive). */
   def apply(first: Int, second: Int): Fraction = {
     val a = first.toLong << 32 | second
     new Fraction(a)
   }
 }
 
+/** Integer range [begin, end] packed as Long (begin<<32|end). */
 @value
 class Fraction(val value: Long) extends Serializable, Ordered[Fraction] {
   override def compare(that: Fraction): Int = {
     java.lang.Long.compare(this.value, that.value)
   }
 
+  /** Start of range (inclusive). */
   def begin: Int = {
     (value >> 32).toInt
   }
 
+  /** End of range (inclusive). */
   def end: Int = {
     (value & 0xffffffff).toInt
   }
 
+  /** Number of elements in range. */
   def length: Int = {
     (end - begin + 1)
   }
@@ -50,26 +56,32 @@ class Fraction(val value: Long) extends Serializable, Ordered[Fraction] {
   }
 }
 
+/** SmallFraction factory (begin:end packed as Int, Short range). */
 object SmallFraction {
 
+  /** Creates SmallFraction from begin and end (inclusive). */
   def apply(first: Short, second: Short): SmallFraction = {
     val a = first.toInt << 16 | second
     new SmallFraction(a)
   }
 }
 
+/** Short range [begin, end] packed as Int (begin<<16|end). */
 @value
 class SmallFraction(val value: Int) extends Serializable, Ordered[SmallFraction] {
   override def compare(that: SmallFraction): Int = this.value - that.value
 
+  /** Start of range (inclusive). */
   def begin: Short = {
     (value >> 16).toShort
   }
 
+  /** End of range (inclusive). */
   def end: Short = {
     (value & 0xffff).toShort
   }
 
+  /** Number of elements in range. */
   def length: Short = {
     (end - begin + 1).asInstanceOf[Short]
   }

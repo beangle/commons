@@ -19,8 +19,20 @@ package org.beangle.commons
 
 import org.slf4j.LoggerFactory
 
+/** Logging helpers (SLF4J logger by name or class). */
 package object logging {
+
+  /** Gets an SLF4J logger by name.
+   *
+   * @param name logger name
+   * @return logger instance
+   */
   def slf4j(name: String): org.slf4j.Logger = LoggerFactory.getLogger(name)
 
+  /** Gets an SLF4J logger for the given class.
+   *
+   * @param clazz class used for logger name
+   * @return logger instance
+   */
   def slf4j(clazz: Class[_]): org.slf4j.Logger = LoggerFactory.getLogger(clazz)
 }

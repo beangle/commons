@@ -19,8 +19,10 @@ package org.beangle.commons.net.http
 
 import org.beangle.commons.lang.Charsets
 
+/** HTTP response with status and content. */
 case class Response(status: Int, content: Any) {
 
+  /** Returns content as UTF-8 string. */
   def getText: String = {
     content match {
       case null => ""
@@ -29,6 +31,7 @@ case class Response(status: Int, content: Any) {
     }
   }
 
+  /** Returns content as byte array. */
   def getBytes: Array[Byte] = {
     content match {
       case null => Array.emptyByteArray
@@ -37,10 +40,12 @@ case class Response(status: Int, content: Any) {
     }
   }
 
+  /** Returns true if status is 200. */
   def isOk: Boolean = {
     status == java.net.HttpURLConnection.HTTP_OK
   }
 
+  /** Returns getText if isOk, else default. */
   def getOrElse(default: => String): String = {
     if this.isOk then getText else default
   }

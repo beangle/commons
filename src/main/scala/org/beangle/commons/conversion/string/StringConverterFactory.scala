@@ -20,11 +20,11 @@ package org.beangle.commons.conversion.string
 import org.beangle.commons.conversion.impl.ConverterFactory
 import org.beangle.commons.lang.{Objects, Strings}
 
-/** String to Object
-  *
-  * @author chaostone
-  * @since 3.2.0
-  */
+/** String-to-target converter factory with empty-string handling.
+ *
+ * @author chaostone
+ * @since 3.2.0
+ */
 class StringConverterFactory[S, R] extends ConverterFactory[S, R] {
 
   override def convert[T](input: Any, targetType: Class[T]): T = {

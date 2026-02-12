@@ -19,10 +19,16 @@ package org.beangle.commons.io
 
 import java.io.Writer
 
+/** Buffered Writer with configurable buffer size.
+ *
+ * @param out        the underlying writer
+ * @param bufferSize buffer size in chars (default 8192)
+ */
 class BufferedWriter(out: Writer, bufferSize: Int = 8192) extends Writer {
-  private var buffer = new Array[Char](bufferSize)
+  private val buffer = new Array[Char](bufferSize)
   private var pointer: Int = _
 
+  /** Writes a single character. */
   override def write(c: Int): Unit = {
     if (pointer + 1 >= buffer.length) flushBuffer()
     buffer(pointer) = c.asInstanceOf[Char]
@@ -35,6 +41,12 @@ class BufferedWriter(out: Writer, bufferSize: Int = 8192) extends Writer {
     pointer = 0
   }
 
+  /** Writes a portion of the character array.
+   *
+   * @param c   the source array
+   * @param off offset to start from
+   * @param len number of chars to write
+   */
   override def write(c: Array[Char], off: Int, len: Int): Unit = {
     if (pointer + len >= buffer.length) {
       flushBuffer()
@@ -47,11 +59,13 @@ class BufferedWriter(out: Writer, bufferSize: Int = 8192) extends Writer {
     pointer += len
   }
 
+  /** Flushes the buffer and underlying writer. */
   override def flush(): Unit = {
     flushBuffer()
     out.flush()
   }
 
+  /** Flushes and closes the underlying writer. */
   override def close(): Unit = {
     flushBuffer()
     out.close()

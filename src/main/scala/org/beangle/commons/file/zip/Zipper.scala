@@ -26,15 +26,13 @@ import org.beangle.commons.lang.Strings
 import java.io.{File, FileInputStream, FileOutputStream}
 import java.util.zip.ZipInputStream
 
-/** Zipper Utility
- *
- */
+/** Zip/unzip utilities. */
 object Zipper {
 
-  /** Unzip zip file to folder
+  /** Unzips a zip file into a folder.
    *
-   * @param zipFile
-   * @param folder
+   * @param zipFile the zip file
+   * @param folder  the target folder
    */
   def unzip(zipFile: File, folder: File): Unit = {
     val outputFolder = folder.getAbsolutePath
@@ -61,11 +59,11 @@ object Zipper {
     zis.close()
   }
 
-  /** Zip dir to zip
+  /** Zips a directory into a zip file.
    *
-   * @param dir
-   * @param zip
-   * @param encoding
+   * @param dir      the source directory
+   * @param zip      the output zip file
+   * @param encoding entry name encoding (default: utf-8)
    */
   def zip(dir: File, zip: File, encoding: String = "utf-8"): Unit = {
     if (!dir.exists()) {
@@ -81,6 +79,13 @@ object Zipper {
     zos.close()
   }
 
+  /** Zips selected files under root into a zip file.
+   *
+   * @param root     base path for entries
+   * @param files    files to include
+   * @param zip      the output zip file
+   * @param encoding entry name encoding
+   */
   def zip(root: File, files: collection.Seq[File], zip: File, encoding: String): Unit = {
     if zip.exists() then zip.delete()
 

@@ -17,80 +17,83 @@
 
 package org.beangle.commons.collection.page
 
+import org.beangle.commons.collection.page.PagedSeq.*
+
+/** PagedSeq factory and helpers. */
 object PagedSeq {
-  private def calcMaxPageNo(pageSize: Int, total: Int): Int =
+
+  /** Computes max page number from total items and page size. */
+  private def calcMaxPageNo(pageSize: Int, total: Int): Int = {
     if total <= pageSize then 1
     else
       val remainder = total % pageSize
       val quotient = total / pageSize
       if ((0 == remainder)) quotient else (quotient + 1)
+  }
 }
 
-import org.beangle.commons.collection.page.PagedSeq.*
-
-/** PagedSeq class.
-  *
-  * @author chaostone
-  */
+/** Paged sequence with page navigation.
+ *
+ * @author chaostone
+ */
 class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends Page[E]() {
 
+  /** Current page slice. */
   var page: Page[E] = _
 
+  /** Current page index (0-based). */
   var pageIndex: Int = limit.pageIndex - 1
 
+  /** Total number of pages. */
   val totalPages: Int = calcMaxPageNo(datas.size, limit.pageSize)
 
+  /** Items per page. */
   val pageSize: Int = limit.pageSize
 
   this.next()
 
-  /** Constructor for PagedSeq
-    */
+  /** Alternate constructor with page size only (page index 1). */
   def this(datas: Seq[E], pageSize: Int) = {
     this(datas, PageLimit(1, pageSize))
   }
 
-  /** getItems.
-    */
-  def items = page.items
+  /** Returns items on the current page. */
+  override def items: collection.Seq[E] = page.items
 
-  /** iterator.
-    */
-  def iterator = page.iterator
+  /** Returns iterator over current page items. */
+  override def iterator: collection.Iterator[E] = page.iterator
 
-  /** size
-    */
-  def length = page.length
+  /** Returns the number of items on the current page. */
+  override def length: Int = page.length
 
-  /**
-    *
-    */
-  def apply(index: Int): E = page(index)
+  /** Returns item at index within current page.
+   *
+   * @param index the index in current page
+   * @return the item
+   */
+  override def apply(index: Int): E = page(index)
 
-  /** totalItems.
-    */
-  def totalItems: Int = datas.size
+  /** Total number of items across all pages. */
+  override def totalItems: Int = datas.size
 
-  /** hasNext.
-    */
-  def hasNext: Boolean = pageIndex < totalPages
+  /** Returns true if there is a next page. */
+  override def hasNext: Boolean = pageIndex < totalPages
 
-  /** hasPrevious.
-    */
-  def hasPrevious: Boolean = pageIndex > 1
+  /** Returns true if there is a previous page. */
+  override def hasPrevious: Boolean = pageIndex > 1
 
-  /** next.
-    */
-  def next(): Page[E] = moveTo(pageIndex + 1)
+  /** Advances to next page. */
+  override def next(): Page[E] = moveTo(pageIndex + 1)
 
-  /** previous.
-    */
-  def previous(): Page[E] = moveTo(pageIndex - 1)
+  /** Goes to previous page. */
+  override def previous(): Page[E] = moveTo(pageIndex - 1)
 
-  /**
-    *
-    */
-  def moveTo(pageIndex: Int): Page[E] = {
+  /** Moves to given page index (1-based).
+   *
+   * @param pageIndex the page number
+   * @return this
+   */
+  override def moveTo(pageIndex: Int): Page[E] = {
     if (pageIndex < 1) throw new RuntimeException("error pageIndex:" + pageIndex)
     this.pageIndex = pageIndex
     val toIndex = pageIndex * pageSize

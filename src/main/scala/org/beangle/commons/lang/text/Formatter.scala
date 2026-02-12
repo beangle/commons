@@ -24,16 +24,19 @@ import java.time.temporal.{Temporal, TemporalAccessor}
 import java.time.{Instant, ZoneId, ZoneOffset}
 import java.util.{Calendar, Date}
 
+/** Formats object to string. */
 trait Formatter {
   def format(obj: Any): String
 }
 
+/** Uses String.valueOf for formatting. */
 object ToStringFormatter extends Formatter {
   override def format(obj: Any): String = {
     String.valueOf(obj)
   }
 }
 
+/** Formats numbers with DecimalFormat pattern. */
 class NumberFormatter(pattern: String) extends Formatter {
   val df = new DecimalFormat(pattern)
   df.setRoundingMode(RoundingMode.HALF_UP)
@@ -43,6 +46,7 @@ class NumberFormatter(pattern: String) extends Formatter {
   }
 }
 
+/** Formats java.util.Date with SimpleDateFormat. */
 class DateFormatter(pattern: String) extends Formatter {
   val df = new SimpleDateFormat(pattern)
 
@@ -51,6 +55,7 @@ class DateFormatter(pattern: String) extends Formatter {
   }
 }
 
+/** Formats Calendar with SimpleDateFormat. */
 class CalendarFormatter(pattern: String) extends Formatter {
   val df = new SimpleDateFormat(pattern)
 
@@ -59,6 +64,7 @@ class CalendarFormatter(pattern: String) extends Formatter {
   }
 }
 
+/** Formats java.time Temporal with DateTimeFormatter. */
 class TemporalFormatter(pattern: String) extends Formatter {
   val df = DateTimeFormatter.ofPattern(pattern)
 
@@ -67,6 +73,7 @@ class TemporalFormatter(pattern: String) extends Formatter {
   }
 }
 
+/** Formats Instant with system timezone. */
 class InstantFormatter(pattern: String) extends TemporalFormatter(pattern) {
   override def format(obj: Any): String = {
     df.format(obj.asInstanceOf[Instant].atZone(ZoneId.systemDefault))

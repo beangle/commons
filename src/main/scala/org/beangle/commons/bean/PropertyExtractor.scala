@@ -17,12 +17,18 @@
 
 package org.beangle.commons.bean
 
+/** Extracts property value from object by name. */
 trait PropertyExtractor {
-
+  /** Gets property value from target.
+   *
+   * @param target   the object
+   * @param property the property name (supports nested path)
+   * @return the value
+   */
   def get(target: Object, property: String): Any
-
 }
 
+/** PropertyExtractor using Properties.get. */
 class DefaultPropertyExtractor extends PropertyExtractor {
   override def get(target: Object, property: String): Any = {
     Properties.get[Any](target, property)

@@ -23,8 +23,10 @@ import org.beangle.commons.io.IOs
 import java.io.{File, FileInputStream}
 import java.security.MessageDigest
 
+/** Base for file digest (hex string of hash). */
 abstract class AbstractFileDigest {
 
+  /** Computes digest of file as hex string; empty if file not found. */
   final def digest(file: File): String = {
     if (!file.exists()) return "";
 
@@ -44,5 +46,6 @@ abstract class AbstractFileDigest {
     Hex.encode(md.digest())
   }
 
+  /** Returns the MessageDigest instance. */
   protected def getAlgorithm(): MessageDigest
 }

@@ -22,7 +22,10 @@ import org.beangle.commons.lang.{Numbers, Strings}
 
 import scala.collection.mutable.ListBuffer
 
+/** PropertyOrdering factory. */
 object PropertyOrdering {
+
+  /** Creates Ordering from property string (e.g. "name", "name,age" for ChainOrdering). */
   def by(cmpStr: String): Ordering[Any] = {
     if cmpStr.contains(",") then
       val properties = Strings.split(cmpStr, ',')
@@ -34,22 +37,27 @@ object PropertyOrdering {
   }
 }
 
-/** 属性比较器
+/** Property comparator for ordering objects by property values.
  *
  * @author chaostone
  */
 class PropertyOrdering(cmpStr: String) extends Ordering[Any] {
 
+  /** Property name to compare. */
   var name: String = cmpStr.trim()
 
   private var index: Int = -1
 
+  /** True for ascending order. */
   var asc: Boolean = true
 
+  /** True to treat nulls as smallest. */
   var nullFirst: Boolean = true
 
+  /** Custom comparator for the extracted value. */
   var comparator: Ordering[Any] = _
 
+  /** Collator for string comparison. */
   var collatorOrdering = new CollatorOrdering(asc)
 
   require(Strings.isNotEmpty(cmpStr))
@@ -69,6 +77,7 @@ class PropertyOrdering(cmpStr: String) extends Ordering[Any] {
     name = name.substring(0, name.indexOf(' '))
   }
 
+  /** Creates PropertyOrdering with explicit asc flag. */
   def this(cmpWhat: String, asc: Boolean) = {
     this(cmpWhat + " " + (if (asc) "" else "desc"))
   }

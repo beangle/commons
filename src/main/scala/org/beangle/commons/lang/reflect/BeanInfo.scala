@@ -26,6 +26,7 @@ import java.lang.reflect.{Method, Modifier}
 import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
 
+/** BeanInfo introspection and PropertyInfo. */
 object BeanInfo {
 
   /** Ignore java object and scala case class methods
@@ -34,12 +35,16 @@ object BeanInfo {
     Set("apply", "unApply", "canEqual")
   private val caseIgnores = Set("productArity", "productIterator", "productPrefix", "productElement", "productElementName", "productElementNames", "copy")
 
+  /** Property metadata (name, type, getter, setter). */
   class PropertyInfo(val name: String, val typeinfo: TypeInfo, val getter: Option[Method],
                      val setter: Option[Method], val isTransient: Boolean) {
+    /** Returns true if property has setter. */
     def writable: Boolean = setter.isDefined
 
+    /** Property type class. */
     def clazz: Class[_] = typeinfo.clazz
 
+    /** Returns true if property has getter. */
     def readable: Boolean = getter.isDefined
 
     override def toString: String = {
@@ -49,18 +54,16 @@ object BeanInfo {
     }
   }
 
+  /** Constructor or method parameter metadata. */
   case class ParamInfo(name: String, typeinfo: TypeInfo, defaultValue: Option[Any])
 
+  /** Method metadata (name, return type, parameters). */
   case class MethodInfo(method: Method, returnType: TypeInfo, parameters: ArraySeq[ParamInfo])
     extends Ordered[MethodInfo] {
 
     override def compare(o: MethodInfo): Int = this.method.getName.compareTo(o.method.getName)
 
-    /** check this method if is preferred over given method
-     *
-     * @param o
-     * @return
-     */
+    /** Returns true if this method is preferred over o (for overload resolution). */
     def isOver(o: MethodInfo): Boolean = {
       if o != this && o.method.getName == this.method.getName && o.parameters.size == this.parameters.size then
         //primary type over Object,but Object.isAssignableFrom(Int) is false
@@ -79,6 +82,7 @@ object BeanInfo {
       s"def ${method.getName}(${params}): ${returnType}"
     }
 
+    /** Returns true if the given args match parameter types. */
     def matches(args: Any*): Boolean = {
       if (parameters.length != args.length) return false
       !(0 until args.length).exists { i =>
@@ -87,6 +91,7 @@ object BeanInfo {
     }
   }
 
+  /** Constructor metadata (parameter list). */
   case class ConstructorInfo(parameters: ArraySeq[ParamInfo]) {
     override def toString: String = {
       val params = parameters.map { x =>
@@ -97,14 +102,17 @@ object BeanInfo {
   }
 
   object Builder {
+    /** Returns true if property should be treated as transient. */
     def isTransient(transientAnnotated: Boolean, hasSetter: Boolean, usedInPrimaryCtor: Boolean): Boolean = {
       if transientAnnotated then true else !usedInPrimaryCtor && !hasSetter
     }
 
+    /** Returns true if method is a case class intrinsic (productArity, copy, etc.). */
     def isCaseMethod(isCase: Boolean, name: String): Boolean = {
       isCase && caseIgnores.contains(name)
     }
 
+    /** Returns true if method is a candidate for property accessor discovery. */
     def isFineMethod(isCase: Boolean, method: Method, allowBridge: Boolean = false): Boolean = {
       val modifiers = method.getModifiers
       val name = method.getName
@@ -113,12 +121,14 @@ object BeanInfo {
       !ignored && modifierNice && isFineMethodName(name) && (!method.isBridge || allowBridge)
     }
 
+    /** Returns true if method name follows getter/setter convention. */
     def isFineMethodName(name: String): Boolean = {
       if name.startsWith("_") then false
       else if name.endsWith("_$eq") then !name.substring(0, name.length - 4).contains("$")
       else !name.contains("$")
     }
 
+    /** Returns true if method return/param types match the given method info. */
     def isSignatureMatchable(method: Method, methodInfo: (TypeInfo, ArraySeq[ParamInfo])): Boolean = {
       if classOf[AnyRef] != method.getReturnType && !method.getReturnType.isAssignableFrom(methodInfo._1.clazz) then false
       else {
@@ -129,8 +139,7 @@ object BeanInfo {
       }
     }
 
-    /** Return this method is property read method (true,name) or write method(false,name) or None.
-     */
+    /** Returns (true, propertyName) for getter, (false, propertyName) for setter, or None. */
     def findAccessor(method: Method): Option[Tuple2[Boolean, String]] = {
       val name = method.getName
       val parameterTypes = method.getParameterTypes
@@ -142,6 +151,7 @@ object BeanInfo {
       } else None
     }
 
+    /** Extracts property name from getter/setter method name. */
     def getPropertyName(name: String, getter: Boolean): String = {
       if (getter) {
         if (name.startsWith("get") && name.length > 3 && isUpperCase(name.charAt(3))) lower(name.substring(3))
@@ -155,11 +165,7 @@ object BeanInfo {
       }
     }
 
-    /** filter bridge method and superclass method with same name and compatible signature
-     *
-     * @param methods
-     * @return
-     */
+    /** Filters out bridge and overridden methods. */
     def filterSameNames(methods: Iterable[MethodInfo]): collection.Seq[MethodInfo] = {
       if (methods.size == 1) {
         methods.toSeq
@@ -181,11 +187,13 @@ object BeanInfo {
       if (name.length > 1 && isUpperCase(name.charAt(1))) name else uncapitalize(name)
     }
 
+    /** Parameter holder for Builder.addCtor. */
     class ParamHolder(name: String, typeinfo: Any, defaultValue: Option[Any]) {
       def this(name: String, typeInfo: Any) = {
         this(name, typeInfo, None)
       }
 
+      /** Converts to ParamInfo. */
       def toParamInfo: ParamInfo = {
         ParamInfo(name, TypeInfo.convert(typeinfo), defaultValue)
       }
@@ -195,10 +203,7 @@ object BeanInfo {
 
   import Builder.*
 
-  /** ClassInfo Builder
-   *
-   * @param clazz
-   */
+  /** Builder for BeanInfo. */
   class Builder(val clazz: Class[_]) {
     private val fieldInfos = new mutable.HashMap[String, TypeInfo]
     //head will be primary constructor
@@ -206,13 +211,16 @@ object BeanInfo {
 
     private val transients = new mutable.HashSet[String]
 
+    /** Adds transient property names. */
     def addTransients(names: Array[String]): Unit = transients ++= names
 
+    /** Adds a property with type info. */
     def addField(name: String, ti: Any): Unit = {
       val typeinfo = TypeInfo.convert(ti)
       fieldInfos.put(name, typeinfo)
     }
 
+    /** Adds a constructor with parameters. */
     def addCtor(paramInfos: Array[ParamHolder]): Unit = {
       ctorInfos.addOne(ArraySeq.from(paramInfos.map(_.toParamInfo)))
     }
@@ -224,6 +232,7 @@ object BeanInfo {
       sameNames += methodInfo
     }
 
+    /** Builds the BeanInfo from gathered fields and constructors. */
     def build(): BeanInfo = {
       val getters = new mutable.HashMap[String, Method]
       val setters = new mutable.HashMap[String, Method]
@@ -284,6 +293,7 @@ object BeanInfo {
   }
 }
 
+/** Introspection info for a Java/Scala class. */
 class BeanInfo(val clazz: Class[_], val ctors: ArraySeq[ConstructorInfo], val properties: Map[String, PropertyInfo],
                val methods: collection.Map[String, ArraySeq[Method]]) {
 
@@ -312,6 +322,7 @@ class BeanInfo(val clazz: Class[_], val ctors: ArraySeq[ConstructorInfo], val pr
     sb.mkString("\n")
   }
 
+  /** Gets TypeInfo for property. */
   def getPropertyTypeInfo(property: String): Option[TypeInfo] = {
     properties.get(property) match {
       case Some(p) => Some(p.typeinfo)
@@ -319,10 +330,12 @@ class BeanInfo(val clazz: Class[_], val ctors: ArraySeq[ConstructorInfo], val pr
     }
   }
 
+  /** Gets property type class. */
   def getPropertyType(property: String): Option[Class[_]] = {
     properties.get(property).map(_.clazz)
   }
 
+  /** Gets getter method for property. */
   def getGetter(property: String): Option[Method] = {
     properties.get(property) match {
       case Some(p) => p.getter
@@ -330,6 +343,7 @@ class BeanInfo(val clazz: Class[_], val ctors: ArraySeq[ConstructorInfo], val pr
     }
   }
 
+  /** Gets setter method for property. */
   def getSetter(property: String): Option[Method] = {
     properties.get(property) match {
       case Some(p) => p.setter
@@ -337,7 +351,9 @@ class BeanInfo(val clazz: Class[_], val ctors: ArraySeq[ConstructorInfo], val pr
     }
   }
 
+  /** Properties with getters. */
   def readables: Map[String, PropertyInfo] = properties.filter(x => x._2.readable)
 
+  /** Properties with setters. */
   def writables: Map[String, PropertyInfo] = properties.filter(x => x._2.writable)
 }

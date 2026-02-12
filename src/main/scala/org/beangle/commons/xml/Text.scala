@@ -17,6 +17,7 @@
 
 package org.beangle.commons.xml
 
+/** XML text node (no attributes, no children). */
 class Text(private val value: String) extends Node {
 
   override def label: String = ""

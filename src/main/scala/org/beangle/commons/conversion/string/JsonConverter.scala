@@ -20,7 +20,7 @@ package org.beangle.commons.conversion.string
 import org.beangle.commons.conversion.Converter
 import org.beangle.commons.json.{Json, JsonArray, JsonObject}
 
-/** Convert String to Json.
+/** Converts string to Json/JsonObject/JsonArray.
  *
  * @author chaostone
  * @since 5.7.0

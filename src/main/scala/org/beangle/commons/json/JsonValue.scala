@@ -17,6 +17,10 @@
 
 package org.beangle.commons.json
 
+/** JSON leaf value (string, number, boolean, null).
+ *
+ * @param value the raw value
+ */
 final case class JsonValue(value: Any) extends Json {
 
   override def query(path: String): Option[Any] = None

@@ -19,11 +19,11 @@ package org.beangle.commons.conversion.impl
 
 import org.beangle.commons.conversion.Converter
 
-/** Adapte a Converter to GenericConverter
-  *
-  * @author chaostone
-  * @since 3.2.0
-  */
+/** Adapts a Converter to GenericConverter.
+ *
+ * @author chaostone
+ * @since 3.2.0
+ */
 class ConverterAdapter(iconverter: Converter[_, _], typeinfo: (Class[_], Class[_])) extends GenericConverter {
 
   private val converter = iconverter.asInstanceOf[Converter[Any, Any]]

@@ -19,11 +19,11 @@ package org.beangle.commons.conversion.impl
 
 import org.beangle.commons.lang.Objects
 
-/** Convert anything to null.
-  *
-  * @author chaostone
-  * @since 3.2.0
-  */
+/** Converts any value to null/default for target type.
+ *
+ * @author chaostone
+ * @since 3.2.0
+ */
 object NoneConverter extends GenericConverter {
 
   override def convert[T](input: Any, targetType: Class[T]): T = Objects.default(targetType)

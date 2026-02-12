@@ -20,25 +20,32 @@ package org.beangle.commons.lang
 import java.awt.GraphicsEnvironment
 import java.lang.management.ManagementFactory
 
+/** JVM detection (debug mode, server VM, headless, version, GC). */
 object JVM {
+
+  /** Returns true if JVM is running with debugger (jdwp). */
   def isDebugMode: Boolean = {
     val args = ManagementFactory.getRuntimeMXBean.getInputArguments
     args.toString.indexOf("-agentlib:jdwp") > 0
   }
 
+  /** Returns true if using Server VM. */
   def isServerMode: Boolean = {
     val name = System.getProperty("java.vm.name")
     name.contains("Server VM")
   }
 
+  /** Returns true if no display (headless). */
   def isHeadless: Boolean = {
     GraphicsEnvironment.isHeadless
   }
 
+  /** Returns java.specification.version. */
   def javaVersion: String = {
     System.getProperty("java.specification.version", "99.0")
   }
 
+  /** Returns the name of the primary garbage collector. */
   def gcName: String = {
     val cs = ManagementFactory.getGarbageCollectorMXBeans
     if cs.isEmpty then "UNKNOWN"
@@ -47,6 +54,7 @@ object JVM {
       Strings.substringBetween(ob, "name=", " ")
   }
 
+  /** Returns true if running as GraalVM native image. */
   lazy val isGraal: Boolean = {
     var result = false
     try {
@@ -58,6 +66,7 @@ object JVM {
     result || System.getProperty("org.graalvm.nativeimage.imagecode") != null
   }
 
+  /** Returns true if JavaRebel or HotswapAgent is active. */
   lazy val isAgentActive: Boolean = {
     val names = List("org.zeroturnaround.javarebel.Integration",
       "org.zeroturnaround.javarebel.ReloaderFactory",

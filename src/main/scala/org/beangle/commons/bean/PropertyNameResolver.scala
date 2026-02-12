@@ -17,6 +17,7 @@
 
 package org.beangle.commons.bean
 
+/** PropertyNameResolver constants. */
 object PropertyNameResolver {
 
   private val Nested = '.'
@@ -40,7 +41,7 @@ import org.beangle.commons.bean.PropertyNameResolver.*
  * <ul>
  * <li>**Simple (`name`)** - The specified `name` identifies an
  * individual property of a particular JavaBean. The name of the actual getter or setter method to
- * be used is determined using standard JavaBeans instrospection, a property named "xyz" will have a
+ * be used is determined using standard JavaBeans introspection, a property named "xyz" will have a
  * getter method named `getXyz()` or (for boolean properties only) `isXyz()`,
  * and a setter method named `setXyz()`.</li>
  * <li><b>Indexed (`name[index]`)</b> - The underlying property value is
@@ -138,7 +139,7 @@ class PropertyNameResolver {
   /** Indicate whether the expression is for an indexed property or not.
    *
    * @param expression The property expression
-   * @return `true` if the expresion is indexed,
+   * @return `true` if the expression is indexed,
    *         otherwise `false`
    */
   def isIndexed(expression: String): Boolean = {
@@ -157,7 +158,7 @@ class PropertyNameResolver {
   /** Indicate whether the expression is for a mapped property or not.
    *
    * @param expression The property expression
-   * @return `true` if the expresion is mapped,
+   * @return `true` if the expression is mapped,
    *         otherwise `false`
    */
   def isMapped(expression: String): Boolean = {
@@ -197,7 +198,7 @@ class PropertyNameResolver {
     expression
   }
 
-  /** Remove the last property expresson from the current expression.
+  /** Removes the first property expression from the current expression.
    *
    * @param expression The property expression
    * @return The new expression value, with first property

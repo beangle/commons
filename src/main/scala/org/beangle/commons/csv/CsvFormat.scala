@@ -17,31 +17,40 @@
 
 package org.beangle.commons.csv
 
+/** CSV format options and builder. */
 object CsvFormat {
 
+  /** Fluent builder for CsvFormat. */
   class Builder {
 
+    /** Quote delimiter character. */
     var delimiter: Char = CsvConstants.Quote
 
+    /** Allowed field separator characters. */
     var separators = collection.mutable.HashSet[Char]()
 
+    /** Escape character for quoted content. */
     var Escape: Char = CsvConstants.Escape
 
+    /** Adds a field separator; returns this for chaining. */
     def separator(Comma: Char): Builder = {
       separators += Comma
       this
     }
 
+    /** Sets escape character; returns this for chaining. */
     def escape(Escape: Char): Builder = {
       this.Escape = Escape
       this
     }
 
+    /** Sets quote delimiter; returns this for chaining. */
     def delimiter(delimiter: Char): Builder = {
       this.delimiter = delimiter
       this
     }
 
+    /** Builds the CsvFormat instance. */
     def build(): CsvFormat = {
       if (separators.isEmpty) separators.add(CsvConstants.Comma)
       new CsvFormat(separators.toSet, delimiter, Escape)
@@ -49,15 +58,16 @@ object CsvFormat {
   }
 }
 
-/**
- * csv format definition
+/** CSV format definition (separator, delimiter, escape).
  *
  * @author chaostone
  */
-class CsvFormat private (val separators: Set[Char], val delimiter: Char) {
+class CsvFormat private(val separators: Set[Char], val delimiter: Char) {
 
+  /** Escape character for quoted content. */
   var escape = CsvConstants.Escape
 
+  /** When true, quotes must strictly wrap fields. */
   val strictQuotes = false
 
   private def this(separators: Set[Char], delimiter: Char, escape: Char) = {
@@ -65,24 +75,16 @@ class CsvFormat private (val separators: Set[Char], val delimiter: Char) {
     this.escape = escape
   }
 
-  /**
-   * isSeparator.
-   */
+  /** Returns true if the char is a field separator. */
   def isSeparator(a: Char): Boolean = separators.contains(a)
 
-  /**
-   * isDelimiter.
-   */
+  /** Returns true if the char is the quote delimiter. */
   def isDelimiter(a: Char): Boolean = a == delimiter
 
-  /**
-   * isEscape.
-   */
+  /** Returns true if the char is the escape character. */
   def isEscape(a: Char): Boolean = a == escape
 
-  /**
-   * defaultSeparator.
-   */
+  /** Returns the primary field separator. */
   def defaultSeparator(): Char =
     if (separators.isEmpty) CsvConstants.Comma
     else separators.head

@@ -23,22 +23,23 @@ import org.beangle.commons.lang.Objects
 import java.time.{LocalDate, LocalDateTime}
 import scala.collection.mutable
 
-/** 循环时间 */
+/** Recurring weekly time slot. */
 @component
 class WeekTime extends Ordered[WeekTime] with Serializable {
 
-  /** 起始日期 */
+  /** Start date of the year/semester. */
   var startOn: LocalDate = _
 
-  /** 开始时间 */
+  /** Start time of day. */
   var beginAt: HourMinute = _
 
-  /** 结束时间 */
+  /** End time of day. */
   var endAt: HourMinute = _
 
-  /** 周状态数字 */
+  /** Week state bitmap (which weeks). */
   var weekstate: WeekState = _
 
+  /** Copy constructor. */
   def this(other: WeekTime) = {
     this()
     this.startOn = other.startOn
@@ -47,16 +48,22 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
     this.weekstate = other.weekstate
   }
 
+  /** Dates covered by this WeekTime (startOn + each week). */
   def dates: List[LocalDate] = weekstate.weeks.map { x => startOn.plusWeeks(x - 1) }
 
+  /** First date in the range. */
   def firstDay: LocalDate = startOn.plusWeeks(weekstate.first - 1)
 
+  /** First day at beginAt time. */
   def firstTime: LocalDateTime = firstDay.atTime(beginAt.toLocalTime)
 
+  /** Last date in the range. */
   def lastDay: LocalDate = startOn.plusWeeks(weekstate.last - 1)
 
+  /** Weekday of startOn. */
   def weekday: WeekDay = WeekDay.of(startOn)
 
+  /** Returns true if this overlaps with o (same startOn, overlapping weeks and time). */
   def isOverlap(o: WeekTime): Boolean = {
     startOn.equals(o.startOn) && weekstate.isOverlap(o.weekstate) & beginAt < o.endAt & o.beginAt < endAt
   }
@@ -89,9 +96,10 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
       case _ => false
     }
 
-  /** 尝试合并两个时间
+  /** Attempts to merge this with another WeekTime if mergeable.
    *
-   * @param w2 second weektime
+   * @param w2     the other WeekTime
+   * @param minGap minimum gap (minutes) to consider adjacent
    * @return true if merged
    */
   def merge(w2: WeekTime, minGap: Int): Boolean =
@@ -101,12 +109,12 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
     } else
       false
 
-  /** 判断合并两个时间是否可以
-   * 标准为 （weekState、weekday相等） 且 （相连时间 或 时间相交）
-   * 或者时间相等则可以合并周次
+  /** Whether this and w2 can be merged. Requires same weekState and weekday, and either adjacent
+   * or overlapping time; or same time to merge week states.
    *
-   * @param w2 second weektime
-   * @return true if merged
+   * @param w2     the other WeekTime
+   * @param minGap minimum gap to treat as adjacent
+   * @return true if mergeable
    */
   def mergeable(w2: WeekTime, minGap: Int): Boolean =
     if (this.startOn == w2.startOn)
@@ -120,10 +128,7 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
     else
       false
 
-  /** 将两时间进行合并，前提是这两时间可以合并
-   *
-   * @param w2 weektime
-   */
+  /** Merges w2 into this. Call only when mergeable. */
   private def doMerge(w2: WeekTime): Unit =
     if (this.weekstate == w2.weekstate) {
       if (w2.beginAt.value < this.beginAt.value)
@@ -134,13 +139,15 @@ class WeekTime extends Ordered[WeekTime] with Serializable {
       this.weekstate = this.weekstate | w2.weekstate
 }
 
+/** WeekTime factory. */
 object WeekTime {
 
-  /** 构造某个日期（beginAt, endAt必须是同一天，只是时间不同）的WeekTime
+  /** Builds WeekTime for a date with time range (beginAt and endAt on same day).
    *
-   * @param beginAt beginAt
-   * @param endAt   endAt
-   * @return
+   * @param startOn the start date
+   * @param beginAt the start time
+   * @param endAt   the end time
+   * @return the WeekTime
    */
   def of(startOn: LocalDate, beginAt: HourMinute, endAt: HourMinute): WeekTime = {
     val time = of(startOn)
@@ -149,10 +156,10 @@ object WeekTime {
     time
   }
 
-  /**
+  /** Builds WeekTime for a date (year start + week bitmap from date).
    *
-   * @param ld date
-   * @return
+   * @param ld the date
+   * @return WeekTime with startOn and weekstate for that week
    */
   def of(ld: LocalDate): WeekTime = {
     val yearStartOn = getStartOn(ld.getYear, WeekDay.of(ld))
@@ -162,11 +169,11 @@ object WeekTime {
     weektime
   }
 
-  /** 查询该年份第一个指定day的日期
+  /** Returns the first occurrence of the given weekday in the year.
    *
-   * @param year    year
-   * @param weekday weekday
-   * @return 指定day的第一天
+   * @param year    the year
+   * @param weekday the weekday
+   * @return the date
    */
   def getStartOn(year: Int, weekday: WeekDay): LocalDate = {
     var startDate = LocalDate.of(year, 1, 1)
@@ -175,6 +182,12 @@ object WeekTime {
     startDate
   }
 
+  /** Creates Builder for semester/year range (startOn to first weekend).
+   *
+   * @param startOn  semester start date
+   * @param firstDay first day of week
+   * @return Builder
+   */
   def newBuilder(startOn: LocalDate, firstDay: WeekDay): Builder = {
     var endOn = startOn
     val weekendDay = firstDay.previous
@@ -183,11 +196,24 @@ object WeekTime {
     new Builder(startOn, endOn)
   }
 
+  /** Builds WeekTime instances for given weekday and week indices. */
   class Builder(startOn: LocalDate, firstWeekEndOn: LocalDate) {
 
+    /** Builds WeekTime for weekday and week index collection.
+     *
+     * @param weekday the weekday
+     * @param weeks   week indices (1-based)
+     * @return Seq of WeekTime
+     */
     def build(weekday: WeekDay, weeks: Iterable[Int]): Seq[WeekTime] =
       build(weekday, weeks.toArray)
 
+    /** Builds WeekTime for weekday and week index array.
+     *
+     * @param weekday the weekday
+     * @param weeks   week indices (1-based)
+     * @return Seq of WeekTime
+     */
     def build(weekday: WeekDay, weeks: Array[Int]): Seq[WeekTime] = {
       val times = new mutable.HashMap[Int, WeekTime]
       var startDate = startOn

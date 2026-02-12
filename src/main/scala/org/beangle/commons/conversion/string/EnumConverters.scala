@@ -24,7 +24,7 @@ import org.beangle.commons.lang.{ClassLoaders, Enums}
 import java.lang.reflect.Method
 import scala.reflect.Enum as ScalaEnum
 
-/** Convert String to Enumeration.
+/** Converts string to Scala enum by name or id.
  *
  * @author chaostone
  * @since 3.2.0
@@ -59,6 +59,7 @@ object EnumConverters extends StringConverterFactory[String, ScalaEnum] {
   }
 }
 
+/** Converts string to Java enum by name. */
 object JavaEnumConverters extends StringConverterFactory[String, Enum[_]] {
 
   private class EnumConverter[T <: Enum[_]](val enumType: Class[_]) extends Converter[String, T] {
@@ -73,7 +74,7 @@ object JavaEnumConverters extends StringConverterFactory[String, Enum[_]] {
     if converter.isEmpty then
       val c = new EnumConverter(targetType)
       register(targetType, c)
-      Some(c.asInstanceOf[Converter[String,T]])
+      Some(c.asInstanceOf[Converter[String, T]])
     else converter
   }
 }

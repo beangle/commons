@@ -25,21 +25,21 @@ import java.util.EventObject
  */
 class Event(src: Any) extends EventObject(src)
 
-/** BusinessEvent
+/** Business event with timestamp, subject, detail, resource.
  *
  * @author chaostone
  * @since 3.0.0
  */
 class BusinessEvent(source: AnyRef) extends Event(source) {
-  /** System time when the event happened */
+  /** System time when the event occurred. */
   val timestamp = System.currentTimeMillis()
 
-  /** event subject */
+  /** Event subject. */
   var subject: String = _
 
-  /** event details */
+  /** Event details. */
   var detail: String = _
 
-  /** resource where the event happened */
+  /** Resource where the event occurred. */
   var resource: String = _
 }

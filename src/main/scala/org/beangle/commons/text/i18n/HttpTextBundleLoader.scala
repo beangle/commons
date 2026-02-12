@@ -24,12 +24,18 @@ import org.beangle.commons.text.i18n.DefaultTextBundleLoader
 import java.io.{ByteArrayInputStream, InputStream}
 import java.util.Locale
 
+/** Loads text bundles from HTTP URL (expects {path} placeholder).
+ *
+ * @param url     base URL with {path} placeholder
+ * @param preload if true, preloads available bundle list from server
+ */
 class HttpTextBundleLoader(url: String, preload: Boolean = false) extends DefaultTextBundleLoader {
 
   private var bundles: Set[String] = _
 
   if preload then loadList()
 
+  /** Fetches bundle from HTTP if path exists in preloaded list. */
   override protected def findExtra(locale: Locale, bundleName: String): collection.Seq[(String, InputStream)] = {
     val path = s"${bundleName.replace('.', '/')}.${locale.toString}"
     if null == bundles then loadList()

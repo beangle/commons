@@ -97,15 +97,18 @@ object Offset {
     out.write(buf)
   }
 
+  /** Writes a bsdiff control block to the output stream. */
   def writeBlock(b: Format.Block, out: OutputStream): Unit = {
     writeOffset(b.diffLength, out)
     writeOffset(b.extraLength, out)
     writeOffset(b.seekLength, out)
   }
 
+  /** Reads a bsdiff control block from the input stream. */
   def readBlock(in: InputStream): Format.Block =
     Format.Block(readOffset(in), readOffset(in), readOffset(in))
 
+  /** Writes a bsdiff header to the output stream. */
   def writeHeader(h: Format.Header, out: OutputStream): Unit = {
     out.write(Format.HeaderMagic.getBytes())
     writeOffset(h.controlLength, out)
@@ -113,6 +116,7 @@ object Offset {
     writeOffset(h.outputLength, out)
   }
 
+  /** Reads a bsdiff header from the input stream. */
   def readHeader(in: InputStream): Format.Header = {
     val headerIn = new DataInputStream(in)
     val buf = new Array[Byte](8)

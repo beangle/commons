@@ -19,18 +19,15 @@ package org.beangle.commons.bean.orderings
 
 import java.text.Collator
 
-/** Collator Ordering
-  *
-  * @author chaostone
-  */
+/** Locale-aware string ordering (asc/desc).
+ *
+ * @author chaostone
+ */
 class CollatorOrdering(val asc: Boolean, val collator: Collator = Collator.getInstance) extends Ordering[String] {
-  /** compare
-    *
-    * @param what0 a String object.
-    * @param what1 a String object.
-    * @return a int.
-    */
-  def compare(what0: String, what1: String): Int =
+
+  /** Compares strings using Collator (locale-aware). */
+  def compare(what0: String, what1: String): Int = {
     (if (asc) 1 else -1) *
       collator.compare(if (null == what0) "" else what0, if (null == what1) "" else what1)
+  }
 }

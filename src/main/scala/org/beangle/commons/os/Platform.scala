@@ -19,17 +19,21 @@ package org.beangle.commons.os
 
 import org.beangle.commons.lang.SystemInfo
 
-/** Java 程序所运行的平台
- */
+/** The platform on which the Java process runs. */
 object Platform {
 
+  /** OS name from System.getProperty("os.name"). */
   val osName = SystemInfo.os.name
 
+  /** Returns true if running on FreeBSD. */
   def isFreeBSD: Boolean = osName.startsWith("FreeBSD")
 
+  /** Returns true if running on Linux. */
   def isLinux: Boolean = osName.startsWith("Linux")
 
+  /** Returns true if running on macOS. */
   def isMac: Boolean = osName.startsWith("Mac OS X")
 
+  /** Returns true if running on Windows. */
   def isWin: Boolean = osName.startsWith("Windows")
 }

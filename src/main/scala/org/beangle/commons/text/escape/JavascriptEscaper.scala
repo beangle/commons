@@ -26,11 +26,11 @@ object JavascriptEscaper {
   private val ESC_HEXA = 1
   private val ESC_BACKSLASH = 3
 
-  /** 给出转义字符串形式
+  /** Returns the escaped string form for use in JavaScript or JSON.
    *
-   * @param s    given string value
-   * @param json 是否是json，json中允许出现单引号，javascript则进行反斜线转义
-   * @return
+   * @param s    the string to escape
+   * @param json if true, JSON mode (single quotes not escaped); if false, JavaScript mode (backslash-escape)
+   * @return the escaped string
    */
   def escape(s: String, json: Boolean): String = {
     val ln = s.length

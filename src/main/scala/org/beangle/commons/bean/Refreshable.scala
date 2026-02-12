@@ -17,7 +17,9 @@
 
 package org.beangle.commons.bean
 
+/** Bean that can refresh its state. */
 trait Refreshable {
 
+  /** Refreshes the bean state. */
   def refresh(): Unit
 }

@@ -20,7 +20,14 @@ package org.beangle.commons.lang.time
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+/** Week arithmetic. */
 object Weeks {
 
+  /** Returns the number of complete weeks between two dates.
+   *
+   * @param a start date
+   * @param b end date
+   * @return weeks between (can be negative)
+   */
   def between(a: LocalDate, b: LocalDate): Int = ChronoUnit.WEEKS.between(a, b).toInt
 }

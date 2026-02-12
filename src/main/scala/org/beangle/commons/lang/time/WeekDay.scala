@@ -19,34 +19,46 @@ package org.beangle.commons.lang.time
 
 import java.time.LocalDate
 
+/** WeekDay factory. */
 object WeekDay {
 
+  /** Gets WeekDay from a LocalDate.
+   *
+   * @param date the date
+   * @return corresponding WeekDay
+   */
   def of(date: LocalDate): WeekDay = fromOrdinal(date.getDayOfWeek.getValue - 1)
 
+  /** Gets WeekDay from an id (1=Mon .. 7=Sun).
+   *
+   * @param id weekday id
+   * @return corresponding WeekDay
+   */
   def of(id: Int): WeekDay = fromOrdinal(id - 1)
 
 }
 
-/** 国家标准GBT 7408-2005
-  */
+/** Weekday per GB/T 7408-2005 (Mon=1 .. Sun=7). */
 enum WeekDay {
   case Mon, Tue, Wed, Thu, Fri, Sat, Sun
 
+  /** Weekday id per GB/T 7408-2005 (Mon=1 .. Sun=7). */
   def id: Int = ordinal + 1
 
-  /** Java calendar Index
-    */
+  /** Java calendar index (Sun=1 .. Sat=7). */
   def index: Int =
     id match {
       case 7 => 1
       case _ => id + 1
     }
 
+  /** Returns the previous weekday (wraps Sun->Sat). */
   def previous: WeekDay = {
     val preDayId = this.id - 1
     if (preDayId <= 0) WeekDay.Sun else WeekDay.of(preDayId)
   }
 
+  /** Returns the next weekday (wraps Sat->Sun). */
   def next: WeekDay = {
     val nextDayId = this.id + 1
     if (nextDayId > 7) WeekDay.Mon else WeekDay.of(this.id + 1)

@@ -23,19 +23,17 @@ import org.beangle.commons.lang.Objects
 import java.lang.reflect.{ParameterizedType, Type}
 import scala.collection.mutable
 
-/** A converter factory that can convert objects from S to subtypes of R.
-  *
-  * @author chaostone
-  * @since 3.2.0
-  * @param < S>
-  * @param < R> The target base
-  */
+/** Converter factory from S to subtypes of R.
+ *
+ * @param S source type
+ * @param R target base type
+ * @author chaostone
+ * @since 3.2.0
+ */
 abstract class ConverterFactory[S, R] extends GenericConverter {
 
   protected val converters = new mutable.HashMap[Class[_], Converter[S, _]]
 
-  /** Return convert from S to T
-    */
   def getConverter[T](targetType: Class[T]): Option[Converter[S, T]] =
     converters.get(targetType).asInstanceOf[Option[Converter[S, T]]]
 

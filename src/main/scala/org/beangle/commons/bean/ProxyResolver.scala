@@ -17,8 +17,10 @@
 
 package org.beangle.commons.bean
 
+/** ProxyResolver factory. */
 object ProxyResolver {
 
+  /** No-op resolver; returns object as-is. */
   object Null extends ProxyResolver {
 
     def isProxy(obj: AnyRef): Boolean = false
@@ -29,11 +31,15 @@ object ProxyResolver {
   }
 }
 
+/** Resolves proxy to target class/instance. */
 trait ProxyResolver {
 
+  /** Returns true if obj is a proxy. */
   def isProxy(obj: AnyRef): Boolean
 
+  /** Returns the target (unproxied) class. */
   def targetClass(obj: AnyRef): Class[_]
 
+  /** Returns the unproxied instance. */
   def unproxy(obj: AnyRef): AnyRef
 }

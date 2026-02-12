@@ -17,13 +17,24 @@
 
 package org.beangle.commons.lang
 
+/** Scala companion object utilities. */
 object Companions {
 
+  /** Returns the companion object class for a Scala class.
+   *
+   * @param clazz the class (e.g. MyClass)
+   * @return Some(MyClass$) or None
+   */
   def getCompanionClass(clazz: Class[_]): Option[Class[_]] = {
     val clazzName = clazz.getName
     if clazzName.endsWith("$") then Some(clazz) else ClassLoaders.get(clazz.getName + "$")
   }
 
+  /** Returns the companion object instance for a Scala class.
+   *
+   * @param clazz the class
+   * @return Some(companion instance) or None
+   */
   def getCompanion(clazz: Class[_]): Option[Any] = {
     getCompanionClass(clazz) match
       case None => None

@@ -22,7 +22,7 @@ import org.beangle.commons.lang.Locales
 
 import java.util.Locale
 
-/** Convert String to Locale.
+/** Converts string to Locale.
  *
  * @author chaostone
  * @since 3.2.0

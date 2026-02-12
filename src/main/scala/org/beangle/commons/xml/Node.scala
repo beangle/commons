@@ -19,6 +19,7 @@ package org.beangle.commons.xml
 
 import org.beangle.commons.collection.Collections
 
+/** XML node interface (label, attributes, children). */
 trait Node {
 
   def label: String
@@ -27,14 +28,18 @@ trait Node {
 
   def children: collection.Seq[Node]
 
+  /** Gets attribute value by name. */
   def get(name: String): Option[String]
 
+  /** Concatenated text content. */
   def text: String
 
+  /** Returns direct children with the given label. */
   final def children(name: String): collection.Seq[Node] = {
     children.filter(_.label == name)
   }
 
+  /** Returns all descendants with the given label (recursive). */
   final def descendants(name: String): collection.Seq[Node] = {
     val newNodes = Collections.newBuffer[Node]
     children.map { cn =>
@@ -47,14 +52,17 @@ trait Node {
     newNodes
   }
 
+  /** Gets attribute value or default. */
   final def get(name: String, defaultValue: String): String = {
     get(name).getOrElse(defaultValue)
   }
 
+  /** Returns true if the attribute exists. */
   final def has(name: String): Boolean = {
     get(name).nonEmpty
   }
 
+  /** Gets attribute value; throws if missing. */
   final def apply(name: String): String = {
     get(name) match {
       case Some(v) => v
@@ -62,10 +70,12 @@ trait Node {
     }
   }
 
+  /** Queries direct children. */
   def \(name: String): NodeSeq = {
     NodeSeq.of(this) \ name
   }
 
+  /** Queries descendants. */
   def \\(name: String): NodeSeq = {
     NodeSeq.of(this) \\ name
   }

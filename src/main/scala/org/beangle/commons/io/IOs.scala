@@ -24,6 +24,7 @@ import java.net.URL
 import java.nio.charset.Charset
 import java.util as ju
 
+/** I/O utilities (copy, read/write bytes and lines). */
 object IOs {
 
   private val defaultBufferSize = 1024 * 4
@@ -50,12 +51,23 @@ object IOs {
     count
   }
 
+  /** Reads all bytes from the input stream and returns them as an array.
+   *
+   * @param input the input stream
+   * @return the byte array; stream is closed after read
+   */
   def readBytes(input: InputStream): Array[Byte] = {
     val baos = new ByteArrayOutputStream
     copy(input, baos)
     baos.toByteArray
   }
 
+  /** Writes the string to the output stream using the given charset.
+   *
+   * @param data    the string to write
+   * @param output  the output stream
+   * @param charset the charset (null for default)
+   */
   def write(data: String, output: OutputStream, charset: Charset = null): Unit = {
     if data != null then
       if charset == null then output.write(data.getBytes())
@@ -82,8 +94,10 @@ object IOs {
     count
   }
 
-  /** Get the contents of a `Reader` as a list of Strings,
-   * one entry per line.
+  /** Reads the Reader as a list of lines.
+   *
+   * @param input the Reader
+   * @return one string per line; stream is closed after read
    */
   def readLines(input: Reader): List[String] = {
     val reader = toBufferedReader(input)
@@ -97,6 +111,12 @@ object IOs {
     list.toList
   }
 
+  /** Reads the InputStream as a string using the given charset.
+   *
+   * @param input   the input stream
+   * @param charset the charset
+   * @return the string; stream is closed after read
+   */
   def readString(input: InputStream, charset: Charset = UTF_8): String = {
     if (null == input) ""
     else
@@ -108,14 +128,21 @@ object IOs {
         close(input)
   }
 
-  /** Read key value properties
+  /** Reads key=value properties from the URL.
+   *
+   * @param url the properties URL
+   * @return map of key -> value
    */
   def readProperties(url: URL): Map[String, String] = {
     if null == url then Map.empty
     else readProperties(url.openStream())
   }
 
-  /** Read key value properties
+  /** Reads key=value properties from the InputStream.
+   *
+   * @param input   the input stream
+   * @param charset the charset
+   * @return map of key -> value; stream is closed after read
    */
   def readProperties(input: InputStream, charset: Charset = UTF_8): Map[String, String] = {
     if null == input then Map.empty
@@ -132,14 +159,20 @@ object IOs {
       texts.toMap
   }
 
-  /** Read Java key value properties by url
+  /** Reads Java Properties format from the URL.
+   *
+   * @param url the properties URL
+   * @return map of key -> value
    */
   def readJavaProperties(url: URL): Map[String, String] = {
     if null == url then Map.empty
     else readJavaProperties(url.openStream())
   }
 
-  /** Read java key value properties
+  /** Reads Java Properties format from the InputStream.
+   *
+   * @param input the input stream
+   * @return map of key -> value; stream is closed after read
    */
   def readJavaProperties(input: InputStream): Map[String, String] = {
     if null == input then Map.empty
@@ -151,12 +184,19 @@ object IOs {
       properties.asScala.toMap
   }
 
+  /** Reads the InputStream as lines using the given charset.
+   *
+   * @param input   the input stream
+   * @param charset the charset
+   * @return list of lines; stream is closed after read
+   */
   def readLines(input: InputStream, charset: Charset = UTF_8): List[String] = {
     readLines(new InputStreamReader(input, charset))
   }
 
-  /** Close many objects quitely.
-   * swallow any exception.
+  /** Closes the given AutoCloseables, swallowing any exceptions.
+   *
+   * @param objs the resources to close
    */
   def close(objs: AutoCloseable*): Unit = {
     objs foreach { obj =>
@@ -165,12 +205,23 @@ object IOs {
     }
   }
 
+  /** Executes the function with the resource, then closes it.
+   *
+   * @param res  the AutoCloseable resource
+   * @param func the function to run
+   * @return the function result
+   */
   def using[T <: AutoCloseable, R](res: T)(func: T => R): R = {
     try func(res)
     finally
       if res != null then res.close()
   }
 
+  /** Concatenates multiple InputStreams into a single SequenceInputStream.
+   *
+   * @param ins the input streams in order
+   * @return the combined stream
+   */
   def pipeline(ins: Iterable[InputStream]): InputStream = {
     new SequenceInputStream(scala.jdk.javaapi.CollectionConverters.asJavaEnumeration(ins.iterator))
   }

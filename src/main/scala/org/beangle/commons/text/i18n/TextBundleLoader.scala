@@ -22,9 +22,12 @@ import org.beangle.commons.lang.annotation.spi
 import java.io.InputStream
 import java.util.Locale
 
+/** Loads text bundles for locale and bundle name. */
 @spi
 trait TextBundleLoader {
+  /** Finds bundle sources (name, stream) for locale and bundle. */
   def find(locale: Locale, bundleName: String): collection.Seq[(String, InputStream)]
 
+  /** Loads bundles from sources; returns Map of bundle name to TextBundle. */
   def load(locale: Locale, bundleName: String): Map[String, TextBundle]
 }

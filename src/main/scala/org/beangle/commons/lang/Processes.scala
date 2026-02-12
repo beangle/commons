@@ -25,14 +25,18 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.{CompletableFuture, TimeUnit, TimeoutException}
 import java.util.regex.{Matcher, Pattern}
 
+/** Process launch and output capture. */
 object Processes {
 
+  /** Default wait time for process termination (seconds). */
   val DefaultWaitSeconds = 60
 
+  /** Launches process with inherited I/O. */
   def launch(program: String, args: collection.Seq[String]): Process = {
     launch(program, args, _.inheritIO())
   }
 
+  /** Launches process with custom ProcessBuilder config. */
   def launch(program: String, args: collection.Seq[String], f: ProcessBuilder => Unit): Process = {
     val arguments = new java.util.ArrayList[String]
     arguments.add(program)
@@ -43,15 +47,16 @@ object Processes {
     pb.start()
   }
 
+  /** Returns true if the path is a readable, executable file. */
   def isExecutable(binaryPath: String): Boolean = {
     isExecutable(Paths.get(binaryPath))
   }
 
-  /** 按照环境变量或者可选路径查找可执行命令
+  /** Finds executable path via environment variable or alternative paths.
    *
-   * @param envName
-   * @param alternatives
-   * @return
+   * @param envName      the environment variable name (e.g. "JAVA_HOME")
+   * @param alternatives fallback paths if env var is not set
+   * @return the executable Path, or None if not found
    */
   def find(envName: String, alternatives: collection.Seq[String]): Option[Path] = {
     val path = System.getenv(envName)
@@ -70,10 +75,11 @@ object Processes {
     }
   }
 
-  /** 关闭进程
+  /** Terminates the process, waiting up to waitSeconds for it to exit.
    *
-   * @param process     process
-   * @param waitSeconds wait seconds
+   * @param process     the process to close
+   * @param waitSeconds maximum seconds to wait
+   * @return the process exit value
    */
   def close(process: Process, waitSeconds: Int = DefaultWaitSeconds): Int = {
     if (process != null && process.isAlive) {
@@ -90,6 +96,7 @@ object Processes {
     if (null != process) process.exitValue() else 0
   }
 
+  /** Reads process stdout until pattern matches; returns Some(matcher) or None. */
   def grep(process: Process, pattern: Pattern, waitSeconds: Int): Option[Matcher] = {
     val result = new CompletableFuture[Matcher]
     val output = new AtomicReference[String]("")

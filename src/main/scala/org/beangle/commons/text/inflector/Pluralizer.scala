@@ -23,9 +23,18 @@ package org.beangle.commons.text.inflector
  */
 trait Pluralizer {
 
-  /** pluralize */
+  /** Returns the plural form of the word.
+   *
+   * @param word the singular word
+   * @return the plural form
+   */
   def pluralize(word: String): String
 
-  /** pluralize */
+  /** Returns plural or singular form based on count.
+   *
+   * @param word   the base word (singular)
+   * @param number the count (1 = singular, else plural)
+   * @return the appropriately inflected form
+   */
   def pluralize(word: String, number: Int): String
 }

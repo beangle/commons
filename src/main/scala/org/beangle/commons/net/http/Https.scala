@@ -24,14 +24,17 @@ import java.security.cert.X509Certificate
 import java.time.Duration
 import javax.net.ssl.*
 
+/** HTTPS client factory (default and trust-all). */
 object Https {
 
   private val Timeout = Duration.ofSeconds(10)
 
+  /** Creates HttpClient with standard SSL verification. */
   def createDefaultClient(): HttpClient = {
     HttpClient.newBuilder().connectTimeout(Timeout).followRedirects(Redirect.NORMAL).build()
   }
 
+  /** Creates HttpClient that trusts all certificates (for dev/testing only). */
   def createTrustAllClient(): HttpClient = {
     try {
       val sslContext = SSLContext.getInstance("TLS")
@@ -43,18 +46,18 @@ object Https {
         .build()
     } catch {
       case e: Exception =>
-        throw new RuntimeException("创建忽略SSL校验的HttpClient失败", e)
+        throw new RuntimeException("Failed to create SSL-ignoring HttpClient", e)
     }
   }
 
-  // 创建宽泛的SSLParameters：关闭主机名校验 + 支持所有常见SSL/TLS协议
+  // wide SSL params: no hostname verification, support common TLS protocols
   private def createWideOpenSslParams() = {
     val sslParams = new SSLParameters
-    //关闭主机名与证书域名的匹配校验（设为null即可）
+    // disable hostname vs certificate domain check (null disables)
     sslParams.setEndpointIdentificationAlgorithm(null)
-    //支持所有常见SSL/TLS协议（包括部分旧协议，极致宽泛）
+    // support common TLS protocols
     sslParams.setProtocols(Array[String]("TLSv1.3", "TLSv1.2", "TLSv1.1", "TLSv1", "SSLv3"))
-    // 可选：支持所有加密套件（进一步放宽）
+    // support all default cipher suites
     sslParams.setCipherSuites(SSLContext.getDefault.getDefaultSSLParameters.getCipherSuites)
     sslParams
   }

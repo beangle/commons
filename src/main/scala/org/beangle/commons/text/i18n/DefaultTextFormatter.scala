@@ -23,16 +23,17 @@ import java.text.MessageFormat
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
-/** DefaultTextFormatter with cache
-  *
-  * @author chaostone
-  * @since 3.0.0
-  */
-@description("缺省Text格式化")
+/** TextFormatter using MessageFormat with per-locale cache.
+ *
+ * @author chaostone
+ * @since 3.0.0
+ */
+@description("Default Text formatter")
 class DefaultTextFormatter extends TextFormatter {
 
   protected var caches: Map[Locale, Map[String, MessageFormat]] = Map.empty
 
+  /** Formats with MessageFormat, caching patterns per locale. */
   def format(text: String, locale: Locale, args: Any*): String = {
     val format =
       caches.get(locale) match

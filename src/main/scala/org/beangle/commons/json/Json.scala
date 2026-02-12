@@ -20,25 +20,52 @@ package org.beangle.commons.json
 import org.beangle.commons.codec.binary.Base64
 import org.beangle.commons.lang.{Options, Strings}
 
+/** JSON parse, query, and serialization. */
 object Json {
 
+  /** Parses a JSON string into a Json value (object or array). Returns JsonValue("") for blank input.
+   *
+   * @param s the JSON string to parse
+   * @return the parsed Json value
+   */
   def parse(s: String): Json = {
     if Strings.isBlank(s) then JsonValue("")
     else new JsonParser(new java.io.StringReader(s)).parse()
   }
 
+  /** Queries the JSON at the given path. Path uses slash or dot for nested properties.
+   *
+   * @param s    the JSON string to query
+   * @param path the query path (e.g. [index]/property or property.nested)
+   * @return the value at the path, or None if not found
+   */
   def query(s: String, path: String): Option[Any] = {
     parse(s).query(path)
   }
 
+  /** Parses a JSON string as a JsonObject. Returns empty object for blank input.
+   *
+   * @param s the JSON string
+   * @return the JsonObject
+   */
   def parseObject(s: String): JsonObject = {
     if Strings.isBlank(s) then new JsonObject() else parse(s).asInstanceOf[JsonObject]
   }
 
+  /** Parses a JSON string as a JsonArray. Returns empty array for blank input.
+   *
+   * @param s the JSON string
+   * @return the JsonArray
+   */
   def parseArray(s: String): JsonArray = {
     if Strings.isBlank(s) then new JsonArray() else parse(s).asInstanceOf[JsonArray]
   }
 
+  /** Converts a Map to its JSON string representation.
+   *
+   * @param datas the map to convert
+   * @return the JSON string
+   */
   def toJson(datas: collection.Map[_, _]): String = {
     if (datas.isEmpty) return "{}"
     val sb = new StringBuilder("{")
@@ -56,14 +83,29 @@ object Json {
     sb.append("}").toString
   }
 
+  /** Converts a JsonObject to its JSON string.
+   *
+   * @param value the JsonObject
+   * @return the JSON string
+   */
   def toJson(value: JsonObject): String = {
     value.toJson
   }
 
+  /** Converts a JsonArray to its JSON string.
+   *
+   * @param value the JsonArray
+   * @return the JSON string
+   */
   def toJson(value: JsonArray): String = {
     value.toJson
   }
 
+  /** Converts an Iterable to its JSON array string representation.
+   *
+   * @param data the iterable to convert
+   * @return the JSON array string
+   */
   def toJson(data: Iterable[_]): String = {
     val sb = new StringBuilder("[")
     for (li <- data) {
@@ -78,14 +120,23 @@ object Json {
     sb.append("]").toString
   }
 
-  def emptyObject: JsonObject = {
-    new JsonObject()
-  }
+  /** Returns a new empty JsonObject.
+   *
+   * @return empty JsonObject
+   */
+  def emptyObject: JsonObject = new JsonObject()
 
-  def emptyArray: JsonArray = {
-    new JsonArray()
-  }
+  /** Returns a new empty JsonArray.
+   *
+   * @return empty JsonArray
+   */
+  def emptyArray: JsonArray = new JsonArray()
 
+  /** Converts a value to its JSON literal representation.
+   *
+   * @param v the value
+   * @return the literal string
+   */
   def toLiteral(v: Any): String = {
     v match {
       case null => "null"
@@ -110,6 +161,11 @@ object Json {
     }
   }
 
+  /** Escapes special characters in a string for JSON representation.
+   *
+   * @param s the string to escape
+   * @return the escaped string with quotes
+   */
   def escape(s: String): String = {
     val length = s.length
     val text = s.toCharArray
@@ -140,32 +196,31 @@ object Json {
   }
 }
 
+/** JSON tree node (object, array, or leaf value). */
 trait Json {
-  /** Query object graph,using slash or dot seperate nested property,like
-   * [index]/property_name/property_name or [index].property_name.property_name
+
+  /** Queries the object graph using slash or dot to separate nested properties.
+   * Path format: [index]/property_name or property.nested.property
    *
-   * @param path query path
-   * @return
+   * @param path the query path
+   * @return the value at the path, or None if not found
    */
   def query(path: String): Option[Any]
 
-  /** Get Property
+  /** Gets the value of the specified property.
    *
-   * @param property name
-   * @return
+   * @param property the property name
+   * @return the property value, or None if not found
    */
   def get(property: String): Option[Any]
 
-  /** 该节点的下级节点
-   *
-   * @return
-   */
+  /** Returns the child nodes of this Json node. */
   def children: Iterable[Json]
 
-  /** Navigate property
+  /** Navigates to the specified property. Returns empty object if not found.
    *
-   * @param path property
-   * @return
+   * @param property the property name to navigate to
+   * @return the Json at the property, or empty object if not found
    */
   def \(property: String): Json = {
     get(property) match {
@@ -179,7 +234,9 @@ trait Json {
     }
   }
 
+  /** Serializes this node to JSON string. */
   def toJson: String
 
+  /** Returns the raw value of this node. */
   def value: Any
 }

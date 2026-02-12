@@ -25,10 +25,14 @@ import org.beangle.commons.lang.{Charsets, Strings}
 
 import java.io.{File, FileInputStream, FileOutputStream}
 
+/** File/text formatting utilities. */
 object Formatter {
+  /** Line feed (Unix-style). */
   val LF = "\n"
+  /** Carriage return + line feed (Windows-style). */
   val CRLF = "\r\n"
 
+  /** Recursively formats files (text/xml by ext or matching ext). */
   def format(formatter: Formatter, dir: File, ext: Option[String]): Unit =
     if dir.isFile then
       ext match {
@@ -46,10 +50,12 @@ object Formatter {
       }
 }
 
+/** Formats string or file content. */
 trait Formatter {
-
+  /** Formats the given string and returns the result. */
   def format(str: String): String
 
+  /** Reads file, formats content, writes back. */
   def format(file: File): Unit = {
     val content = IOs.readString(new FileInputStream(file))
     val rs = format(content)
@@ -59,23 +65,29 @@ trait Formatter {
   }
 }
 
+/** Builder for Formatter with line processors. */
 class FormatterBuilder {
+  /** Number of spaces per tab (used when tab2space enabled). */
   var tablength = 2
+  /** Line ending for output (LF or CRLF). */
   var eof = Formatter.LF
   private var tab2space: Boolean = _
   private var trimTrailingWhiteSpace: Boolean = _
   private var fixLast: Boolean = _
 
+  /** Enables trimming trailing whitespace. */
   def enableTrimTrailingWhiteSpace(): this.type = {
     trimTrailingWhiteSpace = true
     this
   }
 
+  /** Disables trimming trailing whitespace. */
   def disableTrimTrailingWhiteSpace(): this.type = {
     trimTrailingWhiteSpace = false
     this
   }
 
+  /** Converts tabs to spaces. */
   def enableTab2space(tablength: Int): this.type = {
     assert(1 <= tablength && tablength <= 8, "tab length should in [1,8]")
     this.tablength = tablength
@@ -83,22 +95,26 @@ class FormatterBuilder {
     this
   }
 
+  /** Disables tab-to-space conversion. */
   def disableTab2space(): this.type = {
     tab2space = false
     this
   }
 
+  /** Inserts newline at end of output. */
   def insertFinalNewline(): this.type = {
     fixLast = true
     this
   }
 
+  /** Sets line ending (LF or CRLF). */
   def fixcrlf(eof: String): this.type = {
     assert(eof == Formatter.LF || eof == Formatter.CRLF)
     this.eof = eof
     this
   }
 
+  /** Builds Formatter with configured processors. */
   def build(): Formatter = {
     val processors = Collections.newBuffer[LineProcessor]
     if (tab2space) processors += new Tab2Space(tablength)
@@ -107,8 +123,10 @@ class FormatterBuilder {
   }
 }
 
+/** Formatter with line processors and EOL/trim options. */
 class DefaultFormatter(val eof: String = Formatter.LF, lineProcessors: List[LineProcessor], val fixLast: Boolean) extends Formatter {
 
+  /** Applies line processors and joins with configured EOL. */
   def format(str: String): String = {
     var fixlf = Strings.replace(str, "\r", "")
     var smaller = Strings.replace(fixlf, "\n\n\n", "\n\n")

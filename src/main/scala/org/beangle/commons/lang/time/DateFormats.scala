@@ -49,6 +49,7 @@ object DateFormats {
     }
   }
 
+  /** RFC 1123 date format (alias for Http). */
   val RFC1123 = Http
 
   object UTC extends DateFormat {

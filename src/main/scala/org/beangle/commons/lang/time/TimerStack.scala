@@ -19,19 +19,22 @@ package org.beangle.commons.lang.time
 
 import java.util.Arrays
 
-/** Record timer nodes
-  *
-  * @author chaostone
-  * @since 3.0.0
-  */
+/** Stack of TimerNodes for profiling (push/pop).
+ *
+ * @author chaostone
+ * @since 3.0.0
+ */
 class TimerStack(root: TimerNode, initCapacity: Int) {
 
+  /** Current stack index (-1 when empty). */
   var index: Int = -1
 
+  /** Stack storage array. */
   var nodes: Array[TimerNode] = new Array[TimerNode](initCapacity)
 
   push(root)
 
+  /** Creates TimerStack with default capacity (15). */
   def this(root: TimerNode) = {
     this(root, 15)
   }
@@ -42,11 +45,19 @@ class TimerStack(root: TimerNode, initCapacity: Int) {
       nodes = Arrays.copyOf(nodes, newCapacity)
     }
 
+  /** Pushes a timer node onto the stack.
+   *
+   * @param node the node to push
+   */
   def push(node: TimerNode): Unit = {
     ensureCapacity()
     nodes(index) = node
   }
 
+  /** Pops the top timer node from the stack.
+   *
+   * @return the top node, or null if empty
+   */
   def pop(): TimerNode = {
     if (index < 0) return null
     val top = nodes(index)
@@ -55,6 +66,10 @@ class TimerStack(root: TimerNode, initCapacity: Int) {
     top
   }
 
+  /** Returns the top timer node without removing it.
+   *
+   * @return the top node, or null if empty
+   */
   def peek(): TimerNode = {
     if (index < 0) return null
     nodes(index)

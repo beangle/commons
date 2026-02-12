@@ -22,46 +22,38 @@ import org.beangle.commons.csv.CsvFormat
 import scala.collection.mutable
 
 
-/**
- * A very simple CSV parser released under a commercial-friendly license. This
- * just implements splitting a single line into fields.
+/** Simple CSV parser that splits a single line into fields.
  *
  * @author chaostone
  */
 class CsvParser(var format: CsvFormat) {
-  /**
-   * Constant `InitialReadSize=128`
-   */
   private val InitialReadSize = 128
-
   private var pending: String = _
-
   private var inField: Boolean = false
-
   private val ignoreLeadingWhiteSpace = true
 
-  /**
-   * isPending.
-   */
+  /** Returns true if there is pending content from a previous multi-line read. */
   def isPending: Boolean = pending != null
 
-  /**
-   * parseLineMulti.
+  /** Parses a line, possibly spanning multiple physical lines (handles quoted newlines).
+   *
+   * @param nextLine the line(s) to parse
+   * @return the field array, or null if nextLine is null
    */
   def parseLineMulti(nextLine: String): Array[String] = parseLine(nextLine, true)
 
-  /**
-   * parseLine.
+  /** Parses a single line into fields.
+   *
+   * @param nextLine the line to parse
+   * @return the field array, or null if nextLine is null
    */
   def parseLine(nextLine: String): Array[String] = parseLine(nextLine, false)
 
-  /**
-   * Parses an incoming String and returns an array of elements.
+  /** Parses the string and returns tokenized fields.
    *
    * @param nextLine the string to parse
-   * @param multi
-   * @return the Comma-tokenized list of elements, or null if nextLine is null
-   * @throws IOException if bad things happen during the read
+   * @param multi    if true, handles quoted newlines (multi-line fields)
+   * @return the field array, or null if nextLine is null
    */
   private def parseLine(nextLine: String, multi: Boolean): Array[String] = {
     if (!multi && pending != null)

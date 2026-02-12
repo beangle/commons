@@ -32,16 +32,13 @@ import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
 import scala.reflect.*
 
-/** Load ClassInfo using reflection
-  *
-  */
+/** Loads BeanInfo via reflection. */
 object BeanInfoLoader {
   private case class Getter(method: Method, returnType: TypeInfo)
 
   private case class Setter(method: Method, parameterTypes: Array[TypeInfo])
 
-  /** Load BeanInfo using reflections
-    */
+  /** Loads BeanInfo for class. */
   def load(clazz: Class[_]): BeanInfo = {
     val className = clazz.getName
     if (className.startsWith("java.") || className.startsWith("scala.") || className.contains("$$"))
@@ -213,6 +210,7 @@ object BeanInfoLoader {
     else false
   }
 
+  /** Resolves TypeInfo from Class and generic Type. */
   def typeof(clazz: Class[_], typ: java.lang.reflect.Type, paramTypes: collection.Map[String, Class[_]]): TypeInfo = {
     if TypeInfo.isIterableType(clazz) then
       if clazz.isArray then

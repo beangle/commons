@@ -22,29 +22,36 @@ import org.beangle.commons.codec.{Decoder, Encoder}
 import javax.crypto.spec.{DESKeySpec, IvParameterSpec}
 import javax.crypto.{Cipher, SecretKey, SecretKeyFactory}
 
-/** @see https://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#impl
-  */
+/** DES cipher utilities.
+ *
+ * @see https://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#impl
+ */
 object Des {
+  /** Builds SecretKey from string (UTF-8). */
   def buildKey(key: String): SecretKey =
     SecretKeyFactory.getInstance("DES").generateSecret(new DESKeySpec(key.getBytes("UTF-8")))
 
-  /** Cipher-Block Chaining ecode and decode utility
-    */
+  /** DES CBC mode encode/decode. */
   object CBC {
+    /** Encodes string to hex; returns Base16 of ciphertext. */
     def encode2Hex(key: String, data: String, padding: String = Padding.PKCS5, iv: String = null): String = {
       val d = new CBCEncoder(key, iv, padding).encode(data.getBytes("UTF-8"))
       Hex.encode(d, true)
     }
 
+    /** Decodes hex-encoded ciphertext to plaintext string. */
     def decodeHex(key: String, data: String, padding: String = Padding.PKCS5, iv: String = null): String =
       new String(new CBCDecoder(key, iv, padding).decode(Hex.decode(data)))
 
+    /** Encodes bytes to ciphertext. */
     def encode(key: String, data: Array[Byte], padding: String = Padding.PKCS5, iv: String = null): Array[Byte] =
       new CBCEncoder(key, iv, padding).encode(data)
 
+    /** Decodes ciphertext to bytes. */
     def decode(key: String, data: Array[Byte], padding: String = Padding.PKCS5, iv: String = null): Array[Byte] =
       new CBCDecoder(key, iv, padding).decode(data)
 
+    /** Builds DES/CBC Cipher for encrypt or decrypt mode. */
     def buildCipher(mode: Int, key: String, initVector: String, padding: String): Cipher = {
       val cipher = Cipher.getInstance("DES/CBC/" + padding)
       val iv = if (initVector eq null) key else initVector
@@ -54,13 +61,15 @@ object Des {
     }
   }
 
+  /** DES CBC mode encoder. */
   class CBCEncoder(key: String, iv: String, padding: String) extends Encoder[Array[Byte], Array[Byte]] {
-    def encode(data: Array[Byte]): Array[Byte] =
+    override def encode(data: Array[Byte]): Array[Byte] =
       CBC.buildCipher(Cipher.ENCRYPT_MODE, key, iv, padding).doFinal(data)
   }
 
+  /** DES CBC mode decoder. */
   class CBCDecoder(key: String, iv: String, padding: String) extends Decoder[Array[Byte], Array[Byte]] {
-    def decode(data: Array[Byte]): Array[Byte] =
+    override def decode(data: Array[Byte]): Array[Byte] =
       CBC.buildCipher(Cipher.DECRYPT_MODE, key, iv, padding).doFinal(data)
   }
 }

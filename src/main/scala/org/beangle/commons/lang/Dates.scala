@@ -22,48 +22,59 @@ import org.beangle.commons.lang.time.HourMinute
 
 import java.time.*
 
-/** Dates class.
+/** Date and time parsing utilities.
  *
  * @author chaostone
  */
 object Dates {
 
+  /** Today's date. */
   def today: LocalDate = LocalDate.now()
 
+  /** Current date-time. */
   def now: LocalDateTime = LocalDateTime.now()
 
+  /** Parses string to HourMinute. */
   def toHourMinute(value: String): HourMinute = {
     if isEmpty(value) then null else HourMinute.apply(value)
   }
 
+  /** Parses string to LocalTime. */
   def toTime(value: String): LocalTime = {
     if isEmpty(value) then null else LocalTime.parse(value)
   }
 
+  /** Parses string to MonthDay. */
   def toMonthDay(value: String): MonthDay = {
     if isEmpty(value) then null else MonthDay.parse(Dates.normalizeMonthDay(value))
   }
 
+  /** Parses string to YearMonth. */
   def toYearMonth(value: String): YearMonth = {
     if isEmpty(value) then null else YearMonth.parse(Dates.nomalizeYearMonth(value))
   }
 
+  /** Parses string to LocalDate. */
   def toDate(value: String): LocalDate = {
     if isEmpty(value) then null else LocalDate.parse(Dates.normalizeDate(value))
   }
 
+  /** Parses string to LocalDateTime. */
   def toDateTime(value: String): LocalDateTime = {
     if isEmpty(value) then null else LocalDateTime.parse(normalizeDateTime(value))
   }
 
+  /** Parses string to ZonedDateTime. */
   def toZonedDateTime(value: String): ZonedDateTime = {
     if isEmpty(value) then null else ZonedDateTime.parse(Dates.normalizeDateTime(value))
   }
 
+  /** Parses string to OffsetDateTime. */
   def toOffsetateTime(value: String): OffsetDateTime = {
     if isEmpty(value) then null else OffsetDateTime.parse(Dates.normalizeDateTime(value))
   }
 
+  /** Parses string to Instant. */
   def toInstant(value: String): Instant = {
     if isEmpty(value) then return null
     if value.endsWith("Z") then Instant.parse(value)
@@ -74,16 +85,10 @@ object Dates {
     }
   }
 
-  /** normalize.
-   * change other formats to uniform one.
-   * <p>
-   * YYYYMMDD => YYYY-MM-DD
-   * YYYY-M-D => YYYY-MM-DD
-   * YYYY.MM.dd =>YYYY-MM-DD
-   * </p>
+  /** Normalizes date string to YYYY-MM-DD. Handles YYYYMMDD, YYYY-M-D, YYYY.MM.dd.
    *
-   * @param dateStr a String object.
-   * @return a String object.
+   * @param str the date string
+   * @return normalized string
    */
   def normalizeDate(str: String): String = {
     var dateStr = if (str.contains(".")) Strings.replace(str, ".", "-") else str
@@ -111,9 +116,12 @@ object Dates {
     }
   }
 
-  /** Change DateTime Format
-   *  - YYYY-MM-DD HH:mm into YYYY-MM-DDTHH:mm:00
-   *  - YYYY-MM-DD HH:mm:ss into YYYY-MM-DDTHH:mm:ss
+  /** Normalizes date-time to ISO format (YYYY-MM-DDTHH:mm:ss).
+   *
+   * - YYYY-MM-DD HH:mm into YYYY-MM-DDTHH:mm:00
+   * - YYYY-MM-DD HH:mm:ss into YYYY-MM-DDTHH:mm:ss
+   *
+   * @param value datetime string
    */
   def normalizeDateTime(value: String): String = {
     val v = Strings.replace(value, " ", "T")
@@ -134,7 +142,8 @@ object Dates {
     normalizeDate(date) + "T" + hms
   }
 
-  /** Change YearMonth Format
+  /** Normalizes YearMonth string to YYYY-MM.
+   *
    *  - YYYY.M into YYYY-0M
    *  - YYYY.MM into YYYY-MM
    *  - YYYY-M into YYYY-0M
@@ -150,6 +159,7 @@ object Dates {
     }
   }
 
+  /** Normalizes MonthDay string to --MM-DD. */
   def normalizeMonthDay(md: String): String = {
     var str = Strings.replace(md, ".", "-")
     if str.startsWith("--") then str = str.substring(2)

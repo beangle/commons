@@ -21,25 +21,33 @@ import org.beangle.commons.lang.Strings.{split, substringAfter, substringBetween
 
 import java.net.URL
 
+/** ResourceVersionLoader factory. */
 object ResourceVersionLoader {
+
+  /** Gets the best-matching resource for the version.
+   *
+   * @param resourceName the resource path
+   * @param version      the version string
+   * @return Some(URL) or None
+   */
   def getResource(resourceName: String, version: String): Option[URL] = {
     new ResourceVersionLoader().getResource(resourceName, version)
   }
 }
 
-/** Get resources by version
-  * matched order
-  * {{{
-  * 1 path/to/file_version.txt
-  * 2 path/to/file(start_version~end_version).txt
-  * 3 path/to/file.txt
-  * }}}
-  *
-  * @param loader
-  */
+/** Loads resources by version. Match order: 1) file_version.ext, 2) file(start~end).ext, 3) file.ext.
+ *
+ * @param loader the underlying ResourceLoader
+ */
 class ResourceVersionLoader(loader: ResourceLoader = new ClasspathResourceLoader) {
   private val patternResolver = new ResourcePatternResolver(loader)
 
+  /** Returns the best-matching resource for the given version.
+   *
+   * @param resourceName the resource path (e.g. "path/to/file.txt")
+   * @param version      the version string
+   * @return Some(URL) or None
+   */
   def getResource(resourceName: String, version: String): Option[URL] = {
     val idxLastDot = resourceName.lastIndexOf('.')
     var path = resourceName

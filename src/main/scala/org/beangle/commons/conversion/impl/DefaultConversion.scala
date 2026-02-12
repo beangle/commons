@@ -19,6 +19,7 @@ package org.beangle.commons.conversion.impl
 
 import org.beangle.commons.conversion.{converter, string}
 
+/** DefaultConversion singleton and convert helper. */
 object DefaultConversion {
 
   val Instance = new DefaultConversion()
@@ -27,9 +28,9 @@ object DefaultConversion {
 }
 
 /** Default Conversion implementation.
- * <p>
- * It register String to Boolean/Number/Date/Locale, Number to Number and Object to String buildin
- * converters.
+ *
+ * Registers built-in converters: String to Boolean/Number/Date/Locale, Number to Number,
+ * Object to String, etc.
  *
  * @author chaostone
  * @since 3.2.0

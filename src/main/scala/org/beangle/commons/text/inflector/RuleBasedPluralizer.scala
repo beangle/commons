@@ -22,6 +22,7 @@ import org.beangle.commons.text.inflector.RuleBasedPluralizer.*
 import java.util.Locale
 import java.util.regex.Pattern
 
+/** RuleBasedPluralizer factory and helpers. */
 object RuleBasedPluralizer {
 
   class IdentityPluralizer extends Pluralizer {
@@ -40,7 +41,7 @@ object RuleBasedPluralizer {
   private val pluPattern2: Pattern = Pattern.compile("^\\p{Lu}.*")
 }
 
-/** RuleBasedPluralizer class.
+/** Pluralizer that applies rules in order with locale-aware case handling.
  *
  * @author chaostone
  */

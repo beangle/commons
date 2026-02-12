@@ -21,9 +21,17 @@ import org.beangle.commons.activation.MediaType
 
 import java.io.OutputStream
 
+/** Serializes objects to an output stream. */
 trait Serializer {
 
+  /** Serializes data to the output stream.
+   *
+   * @param data   the object to serialize
+   * @param os     the output stream
+   * @param params optional serialization parameters
+   */
   def serialize(data: Any, os: OutputStream, params: Map[String, Any]): Unit
 
+  /** Supported media types. */
   def mediaTypes: Seq[MediaType]
 }

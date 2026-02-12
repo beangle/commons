@@ -17,6 +17,7 @@
 
 package org.beangle.commons.dbf
 
+/** Exception thrown when reading or writing DBF fails. */
 class DbfException(message: String, cause: Throwable) extends RuntimeException(message, cause) {
 
   def this(message: String) = {

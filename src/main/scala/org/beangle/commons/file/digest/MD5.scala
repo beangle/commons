@@ -19,6 +19,7 @@ package org.beangle.commons.file.digest
 
 import java.security.MessageDigest
 
+/** MD5 file digest. */
 object MD5 extends AbstractFileDigest {
 
   protected override def getAlgorithm(): MessageDigest =

@@ -26,15 +26,23 @@ import java.net.URL
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import javax.xml.parsers.DocumentBuilderFactory
 
+/** Cached XML config document loader. */
 object XmlConfigs {
+
   private var configs: Map[String, Document] = Map.empty
-  //读写控制，多个读写者，读不到可以写
+  // read-write lock: multiple readers, single writer when cache miss
   private val rwLock = new ReentrantReadWriteLock()
 
+  /** Clears the config cache. */
   def clear(): Unit = {
     configs = Map.empty
   }
 
+  /** Loads XML config by path (cached); resolves via Resources.load.
+   *
+   * @param path the config path (e.g. classpath resource)
+   * @return the parsed Document
+   */
   def load(path: String): Document = {
     Locks.withReadLock(rwLock) {
       configs.get(path)
@@ -42,7 +50,7 @@ object XmlConfigs {
       case Some(d) => d
       case None =>
         Locks.withWriteLock(rwLock) {
-          //二次读取（防止并发重复生成）
+          // double-check after acquiring write lock to avoid duplicate generation
           configs.get(path) match {
             case Some(d) => d
             case None =>
@@ -55,6 +63,11 @@ object XmlConfigs {
     }
   }
 
+  /** Parses XML from URLs and merges into a single Document.
+   *
+   * @param urls the config URLs (first is base, rest are merged)
+   * @return merged Document
+   */
   def parseConfig(urls: Iterable[URL]): Document = {
     if (urls.isEmpty) {
       new Document("missing")

@@ -22,13 +22,14 @@ import org.beangle.commons.lang.{Options, Primitives, Strings}
 import java.time.temporal.TemporalAccessor
 import java.{lang as jl, util as ju}
 
+/** Format helpers for Number, Date, Temporal (pattern or default formatter). */
 object Formatters {
 
-  /** Format number or Dates
+  /** Formats object using pattern or default formatter for its type.
    *
-   * @param obj
-   * @param pattern
-   * @return
+   * @param obj     value to format
+   * @param pattern optional format pattern (e.g. "yyyy-MM-dd")
+   * @return formatted string, or "" if null
    */
   def format(obj: Any, pattern: String = ""): String = {
     val v = Options.unwrap(obj)
@@ -38,6 +39,12 @@ object Formatters {
       formatter.format(v)
   }
 
+  /** Formats object with the given formatter.
+   *
+   * @param obj       value to format
+   * @param formatter formatter to use
+   * @return formatted string, or "" if null
+   */
   def format(obj: Any, formatter: Formatter): String = {
     val v = Options.unwrap(obj)
     if null == v then "" else formatter.format(v)
@@ -70,6 +77,7 @@ object Formatters {
   private val JtYearMonth = TemporalFormatter("yyyy-MM")
   private val JtMonthDay = TemporalFormatter("MM-dd")
 
+  /** Default formatter mapping by value class. */
   val Defaults: Map[Class[_], Formatter] =
     Map(classOf[jl.Boolean] -> ToStringFormatter, classOf[jl.Short] -> PlainNum,
       classOf[jl.Integer] -> PlainNum, classOf[jl.Long] -> LongNum,
@@ -85,6 +93,11 @@ object Formatters {
       classOf[java.time.YearMonth] -> JtYearMonth, classOf[java.time.MonthDay] -> JtMonthDay
     )
 
+  /** Gets the default formatter for the given class.
+   *
+   * @param clazz the value class (e.g. Integer, LocalDate)
+   * @return formatter for that type
+   */
   def getDefault(clazz: Class[_]): Formatter = {
     val clz = Primitives.wrap(clazz)
     Defaults.get(clz) match {

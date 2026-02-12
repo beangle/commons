@@ -17,9 +17,9 @@
 
 package org.beangle.commons.config
 
-/** Simple K-V config
+/** Simple key-value config backed by a map.
  *
- * @param props properties
+ * @param props the backing properties map
  */
 final class SimpleConfig(private val props: collection.Map[String, String]) extends AbstractMapConfig {
 

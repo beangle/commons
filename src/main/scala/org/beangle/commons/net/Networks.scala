@@ -23,12 +23,29 @@ import java.io.IOException
 import java.net.*
 import scala.annotation.nowarn
 
+/** URL/URI creation and path resolution. */
 object Networks {
 
+  /** Creates a URL from the given string.
+   *
+   * @param l the URL string
+   * @return the URL
+   */
   def url(l: String): URL = URI.create(l).toURL
 
+  /** Creates a URI from the given string.
+   *
+   * @param l the URI string
+   * @return the URI
+   */
   def uri(l: String): URI = URI.create(l)
 
+  /** Resolves path relative to context URL.
+   *
+   * @param context the base URL
+   * @param path    the relative path
+   * @return the resolved URL
+   */
   @nowarn
   def url(context: URL, path: String): URL = {
     //context.toURI.resolve(path).toURL
@@ -36,8 +53,14 @@ object Networks {
     new URL(context, path)
   }
 
+  /** Opens a connection to the URL.
+   *
+   * @param l the URL string
+   * @return the connection
+   */
   def openURL(l: String): URLConnection = url(l).openConnection()
 
+  /** Returns the local hostname. */
   def hostname: String = {
     try
       InetAddress.getLocalHost.getHostName
@@ -46,14 +69,21 @@ object Networks {
     }
   }
 
+  /** Returns all IPv4 addresses of this host. */
   def ipv4: Set[String] = {
     addresses(1)
   }
 
+  /** Returns all IPv6 addresses of this host. */
   def ipv6: Set[String] = {
     addresses(2)
   }
 
+  /** Returns network addresses. family: 0=all, 1=IPv4, 2=IPv6.
+   *
+   * @param family 0 for all, 1 for IPv4 only, 2 for IPv6 only
+   * @return set of address strings
+   */
   def addresses(family: Int = 0): Set[String] = {
     val niEnum = NetworkInterface.getNetworkInterfaces
     val ips = Collections.newBuffer[String]
@@ -79,6 +109,11 @@ object Networks {
     ips.toSet
   }
 
+  /** Tries to connect to the URL; returns None on failure.
+   *
+   * @param l the URL string
+   * @return Some(URL) if connect succeeds, None otherwise
+   */
   def tryConnectURL(l: String): Option[URL] = {
     try {
       val rs = url(l)
@@ -90,6 +125,11 @@ object Networks {
     }
   }
 
+  /** Returns true if no process is listening on the port.
+   *
+   * @param port the port number
+   * @return true if free
+   */
   def isPortFree(port: Int): Boolean = {
     try
       new Socket("localhost", port).close()
@@ -98,11 +138,11 @@ object Networks {
       case e: IOException => true
   }
 
-  /** 获取一定数量的空余端口
+  /** Finds the specified number of free ports starting from startPort.
    *
-   * @param startPort 开始端口
-   * @param portCount 端口数量
-   * @return
+   * @param startPort the port to start scanning from
+   * @param portCount the number of free ports to find (1-100)
+   * @return sequence of free port numbers
    */
   def nextFreePorts(startPort: Int, portCount: Int): Seq[Int] = {
     require(portCount >= 1 && portCount <= 100, s"${portCount} is to small or too big")

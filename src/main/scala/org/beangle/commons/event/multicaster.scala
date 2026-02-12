@@ -28,15 +28,23 @@ import scala.collection.mutable
  */
 trait EventListener[E <: Event] extends java.util.EventListener {
 
-  /** Handle an application event.
+  /** Handles the event.
+   *
+   * @param event the event
    */
   def onEvent(event: E): Unit
 
-  /** Determine whether this listener actually supports the given event type.
+  /** Returns true if this listener supports the event type.
+   *
+   * @param eventType the event class
+   * @return true if supported
    */
   def supportsEventType(eventType: Class[_ <: Event]): Boolean
 
-  /** Determine whether this listener actually supports the given source type.
+  /** Returns true if this listener supports the source type.
+   *
+   * @param sourceType the source class
+   * @return true if supported
    */
   def supportsSourceType(sourceType: Class[_]): Boolean
 }
@@ -45,26 +53,31 @@ trait EventListener[E <: Event] extends java.util.EventListener {
  */
 trait EventMulticaster {
 
-  /** Add a listener to be notified of all events.
+  /** Adds a listener.
+   *
+   * @param listener the listener to add
    */
   def addListener(listener: EventListener[_]): Unit
 
-  /** Remove a listener from the notification list.
+  /** Removes a listener.
+   *
+   * @param listener the listener to remove
    */
   def removeListener(listener: EventListener[_]): Unit
 
-  /** Remove all listeners registered with this multicaster.
-   * <p>
-   * After a remove call, the multicaster will perform no action on event notification until new
-   * listeners are being registered.
+  /** Removes all listeners. After this call, the multicaster will perform no action on event
+   * notification until new listeners are registered.
    */
   def removeAllListeners(): Unit
 
-  /** multicast.
+  /** Multicasts the event to all matching listeners.
+   *
+   * @param e the event
    */
   def multicast(e: Event): Unit
 }
 
+/** DefaultEventMulticaster types. */
 object DefaultEventMulticaster {
 
   private class ListenerCacheKey(val eventType: Class[_], val sourceType: Class[_]) {
@@ -79,8 +92,7 @@ object DefaultEventMulticaster {
   }
 }
 
-/** DefaultEventMulticaster class.
- */
+/** Default event multicaster implementation. */
 class DefaultEventMulticaster extends EventMulticaster {
 
   import DefaultEventMulticaster.*
@@ -91,23 +103,34 @@ class DefaultEventMulticaster extends EventMulticaster {
 
   private var listenerCache: Map[ListenerCacheKey, List[EventListener[Event]]] = Map.empty
 
+  /** Multicasts the event to all matching listeners.
+   *
+   * @param e the event to multicast
+   */
   def multicast(e: Event): Unit = {
     val adapted = getListeners(e)
     for (listener <- adapted) listener.onEvent(e)
   }
 
+  /** Adds a listener.
+   *
+   * @param listener the listener to add
+   */
   def addListener(listener: EventListener[_]): Unit = {
     listeners ::= listener.asInstanceOf[EventListener[Event]]
     listenerCache = Map.empty
   }
 
+  /** Removes a listener.
+   *
+   * @param listener the listener to remove
+   */
   def removeListener(listener: EventListener[_]): Unit = {
     listeners = listeners diff List(listener.asInstanceOf[EventListener[Event]])
     listenerCache = Map.empty
   }
 
-  /** removeAllListeners.
-   */
+  /** Removes all listeners. */
   def removeAllListeners(): Unit = {
     listeners = Nil
     listenerCache = Map.empty
@@ -129,11 +152,15 @@ class DefaultEventMulticaster extends EventMulticaster {
   }
 }
 
-/** EventPublisher interface.
- */
+/** EventPublisher interface. */
 trait EventPublisher {
 
+  /** The multicaster to dispatch events to. */
   var multicaster: EventMulticaster = _
 
+  /** Publishes the event to the multicaster.
+   *
+   * @param event the event to publish
+   */
   def publish(event: Event): Unit = multicaster.multicast(event)
 }

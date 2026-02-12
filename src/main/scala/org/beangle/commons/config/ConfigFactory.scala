@@ -20,10 +20,10 @@ package org.beangle.commons.config
 import java.util as ju
 import scala.jdk.javaapi.CollectionConverters.asScala
 
+/** Config factory (SystemEnvironment, SystemProperties). */
 object ConfigFactory {
 
-  /** Extract property from Env
-   */
+  /** Config from system environment (env vars; dots mapped to underscores). */
   object SystemEnvironment extends AbstractMapConfig {
 
     override def getValue(name: String, defaults: Any): Any = {
@@ -55,6 +55,7 @@ object ConfigFactory {
     override def next(): String = toPropertyName(i.next)
   }
 
+  /** Config from System.getProperty. */
   object SystemProperties extends AbstractMapConfig {
 
     def getValue(name: String, defaults: Any): Any = {

@@ -22,11 +22,11 @@ import org.beangle.commons.lang.Numbers
 
 import java.{lang as jl, math as jm}
 
-/** Convert string to number.
-  *
-  * @author chaostone
-  * @since 3.2.0
-  */
+/** Converts string to Short/Integer/Long/Float/Double/BigInteger/BigDecimal.
+ *
+ * @author chaostone
+ * @since 3.2.0
+ */
 object NumberConverters extends StringConverterFactory[String, Number] {
 
   private object ShortConverter extends Converter[String, jl.Short] {

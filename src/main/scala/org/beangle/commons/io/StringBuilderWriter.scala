@@ -19,12 +19,7 @@ package org.beangle.commons.io
 
 import java.io.Writer
 
-/** A [[java.io.Writer]] implementation that outputs to a [[StringBuilder]].
- * <p>
- * <b>NOTE:</b> This implementation, as an alternative to
- * [[java.io.StringWriter]], provides an single thread implementation for better performance.
- * For safe usage with multiple `thread`s then
- * [[java.io.StringWriter]] should be used.
+/** Writer that outputs to StringBuilder (single-thread, faster than StringWriter).
  *
  * @author chaostone
  * @since 3.1
@@ -35,21 +30,23 @@ class StringBuilderWriter(val builder: StringBuilder) extends Writer, Serializab
     this(new StringBuilder(capacity))
   }
 
-  /** Append a single character to this Writer.
-   */
+  /** Appends a single character to this Writer. */
   override def append(value: Char): Writer = {
     builder.append(value)
     this
   }
 
-  /** Append a character sequence to this Writer.
-   */
+  /** Appends a character sequence to this Writer. */
   override def append(value: CharSequence): Writer = {
     builder.append(value)
     this
   }
 
-  /** Append a portion of a character sequence to the [[StringBuilder]].
+  /** Appends a subsequence to the underlying StringBuilder.
+   *
+   * @param value the character sequence
+   * @param start start index (inclusive)
+   * @param end   end index (exclusive)
    */
   override def append(value: CharSequence, start: Int, end: Int): Writer = {
     builder.append(value, start, end)
@@ -73,12 +70,15 @@ class StringBuilderWriter(val builder: StringBuilder) extends Writer, Serializab
   override def write(value: String): Unit =
     if (value != null) builder.append(value)
 
-  /** Write a portion of a character array to the [[StringBuilder]].
+  /** Writes a portion of a character array to the StringBuilder.
+   *
+   * @param value  the character array
+   * @param offset the start offset
+   * @param length the number of characters to write
    */
   override def write(value: Array[Char], offset: Int, length: Int): Unit =
     if (value != null) builder.appendAll(value, offset, length)
 
-  /** Returns underling build.toString.
-   */
+  /** Returns the underlying StringBuilder's string. */
   override def toString: String = builder.toString
 }

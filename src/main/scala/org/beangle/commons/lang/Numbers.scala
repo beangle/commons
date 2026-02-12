@@ -46,31 +46,43 @@ object Numbers {
     catch case nfe: NumberFormatException => defaultValue
   }
 
-  /** transform to int.
+  /** Converts each string in the array to int. Uses default 0 for invalid entries.
    *
-   * @param ids an array of String objects.
-   * @return an array of  int objects.
+   * @param ids the array of strings to convert
+   * @return the array of int values
    */
   def toInt(ids: Array[String]): Array[Int] = {
     ids.map { x => toInt(x) }
   }
 
+  /** Converts string to Short, returning default on failure.
+   *
+   * @param str          the string to convert
+   * @param defaultValue the default value
+   * @return the Short or default
+   */
   def toShort(str: String, defaultValue: Short = 0): Short = {
     if (isEmpty(str)) return defaultValue
     try jl.Short.parseShort(str)
     catch case nfe: NumberFormatException => defaultValue
   }
 
+  /** Converts string to Long, returning default on failure.
+   *
+   * @param str          the string to convert
+   * @param defaultValue the default value
+   * @return the Long or default
+   */
   def toLong(str: String, defaultValue: Long = 0L): Long = {
     if (isEmpty(str)) return defaultValue
     try jl.Long.parseLong(str)
     catch case nfe: NumberFormatException => defaultValue
   }
 
-  /** transformToLong.
+  /** Converts each string in the array to long. Throws on invalid entries.
    *
-   * @param ids an array of String objects.
-   * @return an array of Long objects.
+   * @param ids the array of strings to convert
+   * @return the array of long values, or null if ids is null
    */
   def toLong(ids: Array[String]): Array[Long] = {
     if (null == ids) return null
@@ -79,55 +91,108 @@ object Numbers {
     idsOfLong
   }
 
+  /** Converts string to Float, returning default on failure.
+   *
+   * @param str          the string to convert
+   * @param defaultValue the default value
+   * @return the Float or default
+   */
   def toFloat(str: String, defaultValue: Float = 0.0f): Float = {
     if (isEmpty(str)) return defaultValue
     try jl.Float.parseFloat(str)
     catch case nfe: NumberFormatException => defaultValue
   }
 
+  /** Converts string to Double, returning default on failure.
+   *
+   * @param str          the string to convert
+   * @param defaultValue the default value
+   * @return the Double or default
+   */
   def toDouble(str: String, defaultValue: Double = 0.0d): Double = {
     if (isEmpty(str)) return defaultValue
     try jl.Double.parseDouble(str)
     catch case nfe: NumberFormatException => defaultValue
   }
 
-  // convert string to number object
+  /** Converts string to Integer (boxed), returning default on failure.
+   *
+   * @param str          the string to convert
+   * @param defaultValue the default value
+   * @return the Integer or default
+   */
   def convert2Int(str: String, defaultValue: jl.Integer = null): jl.Integer = {
     if isEmpty(str) then return defaultValue
     try Integer.valueOf(str)
     catch case nfe: NumberFormatException => defaultValue
   }
 
+  /** Converts string to Short (boxed), returning default on failure.
+   *
+   * @param str          the string to convert
+   * @param defaultValue the default value
+   * @return the Short or default
+   */
   def convert2Short(str: String, defaultValue: jl.Short = null): jl.Short = {
     if (isEmpty(str)) return defaultValue
     try jl.Short.valueOf(str)
     catch case nfe: NumberFormatException => defaultValue
   }
 
+  /** Converts string to Long (boxed), returning default on failure.
+   *
+   * @param str          the string to convert
+   * @param defaultValue the default value
+   * @return the Long or default
+   */
   def convert2Long(str: String, defaultValue: jl.Long = null): jl.Long = {
     if (isEmpty(str)) return defaultValue
     try jl.Long.valueOf(str)
     catch case nfe: NumberFormatException => defaultValue
   }
 
+  /** Converts string to Float (boxed), returning default on failure.
+   *
+   * @param str          the string to convert
+   * @param defaultValue the default value
+   * @return the Float or default
+   */
   def convert2Float(str: String, defaultValue: jl.Float = null): jl.Float = {
     if (isEmpty(str)) return defaultValue
     try jl.Float.valueOf(str)
     catch case nfe: NumberFormatException => defaultValue
   }
 
+  /** Converts string to Double (boxed), returning default on failure.
+   *
+   * @param str          the string to convert
+   * @param defaultValue the default value
+   * @return the Double or default
+   */
   def convert2Double(str: String, defaultValue: jl.Double = null): jl.Double = {
     if (isEmpty(str)) return defaultValue
     try jl.Double.valueOf(str)
     catch case nfe: NumberFormatException => defaultValue
   }
 
+  /** Converts string to BigInteger, returning default on failure.
+   *
+   * @param str          the string to convert
+   * @param defaultValue the default value
+   * @return the BigInteger or default
+   */
   def convert2BigInt(str: String, defaultValue: jm.BigInteger = null): jm.BigInteger = {
     if (isEmpty(str)) return defaultValue
     try new jm.BigInteger(str)
     catch case nfe: NumberFormatException => defaultValue
   }
 
+  /** Converts string to BigDecimal, returning default on failure.
+   *
+   * @param str          the string to convert
+   * @param defaultValue the default value
+   * @return the BigDecimal or default
+   */
   def convert2BigDecimal(str: String, defaultValue: jm.BigDecimal = null): jm.BigDecimal = {
     if (isEmpty(str)) return defaultValue
     try new jm.BigDecimal(str)
@@ -148,29 +213,60 @@ object Numbers {
     (start until str.length).forall(i => Character.isDigit(str.charAt(i)))
   }
 
+  /** Rounds a double value to the specified decimal scale using HALF_UP rounding.
+   *
+   * @param n     the value to round
+   * @param scale number of decimal places
+   * @return rounded value
+   */
   def round(n: Double, scale: Int): Double = {
     val b = jm.BigDecimal(jl.Double.toString(n))
     b.setScale(scale, RoundingMode.HALF_UP).doubleValue
   }
 
+  /** Adds two double values with BigDecimal precision to avoid floating-point errors.
+   *
+   * @param v1 first value
+   * @param v2 second value
+   * @return sum
+   */
   def add(v1: Double, v2: Double): Double = {
     val b1 = jm.BigDecimal(jl.Double.toString(v1))
     val b2 = jm.BigDecimal(jl.Double.toString(v2))
     b1.add(b2).doubleValue
   }
 
+  /** Subtracts v2 from v1 with BigDecimal precision to avoid floating-point errors.
+   *
+   * @param v1 minuend
+   * @param v2 subtrahend
+   * @return difference
+   */
   def subtract(v1: Double, v2: Double): Double = {
     val b1 = jm.BigDecimal(jl.Double.toString(v1))
     val b2 = jm.BigDecimal(jl.Double.toString(v2))
     b1.subtract(b2).doubleValue
   }
 
+  /** Multiplies two double values with BigDecimal precision to avoid floating-point errors.
+   *
+   * @param v1 first factor
+   * @param v2 second factor
+   * @return product
+   */
   def multiply(v1: Double, v2: Double): Double = {
     val b1 = jm.BigDecimal(jl.Double.toString(v1))
     val b2 = jm.BigDecimal(jl.Double.toString(v2))
     b1.multiply(b2).doubleValue
   }
 
+  /** Divides v1 by v2 with BigDecimal precision and rounding.
+   *
+   * @param v1    dividend
+   * @param v2    divisor
+   * @param scale decimal places for result (default 10)
+   * @return quotient
+   */
   def divide(v1: Double, v2: Double, scale: Int = 10): Double = {
     val b1 = jm.BigDecimal(jl.Double.toString(v1))
     val b2 = jm.BigDecimal(jl.Double.toString(v2))

@@ -29,12 +29,13 @@ import java.net.URLEncoder
 import java.util.UUID
 import scala.collection.mutable
 
+/** HTTP Request factory. */
 object Request {
 
-  /** Convert data to Json Payload
+  /** Converts data to JSON payload (supports string, map, list).
    *
-   * @param data string or json or map or list json
-   * @return
+   * @param data the body data
+   * @return Request with JSON content-type
    */
   def asJson(data: Any): Request = {
     require(null != data, "body cannot be empty")
@@ -47,11 +48,10 @@ object Request {
     new Request(Some(newBody), MediaTypes.json.toString)
   }
 
-  /** Convert data to form Payload
-   * support file or inputstream
+  /** Converts data to form payload (supports string, tuple, file, InputStream).
    *
-   * @param data tuple or tuples
-   * @return
+   * @param data the form data
+   * @return Request with form content-type
    */
   def asForm(data: Any): Request = {
     require(null != data, "body cannot be empty")
@@ -90,13 +90,13 @@ object Request {
       formFields foreach { case (k, v) =>
         text.append(boundaryStart)
         text.append(s"""Content-Disposition: form-data; name="${k}"""").append(crlf)
-        text.append(crlf) //字段元信息和值之间需要增加一个换行符
+        text.append(crlf) // blank line between headers and value
         text.append(v).append(crlf)
       }
       val ins = Collections.newBuffer[InputStream]
       ins.addOne(toStream(text))
 
-      //每个文件包含边界符号+文件头+文件二进制
+      // each file part: boundary + headers + binary content
       fileFields foreach { case (name, (fileName, is)) =>
         val meta = new StringBuilder
         meta.append(boundaryStart)
@@ -107,7 +107,7 @@ object Request {
         }
         meta.append(crlf)
         meta.append("Content-Type:application/octet-stream").append(crlf)
-        meta.append(crlf) //字段元信息和字节流之间需要增加一个换行符
+        meta.append(crlf) // blank line between headers and binary stream
         ins.addOne(toStream(meta))
         ins.addOne(is)
         ins.addOne(toStream(crlf))
@@ -117,11 +117,11 @@ object Request {
     }
   }
 
-  /** Convert any data to payload
+  /** Builds Request from data and content-type.
    *
-   * @param data        body data
-   * @param contentType content-type string
-   * @return
+   * @param data        the body data
+   * @param contentType the Content-Type header
+   * @return Request
    */
   def build(data: Any, contentType: String): Request = {
     if (null == data || data == None) {
@@ -133,6 +133,10 @@ object Request {
     }
   }
 
+  /** Returns an empty Request (no body).
+   *
+   * @return Request with no body
+   */
   def noBody: Request = {
     new Request(None, "application/json")
   }
@@ -160,36 +164,73 @@ final class Request(val body: Option[Any], val contentType: String) {
   protected[http] val headers = new mutable.HashMap[String, Any]
   protected[http] var authorization: Option[String] = None
 
+  /** Adds headers.
+   *
+   * @param kvs the name-value pairs
+   * @return this for chaining
+   */
   def headers(kvs: Iterable[(String, String)]): Request = {
     kvs foreach { kv => headers.put(kv._1, kv._2) }
     this
   }
 
+  /** Adds a single header.
+   *
+   * @param name  the header name
+   * @param value the header value
+   * @return this for chaining
+   */
   def header(name: String, value: String): Request = {
     headers.put(name, value)
     this
   }
 
+  /** Sets authorization header.
+   *
+   * @param a optional auth value
+   * @return this for chaining
+   */
   def auth(a: Option[String]): Request = {
     this.authorization = a
     this
   }
 
+  /** Sets authorization header.
+   *
+   * @param str the auth value
+   * @return this for chaining
+   */
   def auth(str: String): Request = {
     this.authorization = Some(str)
     this
   }
 
+  /** Sets Basic auth from username and password.
+   *
+   * @param username the username
+   * @param password the password
+   * @return this for chaining
+   */
   def auth(username: String, password: String): Request = {
     this.authorization = Some("Basic " + Base64.encode(s"$username:$password".getBytes(Charsets.UTF_8)))
     this
   }
 
+  /** Sets Bearer token auth.
+   *
+   * @param token the token
+   * @return this for chaining
+   */
   def bearer(token: String): Request = {
     this.authorization = Some(s"Bearer $token")
     this
   }
 
+  /** Sets Accept header.
+   *
+   * @param acceptType the Accept value
+   * @return this for chaining
+   */
   def request(acceptType: String): Request = {
     headers.put("Accept", acceptType)
     this

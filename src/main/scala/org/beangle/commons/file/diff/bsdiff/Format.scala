@@ -17,27 +17,32 @@
 
 package org.beangle.commons.file.diff.bsdiff
 
+/** Bsdiff format constants and structures. */
 object Format {
 
+  /** Compression algorithm for patch content (bzip2). */
   val Compression = "bzip2";
 
-  //Size of the Header, in bytes.  4 fields * 8 bytes = 32 bytes
+  /** Size of the Header, in bytes (4 fields * 8 bytes = 32). */
   val HeaderLength = 32;
 
-  // Magic number to mark the start of a bsdiff header.
+  /** Magic number to mark the start of a bsdiff header. */
   val HeaderMagic = "BSDIFF40";
 
   /** Data structure that encapsulates a bsdiff header.  The header is composed of
-    * 8-byte fields, starting with the magic number "BSDIFF40."
-    * <p/>
-    * 0: BSDIFF40
-    * 8: length of control block
-    * 16: length of the diff block
-    * 24: size of the output file
-    */
+   * 8-byte fields, starting with the magic number "BSDIFF40."
+   * <p/>
+   * 0: BSDIFF40
+   * 8: length of control block
+   * 16: length of the diff block
+   * 24: size of the output file
+   */
+
+  /** Data structure that encapsulates a bsdiff header. */
   case class Header(controlLength: Int, diffLength: Int, outputLength: Int) {
     require(controlLength > 0 && diffLength > 0 && outputLength > 0)
   }
 
+  /** A single control block in bsdiff format. */
   case class Block(diffLength: Int, extraLength: Int, seekLength: Int)
 }

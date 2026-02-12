@@ -17,26 +17,28 @@
 
 package org.beangle.commons.collection.page
 
+/** PageLimit factory. */
 object PageLimit {
+
+  /** Creates a PageLimit with the given page index and size.
+   *
+   * @param pageIndex 1-based page number
+   * @param pageSize  items per page
+   * @return PageLimit instance
+   */
   def apply(pageIndex: Int, pageSize: Int) = new PageLimit(pageIndex, pageSize)
 }
 
-/** 查询分页限制
-  *
-  * @author chaostone
-  */
+/** Query pagination limit (page index and page size).
+ *
+ * @author chaostone
+ */
 class PageLimit(val pageIndex: Int, val pageSize: Int) extends Limit {
 
-  /** isValid.
-    * @return a boolean.
-    */
+  /** Returns true if pageIndex and pageSize are both positive. */
   def isValid: Boolean = pageIndex > 0 && pageSize > 0
 
-  /** toString
-    *
-    * @see java.lang.Object#toString()
-    * @return a String object.
-    */
+  /** Returns string representation (pageIndex and pageSize). */
   override def toString: String =
     new StringBuilder().append("pageIndex:").append(pageIndex)
       .append(" pageSize:")

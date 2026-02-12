@@ -19,10 +19,13 @@ package org.beangle.commons.file.text
 
 import org.beangle.commons.lang.Strings
 
+/** Processes a single line of text. */
 trait LineProcessor {
+  /** Processes the line and returns the result. */
   def process(line: String): String
 }
 
+/** Replaces tabs with spaces. */
 class Tab2Space(tablength: Int = 2) extends LineProcessor {
   private val spaces = " " * tablength
 
@@ -30,6 +33,7 @@ class Tab2Space(tablength: Int = 2) extends LineProcessor {
     Strings.replace(line, "\t", spaces)
 }
 
+/** Trims trailing whitespace from lines. */
 object TrimTrailingWhiteSpace extends LineProcessor {
 
   override def process(line: String): String =

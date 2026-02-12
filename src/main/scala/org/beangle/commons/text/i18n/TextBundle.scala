@@ -19,17 +19,19 @@ package org.beangle.commons.text.i18n
 
 import java.util.Locale
 
-/** TextBundle
-  *
-  * @author chaostone
-  * @since 3.0.0
-  */
+/** Locale-specific text bundle (resource + key-value map).
+ *
+ * @author chaostone
+ * @since 3.0.0
+ */
 final class TextBundle(val locale: Locale, val resource: String, val texts: Map[String, String]) {
 
+  /** Gets value for key, or None if not found. */
   def get(key: String): Option[String] = texts.get(key)
 
   override def toString: String = resource
 
+  /** Merges with another bundle; second overrides on key collision. */
   def merge(second: TextBundle): TextBundle = {
     val values = this.texts ++ second.texts
     new TextBundle(this.locale, this.resource + ";" + second, values)

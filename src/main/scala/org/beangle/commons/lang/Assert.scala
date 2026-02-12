@@ -17,7 +17,7 @@
 
 package org.beangle.commons.lang
 
-/** Assertion tool class
+/** Assertion utilities for validation.
  *
  * @author chaostone
  * @since 3.0.0

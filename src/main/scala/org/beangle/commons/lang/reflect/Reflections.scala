@@ -26,8 +26,10 @@ import scala.collection.{immutable, mutable}
 import scala.language.existentials
 import scala.reflect.ClassTag
 
+/** Reflection utilities. */
 object Reflections {
 
+  /** Creates instance via no-arg constructor; null for interface/abstract. */
   def newInstance[T](clazz: Class[T]): T = {
     if (clazz.isInterface || Modifier.isAbstract(clazz.getModifiers)) {
       null.asInstanceOf[T]
@@ -41,6 +43,7 @@ object Reflections {
     }
   }
 
+  /** Gets field from class or superclass; sets accessible. */
   def getField(clazz: Class[_], name: String): Option[Field] = {
     try {
       Some(clazz.getField(name))
@@ -65,12 +68,20 @@ object Reflections {
       case e: NoSuchFieldException => None
   }
 
+  /** Creates instance by class name (uses default class loader). */
   def newInstance[T](className: String): T = newInstance(className, null)
 
+  /** Creates instance by class name and optional class loader.
+   *
+   * @param className   fully qualified class name
+   * @param classLoader optional loader; default if null
+   * @return new instance
+   */
   def newInstance[T](className: String, classLoader: ClassLoader): T = {
     newInstance(ClassLoaders.load(className, classLoader).asInstanceOf[Class[T]])
   }
 
+  /** Gets singleton or creates instance (for companion objects or classes). */
   def getInstance[T](name: String): T = {
     val companionClass = if name.endsWith("$") then name else name + "$"
     ClassLoaders.get(companionClass) match {
@@ -82,12 +93,12 @@ object Reflections {
     }
   }
 
-  /** Find parameter types of given class's interface or superclass
-   */
+  /** Finds generic parameter types for expected interface/superclass. */
   def getGenericParamTypes(clazz: Class[_], expected: Class[_]): collection.Map[String, Class[_]] = {
     if !expected.isAssignableFrom(clazz) then Map.empty else getGenericParamTypes(clazz, Set(expected))
   }
 
+  /** Extracts collection element type from a Collection/Seq class. */
   def getCollectionParamTypes(clazz: Class[_]): ArraySeq[TypeInfo] = {
     val collections: Set[Class[_]] = Set(classOf[mutable.Seq[_]], classOf[immutable.Seq[_]], classOf[java.util.Collection[_]])
     val types = getGenericParamTypes(clazz, collections)
@@ -98,6 +109,7 @@ object Reflections {
     }
   }
 
+  /** Extracts key and value type from a Map class. */
   def getMapParamTypes(clazz: Class[_]): ArraySeq[TypeInfo] = {
     val maps: Set[Class[_]] = Set(classOf[mutable.Map[_, _]], classOf[immutable.Map[_, _]], classOf[java.util.Map[_, _]])
     val types = getGenericParamTypes(clazz, maps)
@@ -105,6 +117,12 @@ object Reflections {
     else ArraySeq(TypeInfo.get(types("K"), false), TypeInfo.get(types("V"), false))
   }
 
+  /** Finds generic parameter types for expected interfaces/superclasses.
+   *
+   * @param clazz   the class to inspect
+   * @param expects expected supertypes (Collection, Map, etc.)
+   * @return map of parameter name to resolved class
+   */
   def getGenericParamTypes(clazz: Class[_], expects: Set[Class[_]]): collection.Map[String, Class[_]] = {
     var targetParamTypes: collection.Map[String, Class[_]] = Map.empty
     var paramTypes: collection.Map[String, Class[_]] = Map.empty
@@ -158,6 +176,12 @@ object Reflections {
     result
   }
 
+  /** Returns true if the method (or overridden method in superclass) has the annotation.
+   *
+   * @param method the method
+   * @param clazz  the annotation class
+   * @return true if present
+   */
   def isAnnotationPresent[T <: Annotation](method: Method, clazz: Class[T]): Boolean = {
     val ann = method.getAnnotation(clazz)
     if (null == ann) {
@@ -172,8 +196,7 @@ object Reflections {
     } else true
   }
 
-  /** Find annotation in method declare class hierarchy
-   */
+  /** Finds annotation in method's declaring class hierarchy. */
   def getAnnotation[T <: Annotation](method: Method, clazz: Class[T]): Tuple2[T, Method] = {
     val ann = method.getAnnotation(clazz)
     if (null == ann) {
@@ -188,7 +211,12 @@ object Reflections {
     } else (ann, method)
   }
 
-  /** 得到类和对应泛型的参数信息
+  /** Deduces class and generic parameter type information.
+   *
+   * @param clazz      the class
+   * @param typ        the generic type
+   * @param paramTypes existing parameter type mappings
+   * @return map of parameter names to resolved classes
    */
   def deduceParamTypes(clazz: Class[_], typ: java.lang.reflect.Type,
                        paramTypes: collection.Map[String, Class[_]]): collection.Map[String, Class[_]] = {

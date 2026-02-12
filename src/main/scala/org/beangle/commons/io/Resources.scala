@@ -24,8 +24,14 @@ import org.beangle.commons.net.Networks
 import java.io.File
 import java.net.URL
 
+/** Resource loading (classpath, file, http). */
 object Resources {
 
+  /** Loads resources from comma-separated paths. Supports class://, classpath:, classpath*:, file://, http.
+   *
+   * @param paths comma-separated resource paths
+   * @return iterable of URLs
+   */
   def load(paths: String): Iterable[URL] = {
     Strings.split(paths, ",").flatMap(p => doLoad(p))
   }
@@ -36,7 +42,7 @@ object Resources {
     } else if (path.startsWith("classpath:")) {
       getResource(path.substring("classpath:".length))
     } else if (path.startsWith("classpath*:")) {
-      getResources(path.substring("classpath*:".length)) //多值
+      getResources(path.substring("classpath*:".length)) // multiple values
     } else if (path.startsWith("http")) {
       Some(Networks.url(path))
     } else if (path.startsWith("file://")) {

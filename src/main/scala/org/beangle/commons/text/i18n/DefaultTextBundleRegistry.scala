@@ -26,21 +26,24 @@ import java.nio.charset.Charset
 import java.util
 import java.util.Locale
 
-/** @since 3.0.0
-  */
-@description("缺省TextBundle注册表")
+/** Default TextBundle registry with caching.
+ *
+ * @since 3.0.0
+ */
+@description("Default TextBundle registry")
 class DefaultTextBundleRegistry extends TextBundleRegistry {
 
+  /** Loader for fetching bundles from classpath/files. */
   var loader: TextBundleLoader = new DefaultTextBundleLoader
   protected var caches: Map[Locale, Map[String, TextBundle]] = Map.empty
 
   protected val defaultBundleNames = new collection.mutable.ListBuffer[String]
 
-  def addDefaults(bundleNames: String*): Unit = {
+  override def addDefaults(bundleNames: String*): Unit = {
     defaultBundleNames ++= bundleNames
   }
 
-  def load(locale: Locale, bundleName: String): TextBundle = {
+  override def load(locale: Locale, bundleName: String): TextBundle = {
     caches.get(locale) match
       case None =>
         val results = loader.load(locale, bundleName)
@@ -55,14 +58,14 @@ class DefaultTextBundleRegistry extends TextBundleRegistry {
           case Some(bundle) => bundle
   }
 
-  def getBundles(locale: Locale): List[TextBundle] = {
+  override def getBundles(locale: Locale): List[TextBundle] = {
     caches.get(locale) match {
       case Some(map) => map.values.toList
       case None => List.empty
     }
   }
 
-  def getDefaultText(key: String, locale: Locale): Option[String] = {
+  override def getDefaultText(key: String, locale: Locale): Option[String] = {
     var msg: Option[String] = None
     defaultBundleNames find { bundleName =>
       val bundle = load(locale, bundleName)

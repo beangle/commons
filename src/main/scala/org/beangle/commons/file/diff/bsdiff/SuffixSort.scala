@@ -17,9 +17,13 @@
 
 package org.beangle.commons.file.diff.bsdiff
 
+/** Suffix array for bsdiff (qsufsort + search). */
 object SuffixSort {
+
+  /** Result of suffix array search: length of match and position in old data. */
   case class SearchResult(length: Int, position: Int)
 
+  /** Builds suffix array for bsdiff algorithm. */
   def qsufsort(I: Array[Int], V: Array[Int], data: Array[Byte]): Unit = {
     val buckets = new Array[Int](256)
     var i = 0
@@ -100,6 +104,7 @@ object SuffixSort {
     }
   }
 
+  /** Recursively splits suffix array during qsufsort. */
   def split(I: Array[Int], V: Array[Int], start: Int, len: Int, h: Int): Unit = {
     var i, j, k, x, tmp, jj, kk = 0
 
@@ -194,6 +199,7 @@ object SuffixSort {
       split(I, V, kk, start + len - kk, h)
   }
 
+  /** Binary search in suffix array for longest match. */
   def search(I: Array[Int], oldBytes: Array[Byte], oldOffset: Int, newBytes: Array[Byte], newOffset: Int,
              start: Int, end: Int): SearchResult =
 

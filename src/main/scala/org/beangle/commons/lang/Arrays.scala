@@ -20,25 +20,30 @@ package org.beangle.commons.lang
 import scala.reflect.ClassTag
 
 /** Operations on arrays
-  * primitive arrays (like `int[]`) and primitive wrapper arrays (like
-  * `Integer[]`).
-  * <p>
-  * This class tries to handle `null` input gracefully. An exception will not be thrown for a
-  * `null` array input.
-  * </p>
-  *
-  * @author chaostone
-  * @since 3.0.0
-  */
+ * primitive arrays (like `int[]`) and primitive wrapper arrays (like
+ * `Integer[]`).
+ * <p>
+ * This class tries to handle `null` input gracefully. An exception will not be thrown for a
+ * `null` array input.
+ * </p>
+ *
+ * @author chaostone
+ * @since 3.0.0
+ */
 object Arrays {
 
   /** Checks if an array of Objects is empty or `null`.
-    *
-    * @param array the array to test
-    * @return `true` if the array is empty or `null`
-    */
+   *
+   * @param array the array to test
+   * @return `true` if the array is empty or `null`
+   */
   def isEmpty(array: Array[_ <: Any]): Boolean = array == null || array.length == 0
 
+  /** Returns true if the array is null, empty, or all elements are null.
+   *
+   * @param array the array to test
+   * @return true if blank
+   */
   def isBlank(array: Array[_ <: Any]): Boolean = {
     val length = if (null == array) 0 else array.length
     if (0 == length) return true
@@ -52,30 +57,30 @@ object Arrays {
   }
 
   /** Produces a new array containing the elements between the start and end indices.
-    * <p>
-    * The start index is inclusive, the end index exclusive. Null array input produces null output.
-    * </p>
-    * <p>
-    * The component type of the subarray is always the same as that of the input array. Thus, if the
-    * input is an array of type `Date`, the following usage is envisaged:
-    * </p>
-    *
-    * <pre>
-    * Date[] someDates = (Date[]) Arrays.subarray(allDates, 2, 5);
-    * </pre>
-    *
-    * @param <                   T> the component type of the array
-    * @param array               the array
-    * @param startIndexInclusive the starting index. Undervalue (&lt;0)
-    *                            is promoted to 0, overvalue (&gt;array.length) results
-    *                            in an empty array.
-    * @param endIndexExclusive   elements up to endIndex-1 are present in the
-    *                            returned subarray. Undervalue (&lt; startIndex) produces
-    *                            empty array, overvalue (&gt;array.length) is demoted to
-    *                            array length.
-    * @return a new array containing the elements between
-    *         the start and end indices.
-    */
+   * <p>
+   * The start index is inclusive, the end index exclusive. Null array input produces null output.
+   * </p>
+   * <p>
+   * The component type of the subarray is always the same as that of the input array. Thus, if the
+   * input is an array of type `Date`, the following usage is envisaged:
+   * </p>
+   *
+   * <pre>
+   * Date[] someDates = (Date[]) Arrays.subarray(allDates, 2, 5);
+   * </pre>
+   *
+   * @param <                   T> the component type of the array
+   * @param array               the array
+   * @param startIndexInclusive the starting index. Undervalue (&lt;0)
+   *                            is promoted to 0, overvalue (&gt;array.length) results
+   *                            in an empty array.
+   * @param endIndexExclusive   elements up to endIndex-1 are present in the
+   *                            returned subarray. Undervalue (&lt; startIndex) produces
+   *                            empty array, overvalue (&gt;array.length) is demoted to
+   *                            array length.
+   * @return a new array containing the elements between
+   *         the start and end indices.
+   */
   def subarray[T: ClassTag](array: Array[T], startIndexInclusive: Int, endIndexExclusive: Int): Array[T] = {
     if (array == null) return null
     var start = if (startIndexInclusive < 0) 0 else startIndexInclusive
@@ -88,6 +93,11 @@ object Arrays {
     subarray
   }
 
+  /** Concatenates multiple arrays into one.
+   *
+   * @param arrays the arrays to concatenate
+   * @return a new array containing all elements in order
+   */
   def concat[T: ClassTag](arrays: Array[T]*): Array[T] = {
     val result = new Array[T](arrays.foldLeft(0)((sum, a) => sum + a.length))
     var start = 0
@@ -98,6 +108,11 @@ object Arrays {
     result
   }
 
+  /** Returns a string representation of the elements (e.g. "[a, b, c]").
+   *
+   * @param a the elements
+   * @return the string
+   */
   def toString(a: Any*): String = {
     if (a eq null) return "null";
     val iMax = a.length - 1;

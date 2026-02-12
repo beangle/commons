@@ -19,45 +19,56 @@ package org.beangle.commons.script
 
 import javax.script.{ScriptEngine, ScriptEngineManager, SimpleBindings}
 
-/** 表达式执行器
+/** Expression evaluator.
  *
  * @author chaostone
  * @since 2012-03-05
  */
 trait ExpressionEvaluator {
 
-  /** Parse the expression
+  /** Parses the expression (optional, no-op for some engines).
    *
-   * @param exp
-   * @throws EvaluationException
+   * @param exp the expression string
    */
   def parse(exp: String): Unit
 
-  /** Eval a expression within context
+  /** Evaluates an expression within the given context.
    *
-   * @param exp  a java's expression
-   * @param root params.
-   * @return evaluate result
+   * @param exp  the expression string
+   * @param root context params (Map or object)
+   * @return evaluation result
    */
   def eval(exp: String, root: AnyRef): AnyRef
 
-  /** Eval a expression within context,Return the given type
+  /** Evaluates an expression and returns the result as the specified type.
    *
-   * @param exp        a java's expression
-   * @param root       params.
-   * @param resultType What type of the result
-   * @return evaluate result
+   * @param exp        the expression string
+   * @param root       context params
+   * @param resultType the expected result type
+   * @return typed result
    */
   def eval[T](exp: String, root: AnyRef, resultType: Class[T]): T
 }
 
+/** ExpressionEvaluator factory (Jexl3, JSR223). */
 object ExpressionEvaluator {
+
+  /** Gets evaluator by name (jexl3 or JSR223 engine name).
+   *
+   * @param engineName engine name (e.g. "jexl3")
+   * @return ExpressionEvaluator instance
+   */
   def get(engineName: String): ExpressionEvaluator = {
     engineName match
       case "jexl3" => Jexl3.newEvaluator()
       case _ => jsr223(engineName)
   }
 
+  /** Creates JSR 223 ScriptEngine-based evaluator.
+   *
+   * @param engineName JSR 223 engine name (e.g. "javascript", "nashorn")
+   * @return ExpressionEvaluator instance
+   */
   def jsr223(engineName: String): ExpressionEvaluator = {
     val engine = new ScriptEngineManager().getEngineByName(engineName)
     require(engine != null, s"Cannot find script engine named ${engineName}")
@@ -65,6 +76,7 @@ object ExpressionEvaluator {
   }
 }
 
+/** ExpressionEvaluator implementation using JSR 223 ScriptEngine. */
 class JSR223ExpressionEvaluator(engine: ScriptEngine) extends ExpressionEvaluator {
   def parse(exp: String): Unit = {}
 

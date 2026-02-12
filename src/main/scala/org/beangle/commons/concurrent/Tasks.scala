@@ -17,11 +17,12 @@
 
 package org.beangle.commons.concurrent
 
-/** Start multiple thread simultaneously
- */
+/** Runs multiple tasks in parallel and waits for completion. */
 object Tasks {
 
-  /** Start collection of runnable
+  /** Starts each runnable in a new thread and joins all.
+   *
+   * @param runnables the tasks to run
    */
   def start(runnables: Iterator[Runnable]): Unit = {
     val tasks = new collection.mutable.ListBuffer[Thread]
@@ -39,7 +40,11 @@ object Tasks {
     }
   }
 
-  /** Start runnable multiple
+  /** Starts the same runnable in multiple threads and joins all.
+   *
+   * @param runnable       the task to run
+   * @param threadPoolSize number of threads
+   * @param name           optional thread name prefix
    */
   def start(runnable: Runnable, threadPoolSize: Int, name: String = null): Unit = {
     val tasks = new collection.mutable.ListBuffer[Thread]

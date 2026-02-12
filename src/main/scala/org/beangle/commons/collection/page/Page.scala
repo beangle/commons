@@ -17,12 +17,19 @@
 
 package org.beangle.commons.collection.page
 
+/** Page factory and constants. */
 object Page {
 
+  /** Default 1-based page index. */
   val DefaultPageNo = 1
 
+  /** Default page size (items per page). */
   val DefaultPageSize = 20
 
+  /** Returns an empty page (0 items, no next/previous).
+   *
+   * @return empty page for type T
+   */
   def empty[T](): Page[T] = EmptyPage.asInstanceOf[Page[T]]
 
   private object EmptyPage extends Page[Any] {
@@ -55,29 +62,39 @@ object Page {
   }
 }
 
-/** 分页对象
-  *
-  * @author chaostone
-  */
+/** Paging model for paginated result sets.
+ *
+ * @author chaostone
+ */
 trait Page[E] extends collection.immutable.Seq[E] {
 
+  /** Total number of pages. */
   def totalPages: Int
 
+  /** Current page index (0-based). */
   def pageIndex: Int
 
+  /** Items per page. */
   def pageSize: Int
 
+  /** Total item count across all pages. */
   def totalItems: Int
 
+  /** Next page. */
   def next(): Page[E]
 
+  /** True if next page exists. */
   def hasNext: Boolean
 
+  /** Previous page. */
   def previous(): Page[E]
 
+  /** True if previous page exists. */
   def hasPrevious: Boolean
 
+  /** Page at given index. */
   def moveTo(pageIndex: Int): Page[E]
 
+  /** Items on this page. */
   def items: collection.Seq[E]
 }

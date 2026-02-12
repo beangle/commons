@@ -19,25 +19,32 @@ package org.beangle.commons.collection
 
 import scala.reflect.ClassTag
 
-/** Array based Stack
-  */
+/** Array-based stack for high performance. Not thread-safe.
+ *
+ * @param initialCapacity initial array capacity
+ */
 final class FastStack[T: ClassTag](initialCapacity: Int = 16) {
 
   private var stack: Array[T] = new Array[T](initialCapacity)
-  // pointer to top empty slot
   private var pointer: Int = 0
 
+  /** Pushes a value onto the stack.
+   *
+   * @param value the value to push
+   */
   def push(value: T): Unit = {
     if (pointer + 1 >= stack.length) resizeStack(stack.length * 2)
     stack(pointer) = value
     pointer += 1
   }
 
+  /** Pops the top element without returning it. Assumes non-empty stack. */
   def popSilently(): Unit = {
     pointer -= 1
     stack(pointer) = null.asInstanceOf[T]
   }
 
+  /** Pops and returns the top element. */
   def pop(): T = {
     pointer -= 1
     val result = stack(pointer)
@@ -45,25 +52,37 @@ final class FastStack[T: ClassTag](initialCapacity: Int = 16) {
     result
   }
 
-  def peek(): T =
+  /** Returns the top element without removing it. */
+  def peek(): T = {
     if (pointer == 0) null.asInstanceOf[T] else stack(pointer - 1)
+  }
 
+  /** Replaces the top element with the given value.
+   *
+   * @param value the new value
+   * @return the previous top element
+   */
   def replace(value: T): T = {
     val result = stack(pointer - 1)
     stack(pointer - 1) = value
     result
   }
 
-  def size(): Int =
-    pointer
+  /** Returns the number of elements on the stack. */
+  def size(): Int = pointer
 
-  def isEmpty(): Boolean =
-    pointer == 0
+  /** Returns true if the stack has no elements. */
+  def isEmpty: Boolean = pointer == 0
 
-  def get(i: Int): T =
-    stack(i)
+  /** Gets the element at the given index (0 = bottom).
+   *
+   * @param i the index
+   * @return the element
+   */
+  def get(i: Int): T = stack(i)
 
-  def toArray(): Array[T] = {
+  /** Copies the stack elements to a new array (bottom to top). */
+  def toArray: Array[T] = {
     val result = new Array[T](pointer)
     System.arraycopy(stack, 0, result, 0, pointer)
     result

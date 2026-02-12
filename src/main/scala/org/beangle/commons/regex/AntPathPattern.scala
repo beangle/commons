@@ -23,12 +23,30 @@ import org.beangle.commons.regex.AntPathPattern.DefaultPattern
 
 import java.util.regex.Pattern
 
+/** Ant-style path pattern matching. */
 object AntPathPattern {
 
+  /** Returns true if the path fully matches the Ant-style pattern.
+   *
+   * @param pattern the Ant pattern
+   * @param path    the path to match
+   * @return true if full match
+   */
   def matches(pattern: String, path: String): Boolean = new AntPathPattern(pattern).matches(path)
 
+  /** Returns true if the path is a prefix match of the pattern.
+   *
+   * @param pattern the Ant pattern
+   * @param path    the path to match
+   * @return true if prefix match
+   */
   def matchStart(pattern: String, path: String): Boolean = new AntPathPattern(pattern).matchStart(path)
 
+  /** Returns true if the path contains Ant wildcards (* or ?).
+   *
+   * @param path the path to check
+   * @return true if contains wildcards
+   */
   def isPattern(path: String): Boolean = {
     (path.indexOf('*') != -1 || path.indexOf('?') != -1)
   }
@@ -63,11 +81,15 @@ class AntPathPattern(val text: String) {
   private var pattern: Pattern = _
   private var exactMatch: Boolean = _
 
+  /** Variable names captured from {name} or {name:regex} in pattern. */
   var variables: List[String] = List.empty
 
   preprocess(text, false)
 
-  /** translate ant string to regex string
+  /** Translates Ant-style pattern to regex and compiles it.
+   *
+   * @param pattern       Ant pattern string
+   * @param caseSensitive whether matching is case-sensitive
    */
   def preprocess(pattern: String, caseSensitive: Boolean): Unit = {
     val builder = new StringBuilder()
@@ -123,10 +145,20 @@ class AntPathPattern(val text: String) {
     case _ => false
   }
 
+  /** Returns true if the path fully matches this pattern.
+   *
+   * @param path the path to match
+   * @return true if full match
+   */
   def matches(path: String): Boolean = {
     if exactMatch then text == path else pattern.matcher(path).matches()
   }
 
+  /** Returns true if the path is a prefix match of this pattern.
+   *
+   * @param path the path to match
+   * @return true if prefix match
+   */
   def matchStart(path: String): Boolean = {
     if exactMatch then path.startsWith(text)
     else

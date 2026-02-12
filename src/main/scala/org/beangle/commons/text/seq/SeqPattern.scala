@@ -21,14 +21,16 @@ import org.beangle.commons.lang.{Numbers, Strings}
 
 import java.util.Collections
 
-/** SeqPattern class.
-  *
-  * @author chaostone
-  */
+/** Sequence pattern with style and placeholder levels.
+ *
+ * @author chaostone
+ */
 class SeqPattern(val seqNumStyle: SeqNumStyle, val pattern: String) {
 
+  /** Parent generator for nested levels. */
   var generator: MultiLevelSeqGenerator = _
 
+  /** Current nesting level. */
   var level: Int = 0
 
   private var seq: Int = 0
@@ -50,16 +52,10 @@ class SeqPattern(val seqNumStyle: SeqNumStyle, val pattern: String) {
     rs.take(rs.size - 1).toList
   }
 
-  /** curSeqText.
-    *
-    * @return a String object.
-    */
+  /** Returns current sequence as formatted string. */
   def curSeqText(): String = seqNumStyle.build(seq)
 
-  /** next.
-    *
-    * @return a String object.
-    */
+  /** Advances sequence and returns formatted string. */
   def next(): String = {
     seq += 1
     var text = pattern
@@ -68,8 +64,7 @@ class SeqPattern(val seqNumStyle: SeqNumStyle, val pattern: String) {
     Strings.replace(text, "{" + level + "}", seqNumStyle.build(seq))
   }
 
-  /** reset.
-    */
+  /** Resets sequence to 0. */
   def reset(): Unit =
     seq = 0
 }

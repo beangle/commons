@@ -21,21 +21,16 @@ import org.beangle.commons.text.inflector.Rule
 
 import java.util.regex.Pattern
 
-/** SuffixInflectionRule class.
-  *
-  * @author chaostone
-  */
+/** Inflection rule by suffix replacement (e.g. -y → -ies).
+ *
+ * @author chaostone
+ */
 class SuffixInflectionRule(suffix: String, val singularSuffix: String, val pluralSuffix: String)
   extends Rule {
 
   private val regex = Pattern.compile("(?i).*" + suffix.substring(1) + "$")
 
-  /** Construct a rule for words with suffix `singularSuffix` which becomes
-    * `pluralSuffix` in the plural.
-    *
-    * @param singularSuffix the singular suffix, starting with a "-" character
-    * @param pluralSuffix   the plural suffix, starting with a "-" character
-    */
+  /** Alternate constructor: singular and plural suffixes. */
   def this(singularSuffix: String, pluralSuffix: String) = {
     this(singularSuffix, singularSuffix, pluralSuffix)
   }

@@ -26,20 +26,10 @@ import java.io.{PrintWriter, StringWriter}
  */
 object Throwables {
 
-  /** Propagates `throwable` exactly as-is, if and only if it is an
-   * instance of `declaredType`. Example usage:
+  /** Propagates throwable as-is if it is an instance of declaredType.
    *
-   * {{{
-   * try {
-   * someMethodThatCouldThrowAnything();
-   * } catch (IKnowWhatToDoWithThisException e) {
-   * handle(e);
-   * } catch (Throwable t) {
-   * Throwables.propagateIfInstanceOf(t, IOException.class);
-   * Throwables.propagateIfInstanceOf(t, SQLException.class);
-   * throw Throwables.propagate(t);
-   * }
-   * }}}
+   * @param throwable    the throwable
+   * @param declaredType the type to check
    */
   def propagateIfInstanceOf[X <: Throwable](throwable: Throwable, declaredType: Class[X]): Unit =
     if (throwable != null && declaredType.isInstance(throwable)) throw declaredType.cast(throwable)
@@ -72,11 +62,10 @@ object Throwables {
     throw new RuntimeException(throwable)
   }
 
-  /** Returns a string containing the result of `Throwable#toString`, followed by
-   * the full, recursive
-   * stack trace of `throwable`. Note that you probably should not be
-   * parsing the resulting string; if you need programmatic access to the stack
-   * frames, you can call `Throwable.getStackTrace()`.
+  /** Returns toString plus full stack trace of the throwable.
+   *
+   * @param throwable the throwable
+   * @return the formatted string
    */
   def stackTrace(throwable: Throwable): String = {
     val sw = new StringWriter()

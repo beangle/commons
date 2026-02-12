@@ -25,10 +25,10 @@ import java.io.{File, FileOutputStream, FilenameFilter, OutputStreamWriter}
 import java.nio.charset.Charset
 import scala.collection.mutable
 
+/** Batch file replacement by extension profiles. */
 object BatchReplaceMain {
 
-  /** Usage:BatchReplaceMain dir patternfile encoding
-   */
+  /** Entry point. Usage: BatchReplaceMain dir patternfile [encoding] */
   def main(args: Array[String]): Unit = {
     if (args.length < 2) {
       log("using BatchReplaceMain dir patternfile encoding")
@@ -67,8 +67,7 @@ object BatchReplaceMain {
     replaceFile(dir, profiles.toMap, charset)
   }
 
-  /** replaceFile.
-   */
+  /** Recursively replaces files by extension profile. */
   def replaceFile(fileName: String, profiles: Map[String, List[Replacer]], charset: Charset): Unit = {
     val file = new File(fileName)
     if (file.isFile && !file.isHidden) {
@@ -96,8 +95,7 @@ object BatchReplaceMain {
     }
   }
 
-  /** writeToFile.
-   */
+  /** Writes string to file with optional charset. */
   def writeToFile(str: String, fileName: String, charset: Charset): Unit = {
     val writer =
       if null == charset then new OutputStreamWriter(new FileOutputStream(fileName))

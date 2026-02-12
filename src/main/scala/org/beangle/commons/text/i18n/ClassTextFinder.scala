@@ -19,8 +19,10 @@ package org.beangle.commons.text.i18n
 
 import java.util.Locale
 
+/** Finds text by traversing class hierarchy, interfaces, and package bundles. */
 class ClassTextFinder(locale: Locale, registry: TextBundleRegistry) {
 
+  /** Looks up message in class hierarchy: class bundle, interfaces, package, superclass. */
   def find(clazz: Class[_], key: String): Option[String] = {
     find(clazz, key, new collection.mutable.HashSet[String])
   }
@@ -31,19 +33,18 @@ class ClassTextFinder(locale: Locale, registry: TextBundleRegistry) {
     if (dollarIdx == -1) classFullName else classFullName.substring(0, dollarIdx)
   }
 
-  /** <li>Look for message in aClass' class hierarchy.
-    * <ol>
-    * <li>Look for the message in a resource bundle for aClass</li>
-    * <li>If not found, look for the message in a resource bundle for any implemented interface</li>
-    * <li>If not found, traverse up the Class' hierarchy and repeat from the first sub-step</li>
-    * </ol>
-    * </li>
-    *
-    * @param clazz
-    * @param key
-    * @param checked
-    * @return
-    */
+  /** Look for message in aClass' class hierarchy.
+   * <ol>
+   * <li>Look for the message in a resource bundle for aClass</li>
+   * <li>If not found, look for the message in a resource bundle for any implemented interface</li>
+   * <li>If not found, traverse up the Class' hierarchy and repeat from the first sub-step</li>
+   * </ol>
+   *
+   * @param clazz   a class
+   * @param key     key
+   * @param checked checked set
+   * @return
+   */
   private def find(clazz: Class[_], key: String, checked: collection.mutable.Set[String]): Option[String] = {
     val className = bundleName(clazz)
 
@@ -92,8 +93,7 @@ class ClassTextFinder(locale: Locale, registry: TextBundleRegistry) {
     }
   }
 
-  /** Gets the message from the named resource bundle.
-    */
+  /** Gets message from package resource bundle. */
   protected final def getPackageMessage(packageName: String, key: String, checked: collection.mutable.Set[String]): Option[String] = {
     if checked.contains(packageName) then
       None
@@ -102,8 +102,7 @@ class ClassTextFinder(locale: Locale, registry: TextBundleRegistry) {
       registry.load(locale, packageName + ".package").get(key)
   }
 
-  /** Gets the message from the named resource bundle.
-    */
+  /** Gets message from class resource bundle. */
   protected final def getClassMessage(className: String, key: String): Option[String] = {
     registry.load(locale, className).get(key)
   }

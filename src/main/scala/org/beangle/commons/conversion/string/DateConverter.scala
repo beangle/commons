@@ -25,11 +25,11 @@ import org.beangle.commons.lang.Strings.*
 import java.util as ju
 import java.util.Calendar.*
 
-/** DateConverter
-  *
-  * @author chaostone
-  * @since 3.2.0
-  */
+/** Converts string to java.util.Date and java.sql.Date.
+ *
+ * @author chaostone
+ * @since 3.2.0
+ */
 object DateConverter extends StringConverterFactory[String, ju.Date] {
 
   register(classOf[ju.Date], new DateConverter())

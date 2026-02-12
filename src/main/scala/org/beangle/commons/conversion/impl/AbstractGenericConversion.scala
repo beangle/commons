@@ -25,8 +25,7 @@ import java.lang.reflect.{Array, Modifier}
 import scala.collection.{concurrent, mutable}
 import scala.language.existentials
 
-/** Generic Conversion Super class
- * It provider converter registry and converter search machanism.
+/** Generic Conversion base class with converter registry and lookup mechanism.
  *
  * @author chaostone
  * @since 3.2.0
@@ -37,8 +36,6 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
 
   val cache = new concurrent.TrieMap[(Class[_], Class[_]), GenericConverter]
 
-  /** Convert to target type.
-   */
   override def convert[T](source: Any, target: Class[T]): T = {
     if (null == source) return Objects.default(target)
     val sourceClazz = Primitives.wrap(source.getClass)
@@ -101,6 +98,7 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
     converter
   }
 
+  /** Finds or creates a converter that uses target's constructor or companion apply. */
   def findCtorConverter(sourceType: Class[_], targetType: Class[_]): GenericConverter = {
     val ctor = targetType.getConstructors.find { c =>
       val pts = c.getParameterTypes

@@ -26,11 +26,18 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import scala.collection.mutable
 
+/** Converts WeekTime list to human-readable cycle string (e.g. "2024-01-01~01-31 每周三 09:00~11:00"). */
 object CycleTimeDigest {
   private val wMap = Map("Mon" -> "一", "Tue" -> "二", "Wed" -> "三", "Thu" -> "四", "Fri" -> "五", "Sat" -> "六", "Sun" -> "日")
   private val format = DateTimeFormatter.ofPattern("yyyy-MM-dd")
   private val format2 = DateTimeFormatter.ofPattern("MM-dd")
 
+  /** Digests WeekTime list into compact Chinese cycle description.
+   *
+   * @param times     the WeekTime list
+   * @param delimeter separator between cycle entries (default: ",")
+   * @return formatted string
+   */
   def digest(times: collection.Seq[WeekTime], delimeter: String = ","): String = {
     if (times.isEmpty) return ""
     val timeList = Collections.newBuffer[String]
@@ -48,14 +55,14 @@ object CycleTimeDigest {
         dateList.addAll(dates).sortInPlace()
 
         val intervalMap = calcIntervals(dateList)
-        if (intervalMap.size == 1) { //只有一种间隔
+        if (intervalMap.size == 1) { // single interval
           val period = intervalMap.head._1
           if (period % 7 == 0) {
             cycleTimes.addOne(CycleTime(dateList.head, dateList.last, b, e, period / 7, CycleTimeType.Week))
           } else {
             cycleTimes.addOne(CycleTime(dateList.head, dateList.last, b, e, period, CycleTimeType.Day))
           }
-        } else { //多种间隔
+        } else { // multiple intervals
           dateList.groupBy(_.getDayOfWeek) foreach { case (dofw, wdates) =>
             val wIntervalMap = calcIntervals(wdates)
             if (wIntervalMap.size == 1) {

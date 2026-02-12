@@ -17,8 +17,7 @@
 
 package org.beangle.commons.logging
 
-/** Adds the val logger of type Logger to the class into which this trait is mixed.
- */
+/** Adds a val logger of type org.slf4j.Logger to the class into which this trait is mixed. */
 trait Logging {
 
   protected val logger: org.slf4j.Logger = slf4j(getClass)

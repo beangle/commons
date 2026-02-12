@@ -22,6 +22,7 @@ import org.beangle.commons.conversion.impl.ConverterFactory
 
 import java.math.{BigDecimal, BigInteger}
 
+/** Converts Number to Short/Integer/Long/Float/Double/BigInteger/BigDecimal. */
 object Number2NumberConverter extends ConverterFactory[Number, Number] {
 
   private object ShortConverter extends Converter[Number, java.lang.Short] {

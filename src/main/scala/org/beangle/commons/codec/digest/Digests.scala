@@ -22,19 +22,40 @@ import org.beangle.commons.lang.Charsets.*
 
 import java.security.MessageDigest
 
-/** Digest tools
-  */
+/** Message digest utilities (MD5, SHA-1). */
 object Digests {
 
+  /** Returns MD5 MessageDigest instance. */
   def md5: MessageDigest = MessageDigest.getInstance("MD5")
 
+  /** Returns SHA-1 MessageDigest instance. */
   def sha1: MessageDigest = MessageDigest.getInstance("SHA-1")
 
+  /** Returns MD5 digest as hex string.
+   *
+   * @param bytes the input bytes
+   * @return hex string
+   */
   def md5Hex(bytes: Array[Byte]): String = Hex.encode(md5.digest(bytes))
 
+  /** Returns MD5 digest of UTF-8 string as hex.
+   *
+   * @param string the input string
+   * @return hex string
+   */
   def md5Hex(string: String): String = Hex.encode(md5.digest(string.getBytes(UTF_8)))
 
+  /** Returns SHA-1 digest as hex string.
+   *
+   * @param bytes the input bytes
+   * @return hex string
+   */
   def sha1Hex(bytes: Array[Byte]): String = Hex.encode(sha1.digest(bytes))
 
+  /** Returns SHA-1 digest of UTF-8 string as hex.
+   *
+   * @param string the input string
+   * @return hex string
+   */
   def sha1Hex(string: String): String = Hex.encode(sha1.digest(string.getBytes(UTF_8)))
 }

@@ -18,17 +18,17 @@
 package org.beangle.commons.lang
 
 /** BitStrings class.
-  *
-  * @author chaostone
-  */
+ *
+ * @author chaostone
+ */
 object BitStrings {
 
-  /** 比较两个等长字符串的每一位，若都大于0，则返回结果的相应位为1，否则为0;
-    *
-    * @param first  a String.
-    * @param second a String.
-    * @return a String.
-    */
+  /** Bitwise AND of two equal-length strings. Result bit is 1 only when both input bits are non-zero.
+   *
+   * @param first  the first bit string
+   * @param second the second bit string
+   * @return the result bit string
+   */
   def and(first: String, second: String): String = {
     val buffer = new StringBuilder()
     for (i <- 0 until first.length)
@@ -37,13 +37,12 @@ object BitStrings {
     buffer.toString
   }
 
-  /** 比较两个等长字符串的每一位，相或<br>
-    * 适用于仅含有1和0的字符串.
-    *
-    * @param first  a String.
-    * @param second a String.
-    * @return a String.
-    */
+  /** Bitwise OR of two equal-length strings containing only '1' and '0'.
+   *
+   * @param first  the first bit string
+   * @param second the second bit string
+   * @return the result bit string
+   */
   def or(first: String, second: String): String = {
     val buffer = new StringBuilder()
     for (i <- 0 until first.length)
@@ -52,12 +51,12 @@ object BitStrings {
     buffer.toString
   }
 
-  /** 将一个字符串，按照boolString的形式进行变化. 如果boolString[i]!=0则保留str[i],否则置0
-    *
-    * @param str        a String.
-    * @param boolString a String.
-    * @return a String.
-    */
+  /** Masks str by boolString: keep str(i) if boolString(i)!='0', otherwise set to '0'.
+   *
+   * @param str        the string to mask
+   * @param boolString the mask (0/1 string)
+   * @return the masked string
+   */
   def andWith(str: String, boolString: String): String = {
     if (Strings.isEmpty(str)) return null
     if (Strings.isEmpty(boolString)) return str
@@ -67,11 +66,11 @@ object BitStrings {
     buffer.toString
   }
 
-  /** 将"314213421340asdf"转换成"1111111111101111"
-    *
-    * @param first a String object.
-    * @return a String object.
-    */
+  /** Converts each non-zero character to '1', zero to '0' (e.g. "3142" -> "1111").
+   *
+   * @param first the input string
+   * @return the binary-like string
+   */
   def convertToBoolStr(first: String): String = {
     val occupyBuffer = new StringBuilder(first.length)
     for (i <- 0 until first.length)
@@ -80,11 +79,11 @@ object BitStrings {
     occupyBuffer.toString
   }
 
-  /** 返回零一串的整型值
-    *
-    * @param binaryStr a String object.
-    * @return a long.
-    */
+  /** Parses a binary string ('0'/'1') to long value.
+   *
+   * @param binaryStr the binary string
+   * @return the numeric value
+   */
   def binValueOf(binaryStr: String): Long = {
     if (Strings.isEmpty(binaryStr)) return 0
     var value = 0
@@ -99,10 +98,10 @@ object BitStrings {
   }
 
   /** Reverse.
-    *
-    * @param binaryStr a String object.
-    * @return a String object.
-    */
+   *
+   * @param binaryStr a String object.
+   * @return a String object.
+   */
   def reverse(binaryStr: String): String = {
     val occupyBuffer = new StringBuilder(binaryStr.length)
     for (i <- 0 until binaryStr.length)

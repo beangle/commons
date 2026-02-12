@@ -17,8 +17,5 @@
 
 package org.beangle.commons.collection.page
 
-/** 查询中的数目限制
-  *
-  * @author chaostone
-  */
+/** Limit on the number of query results. */
 trait Limit

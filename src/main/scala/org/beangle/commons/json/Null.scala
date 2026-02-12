@@ -17,6 +17,7 @@
 
 package org.beangle.commons.json
 
+/** JSON null singleton (distinct from Scala null). Used when JSON explicitly has "null". */
 object Null {
 
   override def equals(obj: Any): Boolean = {

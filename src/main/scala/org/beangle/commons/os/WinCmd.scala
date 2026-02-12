@@ -35,7 +35,7 @@ object WinCmd extends Shell(Charsets.GBK) {
    */
   override def exec(arg: String): (Int, collection.Seq[String]) = {
     require(null != arg, "Need command")
-    //如果是个绝对地址，则直接执行，不用放在cmd环境中执行。
+    // if absolute path, run directly; otherwise wrap in cmd /c
     val args = Collections.newBuffer[String]
     if (!Shell.isFile(arg)) {
       args.addOne("cmd")
@@ -52,7 +52,7 @@ object WinCmd extends Shell(Charsets.GBK) {
 
   override def killall(exename: String): Int = {
     checkExeName(exename)
-    // /NH 隐藏表头，简化解析
+    // /NH hides table header for simpler parsing
     val rs = execute("tasklist", "/FI", s"IMAGENAME eq $exename", "/NH")
     val pids = rs._2.filter(_.startsWith(exename)).map(x => Strings.split(x, " ").apply(1).toInt)
     kill(pids.toSeq: _*)
@@ -79,10 +79,10 @@ object WinCmd extends Shell(Charsets.GBK) {
     }
   }
 
-  /**
-   * 读取注册表中 exename 的 App Paths 项，获取完整路径
+  /** Reads exename's App Paths from Windows registry to get full path.
    *
-   * @return exename 完整路径（null 表示未找到）
+   * @param exename the executable name (e.g. "cmd.exe")
+   * @return the full path, or None if not found
    */
   private def findExeFromRegistry(exename: String): Option[Path] = {
     val lines = exec("reg query \"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\" + exename + "\" /ve")

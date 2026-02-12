@@ -25,17 +25,21 @@ import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
 import scala.quoted.*
 
+/** Global BeanInfo cache and of() macros. */
 object BeanInfos {
 
+  /** Shared BeanInfo cache. */
   val cache = new BeanInfoCache
 
-  /** Get ClassInfo from cache or load it by type.
-    */
+  /** Gets BeanInfo from cache or loads by reflection. */
   def get(clazz: Class[_]): BeanInfo = cache.get(clazz)
 
+  /** Digs BeanInfo for classes (macro, compile-time). */
   inline def of(inline clazzes: Class[_]*): List[BeanInfo] = ${ BeanInfoDigger.digInto('clazzes, 'cache) }
 
+  /** Digs BeanInfo for single class (macro, compile-time). */
   inline def of[T](clazz: Class[T]): BeanInfo = ${ BeanInfoDigger.digInto('clazz, 'cache) ; }
 
+  /** Returns true if BeanInfo is cached for the class. */
   def cached(clazz: Class[_]): Boolean = cache.contains(clazz)
 }

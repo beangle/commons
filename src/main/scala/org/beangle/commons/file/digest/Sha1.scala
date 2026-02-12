@@ -19,6 +19,7 @@ package org.beangle.commons.file.digest
 
 import java.security.MessageDigest
 
+/** SHA-1 file digest. */
 object Sha1 extends AbstractFileDigest {
 
   protected override def getAlgorithm(): MessageDigest =

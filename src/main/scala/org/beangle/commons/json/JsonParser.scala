@@ -19,15 +19,19 @@ package org.beangle.commons.json
 
 import java.io.Reader
 
+/** Parses JSON from Reader into Json object/array/value.
+ *
+ * @param reader the Reader to parse from
+ */
 class JsonParser(reader: Reader) {
   private var index = 1 //current index in the buffer
   private var length = 0 // max length of buffer
   private var bufferSize = 1024 // size of the buffer
   private val buffer = new Array[Char](bufferSize)
 
-  /** Parse text into a json object or value
+  /** Parses text into Json object, array, or value.
    *
-   * @return
+   * @return parsed Json tree
    */
   def parse(): Json = {
     try {
@@ -88,11 +92,6 @@ class JsonParser(reader: Reader) {
     new String(chars)
   }
 
-  /** read literal value
-   *
-   * @param char leading char
-   * @return
-   */
   private def readValue(char: Char): JsonValue = {
     var string: String = null
     char match {
@@ -220,7 +219,7 @@ class JsonParser(reader: Reader) {
     if ((initial >= '0' && initial <= '9') || initial == '-') {
       val isDecimal = str.indexOf('.') > -1 || str.indexOf('e') > -1 || str.indexOf('E') > -1 || "-0".equals(str)
       try {
-        //如果是数字，则直接使用double和int表示，long型的会采用字符串表示
+        // use double for decimals, int for integers; long overflow falls back to string
         if isDecimal then java.lang.Double.valueOf(str) else java.lang.Integer.valueOf(str)
       } catch
         case exception: Exception => str

@@ -24,12 +24,15 @@ import java.awt.image.BufferedImage
 import java.io.{File, FileOutputStream, OutputStream}
 import javax.imageio.ImageIO
 
+/** Image manipulation utilities. */
 object Images {
 
+  /** Rotates image and writes to destination file. */
   def rotate(src: File, dest: File, degree: Int): Unit = {
     rotate(src, new FileOutputStream(dest), degree)
   }
 
+  /** Rotates image by degree and writes to stream. */
   def rotate(src: File, dest: OutputStream, degree: Int): Unit = {
     try {
       val buf = ImageIO.read(src)

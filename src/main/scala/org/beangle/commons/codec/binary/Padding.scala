@@ -17,7 +17,10 @@
 
 package org.beangle.commons.codec.binary
 
+/** Cipher padding algorithm names. */
 object Padding {
+  /** NoPadding. */
   val No = "NoPadding"
+  /** PKCS5Padding. */
   val PKCS5 = "PKCS5Padding"
 }

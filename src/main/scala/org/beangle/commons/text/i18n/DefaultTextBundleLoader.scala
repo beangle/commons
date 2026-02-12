@@ -24,6 +24,7 @@ import java.io.{InputStream, InputStreamReader, LineNumberReader}
 import java.nio.charset.Charset
 import java.util.Locale
 
+/** Classpath-based TextBundleLoader (properties files). */
 class DefaultTextBundleLoader extends TextBundleLoader {
   override def find(locale: Locale, bundleName: String): collection.Seq[(String, InputStream)] = {
     val inputs = Collections.newBuffer[(String, InputStream)]
@@ -48,6 +49,7 @@ class DefaultTextBundleLoader extends TextBundleLoader {
     inputs
   }
 
+  /** Override to add extra bundle sources. */
   protected def findExtra(locale: Locale, bundleName: String): collection.Seq[(String, InputStream)] = {
     List.empty
   }
@@ -85,8 +87,6 @@ class DefaultTextBundleLoader extends TextBundleLoader {
     results.toMap
   }
 
-  /** Convert locale to string with language_country[_variant]
-    */
   private def toLocaleStr(locale: Locale): String = {
     if (locale == Locale.ROOT) return ""
     val language = locale.getLanguage
@@ -103,9 +103,7 @@ class DefaultTextBundleLoader extends TextBundleLoader {
     sb.toString
   }
 
-  /** Read key value properties
-    * Group by Uppercased key,and default group
-    */
+  /** Parses properties; groups by uppercase-prefixed keys. */
   protected def resolve(input: InputStream, charset: Charset = Charsets.UTF_8): Map[String, Map[String, String]] = {
     val defaults = ""
     val texts = new collection.mutable.HashMap[String, collection.mutable.HashMap[String, String]]

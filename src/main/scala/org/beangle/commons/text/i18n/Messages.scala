@@ -19,12 +19,26 @@ package org.beangle.commons.text.i18n
 
 import java.util.Locale
 
+/** Messages factory. */
 object Messages {
+
+  /** Creates Messages with default registry and formatter.
+   *
+   * @param locale the locale for message lookup
+   * @return Messages instance
+   */
   def apply(locale: Locale): Messages =
     new Messages(locale, new DefaultTextBundleRegistry(), new DefaultTextFormatter())
 }
 
+/** Locale-aware message lookup by class and key. */
 class Messages(locale: Locale, val registry: TextBundleRegistry, val format: TextFormatter) {
+  /** Returns message for class/key; key "class" gets class display name.
+   *
+   * @param clazz the class for bundle lookup
+   * @param key   the message key
+   * @return the message or key if not found
+   */
   def get(clazz: Class[_], key: String): String = {
     if key == "class" then
       val bundle = registry.load(locale, clazz.getPackage.getName + ".package")

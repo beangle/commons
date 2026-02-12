@@ -26,18 +26,22 @@ import java.io.File
 import java.net.{JarURLConnection, URL}
 import java.util.jar.JarFile
 
+/** Resource pattern resolution factory. */
 object ResourcePatternResolver {
+
+  /** Returns resources matching the Ant-style pattern.
+   *
+   * @param locationPattern the pattern (e.g. classpath*:META-INF/**/*.xml)
+   * @return list of matching URLs
+   *         */
   def getResources(locationPattern: String): List[URL] = {
     new ResourcePatternResolver().getResources(locationPattern)
   }
 }
 
+/** Resolves resources using Ant-style patterns. Supports classpath, JAR, and file system. */
 class ResourcePatternResolver(val loader: ResourceLoader = new ClasspathResourceLoader) extends ResourceResolver {
 
-  /** Find all resources that match the given location pattern via the
-   * Ant-style PathMatcher. Supports resources in jar files and zip files
-   * and in the file system.
-   */
   override def getResources(locationPattern: String): List[URL] = {
     val location =
       if (locationPattern.startsWith(ClasspathAllUrlPrefix) || locationPattern.startsWith(ClasspathUrlPrefix)) Strings.substringAfter(locationPattern, ":")

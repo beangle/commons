@@ -31,18 +31,16 @@ import scala.collection.mutable
  */
 object Strings {
 
-  /** Constant `DELIMITER=","`
-   */
+  /** Constant `DELIMITER=","`. */
   val DELIMITER = ","
 
+  /** Empty string constant. */
   val Empty = ""
 
   private val Index_not_found = -1
 
   /** Capitalizes a String changing the first letter to title case as per
-   * `Character# toTitleCase(char)`. No other letters are changed.
-   * For a word based algorithm, see returns `null`.
-   *
+   * `Character#toTitleCase(char)`. No other letters are changed. Returns `null` for null input.
    * {{{
    * capitalize(null)  = null
    * capitalize("")    = ""
@@ -68,40 +66,34 @@ object Strings {
     }
   }
 
-  /** concat.
+  /** Concatenates the given sequence of values into a single string using null as delimiter.
    *
-   * @param seq a String object.
-   * @return a String object.
+   * @param seq the sequence of values to concatenate
+   * @return the concatenated string
    */
   def concat(seq: Any*): String = join(seq, null)
 
-  /** Checks if CharSequence contains a search CharSequence, handling `null`. This method uses
-   * `String#indexOf(String)` if possible.
-   * A `null` CharSequence will return `false`.
-   *
+  /** Checks if CharSequence contains a search CharSequence, handling `null`.
+   * Uses `String#indexOf(String)` if possible. A `null` CharSequence returns `false`.
    * {{{
    * contains(null, *)     = false
    * contains(*, null)     = false
    * contains("", "")      = true
-   * contains("abc", "")   = true
    * contains("abc", "a")  = true
    * contains("abc", "z")  = false
    * }}}
    *
    * @param seq       the CharSequence to check, may be null
    * @param searchSeq the CharSequence to find, may be null
-   * @return true if the CharSequence contains the search CharSequence,
-   *         false if not or `null` string input
+   * @return true if seq contains searchSeq, false otherwise
    */
   def contains(seq: CharSequence, searchSeq: CharSequence): Boolean = {
     if (seq == null || searchSeq == null) return false
     indexOf(seq, searchSeq, 0) >= 0
   }
 
-  /** Checks if CharSequence contains a search character, handling `null`. This method uses
-   * `String#indexOf(int)` if possible.
-   * A `null` or empty ("") CharSequence will return `false`.
-   *
+  /** Checks if CharSequence contains a search character, handling `null`.
+   * Uses `String#indexOf(int)` if possible. Null or empty CharSequence returns `false`.
    * {{{
    * contains(null, *)    = false
    * contains("", *)      = false
@@ -111,8 +103,7 @@ object Strings {
    *
    * @param seq        the CharSequence to check, may be null
    * @param searchChar the character to find
-   * @return true if the CharSequence contains the search character,
-   *         false if not or `null` string input
+   * @return true if seq contains searchChar, false otherwise
    * @since 2.0
    */
   def contains(seq: CharSequence, searchChar: Int): Boolean = {
@@ -120,11 +111,11 @@ object Strings {
     indexOf(seq, searchChar, 0) >= 0
   }
 
-  /** count char in host string
+  /** Counts the number of occurrences of a character in the host string.
    *
-   * @param host      String object.
-   * @param charactor a char.
-   * @return a int.
+   * @param host      the string to search in
+   * @param charactor the character to count
+   * @return the count of occurrences
    */
   def count(host: String, charactor: Char): Int = {
     var count = 0
@@ -132,11 +123,11 @@ object Strings {
     count
   }
 
-  /** count inner string in host string
+  /** Counts the number of occurrences of a substring in the host string.
    *
-   * @param host      a String object.
-   * @param searchStr a String object.
-   * @return a int.
+   * @param host      the string to search in
+   * @param searchStr the substring to count
+   * @return the count of occurrences
    */
   def count(host: String, searchStr: String): Int = {
     var count = 0
@@ -148,22 +139,9 @@ object Strings {
     count
   }
 
-  /** Returns index of searchChar in cs with begin index `start`
-   *
-   * @param cs         char sequences
-   * @param searchChar search char
-   * @param start      start position
-   */
   private def indexOf(cs: CharSequence, searchChar: CharSequence, start: Int): Int =
     cs.toString.indexOf(searchChar.toString, start)
 
-  /** Finds the first index in the `CharSequence` that matches the specified character.
-   *
-   * @param cs         the { @code CharSequence} to be processed, not null
-   * @param searchChar the char to be searched for
-   * @param start      the start index, negative starts at the string start
-   * @return the index where the search char was found, -1 if not found
-   */
   private def indexOf(cs: CharSequence, searchChar: Int, start: Int): Int = {
     if cs.isInstanceOf[String] then
       cs.asInstanceOf[String].indexOf(searchChar, start)
@@ -171,12 +149,12 @@ object Strings {
       ((if (start < 0) 0 else start) until cs.length).find(cs.charAt(_) == searchChar).getOrElse(-1)
   }
 
-  /** insert.
+  /** Inserts a string at the specified position.
    *
-   * @param str a String object.
-   * @param c   a String object.
-   * @param pos a int.
-   * @return a String object.
+   * @param str the original string
+   * @param c   the string to insert
+   * @param pos the insertion position (1-based)
+   * @return the result string with the inserted content
    */
   def insert(str: String, c: String, pos: Int): String = {
     if (str.length < pos) return str
@@ -186,34 +164,33 @@ object Strings {
     else str + c
   }
 
-  /** replace [bigen,end] [1...end] with givenStr
-   * 可以使用StringBuilder的replace方法替换该方法
+  /** Replaces the substring from beginAt to endAt (1-based inclusive) with the given string.
    *
-   * @param str      a String object.
-   * @param beginAt  a int.
-   * @param endAt    a int.
-   * @param contnets a String object.
-   * @return a String object.
+   * @param str      the original string
+   * @param contnets the replacement string
+   * @param beginAt  the start position (1-based)
+   * @param endAt    the end position (1-based, inclusive)
+   * @return the result string with the replaced content
    */
   def insert(str: String, contnets: String, beginAt: Int, endAt: Int): String = {
     if (beginAt < 1 || endAt > str.length || endAt < beginAt) return str
     str.substring(0, beginAt - 1) + contnets + str.substring(endAt)
   }
 
-  /** intersectSeq.
+  /** Returns a new comma-separated string containing words that appear in both input strings.
    *
-   * @param first  a String object.
-   * @param second a String object.
-   * @return a String object.
+   * @param first  the first delimiter-separated string
+   * @param second the second delimiter-separated string
+   * @return the intersection of words from both strings, comma-separated
    */
   def intersectSeq(first: String, second: String): String = intersectSeq(first, second, DELIMITER)
 
-  /** 返回一个新的逗号相隔字符串，实现其中的单词a-b的功能
+  /** Returns a new delimiter-separated string containing words that appear in both input strings.
    *
-   * @param first     a String object.
-   * @param second    a String object.
-   * @param delimiter a String object.
-   * @return a String object.
+   * @param first     the first delimiter-separated string
+   * @param second    the second delimiter-separated string
+   * @param delimiter the delimiter used to separate words
+   * @return the intersection of words from both strings
    */
   def intersectSeq(first: String, second: String, delimiter: String): String = {
     if (isEmpty(first) || isEmpty(second)) return ""
@@ -225,7 +202,6 @@ object Strings {
   }
 
   /** Checks if a CharSequence is whitespace, empty ("") or null.
-   *
    * {{{
    * isBlank(null)      = true
    * isBlank("")        = true
@@ -234,9 +210,8 @@ object Strings {
    * isBlank("  bob  ") = false
    * }}}
    *
-   * @param cs
-   * the CharSequence to check, may be null
-   * @return `true` if the CharSequence is null, empty or whitespace
+   * @param cs the CharSequence to check, may be null
+   * @return true if cs is null, empty or whitespace only
    * @since 3.0
    */
   def isBlank(cs: CharSequence): Boolean = {
@@ -245,25 +220,24 @@ object Strings {
     (0 until strLen).forall(i => Character.isWhitespace(cs.charAt(i)))
   }
 
-  /** Returns true is cs is null or cs.length equals 0.
-   */
+  /** Returns true if the CharSequence is null or has zero length. */
   @inline
   def isEmpty(cs: CharSequence): Boolean = (cs eq null) || 0 == cs.length
 
-  /** isEqualSeq.
+  /** Checks whether two comma-separated strings contain exactly the same set of words.
    *
-   * @param first  not null
-   * @param second not null
-   * @return a boolean.
+   * @param first  the first string to compare
+   * @param second the second string to compare
+   * @return true if both contain the same words (order independent)
    */
   def isEqualSeq(first: String, second: String): Boolean = isEqualSeq(first, second, DELIMITER)
 
-  /** 判断两个","逗号相隔的字符串中的单词是否完全等同.
+  /** Checks whether two delimiter-separated strings contain exactly the same set of words.
    *
-   * @param first     a String object.
-   * @param second    a String object.
-   * @param delimiter a String object.
-   * @return a boolean.
+   * @param first     the first string to compare
+   * @param second    the second string to compare
+   * @param delimiter the delimiter used to separate words
+   * @return true if both contain the same words (order independent)
    */
   def isEqualSeq(first: String, second: String, delimiter: String): Boolean =
     if (isNotEmpty(first) && isNotEmpty(second))
@@ -271,8 +245,7 @@ object Strings {
     else
       isEmpty(first) & isEmpty(second)
 
-  /** Checks if a CharSequence is not empty (""), not null and not whitespace only.
-   *
+  /** Checks if a CharSequence is not empty, not null, and not whitespace only.
    * {{{
    * isNotBlank(null)      = false
    * isNotBlank("")        = false
@@ -282,21 +255,20 @@ object Strings {
    * }}}
    *
    * @param cs the CharSequence to check, may be null
-   * @return `true` if the CharSequence is not empty and not null and not whitespace
+   * @return true if cs has content beyond whitespace
    * @since 3.0
    */
   def isNotBlank(cs: CharSequence): Boolean = !isBlank(cs)
 
-  /** Return true if cs not null and cs has length.
-   */
+  /** Returns true if the CharSequence is not null and has at least one character. */
   @inline
   def isNotEmpty(cs: CharSequence): Boolean = !(cs eq null) && cs.length > 0
 
-  /** join.
+  /** Joins the elements of the sequence with the specified delimiter.
    *
-   * @param seq
-   * @param delimiter a String object.
-   * @return a String object.
+   * @param seq       the iterable to join
+   * @param delimiter the delimiter to use between elements
+   * @return the joined string
    */
   def join(seq: Iterable[_], delimiter: String): String =
     if (null == seq)
@@ -310,19 +282,18 @@ object Strings {
       aim.toString
     }
 
-  /** join.
+  /** Joins the given strings with the default comma delimiter.
    *
-   * @param seq a String object.
-   * @return a String object.
+   * @param seq the strings to join
+   * @return the joined string
    */
   def join(seq: String*): String = join(seq, DELIMITER)
 
-  /** 将数组中的字符串，用delimiter串接起来.<br>
-   * 首尾不加delimiter
+  /** Joins the array of strings with the specified delimiter. The result has no delimiter at start or end.
    *
-   * @param seq       an array of String objects.
-   * @param delimiter a String object.
-   * @return a String object.
+   * @param seq       the array of strings to join
+   * @param delimiter the delimiter to use between elements
+   * @return the joined string
    */
   def join(seq: Array[String], delimiter: String): String =
     if (null == seq)
@@ -341,10 +312,10 @@ object Strings {
       }
     }
 
-  /** 保持逗号分隔的各个单词都是唯一的。并且按照原来的顺序存放。
+  /** Keeps only unique words in the comma-separated string, preserving original order.
    *
-   * @param keyString a String object.
-   * @return a String object.
+   * @param keyString the comma-separated string to deduplicate
+   * @return the string with duplicate words removed
    */
   def keepSeqUnique(keyString: String): String = {
     val keyList = split(keyString, ",").toList
@@ -361,9 +332,7 @@ object Strings {
     newKeys.mkString(",")
   }
 
-  /** Left pad a String with a specified character.
-   * Pad to a size of `size`.
-   *
+  /** Left-pads a String with a specified character to the given size.
    * {{{
    * leftPad(null, *, *)     = null
    * leftPad("", 3, 'z')     = "zzz"
@@ -374,10 +343,9 @@ object Strings {
    * }}}
    *
    * @param str     the String to pad out, may be null
-   * @param size    the size to pad to
+   * @param size    the target size to pad to
    * @param padChar the character to pad with
-   * @return left padded String or original String if no padding is necessary, `null` if null
-   *         String input
+   * @return left-padded String or original if no padding needed, null if null input
    * @since 3.0
    */
   def leftPad(str: String, size: Int, padChar: Char): String = {
@@ -387,9 +355,7 @@ object Strings {
     repeat(padChar, pads).concat(str)
   }
 
-  /** Right pad a String with a specified character.
-   * The String is padded to the size of `size`.
-   *
+  /** Right-pads a String with a specified character to the given size.
    * {{{
    * rightPad(null, *, *)     = null
    * rightPad("", 3, 'z')     = "zzz"
@@ -400,10 +366,9 @@ object Strings {
    * }}}
    *
    * @param str     the String to pad out, may be null
-   * @param size    the size to pad to
+   * @param size    the target size to pad to
    * @param padChar the character to pad with
-   * @return right padded String or original String if no padding is necessary, `null` if null
-   *         String input
+   * @return right-padded String or original if no padding needed, null if null input
    * @since 3.0
    */
   def rightPad(str: String, size: Int, padChar: Char): String = {
@@ -413,35 +378,30 @@ object Strings {
     str.concat(repeat(padChar, pads))
   }
 
-  /** mergeSeq.
+  /** Merges two comma-separated strings, removing duplicate words.
    *
-   * @param first  a String object.
-   * @param second a String object.
-   * @return a String object.
+   * @param first  the first delimiter-separated string
+   * @param second the second delimiter-separated string
+   * @return the merged string with unique words
    */
   def mergeSeq(first: String, second: String): String = mergeSeq(first, second, DELIMITER)
 
-  /** 将两个用delimiter串起来的字符串，合并成新的串，重复的"单词"只出现一次.
-   * 如果第一个字符串以delimiter开头，第二个字符串以delimiter结尾，<br>
-   * 合并后的字符串仍以delimiter开头和结尾.<br>
-   * <p>
-   * <blockquote>
-   *
+  /** Merges two delimiter-separated strings into one, with duplicate words appearing only once.
+   * If the first string starts with delimiter or the second ends with delimiter,
+   * the merged result preserves those delimiters. Examples:
    * {{{
-   * mergeSeq(&quot;,1,2,&quot;, &quot;&quot;) = &quot;,1,2,&quot;;
-   * mergeSeq(&quot;,1,2,&quot;, null) = &quot;,1,2,&quot;;
-   * mergeSeq(&quot;1,2&quot;, &quot;3&quot;) = &quot;1,2,3&quot;;
-   * mergeSeq(&quot;1,2&quot;, &quot;3,&quot;) = &quot;1,2,3,&quot;;
-   * mergeSeq(&quot;,1,2&quot;, &quot;3,&quot;) = &quot;,1,2,3,&quot;;
-   * mergeSeq(&quot;,1,2,&quot;, &quot;,3,&quot;) = &quot;,1,2,3,&quot;;
+   * mergeSeq(",1,2,", "") = ",1,2,";
+   * mergeSeq(",1,2,", null) = ",1,2,";
+   * mergeSeq("1,2", "3") = "1,2,3";
+   * mergeSeq("1,2", "3,") = "1,2,3,";
+   * mergeSeq(",1,2", "3,") = ",1,2,3,";
+   * mergeSeq(",1,2,", ",3,") = ",1,2,3,";
    * }}}
    *
-   * </blockquote>
-   *
-   * @param first     a String object.
-   * @param second    a String object.
-   * @param delimiter a String object.
-   * @return a String object.
+   * @param first     the first delimiter-separated string
+   * @param second    the second delimiter-separated string
+   * @param delimiter the delimiter used to separate words
+   * @return the merged string with unique words
    */
   def mergeSeq(first: String, second: String, delimiter: String): String = {
     if (isNotEmpty(second) && isNotEmpty(first)) {
@@ -456,20 +416,20 @@ object Strings {
       (if ((first == null)) "" else first) + (if ((second == null)) "" else second)
   }
 
-  /** removeWord.
+  /** Removes all occurrences of the word from the comma-separated host string.
    *
-   * @param host a String object.
-   * @param word a String object.
-   * @return a String object.
+   * @param host the delimiter-separated string to remove from
+   * @param word the word to remove
+   * @return the string with the word removed
    */
   def removeWord(host: String, word: String): String = removeWord(host, word, DELIMITER)
 
-  /** removeWord.
+  /** Removes all occurrences of the word from the delimiter-separated host string.
    *
-   * @param host      a String object.
-   * @param word      a String object.
-   * @param delimiter a String object.
-   * @return a String object.
+   * @param host      the string to remove from
+   * @param word      the word to remove
+   * @param delimiter the delimiter used to separate words
+   * @return the string with the word removed
    */
   def removeWord(host: String, word: String, delimiter: String): String = {
     if host.indexOf(word) == -1 then host
@@ -477,17 +437,16 @@ object Strings {
       split(host, delimiter).filterNot(_ == word).mkString(delimiter)
   }
 
-  /** Returns padding using the specified delimiter repeated to a given length.
-   *
+  /** Returns a string of the specified character repeated to the given length.
    * {{{
    * repeat(0, 'e')  = ""
    * repeat(3, 'e')  = "eee"
    * repeat(-2, 'e') = ""
    * }}}
    *
-   * @param ch     character to repeat
-   * @param repeat number of times to repeat char, negative treated as zero
-   * @return String with repeated character
+   * @param ch     the character to repeat
+   * @param repeat number of times to repeat, negative treated as zero
+   * @return the repeated character string
    * @see #repeat(String, int)
    */
   def repeat(ch: Char, repeat: Int): String = {
@@ -503,8 +462,7 @@ object Strings {
     new String(buf)
   }
 
-  /** Repeat a String `repeat` times to form a new String.
-   *
+  /** Repeats a String the given number of times to form a new String.
    * {{{
    * repeat(null, 2) = null
    * repeat("", 0)   = ""
@@ -515,9 +473,8 @@ object Strings {
    * }}}
    *
    * @param str    the String to repeat, may be null
-   * @param repeat number of times to repeat str, negative treated as zero
-   * @return a new String consisting of the original String repeated, `null` if null String
-   *         input
+   * @param repeat number of times to repeat, negative treated as zero
+   * @return the repeated string, null if null input
    * @since 3.0
    */
   def repeat(str: String, repeat: Int): String = {
@@ -541,9 +498,7 @@ object Strings {
     new String(array)
   }
 
-  /** Replaces all occurrences of a String within another String.
-   * A `null` reference passed to this method is a no-op.
-   *
+  /** Replaces all occurrences of a String within another String. Null references are no-op.
    * {{{
    * replace(null, *, *)        = null
    * replace("", *, *)          = ""
@@ -555,10 +510,10 @@ object Strings {
    * replace("aba", "a", "z")   = "zbz"
    * }}}
    *
-   * @param text         text to search and replace in, may be null
+   * @param text         the text to search and replace in, may be null
    * @param searchString the String to search for, may be null
-   * @param replacement  the String to replace it with, may be null
-   * @return the text with any replacements processed, `null` if null String input
+   * @param replacement  the String to replace with, may be null
+   * @return the text with replacements applied, null if null input
    */
   def replace(text: String, searchString: String, replacement: String): String = {
     if (isEmpty(text) || isEmpty(searchString) || replacement == null)
@@ -580,19 +535,17 @@ object Strings {
     buf.toString
   }
 
-  /** split.
+  /** Splits the string by comma, semicolon, carriage return, newline, or space.
    *
-   * @param target a String object.
-   * @return an array of String objects.
+   * @param target the string to split
+   * @return an array of non-empty substrings
    */
   def split(target: String): Array[String] = {
     split(target, Array(',', ';', '\r', '\n', ' '))
   }
 
-  /** Splits the provided text into an array, separator specified. This is an alternative to using
-   * StringTokenizer.
-   * A `null` input String returns `null`.
-   *
+  /** Splits the text into an array using the specified separator character.
+   * Null input returns null. Multiple adjacent separators produce empty string gaps.
    * {{{
    * split(null, *)         = null
    * split("", *)           = []
@@ -601,6 +554,10 @@ object Strings {
    * split("a:b:c", '.')    = ["a:b:c"]
    * split("a b c", ' ')    = ["a", "b", "c"]
    * }}}
+   *
+   * @param str           the string to split, may be null
+   * @param separatorChar the separator character
+   * @return array of substrings, or null if null input
    */
   def split(str: String, separatorChar: Char): Array[String] = {
     if (str == null) return null
@@ -624,16 +581,17 @@ object Strings {
     list.toArray
   }
 
+  /** Adds non-empty trimmed substring from chars[start..end) to the buffer. */
   def addNonEmpty(buffer: mutable.Buffer[String], chars: Array[Char], start: Int, end: Int): Unit = {
     val rs = new String(chars, start, end - start).trim()
     if rs.nonEmpty then buffer.addOne(rs)
   }
 
-  /** split with separators
+  /** Splits the string using any of the characters in the separator array.
    *
-   * @param target         a String object.
-   * @param separatorChars an array of char.
-   * @return an array of String objects.
+   * @param target         the string to split
+   * @param separatorChars the array of separator characters
+   * @return an array of substrings
    */
   def split(target: String, separatorChars: Array[Char]): Array[String] = {
     if (null == target) return new Array[String](0)
@@ -648,11 +606,8 @@ object Strings {
     }
   }
 
-  /** Splits the provided text into an array, separators specified. This is an alternative to using
-   * StringTokenizer.
-   * A `null` input String returns `null`. A `null` separatorChars splits on
-   * whitespace.
-   *
+  /** Splits the text into an array using any character in the separator string.
+   * Null input returns null. Null separatorChars splits on whitespace.
    * {{{
    * split(null, *)         = null
    * split("", *)           = []
@@ -661,6 +616,10 @@ object Strings {
    * split("abc  def", " ") = ["abc", "def"]
    * split("ab:cd:ef", ":") = ["ab", "cd", "ef"]
    * }}}
+   *
+   * @param str            the string to split, may be null
+   * @param separatorChars the separator characters, null for whitespace
+   * @return array of substrings, or null if null input
    */
   def split(str: String, separatorChars: String): Array[String] = {
     if (str == null) return null
@@ -685,10 +644,11 @@ object Strings {
     list.toArray
   }
 
-  /** 将1-2,3,4-9之类的序列拆分成数组
+  /** Parses a number sequence string like "1-2,3,4-9" into an array of integers.
+   * Supports ranges (e.g. 1-5) and comma-separated values.
    *
-   * @param numSeq a String object.
-   * @return an array of Int objects.
+   * @param numSeq the number sequence string to parse
+   * @return an array of integers, or null if input is empty
    */
   def splitNumSeq(numSeq: String): Array[Int] = {
     if (isEmpty(numSeq)) return null
@@ -711,29 +671,20 @@ object Strings {
     numSet.toArray
   }
 
-  /** splitToInteger.
-   */
+  /** Splits the comma-separated string and converts each part to an integer. */
   def splitToInt(ids: String): Seq[Int] =
     if (isEmpty(ids)) List.empty else Numbers.toInt(split(ids, ',')).toIndexedSeq
 
-  /** Split string to long seq */
+  /** Splits the comma-separated string and converts each part to a long. */
   def splitToLong(ids: String): Seq[Long] = {
     if (isEmpty(ids)) List.empty else Numbers.toLong(split(ids, ',')).toIndexedSeq
   }
 
   /** Gets a substring from the specified String avoiding exceptions.
-   *
-   * A negative start position can be used to start/end `n` characters from the end of the
-   * String.
-   * The returned substring starts with the character in the `start` position and ends before
-   * the `end` position. All position counting is zero-based -- i.e., to start at the
-   * beginning of the string use `start = 0`. Negative start and end positions can be used to
-   * specify offsets relative to the end of the String.
-   * If `start` is not strictly to the left of `end`, "" is returned.
-   *
+   * Negative positions count from the end. Zero-based. Returns "" if start >= end.
    * {{{
    * substring(null, *, *)    = null
-   * substring("", * ,  *)    = "";
+   * substring("", *, *)      = ""
    * substring("abc", 0, 2)   = "ab"
    * substring("abc", 2, 0)   = ""
    * substring("abc", 2, 4)   = "c"
@@ -744,11 +695,9 @@ object Strings {
    * }}}
    *
    * @param str        the String to get the substring from, may be null
-   * @param startIndex the position to start from, negative means
-   *                   count back from the end of the String by this many characters
-   * @param endIndex   the position to end at (exclusive), negative means
-   *                   count back from the end of the String by this many characters
-   * @return substring from start position to end position, `null` if null String input
+   * @param startIndex start position (negative = from end)
+   * @param endIndex   end position exclusive (negative = from end)
+   * @return the substring, null if null input
    */
   def substring(str: String, startIndex: Int, endIndex: Int): String = {
     if (str == null) return null
@@ -766,15 +715,21 @@ object Strings {
     str.substring(start, end)
   }
 
-  /** subtractSeq.
+  /** Returns a new comma-separated string containing words in first but not in second.
    *
-   * @param first  a String object.
-   * @param second a String object.
-   * @return a String object.
+   * @param first  the first delimiter-separated string
+   * @param second the second delimiter-separated string (words to subtract)
+   * @return the result string, with leading and trailing delimiter if original had them
    */
   def subtractSeq(first: String, second: String): String = subtractSeq(first, second, DELIMITER)
 
-  /** 返回一个新的逗号相隔字符串，实现其中的单词a-b的功能. 新的字符串将以,开始,结束<br>
+  /** Returns a new delimiter-separated string with words from first minus words in second.
+   * The result preserves leading/trailing delimiter if the original first string had them.
+   *
+   * @param first     the source string
+   * @param second    the string whose words are to be subtracted
+   * @param delimiter the delimiter used to separate words
+   * @return the result string
    */
   def subtractSeq(first: String, second: String, delimiter: String): String = {
     if (isEmpty(first)) return ""
@@ -793,24 +748,23 @@ object Strings {
     buf.toString
   }
 
-  /** unCamel.
-   */
+  /** Converts camelCase to hyphenated lowercase (e.g. camelCase -> camel-case). */
   def unCamel(str: String): String = unCamel(str, '-', true)
 
-  /** unCamel.
+  /** Converts camelCase to the specified separator style (e.g. camelCase with '_' -> camel_case).
    *
-   * @param str       a String object.
-   * @param seperator a char.
-   * @return a String object.
+   * @param str       the camelCase string to convert
+   * @param seperator the separator character to insert between words
+   * @return the converted string
    */
   def unCamel(str: String, seperator: Char): String = unCamel(str, seperator, true)
 
-  /** 将驼峰表示法转换为下划线小写表示
+  /** Converts camelCase to separated format (e.g. underscore lowercase).
    *
-   * @param str       a String object.
-   * @param seperator a char.
-   * @param lowercase a boolean.
-   * @return a String object.
+   * @param str       the camelCase string to convert
+   * @param seperator the separator character to insert between words
+   * @param lowercase whether to convert to lowercase
+   * @return the converted string
    */
   def unCamel(str: String, seperator: Char, lowercase: Boolean): String = {
     if (3 > str.length) return if (lowercase) str.toLowerCase else str
@@ -843,11 +797,7 @@ object Strings {
     build.toString
   }
 
-  /** Gets the substring before the first occurrence of a separator. The separator is not returned.
-   * A `null` string input will return `null`. An empty ("") string input will return
-   * the empty string. A `null` separator will return the input string.
-   * If nothing is found, the string input is returned.
-   *
+  /** Gets the substring before the first occurrence of a separator. Separator not included.
    * {{{
    * substringBefore(null, *)      = null
    * substringBefore("", *)        = ""
@@ -859,10 +809,9 @@ object Strings {
    * substringBefore("abc", null)  = "abc"
    * }}}
    *
-   * @param str       the String to get a substring from, may be null
-   * @param separator the String to search for, may be null
-   * @return the substring before the first occurrence of the separator, `null` if null String
-   *         input
+   * @param str       the String to get substring from, may be null
+   * @param separator the separator to search for, may be null
+   * @return substring before first separator, null if null input
    * @since 2.0
    */
   def substringBefore(str: String, separator: String): String = {
@@ -874,12 +823,7 @@ object Strings {
     str.substring(0, pos)
   }
 
-  /** Gets the substring after the first occurrence of a separator. The separator is not returned.
-   * A `null` string input will return `null`. An empty ("") string input will return
-   * the empty string. A `null` separator will return the empty string if the input string is
-   * not `null`.
-   * If nothing is found, the empty string is returned.
-   *
+  /** Gets the substring after the first occurrence of a separator. Separator not included.
    * {{{
    * substringAfter(null, *)      = null
    * substringAfter("", *)        = ""
@@ -891,10 +835,9 @@ object Strings {
    * substringAfter("abc", "")    = "abc"
    * }}}
    *
-   * @param str       the String to get a substring from, may be null
-   * @param separator the String to search for, may be null
-   * @return the substring after the first occurrence of the separator, `null` if null String
-   *         input
+   * @param str       the String to get substring from, may be null
+   * @param separator the separator to search for, may be null
+   * @return substring after first separator, empty if not found
    * @since 2.0
    */
   def substringAfter(str: String, separator: String): String = {
@@ -905,27 +848,21 @@ object Strings {
     str.substring(pos + separator.length)
   }
 
-  /** Gets the String that is nested in between two Strings. Only the first match is returned.
-   * A `null` input String returns `null`. A `null` open/close returns
-   * `null` (no match). An empty ("") open and close returns an empty string.
-   *
+  /** Gets the String nested between the open and close strings. Returns first match only.
    * {{{
    * substringBetween("wx[b]yz", "[", "]") = "b"
    * substringBetween(null, *, *)          = null
    * substringBetween(*, null, *)          = null
    * substringBetween(*, *, null)          = null
    * substringBetween("", "", "")          = ""
-   * substringBetween("", "", "]")         = null
-   * substringBetween("", "[", "]")        = null
-   * substringBetween("yabcz", "", "")     = ""
    * substringBetween("yabcz", "y", "z")   = "abc"
-   * substringBetween("yabczyabcz", "y", "z")   = "abc"
+   * substringBetween("yabczyabcz", "y", "z") = "abc"
    * }}}
    *
    * @param str   the String containing the substring, may be null
    * @param open  the String before the substring, may be null
    * @param close the String after the substring, may be null
-   * @return the substring, `null` if no match
+   * @return the nested substring, null if no match
    * @since 3.0
    */
   def substringBetween(str: String, open: String, close: String): String = {
@@ -938,11 +875,7 @@ object Strings {
     null
   }
 
-  /** Gets the substring before the last occurrence of a separator. The separator is not returned.
-   * A `null` string input will return `null`. An empty ("") string input will return
-   * the empty string. An empty or `null` separator will return the input string.
-   * If nothing is found, the string input is returned.
-   *
+  /** Gets the substring before the last occurrence of a separator. Separator not included.
    * {{{
    * substringBeforeLast(null, *)      = null
    * substringBeforeLast("", *)        = ""
@@ -954,10 +887,9 @@ object Strings {
    * substringBeforeLast("a", "")      = "a"
    * }}}
    *
-   * @param str       the String to get a substring from, may be null
-   * @param separator the String to search for, may be null
-   * @return the substring before the last occurrence of the separator, `null` if null String
-   *         input
+   * @param str       the String to get substring from, may be null
+   * @param separator the separator to search for, may be null
+   * @return substring before last separator
    * @since 3.0
    */
   def substringBeforeLast(str: String, separator: String): String = {
@@ -967,12 +899,7 @@ object Strings {
     str.substring(0, pos)
   }
 
-  /** Gets the substring after the last occurrence of a separator. The separator is not returned.
-   * A `null` string input will return `null`. An empty ("") string input will return
-   * the empty string. An empty or `null` separator will return the empty string if the input
-   * string is not `null`.
-   * If nothing is found, the empty string is returned.
-   *
+  /** Gets the substring after the last occurrence of a separator. Separator not included.
    * {{{
    * substringAfterLast(null, *)      = null
    * substringAfterLast("", *)        = ""
@@ -985,10 +912,9 @@ object Strings {
    * substringAfterLast("a", "z")     = ""
    * }}}
    *
-   * @param str       the String to get a substring from, may be null
-   * @param separator the String to search for, may be null
-   * @return the substring after the last occurrence of the separator, `null` if null String
-   *         input
+   * @param str       the String to get substring from, may be null
+   * @param separator the separator to search for, may be null
+   * @return substring after last separator, empty if not found
    * @since 3.0
    */
   def substringAfterLast(str: String, separator: String): String = {
@@ -999,11 +925,7 @@ object Strings {
     str.substring(pos + separator.length)
   }
 
-  /** Removes control characters (char &lt;= 32) from both ends of this String, handling `null`
-   * by returning `null`.
-   * The String is trimmed using `String#trim()`. Trim removes start and end characters &lt;=
-   * 32.
-   *
+  /** Removes control characters (char <= 32) from both ends using `String#trim()`.
    * {{{
    * trim(null)          = null
    * trim("")            = ""
@@ -1012,13 +934,14 @@ object Strings {
    * trim("    abc    ") = "abc"
    * }}}
    *
-   * @param str the String to be trimmed, may be null
-   * @return the trimmed string, `null` if null String input
+   * @param str the String to trim, may be null
+   * @return the trimmed string, null if null input
    * @since 3.0
    */
   def trim(str: String): String =
     if (str == null) null else str.trim()
 
+  /** Trims whitespace from the end of the string. Returns null for null input. */
   def trimEnd(str: String): String =
     if (str == null)
       null
@@ -1029,25 +952,19 @@ object Strings {
       if (len < str.length) str.substring(0, len) else str
     }
 
-  /** Strips any of a set of characters from the end of a String.
-   *
-   * <p>A `null` input String returns `null`.
-   * An empty string ("") input returns the empty string.</p>
-   *
-   * <p>If the stripChars String is `null`, whitespace is
-   * stripped as defined by `Character#isWhitespace(char)`.</p>
-   *
+  /** Strips any of the specified characters from the end of a String.
+   * Null input returns null. Null stripChars treats as whitespace.
    * {{{
    * stripEnd(null, *)          = null
    * stripEnd("", *)            = ""
    * stripEnd("abc", "")        = "abc"
-   * stripEnd(*, null)    = *
+   * stripEnd(*, null)          = *
    * stripEnd("  abcyx", "xyz") = "  abc"
    * }}}
    *
-   * @param str        the String to remove characters from, may be null
-   * @param stripChars the characters to remove, null treated as whitespace
-   * @return the stripped String, `null` if null String input
+   * @param str        the String to strip, may be null
+   * @param stripChars characters to remove, null for whitespace
+   * @return the stripped String, null if null input
    */
   def stripEnd(str: String, stripChars: String): String =
     if (str == null || str.isEmpty || null == stripChars || stripChars.isEmpty)
@@ -1059,10 +976,7 @@ object Strings {
       str.substring(0, end)
     }
 
-  /** Uncapitalizes a String changing the first letter to title case as per
-   * [[java.lang.Character#toLowerCase(char)]]. No other letters are changed.
-   * For a word based algorithm, see String returns `null`.
-   *
+  /** Uncapitalizes a String changing the first letter to lowercase. No other letters changed.
    * {{{
    * uncapitalize(null)  = null
    * uncapitalize("")    = ""
@@ -1071,7 +985,7 @@ object Strings {
    * }}}
    *
    * @param str the String to uncapitalize, may be null
-   * @return the uncapitalized String, `null` if null String input
+   * @return the uncapitalized String, null if null input
    * @see #capitalize(String)
    * @since 3.0
    */
@@ -1088,24 +1002,34 @@ object Strings {
     }
   }
 
-  /** Returns either the passed in CharSequence, or if the CharSequence is whitespace, empty ("") or
-   * `null`, the value of `defaultStr`.
+  /** Returns the passed-in CharSequence, or defaultStr if it is whitespace, empty, or null.
    *
-   * @param str
-   * @param defaultStr
+   * @param str        the CharSequence to check
+   * @param defaultStr the value to return when str is blank
+   * @return str if not blank, otherwise defaultStr
    */
   def defaultIfBlank[T <: CharSequence](str: T, defaultStr: T): T =
     if (isBlank(str)) defaultStr else str
 
+  /** Converts the string to lowercase. Returns null for null input. */
   def lowerCase(s: String): String =
     if (null == s) null else s.toLowerCase()
 
+  /** Converts the string to uppercase. Returns null for null input. */
   def upperCase(s: String): String =
     if (null == s) null else s.toUpperCase()
 
+  /** Abbreviates the string to the specified max width with ellipsis. */
   def abbreviate(str: String, maxWidth: Int): String =
     abbreviate(str, 0, maxWidth);
 
+  /** Abbreviates the string from the given offset to max width with ellipsis.
+   *
+   * @param str      the string to abbreviate
+   * @param offset   the starting offset
+   * @param maxWidth the maximum width including ellipsis
+   * @return the abbreviated string
+   */
   def abbreviate(str: String, offset: Int, maxWidth: Int): String = {
     if (str eq null) return null
     if (maxWidth < 4) throw new IllegalArgumentException("Minimum abbreviation width is 4")
@@ -1123,20 +1047,17 @@ object Strings {
       abrevMarker + str.substring(str.length() - (maxWidth - 3))
   }
 
-  /** Removes all occurrences of a character from within the source string.
-   * A `null` source string will return `null`. An empty ("") source string will return
-   * the empty string.
-   *
+  /** Removes all occurrences of a character from the source string.
    * {{{
-   * StringUtils.remove(null, *) = null
-   * StringUtils.remove("", *) = ""
-   * StringUtils.remove("queued", 'u') = "qeed"
-   * StringUtils.remove("queued", 'z') = "queued"
+   * remove(null, *) = null
+   * remove("", *) = ""
+   * remove("queued", 'u') = "qeed"
+   * remove("queued", 'z') = "queued"
    * }}}
    *
    * @param str    the source String to search, may be null
-   * @param remove the char to search for and remove, may be null
-   * @return the substring with the char removed if found, `null` if null String input
+   * @param remove the character to remove
+   * @return the string with the char removed, null if null input
    */
   def remove(str: String, remove: Char): String = {
     if (isEmpty(str) || str.indexOf(remove) == -1)
@@ -1153,14 +1074,27 @@ object Strings {
     new String(chars, 0, pos);
   }
 
+  /** Formats the string using the given format and arguments (java.util.Formatter syntax).
+   *
+   * @param format the format string
+   * @param args   the format arguments
+   * @return the formatted string
+   */
   def format(format: String, args: Any*): String = {
     new java.util.Formatter().format(format, args.toArray.asInstanceOf[Array[Object]]: _*).toString
   }
 
+  /** Converts the string to an InputStream using UTF-8 encoding. */
   def asStream(contents: String): InputStream = {
     new ByteArrayInputStream(contents.getBytes(Charsets.UTF_8))
   }
 
+  /** Converts the string to an InputStream using the specified charset.
+   *
+   * @param contents the string content
+   * @param charset  the charset for encoding
+   * @return an InputStream of the encoded bytes
+   */
   def asStream(contents: String, charset: Charset): InputStream = {
     new ByteArrayInputStream(contents.getBytes(charset))
   }

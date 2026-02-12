@@ -17,15 +17,22 @@
 
 package org.beangle.commons.collection
 
-/** Similar to java.util.IdentityHashMap,but using chaining bucket
-  * But do not support null key and null value(not thread safe)
-  */
+/** Identity-based map similar to java.util.IdentityHashMap, using chaining buckets.
+ * Does not support null key or null value. Not thread-safe.
+ *
+ * @param capacity initial bucket count (must be even)
+ */
 final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
   require(capacity % 2 == 0)
 
   private val table = new Array[Entry[K, V]](capacity)
   private val mask = capacity - 1
 
+  /** Gets the value for the key (identity-based lookup).
+   *
+   * @param key the key
+   * @return the value, or null if not found
+   */
   final def get(key: K): V = {
     val bucket = System.identityHashCode(key) & mask
     var entry = table(bucket)
@@ -36,6 +43,7 @@ final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
     null.asInstanceOf[V]
   }
 
+  /** Removes all entries from the map. */
   def clear(): Unit = {
     var i = 0
     val tab = table
@@ -45,9 +53,20 @@ final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
     }
   }
 
+  /** Returns true if the key exists.
+   *
+   * @param key the key
+   * @return true if present
+   */
   def contains(key: K): Boolean =
     null != get(key)
 
+  /** Puts the key-value pair. Returns true if key already existed (replaced).
+   *
+   * @param key   the key
+   * @param value the value
+   * @return true if replaced existing, false if new
+   */
   def put(key: K, value: V): Boolean = {
     val hash = System.identityHashCode(key) & mask
     val tab = table
@@ -63,6 +82,11 @@ final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
     false
   }
 
+  /** Removes the key and returns its value.
+   *
+   * @param key the key to remove
+   * @return the previous value, or null if not found
+   */
   def remove(key: K): V = {
     val tab = table
 
@@ -84,6 +108,7 @@ final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
     null.asInstanceOf[V]
   }
 
+  /** Returns the number of entries. */
   def size(): Int = {
     var size = 0
     (0 until table.length) foreach { bucket =>
@@ -96,6 +121,7 @@ final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
     size
   }
 
+  /** Returns iterator over keys. */
   def keysIterator: Iterator[K] =
     new KeyIterator(table)
 

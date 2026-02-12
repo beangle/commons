@@ -17,6 +17,7 @@
 
 package org.beangle.commons.lang.time
 
+/** Profile timer stack (thread-local, min-time logging). */
 object TimerTrace {
 
   protected var curStack: ThreadLocal[TimerStack] = new ThreadLocal[TimerStack]()
@@ -58,9 +59,7 @@ object TimerTrace {
     if (null == stack) curStack.set(new TimerStack(root)) else stack.push(root)
   }
 
-  /** End a preformance profiling with the `name` given. Deal with
-   * profile hierarchy automatically, so caller don't have to be concern about it.
-   */
+  /** Ends the current performance profiling. Handles hierarchy automatically. */
   def end(): Unit = {
     if (!active) return
     val stack = curStack.get
@@ -82,26 +81,28 @@ object TimerTrace {
    */
   def getMinTime: Int = mintime
 
-  /** Change mintime
+  /** Sets the minimum time threshold for logging.
    *
-   * @param mintime
+   * @param mintime the minimum milliseconds to log
    */
   def setMinTime(mintime: Int): Unit = {
     System.setProperty(MIN_TIME, String.valueOf(mintime))
     TimerTrace.mintime = mintime
   }
 
-  /** Turn profiling on or off.
+  /** Enables or disables profiling.
    *
-   * @param active
+   * @param active true to enable, false to disable
    */
   def setActive(active: Boolean): Unit = {
     if (active) System.setProperty(ACTIVATE_PROPERTY, "true") else System.clearProperty(ACTIVATE_PROPERTY)
     TimerTrace.active = active
   }
 
+  /** Returns true if profiling is enabled. */
   def isActive: Boolean = active
 
+  /** Clears the thread-local timer stack. */
   def clear(): Unit = {
     curStack.set(null)
   }

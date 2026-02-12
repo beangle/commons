@@ -22,13 +22,26 @@ import org.beangle.commons.lang.annotation.beta
 
 import java.util as ju
 
+/** JSON path query for Java Map/List structures. */
 @beta
 object JsonQuery {
 
+  /** Gets a string at the path (direct key; no dot path).
+   *
+   * @param data the root Map
+   * @param path the key name
+   * @return the string value
+   */
   def getString(data: ju.Map[String, _], path: String): String = {
     data.get(path).asInstanceOf[String]
   }
 
+  /** Gets the value at the dot-separated path. Supports nested maps and lists (e.g. "a.b[0].c").
+   *
+   * @param data the root Map
+   * @param path the path (e.g. "users[0].name")
+   * @return the value, or null if not found
+   */
   def get(data: ju.Map[String, Object], path: String): Object = {
     val paths = Strings.split(path, ".")
     var current: Object = data

@@ -22,7 +22,10 @@ import org.beangle.commons.text.escape.XmlEscaper
 
 import scala.collection.mutable
 
+/** Element factory. */
 object Element {
+
+  /** Creates an Element with name and attributes. */
   def apply(name: String, attrs: (String, String)*): Element = {
     val node = new Element(name)
     node.set(attrs)
@@ -55,18 +58,22 @@ class Element(val label: String) extends Node {
     attributes
   }
 
+  /** Sets multiple attributes. */
   def set(kvs: Iterable[(String, String)]): Unit = {
     attributes.addAll(kvs)
   }
 
+  /** Sets attribute; removes if value is None. */
   def set(key: String, value: Option[String]): Unit = {
     value foreach { v => attributes += (key -> v) }
   }
 
+  /** Sets attribute. */
   def set(key: String, value: String): Unit = {
     attributes += (key -> value)
   }
 
+  /** Appends an Element child. */
   def append(node: Node): Unit = {
     node match {
       case elem: Element => childNodes.addOne(elem)
@@ -74,6 +81,7 @@ class Element(val label: String) extends Node {
     }
   }
 
+  /** Creates and appends child Element; returns the new child. */
   def append(name: String, attrs: (String, String)*): Element = {
     val node = new Element(name)
     node.set(attrs)
@@ -100,9 +108,9 @@ class Element(val label: String) extends Node {
           buf.append(indent).append(s"</${node.label}>\n")
         }
       case Some(t) =>
-        if (node.children.isEmpty) { //只有文本的节点
+        if (node.children.isEmpty) { // text-only node
           buf.append(">").append(XmlEscaper.escapeText(t)).append(s"</${node.label}>\n")
-        } else { //文本和子节点都有的情况
+        } else { // node with both text and child elements
           buf.append(">\n")
           buf.append(indent).append(XmlEscaper.escapeText(t)).append("\n")
           buf.append(indent).append(s"</${node.label}>\n")
@@ -110,6 +118,7 @@ class Element(val label: String) extends Node {
     }
   }
 
+  /** Sets text content; returns this for chaining. */
   def inner(text: String): this.type = {
     this.innerText = Some(text)
     this

@@ -19,33 +19,31 @@ package org.beangle.commons.lang.reflect
 
 import org.beangle.commons.collection.IdentityCache
 
+/** Cache for BeanInfo by class. */
 class BeanInfoCache {
 
-  /** class info cache
-   */
   private val cache = new IdentityCache[Class[_], BeanInfo]
 
+  /** Digs BeanInfo for classes at compile-time (macro). */
   inline def of(inline clazzes: Class[_]*): List[BeanInfo] = ${ BeanInfoDigger.digInto('clazzes, 'this) }
 
+  /** Digs BeanInfo for single class at compile-time (macro). */
   inline def of[T](clazz: Class[T]): BeanInfo = ${ BeanInfoDigger.digInto('clazz, 'this) ; }
 
-  /** register classInfo
-   *
-   * @param bi
-   */
+  /** Registers BeanInfo. */
   def update(bi: BeanInfo): BeanInfo = {
     cache.put(bi.clazz, bi)
     bi
   }
 
+  /** Registers BeanInfo for a subclass (clazz must extend bi.clazz). */
   def update(clazz: Class[_], bi: BeanInfo): BeanInfo = {
     require(bi.clazz.isAssignableFrom(clazz), s"${clazz.getName} is not a subclass of ${bi.clazz.getName}")
     cache.put(clazz, bi)
     bi
   }
 
-  /** Load ClassInfo using reflections
-   */
+  /** Loads BeanInfo via reflection. */
   def get(clazz: Class[_]): BeanInfo = {
     val exist = cache.get(clazz)
     if (null != exist) return exist
@@ -54,9 +52,12 @@ class BeanInfoCache {
     ci
   }
 
+  /** Returns true if BeanInfo is cached for the class. */
   def contains(clazz: Class[_]): Boolean = cache.contains(clazz)
 
+  /** Clears all cached BeanInfo. */
   def clear(): Unit = cache.clear()
 
+  /** Number of cached BeanInfo entries. */
   def size: Int = cache.size()
 }

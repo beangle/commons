@@ -17,18 +17,18 @@
 
 package org.beangle.commons.bean.orderings
 
-/** 比较两个集合，元素多的大
-  *
-  * @author chaostone
-  */
+/** Orders collections by size; larger collections rank higher.
+ *
+ * @author chaostone
+ */
 class CollectionSizeOrdering[T <: Iterator[_]] extends Ordering[T] {
 
-  /** compare
-    *
-    * @param first  a T object.
-    * @param second a T object.
-    * @return equals : 0,first less then second : -1 or small , first greate then second : 1 or big
-    */
+  /** Compares by element count.
+   *
+   * @param first  the first collection
+   * @param second the second collection
+   * @return 0 if equal, negative if first smaller, positive if first larger
+   */
   def compare(first: T, second: T): Int =
     if (first sameElements second) 0 else first.size - second.size
 }

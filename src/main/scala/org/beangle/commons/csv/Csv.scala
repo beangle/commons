@@ -19,12 +19,12 @@ package org.beangle.commons.csv
 
 import scala.collection.mutable.ListBuffer
 
-/**
- * csv document object.
+/** In-memory CSV document.
  *
  * @author chaostone
  */
 class Csv(val format: CsvFormat = new CsvFormat.Builder().build()) {
 
+  /** Rows of cell values. */
   var contents = new ListBuffer[Array[String]]()
 }

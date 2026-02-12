@@ -21,6 +21,7 @@ import org.beangle.commons.text.inflector.Rule
 
 import java.util.regex.{Matcher, Pattern}
 
+/** Regex disjunction and base rule. */
 object AbstractRegexReplacementRule {
 
   /** Disjunction
@@ -40,11 +41,9 @@ object AbstractRegexReplacementRule {
     "(?:" + regex + ")"
   }
 
-  /** disjunction
-   * <p>
+  /** Forms disjunction (a|b) from pattern set.
    * Form the disjunction of the given regular expression patterns. For example if patterns contains
    * "a" and "b" then the disjunction is "(a|b)", that is, "a or b".
-   * </p>
    *
    * @param patterns a set of regular expression patterns
    * @return a pattern that matches if any of the input patterns match
@@ -53,7 +52,7 @@ object AbstractRegexReplacementRule {
     disjunction(patterns.toArray)
 }
 
-/** Abstract AbstractRegexReplacementRule class.
+/** Base for regex-based inflection rules.
  *
  * @author chaostone
  */
@@ -61,8 +60,10 @@ abstract class AbstractRegexReplacementRule(regex: String) extends Rule {
 
   private val pattern = Pattern.compile(regex)
 
+  /** Returns true if word matches the regex. */
   def applies(word: String): Boolean = pattern.matcher(word).matches()
 
+  /** Applies replacement using matched groups. */
   def apply(word: String): String = {
     val matcher = pattern.matcher(word)
     if (!matcher.matches()) {

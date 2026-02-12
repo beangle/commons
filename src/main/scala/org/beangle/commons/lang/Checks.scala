@@ -20,8 +20,13 @@ package org.beangle.commons.lang
 import scala.annotation.elidable
 import scala.annotation.elidable.ASSERTION
 
+/** Runtime checks (notnull, elidable). */
 object Checks {
 
+  /** Throws IllegalArgumentException if obj is null. Elidable at ASSERTION level.
+   *
+   * @param obj the object to check
+   */
   @elidable(ASSERTION)
   @inline
   def notnull(obj: AnyRef): Unit = {

@@ -19,6 +19,7 @@ package org.beangle.commons.lang
 
 import java.nio.charset.Charset
 
+/** Charset constants (UTF-8, GBK, etc.). */
 object Charsets {
 
   /** US-ASCII: seven-bit ASCII, the Basic Latin block of the Unicode character set (ISO646-US).
@@ -34,6 +35,6 @@ object Charsets {
   /** UTF-16: sixteen-bit UCS Transformation Format, byte order identified by an optional byte-order-mark. */
   val UTF_16: Charset = Charset.forName("UTF-16")
 
-  /** Chinese Internal Code Specification(Guo Biao Kuozhan) */
+  /** GBK: Chinese Internal Code Specification (Guo Biao Kuo Zhan). */
   val GBK: Charset = Charset.forName("GBK")
 }

@@ -17,11 +17,12 @@
 
 package org.beangle.commons.text.seq
 
-/** ArabicSeqStyle class.
-  *
-  * @author chaostone
-  */
+/** Arabic numeral sequence style (1, 2, 3...).
+ *
+ * @author chaostone
+ */
 class ArabicSeqStyle extends SeqNumStyle {
 
+  /** Returns the sequence index as string (e.g. 1, 2, 3). */
   def build(seq: Int): String = String.valueOf(seq)
 }

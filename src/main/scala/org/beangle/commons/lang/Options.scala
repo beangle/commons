@@ -17,8 +17,14 @@
 
 package org.beangle.commons.lang
 
+/** Option utilities. */
 object Options {
 
+  /** Unwraps Option to its value, or returns the object for non-Option.
+   *
+   * @param obj the value (Option or any)
+   * @return the inner value for Option, or the object itself
+   */
   def unwrap(obj: Any): Any = {
     obj match
       case null => null

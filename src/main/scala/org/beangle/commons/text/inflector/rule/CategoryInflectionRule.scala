@@ -19,10 +19,10 @@ package org.beangle.commons.text.inflector.rule
 
 import java.util.regex.Pattern
 
-/** CategoryInflectionRule class.
-  *
-  * @author chaostone
-  */
+/** Inflection rule for word categories (e.g. -um → -a).
+ *
+ * @author chaostone
+ */
 class CategoryInflectionRule(words: Array[String], singularSuffix: String, pluralSuffix: String)
   extends SuffixInflectionRule(singularSuffix, pluralSuffix) {
 

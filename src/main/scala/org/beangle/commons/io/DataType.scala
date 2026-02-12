@@ -19,11 +19,19 @@ package org.beangle.commons.io
 
 import org.beangle.commons.lang.{Numbers, Primitives}
 
+/** IO data type enum. */
 enum DataType {
   case String, Boolean, Short, Integer, Long, Float, Double, Date, Time, DateTime, YearMonth, MonthDay, OffsetDateTime, Instant, Formula, Blank, Error
 }
 
+/** DataType utilities. */
 object DataType {
+
+  /** Maps Java class to DataType.
+   *
+   * @param clazz the Java class
+   * @return the corresponding DataType, or String if no match
+   */
   def toType(clazz: Class[_]): DataType = {
     val clz = Primitives.wrap(clazz)
     if (classOf[java.lang.Boolean].isAssignableFrom(clz)) {

@@ -28,8 +28,10 @@ import java.lang.reflect.{InvocationTargetException, Method}
 import java.util as ju
 import scala.jdk.javaapi.CollectionConverters.asJava
 
+/** Jexl3 expression evaluator factory. */
 object Jexl3 {
 
+  /** Creates a Jexl3 expression evaluator with Scala property support. */
   def newEvaluator(): ExpressionEvaluator = {
     val jexlBuilder = new JexlBuilder().cache(512).strict(true).silent(false)
     val uberspect = new ScalaJexlUberspect(JexlUberspect.JEXL_STRATEGY, JexlPermissions.UNRESTRICTED)

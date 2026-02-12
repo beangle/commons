@@ -22,12 +22,14 @@ import org.beangle.commons.lang.time.Stopwatch.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.{MICROSECONDS, MILLISECONDS, NANOSECONDS, SECONDS}
 
+/** Stopwatch formatting utilities. */
 object Stopwatch {
 
-  /** Returns a string representation of the current elapsed time, choosing an
-   * appropriate unit and using the specified number of significant figures.
-   * For example, at the instant when `elapsedTime(NANOSECONDS)` would
-   * return {1234567}, `toString(4)} returns {@code "1.235 ms"`.
+  /** Returns a string representation of elapsed nanoseconds with given significant figures.
+   *
+   * @param nanos             the elapsed nanoseconds
+   * @param significantDigits the number of significant digits
+   * @return formatted string (e.g. "1.235 ms")
    */
   def format(nanos: Long, significantDigits: Int): String = {
     val unit = chooseUnit(nanos)
@@ -50,6 +52,10 @@ object Stopwatch {
     case _ => throw new AssertionError()
   }
 
+  /** Creates and starts a new Stopwatch.
+   *
+   * @return running Stopwatch
+   */
   def start(): Stopwatch = {
     new Stopwatch(true)
   }
@@ -62,6 +68,7 @@ object Stopwatch {
  */
 class Stopwatch(val ticker: Ticker = Ticker.systemTicker(), immediately: Boolean = false) {
 
+  /** True if stopwatch is currently running. */
   var running: Boolean = _
 
   private var elapsed: Long = _
@@ -73,6 +80,7 @@ class Stopwatch(val ticker: Ticker = Ticker.systemTicker(), immediately: Boolean
     startTick = ticker.read()
   }
 
+  /** Creates Stopwatch with system ticker; starts immediately if true. */
   def this(immediately: Boolean) = {
     this(Ticker.systemTicker(), immediately)
   }
@@ -113,11 +121,10 @@ class Stopwatch(val ticker: Ticker = Ticker.systemTicker(), immediately: Boolean
 
   private def elapsedNanos: Long = if (running) ticker.read() - startTick + elapsed else elapsed
 
-  /** Returns the current elapsed time shown on this stopwatch, expressed
-   * in the desired time unit, with any fraction rounded down.
-   * <p>
-   * Note that the overhead of measurement can be more than a microsecond, so it is generally not
-   * useful to specify `TimeUnit#NANOSECONDS` precision here.
+  /** Returns the current elapsed time in the desired unit (fraction rounded down).
+   *
+   * @param desiredUnit the time unit for the result
+   * @return elapsed time in desiredUnit
    */
   def elapsedTime(desiredUnit: TimeUnit): Long = desiredUnit.convert(elapsedNanos, NANOSECONDS)
 

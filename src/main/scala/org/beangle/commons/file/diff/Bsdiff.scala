@@ -31,6 +31,7 @@ import java.io.*
  */
 object Bsdiff {
 
+  /** Generates patch from old and new files. */
   def diff(oldFile: File, newFile: File, patchFile: File): Unit = {
     val oldIn = new FileInputStream(oldFile)
     val oldBytes = new Array[Byte](oldFile.length.asInstanceOf[Int])
@@ -48,6 +49,7 @@ object Bsdiff {
     out.close()
   }
 
+  /** Generates patch from byte arrays to output stream. */
   def diff(oldBytes: Array[Byte], newBytes: Array[Byte], out: OutputStream): Unit = {
     val compressor = new CompressorStreamFactory()
 
@@ -254,6 +256,7 @@ object Bsdiff {
     }
   }
 
+  /** Applies patch to old file, writes result to new file. */
   def patch(oldFile: File, newFile: File, patchFile: File): Unit = {
     val headerIn = new FileInputStream(patchFile)
     val header = Offset.readHeader(headerIn)

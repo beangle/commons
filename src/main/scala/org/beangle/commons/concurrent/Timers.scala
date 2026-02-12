@@ -19,14 +19,26 @@ package org.beangle.commons.concurrent
 
 import java.util.{Timer, TimerTask}
 
+/** Daemon timer scheduling. */
 object Timers {
 
+  /** Schedules tasks to run at fixed intervals in a daemon timer.
+   *
+   * @param name            timer name
+   * @param intervalSeconds interval in seconds
+   * @param tasks           the tasks to run
+   */
   def start(name: String, intervalSeconds: Int, tasks: Runnable*): Unit = {
     val daemon = new Timers(tasks)
     new Timer(s"$name", true).schedule(daemon,
       new java.util.Date(System.currentTimeMillis), intervalSeconds * 1000)
   }
 
+  /** Runs the function once after the delay.
+   *
+   * @param delaySecond delay in seconds
+   * @param f           the function to run
+   */
   def setTimeout(delaySecond: Int, f: () => Unit): Unit = {
     val t = new Timer()
     t.schedule(new TimerTask() {

@@ -21,8 +21,7 @@ import org.beangle.commons.csv.internal.CsvParser
 
 import java.io.{BufferedReader, Reader}
 
-/**
- * CsvReader class.
+/** Reads CSV from a Reader.
  *
  * @author chaostone
  */
@@ -61,9 +60,9 @@ class CsvReader(reader: Reader, format: CsvFormat) {
     if (hasNext) nextLine else null
   }
 
-  /** read next array of data
+  /** Reads next row as array of cell values; null when EOF.
    *
-   * @return an array of String objects.
+   * @return array of strings, or null if no more data
    */
   def readNext(): Array[String] = {
     var result: Array[String] = null

@@ -21,25 +21,30 @@ import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.annotation.value
 import org.beangle.commons.lang.math.IntSeg
 
+/** Week cycle type for WeekState.build (consecutive, odd, even, random). */
 enum WeekCycle {
 
   case Continuous, Odd, Even, Random
 
+  /** Numeric id for this cycle (1-based). */
   def id: Int = ordinal + 1
 }
 
+/** WeekState factory and constants. */
 object WeekState {
 
+  /** Empty WeekState (no weeks set). */
   val Zero = new WeekState(0L)
 
+  /** Parses raw string (binary or IntSeg notation) to WeekState. */
   def apply(raw: String): WeekState = new WeekState(raw)
 
-  /** Build a weekstate by cycle
+  /** Builds WeekState by cycle.
    *
-   * @param start start week 1 based
-   * @param weeks how may weeks
-   * @param cycle cycle type(1"连续周", 2"单周", 3"双周", 4"任意周")
-   * @return
+   * @param start start week (1-based)
+   * @param weeks number of weeks
+   * @param cycle cycle type (Continuous, Odd, Even, Random)
+   * @return WeekState with bits set for selected weeks
    */
   def build(start: Int, weeks: Int, cycle: WeekCycle): WeekState = {
     val maxWeek = start + weeks - 1
@@ -55,16 +60,28 @@ object WeekState {
     new WeekState(v)
   }
 
+  /** Builds WeekState from a single week index.
+   *
+   * @param weekIndex 0-based week index
+   * @return WeekState with that week set
+   */
   def of(weekIndex: Int): WeekState = new WeekState(1L << weekIndex)
 
+  /** Builds WeekState from week index collection.
+   *
+   * @param weekIndecies 0-based week indices
+   * @return WeekState with those weeks set
+   */
   def of(weekIndecies: Iterable[Int]): WeekState = {
     var v = 0L
     for (index <- weekIndecies) v |= (1L << index)
     new WeekState(v)
   }
 
+  /** Builds WeekState from week index varargs. */
   def of(weekIndecies: Int*): WeekState = of(weekIndecies)
 
+  /** Parses raw string to long bitmap (binary or IntSeg). */
   def valueOf(raw: String): Long = {
     if Strings.isBlank(raw) then 0
     else {
@@ -100,16 +117,21 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     else 1
   }
 
+  /** Bitwise OR of week sets. */
   def |(other: WeekState): WeekState = new WeekState(this.value | other.value)
 
+  /** Bitwise AND of week sets. */
   def &(other: WeekState): WeekState = new WeekState(this.value & other.value)
 
+  /** Bitwise XOR of week sets. */
   def ^(other: WeekState): WeekState = new WeekState(this.value ^ other.value)
 
+  /** Returns true if this and other share at least one week. */
   def isOverlap(other: WeekState): Boolean = (this.value & other.value) > 0
 
   override def toString: String = java.lang.Long.toBinaryString(value)
 
+  /** Returns IntSeg-style digest string of selected weeks. */
   def digest: String = {
     IntSeg.digest(this.weeks)
   }
@@ -123,6 +145,7 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
 
   override def hashCode: Int = java.lang.Long.hashCode(value)
 
+  /** Returns (firstWeekIndex, lastWeekIndex) of selected weeks. */
   def span: (Int, Int) = {
     val str = toString
     val length = str.length
@@ -145,6 +168,7 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     c
   }
 
+  /** Index of the last selected week (0-based), or -1 if none. */
   def last: Int = {
     if value > 0 then
       val str = toString
@@ -152,6 +176,7 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     else -1
   }
 
+  /** Index of the first selected week (0-based), or -1 if none. */
   def first: Int = {
     if value > 0 then
       val str = toString
@@ -159,6 +184,7 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     else -1
   }
 
+  /** List of 0-based week indices that are selected. */
   def weeks: List[Int] = {
     val weekstr = toString
     var i = weekstr.length - 1
@@ -170,8 +196,10 @@ class WeekState(val value: Long) extends Ordered[WeekState] with Serializable {
     result.toList
   }
 
+  /** Returns true if the given week (0-based) is selected. */
   def contains(week: Int): Boolean = (value & (1L << week)) > 0
 
+  /** Determines the week cycle pattern (Continuous, Odd, Even, or Random). */
   def cycle: WeekCycle = {
     val wl = this.weeks
     if (wl.isEmpty) return WeekCycle.Continuous

@@ -17,6 +17,5 @@
 
 package org.beangle.commons.bean
 
-/** Represents a dynamic bean.
- */
+/** Dynamic bean as Map[String, Any]. */
 trait DynamicBean extends collection.Map[String, Any]

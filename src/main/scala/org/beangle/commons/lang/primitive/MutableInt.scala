@@ -17,13 +17,16 @@
 
 package org.beangle.commons.lang.primitive
 
+/** Mutable Int wrapper with increment/decrement. */
 class MutableInt(var value: Int = 0) {
 
+  /** Increments value by 1 and returns new value. */
   def increment(): Int = {
     value += 1
     value
   }
 
+  /** Decrements value by 1 and returns new value. */
   def decrement(): Int = {
     value -= 1
     value

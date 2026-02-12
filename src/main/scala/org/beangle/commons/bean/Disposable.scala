@@ -17,13 +17,11 @@
 
 package org.beangle.commons.bean
 
-/** Disposable interface.
-  *
-  * @author chaostone
-  */
+/** Lifecycle hook for resource release.
+ *
+ * @author chaostone
+ */
 trait Disposable {
-
-  /** do destroy.
-    */
+  /** Releases resources held by this instance. */
   def destroy(): Unit
 }

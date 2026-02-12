@@ -22,7 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/** default value of field
+/**
+ * default value of field
  *
  * @author chaostone
  */

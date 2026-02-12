@@ -19,7 +19,14 @@ package org.beangle.commons.bean
 
 import org.beangle.commons.lang.reflect.Reflections
 
+/** Factory utilities. */
 object Factory {
+
+  /** Infers produced type from Factory generic.
+   *
+   * @param clazz the Factory class
+   * @return the produced object type
+   */
   def getObjectType(clazz: Class[_]): Class[_] = {
     val objectTypes = Reflections.getGenericParamTypes(clazz, classOf[Factory[_]]).values
     if (objectTypes.isEmpty) throw new RuntimeException(s"Cannot find factory object type of class ${clazz.getName}")
@@ -27,12 +34,16 @@ object Factory {
   }
 }
 
+/** Produces a single object instance. */
 trait Factory[T] {
 
+  /** Returns the produced object instance. */
   def getObject: T
 
+  /** Whether this factory produces a singleton (true by default). */
   def singleton: Boolean = true
 
+  /** Infers the produced object type from the generic. */
   def objectType: Class[T] = {
     Reflections.getGenericParamTypes(this.getClass, classOf[Factory[_]]).values.head.asInstanceOf[Class[T]]
   }

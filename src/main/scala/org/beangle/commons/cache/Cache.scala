@@ -17,77 +17,80 @@
 
 package org.beangle.commons.cache
 
-/**
- * Common interface of Cache
+/** Common cache interface.
  *
  * @author chaostone
  * @since 3.2.0
  */
 trait Cache[K, V] {
 
-  /**
-   * Get Some(T) or None
+  /** Gets the value for the key.
+   *
+   * @param key the cache key
+   * @return Some(value) or None
    */
   def get(key: K): Option[V]
 
-  /**
-   * Put a new Value
+  /** Puts a key-value pair.
+   *
+   * @param key   the cache key
+   * @param value the value to store
    */
   def put(key: K, value: V): Unit
 
-  /**
-   * Touch the key,restart ttl
-   * The default implementation is equivalent to
-   * {{{
-   *  val v = cache.get(k)
-   *  if(v.isEmpty) false
-   *  else {
-   *    cache.remove(k)
-   *    cache.put(k,v.get)
-   *    true
-   *  }
-   * }}}
-   * @return false if key not exists
+  /** Touches the key to restart TTL. Returns false if key does not exist.
+   * Default equivalent: get(k); if empty false else remove+put.
+   *
+   * @param key the cache key
+   * @return true if touched, false if key not exists
    */
   def touch(key: K): Boolean
 
-  /**
-   * Exists key
+  /** Returns true if the key exists.
+   *
+   * @param key the cache key
+   * @return true if exists
    */
   def exists(key: K): Boolean
 
-  /**
-   * Same with put,but return true when absent
+  /** Puts the value only when key is absent.
+   *
+   * @param key   the cache key
+   * @param value the value to store
+   * @return true if put succeeded (was absent)
    */
   def putIfAbsent(key: K, value: V): Boolean
 
-  /**
-   * return Some(v) when exists old value
+  /** Replaces the value for the key.
+   *
+   * @param key   the cache key
+   * @param value the new value
+   * @return Some(old value) if existed, else None
    */
   def replace(key: K, value: V): Option[V]
 
-  /**
-   * return true is (k,oldvalue) exists
+  /** Replaces only when current value matches oldvalue.
+   *
+   * @param key      the cache key
+   * @param oldvalue the expected current value
+   * @param newvalue the new value
+   * @return true if replaced (key and oldvalue matched)
    */
   def replace(key: K, oldvalue: V, newvalue: V): Boolean
 
-  /**
-   * Evict specified key
+  /** Evicts the specified key.
+   *
+   * @param key the cache key
+   * @return true if evicted
    */
   def evict(key: K): Boolean
 
-  /**
-   * Remove all mappings from the cache.
-   */
+  /** Removes all mappings from the cache. */
   def clear(): Unit
 
-  /**
-   * Time to live seconds,-1 is forever
-   */
+  /** Time to live in seconds; -1 means forever. */
   def ttl: Long
 
-  /**
-   * Time to idle seconds,-1 is forever
-   */
+  /** Time to idle in seconds; -1 means forever. */
   def tti: Long
 }

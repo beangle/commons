@@ -28,15 +28,23 @@ import java.nio.file.Path
 import java.util.concurrent.{Executors, TimeUnit}
 import java.util.regex.Pattern
 
+/** Shell command helpers (isFile, isValidFileName). */
 object Shell {
-  /** 判断一个命令是否是个可执行文件
+
+  /** Returns true if the command is a path to an existing file.
    *
-   * @param command cmd
+   * @param command the command string to check
+   * @return true if it is a file path that exists
    */
   def isFile(command: String): Boolean = {
     (command.contains('/') || command.contains('\\')) && new File(command).exists()
   }
 
+  /** Returns true if the name is a safe executable filename (no path chars).
+   *
+   * @param exename the name to validate
+   * @return true if valid
+   */
   def isValidFileName(exename: String): Boolean = {
     ImageNamePattern.matcher(exename).matches &&
       !DangerousChars.exists(x => exename.indexOf(x) > -1)
@@ -47,13 +55,10 @@ object Shell {
   private val DangerousChars = Array(";", "&", "|", ">", "<", "(", ")", "*", "?", "/", "\\", "`", "$", "\"", "'")
 }
 
-/** 使用OS中命令行的工具类
- *
- * @param charset output charset
- */
+/** OS shell command utility. */
 abstract class Shell(charset: Charset = Charsets.UTF_8) {
 
-  /** 读取输出的最多行数 */
+  /** Maximum lines to read from command output. */
   var maxLine: Int = 10000
 
   /** Execute a command

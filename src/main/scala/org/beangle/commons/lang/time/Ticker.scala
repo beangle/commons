@@ -17,9 +17,10 @@
 
 package org.beangle.commons.lang.time
 
+/** Ticker factory (system nanoTime source). */
 object Ticker {
 
-  /** A ticker that reads the current time using `System.nanoTime`.
+  /** Returns ticker using System.nanoTime.
    */
   def systemTicker(): Ticker = defaultTicker
 
@@ -37,6 +38,7 @@ abstract class Ticker {
   def read(): Long
 }
 
+/** Ticker using System.nanoTime. */
 class SystemTicker extends Ticker {
   override def read(): Long = System.nanoTime()
 }

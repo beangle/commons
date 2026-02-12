@@ -17,6 +17,7 @@
 
 package org.beangle.commons.lang
 
+/** Character utilities. */
 object Chars {
 
   /** Checks whether the character is ASCII 7 bit alphabetic.
@@ -38,10 +39,12 @@ object Chars {
     (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')
   }
 
+  /** Returns true if char is '0'-'9'. */
   def isNumber(char: Char): Boolean = {
     '0' <= char && char <= '9'
   }
 
+  /** Returns display length (ASCII=1, others=2). */
   def charLength(str: String): Int = {
     val chars = str.toCharArray
     var l = 0

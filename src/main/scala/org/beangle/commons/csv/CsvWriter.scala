@@ -22,6 +22,7 @@ import org.beangle.commons.lang.Throwables
 
 import java.io.{Closeable, IOException, Writer}
 
+/** CsvWriter constants and factory. */
 object CsvWriter {
 
   /**
@@ -39,9 +40,10 @@ object CsvWriter {
   val DefaultLineEnd = "\n"
 }
 
-/**
- * CsvWriter class.
+/** Writes CSV rows to a Writer.
  *
+ * @param writer the output writer
+ * @param format CSV format (delimiter, quote, escape)
  * @author chaostone
  */
 class CsvWriter(val writer: Writer,
@@ -53,8 +55,9 @@ class CsvWriter(val writer: Writer,
   private val InitialStringSize = 128
   private val lineEnd: String = "\n"
 
-  /**
-   * write.
+  /** Writes the data as CSV. Supports Array or Iterable of Array.
+   *
+   * @param data the data to write (Array or Iterable[Array])
    */
   def write(data: Any): Unit = {
     data match {
@@ -86,10 +89,10 @@ class CsvWriter(val writer: Writer,
   private def containsSpecialChar(line: String): Boolean =
     line.indexOf(format.delimiter) != -1 || line.indexOf(format.delimiter) != -1
 
-  /** process line.
+  /** Processes a line element for CSV (escapes delimiter and escape chars).
    *
-   * @param nextElement a String object.
-   * @return a `StringBuilder` object.
+   * @param nextElement the element string
+   * @return StringBuilder with processed content
    */
   protected def processLine(nextElement: String): StringBuilder = {
     val sb = new StringBuilder(InitialStringSize)
@@ -106,11 +109,11 @@ class CsvWriter(val writer: Writer,
     sb
   }
 
-  /** flush. */
+  /** Flushes buffered output to the underlying writer. */
   def flush(): Unit =
     writer.flush()
 
-  /** close. */
+  /** Closes the writer (flush then close). */
   def close(): Unit =
     try {
       flush()

@@ -19,11 +19,11 @@ package org.beangle.commons.conversion.string
 
 import org.beangle.commons.conversion.Converter
 
-/** Convert Object to String
-  *
-  * @author chaostone
-  * @since 3.2.0
-  */
+/** Converts AnyRef to String (null -> "null", else toString).
+ *
+ * @author chaostone
+ * @since 3.2.0
+ */
 object ToStringConverter extends Converter[AnyRef, String] {
 
   override def apply(input: AnyRef): String = if input == null then "null" else input.toString

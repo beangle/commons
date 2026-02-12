@@ -17,25 +17,18 @@
 
 package org.beangle.commons.csv
 
+/** CSV delimiter, quote, and escape constants. */
 object CsvConstants {
 
-  /**
-   * Constant `Comma=','`
-   */
+  /** Comma delimiter. */
   val Comma = ','
 
-  /**
-   * Constant `Semicolon=';'`
-   */
+  /** Semicolon delimiter. */
   val Semicolon = ';'
 
-  /**
-   * Constant `Quote='"'`
-   */
+  /** Quote character. */
   val Quote = '"'
 
-  /**
-   * Constant `Escape='\\'`
-   */
+  /** Escape character. */
   val Escape = '\\'
 }

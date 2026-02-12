@@ -20,12 +20,13 @@ package org.beangle.commons.lang.math
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.{Numbers, Strings}
 
+/** Integer range segment assembly (e.g. 1-10, [2-10]even). */
 object IntSeg {
 
-  /**
-   * 根据输入的数字序列，返回1-10，[2-10]双，[4-12]之类的分段区间
+  /** Assembles a number sequence into range segments (e.g. 1-10, [2-10]even, [4-12]).
    *
-   * @return 如果输入的是null或者长度为0的数组，返回""
+   * @param ns the input number sequence
+   * @return the assembled IntRange segments; empty if ns is null or empty
    */
   def assemble(ns: Iterable[Int]): Iterable[IntRange] = {
     if (ns == null || ns.isEmpty) {
@@ -51,6 +52,13 @@ object IntSeg {
     patterns
   }
 
+  /** Formats number sequence as range string (e.g. "1-10 12-20单").
+   *
+   * @param nums     number sequence
+   * @param strigula range separator (default "-")
+   * @param sep      segment separator (default " ")
+   * @return formatted string
+   */
   def digest(nums: Iterable[Int], strigula: String = "-", sep: String = " "): String = {
     val seqs = IntSeg.assemble(nums).map { s =>
       if (s.step == 1) {
@@ -75,6 +83,11 @@ object IntSeg {
     s
   }
 
+  /** Parses range string (e.g. "1-10,12-20单,5") to Int sequence.
+   *
+   * @param str range string (supports 单/双, comma, hyphen)
+   * @return flat list of integers
+   */
   def parse(str: String): Iterable[Int] = {
     val newstr = normalize(str)
     val pairs = Strings.split(newstr, ",")
@@ -101,11 +114,17 @@ object IntSeg {
     numbers
   }
 
+  /** Integer range [start, end] with step (1=consecutive, 2=odd/even). */
   class IntRange(var start: Int, var end: Int, var step: Int) {
     override def toString: String = {
       s"[$start,$end]($step)"
     }
 
+    /** Tests whether i extends this range (consecutive or step pattern); if so updates end.
+     *
+     * @param i candidate integer
+     * @return true if i is accepted and range extended
+     */
     def accept(i: Int): Boolean = {
       val matched =
         if i == this.end then true
@@ -120,32 +139,35 @@ object IntSeg {
       new IntRange(i, i, s)
     }
 
+    /** Copies start, end, step from that to this. */
     def copy(that: IntRange): Unit = {
       this.start = that.start
       this.end = that.end
       this.step = that.step
     }
 
+    /** Returns a new IntRange that would accept number (consecutive or odd/even).
+     *
+     * @param number next number in sequence
+     * @return new IntRange
+     */
     def next(number: Int): IntRange = {
       if (this.step == 2) {
         return continuous(number)
       }
-      // 到这里就说明当前模式是连续周，那么就返回一个从头开始的连续周Pattern
+      // current pattern is consecutive; return new consecutive pattern
       if (!(this.end == this.start)) {
         return continuous(number)
       }
-      //到这里说明start==end，且是连续周 尝试用单、双模式来实验
+      // start==end and consecutive; try odd/even pattern
       val next = continuous(this.start, 2)
       if next.accept(number) then next
       else continuous(number)
     }
 
+    /** Returns the integer sequence for this range. */
     def nums: Seq[Int] = {
       Range(start, end + 1, step)
     }
   }
-}
-
-class IntSeg {
-
 }

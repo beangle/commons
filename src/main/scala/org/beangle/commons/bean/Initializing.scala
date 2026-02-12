@@ -17,13 +17,12 @@
 
 package org.beangle.commons.bean
 
-/** Initializing interface.
-  *
-  * @author chaostone
-  */
+/** Lifecycle hook for initialization.
+ *
+ * @author chaostone
+ */
 trait Initializing {
 
-  /** do initialization.
-    */
+  /** Performs initialization after construction. */
   def init(): Unit
 }

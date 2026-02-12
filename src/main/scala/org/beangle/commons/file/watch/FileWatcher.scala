@@ -24,51 +24,60 @@ import org.beangle.commons.regex.AntPathPattern
 
 import java.nio.file.{Path, Paths}
 
-/** File Watcher
- * {{{
- *       val watcher = FileWatcher.newBuilder().add("D:\\tmp","*.jpg","*.png")
- *         .build((kind: String, path: Path) => {
- *           println(s"$kind $path")
- *         })
- *       try {
- *         Thread.sleep(1000000) // ensure the callback fires
- *       } finally watcher.close()
- * }}}
+/** Watches paths for file changes with optional Ant-style globs.
  *
- * @param paths
- * @param o
+ * Example:
+ * {{{
+ *   val watcher = FileWatcher.newBuilder().add("D:\\tmp","*.jpg","*.png")
+ *     .build((kind: String, path: Path) => println(s"$kind $path"))
+ *   try Thread.sleep(1000000) finally watcher.close()
+ * }}}
  */
 class FileWatcher private(paths: Iterable[WatcherPath], o: Observer) extends AutoCloseable {
-  val watcher = com.swoval.files.PathWatchers.get(true)
+  /** Underlying path watcher instance (for advanced use). */
+  private val watcher = com.swoval.files.PathWatchers.get(true)
+
   paths foreach { path => watcher.register(path.path, Integer.MAX_VALUE) }
   watcher.addObserver(new Reply(o, paths))
 
-  def close(): Unit = {
+  /** Stops watching and releases resources. */
+  override def close(): Unit = {
     watcher.close()
   }
 }
 
+/** FileWatcher factory and types. */
 object FileWatcher {
+
+  /** Creates a new builder. */
   def newBuilder(): Builder = new Builder
 
   @FunctionalInterface
   trait Observer {
+    /** Callback invoked when a file change is detected.
+     *
+     * @param kind event kind (e.g. Create, Modify, Delete)
+     * @param path affected file path
+     */
     def onChange(kind: String, path: Path): Unit
   }
 
   class Builder {
     private val paths = Collections.newBuffer[WatcherPath]
 
+    /** Adds path with optional Ant patterns. */
     def add(path: Path, patterns: AntPathPattern*): Builder = {
       paths.addOne(WatcherPath(path, patterns: _*))
       this
     }
 
+    /** Adds path by string with optional glob patterns. */
     def add(path: String, patterns: String*): Builder = {
       paths.addOne(WatcherPath(Paths.get(path), patterns.map(x => new AntPathPattern(x)): _*))
       this
     }
 
+    /** Builds FileWatcher with observer. */
     def build(o: Observer): FileWatcher = {
       new FileWatcher(paths, o)
     }
@@ -76,14 +85,9 @@ object FileWatcher {
 
   private case class WatcherPath(path: Path, patterns: AntPathPattern*)
 
-  /** File event reply
-   *
-   * @param o
-   * @param paths
-   */
   private class Reply(o: Observer, paths: Iterable[WatcherPath]) extends FileTreeViews.Observer[PathWatchers.Event] {
 
-    val hasFilter = paths.exists(_.patterns.nonEmpty)
+    private val hasFilter = paths.exists(_.patterns.nonEmpty)
 
     def onError(t: Throwable): Unit = {}
 

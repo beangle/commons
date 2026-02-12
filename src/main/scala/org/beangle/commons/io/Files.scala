@@ -31,16 +31,17 @@ object Files {
   private val copyBufferSize = 1024 * 1024 * 30
   private val reservedChars = Array('/', '\\', ':', '*', '?', '"', '>', '<', '|', '\t', '\n')
 
+  /** File path separator for the current platform (e.g. / or \). */
   val / = File.separator
 
   private def fileName(name: String): String = {
     if (/ == "\\") replace(name, "/", "\\") else replace(name, "\\", "/")
   }
 
-  /** 过滤不适合作为文件名的特殊字符
+  /** Replaces characters unsuitable for filenames (/, \\, :, *, ?, etc.) with spaces.
    *
-   * @param name
-   * @return
+   * @param name the string to purify
+   * @return the purified string safe for use as filename
    */
   def purify(name: String): String = {
     var result = name
@@ -50,8 +51,19 @@ object Files {
     result
   }
 
+  /** Returns a File for the given path, expanding tilde and resolving to absolute path.
+   *
+   * @param name the file path (supports ~ for home, ~+ for pwd)
+   * @return the absolute File
+   */
   def forName(name: String): File = new File(expandTilde(name)).getAbsoluteFile
 
+  /** Returns a File for the given path relative to pwd, or absolute if path starts with / or :.
+   *
+   * @param pwd      the working directory for relative paths
+   * @param filePath the file path (relative or absolute)
+   * @return the resolved File
+   */
   def forName(pwd: String, filePath: String): File = {
     val path = expandTilde(filePath)
     if / == "\\" && path.contains(":") then new File(path) //windows
@@ -59,11 +71,10 @@ object Files {
     else new File(pwd + / + path)
   }
 
-  /** 展开波浪线
-   * ~/表示用户目录，~+表示工作目录workdir
+  /** Expands tilde in path: ~/ for user home directory, ~+ for working directory.
    *
-   * @param path
-   * @return
+   * @param path the path containing tilde
+   * @return the expanded path
    */
   def expandTilde(path: String): String = {
     val p = fileName(path)
@@ -72,12 +83,21 @@ object Files {
     else p
   }
 
+  /** Creates a BufferedWriter for the file with the specified charset.
+   *
+   * @param file    the file to write
+   * @param charset the charset (default UTF-8)
+   * @return Writer for the file
+   */
   def stringWriter(file: File, charset: Charset = UTF_8): Writer = {
     new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), charset))
   }
 
-  /** Reads the contents of a file into a String.
-   * The file is always closed.
+  /** Reads the contents of a file into a String. The file is always closed.
+   *
+   * @param file    the file to read
+   * @param charset the charset for decoding (default UTF-8)
+   * @return the file contents as string
    */
   def readString(file: File, charset: Charset = UTF_8): String = {
     var in: InputStream = null
@@ -90,7 +110,11 @@ object Files {
       IOs.close(in)
   }
 
-  /** Writes a String to a file creating the file if it does not exist.
+  /** Writes a String to a file, creating the file if it does not exist.
+   *
+   * @param file    the file to write to
+   * @param data    the string content to write
+   * @param charset the charset for encoding (default UTF-8)
    */
   def writeString(file: File, data: String, charset: Charset = UTF_8): Unit = {
     var out: OutputStream = null
@@ -102,12 +126,22 @@ object Files {
       IOs.close(out)
   }
 
+  /** Updates the file's last modified time. Creates the file if it does not exist.
+   *
+   * @param file the file to touch
+   */
   def touch(file: File): Unit = {
     if (!file.exists()) IOs.close(writeOpen(file))
     val success = file.setLastModified(System.currentTimeMillis)
     if (!success) throw new IOException("Unable to set the last modification time for " + file)
   }
 
+  /** Opens a file for writing, creating parent directories if needed.
+   *
+   * @param file   the file to open
+   * @param append if true, append to existing content
+   * @return the FileOutputStream
+   */
   def writeOpen(file: File, append: Boolean = false): FileOutputStream = {
     if (file.exists()) {
       if (file.isDirectory) throw new IOException("File '" + file + "' exists but is a directory")
@@ -121,8 +155,11 @@ object Files {
     new FileOutputStream(file, append)
   }
 
-  /** Reads the contents of a file line by line to a List of Strings.
-   * The file is always closed.
+  /** Reads the contents of a file line by line. The file is always closed.
+   *
+   * @param file    the file to read
+   * @param charset the charset for decoding (default UTF-8)
+   * @return the list of lines
    */
   def readLines(file: File, charset: Charset = UTF_8): List[String] = {
     var in: InputStream = null
@@ -135,17 +172,11 @@ object Files {
   }
 
   /** Copies a file to a new location preserving the file date.
+   * Creates destination directory if needed. Overwrites if destination exists.
+   * Tries to preserve last modified date but success is not guaranteed.
    *
-   * This method copies the contents of the specified source file to the specified destination file.
-   * The directory holding the destination file is created if it does not exist. If the destination
-   * file exists, then this method will overwrite it.
-   *
-   * <b>Note:</b> This method tries to preserve the file's last modified date/times using
-   * `File#setLastModified(long)`, however it is not guaranteed that the operation will
-   * succeed. If the modification operation fails, no indication is provided.
-   *
-   * @param src  an existing file to copy, must not be `null`
-   * @param dest the new file, must not be `null`
+   * @param src  the source file to copy, must not be null
+   * @param dest the destination file, must not be null
    */
   @throws[IOException]("if source or destination is invalid or an IO error occurs during copying")
   def copy(src: File, dest: File): Unit = {
@@ -190,21 +221,38 @@ object Files {
     if preserveFileDate then destFile.setLastModified(srcFile.lastModified())
   }
 
+  /** Sets the file (and children if directory) to read-only.
+   *
+   * @param file the file or directory
+   */
   def setReadOnly(file: File): Unit = {
     if (file.exists() && file.canWrite)
       travel(file, x => x.setReadOnly())
   }
 
+  /** Sets the file (and children if directory) to writable.
+   *
+   * @param file the file or directory
+   */
   def setWriteable(file: File): Unit = {
     if (file.exists() && !JFiles.isWritable(file.toPath))
       travel(file, x => x.setWritable(true))
   }
 
+  /** Sets the file (and children if directory) to executable.
+   *
+   * @param file the file or directory
+   */
   def setExecutable(file: File): Unit = {
     if (file.exists() && !JFiles.isExecutable(file.toPath))
       travel(file, x => x.setExecutable(true))
   }
 
+  /** Recursively applies the function to the file and its descendants (excluding hidden/symlinks).
+   *
+   * @param file         the root file or directory
+   * @param attributeSet the function to apply to each file
+   */
   def travel(file: File, attributeSet: File => Unit): Unit = {
     attributeSet(file)
     if (file.isDirectory && !file.isHidden && !JFiles.isSymbolicLink(file.toPath))
@@ -213,12 +261,20 @@ object Files {
       }
   }
 
+  /** Deletes the file or directory recursively.
+   *
+   * @param file the file or directory to delete
+   */
   def remove(file: File): Unit = {
     if file.isFile then file.delete()
     Files.travel(file, f => f.delete())
     file.delete()
   }
 
+  /** Clears the directory by deleting all descendants, or deletes the file.
+   *
+   * @param file the file or directory to clear
+   */
   def clear(file: File): Unit = {
     if file.isFile then file.delete()
     Files.travel(file, f => f.delete())

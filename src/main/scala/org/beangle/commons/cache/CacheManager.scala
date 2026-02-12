@@ -19,16 +19,19 @@ package org.beangle.commons.cache
 
 import org.beangle.commons.bean.Disposable
 
-/**
- * Cache Manager
+/** Cache manager that provides named caches.
  *
  * @author chaostone
  * @since 3.2.0
  */
 trait CacheManager extends Disposable {
 
-  /**
-   * Return the cache associated with the given name.
+  /** Returns the cache associated with the given name.
+   *
+   * @param name      the cache name
+   * @param keyType   the key type
+   * @param valueType the value type
+   * @return the Cache instance
    */
   def getCache[K, V](name: String, keyType: Class[K], valueType: Class[V]): Cache[K, V]
 

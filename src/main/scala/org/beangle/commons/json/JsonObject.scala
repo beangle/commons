@@ -29,10 +29,20 @@ import scala.collection.mutable
  */
 object JsonObject {
 
+  /** Creates JsonObject from key-value pairs.
+   *
+   * @param v the key-value pairs
+   * @return the new JsonObject
+   */
   def apply(v: (String, Any)*): JsonObject = {
     new JsonObject(v)
   }
 
+  /** Converts value to JSON literal. Deprecated: use Json.toLiteral.
+   *
+   * @param v the value
+   * @return the literal string
+   */
   @deprecated("Using Json.toLiteral", "5.7.1")
   def toLiteral(v: Any): String = {
     Json.toLiteral(v)
@@ -44,6 +54,10 @@ object JsonObject {
 class JsonObject extends DynamicBean, Json {
   private val props: mutable.Map[String, Any] = Collections.newMap[String, Any]
 
+  /** Creates JsonObject from iterable of key-value pairs.
+   *
+   * @param v the key-value pairs
+   */
   def this(v: Iterable[(String, Any)]) = {
     this()
     v foreach { x => add(x._1, x._2) }
@@ -72,11 +86,11 @@ class JsonObject extends DynamicBean, Json {
     }
   }
 
-  /** 根据路径更新或生成对象
+  /** Updates or creates objects at the given path (e.g. /a/b/3/c or a.b[3].c).
    *
-   * @param path
-   * @param value
-   * @return
+   * @param path  the path to the property
+   * @param value the value to set
+   * @return this JsonObject for chaining
    */
   def update(path: String, value: Any): JsonObject = {
     val parts = splitPath(path)
@@ -107,13 +121,7 @@ class JsonObject extends DynamicBean, Json {
     this
   }
 
-  /** 将查询路径转换成属性数组
-   * /a/b/3/c 转换成[a,b,3,c]
-   * a.b[3].c 转换成[a,b,[3],c]
-   *
-   * @param path
-   * @return
-   */
+  /** Splits query path into property array. /a/b/3/c -> [a,b,3,c]; a.b[3].c -> [a,b,[3],c]. */
   private def splitPath(path: String): Array[String] = {
     if path.charAt(0) == '/' then
       Strings.split(path, "/")
@@ -139,10 +147,10 @@ class JsonObject extends DynamicBean, Json {
     }
   }
 
-  /** 删除keys
+  /** Removes the specified keys from this object.
    *
-   * @param keys
-   * @return
+   * @param keys the property names to remove
+   * @return this JsonObject for chaining
    */
   def remove(keys: String*): JsonObject = {
     keys foreach { key =>
@@ -151,11 +159,23 @@ class JsonObject extends DynamicBean, Json {
     this
   }
 
+  /** Removes the key and returns this for chaining.
+   *
+   * @param key the key to remove
+   * @return this
+   */
   override def -(key: String): collection.Map[String, Any] = {
     props -= key
     this
   }
 
+  /** Removes the given keys and returns this for chaining.
+   *
+   * @param key1 the first key
+   * @param key2 the second key
+   * @param keys additional keys
+   * @return this
+   */
   override def -(key1: String, key2: String, keys: String*): collection.Map[String, Any] = {
     props -= key1
     props -= key2
@@ -165,11 +185,11 @@ class JsonObject extends DynamicBean, Json {
     this
   }
 
-  /** 添加直接属性
+  /** Adds a direct property.
    *
-   * @param key
-   * @param value
-   * @return
+   * @param key   the property name
+   * @param value the property value (null removes the key)
+   * @return this JsonObject for chaining
    */
   def add(key: String, value: Any): JsonObject = {
     if (value == null) {
@@ -180,10 +200,10 @@ class JsonObject extends DynamicBean, Json {
     this
   }
 
-  /** 批量添加属性
+  /** Adds all entries from the given map.
    *
-   * @param datas
-   * @return
+   * @param datas the map of key-value pairs to add
+   * @return this JsonObject for chaining
    */
   def addAll(datas: collection.Map[String, Any]): JsonObject = {
     datas foreach { case (k, v) =>
@@ -192,6 +212,11 @@ class JsonObject extends DynamicBean, Json {
     this
   }
 
+  /** Adds all entries from the given JsonObject.
+   *
+   * @param datas the JsonObject to merge
+   * @return this for chaining
+   */
   def addAll(datas: JsonObject): JsonObject = {
     datas.props foreach { case (k, v) =>
       this.props += k -> v
@@ -199,6 +224,11 @@ class JsonObject extends DynamicBean, Json {
     this
   }
 
+  /** Gets value by key. Throws if key not found.
+   *
+   * @param key the property name
+   * @return the value
+   */
   override def apply(key: String): Any = {
     props(key)
   }
@@ -207,6 +237,12 @@ class JsonObject extends DynamicBean, Json {
     props.get(key)
   }
 
+  /** Gets string value, or default if missing.
+   *
+   * @param key          the property name
+   * @param defaultValue the default when not found
+   * @return the string value
+   */
   def getString(key: String, defaultValue: String = ""): String = {
     props.get(key) match {
       case Some(s) => s.toString
@@ -214,6 +250,12 @@ class JsonObject extends DynamicBean, Json {
     }
   }
 
+  /** Gets boolean value, or default if missing.
+   *
+   * @param key          the property name
+   * @param defaultValue the default when not found
+   * @return the boolean value
+   */
   def getBoolean(key: String, defaultValue: Boolean = false): Boolean = {
     props.get(key) match {
       case Some(s) =>
@@ -225,6 +267,12 @@ class JsonObject extends DynamicBean, Json {
     }
   }
 
+  /** Gets int value, or default if missing.
+   *
+   * @param key          the property name
+   * @param defaultValue the default when not found
+   * @return the int value
+   */
   def getInt(key: String, defaultValue: Int = 0): Int = {
     props.get(key) match {
       case Some(s) =>
@@ -236,6 +284,12 @@ class JsonObject extends DynamicBean, Json {
     }
   }
 
+  /** Gets long value, or default if missing.
+   *
+   * @param key          the property name
+   * @param defaultValue the default when not found
+   * @return the long value
+   */
   def getLong(key: String, defaultValue: Long = 0l): Long = {
     props.get(key) match {
       case Some(s) =>
@@ -247,6 +301,12 @@ class JsonObject extends DynamicBean, Json {
     }
   }
 
+  /** Gets double value, or default if missing.
+   *
+   * @param key          the property name
+   * @param defaultValue the default when not found
+   * @return the double value
+   */
   def getDouble(key: String, defaultValue: Double = 0d): Double = {
     props.get(key) match {
       case Some(s) =>
@@ -257,6 +317,12 @@ class JsonObject extends DynamicBean, Json {
     }
   }
 
+  /** Gets LocalDate value, or default if missing.
+   *
+   * @param key          the property name
+   * @param defaultValue the default when not found
+   * @return the LocalDate value
+   */
   def getDate(key: String, defaultValue: LocalDate = null): LocalDate = {
     props.get(key) match {
       case Some(s) => TemporalConverter.convert(s.toString, classOf[LocalDate])
@@ -264,6 +330,12 @@ class JsonObject extends DynamicBean, Json {
     }
   }
 
+  /** Gets LocalDateTime value, or default if missing.
+   *
+   * @param key          the property name
+   * @param defaultValue the default when not found
+   * @return the LocalDateTime value
+   */
   def getDateTime(key: String, defaultValue: LocalDateTime = null): LocalDateTime = {
     props.get(key) match {
       case Some(s) => TemporalConverter.convert(s.toString, classOf[LocalDateTime])
@@ -271,6 +343,12 @@ class JsonObject extends DynamicBean, Json {
     }
   }
 
+  /** Gets Instant value, or default if missing.
+   *
+   * @param key          the property name
+   * @param defaultValue the default when not found
+   * @return the Instant value
+   */
   def getInstant(key: String, defaultValue: Instant = null): Instant = {
     props.get(key) match {
       case Some(s) => TemporalConverter.convert(s.toString, classOf[Instant])
@@ -278,6 +356,12 @@ class JsonObject extends DynamicBean, Json {
     }
   }
 
+  /** Gets JsonObject value, or default/empty if missing.
+   *
+   * @param key          the property name
+   * @param defaultValue the default when not found
+   * @return the JsonObject value
+   */
   def getObject(key: String, defaultValue: JsonObject = null): JsonObject = {
     props.get(key) match {
       case Some(s) => s.asInstanceOf[JsonObject]
@@ -285,6 +369,11 @@ class JsonObject extends DynamicBean, Json {
     }
   }
 
+  /** Gets JsonArray value, or empty array if missing.
+   *
+   * @param key the property name
+   * @return the JsonArray value
+   */
   def getArray(key: String): JsonArray = {
     props.get(key) match {
       case Some(s) => s.asInstanceOf[JsonArray]
@@ -309,39 +398,29 @@ class JsonObject extends DynamicBean, Json {
 
   override def iterator: Iterator[(String, Any)] = props.iterator
 
-  /**
-   * 检查当前JSON对象是否与目标JSON对象匹配
-   * 此方法用于深度比较两个JSON对象的结构和内容，以确定它们是否在结构上相等
+  /** Deep-compares this JSON object with the target for structural equality.
    *
-   * @param target 目标JSON对象，用于与当前对象进行比较
-   * @return 如果当前JSON对象与目标JSON对象匹配，则返回true；否则返回false
+   * @param target the JSON object to compare with
+   * @return true if both objects match in structure and content
    */
   def isMatch(target: JsonObject): Boolean = {
-    // 遍历目标JSON对象的所有键，检查每个键值对是否与当前对象中的键值对匹配
     target.keys.forall { k =>
-      // 获取目标JSON对象中键k对应的值
       val t = target(k)
-      // 如果当前对象包含键k，则进行匹配检查
       if this.contains(k) then
-        // 根据值的类型，进行不同的匹配逻辑
         t match {
-          // 如果值是JsonObject类型，则递归调用isMatch方法进行深度匹配
           case jo: JsonObject =>
             this (k) match {
               case sjo: JsonObject => sjo.isMatch(jo)
               case _ => false
             }
-          // 如果值是JsonArray类型，则调用isMatch方法比较数组内容
           case ja: JsonArray =>
             this (k) match {
               case sja: JsonArray => isMatch(sja, ja)
               case sjo: JsonObject => false
               case v: Any => ja.contains(v)
             }
-          // 如果值是其他类型，则直接比较值是否相等
           case v: Any => this (k) == t
         }
-      // 如果当前对象不包含键k，则返回false，表示不匹配
       else false
     }
   }

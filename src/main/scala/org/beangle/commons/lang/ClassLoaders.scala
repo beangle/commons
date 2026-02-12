@@ -22,9 +22,7 @@ import java.lang.management.ManagementFactory
 import java.net.{URL, URLClassLoader}
 import scala.collection.mutable
 
-/** ClassLoaders
- * load class,stream
- */
+/** Class loader utilities: load classes and resources. */
 object ClassLoaders {
   private val buildins = Map("byte" -> classOf[Byte], "Byte" -> classOf[Byte], "boolean" -> classOf[Boolean],
     "Boolean" -> classOf[Boolean], "short" -> classOf[Short], "Short" -> classOf[Short],
@@ -69,7 +67,11 @@ object ClassLoaders {
     }
   }
 
-  /** Load a given resource(Cannot start with slash /).
+  /** Loads a resource. Path should not start with slash.
+   *
+   * @param resourceName the resource path
+   * @param callingClass optional class for loader resolution
+   * @return Some(URL) or None
    */
   def getResource(resourceName: String, callingClass: Class[_] = null): Option[URL] = {
     val path = normalize(resourceName)
@@ -80,9 +82,11 @@ object ClassLoaders {
     Option(url)
   }
 
-  /** Load list of resource(Cannot start with slash /).
+  /** Loads all matching resources from classpath. Path should not start with slash.
    *
-   * @return List of resources url or empty list.
+   * @param resourceName the resource path
+   * @param callingClass optional class for loader resolution
+   * @return list of URLs
    */
   def getResources(resourceName: String, callingClass: Class[_] = null): List[URL] = {
     val path = normalize(resourceName)
@@ -95,20 +99,34 @@ object ClassLoaders {
     urls.toList
   }
 
-  /** This is a convenience method to load a resource as a stream.
+  /** Loads a resource as InputStream. Uses same lookup as getResource.
    *
-   * The algorithm used to find the resource is given in getResource()
+   * @param resourceName the resource path
+   * @param callingClass optional class for loader resolution
+   * @return Some(InputStream) or None
    */
   def getResourceAsStream(resourceName: String, callingClass: Class[_] = null): Option[InputStream] = {
     getResource(resourceName, callingClass).map { r => r.openStream() }
   }
 
+  /** Loads a class by name. Supports primitive and built-in type aliases.
+   *
+   * @param className   the class name
+   * @param classLoader optional loader; default if null
+   * @return the Class
+   */
   def load(className: String, classLoader: ClassLoader = null): Class[_] = {
     val loader = if (classLoader == null) defaultClassLoader else classLoader
     if (buildins.contains(className)) buildins(className)
     else loader.loadClass(className)
   }
 
+  /** Returns Some(Class) if the class exists, None otherwise.
+   *
+   * @param className   the class name
+   * @param classLoader optional loader; default if null
+   * @return Some(Class) or None
+   */
   def get(className: String, classLoader: ClassLoader = null): Option[Class[_]] = {
     val loader = if (classLoader == null) defaultClassLoader else classLoader
     if buildins.contains(className) then buildins.get(className)
@@ -118,6 +136,12 @@ object ClassLoaders {
       None
   }
 
+  /** Returns true if the class can be loaded.
+   *
+   * @param className   the class name
+   * @param classLoader optional loader; default if null
+   * @return true if class exists
+   */
   def exists(className: String, classLoader: ClassLoader = null): Boolean = {
     val loader = if (classLoader == null) defaultClassLoader else classLoader
     if buildins.contains(className) then true
@@ -131,6 +155,11 @@ object ClassLoaders {
     }
   }
 
+  /** Returns the classpath URLs for the given loader.
+   *
+   * @param loader the class loader
+   * @return sequence of URLs
+   */
   def urls(loader: ClassLoader): Seq[URL] = {
     loader match
       case ul: URLClassLoader => ul.getURLs.toIndexedSeq

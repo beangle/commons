@@ -22,8 +22,14 @@ import org.beangle.commons.lang.Strings
 
 import java.time.Duration
 
+/** Converts string to java.time.Duration. Supports ISO-8601 and Chinese/English units (天/day, 时/hour, 分/minute, 秒/second). */
 object DurationConverter extends Converter[String, Duration] {
 
+  /** Parses a duration string to Duration.
+   *
+   * @param str the duration string (e.g. "1D", "2H30M", "1天2小时")
+   * @return the parsed Duration
+   */
   override def apply(str: String): Duration = {
     Duration.parse(normalize(str))
   }

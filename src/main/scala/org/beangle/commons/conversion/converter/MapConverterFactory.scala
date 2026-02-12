@@ -23,6 +23,7 @@ import org.beangle.commons.conversion.impl.ConverterFactory
 import java.util as ju
 import scala.collection.{immutable, mutable}
 
+/** Converts java.util.Map to Scala mutable/immutable Map. */
 object MapConverterFactory extends ConverterFactory[ju.Map[_, _], scala.collection.Map[_, _]] {
 
   register(classOf[mutable.Map[_, _]], new MapConverter(false))

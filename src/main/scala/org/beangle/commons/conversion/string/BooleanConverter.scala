@@ -22,14 +22,11 @@ import org.beangle.commons.lang.Strings
 
 import java.lang as jl
 
-/** Convert String to Boolean.
-  * <p>
-  * Convert true,on,yes,Y,1 to Boolean.TRUE.<br>
-  * Convert false,off,no,N,0,"" to Boolean.FALSE. <br>
-  *
-  * @author chaostone
-  * @since 3.2.0
-  */
+/** Converts string to Boolean (true/on/yes/Y/1/是 -> true; false/off/no/N/0/empty -> false).
+ *
+ * @author chaostone
+ * @since 3.2.0
+ */
 object BooleanConverter extends Converter[String, jl.Boolean] {
 
   private val trues = Set("true", "on", "Y", "1", "yes", "t", "y", "是")

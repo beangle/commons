@@ -17,8 +17,8 @@
 
 package org.beangle.commons.script
 
-/** EvaluationException class.
-  *
-  * @author chaostone
-  */
+/** Exception thrown when script evaluation fails.
+ *
+ * @author chaostone
+ */
 class EvaluationException(message: String, cause: Throwable) extends RuntimeException(message, cause)

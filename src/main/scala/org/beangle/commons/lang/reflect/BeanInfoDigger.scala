@@ -27,7 +27,9 @@ import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
 import scala.quoted.*
 
+/** Compile-time BeanInfo digger (quoted macro). */
 object BeanInfoDigger {
+  /** Macro: digs BeanInfo for each class and updates cache. */
   def digInto(argsExpr: Expr[Seq[Class[_]]], cache: Expr[BeanInfoCache])(using Quotes): Expr[List[BeanInfo]] = {
     import quotes.reflect.*
     argsExpr match {
@@ -48,6 +50,7 @@ object BeanInfoDigger {
     }
   }
 
+  /** Macro: digs BeanInfo for type T and updates cache. */
   def digInto[T: Type](ec: Expr[Class[T]], cache: Expr[BeanInfoCache])(implicit quotes: Quotes): Expr[BeanInfo] = {
     import quotes.reflect.*
     val digger = new BeanInfoDigger[quotes.type](quotes.reflect.TypeRepr.of[T])
@@ -57,12 +60,15 @@ object BeanInfoDigger {
   }
 }
 
+/** Macro-time type digger for BeanInfo. */
 class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
 
   import q.reflect.*
 
+  /** The TypeRepr being digested. */
   val typeRepr = trr.asInstanceOf[TypeRepr]
 
+  /** Produces Expr[BeanInfo] for the type. */
   def dig(): Expr[BeanInfo] = {
     '{
       val b = new BeanInfo.Builder(${ typeOf(typeRepr) })
@@ -70,21 +76,28 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     }
   }
 
+  /** Converts TypeRepr to Expr[Class[?]]. */
   def typeOf(tpe: TypeRepr): Expr[Class[?]] =
     Literal(ClassOfConstant(tpe)).asExpr.asInstanceOf[Expr[Class[?]]]
 
+  /** Field expression for macro (name, type, get/set flags). */
   case class FieldExpr(name: String, typeinfo: Expr[AnyRef], transntAnnotated: Boolean, hasGet: Boolean, hasSet: Boolean, defaultValue: Option[Expr[Any]] = None) {
+    /** Returns true if this field should be transient. */
     def transnt(constructParamNames: Set[String]): Boolean = BeanInfo.Builder.isTransient(transntAnnotated, hasSet, constructParamNames.contains(name))
   }
 
+  /** Parameter expression for macro. */
   case class ParamExpr(name: String, typeinfo: Expr[AnyRef], defaultValue: Option[Expr[Any]] = None)
 
+  /** Method expression for macro (name, return type, params, asField). */
   case class MethodExpr(name: String, rt: Expr[Any], params: Seq[ParamExpr], asField: Boolean)
 
+  /** Returns true if the name is a normal identifier (no $ or leading _). */
   def isNormal(name: String): Boolean = {
     !name.contains("$") && !name.startsWith("_")
   }
 
+  /** Extracts (isGetter, propertyName) from DefDef if it is an accessor. */
   def findAccessor(m: DefDef): Option[(Boolean, String)] = {
     val name = m.name
     var paramSize = 0
@@ -185,6 +198,7 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     members.toList
   }
 
+  /** Resolves TypeRepr to Expr[AnyRef] (Class or Array[Class, TypeInfo[]]). */
   def resolveType(typeRepr: TypeRepr, params: Map[String, TypeRepr]): Expr[AnyRef] = {
     var tpe = typeRepr
     var args: List[Expr[AnyRef]] = List.empty
@@ -199,6 +213,7 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     else '{ Array(${ typeOf(tpe) }, Array(${ Varargs(args) }: _*)) }
   }
 
+  /** Resolves AppliedType's type args to a map of param name -> TypeRepr. */
   def resolveClassTypes(a: AppliedType, ctx: Map[String, TypeRepr] = Map.empty): Map[String, TypeRepr] = {
     val params = new mutable.HashMap[String, TypeRepr]
     val mts = a.typeSymbol.typeMembers
@@ -211,6 +226,7 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     params.toMap
   }
 
+  /** Resolves AppliedType args to List[Expr[AnyRef]]. */
   def resolveParamTypes(a: AppliedType, ctx: Map[String, TypeRepr] = Map.empty): List[Expr[AnyRef]] = {
     var i = 0
     val params = new mutable.ArrayBuffer[Expr[AnyRef]]
@@ -228,6 +244,7 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     params.toList
   }
 
+  /** Resolves default parameter values from companion object. */
   def resolveCtorDefaults(symbol: Symbol): Map[Int, Expr[Any]] = {
     val comp = symbol.companionClass
     if (comp != Symbol.noSymbol) {
@@ -242,6 +259,7 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     }
   }
 
+  /** Resolves DefDef parameters to ParamExpr list. */
   def resolveDefParams(defdef: DefDef, typeParams: Map[String, TypeRepr], defaults: Map[Int, Expr[Any]]): List[ParamExpr] = {
     val paramList = new mutable.ArrayBuffer[ParamExpr]
     defdef.paramss foreach {

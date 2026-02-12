@@ -24,6 +24,7 @@ import java.lang.Iterable as JIterable
 import java.util as ju
 import scala.collection.{immutable, mutable}
 
+/** Converts java.util.Collection/List/Set to Scala Seq/Buffer/Set/Iterable. */
 object IterableConverterFactory extends ConverterFactory[JIterable[_], scala.collection.Iterable[_]] {
 
   //seq

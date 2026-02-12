@@ -19,34 +19,35 @@ package org.beangle.commons.text.seq
 
 import org.beangle.commons.text.seq.HanZiSeqStyle.*
 
+/** HanZiSeqStyle constants (零, 一, 二... 十, 百, 千, 万). */
 object HanZiSeqStyle {
 
-  /** Constant `MAX=99999` */
+  /** Maximum supported sequence number. */
   val MAX = 99999
-
-  /** Constant `CHINESE_NAMES="{ 零, 一, 二, 三, 四, 五, 六, 七, 八, 九, 十 }"` */
+  /** Chinese digit characters (0-10). */
   val CHINESE_NAMES = Array("零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十")
 
-  /** Constant `PRIORITIES="{ 十, 百, 千, 万 }"` */
+  /** Unit characters (十, 百, 千, 万). */
   val PRIORITIES = Array("十", "百", "千", "万")
 }
 
-/** 汉字序列产生器
+/** Chinese character sequence generator (零, 一, 二, 三... for numbers).
  *
  * @author chaostone,zhufengbin
  */
 class HanZiSeqStyle extends SeqNumStyle {
 
+  /** Builds the Chinese character representation of the sequence number. */
   def build(seq: Int): String = {
     if (seq > MAX)
       throw new RuntimeException("seq greate than " + MAX)
     buildText(String.valueOf(seq))
   }
 
-  /** buildText.
+  /** Converts a numeric string to Chinese character representation.
    *
-   * @param str1 a String object.
-   * @return a String object.
+   * @param str1 the digit string (e.g. "123")
+   * @return the Chinese number string (e.g. "一百二十三")
    */
   def buildText(str1: String): String = {
     val sb = new StringBuilder()
@@ -63,17 +64,17 @@ class HanZiSeqStyle extends SeqNumStyle {
     result
   }
 
-  /** basicOf.
+  /** Returns the Chinese character for digit 0-10.
    *
-   * @param num a int.
-   * @return a String object.
+   * @param num the digit (0-10)
+   * @return the Chinese character
    */
   def basicOf(num: Int): String = CHINESE_NAMES(num)
 
-  /** priorityOf.
+  /** Returns the Chinese unit character for the digit position (十, 百, 千, 万).
    *
-   * @param index a int.
-   * @return a String object.
+   * @param index the position index
+   * @return the unit character or empty string for ones/tens
    */
   def priorityOf(index: Int): String = {
     if index < 2 then ""

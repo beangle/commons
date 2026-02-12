@@ -1,0 +1,150 @@
+{
+  "repo_notes": [
+    {
+      "content": "Beangle Commons is a Scala-based enterprise development toolkit following Convention Over Configuration. Source code is under src/main/scala/org/beangle/commons/. Each subpackage provides distinct utilities: activation for MIME types, bean for property access, cache for caching, cdi for dependency injection, codec for encoding/decoding, collection for collection utilities, config for configuration, conversion for type conversion, csv/dbf for file formats, event for event bus, file for file operations, image for image processing, io for I/O and resources, json/xml for parsing, lang for language utilities including reflect and time, logging for logging, net for HTTP and networking, os for platform/shell, regex for path patterns, script for expression evaluation, security for request context, and text for i18n, inflector, and sequence styles.",
+      "author": "Beangle Commons"
+    }
+  ],
+  "pages": [
+    {
+      "title": "Beangle Commons Overview",
+      "purpose": "High-level overview of the Beangle Commons library: architecture, module organization, and how packages relate. Document the root org.beangle.commons structure and Version.",
+      "parent": null
+    },
+    {
+      "title": "Bean Properties and Reflection",
+      "purpose": "Document org.beangle.commons.bean: Properties, PropertyExtractor, PropertyNameResolver, ProxyResolver, Disposable, Initializing, Refreshable, Factory, DynamicBean. For orderings and predicates see child page.",
+      "parent": "Beangle Commons Overview"
+    },
+    {
+      "title": "Property Orderings and Predicates",
+      "purpose": "Document org.beangle.commons.bean.orderings: PropertyOrdering, ChainOrdering, CollatorOrdering, CollectionSizeOrdering; bean.predicates: PropertyEqualPredicate. Sorting and filtering by property.",
+      "parent": "Bean Properties and Reflection"
+    },
+    {
+      "title": "Caching",
+      "purpose": "Document org.beangle.commons.cache: Cache trait and CacheManager for caching abstractions.",
+      "parent": "Beangle Commons Overview"
+    },
+    {
+      "title": "Dependency Injection",
+      "purpose": "Document org.beangle.commons.cdi: Binder, BindModule, Container, Condition, Reconfig, ReconfigModule, Scope, CdiEventListener for dependency injection and configuration.",
+      "parent": "Beangle Commons Overview"
+    },
+    {
+      "title": "Encoding and Encryption",
+      "purpose": "Document org.beangle.commons.codec: Encoder, Decoder, Base64, Hex. For binary encryption and digest see child page.",
+      "parent": "Beangle Commons Overview"
+    },
+    {
+      "title": "Binary and Digest Codecs",
+      "purpose": "Document org.beangle.commons.codec.binary: Des, Aes, Padding, PBEEncryptor; codec.digest: Digests; codec.net: BCoder. Encryption, password-based encryption, digest hashing.",
+      "parent": "Encoding and Encryption"
+    },
+    {
+      "title": "Collection Utilities",
+      "purpose": "Document org.beangle.commons.collection: Collections, FastStack, IdentityMap, IdentitySet, MapConverter, Order, Properties, Wrappers, page (Limit, Page, PagedSeq, PageLimit, SinglePage).",
+      "parent": "Beangle Commons Overview"
+    },
+    {
+      "title": "Concurrency",
+      "purpose": "Document org.beangle.commons.concurrent: Locks, Tasks, Timers, Workers, Sidecar for concurrency utilities.",
+      "parent": "Beangle Commons Overview"
+    },
+    {
+      "title": "Configuration",
+      "purpose": "Document org.beangle.commons.config: Config, ConfigFactory (SystemEnvironment, SystemProperties), AbstractMapConfig, SimpleConfig, Enviroment, PlaceHolder, XmlConfigs for configuration and property resolution.",
+      "parent": "Beangle Commons Overview"
+    },
+    {
+      "title": "Type Conversion",
+      "purpose": "Document org.beangle.commons.conversion: Conversion, Converter, ConverterRegistry, impl. For converter factories and string converters see child page.",
+      "parent": "Beangle Commons Overview"
+    },
+    {
+      "title": "Converter Factories",
+      "purpose": "Document org.beangle.commons.conversion.converter: DateTimeConverterFactory, IterableConverterFactory, MapConverterFactory, MethodConverter, Number2NumberConverter; conversion.string: BooleanConverter, DateConverter, DurationConverter, EnumConverters, JsonConverter, LocaleConverter, NumberConverters, StringConverterFactory.",
+      "parent": "Type Conversion"
+    },
+    {
+      "title": "CSV I/O",
+      "purpose": "Document org.beangle.commons.csv: Csv, CsvConstants, CsvFormat, CsvReader, CsvWriter, and internal CsvParser for CSV read/write.",
+      "parent": "Beangle Commons Overview"
+    },
+    {
+      "title": "Event System",
+      "purpose": "Document org.beangle.commons.event: Event, BusinessEvent, EventListener, EventMulticaster, DefaultEventMulticaster, EventPublisher for event handling.",
+      "parent": "Beangle Commons Overview"
+    },
+    {
+      "title": "File Operations",
+      "purpose": "Document org.beangle.commons.file: text (Formatter, LineProcessor), watch (FileWatcher), zip (Zipper). For digest and diff see child page.",
+      "parent": "Beangle Commons Overview"
+    },
+    {
+      "title": "File Digest and Diff",
+      "purpose": "Document org.beangle.commons.file.digest: AbstractFileDigest, MD5, Sha1, Sha256; file.diff.bsdiff: Format, Offset, SuffixSort, Bsdiff. File hashing and binary diff.",
+      "parent": "File Operations"
+    },
+    {
+      "title": "I/O and Resources",
+      "purpose": "Document org.beangle.commons.io: Dirs, Files, IOs, Jars, Resources, ResourceLoader, ResourceResolver, ResourcePatternResolver, ResourceVersionLoader, BufferedWriter, BinarySerializer, ObjectSerializer, Serializer, Deserializer, DataType, StringBuilderWriter.",
+      "parent": "Beangle Commons Overview"
+    },
+    {
+      "title": "JSON Processing",
+      "purpose": "Document org.beangle.commons.json: Json, JsonObject, JsonArray, JsonParser, JsonQuery, JsonValue, Null for JSON handling.",
+      "parent": "Beangle Commons Overview"
+    },
+    {
+      "title": "Language Utilities",
+      "purpose": "Document org.beangle.commons.lang core: Numbers, Strings, Objects, Arrays, Assert, BitStrings, Chars, Charsets, Checks, ClassLoaders, Consoles, Enums, JVM, Primitives, SystemInfo, Throwables, types; annotation, functor (Predicate, predicates), math (Fraction, IntSeg), primitive, text (Formatter, Formatters). For reflect and time see child pages.",
+      "parent": "Beangle Commons Overview"
+    },
+    {
+      "title": "Reflection and BeanInfo",
+      "purpose": "Document org.beangle.commons.lang.reflect: BeanInfo, BeanInfoCache, BeanInfoDigger, BeanInfoLoader, BeanInfos, Reflections, TypeInfo, Accessor. Introspection, PropertyInfo, macro-based BeanInfo generation.",
+      "parent": "Language Utilities"
+    },
+    {
+      "title": "Date and Time",
+      "purpose": "Document org.beangle.commons.lang.time: CycleTime, CycleTimeDigester, DateFormats, HourMinute, Stopwatch, Ticker, TimerNode, TimerStack, TimerTrace, WeekDay, Weeks, WeekState, WeekTime, Dates. Time ranges, week cycles, scheduling utilities.",
+      "parent": "Language Utilities"
+    },
+    {
+      "title": "HTTP and Networking",
+      "purpose": "Document org.beangle.commons.net: Networks for URL/URI and host resolution. For HTTP client see child page.",
+      "parent": "Beangle Commons Overview"
+    },
+    {
+      "title": "HTTP Client",
+      "purpose": "Document org.beangle.commons.net.http: HttpUtils, Request, Response, Https, HttpMethods, ResourceStatus; net.ws: RestRequest. HTTP client, request/response, SSL, REST.",
+      "parent": "HTTP and Networking"
+    },
+    {
+      "title": "Platform and Shell",
+      "purpose": "Document org.beangle.commons.os: Platform, Shell, Desktops, LinuxBash, WinCmd for OS and platform detection.",
+      "parent": "Beangle Commons Overview"
+    },
+    {
+      "title": "Expression Evaluation",
+      "purpose": "Document org.beangle.commons.script: ExpressionEvaluator, Jexl3, EvaluationException for script and expression evaluation.",
+      "parent": "Beangle Commons Overview"
+    },
+    {
+      "title": "Text and Internationalization",
+      "purpose": "Document org.beangle.commons.text: escape (JavascriptEscaper, XmlEscaper), inflector (Pluralizer, rules, RuleBasedPluralizer), replace (Replacer), seq (SeqNumStyle, HanZiSeqStyle, RomanSeqStyle, ArabicSeqStyle, SeqPattern, MultiLevelSeqGenerator). For i18n see child page.",
+      "parent": "Beangle Commons Overview"
+    },
+    {
+      "title": "Internationalization",
+      "purpose": "Document org.beangle.commons.text.i18n: TextBundle, TextBundleLoader, TextBundleRegistry, TextFormatter, TextResource, Message, Messages, ClassTextFinder, DefaultTextBundleLoader, DefaultTextFormatter, DefaultTextResource, HttpTextBundleLoader. Locale-aware messaging and formatting.",
+      "parent": "Text and Internationalization"
+    },
+    {
+      "title": "XML Processing",
+      "purpose": "Document org.beangle.commons.xml: Document, Doms, Element, Node, NodeSeq, Text for XML handling.",
+      "parent": "Beangle Commons Overview"
+    }
+  ]
+}

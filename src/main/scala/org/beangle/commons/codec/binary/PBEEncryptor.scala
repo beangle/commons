@@ -26,8 +26,7 @@ import java.util.concurrent.locks.ReentrantLock
 import javax.crypto.spec.{IvParameterSpec, PBEKeySpec, PBEParameterSpec}
 import javax.crypto.{Cipher, SecretKey, SecretKeyFactory}
 
-/** 基于密码的加密工具类(Password-Based Encryption)
- */
+/** Password-Based Encryption utility. Supports fixed and random salt/IV. */
 object PBEEncryptor {
 
   /** The default salt size */
@@ -42,13 +41,13 @@ object PBEEncryptor {
   /** The default PBE algo */
   val DefaultAlgorithm = "PBEWithMD5AndDES"
 
-  /** 根据密码和固定的盐以及初始向量生成加密和解密设施
+  /** Creates encryptor/decryptor with fixed salt and IV.
    *
-   * @param algorithm algo
-   * @param password  plain
-   * @param salt      fix salt
-   * @param iv        fixed iv
-   * @return
+   * @param algorithm the PBE algorithm
+   * @param password  the plain password
+   * @param salt      the fixed salt bytes
+   * @param iv        the fixed initialization vector
+   * @return the FixedPBEEncryptor
    */
   def fixed(algorithm: String, password: String, salt: Array[Byte], iv: Array[Byte]): FixedPBEEncryptor = {
     val encryptor = Cipher.getInstance(algorithm)
@@ -68,15 +67,16 @@ object PBEEncryptor {
     FixedPBEEncryptor(encryptor, decryptor)
   }
 
+  /** Creates RandomPBEEncryptor with default algorithm. */
   def random(password: String): RandomPBEEncryptor = {
     random(DefaultAlgorithm, password)
   }
 
-  /** 根据随机盐和随机iv生成的加密/解密设施
+  /** Creates encryptor/decryptor with random salt and IV per encryption.
    *
-   * @param algorithm algo
-   * @param password  plain text
-   * @return
+   * @param algorithm the PBE algorithm
+   * @param password  the plain password
+   * @return the RandomPBEEncryptor
    */
   def random(algorithm: String, password: String): RandomPBEEncryptor = {
     val encryptor = Cipher.getInstance(algorithm)
@@ -86,6 +86,7 @@ object PBEEncryptor {
     RandomPBEEncryptor(encryptor, decryptor, buildKey(algorithm, password), saltSize, ivSize)
   }
 
+  /** Generates random salt and IV strings for the given algorithm. */
   def generateSaltAndIv(algorithm: String): (String, String) = {
     val encryptor = Cipher.getInstance(algorithm)
     val salt = Array.ofDim[Char](getSaltSize(encryptor))
@@ -99,31 +100,28 @@ object PBEEncryptor {
     (new String(salt), new String(iv))
   }
 
-  /** 将一个普通的密码转成PBE所需的密钥格式
-   * 不保留密码铭文本身
+  /** Converts a plain password to PBE key format. Does not retain plaintext.
    *
-   * @param algorithm pbe algo
-   * @param password  plain password
-   * @return
+   * @param algorithm the PBE algorithm
+   * @param password  the plain password
+   * @return the SecretKey
    */
   def buildKey(algorithm: String, password: String): SecretKey = {
     SecretKeyFactory.getInstance(algorithm).generateSecret(new PBEKeySpec(normalize(password)))
   }
 
-  /** 根据盐和初始向量构建加密参数
+  /** Builds PBE parameters from salt and IV.
    *
-   * @param salt salt bytes
-   * @param iv   initialization vector bytes
+   * @param salt       the salt bytes
+   * @param iv         the initialization vector bytes
+   * @param iterations the key derivation iteration count
+   * @return the PBEParameterSpec
    */
   def buildParameter(salt: Array[Byte], iv: Array[Byte], iterations: Int): PBEParameterSpec = {
     new PBEParameterSpec(salt, iterations, new IvParameterSpec(iv))
   }
 
-  /** 提供固定盐和初始向量的加密器
-   *
-   * @param encryptor encryptor
-   * @param decryptor decryptor
-   */
+  /** PBE encryptor with fixed salt and IV. */
   class FixedPBEEncryptor(encryptor: Cipher, decryptor: Cipher) extends PBEEncryptor {
 
     private val lock = new ReentrantLock
@@ -139,25 +137,15 @@ object PBEEncryptor {
     }
   }
 
-  /** 随机生成盐和iv的加密器
-   *
-   * @param encryptor encryptor
-   * @param decryptor decryptor
-   * @param key       key
-   * @param saltSize  salt byte size
-   * @param ivSize    iv byte size
-   */
+  /** PBE encryptor that generates random salt and IV per encryption. */
   class RandomPBEEncryptor(encryptor: Cipher, decryptor: Cipher, key: SecretKey, saltSize: Int, ivSize: Int) extends PBEEncryptor {
 
+    /** Key derivation iteration count. */
     var iterations: Int = 1000
     private val lock = new ReentrantLock
     private val random = SecureRandom.getInstance("SHA1PRNG")
 
-    /** 对输入进行加密，返回格式为salt+iv+encrypted
-     *
-     * @param message input string
-     * @return
-     */
+    /** Encrypts input. Output format is base64(salt + iv + encrypted). */
     override def encrypt(message: String): String = {
       val salt = randomBytes(saltSize)
       val iv = randomBytes(ivSize)
@@ -208,13 +196,7 @@ object PBEEncryptor {
     }
   }
 
-  /** 初始化加密和解密模式
-   *
-   * @param key       key
-   * @param parameter parameter
-   * @param encryptor encryptor
-   * @param decryptor decryptor
-   */
+  /** Initializes encryptor and decryptor with key and parameters. */
   private def init(key: SecretKey, parameter: PBEParameterSpec, encryptor: Cipher, decryptor: Cipher): Unit = {
     encryptor.init(Cipher.ENCRYPT_MODE, key, parameter)
     decryptor.init(Cipher.DECRYPT_MODE, key, parameter)
@@ -242,7 +224,9 @@ object PBEEncryptor {
 }
 
 trait PBEEncryptor {
+  /** Encrypts plaintext; output format depends on implementation. */
   def encrypt(message: String): String
 
+  /** Decrypts ciphertext to plaintext. */
   def decrypt(message: String): String
 }

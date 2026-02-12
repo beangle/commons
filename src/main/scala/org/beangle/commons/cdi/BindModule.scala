@@ -24,9 +24,15 @@ import org.beangle.commons.lang.reflect.*
 import java.util as ju
 import scala.quoted.*
 
+/** Compile-time binding macros. */
 object BindModule {
-  /**
-   * bind class with a name.
+
+  /** Binds the given classes to the binder.
+   *
+   * @param clazzesExpr  the classes to bind
+   * @param binder       the Binder
+   * @param wiredEagerly whether to wire eagerly
+   * @return the BatchBinder
    */
   def bind(clazzesExpr: Expr[Seq[Class[_]]],
            binder: Expr[Binder], wiredEagerly: Expr[Boolean])
@@ -37,8 +43,13 @@ object BindModule {
     }
   }
 
-  /**
-   * bind class with a name.
+  /** Binds the given class with the specified bean name.
+   *
+   * @param beanName     the bean name
+   * @param clazz        the class to bind
+   * @param binder       the Binder
+   * @param wiredEagerly whether to wire eagerly
+   * @return the BatchBinder
    */
   def bind[T: Type](beanName: Expr[String], clazz: Expr[Class[T]],
                     binder: Expr[Binder], wiredEagerly: Expr[Boolean])
@@ -49,8 +60,12 @@ object BindModule {
     }
   }
 
-  /**
-   * bind class with a name.
+  /** Creates a bean definition for the given class.
+   *
+   * @param clazz        the class
+   * @param binder       the Binder
+   * @param wiredEagerly whether to wire eagerly
+   * @return the Definition
    */
   def bean[T: Type](clazz: Expr[Class[T]],
                     binder: Expr[Binder], wiredEagerly: Expr[Boolean])
@@ -63,48 +78,37 @@ object BindModule {
 
 }
 
-/** Abstract BindModule class.
- * The subclass can writed in /META-INF/beangle/cdi.xml
- * using modules=com.your.class
- */
+/** Abstract CDI binding module. Subclasses can be registered in /META-INF/beangle/cdi.xml via modules=com.your.Class. */
 abstract class BindModule {
 
   private var binder: Binder = _
 
   private var wiredEagerly: Boolean = _
 
-  /**
-   * config module using binder
-   */
+  /** Configures this module with the given binder. */
   final def configure(binder: Binder): Unit = {
     this.binder = binder
     binding()
   }
 
+  /** Sets whether beans are wired eagerly. */
   def wiredEagerly(newvalue: Boolean): Unit = {
     this.wiredEagerly = newvalue
   }
 
-  /**
-   * bind class.
-   */
+  /** Binds the given classes. */
   protected inline def bind(inline classes: Class[_]*): BatchBinder = ${ BindModule.bind('classes, 'binder, 'wiredEagerly) }
 
-  /**
-   * Returns a reference definition based on Name;
-   */
+  /** Returns a reference to a bean by name. */
   protected final def ref(name: String): Reference = Reference(name)
 
+  /** Returns an injection by class. */
   protected final def ref(clazz: Class[_]): Injection[_] = Injection(clazz)
 
-  /**
-   * Return new map entry
-   */
+  /** Creates a map entry. */
   protected final def entry(key: Any, value: Any): (_, _) = Tuple2(key, value)
 
-  /**
-   * Generate a inner bean definition
-   */
+  /** Creates an inner bean definition. */
   protected inline def bean[T](clazz: Class[T]): Definition = ${ BindModule.bean('clazz, 'binder, 'wiredEagerly) }
 
   protected final def inject[T](clazz: Class[T]): Injection[T] = {
@@ -122,11 +126,11 @@ abstract class BindModule {
     }
   }
 
-  /**
-   * Generate a list property
+  /** Builds a list property. Use list(A.class, B.class) or list(ref("id"), C.class) for beans;
+   * list("a", "b") for simple values.
    *
-   * List singleton bean references with list(A.class,B.class) or list(ref("someBeanId"),C.class).<br>
-   * List simple values with list("strValue1","strValue2")
+   * @param datas the items (Class for bean ref, or value)
+   * @return the list
    */
   protected final def list(datas: AnyRef*): List[_] = {
     datas.map {
@@ -135,19 +139,12 @@ abstract class BindModule {
     }.toList
   }
 
-  /**
-   * Generate a list reference property
-   */
+  /** Builds a list of bean references. */
   protected final def listref(classes: Class[_]*): List[_] = {
     classes.map(clazz => Injection(clazz)).toList
   }
 
-  /**
-   * Generate a set property
-   *
-   * List singleton bean references with set(A.class,B.class) or set(ref("someBeanId"),C.class).<br>
-   * List simple values with set("strValue1","strValue2")
-   */
+  /** Builds a set property. Use set(A.class, B.class) for beans; set("a", "b") for values. */
   protected final def set(datas: AnyRef*): Set[_] = {
     datas.map {
       case clazz: Class[_] => buildInnerReference(clazz)
@@ -155,6 +152,7 @@ abstract class BindModule {
     }.toSet
   }
 
+  /** Builds a map from key-value entries. */
   protected final def map(entries: (_, _)*): Map[_, _] = {
     entries.map {
       case (k, v) =>
@@ -165,6 +163,7 @@ abstract class BindModule {
     }.toMap
   }
 
+  /** Builds Properties from key=value strings. */
   protected final def props(keyValuePairs: String*): ju.Properties = {
     val properties = new ju.Properties
     keyValuePairs foreach { pair =>
@@ -174,22 +173,16 @@ abstract class BindModule {
     properties
   }
 
-  /**
-   * bind class with a name.
-   */
+  /** Binds the class with the given bean name. */
   protected inline def bind[T](beanName: String, clazz: Class[T]): BatchBinder =
     ${ BindModule.bind('beanName, 'clazz, 'binder, 'wiredEagerly) }
 
-  /**
-   * bind singleton with a name.
-   */
+  /** Binds a singleton instance with the given name. */
   protected final def bind(beanName: String, singleton: AnyRef): Singleton = {
     binder.bind(beanName, singleton)
   }
 
-  /**
-   * binding.
-   */
+  /** Override to perform binding. */
   protected def binding(): Unit
 
   final def devEnabled: Boolean = {
@@ -202,14 +195,17 @@ abstract class BindModule {
     Reference(targetBean)
   }
 
+  /** Condition: class missing from classpath. */
   def missing(clazz: Class[_]): Condition = {
     Condition.missing(clazz)
   }
 
+  /** Condition: system property exists (optionally with value). */
   def hasProperty(name: String, value: String = ""): Condition = {
     Condition.hasProperty(name, value)
   }
 
+  /** Condition: resource exists at path. */
   def hasResource(path: String): Condition = {
     Condition.hasResource(path)
   }

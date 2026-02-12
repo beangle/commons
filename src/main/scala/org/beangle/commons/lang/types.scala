@@ -16,6 +16,7 @@
  */
 
 package org.beangle.commons {
+  /** Lang type aliases (JLong, JInt, etc. for java.lang boxed types). */
   package object lang {
     type JLong = java.lang.Long
     type JDouble = java.lang.Double

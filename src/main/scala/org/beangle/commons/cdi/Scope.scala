@@ -19,11 +19,12 @@ package org.beangle.commons.cdi
 
 import org.beangle.commons.lang.Strings
 
+/** Bean lifecycle scope. */
 enum Scope {
 
-  case Singleton,Prototype,Request,Session
+  case Singleton, Prototype, Request, Session
 
-  def name:String={
+  def name: String = {
     Strings.uncapitalize(this.toString)
   }
 }

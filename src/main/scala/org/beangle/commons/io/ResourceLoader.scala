@@ -22,20 +22,36 @@ import org.beangle.commons.lang.{ClassLoaders, Strings}
 import java.io.IOException
 import java.net.URL
 
-/** Resource loader
+/** Loads resources by name.
  *
  * @author chaostone
  * @since 3.3.0
  */
 trait ResourceLoader {
 
+  /** Loads a single resource by name.
+   *
+   * @param resourceName the resource path
+   * @return Some(URL) if found, None otherwise
+   */
   def load(resourceName: String): Option[URL]
 
+  /** Loads all matching resources (e.g. classpath*:).
+   *
+   * @param resourceName the resource path
+   * @return list of URLs
+   */
   def loadAll(resourceName: String): List[URL]
 
+  /** Loads resources for each name.
+   *
+   * @param names the resource paths
+   * @return list of URLs
+   */
   def load(names: Seq[String]): List[URL]
 }
 
+/** Delegates to a list of loaders; first successful result wins. */
 class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader {
 
   def this(loaderArray: ResourceLoader*) = {
@@ -68,8 +84,7 @@ class MultiResourceLoader(loaders: List[ResourceLoader]) extends ResourceLoader 
   }
 }
 
-/** Load resource by class loader.
- */
+/** Loads resources via class loader with optional path prefixes. */
 class ClasspathResourceLoader(val prefixes: List[String] = List("")) extends ResourceLoader {
 
   def this(prefixStr: String) = {

@@ -21,11 +21,28 @@ import org.beangle.commons.codec.{Decoder, Encoder}
 
 import java.io.{File, FileOutputStream, IOException}
 
+/** Base64 encode/decode and file dump. */
 object Base64 {
+
+  /** Encodes bytes to Base64 string.
+   *
+   * @param data the bytes to encode
+   * @return Base64 string
+   */
   def encode(data: Array[Byte]): String = Base64Encoder.encode(data)
 
+  /** Decodes Base64 string to bytes.
+   *
+   * @param data the Base64 string
+   * @return decoded bytes
+   */
   def decode(data: String): Array[Byte] = Base64Decoder.decode(data)
 
+  /** Decodes Base64 string and writes to file.
+   *
+   * @param data Base64-encoded string
+   * @param file target file to write
+   */
   def dump(data: String, file: File): Unit = {
     var os: FileOutputStream = null
     try {
@@ -42,15 +59,19 @@ object Base64 {
   }
 }
 
+/** Base64 encoder (bytes -> string). */
 object Base64Encoder extends Encoder[Array[Byte], String] {
 
+  /** Encodes bytes to Base64 string. */
   def encode(data: Array[Byte]): String = {
     new String(java.util.Base64.getEncoder.encode(data))
   }
 }
 
+/** Base64 decoder (string -> bytes). */
 object Base64Decoder extends Decoder[String, Array[Byte]] {
 
+  /** Decodes Base64 string to bytes. */
   def decode(str: String): Array[Byte] = {
     java.util.Base64.getDecoder.decode(str)
   }

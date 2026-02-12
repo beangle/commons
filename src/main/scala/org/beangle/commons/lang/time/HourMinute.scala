@@ -21,23 +21,45 @@ import org.beangle.commons.lang.Numbers.toShort
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.annotation.value
 
-/** Hour and minute of day
+/** Hour:minute of day (e.g. 09:30), value = hour*100+minute.
  *
  * @version 4.0.5
  * @since 4.0.5
  */
 object HourMinute {
 
+  /** Zero hour-minute (00:00). */
   val Zero = new HourMinute(0)
 
+  /** Parses a time string in HH:mm format to HourMinute. Returns Zero for blank input.
+   *
+   * @param time time string (e.g. "09:30")
+   * @return HourMinute instance
+   */
   def apply(time: String): HourMinute = {
     if Strings.isBlank(time) then Zero else new HourMinute(convert(time))
   }
 
+  /** Creates HourMinute from hour and minute components.
+   *
+   * @param hour   hour (0–23)
+   * @param minute minute (0–59)
+   * @return HourMinute instance
+   */
   def of(hour: Int, minute: Int): HourMinute = new HourMinute((hour * 100 + minute).asInstanceOf[Short])
 
+  /** Creates HourMinute from a LocalTime.
+   *
+   * @param time LocalTime to convert
+   * @return HourMinute instance
+   */
   def of(time: java.time.LocalTime): HourMinute = of(time.getHour, time.getMinute)
 
+  /** Converts a time string (HH:mm) to internal Short value (HHmm).
+   *
+   * @param time time string (e.g. "09:30")
+   * @return value as Short
+   */
   def convert(time: String): Short = {
     val index = time.indexOf(':')
     require(index > 0 && time.length <= 5, "illegal time,it should with 00:00 format")
@@ -48,12 +70,14 @@ object HourMinute {
   }
 }
 
-/** 一天中的分钟时间，格式如23:33
- */
+/** Time of day in minutes (format HHmm, e.g. 2333 for 23:33). */
 @value
 class HourMinute(val value: Short) extends Serializable with Ordered[HourMinute] {
 
   require(value <= 2400, s"Invalid time value $value,It should less than or equals 2400")
+
+  /** Converts to java.time.LocalTime. */
+  def toLocalTime: java.time.LocalTime = java.time.LocalTime.of(hour, minute)
 
   override def toString: String = {
     var time = String.valueOf(value)
@@ -61,16 +85,26 @@ class HourMinute(val value: Short) extends Serializable with Ordered[HourMinute]
     time.substring(0, 2) + ":" + time.substring(2, 4)
   }
 
-  def toLocalTime: java.time.LocalTime = java.time.LocalTime.of(hour, minute)
-
   override def compare(o: HourMinute): Int = this.value - o.value
 
+  /** Hour component (0–23). */
   def hour: Int = value / 100
 
+  /** Minute component (0–59). */
   def minute: Int = value % 100
 
+  /** Returns the absolute difference in minutes between this and another HourMinute.
+   *
+   * @param other other HourMinute
+   * @return minutes between the two times
+   */
   def interval(other: HourMinute): Int = Math.abs(this.minutes - other.minutes)
 
+  /** Adds a duration in minutes. Wraps around midnight for overflow/underflow.
+   *
+   * @param minutesDuration minutes to add (can be negative)
+   * @return new HourMinute
+   */
   def +(minutesDuration: Int): HourMinute = {
     var minutesValue = minutes + minutesDuration
     val day = 24 * 60
@@ -83,10 +117,20 @@ class HourMinute(val value: Short) extends Serializable with Ordered[HourMinute]
     new HourMinute(((minutesValue / 60) * 100 + minutesValue % 60).asInstanceOf[Short])
   }
 
+  /** Subtracts a duration in minutes. Wraps around midnight for underflow.
+   *
+   * @param minutesDuration minutes to subtract
+   * @return new HourMinute
+   */
   def -(minutesDuration: Int): HourMinute = this + (0 - minutesDuration)
 
   private def minutes: Int = hour * 60 + minute
 
+  /** Returns the minute difference between this and another HourMinute.
+   *
+   * @param other other HourMinute
+   * @return minutes (can be negative)
+   */
   def -(other: HourMinute): Short = (this.minutes - other.minutes).asInstanceOf[Short]
 
   override def equals(obj: Any): Boolean = {

@@ -26,10 +26,18 @@ import java.lang.reflect.Method
 import java.net.{JarURLConnection, URL}
 import java.util.jar.JarFile
 
+/** Resolves resources by location pattern (supports Ant-style patterns). */
 trait ResourceResolver {
 
+  /** Prefix for loading all matching classpath resources. */
   val ClasspathAllUrlPrefix = "classpath*:"
+  /** Prefix for loading a single classpath resource. */
   val ClasspathUrlPrefix = "classpath:"
 
+  /** Returns all resources matching the location pattern.
+   *
+   * @param locationPattern the pattern (e.g. classpath&#42;:META-INF/&#42;&#42;)
+   * @return list of matching URLs
+   */
   def getResources(locationPattern: String): List[URL]
 }

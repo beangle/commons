@@ -19,15 +19,20 @@ package org.beangle.commons.io
 
 import java.io.{InputStream, ObjectInputStream, ObjectOutputStream, OutputStream}
 
+/** Serializes/deserializes a single object type. */
 trait ObjectSerializer {
 
+  /** Serializes data to the output stream. */
   def serialize(data: Any, os: OutputStream, params: Map[String, Any]): Unit
 
+  /** Deserializes object from the input stream. */
   def deserialize(is: InputStream, params: Map[String, Any]): Any
 }
 
+/** ObjectSerializer implementations. */
 object ObjectSerializer {
 
+  /** Java ObjectOutputStream/ObjectInputStream-based serializer. */
   object Default extends ObjectSerializer {
     def serialize(data: Any, os: OutputStream, params: Map[String, Any]): Unit = {
       val oos = new ObjectOutputStream(os)

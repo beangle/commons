@@ -22,23 +22,43 @@ import org.beangle.commons.lang.Strings
 import java.net.{URI, URL, URLConnection}
 import java.util.jar.JarFile
 
+/** JAR URL and file utilities. */
 object Jars {
 
+  /** JAR URL protocols. */
   val protocols = Set("jar", "zip", "wsjar", "vsfzip")
 
+  /** Separator between JAR URL and entry path. */
   val URLSeparator = "!/"
 
+  /** Returns true if the URL is a JAR/zip URL.
+   *
+   * @param url the URL to check
+   * @return true if JAR protocol
+   */
   def isJarURL(url: URL): Boolean =
     protocols.contains(url.getProtocol)
 
+  /** Enables URLConnection caches for JNLP connections.
+   *
+   * @param con the connection to configure
+   */
   def useCachesIfNecessary(con: URLConnection): Unit =
     con.setUseCaches(con.getClass.getSimpleName.startsWith("JNLP"))
 
+  /** Converts location string to URI (spaces to %20).
+   *
+   * @param location the location string
+   * @return the URI
+   */
   def toURI(location: String): URI =
     new URI(Strings.replace(location, " ", "%20"));
 
-  /** Resolve the given jar file URL into a JarFile object.
-    */
+  /** Resolves the JAR file URL/path to a JarFile.
+   *
+   * @param jarFileUrl the JAR URL or path
+   * @return the JarFile
+   */
   def getJarFile(jarFileUrl: String): JarFile =
     if (jarFileUrl.startsWith("file:"))
       new JarFile(Jars.toURI(jarFileUrl).getSchemeSpecificPart())

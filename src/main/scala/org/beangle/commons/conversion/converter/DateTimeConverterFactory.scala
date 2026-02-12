@@ -23,8 +23,7 @@ import org.beangle.commons.conversion.impl.ConverterFactory
 import java.time.*
 import java.time.temporal.Temporal
 
-/** Convert LocalDateTime to Instant.
- */
+/** Converts LocalDateTime to Instant/ZonedDateTime/OffsetDateTime. */
 object DateTimeConverterFactory extends ConverterFactory[LocalDateTime, Temporal] {
 
   object ToInstant extends Converter[LocalDateTime, Instant] {

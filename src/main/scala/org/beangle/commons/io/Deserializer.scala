@@ -19,9 +19,15 @@ package org.beangle.commons.io
 
 import java.io.InputStream
 
+/** Deserializes objects from an input stream. */
 trait Deserializer {
 
-  /** Deserializer a object from inputstream,then close then stream,return the object.
-    */
+  /** Deserializes an object from the input stream and closes it.
+   *
+   * @param clazz  the target class
+   * @param is     the input stream
+   * @param params optional deserialization parameters
+   * @return the deserialized object
+   */
   def deserialize[T](clazz: Class[T], is: InputStream, params: Map[String, Any]): T
 }

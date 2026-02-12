@@ -21,17 +21,17 @@ import org.beangle.commons.lang.reflect.Reflections
 
 import java.lang.reflect.Method
 
-/** Create Enumeration value
+/** Utilities for Scala 3 enum and Java enum.
  *
  * @since 3.1
  */
 object Enums {
 
-  /** Returns an optional enum constant for the given type, using `Enum#valueOf`. If the
-   * constant does not exist, `Option.none` is returned. A common use case is for parsing
-   * user input or falling back to a default enum constant. For example,
-   * `Enums.get(Country.class, countryInput).getOrElse(Country.DEFAULT);`
+  /** Returns an optional enum constant for the given type, using Enum.valueOf.
    *
+   * @param enumClass the enum class
+   * @param value     the constant name
+   * @return Some(constant) or None if not found
    * @since 3.1
    */
   def get[T <: _root_.scala.reflect.Enum](enumClass: Class[T], value: String): Option[T] = {
@@ -43,19 +43,28 @@ object Enums {
     }
   }
 
+  /** Returns enum constant by id (ordinal or id method).
+   *
+   * @param enumClass the enum class
+   * @param id        the id/ordinal
+   * @return Some(constant) or None
+   */
   def of[T <: _root_.scala.reflect.Enum](enumClass: Class[T], id: Int): Option[T] = {
     val e = Reflections.getInstance[AnyRef](enumClass.getName)
     toIdMaps(values(e)).get(id).asInstanceOf[Option[T]]
   }
 
+  /** Returns the id (or ordinal) of the enum constant. */
   def id(e: AnyRef): Int = {
     findIndexMethod(e.getClass).invoke(e).asInstanceOf[Int]
   }
 
+  /** Returns the values array of the enum. */
   def values(e: AnyRef): Array[AnyRef] = {
     e.getClass.getMethod("values").invoke(e).asInstanceOf[Array[AnyRef]]
   }
 
+  /** Maps id to enum constant for the given values array. */
   def toIdMaps(vs: Array[AnyRef]): Map[Int, AnyRef] = {
     vs.map { v =>
       val idMethod = findIndexMethod(v.getClass)
@@ -64,6 +73,7 @@ object Enums {
     }.toMap[Int, AnyRef]
   }
 
+  /** Returns true if the class is a Scala 3 enum or Java enum. */
   def isEnum(clazz: Class[_]): Boolean = {
     classOf[_root_.scala.reflect.Enum].isAssignableFrom(clazz) || clazz.isEnum
   }

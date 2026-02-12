@@ -42,7 +42,7 @@ object LinuxBash extends Shell(Charsets.UTF_8) {
    */
   override def exec(arg: String): (Int, collection.Seq[String]) = {
     require(null != arg, "Need command")
-    //如果是个绝对地址，则直接执行，不用放在shell环境中执行。
+    // if absolute path, run directly; otherwise wrap in sh -c
     val args = Collections.newBuffer[String]
     if (!Shell.isFile(arg)) {
       args.addOne("sh")

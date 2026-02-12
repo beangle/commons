@@ -23,8 +23,10 @@ import org.beangle.commons.concurrent.Sidecar.Worker
 import java.util as ju
 import java.util.concurrent.ArrayBlockingQueue
 
+/** Async queue with worker thread. */
 object Sidecar {
 
+  /** Worker thread that processes items from the sidecar queue. */
   class Worker[T](car: Sidecar[T], job: T => Unit) extends Thread {
     var stopped: Boolean = false
 
@@ -47,6 +49,12 @@ object Sidecar {
   }
 }
 
+/** Background queue processor. Items offered are processed by a worker thread.
+ *
+ * @param name     worker thread name
+ * @param job      the function to apply to each item
+ * @param capacity queue capacity
+ */
 class Sidecar[T](name: String, job: T => Unit, capacity: Int = 512) extends Disposable {
   private val queue = new ArrayBlockingQueue[T](capacity)
   private val worker: Worker[T] = new Worker[T](this, job)
@@ -55,6 +63,10 @@ class Sidecar[T](name: String, job: T => Unit, capacity: Int = 512) extends Disp
   worker.setName(name)
   worker.start()
 
+  /** Adds an item to the queue for processing.
+   *
+   * @param t the item to process
+   */
   def offer(t: T): Unit = {
     queue.offer(t)
   }

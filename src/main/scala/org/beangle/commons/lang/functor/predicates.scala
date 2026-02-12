@@ -19,55 +19,65 @@ package org.beangle.commons.lang.functor
 
 import org.beangle.commons.lang.Strings.*
 
-import java.util.Collection
+import java.util as ju
 
-/** 有效整型判断谓词
-  *
-  * @author chaostone
-  */
+/** Predicate: value is a valid integer within the given range.
+ *
+ * @author chaostone
+ */
 class InRange(val floor: Int, val upper: Int) extends Predicate[Number] {
 
-  def apply(value: Number): Boolean =
-    if (null == value)
+  def apply(value: Number): Boolean = {
+    if (null == value) {
       false
-    else {
+    } else {
       val valueInt = value.intValue()
       valueInt <= upper && valueInt >= floor
     }
+  }
 }
 
+/** Predicate: value is non-null and non-zero. */
 object NotZero extends Predicate[Number] {
 
   def apply(value: Number): Boolean =
     null != value && 0 != value.asInstanceOf[Number].intValue
 }
 
+/** Predicate: value is non-null and non-blank. */
 object NotEmpty extends Predicate[String] {
 
-  def apply(value: String): Boolean =
-    (null != value) && (value.isInstanceOf[String]) && isNotEmpty(value.asInstanceOf[String])
+  def apply(value: String): Boolean = {
+    (null != value) && isNotEmpty(value)
+  }
 }
 
+/** Predicate: string contains no delimiter. */
 object SingleWord extends Predicate[String] {
 
-  def apply(str: String): Boolean =
+  def apply(str: String): Boolean = {
     str.indexOf(DELIMITER) == -1
+  }
 }
 
+/** Predicate: str contains the argument. */
 class InStr(val str: String) extends Predicate[String] {
 
-  def apply(arg0: String): Boolean =
-    -1 != str.indexOf(arg0.toString)
+  def apply(arg0: String): Boolean = {
+    -1 != str.indexOf(arg0)
+  }
 }
 
-class Contains[T](val objs: Collection[_ <: T]) extends Predicate[T]() {
+/** Predicate: value is in the given collection. */
+class Contains[T](val objs: ju.Collection[_ <: T]) extends Predicate[T]() {
 
-  def apply(arg0: T): Boolean =
-    objs.contains(arg0)
+  def apply(arg0: T): Boolean = objs.contains(arg0)
 }
 
-class Max1Element extends Predicate[Collection[_]] {
+/** Predicate: collection has at most one element. */
+class Max1Element extends Predicate[ju.Collection[_]] {
 
-  def apply(col: Collection[_]): Boolean =
+  def apply(col: ju.Collection[_]): Boolean = {
     col.size < 2
+  }
 }

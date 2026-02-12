@@ -19,4 +19,5 @@ package org.beangle.commons.cdi
 
 import org.beangle.commons.event.{Event, EventListener}
 
+/** CDI-aware event listener. */
 trait CdiEventListener[E <: Event] extends EventListener[E]

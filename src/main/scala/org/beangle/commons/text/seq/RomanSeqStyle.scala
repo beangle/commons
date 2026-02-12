@@ -21,14 +21,14 @@ import org.beangle.commons.text.seq.RomanSeqStyle.*
 
 import scala.collection.mutable
 
+/** RomanSeqStyle constants. */
 object RomanSeqStyle {
-  // 支持的最大数字
+
+  /** Maximum supported sequence number. */
   val MAX: Int = 99999
 }
 
-/** 罗马数字风格的序列号
-  * I(1)，V(5)，X(10)，L(50)，C(100)，D(500)，M(1000)
-  */
+/** Roman numeral sequence style. I(1), V(5), X(10), L(50), C(100), D(500), M(1000). */
 class RomanSeqStyle extends SeqNumStyle {
 
   private val levels = Array(Array("I", "V", "X"), Array("X", "L", "C"), Array("C", "D", "M"))
@@ -39,6 +39,7 @@ class RomanSeqStyle extends SeqNumStyle {
     toRoman(String.valueOf(seq))
   }
 
+  /** Converts digit string to Roman numerals. */
   def toRoman(n: String): String = {
     val r = new mutable.StringBuilder
     for (c <- 0 until n.length) {
@@ -47,6 +48,7 @@ class RomanSeqStyle extends SeqNumStyle {
     r.mkString
   }
 
+  /** Converts a single digit at position to Roman symbols. */
   def calcDigit(d: Integer, l: Int): String = {
     if (l > 2) {
       "M" * (d * Math.pow(10, l - 3)).toInt
@@ -66,6 +68,7 @@ class RomanSeqStyle extends SeqNumStyle {
     }
   }
 
+  /** Returns true if string contains only digits. */
   def isNumeric(str: String): Boolean = {
     str.forall(x => '0' <= x && x <= '9')
   }

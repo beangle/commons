@@ -21,33 +21,41 @@ import org.beangle.commons.collection.Collections
 
 import scala.collection.mutable
 
+/** Bean reconfiguration definitions. */
 object Reconfig {
+
+  /** Bean reconfiguration definition. */
   class Definition(val beanName: String, var configType: ReconfigType) {
     var clazz: Option[Class[_]] = None
     var properties: mutable.Map[String, Any] = Collections.newMap[String, Any]
     var constructorArgs: mutable.Buffer[Any] = Collections.newBuffer[Any]
     var primaryOf: Set[Class[_]] = Set.empty
 
+    /** Sets the target class. */
     def setClass(clazz: Class[_]): this.type = {
       this.clazz = Some(clazz)
       this
     }
 
+    /** Marks this bean as primary for the given types. */
     def primaryOf(clazz: Class[_]*): Unit = {
       this.primaryOf = clazz.toSet
     }
 
+    /** Sets a property. */
     def set(property: String, value: AnyRef): Definition = {
       this.properties.put(property, value)
       this
     }
 
+    /** Removes a property. */
     def remove(property: String): Definition = {
       this.properties.remove(property)
       this.properties.put("-" + property, "--")
       this
     }
 
+    /** Merges a property (adds to existing). */
     def merge(property: String, value: AnyRef): Definition = {
       this.properties.remove(property)
       this.properties.put("+" + property, value)
@@ -60,9 +68,9 @@ object Reconfig {
   }
 }
 
+/** Runtime CDI reconfiguration (update/remove bean definitions). */
 class Reconfig {
 
   var definitions = Collections.newMap[String, Reconfig.Definition]
-
   var ignoreMissing: Boolean = true
 }

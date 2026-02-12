@@ -19,8 +19,10 @@ package org.beangle.commons.text.i18n
 
 import java.util.Locale
 
+/** TextResource factory. */
 object TextResource {
 
+  /** Empty resource; returns key as-is. */
   object Empty extends TextResource {
     def apply(key: String): Option[String] = Some(key)
 
@@ -31,31 +33,27 @@ object TextResource {
 
 }
 
-/** TextResource interface.
-  *
-  * @author chaostone
-  */
+/** Locale-aware text resource (message bundle).
+ *
+ * @author chaostone
+ */
 trait TextResource {
 
-  /** Gets a message based on a message key, or null if no message is found.
-    *
-    * @param key the resource bundle key that is to be searched for
-    * @return the message as found in the resource bundle, or null if none is found.
-    */
+  /** Gets message by key.
+   *
+   * @param key resource bundle key
+   * @return message or None if not found
+   */
   def apply(key: String): Option[String]
 
-  /** Gets a message based on a key using the supplied obj, as defined in
-    * [[java.text.MessageFormat]], or, if the message is not found, a
-    * supplied default value is returned.
-    *
-    * @param key          the resource bundle key that is to be searched for
-    * @param defaultValue the default value which will be returned if no message is found
-    * @param obj          obj to be used in a [[java.text.MessageFormat]] message
-    * @return the message as found in the resource bundle, or defaultValue if none is found
-    */
+  /** Gets message by key with MessageFormat args, or default if not found.
+   *
+   * @param key          resource bundle key
+   * @param defaultValue value when not found
+   * @param obj          MessageFormat arguments
+   * @return formatted message or defaultValue
+   */
   def apply(key: String, defaultValue: String, obj: Any*): String
 
-  /** @return locale
-    */
   def locale: Locale
 }

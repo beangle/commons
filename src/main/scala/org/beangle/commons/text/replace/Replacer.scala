@@ -19,11 +19,10 @@ package org.beangle.commons.text.replace
 
 import java.util.regex.Pattern
 
+/** Replacer factory. */
 object Replacer {
 
-  /** process.
-    *
-    */
+  /** Applies replacers in sequence to input. */
   def process(input: String, replacers: List[Replacer]): String = {
     if (null eq input) return null
     var in = input
@@ -32,19 +31,22 @@ object Replacer {
   }
 }
 
+/** String replacement strategy. */
 trait Replacer {
-
+  /** Processes input and returns the result. */
   def process(input: String): String
 }
 
-/** Replace target with value on any input.
-  */
+/** Replaces regex matches with a fixed value. */
 class PatternReplacer(key: String, var value: String) extends Replacer {
 
+  /** Regex pattern for matching. */
   var pattern: Pattern = Pattern.compile(key)
 
+  /** Display label for this replacer. */
   var target: String = key
 
+  /** Replaces all pattern matches with value. */
   def process(input: String): String =
     pattern.matcher(input).replaceAll(value)
 

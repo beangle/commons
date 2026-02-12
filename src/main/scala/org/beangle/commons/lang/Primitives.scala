@@ -20,14 +20,14 @@ package org.beangle.commons.lang
 import java.lang as jl
 
 /** Wrap or Unwrap primitive
-  *
-  * @author chaostone
-  * @since 3.2.0
-  */
+ *
+ * @author chaostone
+ * @since 3.2.0
+ */
 object Primitives {
 
   /** Primitive types to their corresponding wrapper types.
-    */
+   */
   private val primitiveToWrappers: Map[Class[_], Class[_]] = Map(
     (classOf[Boolean], classOf[jl.Boolean]),
     (classOf[Byte], classOf[jl.Byte]), (classOf[Char], classOf[jl.Character]),
@@ -44,42 +44,52 @@ object Primitives {
     (classOf[Int], "0"), (classOf[Long], "0L"), (classOf[Float], "0F"), (classOf[Double], "0D"))
 
   /** Wrapper types to their corresponding primitive types.
-    */
+   */
   private val wrapperToPrimitives = primitiveToWrappers.map(_.swap)
 
+  /** Returns the default value for the type (0, false, etc.; null for reference types).
+   *
+   * @param clazz the class
+   * @return the default value
+   */
   def default[T](clazz: Class[T]): T =
     if (clazz.isPrimitive) defaults(clazz).asInstanceOf[T] else null.asInstanceOf[T]
 
+  /** Returns the default literal string for the type (e.g. "0", "false", "null").
+   *
+   * @param clazz the class
+   * @return literal string
+   */
   def defaultLiteral[T](clazz: Class[T]): String =
     if (clazz.isPrimitive) defaultLiterals(clazz) else "null"
 
   /** Returns `true` if `type` is one of the nine
-    * primitive-wrapper types, such as Integer.
-    *
-    * @see Class#isPrimitive
-    */
+   * primitive-wrapper types, such as Integer.
+   *
+   * @see Class#isPrimitive
+   */
   def isWrapperType(clazz: Class[_]): Boolean = wrapperToPrimitives.contains(clazz)
 
   /** Returns the corresponding wrapper type of `type` if it is a primitive
-    * type; otherwise returns `type` itself. Idempotent.
-    *
-    * <pre>
-    * wrap(int.class) == Integer.class
-    * wrap(Integer.class) == Integer.class
-    * wrap(String.class) == String.class
-    * </pre>
-    */
+   * type; otherwise returns `type` itself. Idempotent.
+   *
+   * <pre>
+   * wrap(int.class) == Integer.class
+   * wrap(Integer.class) == Integer.class
+   * wrap(String.class) == String.class
+   * </pre>
+   */
   def wrap[T](clazz: Class[T]): Class[T] =
-    if ((clazz.isPrimitive || (clazz eq classOf[Unit]))) primitiveToWrappers.get(clazz).get.asInstanceOf[Class[T]] else clazz
+    if ((clazz.isPrimitive || (clazz eq classOf[Unit]))) primitiveToWrappers(clazz).asInstanceOf[Class[T]] else clazz
 
   /** Returns the corresponding primitive type of `type` if it is a
-    * wrapper type; otherwise returns `type` itself. Idempotent.
-    *
-    * <pre>
-    * unwrap(Integer.class) == int.class
-    * unwrap(int.class) == int.class
-    * unwrap(String.class) == String.class
-    * </pre>
-    */
-  def unwrap[T](clazz: Class[T]): Class[T] = wrapperToPrimitives.get(clazz).getOrElse(clazz).asInstanceOf[Class[T]]
+   * wrapper type; otherwise returns `type` itself. Idempotent.
+   *
+   * <pre>
+   * unwrap(Integer.class) == int.class
+   * unwrap(int.class) == int.class
+   * unwrap(String.class) == String.class
+   * </pre>
+   */
+  def unwrap[T](clazz: Class[T]): Class[T] = wrapperToPrimitives.getOrElse(clazz, clazz).asInstanceOf[Class[T]]
 }

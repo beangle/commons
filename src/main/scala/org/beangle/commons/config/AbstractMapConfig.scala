@@ -19,10 +19,10 @@ package org.beangle.commons.config
 
 import org.beangle.commons.collection.Collections
 
-/** Abstract Config support direct access property value
- */
+/** Config backed by key-value map with prefix support. */
 abstract class AbstractMapConfig extends Config {
 
+  /** Returns iterator over all property keys. */
   def keysIterator: Iterator[String]
 
   final override def get(name: String, defaults: Any): Any = {

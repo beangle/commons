@@ -17,15 +17,25 @@
 
 package org.beangle.commons.text.escape
 
+/** Escapes XML special characters. */
 object XmlEscaper {
   private val textTargets = Map('<' -> "&lt;", '>' -> "&gt;", '&' -> "&amp;")
-
   private val targets = textTargets ++ Map('"' -> "&quot;", '\'' -> "&apos;")
 
+  /** Escapes XML special characters including quotes. For attribute values.
+   *
+   * @param str the string to escape
+   * @return the escaped string
+   */
   def escape(str: String): String = {
     escape(str, targets)
   }
 
+  /** Escapes XML text content (no quotes). For element text.
+   *
+   * @param str the string to escape
+   * @return the escaped string
+   */
   def escapeText(str: String): String = {
     escape(str, textTargets)
   }

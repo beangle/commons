@@ -25,20 +25,25 @@ import java.io.*
 import java.nio.charset.Charset
 import java.util.{Date, GregorianCalendar}
 
+/** DBF Reader factory and CSV export. */
 object Reader {
+
   private final val DATA_ENDED: Byte = 0x1A
   private final val DATA_DELETED: Byte = 0x2A
 
+  /** Creates Reader from File (RandomAccessFile). */
   def apply(file: File): Reader = {
     val dataInput = new RandomAccessFile(file, "r")
     new Reader(dataInput, Header.read(dataInput))
   }
 
+  /** Creates Reader from InputStream. */
   def apply(in: InputStream): Reader = {
     val dataInput = new DataInputStream(new BufferedInputStream(in))
     new Reader(dataInput, Header.read(dataInput))
   }
 
+  /** Writes DBF to CSV using the given charset. */
   def writeToCsv(dbf: File, csv: File, dbfEncoding: Charset): Unit = {
     val reader = Reader(dbf)
     val writer = new PrintWriter(new BufferedWriter(new FileWriter(csv)))
@@ -77,14 +82,10 @@ object Reader {
     }
   }
 
-  /**
-   * Create string with dbf information:
-   *   - creation date
-   *   - total records count
-   *   - columns info
+  /** Returns a string with DBF metadata (creation date, record count, columns).
    *
-   * @param dbf .dbf file
-   * @return string with dbf information
+   * @param dbf the DBF file
+   * @return formatted info string
    */
   def readInfo(dbf: File): String = {
     val indexWidth = 4
@@ -133,8 +134,9 @@ object Reader {
   }
 }
 
-/**
- * @see <a href="http://www.fship.com/dbfspecs.txt">DBF specification</a>
+/** DBF file reader.
+ *
+ * @see http://www.fship.com/dbfspecs.txt
  */
 class Reader(dataInput: DataInput, val header: Header) extends Closeable {
   skipToDataBeginning()
@@ -145,15 +147,14 @@ class Reader(dataInput: DataInput, val header: Header) extends Closeable {
     if (dataStartIndex > 0) dataInput.skipBytes(dataStartIndex)
   }
 
+  /** Returns true if the underlying stream supports seeking (RandomAccessFile). */
   def canSeek: Boolean = {
     dataInput.isInstanceOf[RandomAccessFile]
   }
 
-  /**
-   * Attempt to seek to a specified record index. If successful the record can be read
-   * by calling  `DbfReader#nextRecord()` .
+  /** Seeks to record index; next nextRecord() returns that record.
    *
-   * @param n The zero-based record index.
+   * @param n zero-based record index
    */
   def seekToRecord(n: Int): Unit = {
     if (!canSeek) throw new DbfException("Seeking is not supported.")
@@ -168,11 +169,7 @@ class Reader(dataInput: DataInput, val header: Header) extends Closeable {
     }
   }
 
-  /**
-   * Reads and returns the next row in the Dbf stream
-   *
-   * @return The next row as an Object array.
-   */
+  /** Reads and returns the next row (Object array), or null at EOF. */
   def nextRecord(): Array[Object] =
     try {
       var nextByte: Int = 0

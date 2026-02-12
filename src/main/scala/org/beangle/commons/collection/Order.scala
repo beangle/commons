@@ -21,37 +21,45 @@ import org.beangle.commons.lang.Strings
 
 import scala.collection.mutable.ListBuffer
 
-/** 排序
+/** Ordering specification for sorting (property with asc/desc direction).
  *
  * @author chaostone
  */
 object Order {
-  /** Constant `OrderStr="orderBy"`
-   */
+
+  /** Default param name for order string (e.g. "orderBy=name,-age"). */
   val OrderStr = "orderBy"
 
+  /** Creates an ascending Order for the given property. Use parse for comma-separated multiple orders.
+   *
+   * @param property the property name to sort by
+   * @return ascending Order
+   */
   def apply(property: String): Order = {
     require(!Strings.contains(property, ","), "use parse for multiple order")
     parse(property).head
   }
 
-  /** Asc.
+  /** Creates an ascending order for the property.
    *
-   * @param property a String object.
-   * @return a order object.
+   * @param property the property name to sort by
+   * @return ascending Order
    */
   def asc(property: String): Order = {
     new Order(property, true)
   }
 
-  /** Desc.
+  /** Creates a descending order for the property.
    *
-   * @param property a String object.
-   * @return a order object.
+   * @param property the property name to sort by
+   * @return descending Order
    */
   def desc(property: String): Order = new Order(property, false)
 
-  /** toSortString.
+  /** Converts the order list to SQL "order by" clause string.
+   *
+   * @param orders the list of Order specifications
+   * @return the order by string (e.g. "order by name, age desc")
    */
   def toSortString(orders: List[Order]): String = {
     if (null == orders || orders.isEmpty) return ""
@@ -62,7 +70,11 @@ object Order {
     buf.substring(0, buf.length - 1)
   }
 
-  /** parse order string.
+  /** Parses an order string (e.g. "name,-age,+score") into a list of Order.
+   * Supports: "name desc", "name asc", "-name" (desc), "+name" (asc).
+   *
+   * @param orderString the comma-separated order string
+   * @return the list of Order
    */
   def parse(orderString: String): List[Order] =
     if (Strings.isBlank(orderString)) {
@@ -90,16 +102,15 @@ object Order {
     }
 }
 
-/** 排序
+/** Ordering specification: property name with ascending/descending direction.
  *
+ * @param property  the property name to sort by
+ * @param ascending true for asc, false for desc
  * @author chaostone
  */
 case class Order(property: String, ascending: Boolean) {
 
-  /** ToString.
-   *
-   * @return a String object.
-   */
+  /** Returns string representation (e.g. "name asc" or "age desc"). */
   override def toString: String = {
     property + " " + (if (ascending) "asc" else "desc")
   }

@@ -19,9 +19,9 @@ package org.beangle.commons.lang.annotation
 
 import scala.annotation.StaticAnnotation
 
-/** Ignore field when using reflection
-  *
-  * @author chaostone
-  * @since 3.0.2
-  */
+/** Excludes field from reflection (BeanInfo, Properties, etc.).
+ *
+ * @author chaostone
+ * @since 3.0.2
+ */
 class noreflect extends StaticAnnotation

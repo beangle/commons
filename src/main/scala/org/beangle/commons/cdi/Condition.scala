@@ -20,16 +20,34 @@ package org.beangle.commons.cdi
 import org.beangle.commons.config.Enviroment
 import org.beangle.commons.lang.ClassLoaders
 
+/** CDI binding conditions. */
 object Condition {
 
+  /** Condition that always meets (true). */
   object None extends Condition {
     override def meet(registry: Binder.Registry): Boolean = true
   }
 
+  /** Condition: registry does not contain the given class.
+   *
+   * @param clazz the bean class to check
+   * @return the Condition
+   */
   def missing(clazz: Class[_]): Condition = new MissingByClass(clazz)
 
+  /** Condition: classpath has the given resource.
+   *
+   * @param path the resource path
+   * @return the Condition
+   */
   def hasResource(path: String): Condition = new HasResource(path)
 
+  /** Condition: system/env has property with the given value (empty value = truthy check).
+   *
+   * @param name  the property name
+   * @param value the expected value
+   * @return the Condition
+   */
   def hasProperty(name: String, value: String): Condition = new HasProperty(name, value)
 
   private class MissingByClass(beanClass: Class[_]) extends Condition {
@@ -73,6 +91,8 @@ object Condition {
   }
 }
 
+/** Condition for conditional bean registration. */
 trait Condition {
+  /** Returns true if the condition is met for the given registry. */
   def meet(registry: Binder.Registry): Boolean
 }

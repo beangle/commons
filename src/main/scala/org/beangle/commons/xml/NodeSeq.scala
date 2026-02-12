@@ -19,9 +19,12 @@ package org.beangle.commons.xml
 
 import org.beangle.commons.collection.Collections
 
+/** NodeSeq factory. */
 object NodeSeq {
+
   val Empty = new NodeSeq(List.empty)
 
+  /** Creates a NodeSeq from a single node. */
   def of(n: Node): NodeSeq = {
     NodeSeq(List(n))
   }
@@ -34,8 +37,11 @@ class NodeSeq(elems: collection.Seq[Node]) extends collection.Seq[Node] {
 
   override def length: Int = elems.length
 
-  /** 按照名称查询自身、孩子或子孙的节点
-   * 和scala的xml模块不一样的地方包括：不支持查询下划线(_)模糊查询,不支持@属性查找
+  /** Queries nodes by name from self, children, or descendants.
+   * Unlike scala.xml: no underscore (_) wildcard, no @ attribute lookup.
+   *
+   * @param name the node name to match
+   * @return the matching NodeSeq
    */
   def \\(name: String): NodeSeq = {
     if elems.isEmpty then this
@@ -52,6 +58,11 @@ class NodeSeq(elems: collection.Seq[Node]) extends collection.Seq[Node] {
     }
   }
 
+  /** Queries direct children. Use "_" for all children; @name for attribute.
+   *
+   * @param name the child name or "_" or "@attrName"
+   * @return the matching NodeSeq
+   */
   def \(name: String): NodeSeq = {
     if elems.isEmpty then this
     else {

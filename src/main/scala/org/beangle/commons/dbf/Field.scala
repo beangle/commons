@@ -19,6 +19,7 @@ package org.beangle.commons.dbf
 
 import java.io.{DataInput, IOException}
 
+/** DBF field descriptor. */
 class Field(
              val index: Int,
              val name: String,
@@ -30,9 +31,12 @@ class Field(
              val indexFieldFlag: Byte) {
 }
 
+/** Field factory. */
 object Field {
-  val HEADER_TERMINATOR = 0x0d;
 
+  val HEADER_TERMINATOR = 0x0d
+
+  /** Reads one field from DataInput. */
   def read(in: DataInput, index: Int): Field =
     try {
       //|fileName{0-10}|data-type{11}|reserved{12-15}|field-ength{16}|decimal-count{17}

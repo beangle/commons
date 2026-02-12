@@ -17,10 +17,14 @@
 
 package org.beangle.commons.codec
 
+/** Encodes source type S to target type T. */
 trait Encoder[S, T] {
+  /** Encodes the source value to target type. */
   def encode(s: S): T
 }
 
+/** Decodes source type S to target type T. */
 trait Decoder[S, T] {
+  /** Decodes the source value to target type. */
   def decode(s: S): T
 }

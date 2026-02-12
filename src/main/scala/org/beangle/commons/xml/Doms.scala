@@ -20,12 +20,23 @@ package org.beangle.commons.xml
 import org.beangle.commons.lang.Strings
 import org.w3c.dom.{Node, Element as XmlElement}
 
+/** W3C DOM utilities. */
 object Doms {
 
+  /** Returns true if the element is the document root.
+   *
+   * @param elem the element to check
+   * @return true if root
+   */
   def isRootElement(elem: XmlElement): Boolean = {
     elem.getParentNode != null && elem.getParentNode.getNodeType == Node.DOCUMENT_NODE
   }
 
+  /** Gets text content when element has no child elements.
+   *
+   * @param elem the W3C element
+   * @return Some(text) if text-only, None if has element children
+   */
   def getTextValue(elem: XmlElement): Option[String] = {
     val nl = elem.getChildNodes
     var hasElement = false

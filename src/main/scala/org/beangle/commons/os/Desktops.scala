@@ -19,8 +19,10 @@ package org.beangle.commons.os
 
 import java.net.URI
 
+/** Desktop integration (open browser, etc.). */
 object Desktops {
 
+  /** Opens URL in system default browser. */
   def openBrowser(url: String): Unit = {
     try {
       val desktopClass = Class.forName("java.awt.Desktop")

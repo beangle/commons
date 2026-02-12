@@ -19,27 +19,26 @@ package org.beangle.commons.text.seq
 
 import org.beangle.commons.text.seq.SeqNumStyle.*
 
+/** SeqNumStyle factory and built-in styles. */
 object SeqNumStyle {
 
-  /** 中文数字
-    */
+  /** Chinese numeral style (零, 一, 二, 三...). */
   val HANZI = new HanZiSeqStyle()
 
-  /** 数字
-    */
+  /** Arabic numeral style (1, 2, 3...). */
   val ARABIC = new ArabicSeqStyle()
 }
 
 /** SeqNumStyle interface.
-  *
-  * @author chaostone
-  */
+ *
+ * @author chaostone
+ */
 trait SeqNumStyle {
 
-  /** build.
-    *
-    * @param seq a int.
-    * @return a String object.
-    */
+  /** Builds the sequence string for the given index.
+   *
+   * @param seq the sequence index (1-based)
+   * @return the formatted string (e.g. "一", "1")
+   */
   def build(seq: Int): String
 }

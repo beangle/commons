@@ -22,12 +22,23 @@ import org.beangle.commons.lang.{Numbers, Options, Strings}
 
 import scala.collection.mutable
 
+/** JsonArray factory. */
 object JsonArray {
 
+  /** Creates JsonArray from values.
+   *
+   * @param v the values
+   * @return the new JsonArray
+   */
   def apply(v: Any*): JsonArray = {
     new JsonArray(v)
   }
 
+  /** Parses index from path part (e.g. "0" or "[1]").
+   *
+   * @param part the path part
+   * @return the index, or -1 if not an index
+   */
   protected[json] def parseIndex(part: String): Int = {
     var index = -1
     if (part.charAt(0) == '[') {
@@ -45,19 +56,37 @@ class JsonArray extends collection.Seq[Any], Json {
 
   private val values = new mutable.ArrayBuffer[Any]
 
+  /** Creates JsonArray from iterable.
+   *
+   * @param v the values
+   */
   def this(v: Iterable[Any]) = {
     this()
     values.addAll(v)
   }
 
+  /** Appends a value to the array.
+   *
+   * @param value the value to add
+   */
   def add(value: Any): Unit = {
     values.addOne(value)
   }
 
+  /** Gets value by property (index as string).
+   *
+   * @param property the index string (e.g. "0" or "[1]")
+   * @return Some(value) or None
+   */
   override def get(property: String): Option[Any] = {
     get(parseIndex(property))
   }
 
+  /** Gets value at the given index.
+   *
+   * @param i the index
+   * @return Some(value) or None if out of bounds
+   */
   def get(i: Int): Option[Any] = {
     if (i >= 0 && i < values.size) {
       Some(values(i))
@@ -66,11 +95,21 @@ class JsonArray extends collection.Seq[Any], Json {
     }
   }
 
+  /** Removes the first occurrence of the value.
+   *
+   * @param value the value to remove
+   * @return this for chaining
+   */
   def substractOne(value: Any): this.type = {
     values.subtractOne(value)
     this
   }
 
+  /** Gets value at the nested path (supports object keys and array indices).
+   *
+   * @param paths the path parts (e.g. ["a", "0", "b"])
+   * @return Some(value) or None
+   */
   def get(paths: Array[String]): Option[Any] = {
     var i = 0
     var o: Any = this
@@ -94,10 +133,10 @@ class JsonArray extends collection.Seq[Any], Json {
     Option(o)
   }
 
-  /** 自动扩容，设置第I个元素的指
+  /** Auto-expands the array and sets the element at the given index.
    *
-   * @param i
-   * @param value
+   * @param i     the index
+   * @param value the value to set
    */
   def set(i: Int, value: Any): Unit = {
     require(i >= 0)
@@ -132,6 +171,11 @@ class JsonArray extends collection.Seq[Any], Json {
 
   override def iterator: Iterator[Any] = values.iterator
 
+  /** Returns element at index.
+   *
+   * @param i the index
+   * @return the element
+   */
   override def apply(i: Int): Any = {
     values(i)
   }

@@ -19,29 +19,31 @@ package org.beangle.commons.codec.binary
 
 import org.beangle.commons.codec.*
 
-/** Hex encode and decode method
-  */
+/** Hex encode and decode. */
 object Hex {
+  /** Hex digits for lower-case output. */
   val LowerDigits = Array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f')
+  /** Hex digits for upper-case output. */
   val UpperDigits = Array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')
 
+  /** Encodes bytes to hex string. */
   def encode(data: Array[Byte], toLowerCase: Boolean = true): String = HexEncoder.encodeHex(data, toLowerCase)
 
+  /** Decodes hex string to bytes. */
   def decode(data: String): Array[Byte] = HexDecoder.decode(data)
 }
 
-/** Hex decoder
-  */
+/** Hex encoder. */
 object HexEncoder extends Encoder[Array[Byte], String] {
 
   import Hex.*
 
-  /** Converts an array of bytes into an array of characters representing the hexadecimal values of each byte in order
-    *
-    * @param data        a byte[] to convert to Hex characters
-    * @param toLowerCase should to lower case
-    * @return A Array[Char] containing hexadecimal characters
-    */
+  /** Converts bytes to hex characters.
+   *
+   * @param data        bytes to convert
+   * @param toLowerCase use lower-case hex digits
+   * @return hex string
+   */
   def encodeHex(data: Array[Byte], toLowerCase: Boolean): String = {
     val digits = if (toLowerCase) LowerDigits else UpperDigits
     val l = data.length
@@ -58,25 +60,21 @@ object HexEncoder extends Encoder[Array[Byte], String] {
     new String(out)
   }
 
+  /** Encodes bytes to hex string (lowercase). */
   def encode(data: Array[Byte]): String = encodeHex(data, true)
 }
 
-/** Hex Decoder
-  */
+/** Hex decoder. */
 object HexDecoder extends Decoder[String, Array[Byte]] {
 
-  /** Converts a hexadecimal character to an integer.
-    */
+  /** Converts a hex character to an integer. */
   private def toDigit(ch: Char, index: Int): Int = {
     val digit = Character.digit(ch, 16)
     if (digit == -1) throw new RuntimeException("Illegal hexadecimal character " + ch + " at index " + index)
     digit
   }
 
-  /** Converts an array of character bytes representing hexadecimal values into an array of bytes of those same values.
-    * The returned array will be half the length of the passed array, as it takes two characters to represent any given
-    * byte. An exception is thrown if the passed char array has an odd number of elements.
-    */
+  /** Converts hex string to bytes. Two chars per byte; odd-length string throws. */
   def decode(data: String): Array[Byte] = {
     val d = data.toCharArray
     val len = d.length

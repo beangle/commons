@@ -20,12 +20,13 @@ package org.beangle.commons.bean.predicates
 import org.beangle.commons.bean.Properties
 import org.beangle.commons.lang.functor.Predicate
 
-/** Property Equals Predicate
-  *
-  * @author chaostone
-  */
+/** Predicate: property equals value.
+ *
+ * @author chaostone
+ */
 class PropertyEqualPredicate[T](name: String, value: Any) extends Predicate[T] {
 
+  /** Returns true if object's property equals value. */
   def apply(arg0: T): Boolean =
     value == Properties.get[Any](arg0, name)
 }

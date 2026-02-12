@@ -17,6 +17,7 @@
 
 package org.beangle.commons
 
+/** Collection types (IdentityCache alias). */
 package object collection {
   type IdentityCache[A <: AnyRef, B <: AnyRef] = IdentityMap[A, B]
 }

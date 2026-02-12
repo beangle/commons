@@ -21,13 +21,19 @@ import org.beangle.commons.lang.annotation.spi
 
 import java.util.Locale
 
-/** Text formatter
-  *
-  * @author chaostone
-  * @since 3.0.0
-  */
+/** Formats text with locale and arguments (MessageFormat-style).
+ *
+ * @author chaostone
+ * @since 3.0.0
+ */
 @spi
 trait TextFormatter {
-
+  /** Formats text with locale and format arguments.
+   *
+   * @param text   the template (MessageFormat pattern)
+   * @param locale the locale for formatting
+   * @param args   format placeholders (e.g. {0}, {1})
+   * @return the formatted string
+   */
   def format(text: String, locale: Locale, args: Any*): String
 }

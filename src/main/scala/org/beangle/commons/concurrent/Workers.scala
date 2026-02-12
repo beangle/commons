@@ -19,8 +19,15 @@ package org.beangle.commons.concurrent
 
 import java.util.concurrent.LinkedBlockingQueue
 
+/** Parallel job processing with thread pool. */
 object Workers {
 
+  /** Processes payloads in parallel using multiple threads.
+   *
+   * @param payloads       the items to process
+   * @param job            the function to apply to each item
+   * @param threadPoolSize number of threads (0 = availableProcessors)
+   */
   def work[T](payloads: Iterable[T], job: T => Unit, threadPoolSize: Int = 0): Unit = {
     val loads = new LinkedBlockingQueue[T]
     import scala.jdk.CollectionConverters.*

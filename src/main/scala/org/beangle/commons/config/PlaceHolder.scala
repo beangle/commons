@@ -21,12 +21,18 @@ import org.beangle.commons.cdi.Binder.Variable
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.Strings
 
-/** 带有占位符的属性描述
- */
+/** Property descriptor with placeholder support (e.g. ${...}). */
 object PlaceHolder {
+  /** Placeholder prefix, e.g. `${`. */
   val Prefix: String = "${"
+  /** Placeholder suffix, e.g. `}`. */
   val Suffix: String = "}"
 
+  /** Returns true if the pattern contains ${...} placeholders.
+   *
+   * @param pattern the string to check
+   * @return true if contains variables
+   */
   def hasVariable(pattern: String): Boolean = {
     val startIdx = pattern.indexOf(Prefix)
     if (startIdx > -1) {
@@ -37,6 +43,11 @@ object PlaceHolder {
     }
   }
 
+  /** Parses the pattern and extracts variable names from ${var} placeholders.
+   *
+   * @param pattern the pattern string
+   * @return PlaceHolder with variables
+   */
   def apply(pattern: String): PlaceHolder = {
     var n = pattern
     val variables = Collections.newSet[Variable]
@@ -53,4 +64,9 @@ object PlaceHolder {
   }
 }
 
+/** Parsed placeholder pattern with variable names and optional defaults.
+ *
+ * @param pattern   the original string with ${var} placeholders
+ * @param variables the extracted variable descriptors
+ */
 case class PlaceHolder(pattern: String, variables: Set[Variable])

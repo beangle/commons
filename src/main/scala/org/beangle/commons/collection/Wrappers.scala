@@ -19,17 +19,22 @@ package org.beangle.commons.collection
 
 import java.util as ju
 
+/** Java collection wrappers. */
 object Wrappers {
 
+  /** Wraps a Java List as an immutable Scala Seq. */
   case class ImmutableJList[A](underlying: ju.List[A]) extends collection.immutable.Seq[A] {
+    /** Number of elements. */
     def length: Int = underlying.size
 
+    /** Returns true if empty. */
     override def isEmpty: Boolean = underlying.isEmpty
 
     import scala.jdk.CollectionConverters.*
 
     override def iterator: Iterator[A] = underlying.iterator.asScala
 
+    /** Gets element at index. */
     def apply(i: Int): A = underlying.get(i)
   }
 }

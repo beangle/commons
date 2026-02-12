@@ -24,13 +24,25 @@ import org.beangle.commons.lang.time.CycleTime.{CycleTimeType, ToWeekTimeBuilder
 import java.time.LocalDate
 import scala.collection.mutable
 
+/** CycleTime factory and CycleTimeType. */
 object CycleTime {
+
   enum CycleTimeType(val id: Int) {
     case Day extends CycleTimeType(1)
     case Week extends CycleTimeType(2)
     case Month extends CycleTimeType(4)
   }
 
+  /** Creates a CycleTime with the given date range, time slot, and cycle settings.
+   *
+   * @param beginOn    start date
+   * @param endOn      end date
+   * @param beginAt    start time
+   * @param endAt      end time
+   * @param cycleCount number of units per cycle
+   * @param cycleType  the cycle unit (Day, Week, Month)
+   * @return configured CycleTime
+   */
   def apply(beginOn: LocalDate, endOn: LocalDate, beginAt: HourMinute, endAt: HourMinute,
             cycleCount: Int = 1, cycleType: CycleTimeType = CycleTimeType.Day): CycleTime = {
     val cd = new CycleTime
@@ -43,15 +55,17 @@ object CycleTime {
     cd
   }
 
+  /** Builds List[WeekTime] from date ranges with time slot, merging adjacent entries. */
   class ToWeekTimeBuilder(beginAt: HourMinute, endAt: HourMinute) {
 
     private val times = Collections.newBuffer[WeekTime]
 
+    /** Returns built list of WeekTime. */
     def build(): List[WeekTime] = times.toList
 
-    /** 在TimeUnitBuilder里添加一个日期
+    /** Adds a date to the builder, merging if adjacent to existing.
      *
-     * @param start
+     * @param start the date to add
      */
     def add(start: LocalDate): Unit = {
       val time = WeekTime.of(start, beginAt, endAt)
@@ -64,16 +78,16 @@ object CycleTime {
       }
     }
 
-    /** 添加以start为起点，cycle为单位，count为步进，循环添加日期，直到end为止
+    /** Adds dates from start to end, stepping by count units of cycleType.
      *
-     * @param start
-     * @param end
-     * @param cycleType
-     * @param count
+     * @param start     the start date
+     * @param end       the end date
+     * @param cycleType the cycle unit (Day, Week, Month)
+     * @param count     the step size
      */
     def addRange(start: LocalDate, end: LocalDate, cycleType: CycleTimeType, count: Int = 1): Unit = {
       var startOn = start
-      require(count > 0, "count should great than 0.")
+      require(count > 0, "count should be greater than 0")
       while (!startOn.isAfter(end)) {
         add(startOn)
         cycleType match {
@@ -86,32 +100,40 @@ object CycleTime {
   }
 }
 
+/** Recurring time slot with begin/end dates, times, and cycle unit (Day/Week/Month). */
 class CycleTime extends Cloneable with Serializable {
-  /** 开始日期 */
+
+  /** Start date. */
   var beginOn: LocalDate = _
-  /** 结束日期 */
+  /** End date. */
   var endOn: LocalDate = _
-  /** 开始时间 */
+  /** Start time. */
   var beginAt: HourMinute = _
-  /** 结束时间 */
+  /** End time. */
   var endAt: HourMinute = _
-  /** 单位 */
+  /** Cycle unit (Day, Week, Month). */
   var cycleType: CycleTimeType = _
-  /** 单位数量 */
+  /** Number of units per cycle. */
   var cycleCount: Int = _
 
+  /** Returns true if beginOn == endOn. */
   def isOneDay: Boolean = {
+
     this.beginOn == this.endOn
   }
 
+  /** Returns total days in cycle (Day=count, Week=7*count, Month=30*count). */
   def getCycleDays: Int = {
+
     cycleType match
       case Day => cycleCount
       case Month => cycleCount * 30
       case Week => cycleCount * 7
   }
 
+  /** Converts cycle to List[WeekTime] via ToWeekTimeBuilder. */
   def convert(): List[WeekTime] = {
+
     val builder = new ToWeekTimeBuilder(beginAt, endAt)
     builder.addRange(beginOn, endOn, cycleType, cycleCount)
     builder.build()

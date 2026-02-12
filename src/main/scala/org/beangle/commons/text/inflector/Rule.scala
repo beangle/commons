@@ -17,21 +17,23 @@
 
 package org.beangle.commons.text.inflector
 
-/** Rule interface.
-  *
-  * @author chaostone
-  */
+/** Pluralization/inflection rule (applies to word, returns transformed word).
+ *
+ * @author chaostone
+ */
 trait Rule {
 
-  /** Tests to see if this rule applies for the given word.
-    *
-    * @return `true` if this rule should be applied, `false` otherwise
-    */
+  /** Returns true if this rule applies to the given word.
+   *
+   * @param word the word to test
+   * @return true if this rule should be applied
+   */
   def applies(word: String): Boolean
 
-  /** Applies this rule to the word, and transforming it into a new form.
-    *
-    * @return the transformed word
-    */
+  /** Applies this rule to transform the word.
+   *
+   * @param word the word to transform
+   * @return the transformed word
+   */
   def apply(word: String): String
 }

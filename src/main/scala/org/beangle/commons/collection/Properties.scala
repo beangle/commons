@@ -19,12 +19,12 @@ package org.beangle.commons.collection
 
 import org.beangle.commons.bean.{DynamicBean, Properties as BeanProperties}
 
-/** Scala properties collection
- */
+/** Mutable Map[String, Any] with DynamicBean and bean property extraction. */
 class Properties extends collection.mutable.Map[String, Any], DynamicBean {
 
   private[this] val data = Collections.newMap[String, Any]
 
+  /** Creates from key-value tuples. */
   def this(tuples: (String, _)*) = {
     this()
     tuples foreach { tuple =>
@@ -32,6 +32,7 @@ class Properties extends collection.mutable.Map[String, Any], DynamicBean {
     }
   }
 
+  /** Creates from object properties (supports attr->rename). */
   def this(obj: Object, attrs: String*) = {
     this()
     for (attr <- attrs) {
@@ -46,6 +47,7 @@ class Properties extends collection.mutable.Map[String, Any], DynamicBean {
     }
   }
 
+  /** Adds nested Properties from obj using attr names (supports attr->rename). */
   def add(attr: String, obj: Object, nestedAttrs: String*): Unit = {
     if null != obj then put(attr, new Properties(obj, nestedAttrs: _*))
   }

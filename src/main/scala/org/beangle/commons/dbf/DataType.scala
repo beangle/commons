@@ -17,7 +17,10 @@
 
 package org.beangle.commons.dbf
 
+/** DataType utilities. */
 object DataType {
+
+  /** Returns DataType for byte code, or null if unknown. */
   def valueOf(bv: Byte): DataType = values.find(p => p.v == bv).orNull
 }
 

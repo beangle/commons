@@ -24,17 +24,20 @@ import java.util as ju
 import javax.naming.{InitialContext, NameNotFoundException}
 import javax.sql.DataSource
 
+/** JndiObjectFactory constants. */
 object JndiObjectFactory {
-  /** JNDI prefix used in a J2EE container */
+
+  /** JNDI prefix used in a J2EE container. */
   val containerPrefix = "java:comp/env/"
 }
 
-/** JNDI Object Factory
- */
+/** Factory that looks up objects from JNDI. */
 class JndiObjectFactory[T](val jndiName: String) extends Factory[T] {
 
+  /** If true, prepends java:comp/env/ when name has no ':' (J2EE resource ref). */
   var resourceRef = true
 
+  /** Optional JNDI environment properties. */
   var environment: ju.Properties = _
 
   override def getObject: T = {
@@ -45,9 +48,7 @@ class JndiObjectFactory[T](val jndiName: String) extends Factory[T] {
     located.asInstanceOf[T]
   }
 
-  /** Convert the given JNDI name into the actual JNDI name to use.
-   * applies the "java:comp/env/" prefix if  resourceRef  is true
-   */
+  /** Converts JNDI name; applies java:comp/env/ prefix if resourceRef. */
   protected def convertJndiName(jndiName: String): String = {
     import JndiObjectFactory.*
     if (resourceRef && !jndiName.startsWith(containerPrefix) && jndiName.indexOf(':') == -1) containerPrefix + jndiName
@@ -55,7 +56,6 @@ class JndiObjectFactory[T](val jndiName: String) extends Factory[T] {
   }
 }
 
-@description("JNDI提供的数据源工厂")
-class JndiDataSourceFactory(jndiName: String) extends JndiObjectFactory[DataSource](jndiName) {
-
-}
+/** JNDI DataSource factory. */
+@description("JNDI DataSource factory")
+class JndiDataSourceFactory(jndiName: String) extends JndiObjectFactory[DataSource](jndiName)

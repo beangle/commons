@@ -19,14 +19,22 @@ package org.beangle.commons.lang
 
 import java.util.Locale
 
+/** Locale parsing and caching. */
 object Locales {
 
   private var cache = Map("_" -> Locale.getDefault())
 
+  /** Simplified Chinese locale (zh_CN). */
   def chinese: Locale = Locale.SIMPLIFIED_CHINESE
 
+  /** US English locale (en_US). */
   def us: Locale = Locale.US
 
+  /** Parses and caches a locale from string (e.g. "zh_CN", "en-US"). Returns default if blank.
+   *
+   * @param localeStr the locale string
+   * @return the Locale; default if blank
+   */
   def of(localeStr: String): Locale = {
     if Strings.isBlank(localeStr) then
       Locale.getDefault()

@@ -17,13 +17,11 @@
 
 package org.beangle.commons.conversion.impl
 
-/** Generic Converter using in DefaultConversion
-  * <p>
-  * It's a SPI interface.
-  *
-  * @author chaostone
-  * @since 3.2.0
-  */
+/** Generic converter used in DefaultConversion (SPI interface).
+ *
+ * @author chaostone
+ * @since 3.2.0
+ */
 trait GenericConverter {
 
   def getTypeinfo: (Class[_], Class[_])

@@ -17,13 +17,15 @@
 
 package org.beangle.commons.security
 
+/** Authorization request: resource + operation to check. */
 trait Request {
 
+  /** The resource being accessed. */
   def resource: Any
 
+  /** The operation to check (e.g. read, write). */
   def operation: Any
 }
 
-class DefaultRequest(val resource: Any, val operation: Any) extends Request {
-
-}
+/** Simple Request implementation. */
+class DefaultRequest(val resource: Any, val operation: Any) extends Request

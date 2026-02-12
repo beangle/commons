@@ -22,14 +22,11 @@ import org.beangle.commons.lang.Strings
 
 import java.sql.Time
 
-/** Convert String to Time.
-  * <p>
-  * Convert HH:mm:ss to java.sql.Time<br>
-  * Convert HH:mm to java.sql.Time<br>
-  *
-  * @author chaostone
-  * @since 4.0.3
-  */
+/** Converts string to java.sql.Time (HH:mm:ss or HH:mm).
+ *
+ * @author chaostone
+ * @since 4.0.3
+ */
 object TimeConverter extends Converter[String, Time] {
 
   override def apply(input: String): Time = {

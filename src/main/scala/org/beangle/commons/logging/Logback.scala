@@ -27,13 +27,11 @@ import org.slf4j.bridge.SLF4JBridgeHandler
 
 import java.io.InputStream
 
-/** Logback日志辅助类
- */
+/** Logback logging helper. */
 @beta
 object Logback {
 
-  /** 在开发环境中，如果存在logback-dev.xml,则启用该配置
-   */
+  /** Configures Logback. In dev mode, uses logback-dev.xml if present. */
   def configure(config: LogConfig): Unit = {
     installJul2Sfl4j()
     var configFile = config.configFile
@@ -54,6 +52,12 @@ object Logback {
     }
   }
 
+  /** Changes logger level. Use "ROOT" for root logger.
+   *
+   * @param name  logger name or "ROOT"
+   * @param level level name (e.g. DEBUG, INFO)
+   * @return true if changed
+   */
   def changeLevel(name: String, level: String): Boolean = {
     val factory = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
     changeLevel(factory, name, level)
@@ -70,10 +74,10 @@ object Logback {
     }
   }
 
-  /** 重新加载logback配置
+  /** Reloads Logback configuration from the given input stream.
    *
-   * @param is input stream
-   * @return
+   * @param is the configuration input stream
+   * @return the LoggerContext after reload
    */
   def refreshConfig(is: InputStream): LoggerContext = {
     try {
@@ -86,15 +90,13 @@ object Logback {
       configurator.doConfigure(is)
       lc
     } catch {
-      case e: Exception => throw new RuntimeException("重新加载 Logback 配置失败", e)
+      case e: Exception => throw new RuntimeException("Failed to reload Logback configuration", e)
     } finally {
       IOs.close(is)
     }
   }
 
-  /** 显式安装jul到slf4j的桥接
-   * 将java.util.logging日志使用导流到SLF4J上
-   */
+  /** Installs JUL-to-SLF4J bridge so java.util.logging is routed to SLF4J. */
   def installJul2Sfl4j(): Unit = {
     if (!SLF4JBridgeHandler.isInstalled) {
       SLF4JBridgeHandler.removeHandlersForRootLogger()

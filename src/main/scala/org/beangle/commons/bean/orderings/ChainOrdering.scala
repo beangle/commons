@@ -17,16 +17,16 @@
 
 package org.beangle.commons.bean.orderings
 
-/** 组合比较器
-  *
-  * @author chaostone
-  */
+/** Chains multiple comparators; uses first non-zero result.
+ *
+ * @author chaostone
+ */
 class ChainOrdering[T](comparators: List[Ordering[T]]) extends Ordering[T] {
 
-  /** compare
-    *
-    * @return 0 is equals,-1 first &lt; second ,1 first &gt; second
-    */
+  /** Compares using the chained comparators in order.
+   *
+   * @return 0 if equal, -1 if first &lt; second, 1 if first &gt; second
+   */
   def compare(first: T, second: T): Int = {
     var rs = 0
     comparators find { com => rs = com.compare(first, second); rs != 0 }

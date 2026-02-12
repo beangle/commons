@@ -22,33 +22,39 @@ import org.beangle.commons.codec.{Decoder, Encoder}
 import javax.crypto.spec.{IvParameterSpec, SecretKeySpec}
 import javax.crypto.{Cipher, SecretKey}
 
-/** Advanced Encryption Standard
-  *
-  * @see https://en.wikipedia.org/wiki/Advanced_Encryption_Standard
-  */
+/** Advanced Encryption Standard.
+ *
+ * @see https://en.wikipedia.org/wiki/Advanced_Encryption_Standard
+ */
 object Aes {
+  /** Builds SecretKey from string (UTF-8 bytes). */
   def buildKey(key: String): SecretKey =
     new SecretKeySpec(key.getBytes("UTF-8"), "AES")
 
-  /** Electronic Codebook ecode and decode utility
-    *
-    * @see https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29
-    */
+  /** Electronic Codebook (ECB) mode encode/decode.
+   *
+   * @see https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29
+   */
   object ECB {
+    /** Encodes string to hex; returns Base16 of ciphertext. */
     def encode2Hex(key: String, data: String, padding: String = Padding.PKCS5): String = {
       val d = new ECBEncoder(key, padding).encode(data.getBytes("UTF-8"))
       Hex.encode(d, true)
     }
 
+    /** Decodes hex-encoded ciphertext to plaintext string. */
     def decodeHex(key: String, data: String, padding: String = Padding.PKCS5): String =
       new String(new ECBDecoder(key, padding).decode(Hex.decode(data)))
 
+    /** Encodes bytes to ciphertext. */
     def encode(key: String, data: Array[Byte], padding: String = Padding.PKCS5): Array[Byte] =
       new ECBEncoder(key, padding).encode(data)
 
+    /** Decodes ciphertext to bytes. */
     def decode(key: String, data: Array[Byte], padding: String = Padding.PKCS5): Array[Byte] =
       new ECBDecoder(key, padding).decode(data)
 
+    /** Builds AES/ECB Cipher. */
     def buildCipher(mode: Int, sk: SecretKey, padding: String): Cipher = {
       val cipher = Cipher.getInstance("AES/ECB/" + padding)
       cipher.init(mode, sk)
@@ -56,6 +62,7 @@ object Aes {
     }
   }
 
+  /** AES ECB mode encoder. */
   class ECBEncoder(val key: String, padding: String) extends Encoder[Array[Byte], Array[Byte]] {
     private val skey = Aes.buildKey(key)
 
@@ -63,6 +70,7 @@ object Aes {
       ECB.buildCipher(Cipher.ENCRYPT_MODE, skey, padding).doFinal(data)
   }
 
+  /** AES ECB mode decoder. */
   class ECBDecoder(key: String, padding: String) extends Decoder[Array[Byte], Array[Byte]] {
     private val skey = Aes.buildKey(key)
 
@@ -70,23 +78,27 @@ object Aes {
       ECB.buildCipher(Cipher.DECRYPT_MODE, skey, padding).doFinal(data)
   }
 
-  /** Cipher-Block Chaining encode and decode utility
-    */
+  /** Cipher-Block Chaining (CBC) mode encode/decode. */
   object CBC {
+    /** Encodes string to hex; returns Base16 of ciphertext. */
     def encode2Hex(key: String, data: String, padding: String = Padding.PKCS5, iv: String = null): String = {
       val d = new CBCEncoder(key, iv, padding).encode(data.getBytes("UTF-8"))
       Hex.encode(d, true)
     }
 
+    /** Decodes hex-encoded ciphertext to plaintext string. */
     def decodeHex(key: String, data: String, padding: String = Padding.PKCS5, iv: String = null): String =
       new String(new CBCDecoder(key, iv, padding).decode(Hex.decode(data)))
 
+    /** Encodes bytes to ciphertext. */
     def encode(key: String, data: Array[Byte], padding: String = Padding.PKCS5, iv: String = null): Array[Byte] =
       new CBCEncoder(key, iv, padding).encode(data)
 
+    /** Decodes ciphertext to bytes. */
     def decode(key: String, data: Array[Byte], padding: String = Padding.PKCS5, iv: String = null): Array[Byte] =
       new CBCDecoder(key, iv, padding).decode(data)
 
+    /** Builds AES/CBC Cipher for encrypt or decrypt mode. */
     def buildCipher(mode: Int, key: String, initVector: String, padding: String): Cipher = {
       val sk = new SecretKeySpec(key.getBytes("UTF-8"), "AES")
       val iv = if (initVector eq null) key else initVector
@@ -97,13 +109,15 @@ object Aes {
     }
   }
 
+  /** AES CBC mode encoder. */
   class CBCEncoder(key: String, iv: String, padding: String) extends Encoder[Array[Byte], Array[Byte]] {
-    def encode(data: Array[Byte]): Array[Byte] =
+    override def encode(data: Array[Byte]): Array[Byte] =
       CBC.buildCipher(Cipher.ENCRYPT_MODE, key, iv, padding).doFinal(data)
   }
 
+  /** AES CBC mode decoder. */
   class CBCDecoder(key: String, iv: String, padding: String) extends Decoder[Array[Byte], Array[Byte]] {
-    def decode(data: Array[Byte]): Array[Byte] =
+    override def decode(data: Array[Byte]): Array[Byte] =
       CBC.buildCipher(Cipher.DECRYPT_MODE, key, iv, padding).doFinal(data)
   }
 }

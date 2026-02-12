@@ -19,11 +19,20 @@ package org.beangle.commons
 
 import java.net.{URI, URL}
 
+/** Library version info. */
 object Version {
+
+  /** The library name. */
   def name: String = "Beangle Scala Development Toolkit"
 
+  /** The version from MANIFEST.MF, or SNAPSHOT if not in jar. */
   def version: String = findBundleVersion(Version.getClass)
 
+  /** Reads version from the class's JAR manifest.
+   *
+   * @param clazz the class (used to locate JAR)
+   * @return Bundle-Version, Implementation-Version, or SNAPSHOT/UNKNOWN
+   */
   def findBundleVersion(clazz: Class[_]): String = {
     val className = "/" + clazz.getName.replace(".", "/") + ".class"
     val classPath = clazz.getResource(className).toString

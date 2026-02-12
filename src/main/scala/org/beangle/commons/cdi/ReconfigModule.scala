@@ -21,17 +21,20 @@ import org.beangle.commons.cdi.Binder.Reference
 
 import java.util as ju
 
+/** Abstract module for runtime CDI reconfiguration. */
 abstract class ReconfigModule {
   var cfg: Reconfig = _
   var configUrl: String = _
   var ignoreMissing: Boolean = true
 
+  /** Configures this module with Reconfig. */
   final def configure(reconfig: Reconfig): Unit = {
     this.cfg = reconfig
     config()
     this.cfg.ignoreMissing = this.ignoreMissing
   }
 
+  /** Creates or returns existing Update definition for bean. */
   protected final def update(name: String): Reconfig.Definition = {
     cfg.definitions.get(name) match {
       case Some(d) => d
@@ -42,27 +45,33 @@ abstract class ReconfigModule {
     }
   }
 
+  /** Adds Remove definition for bean. */
   protected final def remove(name: String): Unit = {
     val rd = new Reconfig.Definition(name, Reconfig.ReconfigType.Remove)
     this.cfg.definitions.put(name, rd)
   }
 
+  /** Builds list from items. */
   protected final def list(datas: AnyRef*): List[_] = {
     datas.toList
   }
 
+  /** Builds list of class name references. */
   protected final def listref(classes: Class[_]*): List[_] = {
     classes.map(clazz => Reference(clazz.getName)).toList
   }
 
+  /** Builds set from items. */
   protected final def set(datas: AnyRef*): Set[_] = {
     datas.toSet
   }
 
+  /** Builds map from key-value entries. */
   protected final def map(entries: (_, _)*): Map[_, _] = {
     entries.toMap
   }
 
+  /** Builds Properties from key=value strings. */
   protected final def props(keyValuePairs: String*): ju.Properties = {
     val properties = new ju.Properties
     keyValuePairs foreach { pair =>

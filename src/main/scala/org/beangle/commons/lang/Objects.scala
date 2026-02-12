@@ -21,6 +21,11 @@ import scala.collection.mutable.ListBuffer
 
 object Objects {
 
+  /** Returns the default value for the given primitive/wrapper class.
+   *
+   * @param clazz the class (e.g. Int, Long, Boolean)
+   * @return the default value
+   */
   @inline
   def default[T](clazz: Class[T]): T = Primitives.default(clazz)
 
@@ -47,9 +52,11 @@ object Objects {
     a == b
   }
 
-  /** Compares two object array for equality, where either one or both objects may be `null`.
-   * Note:
-   * Don't user Any[_],fo after type erase ,it has same signature with equals(a:Any,b:Any)
+  /** Compares two object arrays for equality.
+   *
+   * @param a the first array
+   * @param b the second array
+   * @return true if both null or elements equal
    */
   def equals(a: Array[Any], b: Array[Any]): Boolean = {
     if a eq b then true
@@ -75,8 +82,7 @@ object Objects {
    */
   def toString(obj: AnyRef): String = if (null == obj) "" else obj.toString
 
-  /** 将传入的对象转换为非空值
-   * 如果传入的对象为null，则返回默认值
+  /** Returns the given value if non-null, otherwise the default value.
    * {{{
    * nvl(null, null)      = null
    * nvl(null, "")        = ""
@@ -85,9 +91,9 @@ object Objects {
    * nvl(Boolean.TRUE, *) = Boolean.TRUE
    * }}}
    *
-   * @param s       需要检查的对象
-   * @param default 如果`s`为null时返回的默认值
-   * @return 转换后的非空值
+   * @param s       the value to check
+   * @param default the default value when s is null
+   * @return s if non-null, otherwise default
    */
   def nvl[T](s: T, default: => T): T = if null == s then default else s
 
@@ -98,8 +104,10 @@ object Objects {
    */
   def getIdentityHexString(obj: AnyRef): String = Integer.toHexString(System.identityHashCode(obj))
 
+  /** Creates an EqualsBuilder for stepwise equality comparison. */
   def equalsBuilder: EqualsBuilder = new EqualsBuilder()
 
+  /** Creates a CompareBuilder for stepwise ordering comparison. */
   def compareBuilder: CompareBuilder = new CompareBuilder()
 
   /** Creates an instance of `ToStringBuilder`.
@@ -223,6 +231,7 @@ object Objects {
 
     var rs: Boolean = true
 
+    /** Adds pair to comparison; rs becomes false if unequal. */
     def add(lhs: Any, rhs: Any): EqualsBuilder = {
       if (!rs) return this
       if (lhs.getClass.isArray && rhs.getClass.isArray)
@@ -232,30 +241,35 @@ object Objects {
       this
     }
 
+    /** Adds int pair to comparison. */
     def add(lhs: Int, rhs: Int): EqualsBuilder = {
       if (!rs) return this
       rs &= (lhs == rhs)
       this
     }
 
+    /** Adds long pair to comparison. */
     def add(lhs: Long, rhs: Long): EqualsBuilder = {
       if (!rs) return this
       rs &= (lhs == rhs)
       this
     }
 
+    /** Adds short pair to comparison. */
     def add(lhs: Short, rhs: Short): EqualsBuilder = {
       if (!rs) return this
       rs &= (lhs == rhs)
       this
     }
 
+    /** Adds boolean pair to comparison. */
     def add(lhs: Boolean, rhs: Boolean): EqualsBuilder = {
       if (!rs) return this
       rs &= (lhs == rhs)
       this
     }
 
+    /** Returns true if all added pairs are equal. */
     def isEquals: Boolean = rs
   }
 
@@ -266,6 +280,7 @@ object Objects {
   class CompareBuilder {
     private var comparison: Int = _
 
+    /** Adds pair to comparison; stops when first difference found. */
     def add(lhs: Any, rhs: Any, ordering: Ordering[Any] = null): this.type = {
       if comparison != 0 then return this
       if lhs == rhs then return this
@@ -303,8 +318,10 @@ object Objects {
       }
     }
 
+    /** Returns the comparison result (-1, 0, or 1). */
     def toComparison: Int = comparison
 
+    /** Returns the comparison result. */
     def build(): Int = comparison
   }
 

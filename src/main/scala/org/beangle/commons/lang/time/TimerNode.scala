@@ -19,28 +19,40 @@ package org.beangle.commons.lang.time
 
 import scala.collection.mutable
 
-/** Timer Node in stack
-  *
-  * @author chaostone
-  * @since 3.0.0
-  */
+/** Timer node for profiling (resource name, start time, children).
+ *
+ * @author chaostone
+ * @since 3.0.0
+ */
 @SerialVersionUID(-6180672043920208784L)
 class TimerNode(val resource: String, var startTime: Long) extends Serializable {
 
+  /** Child timer nodes. */
   var children = new mutable.ListBuffer[TimerNode]
 
+  /** Elapsed milliseconds (set by end()). */
   var totalTime: Long = _
 
+  /** Records the start time for this node.
+   *
+   * @param startTime start timestamp (millis)
+   */
   def start(startTime: Long): Unit =
     this.startTime = startTime
 
+  /** Ends timing and returns elapsed milliseconds.
+   *
+   * @return elapsed time since start
+   */
   def end(): Long = {
     this.totalTime = System.currentTimeMillis() - startTime
     this.totalTime
   }
 
-  /** Get a formatted string representing all the methods that took longer than a specified time.
-    */
+  /** Returns a formatted string for this node and its children.
+   *
+   * @return tree-style string with resource names and durations
+   */
   def getPrintable: String = getPrintable("")
 
   protected def getPrintable(indent: String): String = {

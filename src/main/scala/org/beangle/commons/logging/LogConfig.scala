@@ -19,9 +19,12 @@ package org.beangle.commons.logging
 
 import java.net.URL
 
+/** Logback configuration: config file URL and logger levels. */
 class LogConfig {
 
+  /** Path to logback config file. */
   var configFile: URL = _
 
+  /** Logger name -> level mappings. */
   var levels: Map[String, String] = Map.empty
 }

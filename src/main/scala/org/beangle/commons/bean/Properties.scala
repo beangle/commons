@@ -27,30 +27,85 @@ import org.beangle.commons.lang.reflect.{BeanInfo, BeanInfos, TypeInfo}
 import java.lang.reflect.Array as Jarray
 import scala.reflect.ClassTag
 
+/** Bean property get/set via nested, indexed, mapped paths. */
 object Properties {
+
   private val Default = new Properties(DefaultConversion.Instance)
 
+  /** Sets the property value on the bean.
+   *
+   * @param bean         the target bean
+   * @param propertyName the property name (supports nested, indexed, mapped)
+   * @param value        the value to set
+   * @return the previous value if any
+   */
   def set(bean: AnyRef, propertyName: String, value: Any): Any = Default.set(bean, propertyName, value)
 
+  /** Gets the property value from the bean.
+   *
+   * @param inputBean    the bean or Map
+   * @param propertyName the property name (supports nested, indexed, mapped)
+   * @return the property value
+   */
   def get[T: ClassTag](inputBean: Any, propertyName: String): T = Default.get[T](inputBean, propertyName)
 
+  /** Copies value to the bean property (alias for set).
+   *
+   * @param bean         the target bean
+   * @param propertyName the property name
+   * @param value        the value to set
+   * @return the previous value if any
+   */
   def copy(bean: AnyRef, propertyName: String, value: Any): Any = Default.copy(bean, propertyName, value)
 
+  /** Copies value using pre-resolved BeanInfo for performance.
+   *
+   * @param bean         the target bean
+   * @param beanInfo     the bean metadata
+   * @param propertyName the property name
+   * @param value        the value to set
+   * @return the previous value if any
+   */
   def copy(bean: AnyRef, beanInfo: BeanInfo, propertyName: String, value: Any): Any = {
     Default.copy(bean, beanInfo, propertyName, value)
   }
 
+  /** Returns true if the property is writable.
+   *
+   * @param bean the bean to check
+   * @param name the property name
+   * @return true if writable
+   */
   def isWriteable(bean: AnyRef, name: String): Boolean = Default.isWriteable(bean, name)
 
+  /** Returns the property type.
+   *
+   * @param clazz the bean class
+   * @param name  the property name
+   * @return the property class
+   */
   def getType(clazz: Class[_], name: String): Class[_] = Default.getType(clazz, name)
 
+  /** Returns the set of writable property names for the class.
+   *
+   * @param clazz the bean class
+   * @return set of writable property names
+   */
   def writables(clazz: Class[_]): Set[String] = Default.writables(clazz)
 }
 
+/** Bean property access with nested, indexed, and mapped support. */
 class Properties(conversion: Conversion) {
 
   private val resolver = new PropertyNameResolver()
 
+  /** Sets the property value.
+   *
+   * @param bean         the target bean
+   * @param propertyName the property name
+   * @param value        the value to set
+   * @return the previous value if any
+   */
   @throws(classOf[NoSuchMethodException])
   def set(bean: AnyRef, propertyName: String, value: Any): Any = {
     if isMapType(bean) then
@@ -59,6 +114,12 @@ class Properties(conversion: Conversion) {
       copy(bean, BeanInfos.get(bean.getClass), propertyName, value, null)
   }
 
+  /** Gets the property value from the bean or Map.
+   *
+   * @param inputBean    the bean or Map
+   * @param propertyName the property path (supports nested, indexed, mapped)
+   * @return the property value
+   */
   def get[T: ClassTag](inputBean: Any, propertyName: String): T = {
     var result = inputBean
     var name = propertyName
@@ -83,18 +144,23 @@ class Properties(conversion: Conversion) {
     result.asInstanceOf[T]
   }
 
+  /** Copies value to the bean property (alias for set). */
   def copy(bean: AnyRef, propertyName: String, value: Any): Any =
     copy(bean, BeanInfos.get(bean.getClass), propertyName, value, this.conversion)
 
+  /** Copies value using pre-resolved BeanInfo for performance. */
   def copy(bean: AnyRef, beanInfo: BeanInfo, propertyName: String, value: Any): Any =
     copy(bean, beanInfo, propertyName, value, this.conversion)
 
+  /** Returns true if the property is writable. */
   def isWriteable(bean: AnyRef, name: String): Boolean =
     BeanInfos.get(bean.getClass).getSetter(name).isDefined
 
+  /** Returns the property type. */
   def getType(clazz: Class[_], name: String): Class[_] =
     BeanInfos.get(clazz).getPropertyType(name).orNull
 
+  /** Returns the set of writable property names for the class. */
   def writables(clazz: Class[_]): Set[String] =
     BeanInfos.get(clazz).writables.keySet
 

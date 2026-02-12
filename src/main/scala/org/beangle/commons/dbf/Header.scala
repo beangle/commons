@@ -20,6 +20,7 @@ package org.beangle.commons.dbf
 import java.io.{DataInput, IOException}
 import scala.collection.mutable.ListBuffer
 
+/** DBF file header. */
 class Header(
               val signature: Byte,
               val year: Byte,
@@ -37,7 +38,10 @@ class Header(
   def fieldsCount: Int = fields.size
 }
 
+/** Header factory. */
 object Header {
+
+  /** Reads header from DataInput. */
   def read(dataInput: DataInput): Header =
     try {
       //|head{0}|yymmdd{1-3}|numberOfRecords{4-7}|headlength{8-9}|recordLength{10-11}|reserved{12-13}|transaction{14}
