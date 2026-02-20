@@ -21,7 +21,6 @@ import org.beangle.commons.csv.CsvFormat
 
 import scala.collection.mutable
 
-
 /** Simple CSV parser that splits a single line into fields.
  *
  * @author chaostone
