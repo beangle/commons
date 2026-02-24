@@ -96,7 +96,8 @@ abstract class Shell(charset: Charset = Charsets.UTF_8) {
       }
     })
 
-    if (!process.waitFor(5, TimeUnit.SECONDS)) {
+    // max waiting half one hour
+    if (!process.waitFor(30, TimeUnit.MINUTES)) {
       Processes.close(process)
     }
     executor.shutdown()
