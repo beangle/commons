@@ -42,5 +42,10 @@ class JsonTest extends AnyFunSpec, Matchers {
       json.update("/query/term/std/0/skills/0/name", "Play Basketball")
       json.toJson should equal("""{"query":{"term":{"std":[{"skills":[{"name":"Play Basketball"}]}]}}}""")
     }
+    it("process null") {
+      val obj = Json.parseObject("""{"code":"001","name":null} """)
+      obj.getString("name", "33") should equal("33")
+      assert(obj.toJson.contains(""""name":null"""))
+    }
   }
 }

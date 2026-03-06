@@ -230,11 +230,15 @@ class JsonObject extends DynamicBean, Json {
    * @return the value
    */
   override def apply(key: String): Any = {
-    props(key)
+    val d = props(key)
+    if (d == Null) throw new NoSuchElementException(key) else d
   }
 
   override def get(key: String): Option[Any] = {
-    props.get(key)
+    props.get(key) match {
+      case v@Some(a) => if (a == Null) None else v
+      case None => None
+    }
   }
 
   /** Gets string value, or default if missing.
@@ -244,7 +248,7 @@ class JsonObject extends DynamicBean, Json {
    * @return the string value
    */
   def getString(key: String, defaultValue: String = ""): String = {
-    props.get(key) match {
+    get(key) match {
       case Some(s) => s.toString
       case _ => defaultValue
     }
@@ -257,7 +261,7 @@ class JsonObject extends DynamicBean, Json {
    * @return the boolean value
    */
   def getBoolean(key: String, defaultValue: Boolean = false): Boolean = {
-    props.get(key) match {
+    get(key) match {
       case Some(s) =>
         s match
           case i: Boolean => i
@@ -274,7 +278,7 @@ class JsonObject extends DynamicBean, Json {
    * @return the int value
    */
   def getInt(key: String, defaultValue: Int = 0): Int = {
-    props.get(key) match {
+    get(key) match {
       case Some(s) =>
         s match
           case i: Int => i
@@ -291,7 +295,7 @@ class JsonObject extends DynamicBean, Json {
    * @return the long value
    */
   def getLong(key: String, defaultValue: Long = 0l): Long = {
-    props.get(key) match {
+    get(key) match {
       case Some(s) =>
         s match
           case i: Long => i
@@ -308,7 +312,7 @@ class JsonObject extends DynamicBean, Json {
    * @return the double value
    */
   def getDouble(key: String, defaultValue: Double = 0d): Double = {
-    props.get(key) match {
+    get(key) match {
       case Some(s) =>
         s match
           case n: Number => n.doubleValue()
@@ -324,7 +328,7 @@ class JsonObject extends DynamicBean, Json {
    * @return the LocalDate value
    */
   def getDate(key: String, defaultValue: LocalDate = null): LocalDate = {
-    props.get(key) match {
+    get(key) match {
       case Some(s) => TemporalConverter.convert(s.toString, classOf[LocalDate])
       case _ => defaultValue
     }
@@ -337,7 +341,7 @@ class JsonObject extends DynamicBean, Json {
    * @return the LocalDateTime value
    */
   def getDateTime(key: String, defaultValue: LocalDateTime = null): LocalDateTime = {
-    props.get(key) match {
+    get(key) match {
       case Some(s) => TemporalConverter.convert(s.toString, classOf[LocalDateTime])
       case _ => defaultValue
     }
@@ -350,7 +354,7 @@ class JsonObject extends DynamicBean, Json {
    * @return the Instant value
    */
   def getInstant(key: String, defaultValue: Instant = null): Instant = {
-    props.get(key) match {
+    get(key) match {
       case Some(s) => TemporalConverter.convert(s.toString, classOf[Instant])
       case _ => defaultValue
     }
@@ -363,7 +367,7 @@ class JsonObject extends DynamicBean, Json {
    * @return the JsonObject value
    */
   def getObject(key: String, defaultValue: JsonObject = null): JsonObject = {
-    props.get(key) match {
+    get(key) match {
       case Some(s) => s.asInstanceOf[JsonObject]
       case _ => if defaultValue == null then new JsonObject() else defaultValue
     }
@@ -375,7 +379,7 @@ class JsonObject extends DynamicBean, Json {
    * @return the JsonArray value
    */
   def getArray(key: String): JsonArray = {
-    props.get(key) match {
+    get(key) match {
       case Some(s) => s.asInstanceOf[JsonArray]
       case _ => new JsonArray
     }
