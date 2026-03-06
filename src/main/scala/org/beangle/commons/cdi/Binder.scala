@@ -376,6 +376,13 @@ object Binder {
       this
     }
 
+    /** Condition: class exist bean of clazz. */
+    def onExist(clazz: Class[_]): this.type = {
+      val depends = Condition.exist(clazz)
+      for (definition <- beans) definition.on(depends)
+      this
+    }
+
     /** Adds activation condition for beans. */
     def on(condition: Condition): this.type = {
       for (definition <- beans) definition.on(condition)

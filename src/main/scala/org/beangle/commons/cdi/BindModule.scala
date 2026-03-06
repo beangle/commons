@@ -195,9 +195,14 @@ abstract class BindModule {
     Reference(targetBean)
   }
 
-  /** Condition: class missing from classpath. */
+  /** Condition: class missing bean of clazz. */
   def missing(clazz: Class[_]): Condition = {
     Condition.missing(clazz)
+  }
+
+  /** Condition: class exist bean of clazz. */
+  def exist(clazz: Class[_]): Condition = {
+    Condition.exist(clazz)
   }
 
   /** Condition: system property exists (optionally with value). */

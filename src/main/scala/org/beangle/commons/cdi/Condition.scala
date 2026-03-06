@@ -35,6 +35,13 @@ object Condition {
    */
   def missing(clazz: Class[_]): Condition = new MissingByClass(clazz)
 
+  /** Condition: registry does contain the given class.
+   *
+   * @param clazz the bean class to check
+   * @return the Condition
+   */
+  def exist(clazz: Class[_]): Condition = new ExistByClass(clazz)
+
   /** Condition: classpath has the given resource.
    *
    * @param path the resource path
@@ -57,6 +64,16 @@ object Condition {
 
     override def toString: String = {
       s"Missing bean ${beanClass.getName}"
+    }
+  }
+
+  private class ExistByClass(beanClass: Class[_]) extends Condition {
+    override def meet(registry: Binder.Registry): Boolean = {
+      registry.contains(beanClass)
+    }
+
+    override def toString: String = {
+      s"Exist bean of type ${beanClass.getName}"
     }
   }
 
