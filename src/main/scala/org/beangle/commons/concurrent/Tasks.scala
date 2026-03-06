@@ -17,19 +17,32 @@
 
 package org.beangle.commons.concurrent
 
+import java.lang.Thread.UncaughtExceptionHandler
+import java.util.concurrent.atomic.AtomicInteger
+
 /** Runs multiple tasks in parallel and waits for completion. */
 object Tasks {
+
+  @deprecated("using run ", since = "6.0.8")
+  def start(runnable: Runnable, repeat: Int, name: String = null): Unit = {
+    run(runnable, repeat, None)
+  }
+
+  @deprecated("using run ", since = "6.0.8")
+  def start(runnables: Iterator[Runnable]): Unit = {
+    run(runnables, None)
+  }
 
   /** Starts each runnable in a new thread and joins all.
    *
    * @param runnables the tasks to run
    */
-  def start(runnables: Iterator[Runnable]): Unit = {
+  def run(runnables: Iterator[Runnable], handler: Option[UncaughtExceptionHandler]): Int = {
     val tasks = new collection.mutable.ListBuffer[Thread]
+    val reporter = new TaskReporter(handler)
     for (runnable <- runnables) {
-      val thread = new Thread(runnable)
+      val thread = Thread.ofVirtual().uncaughtExceptionHandler(reporter).start(runnable)
       tasks += thread
-      thread.start()
     }
     tasks.foreach { task =>
       try
@@ -38,22 +51,23 @@ object Tasks {
         case e: InterruptedException => e.printStackTrace()
       }
     }
+    reporter.failed.get
   }
 
   /** Starts the same runnable in multiple threads and joins all.
    *
-   * @param runnable       the task to run
-   * @param threadPoolSize number of threads
-   * @param name           optional thread name prefix
+   * @param runnable the task to run
+   * @param repeat   number of threads
+   * @return failed executed count
    */
-  def start(runnable: Runnable, threadPoolSize: Int, name: String = null): Unit = {
+  def run(runnable: Runnable, repeat: Int, handler: Option[UncaughtExceptionHandler]): Int = {
     val tasks = new collection.mutable.ListBuffer[Thread]
-    var index = 0;
-    while (index < threadPoolSize) {
-      val thread = if (null == name) new Thread(runnable) else new Thread(runnable, name + index)
+    var index = 0
+    val reporter = TaskReporter(handler)
+    while (index < repeat) {
+      val thread = Thread.ofVirtual().uncaughtExceptionHandler(reporter).start(runnable)
       tasks += thread
       index += 1
-      thread.start()
     }
     tasks.foreach { task =>
       try
@@ -61,6 +75,36 @@ object Tasks {
       catch {
         case e: InterruptedException => e.printStackTrace()
       }
+    }
+    reporter.failed.get()
+  }
+
+  /** Collection fail count and invoke customHandler
+   *
+   * @param customHandler custom handler
+   */
+  class TaskReporter(customHandler: Option[UncaughtExceptionHandler]) extends UncaughtExceptionHandler {
+    var failed: AtomicInteger = new AtomicInteger(0)
+
+    def uncaughtException(thread: Thread, throwable: Throwable): Unit = {
+      failed.incrementAndGet()
+      customHandler match {
+        case None => throwable.printStackTrace()
+        case Some(h) =>
+          try {
+            h.uncaughtException(thread, throwable)
+          } catch {
+            case e: Throwable => e.printStackTrace()
+          }
+      }
+    }
+  }
+
+  /** Swallow ncaughtException
+   */
+  object MuteHandler extends UncaughtExceptionHandler {
+    def uncaughtException(thread: Thread, throwable: Throwable): Unit = {
+
     }
   }
 }

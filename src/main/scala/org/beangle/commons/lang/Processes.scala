@@ -126,9 +126,7 @@ object Processes {
         } finally IOs.close(reader)
       }
 
-    val readLineThread = new Thread(readLine)
-    readLineThread.setName("read-line-thread")
-    readLineThread.start()
+    val readLineThread = Thread.ofVirtual.name("read-line-thread").start(readLine)
 
     try Option(result.get(waitSeconds, TimeUnit.SECONDS))
     catch {

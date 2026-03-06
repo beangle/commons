@@ -18,26 +18,35 @@
 package org.beangle.commons.concurrent
 
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.atomic.AtomicInteger
 
 /** Parallel job processing with thread pool. */
 object Workers {
 
+  @deprecated("using work(payload,thread,job)", since = "6.0.8")
+  def work[T](payloads: Iterable[T], job: T => Unit, threadPoolSize: Int = 0): Unit = {
+    workOn(payloads, threadPoolSize)(job)
+  }
+
   /** Processes payloads in parallel using multiple threads.
    *
-   * @param payloads       the items to process
-   * @param job            the function to apply to each item
-   * @param threadPoolSize number of threads (0 = availableProcessors)
+   * @param payloads    the items to process
+   * @param job         the function to apply to each item
+   * @param threadCount number of threads (0 = availableProcessors)
    */
-  def work[T](payloads: Iterable[T], job: T => Unit, threadPoolSize: Int = 0): Unit = {
+  def workOn[T](payloads: Iterable[T], threadCount: Int)(job: T => Unit): Int = {
     val loads = new LinkedBlockingQueue[T]
     import scala.jdk.CollectionConverters.*
     loads.addAll(payloads.toSeq.asJava)
 
-    val threads = if threadPoolSize <= 0 then Runtime.getRuntime.availableProcessors else threadPoolSize
-    Tasks.start(new Work(loads, job), threads)
+    val threads = if threadCount <= 0 then Runtime.getRuntime.availableProcessors else threadCount
+    val work = new Work(loads, job)
+    Tasks.run(work, threads, None)
+    work.failed.get
   }
 
   class Work[T](payloads: LinkedBlockingQueue[T], job: T => Unit) extends Runnable {
+    var failed: AtomicInteger = new AtomicInteger(0)
 
     def run(): Unit = {
       while (!payloads.isEmpty) {
@@ -46,8 +55,11 @@ object Workers {
           if (null != pk) job(pk)
         } catch {
           case e: Exception =>
+            failed.incrementAndGet()
+            e.printStackTrace()
         }
       }
     }
   }
+
 }
