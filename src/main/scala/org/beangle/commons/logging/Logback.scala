@@ -21,6 +21,7 @@ import ch.qos.logback.classic.joran.JoranConfigurator
 import ch.qos.logback.classic.{Level, LoggerContext}
 import org.beangle.commons.config.Enviroment
 import org.beangle.commons.io.IOs
+import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.annotation.beta
 import org.slf4j.LoggerFactory
 import org.slf4j.bridge.SLF4JBridgeHandler
@@ -98,9 +99,11 @@ object Logback {
 
   /** Installs JUL-to-SLF4J bridge so java.util.logging is routed to SLF4J. */
   def installJul2Sfl4j(): Unit = {
-    if (!SLF4JBridgeHandler.isInstalled) {
-      SLF4JBridgeHandler.removeHandlersForRootLogger()
-      SLF4JBridgeHandler.install()
+    if (ClassLoaders.get("org.slf4j.bridge.SLF4JBridgeHandler").isDefined) {
+      if (!SLF4JBridgeHandler.isInstalled) {
+        SLF4JBridgeHandler.removeHandlersForRootLogger()
+        SLF4JBridgeHandler.install()
+      }
     }
   }
 }
