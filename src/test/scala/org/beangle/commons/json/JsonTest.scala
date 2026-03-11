@@ -47,5 +47,16 @@ class JsonTest extends AnyFunSpec, Matchers {
       obj.getString("name", "33") should equal("33")
       assert(obj.toJson.contains(""""name":null"""))
     }
+    it("add test") {
+      val jo = new JsonObject()
+      jo.add("grade", List("math" -> 90, "english" -> 80))
+      jo.add("contact", Map("addr" -> "Nanjing Road 121#", "city" -> "Shanghai"))
+      jo.add("card", List("king", "queue", "K"))
+      jo.add("name", "jack")
+      jo.add("age", 22)
+      assert(jo("grade").isInstanceOf[JsonObject])
+      assert(jo("contact").isInstanceOf[JsonObject])
+      jo.getArray("card").size should be(3)
+    }
   }
 }

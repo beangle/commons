@@ -197,7 +197,7 @@ object Json {
 }
 
 /** JSON tree node (object, array, or leaf value). */
-trait Json {
+trait Json extends Serializable{
 
   /** Queries the object graph using slash or dot to separate nested properties.
    * Path format: [index]/property_name or property.nested.property

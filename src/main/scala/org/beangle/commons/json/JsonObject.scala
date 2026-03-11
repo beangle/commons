@@ -195,7 +195,20 @@ class JsonObject extends DynamicBean, Json {
     if (value == null) {
       props -= key
     } else {
-      props += key -> value
+      val jv =
+        value match {
+          case jo: Json => jo
+          case i: Iterable[_] =>
+            if (i.isEmpty) Json.emptyArray
+            else {
+              i.head match {
+                case t: (String, _) => new JsonObject(i.asInstanceOf[Iterable[(String, _)]])
+                case _ => new JsonArray(i)
+              }
+            }
+          case _ => value
+        }
+      props += key -> jv
     }
     this
   }
@@ -207,7 +220,7 @@ class JsonObject extends DynamicBean, Json {
    */
   def addAll(datas: collection.Map[String, Any]): JsonObject = {
     datas foreach { case (k, v) =>
-      props += k -> v
+      add(k, v)
     }
     this
   }
