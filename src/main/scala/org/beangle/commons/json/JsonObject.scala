@@ -201,9 +201,11 @@ class JsonObject extends DynamicBean, Json {
           case i: Iterable[_] =>
             if (i.isEmpty) Json.emptyArray
             else {
-              i.head match {
-                case t: (String, _) => new JsonObject(i.asInstanceOf[Iterable[(String, _)]])
-                case _ => new JsonArray(i)
+              val isTuples = i.forall(x => x.isInstanceOf[(_, _)])
+              if (isTuples) {
+                new JsonObject(i.map { x => val t = x.asInstanceOf[(_, _)]; (t._1.toString, t._2) })
+              } else {
+                new JsonArray(i)
               }
             }
           case _ => value
