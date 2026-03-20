@@ -74,6 +74,33 @@ class DocumentTest extends AnyFunSpec, Matchers {
       val beangle = (doc \\ "beangle")
       beangle.size should equal(1)
     }
+    it("merge") {
+      val cfg1 =
+        """<?xml version="1.0"?>
+          |<beangle>
+          |  <cdi>
+          |    <module class="org.beangle.serializer.json.DefaultModule"/>
+          |    <module class="org.beangle.serializer.xml.DefaultModule"/>
+          |  </cdi>
+          |</beangle>
+          |""".stripMargin
+
+      val cfg2 =
+        """<?xml version="1.0"?>
+          |<beangle>
+          |  <cdi>
+          |    <module class="org.beangle.serializer.json.DefaultModule"/>
+          |    <module class="org.beangle.serializer.text.DefaultModule"/>
+          |  </cdi>
+          |</beangle>
+          |""".stripMargin
+
+      val doc1 = Document.parse(cfg1)
+      val doc2 = Document.parse(cfg2)
+      doc1.merge(doc2)
+      val cdi = (doc1 \ "cdi")
+      assert(cdi.length == 2)
+    }
   }
 
 }
