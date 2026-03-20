@@ -17,6 +17,7 @@
 
 package org.beangle.commons.cdi
 
+import org.beangle.commons.cdi.Condition.{And, Or}
 import org.beangle.commons.config.Enviroment
 import org.beangle.commons.lang.ClassLoaders
 
@@ -28,7 +29,7 @@ object Condition {
     override def meet(registry: Binder.Registry): Boolean = true
   }
 
-  /** Condition: registry does not contain the given class.
+  /** Condition: registry does not contain the given bean.
    *
    * @param clazz the bean class to check
    * @return the Condition
@@ -106,10 +107,30 @@ object Condition {
 
     override def toString: String = s"Has resource ${path}"
   }
+
+  class And(first: Condition, second: Condition) extends Condition {
+    def meet(registry: Binder.Registry): Boolean = {
+      first.meet(registry) && second.meet(registry)
+    }
+  }
+
+  class Or(first: Condition, second: Condition) extends Condition {
+    def meet(registry: Binder.Registry): Boolean = {
+      first.meet(registry) || second.meet(registry)
+    }
+  }
 }
 
 /** Condition for conditional bean registration. */
 trait Condition {
   /** Returns true if the condition is met for the given registry. */
   def meet(registry: Binder.Registry): Boolean
+
+  final def and(con: Condition): Condition = {
+    new And(this, con)
+  }
+
+  final def or(con: Condition): Condition = {
+    new Or(this, con)
+  }
 }
