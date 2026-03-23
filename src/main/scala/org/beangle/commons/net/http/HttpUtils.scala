@@ -19,7 +19,7 @@ package org.beangle.commons.net.http
 
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.time.DateFormats
-import org.beangle.commons.lang.{Charsets, Strings}
+import org.beangle.commons.lang.{Charsets, Strings, SystemInfo}
 
 import java.io.*
 import java.net.*
@@ -31,6 +31,19 @@ object HttpUtils {
 
   /** Default HttpUtils instance (trustAll from beangle.https.trust-all system property). */
   val Default = new HttpUtils(createClient(java.lang.Boolean.getBoolean("beangle.https.trust-all")))
+
+  def defaultUserAgent: String = {
+    var osName = SystemInfo.os.name
+    if (osName.startsWith("Linux")) {
+      val release = new File("/etc/os-release")
+      if (release.exists()) {
+        val lines = IOs.readProperties(release.toURI.toURL)
+        osName = Strings.capitalize(lines.getOrElse("ID", osName))
+      }
+    }
+    val os = s"${osName}/${SystemInfo.os.version}"
+    s"Java/${SystemInfo.jvm.version} (${os})"
+  }
 
   private val statusMap = Map(
     HTTP_OK -> "OK",
@@ -171,6 +184,8 @@ object HttpUtils {
 
 class HttpUtils private(private val client: HttpClient) {
 
+  private val userAgent = HttpUtils.defaultUserAgent
+
   /** Performs HEAD request to get resource status.
    *
    * @param uri the URI
@@ -181,6 +196,7 @@ class HttpUtils private(private val client: HttpClient) {
     try {
       val request = HttpRequest.newBuilder(ouri)
         .method(HttpMethods.HEAD, HttpRequest.BodyPublishers.noBody())
+        .header("User-Agent", userAgent)
         .build()
       val response = client.send(request, HttpResponse.BodyHandlers.discarding())
       val rc = response.statusCode()
@@ -207,6 +223,7 @@ class HttpUtils private(private val client: HttpClient) {
   def get(uri: String, request: Request): Response = {
     try {
       val builder = HttpRequest.newBuilder(URI.create(uri)).method(HttpMethods.GET, HttpRequest.BodyPublishers.noBody())
+      builder.header("User-Agent", userAgent)
       val res = client.send(setup(builder, request), HttpResponse.BodyHandlers.ofByteArray())
       Response(res.statusCode(), res.body())
     } catch {
@@ -223,6 +240,7 @@ class HttpUtils private(private val client: HttpClient) {
   def delete(uri: String, request: Request): Response = {
     try {
       val builder = HttpRequest.newBuilder(URI.create(uri)).method(HttpMethods.DELETE, HttpRequest.BodyPublishers.noBody())
+      builder.header("User-Agent", userAgent)
       val res = client.send(setup(builder, request), HttpResponse.BodyHandlers.ofByteArray())
       Response(res.statusCode(), res.body())
     } catch {
@@ -261,6 +279,7 @@ class HttpUtils private(private val client: HttpClient) {
     require(HttpMethods.POST == method || HttpMethods.PUT == method, "Only support POST or PUT in invoke")
     try {
       val builder = HttpRequest.newBuilder(URI.create(uri))
+      builder.header("User-Agent", userAgent)
       request.body.map {
         case ba: Array[Byte] => HttpRequest.BodyPublishers.ofByteArray(ba)
         case is: InputStream => HttpRequest.BodyPublishers.ofInputStream(() => is)
@@ -284,6 +303,7 @@ class HttpUtils private(private val client: HttpClient) {
     try {
       val request = HttpRequest.newBuilder(URI.create(uri))
         .method(HttpMethods.GET, HttpRequest.BodyPublishers.noBody())
+        .header("User-Agent", userAgent)
         .build()
       val response = client.send(request, HttpResponse.BodyHandlers.ofInputStream())
       if (response.statusCode() == HTTP_OK) {
