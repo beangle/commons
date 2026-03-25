@@ -19,58 +19,47 @@ package org.beangle.commons.net.http
 
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.time.DateFormats
-import org.beangle.commons.lang.{Charsets, Strings, SystemInfo}
+import org.beangle.commons.lang.{Charsets, Strings}
 
 import java.io.*
 import java.net.*
 import java.net.HttpURLConnection.*
 import java.net.http.*
+import java.time.Duration
 
 /** HTTP client and request/response helpers. */
 object HttpUtils {
 
-  /** Default HttpUtils instance (trustAll from beangle.https.trust-all system property). */
-  val Default = new HttpUtils(createClient(java.lang.Boolean.getBoolean("beangle.https.trust-all")))
+  /** Default [[HttpUtils]] instance. */
+  val Default = new HttpUtils(Https.createDefaultClient(), 0)
 
-  def defaultUserAgent: String = {
-    var osName = SystemInfo.os.name
-    if (osName.startsWith("Linux")) {
-      val release = new File("/etc/os-release")
-      if (release.exists()) {
-        val lines = IOs.readProperties(release.toURI.toURL)
-        osName = Strings.capitalize(lines.getOrElse("ID", osName))
-      }
-    }
-    val os = s"${osName}/${SystemInfo.os.version}"
-    s"Java/${SystemInfo.jvm.version} (${os})"
-  }
-
+  private var clientIdx = 0
   private val statusMap = Map(
     HTTP_OK -> "OK",
     HTTP_FORBIDDEN -> "Access denied!",
     HTTP_NOT_FOUND -> "Not Found",
     HTTP_UNAUTHORIZED -> "Access denied")
 
-  /** Creates an HttpClient (trustAll skips certificate verification).
+  /** Session-scoped [[HttpUtils]] with in-memory [[java.net.CookieManager]] on the
+   * [[java.net.http.HttpClient]] (`Https.createClient(trustAll, true)`).
    *
-   * @param trustAll if true, trust all SSL certificates
-   * @return the HttpClient
+   * @param trustAll if true, trust all SSL certificates (first argument to `Https.createClient`)
    */
-  def createClient(trustAll: Boolean = false): HttpClient = {
-    if (trustAll) {
-      Https.createTrustAllClient()
-    } else {
-      Https.createDefaultClient()
-    }
+  def session(trustAll: Boolean, timeout: Duration): HttpUtils = {
+    withClient(Https.createClient(trustAll, true, timeout))
   }
 
-  /** Returns HttpUtils backed by the given client.
+  /** Wraps an existing [[java.net.http.HttpClient]].
    *
-   * @param client the HttpClient
+   * For example from [[Https.createDefaultClient]], [[Https.createClient]], or your own builder.
+   *
+   * @param client
+   * share one instance when the client keeps session state (cookie jar, connection pool, etc.)
    * @return HttpUtils instance
    */
   def withClient(client: HttpClient): HttpUtils = {
-    new HttpUtils(client)
+    clientIdx += 1
+    new HttpUtils(client, clientIdx)
   }
 
   /** Converts HTTP status code to human-readable string.
@@ -182,9 +171,14 @@ object HttpUtils {
   }
 }
 
-class HttpUtils private(private val client: HttpClient) {
+class HttpUtils private(private val client: HttpClient, id: Int) {
 
-  private val userAgent = HttpUtils.defaultUserAgent
+  private var userAgent = Https.defaultUserAgent
+
+  def setUserAgent(ua: String): Unit = {
+    if (id == 0) throw new IllegalArgumentException("Cannot change default HttpUtils user agent,using config")
+    this.userAgent = ua
+  }
 
   /** Performs HEAD request to get resource status.
    *
@@ -196,7 +190,6 @@ class HttpUtils private(private val client: HttpClient) {
     try {
       val request = HttpRequest.newBuilder(ouri)
         .method(HttpMethods.HEAD, HttpRequest.BodyPublishers.noBody())
-        .header("User-Agent", userAgent)
         .build()
       val response = client.send(request, HttpResponse.BodyHandlers.discarding())
       val rc = response.statusCode()
@@ -223,9 +216,8 @@ class HttpUtils private(private val client: HttpClient) {
   def get(uri: String, request: Request): Response = {
     try {
       val builder = HttpRequest.newBuilder(URI.create(uri)).method(HttpMethods.GET, HttpRequest.BodyPublishers.noBody())
-      builder.header("User-Agent", userAgent)
       val res = client.send(setup(builder, request), HttpResponse.BodyHandlers.ofByteArray())
-      Response(res.statusCode(), res.body())
+      Response(res.statusCode(), res.body(), convertHeaders(res.headers()))
     } catch {
       case e: Exception => error(uri, e)
     }
@@ -240,9 +232,8 @@ class HttpUtils private(private val client: HttpClient) {
   def delete(uri: String, request: Request): Response = {
     try {
       val builder = HttpRequest.newBuilder(URI.create(uri)).method(HttpMethods.DELETE, HttpRequest.BodyPublishers.noBody())
-      builder.header("User-Agent", userAgent)
       val res = client.send(setup(builder, request), HttpResponse.BodyHandlers.ofByteArray())
-      Response(res.statusCode(), res.body())
+      Response(res.statusCode(), res.body(), convertHeaders(res.headers()))
     } catch {
       case e: Exception => error(uri, e)
     }
@@ -279,7 +270,6 @@ class HttpUtils private(private val client: HttpClient) {
     require(HttpMethods.POST == method || HttpMethods.PUT == method, "Only support POST or PUT in invoke")
     try {
       val builder = HttpRequest.newBuilder(URI.create(uri))
-      builder.header("User-Agent", userAgent)
       request.body.map {
         case ba: Array[Byte] => HttpRequest.BodyPublishers.ofByteArray(ba)
         case is: InputStream => HttpRequest.BodyPublishers.ofInputStream(() => is)
@@ -287,7 +277,7 @@ class HttpUtils private(private val client: HttpClient) {
       }.foreach(publisher => builder.method(method, publisher))
 
       val res = client.send(setup(builder, request), HttpResponse.BodyHandlers.ofByteArray())
-      Response(res.statusCode(), res.body())
+      Response(res.statusCode(), res.body(), convertHeaders(res.headers()))
     } catch {
       case e: Exception => error(uri, e)
     }
@@ -303,7 +293,6 @@ class HttpUtils private(private val client: HttpClient) {
     try {
       val request = HttpRequest.newBuilder(URI.create(uri))
         .method(HttpMethods.GET, HttpRequest.BodyPublishers.noBody())
-        .header("User-Agent", userAgent)
         .build()
       val response = client.send(request, HttpResponse.BodyHandlers.ofInputStream())
       if (response.statusCode() == HTTP_OK) {
@@ -326,15 +315,27 @@ class HttpUtils private(private val client: HttpClient) {
   }
 
   private[this] def error(uri: String, e: Exception): Response = {
-    Response(404, e.getMessage)
+    Response(404, e.getMessage, Map.empty)
   }
 
   private def setup(builder: HttpRequest.Builder, request: Request): HttpRequest = {
     request.headers foreach { (k, v) => builder.header(k, v.toString) }
+    if (request.cookies.nonEmpty) {
+      builder.header("Cookie", request.cookies.map { case (n, v) => s"$n=$v" }.mkString("; "))
+    }
     request.authorization foreach { auth => builder.header("Authorization", auth) }
     if (request.body.nonEmpty && Strings.isNotBlank(request.contentType)) {
       builder.header("Content-Type", request.contentType)
     }
+    val headers = request.headers.keys.map(_.toLowerCase).toSet
+    if (!headers.contains("user-agent")) {
+      builder.header("User-Agent", userAgent)
+    }
     builder.build()
+  }
+
+  private def convertHeaders(headers: HttpHeaders): Map[String, List[String]] = {
+    import scala.jdk.javaapi.CollectionConverters.asScala
+    asScala(headers.map()).map(x => (x._1, asScala(x._2).toList)).toMap
   }
 }

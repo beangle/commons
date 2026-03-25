@@ -17,9 +17,14 @@
 
 package org.beangle.commons.net.http
 
-import java.net.Socket
+import org.beangle.commons.config.Enviroment
+import org.beangle.commons.io.IOs
+import org.beangle.commons.lang.{Strings, SystemInfo}
+
+import java.io.File
 import java.net.http.HttpClient
 import java.net.http.HttpClient.Redirect
+import java.net.{CookieManager, Socket}
 import java.security.cert.X509Certificate
 import java.time.Duration
 import javax.net.ssl.*
@@ -27,23 +32,66 @@ import javax.net.ssl.*
 /** HTTPS client factory (default and trust-all). */
 object Https {
 
-  private val Timeout = Duration.ofSeconds(10)
-
-  /** Creates HttpClient with standard SSL verification. */
+  /** Creates [[java.net.http.HttpClient]] with standard SSL verification and no cookie jar.
+   * `trustAll` follows system property `beangle.https.trust-all`; client is
+   * Each call is independent unless you add your own [[java.net.CookieHandler]]. */
   def createDefaultClient(): HttpClient = {
-    HttpClient.newBuilder().connectTimeout(Timeout).followRedirects(Redirect.NORMAL).build()
+    val trustAll = Enviroment.Default.getProperty("beangle.https.trust-all").map(_.toString).orNull
+    createClient(java.lang.Boolean.valueOf(trustAll), false, Duration.ofSeconds(30))
   }
 
-  /** Creates HttpClient that trusts all certificates (for dev/testing only). */
-  def createTrustAllClient(): HttpClient = {
+  def defaultUserAgent: String = {
+    Enviroment.Default.getProperty("beangle.https.user-agent") match {
+      case None =>
+        var osName = SystemInfo.os.name
+        if (osName.startsWith("Linux")) {
+          val release = new File("/etc/os-release")
+          if (release.exists()) {
+            val lines = IOs.readProperties(release.toURI.toURL)
+            osName = Strings.capitalize(lines.getOrElse("ID", osName))
+          }
+        }
+        val os = s"${osName}/${SystemInfo.os.version}"
+        s"Java/${SystemInfo.jvm.version} (${os})"
+      case Some(ua) => ua.toString
+    }
+  }
+
+  /** Creates a [[java.net.http.HttpClient]]: strict or trust-all SSL, optionally with session
+   * cookies via an in-memory [[java.net.CookieManager]].
+   *
+   * @param trustAll      if true, [[createTrustAllClient]] (trust all certificates);
+   * @param cookieSupport if true, attach a new [[java.net.CookieManager]]
+   * @return the HttpClient
+   */
+  def createClient(trustAll: Boolean, cookieSupport: Boolean, timeout: Duration): HttpClient = {
+    if (trustAll) {
+      createTrustAllClient(cookieSupport, timeout)
+    } else {
+      val b = HttpClient.newBuilder().connectTimeout(timeout).followRedirects(Redirect.NORMAL)
+      if (cookieSupport) {
+        b.cookieHandler(new CookieManager())
+      }
+      b.build()
+    }
+  }
+
+  /** Creates [[java.net.http.HttpClient]] that trusts all certificates (for dev/testing only).
+   *
+   * @param cookieSupport if true, attach a new [[java.net.CookieManager]]
+   */
+  private def createTrustAllClient(cookieSupport: Boolean, timeout: Duration): HttpClient = {
     try {
       val sslContext = SSLContext.getInstance("TLS")
       sslContext.init(null, Array(NullTrustManager), new java.security.SecureRandom())
-      HttpClient.newBuilder.sslContext(sslContext)
+      val b = HttpClient.newBuilder.sslContext(sslContext)
         .sslParameters(createWideOpenSslParams())
-        .connectTimeout(Timeout)
+        .connectTimeout(timeout)
         .followRedirects(Redirect.NORMAL)
-        .build()
+      if (cookieSupport) {
+        b.cookieHandler(new CookieManager())
+      }
+      b.build()
     } catch {
       case e: Exception =>
         throw new RuntimeException("Failed to create SSL-ignoring HttpClient", e)

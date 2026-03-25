@@ -19,8 +19,8 @@ package org.beangle.commons.net.http
 
 import org.beangle.commons.lang.Charsets
 
-/** HTTP response with status and content. */
-case class Response(status: Int, content: Any) {
+/** HTTP response: status code, body, and headers (header names map to value lists). */
+case class Response(status: Int, content: Any, headers: Map[String, List[String]]) {
 
   /** Returns content as UTF-8 string. */
   def getText: String = {

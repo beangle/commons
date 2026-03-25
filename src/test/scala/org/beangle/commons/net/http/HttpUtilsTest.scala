@@ -24,7 +24,7 @@ class HttpUtilsTest extends AnyFunSpec, Matchers {
 
   describe("HttpUtils") {
     it("userAgent") {
-      val agent = HttpUtils.defaultUserAgent
+      val agent = Https.defaultUserAgent
       agent.startsWith("Java/") should be(true)
     }
   }

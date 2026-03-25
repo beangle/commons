@@ -162,26 +162,45 @@ object Request {
 
 final class Request(val body: Option[Any], val contentType: String) {
   protected[http] val headers = new mutable.HashMap[String, Any]
+  /** Cookie name → value; emitted as one `Cookie` header when the request is sent. */
+  protected[http] val cookies = mutable.LinkedHashMap[String, String]()
   protected[http] var authorization: Option[String] = None
 
-  /** Adds headers.
+  /** Adds headers. A `Cookie` header is parsed into [[cookies]] and not stored in [[headers]].
    *
    * @param kvs the name-value pairs
    * @return this for chaining
    */
   def headers(kvs: Iterable[(String, String)]): Request = {
-    kvs foreach { kv => headers.put(kv._1, kv._2) }
+    kvs foreach { case (n, v) => putHeader(n, v) }
     this
   }
 
   /** Adds a single header.
+   *
+   * A `Cookie` header is parsed into [[cookies]] and not stored in [[headers]].
    *
    * @param name  the header name
    * @param value the header value
    * @return this for chaining
    */
   def header(name: String, value: String): Request = {
-    headers.put(name, value)
+    putHeader(name, value)
+    this
+  }
+
+  /** Adds a cookie (name → value).
+   *
+   * At send time, all cookies are merged into a single `Cookie` header (including any from
+   * `Cookie` headers added via [[header]] / [[headers]]).
+   *
+   * @param name  the cookie name
+   * @param value the cookie value
+   * @return this for chaining
+   */
+  def cookie(name: String, value: String): Request = {
+    require(Strings.isNotBlank(name), "cookie name cannot be blank")
+    cookies.put(name, value)
     this
   }
 
@@ -234,5 +253,25 @@ final class Request(val body: Option[Any], val contentType: String) {
   def request(acceptType: String): Request = {
     headers.put("Accept", acceptType)
     this
+  }
+
+  private def putHeader(name: String, value: String): Unit = {
+    if (name.equalsIgnoreCase("Cookie")) {
+      absorbCookieValue(value)
+    } else {
+      headers.put(name, value)
+    }
+  }
+
+  /** Parses `name=value; ...` and merges into [[cookies]]; later names override earlier ones. */
+  private def absorbCookieValue(cookieHeaderValue: String): Unit = {
+    Strings.split(cookieHeaderValue, ';') foreach { t =>
+      val eq = t.indexOf('=')
+      if (eq > 0) {
+        val k = t.substring(0, eq).trim
+        val v = if (eq + 1 < t.length) t.substring(eq + 1).trim else ""
+        if (Strings.isNotBlank(k)) cookies.put(k, v)
+      }
+    }
   }
 }
