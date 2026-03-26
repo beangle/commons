@@ -50,7 +50,7 @@ object Consoles {
    * @param exits  strings to exit the loop
    * @param p      the handler for each input line
    */
-  def shell(prompt: => String, exits: Set[String], p: String => Unit): Unit = {
+  def shell(prompt: String, exits: Set[String])(p: String => Unit): Unit = {
     val scanner = new Scanner(System.in)
     var content: String = null
     var exit = false
@@ -73,7 +73,7 @@ object Consoles {
    * @param f          validator; loop until true
    * @return the validated input
    */
-  def prompt(msg: String, defaultStr: String, f: String => Boolean): String = {
+  def prompt(msg: String, defaultStr: String)(f: String => Boolean): String = {
     val scanner = new Scanner(System.in)
     var content: String = null
     val promptMsg = msg + (if (null != defaultStr) "(default " + defaultStr + ")" else "")
