@@ -39,9 +39,7 @@ object ClassLoaders {
    * @return the default ClassLoader (never `null`)
    */
   def defaultClassLoader: ClassLoader = {
-    var cl =
-      try Thread.currentThread().getContextClassLoader
-      catch case _: Throwable => null
+    var cl = Thread.currentThread().getContextClassLoader
     if (cl == null) {
       cl = getClass.getClassLoader
       if (null == cl) cl = ClassLoader.getSystemClassLoader
@@ -147,7 +145,7 @@ object ClassLoaders {
     if buildins.contains(className) then true
     else {
       try {
-        Class.forName(className, false, classLoader)
+        loader.loadClass(className)
         true
       } catch {
         case var8: Throwable => false
