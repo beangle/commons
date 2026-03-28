@@ -47,23 +47,30 @@ object Objects {
    * @return `true` if the values of both objects are the same
    * @since 3.0
    */
-  @inline
   def equals(a: Any, b: Any): Boolean = {
-    a == b
+    // 快速路径：同一个引用
+    (a, b) match {
+      case (x: AnyRef, y: AnyRef) if x eq y => return true
+      case _ =>
+    }
+
+    (a, b) match {
+      case (null, null) => true
+      case (null, _) => false
+      case (_, null) => false
+      case (arr1: Array[_], arr2: Array[_]) =>
+        arr1.length == arr2.length && arr1.indices.forall(i => equals(arr1(i), arr2(i)))
+      case (seq1: IterableOnce[_], seq2: IterableOnce[_]) =>
+        val it1 = seq1.iterator
+        val it2 = seq2.iterator
+        while (it1.hasNext && it2.hasNext) {
+          if (!equals(it1.next(), it2.next())) return false
+        }
+        !it1.hasNext && !it2.hasNext
+      case _ => a == b
+    }
   }
 
-  /** Compares two object arrays for equality.
-   *
-   * @param a the first array
-   * @param b the second array
-   * @return true if both null or elements equal
-   */
-  def equals(a: Array[Any], b: Array[Any]): Boolean = {
-    if a eq b then true
-    else if (null == a) || (null == b) then false
-    else if a.length != b.length then false
-    else !Range(0, a.length).exists(i => a(i) != b(i))
-  }
 
   /** Gets the `toString` of an `Object` returning an empty string ("") if `null`
    * input.

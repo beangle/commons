@@ -25,8 +25,8 @@ class ObjectsTest extends AnyFunSpec, Matchers {
   describe("Objects") {
     it("Equals object and array") {
       Objects.equals(null, null) should be(true)
-      // so strange
-      Objects.equals(Array(2), Array(2)) should be(false)
+      Objects.equals(Array(2), Array(2)) should be(true)
+      Objects.equals(Seq(2), Seq(2)) should be(true)
     }
     it("Compare object and array") {
       Objects.compareBuilder.add(1, 2).toComparison should be(-1)
