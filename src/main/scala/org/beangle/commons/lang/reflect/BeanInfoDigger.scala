@@ -19,11 +19,8 @@ package org.beangle.commons.lang.reflect
 
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.annotation.noreflect
-import org.beangle.commons.lang.reflect.BeanInfo.*
 import org.beangle.commons.lang.reflect.BeanInfo.Builder.{ParamHolder, getPropertyName}
 
-import java.lang.reflect.Method
-import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
 import scala.quoted.*
 
@@ -52,7 +49,6 @@ object BeanInfoDigger {
 
   /** Macro: digs BeanInfo for type T and updates cache. */
   def digInto[T: Type](ec: Expr[Class[T]], cache: Expr[BeanInfoCache])(implicit quotes: Quotes): Expr[BeanInfo] = {
-    import quotes.reflect.*
     val digger = new BeanInfoDigger[quotes.type](quotes.reflect.TypeRepr.of[T])
     '{
       ${ cache }.update(${ digger.dig() })
@@ -155,7 +151,6 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
 
       base.typeSymbol.declaredMethods foreach { mm =>
         val defdef = mm.tree.asInstanceOf[DefDef]
-        val rtType = resolveType(defdef.returnTpt.tpe, params)
         val isPublic = !defdef.symbol.flags.is(Flags.Protected) && !defdef.symbol.flags.is(Flags.Private)
         val ignored = isCaseClass && Set("productPrefix", "productArity", "productIterator", "productElementNames").contains(defdef.name)
         if (isPublic && isNormal(defdef.name) && !ignored) {
@@ -163,6 +158,7 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
             fieldMap.get(name) match {
               case Some(fx) => if readable then fieldMap.put(name, fx.copy(hasGet = true)) else fieldMap.put(name, fx.copy(hasSet = true))
               case None =>
+                val rtType = resolveType(defdef.returnTpt.tpe, params)
                 val paramList = resolveDefParams(defdef, params, Map.empty)
                 val transnt = defdef.symbol.annotations exists (x => x.show.toLowerCase.contains("transient"))
                 val fe = if readable then FieldExpr(name, rtType, transnt, true, false) else FieldExpr(name, paramList.head.typeinfo, transnt, false, true)
@@ -207,6 +203,7 @@ class BeanInfoDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       case c: AppliedType => args = resolveParamTypes(c, params)
       case d: AnnotatedType => tpe = d.underlying
       case c: ConstantType =>
+      case n: OrType =>
       case _ => throw new RuntimeException("Unspported type :" + tpe)
     }
     if args.isEmpty then typeOf(tpe)
