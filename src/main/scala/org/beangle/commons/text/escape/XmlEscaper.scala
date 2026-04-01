@@ -21,6 +21,7 @@ package org.beangle.commons.text.escape
 object XmlEscaper {
   private val textTargets = Map('<' -> "&lt;", '>' -> "&gt;", '&' -> "&amp;")
   private val targets = textTargets ++ Map('"' -> "&quot;", '\'' -> "&apos;")
+  private val entities = Map("lt" -> '<', "gt" -> '>', "amp" -> '&', "quot" -> '"', "apos" -> '\'')
 
   /** Escapes XML special characters including quotes. For attribute values.
    *
@@ -54,5 +55,51 @@ object XmlEscaper {
         sb.mkString
       case None => str
     }
+  }
+
+  /** Unescapes XML entities including quotes. Reverse of [[escape]]. */
+  def unescape(str: String): String = {
+    val ln = str.length
+    val firstAmp = str.indexOf('&')
+    if firstAmp < 0 then return str
+
+    val sb = new StringBuilder(str.substring(0, firstAmp))
+    var i = firstAmp
+    while i < ln do
+      val c = str.charAt(i)
+      if c != '&' then
+        sb.append(c)
+        i += 1
+      else
+        val semi = str.indexOf(';', i + 1)
+        if semi < 0 then
+          sb.append(c)
+          i += 1
+        else
+          val name = str.substring(i + 1, semi)
+          decodeEntity(name) match
+            case Some(decoded) =>
+              sb.append(decoded)
+              i = semi + 1
+            case None =>
+              sb.append('&')
+              i += 1
+    sb.toString
+  }
+
+  private def decodeEntity(name: String): Option[Char] = {
+    if name.startsWith("#x") || name.startsWith("#X") then
+      parseCodePoint(name.substring(2), 16)
+    else if name.startsWith("#") then
+      parseCodePoint(name.substring(1), 10)
+    else entities.get(name)
+  }
+
+  private def parseCodePoint(s: String, radix: Int): Option[Char] = {
+    try
+      val n = Integer.parseInt(s, radix)
+      if n >= Char.MinValue && n <= Char.MaxValue then Some(n.toChar) else None
+    catch
+      case _: NumberFormatException => None
   }
 }

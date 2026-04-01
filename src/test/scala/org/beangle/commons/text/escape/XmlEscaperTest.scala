@@ -22,9 +22,68 @@ import org.scalatest.matchers.should.Matchers
 
 class XmlEscaperTest extends AnyFunSpec, Matchers {
 
-  describe("XmlEscaper") {
-    it("Escape") {
-      assert("""RSA key RSA key &lt;expired=&quot;2019-09-09&quot;&gt;""" == XmlEscaper.escape("""RSA key RSA key <expired="2019-09-09">"""))
+  describe("XmlEscaper.escape") {
+    it("escapes angle brackets, ampersand, and quotes for attribute-style content") {
+      XmlEscaper.escape("""RSA key RSA key <expired="2019-09-09">""") should be(
+        """RSA key RSA key &lt;expired=&quot;2019-09-09&quot;&gt;"""
+      )
+    }
+
+    it("escapes ampersand before other special characters") {
+      XmlEscaper.escape("a & b < c") should be("a &amp; b &lt; c")
+    }
+
+    it("escapes single quote as apos") {
+      XmlEscaper.escape("it's") should be("it&apos;s")
+    }
+
+    it("escapes double quotes inside string") {
+      XmlEscaper.escape("say \"hi\"") should be("say &quot;hi&quot;")
+    }
+  }
+
+  describe("XmlEscaper.escapeText") {
+    it("escapes lt, gt, amp only (not quotes)") {
+      XmlEscaper.escapeText("1 < 2 && 3 > 0") should be("1 &lt; 2 &amp;&amp; 3 &gt; 0")
+    }
+
+    it("does not escape double or single quotes in text mode") {
+      XmlEscaper.escapeText("""He said "ok" and 'yes'""") should be("""He said "ok" and 'yes'""")
+    }
+  }
+
+  describe("XmlEscaper.unescape") {
+    it("reverses named entities") {
+      XmlEscaper.unescape("&lt;p&gt; &amp; &quot;x&quot; &apos;y&apos;") should be(
+        """<p> & "x" 'y'"""
+      )
+    }
+
+    it("decodes decimal numeric character references") {
+      XmlEscaper.unescape("&#1212;") should be(1212.toChar.toString)
+      XmlEscaper.unescape("&#34;quote") should be("\"quote")
+      XmlEscaper.unescape("&#65;") should be("A")
+    }
+
+    it("decodes hexadecimal numeric character references") {
+      XmlEscaper.unescape("&#x41;") should be("A")
+      XmlEscaper.unescape("&#X61;") should be("a")
+    }
+
+    it("leaves incomplete or unknown entities as-is after partial decode") {
+      XmlEscaper.unescape("no entity here") should be("no entity here")
+      XmlEscaper.unescape("&") should be("&")
+      XmlEscaper.unescape("&amp") should be("&amp")
+    }
+
+    it("round-trips escape then unescape for typical attribute fragment") {
+      val raw = """<tag attr="a & b" c='d'>"""
+      XmlEscaper.unescape(XmlEscaper.escape(raw)) should be(raw)
+    }
+
+    it("round-trips escapeText then unescape for text-only specials") {
+      val raw = "2 < 3 && 4 > 1"
+      XmlEscaper.unescape(XmlEscaper.escapeText(raw)) should be(raw)
     }
   }
 
