@@ -71,7 +71,6 @@ object Objects {
     }
   }
 
-
   /** Gets the `toString` of an `Object` returning an empty string ("") if `null`
    * input.
    *
