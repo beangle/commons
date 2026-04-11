@@ -17,10 +17,12 @@
 
 package org.beangle.commons.lang.time
 
+import org.beangle.commons.lang.ScopedContext
+
 /** Profile timer stack (thread-local, min-time logging). */
 object TimerTrace {
 
-  protected var curStack: ThreadLocal[TimerStack] = new ThreadLocal[TimerStack]()
+  private var key = ScopedContext.Key[TimerStack]("beangle.commons.timer-stack")
 
   /** System property that controls whether this timer should be used or not. Set to "true" activates
    * the timer. Set to "false" to disactivate.
@@ -55,22 +57,25 @@ object TimerTrace {
   def start(name: String): Unit = {
     if (!active) return
     val root = new TimerNode(name, System.currentTimeMillis())
-    val stack = curStack.get
-    if (null == stack) curStack.set(new TimerStack(root)) else stack.push(root)
+    ScopedContext.get(key) match {
+      case None => ScopedContext.put(key, new TimerStack(root))
+      case Some(ts) => ts.push(root)
+    }
   }
 
   /** Ends the current performance profiling. Handles hierarchy automatically. */
   def end(): Unit = {
-    if (!active) return
-    val stack = curStack.get
-    if (null == stack) return
-    val currentNode = stack.pop()
-    if (currentNode != null) {
-      val parent = stack.peek()
-      val total = currentNode.end()
-      if (parent == null) {
-        curStack.set(null)
-      } else if (total > mintime) parent.children += currentNode
+    if (active) {
+      ScopedContext.get(key) foreach { stack =>
+        val currentNode = stack.pop()
+        if (currentNode != null) {
+          val parent = stack.peek()
+          val total = currentNode.end()
+          if (parent == null) {
+            ScopedContext.remove(key)
+          } else if (total > mintime) parent.children += currentNode
+        }
+      }
     }
   }
 
@@ -104,6 +109,6 @@ object TimerTrace {
 
   /** Clears the thread-local timer stack. */
   def clear(): Unit = {
-    curStack.set(null)
+    ScopedContext.remove(key)
   }
 }

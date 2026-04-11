@@ -40,6 +40,7 @@ object ScopedContext {
     def get(k: String): Option[Any] = {
       values.get(k)
     }
+
   }
 
   def get[T](key: Key[T]): Option[T] = {
@@ -50,11 +51,32 @@ object ScopedContext {
     }
   }
 
+  def getOrElse[T](key: Key[T], defaultValue: => T): T = {
+    get(key) match {
+      case Some(v) => v
+      case None => defaultValue
+    }
+  }
+
+  def getOrElseUpdate[T](key: Key[T], defaultValue: => T): T = {
+    get(key) match {
+      case Some(v) => v
+      case None => val d = defaultValue; put(key, d); d
+    }
+  }
+
+
   def put[T](key: Key[T], value: T): Unit = {
-    if (context.isBound) {
+    if (!context.isBound) {
       throw new IllegalAccessException("ScopedContext was not bounded")
     }
     context.get.add(key.name, value)
+  }
+
+  def remove(key: Key[_]): Unit = {
+    if (context.isBound) {
+      context.get.remove(key.name)
+    }
   }
 
   /** Execute body with the given data. */

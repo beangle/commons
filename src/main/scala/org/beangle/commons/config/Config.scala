@@ -82,7 +82,7 @@ object Config {
   }
 
   /** Returns a Processor that decrypts values using PBE with the given password. */
-  def pbe(password: String): Processor = {
+  def pbe(password: String): PBEProcessor = {
     require(Strings.isNotEmpty(password))
     PBEProcessor(PBEEncryptor.random(password))
   }
