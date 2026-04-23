@@ -139,6 +139,7 @@ class JsonObject extends DynamicBean, Json {
 
   private def convert(value: Any): Any = {
     value match {
+      case null => Null
       case jo: JsonObject => jo
       case ja: JsonArray => ja
       case i: Iterable[Any] => new JsonArray(i)
@@ -246,7 +247,7 @@ class JsonObject extends DynamicBean, Json {
    */
   override def apply(key: String): Any = {
     val d = props(key)
-    if (d == Null) throw new NoSuchElementException(key) else d
+    if (d == Null) null else d
   }
 
   override def get(key: String): Option[Any] = {
