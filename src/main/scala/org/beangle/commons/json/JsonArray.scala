@@ -18,8 +18,9 @@
 package org.beangle.commons.json
 
 import org.beangle.commons.json.JsonArray.parseIndex
-import org.beangle.commons.lang.{Numbers, Options, Strings}
+import org.beangle.commons.lang.{Numbers, Options}
 
+import java.util as ju
 import scala.collection.mutable
 
 /** JsonArray factory. */
@@ -34,19 +35,22 @@ object JsonArray {
     new JsonArray(v)
   }
 
-  /** Parses index from path part (e.g. "0" or "[1]").
+  /** Parses index from path part (e.g. "0", "-1", "[1]", or "[-2]").
    *
    * @param part the path part
-   * @return the index, or -1 if not an index
+   * @return Some(index) if valid, None otherwise
    */
-  protected[json] def parseIndex(part: String): Int = {
-    var index = -1
-    if (part.charAt(0) == '[') {
-      index = part.substring(1, part.length - 1).toInt
-    } else if (Numbers.isDigits(part)) {
-      index = part.toInt
+  protected[json] def parseIndex(part: String): Option[Int] = {
+    if part.isEmpty then None
+    else if (part.charAt(0) == '[' && part.charAt(part.length - 1) == ']') {
+      val idxStr = part.substring(1, part.length - 1)
+      if (Numbers.isDigits(idxStr) || (idxStr.startsWith("-") && Numbers.isDigits(idxStr.substring(1)))) Some(idxStr.toInt)
+      else None
+    } else if (Numbers.isDigits(part) || (part.startsWith("-") && Numbers.isDigits(part.substring(1)))) {
+      Some(part.toInt)
+    } else {
+      None
     }
-    index
   }
 }
 
@@ -79,7 +83,9 @@ class JsonArray extends collection.Seq[Any], Json {
    * @return Some(value) or None
    */
   override def get(property: String): Option[Any] = {
-    get(parseIndex(property))
+    parseIndex(property) match
+      case Some(i) => get(i)
+      case None => None
   }
 
   /** Gets value at the given index.
@@ -88,8 +94,9 @@ class JsonArray extends collection.Seq[Any], Json {
    * @return Some(value) or None if out of bounds
    */
   def get(i: Int): Option[Any] = {
-    if (i >= 0 && i < values.size) {
-      Some(values(i))
+    val index = if i >= 0 then i else values.size + i
+    if (index >= 0 && index < values.size) {
+      Some(values(index))
     } else {
       None
     }
@@ -115,22 +122,56 @@ class JsonArray extends collection.Seq[Any], Json {
     var o: Any = this
     while (o != null && i < paths.length) {
       val part = paths(i)
-      i += 1
-      o match
-        case jo: JsonObject => o = jo.get(part).orNull
+      o match {
+        case jo: JsonObject =>
+          o = jo.get(part).orNull
         case ja: JsonArray =>
-          val index = parseIndex(part)
-          if (index > -1) {
-            o = if index >= ja.length then null else ja.get(index).orNull
+          if ("*" == part) {
+            o = flattenIfNested(ja)
           } else {
-            o = new JsonArray(ja.values.map {
-              case j: JsonObject => j.get(part).orNull
-              case a: JsonArray => null
-              case _ => null
-            }.filter(_ != null))
+            val index = parseIndex(part)
+            if (index.nonEmpty) {
+              o = ja.get(index.get).orNull
+            } else if (i > 0 && paths(i - 1) == "*") {
+              o = new JsonArray(ja.values.map {
+                case j: JsonObject => j.get(part).orNull
+                case _ => null
+              }.filter(_ != null))
+            } else {
+              o = null
+            }
           }
+      }
+      i += 1
     }
     Option(o)
+  }
+
+  /** Flattens one array level for wildcard projection.
+   *
+   * Used by path part `*`: if current array contains nested arrays/lists,
+   * flatten one level so patterns like `matrix[*][*]` can keep projecting.
+   */
+  private def flattenIfNested(array: JsonArray): JsonArray = {
+    val flattened = mutable.ArrayBuffer[Any]()
+    var hasNested = false
+    array.values.foreach {
+      case a: JsonArray =>
+        hasNested = true
+        flattened.addAll(a.values)
+      case l: ju.List[?] =>
+        hasNested = true
+        val it = l.iterator()
+        while (it.hasNext) {
+          flattened += it.next()
+        }
+      case s: collection.Seq[?] =>
+        hasNested = true
+        flattened.addAll(s.asInstanceOf[collection.Seq[Any]])
+      case v =>
+        flattened += v
+    }
+    if hasNested then new JsonArray(flattened) else array
   }
 
   /** Auto-expands the array and sets the element at the given index.
@@ -151,8 +192,7 @@ class JsonArray extends collection.Seq[Any], Json {
   }
 
   override def query(path: String): Option[Any] = {
-    val parts = if (path.charAt(0) == '/') Strings.split(path, "/") else Strings.split(path, ".")
-    get(parts)
+    get(Json.resolvePath(path))
   }
 
   override def toJson: String = {

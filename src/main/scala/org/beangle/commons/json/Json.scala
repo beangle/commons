@@ -20,6 +20,9 @@ package org.beangle.commons.json
 import org.beangle.commons.codec.binary.Base64
 import org.beangle.commons.lang.{Options, Strings}
 
+import java.util as ju
+import scala.jdk.CollectionConverters.*
+
 /** JSON parse, query, and serialization. */
 object Json {
 
@@ -33,14 +36,77 @@ object Json {
     else new JsonParser(new java.io.StringReader(s)).parse()
   }
 
-  /** Queries the JSON at the given path. Path uses slash or dot for nested properties.
+  /** Converts arbitrary value to a Json node.
    *
-   * @param s    the JSON string to query
-   * @param path the query path (e.g. [index]/property or property.nested)
-   * @return the value at the path, or None if not found
+   * Supports Scala/Java map and collection values recursively.
    */
-  def query(s: String, path: String): Option[Any] = {
-    parse(s).query(path)
+  def of(value: Any): Json = {
+    value match
+      case null => Null
+      case jo: JsonObject => jo
+      case ja: JsonArray => ja
+      case m: ju.Map[?, ?] =>
+        val jo = new JsonObject()
+        val it = m.entrySet().iterator()
+        while (it.hasNext) {
+          val e = it.next()
+          if e.getKey != null then jo.add(e.getKey.toString, of(e.getValue).value)
+        }
+        jo
+      case m: collection.Map[?, ?] =>
+        val jo = new JsonObject()
+        m.foreach { case (k, v) =>
+          if k != null then jo.add(k.toString, of(v).value)
+        }
+        jo
+      case c: ju.Collection[?] =>
+        new JsonArray(c.asScala.map(v => of(v).value))
+      case i: Iterable[?] =>
+        new JsonArray(i.map(v => of(v).value))
+      case a: Array[?] =>
+        new JsonArray(a.toIndexedSeq.map(v => of(v).value))
+      case v => JsonValue(v)
+  }
+
+
+  /** Resolves a JSON query path into normalized path parts.
+   *
+   * Supported syntaxes:
+   * {{{
+   * /a/b/3/c
+   * a.b[3].c
+   * a[b][c][0]
+   * }}}
+   *
+   * Normalized result examples:
+   * {{{
+   * resolvePath("/a/b/3/c")   == Array("a", "b", "3", "c")
+   * resolvePath("a.b[3].c")   == Array("a", "b", "3", "c")
+   * resolvePath("a[b][c][0]") == Array("a", "b", "c", "0")
+   * }}}
+   *
+   * @param path the query path
+   * @return normalized path parts
+   */
+  def resolvePath(path: String): Array[String] = {
+    if path.charAt(0) == '/' then
+      Strings.split(path, "/")
+    else {
+      val parts = collection.mutable.ArrayBuffer[String]()
+      val current = new StringBuilder
+      var i = 0
+      while (i < path.length) {
+        path.charAt(i) match
+          case '.' | '[' | ']' =>
+            if current.nonEmpty then
+              parts += current.toString
+              current.clear()
+          case c => current.append(c)
+        i += 1
+      }
+      if current.nonEmpty then parts += current.toString
+      parts.toArray
+    }
   }
 
   /** Parses a JSON string as a JsonObject. Returns empty object for blank input.

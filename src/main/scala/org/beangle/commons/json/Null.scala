@@ -18,7 +18,7 @@
 package org.beangle.commons.json
 
 /** JSON null singleton (distinct from Scala null). Used when JSON explicitly has "null". */
-object Null {
+object Null extends Json {
 
   override def equals(obj: Any): Boolean = {
     obj match {
@@ -27,6 +27,16 @@ object Null {
       case a: Any => false
     }
   }
+
+  override def query(path: String): Option[Any] = None
+
+  override def get(property: String): Option[Any] = None
+
+  override def children: Iterable[Json] = List.empty
+
+  override def toJson: String = "null"
+
+  override def value: Any = null
 
   override def hashCode: Int = 0
 

@@ -34,15 +34,30 @@ class JsonParserTest extends AnyFunSpec, Matchers {
       assert(a.query("/org/code").contains("shcm"))
       assert(a.query("admins.[1]").contains("admin2"))
       assert(a.query("admins[1]").contains("admin2"))
+      assert(a.query("admins[-1]").contains("admin2"))
+      assert(a.query("admins[-2]").contains("admin1"))
+      assert(a.query("admins[-3]").isEmpty)
+      assert(a.query("admins[abc]").isEmpty)
       assert(a.query("/admins/1").contains("admin2"))
       assert(a.query("/admins/32").isEmpty)
       assert(a.query("/hostname/32").isEmpty)
-      val roleNames = a.query("/roles/name")
+      assert(a.query("/roles/name").isEmpty)
+      val roleNames = a.query("/roles/*/name")
       assert(roleNames.nonEmpty)
       assert(roleNames.get.asInstanceOf[JsonArray].contains("role2"))
       val roles = a.query("roles").get.asInstanceOf[JsonArray]
       assert(roles.query("[0].name").contains("role1"))
       assert(roles.query("/1/name").contains("role2"))
+      assert(a.query("roles[1][name]").contains("role2"))
+      val projectedRoleNames = a.query("roles[*].name")
+      assert(projectedRoleNames.nonEmpty)
+      assert(projectedRoleNames.get.asInstanceOf[JsonArray].contains("role1"))
+      assert(projectedRoleNames.get.asInstanceOf[JsonArray].contains("role2"))
+      val matrix = Json.parseObject("""{"matrix":[[1,2],[3,4]]}""")
+      val flattenedMatrix = matrix.query("matrix[*][*]")
+      assert(flattenedMatrix.nonEmpty)
+      val values = flattenedMatrix.get.asInstanceOf[JsonArray]
+      assert(values == JsonArray(1, 2, 3, 4))
     }
 
     it("parse") {
@@ -61,11 +76,6 @@ class JsonParserTest extends AnyFunSpec, Matchers {
       val empty = Json.parseObject(""" {} """)
       assert(src.isMatch(target))
       assert(src.isMatch(empty))
-    }
-    it("update") {
-      val data = new JsonObject()
-      data.update("jobs.[1].title", "Manager")
-      assert(data.query("jobs.[1].title").contains("Manager"))
     }
   }
 

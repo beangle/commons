@@ -20,7 +20,7 @@ package org.beangle.commons.json
 import org.beangle.commons.bean.DynamicBean
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.conversion.string.TemporalConverter
-import org.beangle.commons.lang.{Options, Strings}
+import org.beangle.commons.lang.Options
 
 import java.time.{Instant, LocalDate, LocalDateTime}
 import scala.collection.mutable
@@ -38,15 +38,6 @@ object JsonObject {
     new JsonObject(v)
   }
 
-  /** Converts value to JSON literal. Deprecated: use Json.toLiteral.
-   *
-   * @param v the value
-   * @return the literal string
-   */
-  @deprecated("Using Json.toLiteral", "5.7.1")
-  def toLiteral(v: Any): String = {
-    Json.toLiteral(v)
-  }
 }
 
 /** Represents a JSON object.
@@ -64,7 +55,7 @@ class JsonObject extends DynamicBean, Json {
   }
 
   override def query(path: String): Option[Any] = {
-    val parts = splitPath(path)
+    val parts = Json.resolvePath(path)
     var i = 0
     var o: Any = this
     while (o != null && i < parts.length) {
@@ -72,7 +63,10 @@ class JsonObject extends DynamicBean, Json {
       i += 1
       o = o match
         case jo: JsonObject => jo.props.getOrElse(part, null)
-        case ja: JsonArray => ja.get(Array(part)).orNull
+        case ja: JsonArray =>
+          val rest = parts.slice(i - 1, parts.length)
+          i = parts.length
+          ja.get(rest).orNull
         case _ => null
     }
     Option(o)
@@ -88,64 +82,101 @@ class JsonObject extends DynamicBean, Json {
 
   /** Updates or creates objects at the given path (e.g. /a/b/3/c or a.b[3].c).
    *
+   * Supports wildcard batch update on arrays:
+   * - roles[*].name = "guest"
+   * - matrix[*][*] = 0
+   *
+   * Update is strict: if path cannot be resolved or created under current rules,
+   * this method throws IllegalArgumentException instead of silently ignoring it.
+   *
    * @param path  the path to the property
    * @param value the value to set
    * @return this JsonObject for chaining
    */
   def update(path: String, value: Any): JsonObject = {
-    val parts = splitPath(path)
-    var i = 0
-    var o: Any = this
-    while (o != null && i < parts.length - 1) {
-      val part = parts(i)
-      val nextIdx = JsonArray.parseIndex(parts(i + 1))
-      i += 1
-      o match
-        case jo: JsonObject =>
-          o = jo.props.getOrElseUpdate(part, if nextIdx > -1 then new JsonArray else new JsonObject)
-        case ja: JsonArray =>
-          val idx = JsonArray.parseIndex(part)
-          ja.get(idx) match
-            case None =>
-              o = if nextIdx > -1 then new JsonArray else new JsonObject
-              ja.set(idx, o)
-            case Some(a) => o = a
-        case _ => o = null
-    }
+    val parts = Json.resolvePath(path)
     val cv = convert(value)
-    val last = parts(i)
-    o match
-      case jo: JsonObject => jo.add(last, cv)
-      case ja: JsonArray => ja.set(JsonArray.parseIndex(last), cv)
-
+    if parts.nonEmpty && !updateAt(this, parts, 0, cv) then
+      throw new IllegalArgumentException(s"Cannot update path: ${path}")
     this
   }
 
-  /** Splits query path into property array. /a/b/3/c -> [a,b,3,c]; a.b[3].c -> [a,b,[3],c]. */
-  private def splitPath(path: String): Array[String] = {
-    if path.charAt(0) == '/' then
-      Strings.split(path, "/")
-    else {
-      Strings.split(path, ".").flatMap { p =>
-        val idx = p.indexOf('[')
-        if (idx > 0 && p.charAt(p.length - 1) == ']') {
-          Array(p.substring(0, idx), p.substring(idx))
-        } else {
-          Array(p)
+  private def updateAt(node: Any, parts: Array[String], idx: Int, value: Any): Boolean = {
+    node match
+      case jo: JsonObject => updateObjectNode(jo, parts, idx, value)
+      case ja: JsonArray => updateArrayNode(ja, parts, idx, value)
+      case _ => false
+  }
+
+  private def updateObjectNode(jo: JsonObject, parts: Array[String], idx: Int, value: Any): Boolean = {
+    val part = parts(idx)
+    val isLast = idx == parts.length - 1
+    // Object node only accepts property names; wildcard/index token is array-only.
+    if part == "*" || JsonArray.parseIndex(part).nonEmpty then false
+    else if isLast then
+      jo.add(part, value)
+      true
+    else
+      val nextPart = parts(idx + 1)
+      val child = jo.props.getOrElseUpdate(part, if isArrayToken(nextPart) then new JsonArray else new JsonObject)
+      updateAt(child, parts, idx + 1, value)
+  }
+
+  /** Handles both index update and wildcard batch update on array node. */
+  private def updateArrayNode(ja: JsonArray, parts: Array[String], idx: Int, value: Any): Boolean = {
+    val part = parts(idx)
+    val isLast = idx == parts.length - 1
+    if part == "*" then
+      // Wildcard means update all elements at this level.
+      if isLast then
+        var i = 0
+        while (i < ja.length) {
+          ja.set(i, value)
+          i += 1
         }
-      }
-    }
+        true
+      else
+        var i = 0
+        var updated = false
+        while (i < ja.length) {
+          if updateAt(ja(i), parts, idx + 1, value) then updated = true
+          i += 1
+        }
+        updated
+    else
+      JsonArray.parseIndex(part) match
+        case Some(rawIndex) =>
+          normalizeIndex(ja.length, rawIndex) match
+            case Some(targetIndex) =>
+              if isLast then
+                ja.set(targetIndex, value)
+                true
+              else
+                val nextPart = parts(idx + 1)
+                val child = ja.get(rawIndex) match
+                  case Some(v) => v
+                  case None =>
+                    // Negative index never auto-creates new slots.
+                    if rawIndex < 0 then return false
+                    val created = if isArrayToken(nextPart) then new JsonArray else new JsonObject
+                    ja.set(targetIndex, created)
+                    created
+                updateAt(child, parts, idx + 1, value)
+            case None => false
+        case None => false
+  }
+
+  private def isArrayToken(part: String): Boolean = {
+    part == "*" || JsonArray.parseIndex(part).nonEmpty
+  }
+
+  private def normalizeIndex(length: Int, index: Int): Option[Int] = {
+    val target = if index >= 0 then index else length + index
+    if target >= 0 then Some(target) else None
   }
 
   private def convert(value: Any): Any = {
-    value match {
-      case null => Null
-      case jo: JsonObject => jo
-      case ja: JsonArray => ja
-      case i: Iterable[Any] => new JsonArray(i)
-      case a: Array[Any] => new JsonArray(a)
-      case v: Any => v
-    }
+    Json.of(value).value
   }
 
   /** Removes the specified keys from this object.
