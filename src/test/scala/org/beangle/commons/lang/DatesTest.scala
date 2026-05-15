@@ -50,5 +50,18 @@ class DatesTest extends AnyFunSpec, Matchers {
       assert(i == Dates.toInstant("1980.9.1T"))
       assert(i == Dates.toInstant("1980.9.1 00"))
     }
+
+    it("convert string to YearMonth") {
+      Dates.toYearMonth("2023/09/01") should equal(YearMonth.parse("2023-09"))
+      Dates.toYearMonth("2023/9") should equal(YearMonth.parse("2023-09"))
+      Dates.toYearMonth("20230901") should equal(YearMonth.parse("2023-09"))
+      // '-' 分隔且包含日部分的日期也应归一化为年月
+      Dates.toYearMonth("2023-09-15") should equal(YearMonth.parse("2023-09"))
+    }
+
+    it("convert string to LocalDateTime") {
+      Dates.toDateTime("2023/09/01 9:02:03") should equal(LocalDateTime.parse("2023-09-01T09:02:03"))
+      Dates.toDateTime("2023-09-01 9:02:03") should equal(LocalDateTime.parse("2023-09-01T09:02:03"))
+    }
   }
 }

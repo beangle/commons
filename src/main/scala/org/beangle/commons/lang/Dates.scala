@@ -136,26 +136,50 @@ object Dates {
       date = v.substring(0, sepIdx)
       val commaCount = Strings.count(hms, ':')
       if (hms.isEmpty) hms = "00:00:00"
-      else if (commaCount == 0) hms += ":00:00"
-      else if (commaCount == 1) hms += ":00"
+      else if (commaCount == 0) {
+        // Accept `H` and normalize to `HH:00:00`
+        if hms.length == 1 then hms = leftPad(hms, 2, '0')
+        hms += ":00:00"
+      } else if (commaCount == 1) {
+        // Accept `H:mm` and normalize to `HH:mm:00`
+        val firstColon = hms.indexOf(':')
+        val hourPart = hms.substring(0, firstColon)
+        if hourPart.length == 1 then hms = leftPad(hourPart, 2, '0') + hms.substring(firstColon)
+        hms += ":00"
+      } else {
+        // Accept `H:mm:ss` and normalize to `HH:mm:ss`
+        val firstColon = hms.indexOf(':')
+        val hourPart = hms.substring(0, firstColon)
+        if hourPart.length == 1 then hms = leftPad(hourPart, 2, '0') + hms.substring(firstColon)
+      }
     }
     normalizeDate(date) + "T" + hms
   }
 
-  /** Normalizes YearMonth string to YYYY-MM.
+  /** Normalizes YearMonth string to `YYYY-MM` (for `YearMonth.parse`).
    *
-   *  - YYYY.M into YYYY-0M
-   *  - YYYY.MM into YYYY-MM
-   *  - YYYY-M into YYYY-0M
+   * Supported examples:
+   *  - `YYYY.M` into `YYYY-0M` (e.g. `2023.9` -> `2023-09`)
+   *  - `YYYY.MM` into `YYYY-MM` (e.g. `2023.09` -> `2023-09`)
+   *  - `YYYY-M` into `YYYY-0M` (e.g. `2023-9` -> `2023-09`)
+   *  - also accepts `/` and fullwidth `／` as separators: `2023/09/01` -> `2023-09`
+   *  - numeric formats: `YYYYMM` / `YYYYMMDD` (e.g. `20230901` -> `2023-09`)
    */
   def nomalizeYearMonth(ym: String): String = {
-    val str = Strings.replace(ym, ".", "-")
+    val normalized = ym.trim.replaceAll("\\s+", "")
+    var str = Strings.replace(Strings.replace(normalized, ".", "-"), "/", "-")
+    str = Strings.replace(str, "／", "-")
+
     if (str.contains("-")) {
       val parts = splitDate(str)
       parts(0) + "-" + parts(1)
     } else {
-      val parts = splitDate(str.substring(0, 4) + "-" + str.substring(4))
-      parts(0) + "-" + parts(1)
+      // Numeric formats: YYYYMM, YYYYMMDD (and a single-digit month like YYYYM).
+      val digits = str.replaceAll("[^0-9]", "")
+      require(digits.length >= 5, s"illegal yearMonth $ym,it should like yyyyMM or yyyyMMDD")
+      val year = digits.substring(0, 4)
+      val monthDigits = if (digits.length == 5) digits.substring(4) else digits.substring(4, 6)
+      year + "-" + leftPad(monthDigits, 2, '0')
     }
   }
 

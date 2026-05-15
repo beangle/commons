@@ -40,5 +40,18 @@ class HourMinuteTest extends AnyFunSpec, Matchers {
       assert(HourMinute("23:34") + 110 == new HourMinute(124))
       assert(HourMinute("01:34") - 110 == new HourMinute(2344))
     }
+
+    it("convert 09:00") {
+      HourMinute.convert("09:00") should equal(900.toShort)
+    }
+
+    it("convert accepts short forms 9:00 / 9:01") {
+      HourMinute.convert("9:00") should equal(900.toShort)
+      HourMinute.convert("9:01") should equal(901.toShort)
+    }
+
+    it("convert accepts fullwidth colon 9：00") {
+      HourMinute.convert("9：00") should equal(900.toShort)
+    }
   }
 }
