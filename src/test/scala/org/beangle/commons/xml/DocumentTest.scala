@@ -101,6 +101,23 @@ class DocumentTest extends AnyFunSpec, Matchers {
       val cdi = (doc1 \ "cdi")
       assert(cdi.length == 2)
     }
+    it("parse innerText with tag"){
+      val doc = Document.parse("<?xml version=\"1.0\"?><table><tr><td>text1<span>ddd</span></td></tr></table>")
+      val expected =
+        """<?xml version="1.0" encoding="UTF-8" ?>
+          |<table>
+          |  <tr>
+          |    <td>
+          |      text1
+          |      <span>
+          |      ddd
+          |      </span>
+          |    </td>
+          |  </tr>
+          |</table>
+          |""".stripMargin
+      assert(doc.toXml.trim().equals(expected.trim()))
+    }
   }
 
 }

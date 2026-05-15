@@ -35,7 +35,7 @@ object Element {
 
 class Element(val label: String) extends Node {
   protected[xml] val attributes = new mutable.LinkedHashMap[String, String]
-  protected[xml] val childNodes = Collections.newBuffer[Element]
+  protected[xml] val childNodes = Collections.newBuffer[Node]
   protected[xml] var innerText: Option[String] = None
 
   override def children: collection.Seq[Node] = {
@@ -75,10 +75,7 @@ class Element(val label: String) extends Node {
 
   /** Appends an Element child. */
   def append(node: Node): Unit = {
-    node match {
-      case elem: Element => childNodes.addOne(elem)
-      case _ => throw new IllegalArgumentException(s"cannot append ${node.getClass.getName} to elments.")
-    }
+    childNodes.addOne(node)
   }
 
   /** Creates and appends child Element; returns the new child. */
@@ -93,27 +90,34 @@ class Element(val label: String) extends Node {
     s"<$label>...</$label>"
   }
 
-  protected def appendXml(node: Element, indent: String, buf: mutable.StringBuilder): Unit = {
-    buf.append(indent).append(s"<${node.label}")
-    node.attributes foreach { case (k, v) =>
+  protected def appendXml(text: Text, indent: String, buf: mutable.StringBuilder): Unit = {
+    buf.append(indent).append(XmlEscaper.escapeText(text.text)).append("\n")
+  }
+
+  protected def appendXml(elem: Element, indent: String, buf: mutable.StringBuilder): Unit = {
+    buf.append(indent).append(s"<${elem.label}")
+    elem.attributes foreach { case (k, v) =>
       buf ++= s""" $k="${XmlEscaper.escape(v)}""""
     }
-    node.innerText match {
+    elem.innerText match {
       case None =>
-        if (node.childNodes.isEmpty) {
+        if (elem.childNodes.isEmpty) {
           buf ++= "/>\n"
         } else {
           buf ++= ">\n"
-          node.childNodes foreach (appendXml(_, "  " + indent, buf))
-          buf.append(indent).append(s"</${node.label}>\n")
+          elem.childNodes foreach {
+            case e: Element => appendXml(e, "  " + indent, buf)
+            case t: Text => appendXml(t, "  " + indent, buf)
+          }
+          buf.append(indent).append(s"</${elem.label}>\n")
         }
       case Some(t) =>
-        if (node.children.isEmpty) { // text-only node
-          buf.append(">").append(XmlEscaper.escapeText(t)).append(s"</${node.label}>\n")
+        if (elem.children.isEmpty) { // text-only node
+          buf.append(">").append(XmlEscaper.escapeText(t)).append(s"</${elem.label}>\n")
         } else { // node with both text and child elements
           buf.append(">\n")
           buf.append(indent).append(XmlEscaper.escapeText(t)).append("\n")
-          buf.append(indent).append(s"</${node.label}>\n")
+          buf.append(indent).append(s"</${elem.label}>\n")
         }
     }
   }

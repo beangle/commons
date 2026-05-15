@@ -17,8 +17,8 @@
 
 package org.beangle.commons.xml
 
-import org.beangle.commons.lang.Charsets
-import org.w3c.dom.{Document as XmlDocument, Element as XmlElement}
+import org.beangle.commons.lang.{Charsets, Strings}
+import org.w3c.dom.{Document as XmlDocument, Element as XmlElement, Text as XmlText}
 
 import java.io.{ByteArrayInputStream, File, FileInputStream, InputStream}
 import java.net.URL
@@ -70,6 +70,9 @@ object Document {
     (0 until children.getLength) foreach { i =>
       children.item(i) match {
         case c: XmlElement => node.append(convertNode(c))
+        case t: XmlText =>
+          val txt = t.getNodeValue.trim()
+          if Strings.isNotBlank(txt) then node.append(Text(txt))
         case _ =>
       }
     }
