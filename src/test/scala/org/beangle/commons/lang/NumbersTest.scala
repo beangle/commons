@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons
+package org.beangle.commons.lang
 
 import org.beangle.commons.lang.Numbers.*
 import org.scalatest.funspec.AnyFunSpec
@@ -27,12 +27,6 @@ class NumbersTest extends AnyFunSpec, Matchers {
     it("isDigits") {
       assert(isDigits("23"))
       assert(isDigits("-23"))
-
-      println(round(4.0153d, 3))
-      assert(round(4.015d, 2).toString == "4.02") //3.14
-      assert(round(add(0.05, 0.01), 2).toString == "0.06")
-      assert(round(subtract(1.0, 0.42), 2).toString == "0.58")
-      assert(round(multiply(4.015, 100), 3).toString == "401.5")
     }
   }
 

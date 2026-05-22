@@ -65,7 +65,6 @@ object ScopedContext {
     }
   }
 
-
   def put[T](key: Key[T], value: T): Unit = {
     if (!context.isBound) {
       throw new IllegalAccessException("ScopedContext was not bounded")

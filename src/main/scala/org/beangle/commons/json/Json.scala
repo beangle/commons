@@ -68,7 +68,6 @@ object Json {
       case v => JsonValue(v)
   }
 
-
   /** Resolves a JSON query path into normalized path parts.
    *
    * Supported syntaxes:

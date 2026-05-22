@@ -19,7 +19,6 @@ package org.beangle.commons.lang
 
 import org.beangle.commons.lang.Strings.isEmpty
 
-import java.math.RoundingMode
 import java.{lang as jl, math as jm}
 
 object Numbers {
@@ -219,9 +218,9 @@ object Numbers {
    * @param scale number of decimal places
    * @return rounded value
    */
+  @deprecated("using Doubles", "6.1.3")
   def round(n: Double, scale: Int): Double = {
-    val b = jm.BigDecimal(jl.Double.toString(n))
-    b.setScale(scale, RoundingMode.HALF_UP).doubleValue
+    Doubles.round(n, scale)
   }
 
   /** Adds two double values with BigDecimal precision to avoid floating-point errors.
@@ -230,10 +229,9 @@ object Numbers {
    * @param v2 second value
    * @return sum
    */
+  @deprecated("using Doubles", "6.1.3")
   def add(v1: Double, v2: Double): Double = {
-    val b1 = jm.BigDecimal(jl.Double.toString(v1))
-    val b2 = jm.BigDecimal(jl.Double.toString(v2))
-    b1.add(b2).doubleValue
+    Doubles.add(v1, v2)
   }
 
   /** Subtracts v2 from v1 with BigDecimal precision to avoid floating-point errors.
@@ -242,10 +240,9 @@ object Numbers {
    * @param v2 subtrahend
    * @return difference
    */
+  @deprecated("using Doubles", "6.1.3")
   def subtract(v1: Double, v2: Double): Double = {
-    val b1 = jm.BigDecimal(jl.Double.toString(v1))
-    val b2 = jm.BigDecimal(jl.Double.toString(v2))
-    b1.subtract(b2).doubleValue
+    Doubles.subtract(v1, v2)
   }
 
   /** Multiplies two double values with BigDecimal precision to avoid floating-point errors.
@@ -254,10 +251,9 @@ object Numbers {
    * @param v2 second factor
    * @return product
    */
+  @deprecated("using Doubles", "6.1.3")
   def multiply(v1: Double, v2: Double): Double = {
-    val b1 = jm.BigDecimal(jl.Double.toString(v1))
-    val b2 = jm.BigDecimal(jl.Double.toString(v2))
-    b1.multiply(b2).doubleValue
+    Doubles.multiply(v1, v2)
   }
 
   /** Divides v1 by v2 with BigDecimal precision and rounding.
@@ -267,9 +263,9 @@ object Numbers {
    * @param scale decimal places for result (default 10)
    * @return quotient
    */
+  @deprecated("using Doubles", "6.1.3")
   def divide(v1: Double, v2: Double, scale: Int = 10): Double = {
-    val b1 = jm.BigDecimal(jl.Double.toString(v1))
-    val b2 = jm.BigDecimal(jl.Double.toString(v2))
-    b1.divide(b2, scale, RoundingMode.HALF_UP).doubleValue
+    Doubles.divide(v1, v2, scale)
   }
+
 }
