@@ -144,5 +144,61 @@ class JsonTest extends AnyFunSpec, Matchers {
       data.update("roles[0].name", null)
       data.query("roles[0].name").isEmpty should be(true)
     }
+
+    it("JsonObject equals and hashCode") {
+      val a = JsonObject("id" -> 1, "name" -> "jack")
+      val b = JsonObject("name" -> "jack", "id" -> 1)
+      val c = JsonObject("id" -> 2, "name" -> "jack")
+
+      a should equal(a)
+      a should equal(b)
+      b should equal(a)
+      a should not equal c
+      a should not equal null
+      a should not equal "not json"
+
+      a.hashCode should equal(b.hashCode)
+      a.hashCode should not equal c.hashCode
+    }
+
+    it("JsonObject equals nested structures") {
+      val a = JsonObject("meta" -> JsonObject("ok" -> true), "items" -> JsonArray(1, 2))
+      val b = Json.parseObject("""{"meta":{"ok":true},"items":[1,2]}""")
+      val c = JsonObject("meta" -> JsonObject("ok" -> false), "items" -> JsonArray(1, 2))
+
+      a should equal(b)
+      a should not equal c
+      a.hashCode should equal(b.hashCode)
+    }
+
+    it("JsonArray equals and hashCode") {
+      val a = JsonArray(1, "two", true)
+      val b = JsonArray(1, "two", true)
+      val c = JsonArray(1, "two", false)
+
+      a should equal(a)
+      a should equal(b)
+      b should equal(a)
+      a should not equal c
+      a should not equal null
+      a should not equal List(1, "two", true)
+
+      a.hashCode should equal(b.hashCode)
+      a.hashCode should not equal c.hashCode
+    }
+
+    it("JsonArray equals respects element order") {
+      JsonArray(1, 2) should not equal JsonArray(2, 1)
+    }
+
+    it("JsonArray equals nested structures") {
+      val a = JsonArray(JsonObject("x" -> 1), JsonArray(2, 3))
+      val b = Json.parseArray("""[{"x":1},[2,3]]""")
+      val c = JsonArray(JsonObject("x" -> 2), JsonArray(2, 3))
+
+      a should equal(b)
+      a should not equal c
+      a.hashCode should equal(b.hashCode)
+    }
   }
 }

@@ -56,7 +56,7 @@ object JsonArray {
 
 /** Represents a JSON array.
  */
-class JsonArray extends collection.Seq[Any], Json {
+final class JsonArray extends collection.Seq[Any], Json {
 
   private val values = new mutable.ArrayBuffer[Any]
 
@@ -231,6 +231,17 @@ class JsonArray extends collection.Seq[Any], Json {
   override def length: Int = values.length
 
   override def value: Any = this
+
+  override def equals(o: Any): Boolean = {
+    o match {
+      case that: JsonArray => that.values.equals(this.values)
+      case _ => false
+    }
+  }
+
+  override def hashCode(): Int = {
+    this.values.hashCode()
+  }
 
   override def toString: String = toJson
 }

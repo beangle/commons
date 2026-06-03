@@ -42,7 +42,7 @@ object JsonObject {
 
 /** Represents a JSON object.
  */
-class JsonObject extends DynamicBean, Json {
+final class JsonObject extends DynamicBean, Json {
   private val props: mutable.Map[String, Any] = Collections.newMap[String, Any]
 
   /** Creates JsonObject from iterable of key-value pairs.
@@ -487,6 +487,17 @@ class JsonObject extends DynamicBean, Json {
           case _ => si == ti
       }
     } else false
+  }
+
+  override def equals(o: Any): Boolean = {
+    o match {
+      case that: JsonObject => that.props.equals(this.props)
+      case _ => false
+    }
+  }
+
+  override def hashCode(): Int = {
+    this.props.hashCode()
   }
 
   override def value: Any = this
