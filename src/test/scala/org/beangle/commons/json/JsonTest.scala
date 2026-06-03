@@ -200,5 +200,36 @@ class JsonTest extends AnyFunSpec, Matchers {
       a should not equal c
       a.hashCode should equal(b.hashCode)
     }
+
+    it("JsonObject deepCopy is independent") {
+      val orig = JsonObject("meta" -> JsonObject("n" -> 1), "items" -> JsonArray(10))
+      val copy = Json.deepCopy(orig)
+      copy should equal(orig)
+      (copy ne orig) should be(true)
+
+      copy.getObject("meta").add("n", 2)
+      copy.getArray("items").add(20)
+      orig.getObject("meta").getInt("n") should be(1)
+      orig.getArray("items").length should be(1)
+    }
+
+    it("JsonArray deepCopy is independent") {
+      val orig = JsonArray(JsonObject("v" -> 1), JsonArray(2))
+      val copy = Json.deepCopy(orig)
+      copy should equal(orig)
+
+      copy(0).asInstanceOf[JsonObject].add("v", 9)
+      copy(1).asInstanceOf[JsonArray].add(99)
+      orig(0).asInstanceOf[JsonObject].getInt("v") should be(1)
+      orig(1).asInstanceOf[JsonArray].length should be(1)
+    }
+
+    it("JsonObject deepCopy clones byte array") {
+      val bytes = "photo".getBytes
+      val orig = JsonObject("photo" -> bytes)
+      val copy = Json.deepCopy(orig)
+      bytes(0) = 'X'
+      copy.get("photo").get.asInstanceOf[Array[Byte]](0) should be('p'.toByte)
+    }
   }
 }

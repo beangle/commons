@@ -126,6 +126,32 @@ object Json {
     if Strings.isBlank(s) then new JsonArray() else parse(s).asInstanceOf[JsonArray]
   }
 
+  /** Deep-copies a [[JsonObject]] (nested nodes are not shared with the source).
+   */
+  def deepCopy(jo: JsonObject): JsonObject = {
+    new JsonObject(jo.iterator.map { case (k, v) => k -> deepCopyValue(v) }.toList)
+  }
+
+  /** Deep-copies a [[JsonArray]] (nested nodes are not shared with the source).
+   */
+  def deepCopy(ja: JsonArray): JsonArray = {
+    new JsonArray(ja.iterator.map(deepCopyValue).toList)
+  }
+
+  /** Deep-copies a JSON tree value (object, array, or leaf).
+   *
+   * Nested [[JsonObject]] / [[JsonArray]] are copied recursively; immutable scalars
+   * and [[Null]] are reused. [[Array]]`[Byte]` is cloned when present.
+   */
+  def deepCopyValue(value: Any): Any = {
+    value match
+      case Null => Null
+      case jo: JsonObject => deepCopy(jo)
+      case ja: JsonArray => deepCopy(ja)
+      case bytes: Array[Byte] => bytes.clone()
+      case v => v
+  }
+
   /** Converts a Map to its JSON string representation.
    *
    * @param datas the map to convert
