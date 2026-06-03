@@ -126,6 +126,20 @@ object Json {
     if Strings.isBlank(s) then new JsonArray() else parse(s).asInstanceOf[JsonArray]
   }
 
+  /** Deep-copies a [[Json]] (nested nodes are not shared with the source).
+   *
+   * [[JsonObject]] / [[JsonArray]] are copied recursively; [[JsonValue]] delegates to
+   * [[deepCopyValue]] on its wrapped value; [[Null]] is reused.
+   */
+  def deepCopy(j: Json): Json = {
+    j match {
+      case jo: JsonObject => deepCopy(jo)
+      case ja: JsonArray => deepCopy(ja)
+      case jv: JsonValue => JsonValue(deepCopyValue(jv.value))
+      case Null => Null
+    }
+  }
+
   /** Deep-copies a [[JsonObject]] (nested nodes are not shared with the source).
    */
   def deepCopy(jo: JsonObject): JsonObject = {
@@ -148,6 +162,7 @@ object Json {
       case Null => Null
       case jo: JsonObject => deepCopy(jo)
       case ja: JsonArray => deepCopy(ja)
+      case jv: JsonValue => JsonValue(deepCopyValue(jv.value))
       case bytes: Array[Byte] => bytes.clone()
       case v => v
   }
@@ -288,7 +303,7 @@ object Json {
 }
 
 /** JSON tree node (object, array, or leaf value). */
-trait Json extends Serializable{
+trait Json extends Serializable {
 
   /** Queries the object graph using slash or dot to separate nested properties.
    * Path format: [index]/property_name or property.nested.property

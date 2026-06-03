@@ -231,5 +231,14 @@ class JsonTest extends AnyFunSpec, Matchers {
       bytes(0) = 'X'
       copy.get("photo").get.asInstanceOf[Array[Byte]](0) should be('p'.toByte)
     }
+
+    it("JsonValue deepCopy clones wrapped byte array") {
+      val bytes = "photo".getBytes
+      val orig = JsonValue(bytes)
+      val copy = Json.deepCopy(orig).asInstanceOf[JsonValue]
+      (copy ne orig) should be(true)
+      bytes(0) = 'X'
+      copy.value.asInstanceOf[Array[Byte]](0) should be('p'.toByte)
+    }
   }
 }
