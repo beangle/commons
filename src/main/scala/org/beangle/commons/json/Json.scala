@@ -126,10 +126,10 @@ object Json {
     if Strings.isBlank(s) then new JsonArray() else parse(s).asInstanceOf[JsonArray]
   }
 
-  /** Deep-copies a [[Json]] (nested nodes are not shared with the source).
+  /** Deep-copies a `Json` (nested nodes are not shared with the source).
    *
-   * [[JsonObject]] / [[JsonArray]] are copied recursively; [[JsonValue]] delegates to
-   * [[deepCopyValue]] on its wrapped value; [[Null]] is reused.
+   * `JsonObject` / `JsonArray` are copied recursively; `JsonValue` delegates to
+   * `deepCopyValue` on its wrapped value; `Null` is reused.
    */
   def deepCopy(j: Json): Json = {
     j match {
@@ -140,13 +140,13 @@ object Json {
     }
   }
 
-  /** Deep-copies a [[JsonObject]] (nested nodes are not shared with the source).
+  /** Deep-copies a `JsonObject` (nested nodes are not shared with the source).
    */
   def deepCopy(jo: JsonObject): JsonObject = {
     new JsonObject(jo.iterator.map { case (k, v) => k -> deepCopyValue(v) }.toList)
   }
 
-  /** Deep-copies a [[JsonArray]] (nested nodes are not shared with the source).
+  /** Deep-copies a `JsonArray` (nested nodes are not shared with the source).
    */
   def deepCopy(ja: JsonArray): JsonArray = {
     new JsonArray(ja.iterator.map(deepCopyValue).toList)
@@ -154,8 +154,8 @@ object Json {
 
   /** Deep-copies a JSON tree value (object, array, or leaf).
    *
-   * Nested [[JsonObject]] / [[JsonArray]] are copied recursively; immutable scalars
-   * and [[Null]] are reused. [[Array]]`[Byte]` is cloned when present.
+   * Nested `JsonObject` / `JsonArray` are copied recursively; immutable scalars
+   * and `Null` are reused. `Array[Byte]` is cloned when present.
    */
   def deepCopyValue(value: Any): Any = {
     value match
