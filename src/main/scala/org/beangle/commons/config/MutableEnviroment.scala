@@ -20,6 +20,15 @@ package org.beangle.commons.config
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.Strings
 
+object MutableEnviroment {
+  def system: Enviroment = {
+    val env = new MutableEnviroment
+    env.addConfig(ConfigFactory.SystemEnvironment)
+    env.addConfig(ConfigFactory.SystemProperties)
+    env
+  }
+}
+
 /** Environment config container (profiles, property lookup, cache). */
 class MutableEnviroment extends Enviroment {
   private val configs = Collections.newBuffer[Config]
