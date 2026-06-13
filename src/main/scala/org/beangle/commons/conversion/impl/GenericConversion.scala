@@ -17,24 +17,25 @@
 
 package org.beangle.commons.conversion.impl
 
+import org.beangle.commons.conversion.Conversion
 import org.beangle.commons.conversion.converter.{CtorConverter, MethodConverter}
-import org.beangle.commons.conversion.{Conversion, Converter, ConverterRegistry}
 import org.beangle.commons.lang.{Companions, Objects, Primitives}
 
-import java.lang.reflect.{Array, Modifier}
+import java.lang.reflect.Array
 import scala.collection.{concurrent, mutable}
 import scala.language.existentials
 
-/** Generic Conversion base class with converter registry and lookup mechanism.
+/** Converts values using a pre-built converter registry.
+ *
+ * Lookup walks source/target type hierarchies; ctor and companion `apply` converters
+ * are discovered on demand and cached locally (not registered into the registry).
  *
  * @author chaostone
  * @since 3.2.0
  */
-abstract class AbstractGenericConversion extends Conversion with ConverterRegistry {
+class GenericConversion(private val converters: Map[Class[_], Map[Class[_], GenericConverter]]) extends Conversion {
 
-  val converters = new mutable.HashMap[Class[_], Map[Class[_], GenericConverter]]
-
-  val cache = new concurrent.TrieMap[(Class[_], Class[_]), GenericConverter]
+  private val cache = new concurrent.TrieMap[(Class[_], Class[_]), GenericConverter]
 
   override def convert[T](source: Any, target: Class[T]): T = {
     if (null == source) return Objects.default(target)
@@ -61,45 +62,19 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
     }
   }
 
-  override def addConverter(converter: Converter[_, _]): Unit = {
-    var key: (Class[_], Class[_]) = null
-    for (m <- converter.getClass.getMethods if m.getName == "apply" && Modifier.isPublic(m.getModifiers) && !m.isBridge)
-      key = (m.getParameterTypes()(0), m.getReturnType)
-    if (null == key) throw new IllegalArgumentException("Cannot find convert type pair " + converter.getClass)
-    val sourceType = key._1
-    val adapter = new ConverterAdapter(converter, key)
-    converters.get(sourceType) match {
-      case Some(existed) => converters += (sourceType -> (existed + (key._2 -> adapter)))
-      case _ => converters += (sourceType -> Map((key._2 -> adapter)))
-    }
-    cache.clear()
-  }
-
-  protected def addConverter(converter: GenericConverter): Unit = {
-    val key = converter.getTypeinfo
-    val sourceType = key._1
-    converters.get(sourceType) match {
-      case Some(existed) =>
-        converters += (key._1 -> (existed + (key._2 -> converter)))
-      case _ => converters += (key._1 -> Map((key._2 -> converter)))
-    }
-    cache.clear()
-  }
-
   protected def findConverter(sourceType: Class[_], targetType: Class[_]): GenericConverter = {
     val key = (sourceType, targetType)
-    var converter = cache.get(key).orNull
-    if (null == converter) {
-      converter = searchConverter(sourceType, targetType)
-      if (null == converter) converter = findCtorConverter(sourceType, targetType)
-      if (null == converter) converter = NoneConverter
-      cache.put(key, converter)
-    }
-    converter
+    cache.getOrElseUpdate(key, resolveConverter(sourceType, targetType))
   }
 
-  /** Finds or creates a converter that uses target's constructor or companion apply. */
-  def findCtorConverter(sourceType: Class[_], targetType: Class[_]): GenericConverter = {
+  private def resolveConverter(sourceType: Class[_], targetType: Class[_]): GenericConverter = {
+    var converter = searchConverter(sourceType, targetType)
+    if (null == converter) converter = findCtorConverter(sourceType, targetType)
+    if (null == converter) NoneConverter else converter
+  }
+
+  /** Creates a converter from target's constructor or companion `apply` (cached only). */
+  private def findCtorConverter(sourceType: Class[_], targetType: Class[_]): GenericConverter = {
     val ctor = targetType.getConstructors.find { c =>
       val pts = c.getParameterTypes
       pts.length == 1 && pts.contains(sourceType)
@@ -110,16 +85,11 @@ abstract class AbstractGenericConversion extends Conversion with ConverterRegist
           case None => null
           case Some(ct) =>
             try {
-              val nc = new MethodConverter(sourceType, targetType, ct, ct.getClass.getDeclaredMethod("apply", sourceType))
-              addConverter(nc)
-              nc
+              new MethodConverter(sourceType, targetType, ct, ct.getClass.getDeclaredMethod("apply", sourceType))
             } catch
               case e: Exception => null //ignore
         }
-      case Some(ct) =>
-        val nc = new CtorConverter(sourceType, targetType, ct)
-        addConverter(nc)
-        nc
+      case Some(ct) => new CtorConverter(sourceType, targetType, ct)
   }
 
   protected def searchConverter(sourceType: Class[_], targetType: Class[_]): GenericConverter = {

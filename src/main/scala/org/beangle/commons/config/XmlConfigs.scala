@@ -17,50 +17,23 @@
 
 package org.beangle.commons.config
 
-import org.beangle.commons.concurrent.Locks
 import org.beangle.commons.io.IOs.using
 import org.beangle.commons.io.Resources
 import org.beangle.commons.xml.Document
 
 import java.net.URL
-import java.util.concurrent.locks.ReentrantReadWriteLock
 import javax.xml.parsers.DocumentBuilderFactory
 
 /** Cached XML config document loader. */
 object XmlConfigs {
-
-  private var configs: Map[String, Document] = Map.empty
-  // read-write lock: multiple readers, single writer when cache miss
-  private val rwLock = new ReentrantReadWriteLock()
-
-  /** Clears the config cache. */
-  def clear(): Unit = {
-    configs = Map.empty
-  }
-
   /** Loads XML config by path (cached); resolves via Resources.load.
    *
    * @param path the config path (e.g. classpath resource)
    * @return the parsed Document
    */
   def load(path: String): Document = {
-    Locks.withReadLock(rwLock) {
-      configs.get(path)
-    } match {
-      case Some(d) => d
-      case None =>
-        Locks.withWriteLock(rwLock) {
-          // double-check after acquiring write lock to avoid duplicate generation
-          configs.get(path) match {
-            case Some(d) => d
-            case None =>
-              val urls = Resources.load(path)
-              val newDoc = parseConfig(urls)
-              configs += (path -> newDoc)
-              newDoc
-          }
-        }
-    }
+    val urls = Resources.load(path)
+    parseConfig(urls)
   }
 
   /** Parses XML from URLs and merges into a single Document.
@@ -68,7 +41,7 @@ object XmlConfigs {
    * @param urls the config URLs (first is base, rest are merged)
    * @return merged Document
    */
-  def parseConfig(urls: Iterable[URL]): Document = {
+  private def parseConfig(urls: Iterable[URL]): Document = {
     if (urls.isEmpty) {
       new Document("missing")
     } else {

@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.script
+package org.beangle.commons.lang.time
 
-/** Exception thrown when script evaluation fails.
- *
- * @author chaostone
- */
-class EvaluationException(message: String, cause: Throwable) extends RuntimeException(message, cause)
+/** Outputs completed root span trees. */
+trait TimerReporter {
+
+  def report(root: TimerNode): Unit
+}

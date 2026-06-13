@@ -30,10 +30,9 @@ import java.time.Duration
 /** HTTP client and request/response helpers. */
 object HttpUtils {
 
-  /** Default [[HttpUtils]] instance. */
-  val Default = new HttpUtils(Https.createDefaultClient(), 0)
+  /** Default [[HttpUtils]] instance; User-Agent is fixed via config (`beangle.https.user-agent`). */
+  val Default = new HttpUtils(Https.createDefaultClient(), fixedUserAgent = true)
 
-  private var clientIdx = 0
   private val statusMap = Map(
     HTTP_OK -> "OK",
     HTTP_FORBIDDEN -> "Access denied!",
@@ -58,8 +57,7 @@ object HttpUtils {
    * @return HttpUtils instance
    */
   def withClient(client: HttpClient): HttpUtils = {
-    clientIdx += 1
-    new HttpUtils(client, clientIdx)
+    new HttpUtils(client, fixedUserAgent = false)
   }
 
   /** Converts HTTP status code to human-readable string.
@@ -171,12 +169,13 @@ object HttpUtils {
   }
 }
 
-class HttpUtils private(private val client: HttpClient, id: Int) {
+class HttpUtils private(private val client: HttpClient, fixedUserAgent: Boolean) {
 
   private var userAgent = Https.defaultUserAgent
 
   def setUserAgent(ua: String): Unit = {
-    if (id == 0) throw new IllegalArgumentException("Cannot change default HttpUtils user agent,using config")
+    if fixedUserAgent then
+      throw new IllegalArgumentException("Cannot change default HttpUtils user agent, use config")
     this.userAgent = ua
   }
 

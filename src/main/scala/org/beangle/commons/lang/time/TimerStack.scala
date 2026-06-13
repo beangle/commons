@@ -18,25 +18,34 @@
 package org.beangle.commons.lang.time
 
 import java.util.Arrays
+import scala.collection.mutable
 
-/** Stack of TimerNodes for profiling (push/pop).
+/** Active span stack and completed root trees for one `TimerTrace.runScoped` scope.
  *
  * @author chaostone
  * @since 3.0.0
  */
-class TimerStack(root: TimerNode, initCapacity: Int) {
+class TimerStack(initCapacity: Int) {
 
-  /** Current stack index (-1 when empty). */
+  /** Minimum span duration (ms) for the current root tree. */
+  var minMs: Int = 0
+
+  /** Current stack index (-1 when no active span). */
   var index: Int = -1
 
   /** Stack storage array. */
   var nodes: Array[TimerNode] = new Array[TimerNode](initCapacity)
 
-  push(root)
+  private val roots = mutable.ListBuffer.empty[TimerNode]
 
-  /** Creates TimerStack with default capacity (15). */
-  def this(root: TimerNode) = {
-    this(root, 15)
+  def this() = this(15)
+
+  /** Completed root trees in this scope. */
+  def completedRoots: Iterable[TimerNode] = roots
+
+  /** Records a finished root tree when it passes `minMs` filtering. */
+  def completeRoot(root: TimerNode, elapsed: Long): Unit = {
+    if (elapsed >= minMs || root.children.nonEmpty) roots += root
   }
 
   private def ensureCapacity(): Unit =
@@ -45,19 +54,12 @@ class TimerStack(root: TimerNode, initCapacity: Int) {
       nodes = Arrays.copyOf(nodes, newCapacity)
     }
 
-  /** Pushes a timer node onto the stack.
-   *
-   * @param node the node to push
-   */
   def push(node: TimerNode): Unit = {
+    index += 1
     ensureCapacity()
     nodes(index) = node
   }
 
-  /** Pops the top timer node from the stack.
-   *
-   * @return the top node, or null if empty
-   */
   def pop(): TimerNode = {
     if (index < 0) return null
     val top = nodes(index)
@@ -66,10 +68,6 @@ class TimerStack(root: TimerNode, initCapacity: Int) {
     top
   }
 
-  /** Returns the top timer node without removing it.
-   *
-   * @return the top node, or null if empty
-   */
   def peek(): TimerNode = {
     if (index < 0) return null
     nodes(index)

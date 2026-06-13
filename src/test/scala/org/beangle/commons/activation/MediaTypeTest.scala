@@ -23,12 +23,14 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class MediaTypeTest extends AnyFunSpec, Matchers {
+  val resources = Resources.load("org/beangle/commons/activation/mime_test.types,META-INF/mime_test.types,mime_test.types")
+  val types = MediaTypes.build(resources)
+  val mimetypes= new MediaTypes(types)
+
   describe("MediaType") {
     it("load resource") {
-      val resources = Resources.load("org/beangle/commons/activation/mime_test.types,META-INF/mime_test.types,mime_test.types")
-      val map = MediaTypes.buildTypes(resources)
-      assert(map.size == 10)
-      assert(map.get("xxx").isDefined)
+      assert(types.size == 10)
+      assert(types.get("xxx").isDefined)
     }
     it("parse") {
       val mimeTypes = MediaTypes.parse("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
@@ -37,20 +39,27 @@ class MediaTypeTest extends AnyFunSpec, Matchers {
   }
 
   describe("MediaTypeProvider") {
-    it("load resource") {
-      val xlsx = MediaTypes.get("xlsx")
+    it("load mime-default.types") {
+      val defaults = new MediaTypes(MediaTypes.Defaults)
+
+      val xlsx = defaults.get("xlsx")
       assert(xlsx.isDefined)
       assert(xlsx.get.subType == "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-      val all = MediaTypes.get("*/*")
+      val all = defaults.get("*/*")
       assert(all.contains(MediaTypes.All))
 
       val csv = MediaTypes.parse("text/csv").head
+      assert(defaults.get("text/csv").contains(csv))
       assert(MediaTypes.csv == csv)
 
       val ofd = MediaTypes.parse("application/ofd").head
+      assert(defaults.get("application/ofd").contains(ofd))
       assert(MediaTypes.ofd == ofd)
+    }
 
+    it("build adds wildcard") {
+      assert(mimetypes.get("*/*").contains(MediaTypes.All))
     }
   }
 }

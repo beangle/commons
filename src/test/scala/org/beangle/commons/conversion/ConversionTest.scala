@@ -23,7 +23,7 @@ import org.scalatest.matchers.should.Matchers
 
 class ConversionTest extends AnyFunSpec, Matchers {
 
-  val con = new DefaultConversion();
+  val con = DefaultConversion.Instance
 
   describe("DefaultConversion") {
     it("Convert Integer") {
@@ -40,7 +40,7 @@ class ConversionTest extends AnyFunSpec, Matchers {
     }
 
     it("Convert Primitive Array") {
-      val con = new DefaultConversion()
+      val con = DefaultConversion.Instance
       con.convert(Array("2", "3.4"), classOf[Array[Float]]).asInstanceOf[Array[Float]]
     }
   }

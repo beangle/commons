@@ -36,12 +36,12 @@ object Https {
    * `trustAll` follows system property `beangle.https.trust-all`; client is
    * Each call is independent unless you add your own [[java.net.CookieHandler]]. */
   def createDefaultClient(): HttpClient = {
-    val trustAll = Enviroment.Default.getProperty("beangle.https.trust-all").map(_.toString).orNull
-    createClient(java.lang.Boolean.valueOf(trustAll), false, Duration.ofSeconds(30))
+    val trustAll = java.lang.Boolean.getBoolean("beangle.https.trust-all")
+    createClient(trustAll, false, Duration.ofSeconds(30))
   }
 
   def defaultUserAgent: String = {
-    Enviroment.Default.getProperty("beangle.https.user-agent") match {
+    Option(System.getProperty("beangle.https.user-agent")) match {
       case None =>
         var osName = SystemInfo.os.name
         if (osName.startsWith("Linux")) {

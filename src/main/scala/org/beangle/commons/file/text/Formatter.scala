@@ -33,21 +33,15 @@ object Formatter {
   val CRLF = "\r\n"
 
   /** Recursively formats files (text/xml by ext or matching ext). */
-  def format(formatter: Formatter, dir: File, ext: Option[String]): Unit =
-    if dir.isFile then
-      ext match {
-        case Some(f) =>
-          if (dir.getName.endsWith(f)) formatter.format(dir)
-        case None =>
-          val fileExt = Strings.substringAfterLast(dir.getName, ".")
-          MediaTypes.get(fileExt) foreach { m =>
-            if (m.primaryType == "text" || fileExt == "xml") formatter.format(dir)
-          }
-      }
-    else
+  def format(formatter: Formatter, dir: File, exts: Set[String]): Unit = {
+    if dir.isFile then {
+      val ext = Strings.substringAfterLast(dir.getName, ".")
+      if (ext.nonEmpty && exts.contains(ext)) formatter.format(dir)
+    } else
       dir.list() foreach { childName =>
-        format(formatter, new File(dir.getAbsolutePath + / + childName), ext)
+        format(formatter, new File(dir.getAbsolutePath + / + childName), exts)
       }
+  }
 }
 
 /** Formats string or file content. */

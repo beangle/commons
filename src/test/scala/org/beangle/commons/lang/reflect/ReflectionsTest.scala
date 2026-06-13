@@ -18,7 +18,7 @@
 package org.beangle.commons.lang.reflect
 
 import org.beangle.commons.bean.Factory
-import org.beangle.commons.io.AbstractBinarySerializer
+import org.beangle.commons.io.BinarySerializer
 import org.beangle.commons.jndi.JndiDataSourceFactory
 import org.beangle.commons.lang.annotation.description
 import org.beangle.commons.lang.testbean.{Book, Entity, Professor, TestChild2Bean}
@@ -53,11 +53,11 @@ class ReflectionsTest extends AnyFunSpec, Matchers {
 
       val btypes = Reflections.getGenericParamTypes(classOf[C], classOf[B[_]])
       assert(btypes.size == 1)
-      assert(btypes.get("T1").isDefined)
+      assert(btypes.contains("T1"))
     }
     it("newInstance") {
       val a: String = Reflections.newInstance("java.lang.String")
-      assert(a.length == 0)
+      assert(a.isEmpty)
 
       val i: Int = Reflections.newInstance(classOf[Int])
       assert(i == 0)
@@ -65,7 +65,7 @@ class ReflectionsTest extends AnyFunSpec, Matchers {
       val n: Any = Reflections.newInstance(classOf[Serializable])
       assert(n == null)
 
-      val b: Any = Reflections.newInstance(classOf[AbstractBinarySerializer])
+      val b: Any = Reflections.newInstance(classOf[BinarySerializer])
       assert(b == null)
     }
     it("getInstance") {

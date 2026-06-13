@@ -33,7 +33,7 @@ object MediaTypes {
   /** Wildcard media type (&#42;/&#42;). */
   val All: MediaType = MediaType("*/*")
 
-  private var registerTypes: Map[String, MediaType] = _
+  val Defaults: Map[String, MediaType] = build(Resources.load("org/beangle/commons/activation/mime-default.types"))
 
   /** application/atom+xml */
   def atomXml: MediaType = as("application/atom+xml")
@@ -96,11 +96,12 @@ object MediaTypes {
   def csv: MediaType = as("text/csv")
 
   /** Builds type map from config URLs (extension or full name -> MediaType).
+   * Resources.load("org/beangle/commons/activation/mime.types,classpath*:META-INF/mime.types,mime.types"))
    *
    * @param paths URLs to mime.types config files
    * @return map of extension/fullName to MediaType
    */
-  def buildTypes(paths: Iterable[URL]): Map[String, MediaType] = {
+  def build(paths: Iterable[URL]): Map[String, MediaType] = {
     val buf = new collection.mutable.HashMap[String, MediaType]
     paths foreach { p =>
       buf ++= readMediaTypes(p)
@@ -133,40 +134,13 @@ object MediaTypes {
       buf.toMap
   }
 
-  /** Returns all registered media types. */
-  def getTypes: Map[String, MediaType] = {
-    if (registerTypes == null) {
-      this.registerTypes = buildTypes(Resources.load("org/beangle/commons/activation/mime.types,classpath*:META-INF/mime.types,mime.types"))
-    }
-    this.registerTypes
-  }
-
   /** Returns MediaType by full name (e.g. "text/plain").
    *
    * @param fullName MIME type string
    * @return MediaType
    */
   def as(fullName: String): MediaType = {
-    getTypes(fullName)
-  }
-
-  /** Returns MediaType by extension or full name, or default if not found.
-   *
-   * @param ext          file extension or MIME full name
-   * @param defaultValue fallback when not found
-   * @return MediaType
-   */
-  def get(ext: String, defaultValue: MediaType): MediaType = {
-    getTypes.getOrElse(ext, defaultValue)
-  }
-
-  /** Returns MediaType by extension or full name.
-   *
-   * @param ext file extension or MIME full name
-   * @return Some(MediaType) or None
-   */
-  def get(ext: String): Option[MediaType] = {
-    getTypes.get(ext)
+    Defaults.getOrElse(fullName, MediaType(fullName))
   }
 
   /** Parses Accept-style header string to MediaType sequence.
@@ -181,39 +155,36 @@ object MediaTypes {
       Strings.split(str, ",") foreach { token =>
         val commaIndex = token.indexOf(";")
         val mimetype = if (commaIndex > -1) token.substring(0, commaIndex).trim else token.trim
-        getTypes.get(mimetype) match {
-          case Some(mt) => mimeTypes += mt
-          case None => MediaType(mimetype)
-        }
+        mimeTypes += Defaults.getOrElse(mimetype, MediaType(mimetype))
       }
       mimeTypes.toList
   }
+
 }
 
-/** MediaType companion. */
-object MediaType {
-  /** Creates MediaType from token (e.g. "text/plain" or "text/plain;charset=utf-8").
+class MediaTypes(registerTypes: Map[String, MediaType]) {
+
+  /** Returns all registered media types. */
+  def getTypes: Map[String, MediaType] = {
+    this.registerTypes
+  }
+
+  /** Returns MediaType by extension or full name, or default if not found.
    *
-   * @param token MIME type string, optionally with params
+   * @param ext          file extension or MIME full name
+   * @param defaultValue fallback when not found
    * @return MediaType
    */
-  def apply(token: String): MediaType = {
-    val commaIndex = token.indexOf(";")
-    val mimetype = if (commaIndex > -1) token.substring(0, commaIndex).trim else token.trim
-    val slashIndex = token.indexOf("/")
-    if (-1 == slashIndex)
-      new MediaType(mimetype)
-    else
-      new MediaType(mimetype.substring(0, slashIndex), mimetype.substring(slashIndex + 1))
-  }
-}
-
-/** MIME type (primary/subtype, e.g. text/plain). */
-class MediaType(val primaryType: String, val subType: String) {
-  def this(pt: String) = {
-    this(pt, "*")
+  def get(ext: String, defaultValue: MediaType): MediaType = {
+    registerTypes.getOrElse(ext, defaultValue)
   }
 
-  override def toString: String =
-    if (subType == "*") primaryType else primaryType + "/" + subType
+  /** Returns MediaType by extension or full name.
+   *
+   * @param ext file extension or MIME full name
+   * @return Some(MediaType) or None
+   */
+  def get(ext: String): Option[MediaType] = {
+    registerTypes.get(ext)
+  }
 }

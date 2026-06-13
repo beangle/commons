@@ -17,12 +17,6 @@
 
 package org.beangle.commons.lang.reflect
 
-import org.beangle.commons.collection.IdentityCache
-import org.beangle.commons.lang.reflect.Reflections.deduceParamTypes
-
-import java.lang.reflect.{Method, Modifier, ParameterizedType, TypeVariable}
-import scala.collection.immutable.ArraySeq
-import scala.collection.mutable
 import scala.quoted.*
 
 /** Global BeanInfo cache and of() macros. */

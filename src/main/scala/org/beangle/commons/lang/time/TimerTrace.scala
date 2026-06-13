@@ -18,97 +18,74 @@
 package org.beangle.commons.lang.time
 
 import org.beangle.commons.lang.ScopedContext
+import org.beangle.commons.logging.slf4j
 
-/** Profile timer stack (thread-local, min-time logging). */
+/** Hierarchical performance profiler in `ScopedContext`.
+ *
+ * One `TimerStack` per `runScoped`: `trace` builds span trees on the stack; completed roots
+ * are kept on the stack; `reporter` outputs them when the scope exits.
+ *
+ * To disable profiling, omit `runScoped` at the request boundary or do not call `trace`.
+ *
+ * Usage — servlet filter:
+ * {{{
+ * TimerTrace.runScoped(reporter = TimerTrace.logReporter) {
+ *   chain.doFilter(request, response)
+ * }
+ * }}}
+ *
+ * Usage — nested spans:
+ * {{{
+ * TimerTrace.trace("loadUser", minMs = 50) {
+ *   TimerTrace.trace("queryDb") {
+ *     dao.find(id)
+ *   }
+ * }
+ * }}}
+ */
 object TimerTrace {
 
-  private var key = ScopedContext.Key[TimerStack]("beangle.commons.timer-stack")
+  private val logger = slf4j("org.beangle.commons.lang.time.TimerTrace")
 
-  /** System property that controls whether this timer should be used or not. Set to "true" activates
-   * the timer. Set to "false" to disactivate.
-   */
-  val ACTIVATE_PROPERTY = "beangle.profile.activate"
+  private val stackKey = ScopedContext.Key[TimerStack]("beangle.commons.timer-stack")
 
-  /** System property that controls the min time, that if exceeded will cause a log (at INFO level)
-   * to be created.
-   */
-  val MIN_TIME = "beangle.profile.mintime"
+  /** Default reporter: logs each tree at INFO via SLF4J. */
+  val logReporter: TimerReporter = (root: TimerNode) => logger.info(root.getPrintable)
 
-  /** Initialized in a static block, it can be changed at runtime by calling setActive(...)
-   */
-  var active: Boolean = "true".equalsIgnoreCase(System.getProperty(ACTIVATE_PROPERTY))
-
-  /** Get the min time for this profiling, it searches for a System property
-   * 'beangle.profile.mintime' and default to 0.
-   */
-  private var mintime: Int = _
-
-  try {
-    mintime = Integer.parseInt(System.getProperty(MIN_TIME, "0"))
-  } catch {
-    case _: NumberFormatException =>
-  }
-
-  /** Create and start a performance profiling with the `name` given. Deal with
-   * profile hierarchy automatically, so caller don't have to be concern about it.
-   *
-   * @param name profile name
-   */
-  def start(name: String): Unit = {
-    if (!active) return
-    val root = new TimerNode(name, System.currentTimeMillis())
-    ScopedContext.get(key) match {
-      case None => ScopedContext.put(key, new TimerStack(root))
-      case Some(ts) => ts.push(root)
+  /** Runs `body` in a scope; calls `reporter` for each completed root tree when the scope exits. */
+  def runScoped[T](reporter: TimerReporter = logReporter)(body: => T): T = {
+    ScopedContext.runWith(stackKey -> new TimerStack()) {
+      try body
+      finally ScopedContext.get(stackKey).foreach(s => s.completedRoots.foreach(reporter.report))
     }
   }
 
-  /** Ends the current performance profiling. Handles hierarchy automatically. */
-  def end(): Unit = {
-    if (active) {
-      ScopedContext.get(key) foreach { stack =>
-        val currentNode = stack.pop()
-        if (currentNode != null) {
-          val parent = stack.peek()
-          val total = currentNode.end()
-          if (parent == null) {
-            ScopedContext.remove(key)
-          } else if (total > mintime) parent.children += currentNode
-        }
+  /** Times `body` under `name`; must run inside `runScoped`.
+   *
+   * @param name  span name
+   * @param minMs minimum duration in ms to keep child spans and the root tree (default 0);
+   *              applied when a new root span starts
+   */
+  def trace[T](name: String, minMs: Int = 0)(body: => T): T = {
+    require(ScopedContext.get(stackKey).isDefined, "TimerTrace.trace requires runScoped { ... }")
+    beginSpan(name, minMs)
+    try body finally finishSpan()
+  }
+
+  private def beginSpan(name: String, minMs: Int): Unit = {
+    val stack = ScopedContext.get(stackKey).get
+    if (stack.peek() == null) stack.minMs = minMs
+    stack.push(new TimerNode(name, System.currentTimeMillis()))
+  }
+
+  private def finishSpan(): Unit = {
+    ScopedContext.get(stackKey).foreach { stack =>
+      val current = stack.pop()
+      if (current != null) {
+        val elapsed = current.end()
+        if (stack.peek() == null) stack.completeRoot(current, elapsed)
+        else if (elapsed > stack.minMs) stack.peek().children += current
       }
     }
-  }
-
-  /** Get the min time for this profiling, it searches for a System property
-   * 'beangle.profile.mintime' and default to 0.
-   *
-   * @return long
-   */
-  def getMinTime: Int = mintime
-
-  /** Sets the minimum time threshold for logging.
-   *
-   * @param mintime the minimum milliseconds to log
-   */
-  def setMinTime(mintime: Int): Unit = {
-    System.setProperty(MIN_TIME, String.valueOf(mintime))
-    TimerTrace.mintime = mintime
-  }
-
-  /** Enables or disables profiling.
-   *
-   * @param active true to enable, false to disable
-   */
-  def setActive(active: Boolean): Unit = {
-    if (active) System.setProperty(ACTIVATE_PROPERTY, "true") else System.clearProperty(ACTIVATE_PROPERTY)
-    TimerTrace.active = active
-  }
-
-  /** Returns true if profiling is enabled. */
-  def isActive: Boolean = active
-
-  /** Clears the thread-local timer stack. */
-  def clear(): Unit = {
-    ScopedContext.remove(key)
   }
 }

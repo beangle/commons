@@ -45,23 +45,25 @@ trait BinarySerializer extends Serializer, Deserializer {
 }
 
 /** Base implementation with register-based ObjectSerializer mapping. */
-abstract class AbstractBinarySerializer extends BinarySerializer {
+final class DefaultBinarySerializer extends BinarySerializer {
   private var serializers = Map.empty[Class[_], ObjectSerializer]
 
   /** Registers an ObjectSerializer for the class. */
-  def register(clazz: Class[_], os: ObjectSerializer): Unit =
+  def register(clazz: Class[_], os: ObjectSerializer): Unit = {
     serializers += (clazz -> os)
+  }
 
   /** Serializes data to stream using the registered ObjectSerializer. */
-  def serialize(data: Any, os: OutputStream, params: Map[String, Any]): Unit =
+  def serialize(data: Any, os: OutputStream, params: Map[String, Any]): Unit = {
     if (null != data)
       serializers.get(data.getClass) match {
         case Some(serializer) => serializer.serialize(data, os, params)
         case None => throw new RuntimeException(s"Cannot find ${data.getClass.getName}'s corresponding ObjectSerializer.")
       }
+  }
 
   /** Deserializes from stream using the registered ObjectSerializer and closes stream. */
-  def deserialize[T](clazz: Class[T], is: InputStream, params: Map[String, Any]): T =
+  def deserialize[T](clazz: Class[T], is: InputStream, params: Map[String, Any]): T = {
     serializers.get(clazz) match {
       case Some(serializer) =>
         val rs = serializer.deserialize(is, params).asInstanceOf[T]
@@ -69,6 +71,7 @@ abstract class AbstractBinarySerializer extends BinarySerializer {
         rs
       case None => throw new RuntimeException(s"Cannot find ${clazz.getName}'s ObjectSerializer.")
     }
+  }
 
   override def asBytes(data: Any): Array[Byte] = {
     val os = new ByteArrayOutputStream
@@ -76,17 +79,15 @@ abstract class AbstractBinarySerializer extends BinarySerializer {
     os.toByteArray
   }
 
-  override def asObject[T](clazz: Class[T], data: Array[Byte]): T =
+  override def asObject[T](clazz: Class[T], data: Array[Byte]): T = {
     deserialize(clazz, new ByteArrayInputStream(data), Map.empty)
-}
-
-/** Default binary serializer for Externalizable/Serializable classes. */
-object DefaultBinarySerializer extends AbstractBinarySerializer {
+  }
 
   /** Registers Externalizable or Serializable class with Java serialization. */
-  def registerClass(clazz: Class[_]): Unit =
+  def registerClass(clazz: Class[_]): Unit = {
     if (classOf[Externalizable].isAssignableFrom(clazz) || classOf[java.io.Serializable].isAssignableFrom(clazz))
       register(clazz, ObjectSerializer.Default)
     else
       throw new RuntimeException("DefaultBinarySerializer only supports class implements Externalizable or Serializable")
+  }
 }

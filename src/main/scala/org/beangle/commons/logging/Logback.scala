@@ -19,7 +19,6 @@ package org.beangle.commons.logging
 
 import ch.qos.logback.classic.joran.JoranConfigurator
 import ch.qos.logback.classic.{Level, LoggerContext}
-import org.beangle.commons.config.Enviroment
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.annotation.beta
@@ -35,18 +34,7 @@ object Logback {
   /** Configures Logback. In dev mode, uses logback-dev.xml if present. */
   def configure(config: LogConfig): Unit = {
     installJul2Sfl4j()
-    var configFile = config.configFile
-    if (null == configFile) {
-      if (Enviroment.isDevMode) {
-        if (null == System.getProperty("logback.configurationFile")) {
-          val devFile = getClass.getResource("/logback-dev.xml")
-          if null != devFile then configFile = devFile
-        }
-      }
-    }
-    if (null != configFile) {
-      refreshConfig(configFile.openStream())
-    }
+    config.configFile.foreach(url => refreshConfig(url.openStream()))
     val factory = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
     config.levels foreach { case (name, level) =>
       changeLevel(factory, name, level)

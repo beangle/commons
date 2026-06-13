@@ -17,10 +17,6 @@
 
 package org.beangle.commons.cdi
 
-import org.beangle.commons.concurrent.Locks
-
-import java.util.concurrent.locks.ReentrantReadWriteLock
-
 /** Bean container for dependency injection. Manages bean lifecycle and retrieval.
  *
  * @author chaostone
@@ -74,73 +70,6 @@ trait Container {
 
   /** Returns the underlying container implementation. */
   def underlying: AnyRef
-}
-
-/** Container registry and root/singleton access. */
-object Container {
-
-  private var ROOT: Option[Container] = None
-  private var containers: Map[String, Container] = Map.empty
-  // Read-write lock: multiple readers, single writer, readers wait when locked
-  private val rwLock = new ReentrantReadWriteLock()
-  private val available = rwLock.writeLock().newCondition()
-
-  /** Returns the root container if set. */
-  def root: Option[Container] = {
-    ROOT
-  }
-
-  /** Gets registered container by id.
-   *
-   * @param id container id
-   * @return Some(container) or None
-   */
-  def get(id: String): Option[Container] = {
-    Locks.withReadLock(rwLock) {
-      Container.containers.get(id)
-    }
-  }
-
-  /** Registers a container (ROOT if id is "ROOT").
-   *
-   * @param c the container to register
-   */
-  def register(c: Container): Unit = {
-    assert(null != c.id)
-    Locks.withWriteLock(rwLock) {
-      if (c.id == "ROOT") ROOT = Some(c)
-      containers = containers + (c.id -> c)
-      available.signalAll()
-    }
-  }
-
-  /** Unregisters the container.
-   *
-   * @param c the container to unregister
-   */
-  def unregister(c: Container): Unit = {
-    Locks.withWriteLock(rwLock) {
-      containers -= c.id
-      if (ROOT.contains(c)) ROOT = None
-    }
-  }
-
-  /** Gets container by id, or blocks until it is registered.
-   *
-   * @param id container id
-   * @return the container
-   */
-  def getOrAwait(id: String): Container = {
-    Locks.withReadLock(rwLock) {
-      Container.containers.get(id)
-    } match {
-      case Some(c) => c
-      case None =>
-        Locks.awaitCondition(rwLock.writeLock(), available)(Container.containers.contains(id)) {
-          Container.containers(id)
-        }
-    }
-  }
 }
 
 trait ContainerListener {

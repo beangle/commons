@@ -17,6 +17,7 @@
 
 package org.beangle.commons.collection
 
+import org.beangle.commons.conversion.Conversion
 import org.beangle.commons.conversion.impl.DefaultConversion
 import org.beangle.commons.lang.Strings.{isNotEmpty, split}
 import org.beangle.commons.lang.{Objects, Strings}
@@ -25,11 +26,11 @@ import java.time.{LocalDate, LocalDateTime}
 import scala.collection.Map
 import scala.reflect.ClassTag
 
-/** Converts Map/Array/Iterable values to target type using DefaultConversion.
+/** Converts Map/Array/Iterable values to target type using `Conversion`.
  *
  * @author chaostone
  */
-class MapConverter(val conversion: DefaultConversion = DefaultConversion.Instance) {
+class MapConverter(val conversion: Conversion = DefaultConversion.Instance) {
 
   /** Converts value to target class or array of class.
    *

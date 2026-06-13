@@ -78,18 +78,17 @@ object Condition {
     }
   }
 
-  private abstract class EagerCondition extends Condition {
-    private val meeted = evaluate()
+  private abstract class EvalCondition extends Condition {
 
-    final override def meet(registry: Binder.Registry): Boolean = meeted
+    final override def meet(registry: Binder.Registry): Boolean = evaluate(registry)
 
-    protected def evaluate(): Boolean
+    protected def evaluate(registry: Binder.Registry): Boolean
   }
 
-  private class HasProperty(name: String, value: String) extends EagerCondition {
+  private class HasProperty(name: String, value: String) extends EvalCondition {
 
-    protected override def evaluate(): Boolean = {
-      val v = Enviroment.Default.getValue(name).getOrElse("false")
+    protected override def evaluate(registry: Binder.Registry): Boolean = {
+      val v = registry.env.getValue(name).getOrElse("false")
       if (value == "") {
         v != "false"
       } else {
@@ -100,8 +99,8 @@ object Condition {
     override def toString: String = s"Has property ${name}"
   }
 
-  private class HasResource(path: String) extends EagerCondition {
-    protected override def evaluate(): Boolean = {
+  private class HasResource(path: String) extends EvalCondition {
+    protected override def evaluate(registry: Binder.Registry): Boolean = {
       ClassLoaders.getResource(path).nonEmpty
     }
 

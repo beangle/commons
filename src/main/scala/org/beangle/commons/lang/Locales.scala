@@ -22,7 +22,7 @@ import java.util.Locale
 /** Locale parsing and caching. */
 object Locales {
 
-  private var cache = Map("_" -> Locale.getDefault())
+  private val cache = Map("_" -> Locale.getDefault(), "zh_CN" -> Locale.SIMPLIFIED_CHINESE, "en_US" -> Locale.US)
 
   /** Simplified Chinese locale (zh_CN). */
   def chinese: Locale = Locale.SIMPLIFIED_CHINESE
@@ -37,13 +37,10 @@ object Locales {
    */
   def of(localeStr: String): Locale = {
     if Strings.isBlank(localeStr) then
-      Locale.getDefault()
+      cache("_")
     else
       cache.get(localeStr) match {
-        case None =>
-          val n = parse(localeStr)
-          cache = cache + (localeStr -> n)
-          n
+        case None => parse(localeStr)
         case Some(locale) => locale
       }
   }

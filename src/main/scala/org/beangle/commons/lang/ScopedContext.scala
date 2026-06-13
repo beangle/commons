@@ -51,6 +51,9 @@ object ScopedContext {
     }
   }
 
+  /** Returns true when the current thread is inside `runWith`. */
+  def isBound: Boolean = context.isBound
+
   def getOrElse[T](key: Key[T], defaultValue: => T): T = {
     get(key) match {
       case Some(v) => v

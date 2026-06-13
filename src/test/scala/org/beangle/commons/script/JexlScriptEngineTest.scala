@@ -26,7 +26,7 @@ class JexlScriptEngineTest extends AnyFunSpec, Matchers {
 
   describe("JexlScriptEngine evaluate expression") {
     BeanInfos.of(classOf[Depart])
-    val evaluator = Jexl3.newEvaluator()
+    val evaluator = ExprEvaluator.get(ExprEvaluator.Jexl3Engine)
     val data = Map("depart" -> Depart("销售部", "三楼"), "score" -> 95)
     assert("三楼" == evaluator.eval("depart.office", data))
     val s = evaluator.eval("if (score >= 70) score else 70;", data)

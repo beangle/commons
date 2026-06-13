@@ -23,7 +23,7 @@ import java.net.URL
 class LogConfig {
 
   /** Path to logback config file. */
-  var configFile: URL = _
+  var configFile: Option[URL] = None
 
   /** Logger name -> level mappings. */
   var levels: Map[String, String] = Map.empty

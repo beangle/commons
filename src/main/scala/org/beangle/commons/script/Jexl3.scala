@@ -19,7 +19,6 @@ package org.beangle.commons.script
 
 import org.apache.commons.jexl3.internal.introspection.Uberspect
 import org.apache.commons.jexl3.introspection.{JexlPermissions, JexlPropertyGet, JexlUberspect}
-import org.apache.commons.jexl3.scripting.JexlScriptEngine
 import org.apache.commons.jexl3.{JexlBuilder, JexlEngine, JexlException}
 import org.beangle.commons.lang.Options
 import org.beangle.commons.lang.reflect.BeanInfos
@@ -31,13 +30,12 @@ import scala.jdk.javaapi.CollectionConverters.asJava
 /** Jexl3 expression evaluator factory. */
 object Jexl3 {
 
-  /** Creates a Jexl3 expression evaluator with Scala property support. */
-  def newEvaluator(): ExpressionEvaluator = {
+  /** Creates a Jexl3 Engine with Scala property support. */
+  def newEngine(): JexlEngine = {
     val jexlBuilder = new JexlBuilder().cache(512).strict(true).silent(false)
     val uberspect = new ScalaJexlUberspect(JexlUberspect.JEXL_STRATEGY, JexlPermissions.UNRESTRICTED)
     jexlBuilder.uberspect(uberspect)
-    JexlScriptEngine.setInstance(jexlBuilder.create())
-    ExpressionEvaluator.jsr223("jexl3")
+    jexlBuilder.create()
   }
 
   private class SimplePropertyGet(val clazz: Class[_], val method: Method, val property: String) extends JexlPropertyGet {

@@ -1,0 +1,26 @@
+# Default MIME types referenced by org.beangle.commons.activation.MediaTypes
+type=application/x-www-form-urlencoded                                         exts=
+type=application/vnd.api+json                                                  exts=jsonapi
+type=multipart/form-data                                                       exts=
+#application
+type=application/atom+xml                                                      exts=atom
+type=application/javascript                                                    exts=js,jsonp
+type=application/json                                                          exts=json
+type=application/octet-stream                                                  exts=bin,bpk,deploy,dist,distz,dms,dump,elc,exe,lrf,pkg,so
+type=application/pdf                                                           exts=pdf
+type=application/ofd                                                           exts=ofd
+type=application/xhtml+xml                                                     exts=xht,xhtml
+type=application/xml                                                           exts=xml,pom,xsl
+type=application/zip                                                           exts=zip
+type=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet         exts=xlsx
+type=application/vnd.openxmlformats-officedocument.wordprocessingml.document   exts=docx
+
+#image
+type=image/gif                                                                 exts=gif
+type=image/jpeg                                                                exts=jpeg,jpg,jpe,jfif,pjpeg,pjp
+type=image/png                                                                 exts=png
+
+#text
+type=text/csv                                                                  exts=csv
+type=text/html                                                                 exts=html,htm,shtml,body
+type=text/plain                                                                exts=conf,def,in,jsf,jspf,list,log,text,txt,ftl,properties

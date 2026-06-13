@@ -17,7 +17,7 @@
 
 package org.beangle.commons.conversion.impl
 
-/** Generic converter used in DefaultConversion (SPI interface).
+/** Generic converter used in `GenericConversion` (SPI interface).
  *
  * @author chaostone
  * @since 3.2.0

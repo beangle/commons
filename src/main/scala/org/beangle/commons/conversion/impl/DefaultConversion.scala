@@ -17,51 +17,34 @@
 
 package org.beangle.commons.conversion.impl
 
-import org.beangle.commons.conversion.{converter, string}
+import org.beangle.commons.conversion.{Conversion, converter, string}
 
-/** DefaultConversion singleton and convert helper. */
+/** Built-in conversion singleton.
+ *
+ * Registers default String/Number/Date/Enum/JSON converters via `ConverterRegistry`,
+ * then wraps the frozen registry in `GenericConversion`.
+ */
 object DefaultConversion {
 
-  val Instance = new DefaultConversion()
+  val Instance: Conversion = build()
 
-  def convert[T](value: Any, targetType: Class[T]): T = Instance.convert(value, targetType)
+  private def build(): Conversion = {
+    val registry = new ConverterRegistry()
+    registry.add(string.BooleanConverter)
+    registry.add(string.NumberConverters)
+    registry.add(string.DateConverter)
+    registry.add(string.TemporalConverter)
+    registry.add(string.TimeConverter)
+    registry.add(string.JavaEnumConverters)
+    registry.add(string.EnumConverters)
+    registry.add(string.LocaleConverter)
+    registry.add(string.ToStringConverter)
+    registry.add(string.JsonConverter)
+    registry.add(string.DurationConverter)
+    registry.add(converter.Number2NumberConverter)
+    registry.add(converter.IterableConverterFactory)
+    registry.add(converter.DateTimeConverterFactory)
+    new GenericConversion(registry.build())
+  }
 }
 
-/** Default Conversion implementation.
- *
- * Registers built-in converters: String to Boolean/Number/Date/Locale, Number to Number,
- * Object to String, etc.
- *
- * @author chaostone
- * @since 3.2.0
- */
-class DefaultConversion extends AbstractGenericConversion {
-
-  addConverter(string.BooleanConverter)
-
-  addConverter(string.NumberConverters)
-
-  addConverter(string.DateConverter)
-
-  addConverter(string.TemporalConverter)
-
-  addConverter(string.TimeConverter)
-
-  addConverter(string.JavaEnumConverters)
-
-  addConverter(string.EnumConverters)
-
-  addConverter(string.LocaleConverter)
-
-  addConverter(string.ToStringConverter)
-
-  addConverter(string.JsonConverter)
-
-  addConverter(string.DurationConverter)
-
-  addConverter(converter.Number2NumberConverter)
-
-  addConverter(converter.IterableConverterFactory)
-
-  addConverter(converter.DateTimeConverterFactory)
-}
