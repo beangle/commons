@@ -17,43 +17,30 @@
 
 package org.beangle.commons.config
 
-import org.beangle.commons.io.IOs.using
-import org.beangle.commons.io.Resources
 import org.beangle.commons.xml.Document
 
-import java.net.URL
-import javax.xml.parsers.DocumentBuilderFactory
-
-/** Cached XML config document loader. */
 object XmlConfigs {
-  /** Loads XML config by path (cached); resolves via Resources.load.
-   *
-   * @param path the config path (e.g. classpath resource)
-   * @return the parsed Document
-   */
+  val GlobalConfigKey = "beangle.config.xmlconfigs"
+}
+
+/** XML config document loader. */
+class XmlConfigs {
+  private var configs: Map[String, Document] = Map.empty
+
   def load(path: String): Document = {
-    val urls = Resources.load(path)
-    parseConfig(urls)
+    configs.get(path) match {
+      case Some(d) => d
+      case None =>
+        XmlDocs.load(path) match {
+          case Some(doc) =>
+            configs += (path -> doc)
+            doc
+          case None => new Document("missing")
+        }
+    }
   }
 
-  /** Parses XML from URLs and merges into a single Document.
-   *
-   * @param urls the config URLs (first is base, rest are merged)
-   * @return merged Document
-   */
-  private def parseConfig(urls: Iterable[URL]): Document = {
-    if (urls.isEmpty) {
-      new Document("missing")
-    } else {
-      val factory = DocumentBuilderFactory.newInstance()
-      factory.setNamespaceAware(false)
-      val docBuilder = factory.newDocumentBuilder()
-      val doc = using(urls.head.openStream()) { is => Document.convert(docBuilder.parse(is)) }
-      urls.tail foreach { url =>
-        val o = using(url.openStream()) { is => Document.convert(docBuilder.parse(is)) }
-        doc.merge(o)
-      }
-      doc
-    }
+  def clear(): Unit = {
+    configs = Map.empty
   }
 }

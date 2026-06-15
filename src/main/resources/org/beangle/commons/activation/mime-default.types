@@ -4,23 +4,58 @@ type=application/vnd.api+json                                                  e
 type=multipart/form-data                                                       exts=
 #application
 type=application/atom+xml                                                      exts=atom
+type=application/epub+zip                                                      exts=epub
+type=application/java-archive                                                  exts=jar,war
 type=application/javascript                                                    exts=js,jsonp
 type=application/json                                                          exts=json
+type=application/msword                                                        exts=doc,dot
 type=application/octet-stream                                                  exts=bin,bpk,deploy,dist,distz,dms,dump,elc,exe,lrf,pkg,so
 type=application/pdf                                                           exts=pdf
 type=application/ofd                                                           exts=ofd
+type=application/rss+xml                                                       exts=rss
+type=application/rtf                                                           exts=rtf
+type=application/vnd.ms-excel                                                  exts=xla,xlc,xlm,xls,xlt,xlw
+type=application/vnd.ms-powerpoint                                             exts=pot,pps,ppt
+type=application/vnd.openxmlformats-officedocument.presentationml.presentation exts=pptx
+type=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet         exts=xlsx
+type=application/vnd.openxmlformats-officedocument.wordprocessingml.document   exts=docx
+type=application/x-7z-compressed                                               exts=7z
+type=application/x-bzip2                                                       exts=boz,bz2
+type=application/x-font-woff                                                   exts=woff
+type=application/x-gzip                                                        exts=gz
+type=application/x-protobuf                                                    exts=protobuf
+type=application/x-rar-compressed                                              exts=rar
+type=application/x-tar                                                         exts=tar
 type=application/xhtml+xml                                                     exts=xht,xhtml
 type=application/xml                                                           exts=xml,pom,xsl
 type=application/zip                                                           exts=zip
-type=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet         exts=xlsx
-type=application/vnd.openxmlformats-officedocument.wordprocessingml.document   exts=docx
+type=font/woff2                                                                exts=woff2
+#audio
+type=audio/mpeg                                                                exts=m2a,m3a,mp1,mp2,mp2a,mp3,mpa,mpga
+type=audio/x-wav                                                               exts=wav
 
 #image
+type=image/bmp                                                                 exts=bmp,dib
 type=image/gif                                                                 exts=gif
 type=image/jpeg                                                                exts=jpeg,jpg,jpe,jfif,pjpeg,pjp
 type=image/png                                                                 exts=png
+type=image/svg+xml                                                             exts=svg,svgz
+type=image/tiff                                                                exts=tif,tiff
+type=image/webp                                                                exts=webp
+type=image/x-icon                                                              exts=ico
 
 #text
+type=text/calendar                                                             exts=ics,ifb
+type=text/css                                                                  exts=css
 type=text/csv                                                                  exts=csv
 type=text/html                                                                 exts=html,htm,shtml,body
+type=text/markdown                                                             exts=md,markdown
 type=text/plain                                                                exts=conf,def,in,jsf,jspf,list,log,text,txt,ftl,properties
+type=text/vcard                                                                exts=vcard,vcf
+type=text/yaml                                                                 exts=yml,yaml
+
+#video
+type=video/mp4                                                                 exts=m4v,mp4,mp4v,mpg4
+type=video/quicktime                                                           exts=mov,qt
+type=video/webm                                                                exts=webm
+type=video/x-msvideo                                                           exts=avi

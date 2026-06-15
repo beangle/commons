@@ -47,4 +47,3 @@ object DefaultConversion {
     new GenericConversion(registry.build())
   }
 }
-

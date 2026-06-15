@@ -45,7 +45,7 @@ trait BinarySerializer extends Serializer, Deserializer {
 }
 
 /** Base implementation with register-based ObjectSerializer mapping. */
-final class DefaultBinarySerializer extends BinarySerializer {
+abstract class AbstractBinarySerializer extends BinarySerializer {
   private var serializers = Map.empty[Class[_], ObjectSerializer]
 
   /** Registers an ObjectSerializer for the class. */
@@ -82,9 +82,11 @@ final class DefaultBinarySerializer extends BinarySerializer {
   override def asObject[T](clazz: Class[T], data: Array[Byte]): T = {
     deserialize(clazz, new ByteArrayInputStream(data), Map.empty)
   }
+}
 
-  /** Registers Externalizable or Serializable class with Java serialization. */
-  def registerClass(clazz: Class[_]): Unit = {
+class DefaultBinarySerializer extends AbstractBinarySerializer {
+
+  override def registerClass(clazz: Class[_]): Unit = {
     if (classOf[Externalizable].isAssignableFrom(clazz) || classOf[java.io.Serializable].isAssignableFrom(clazz))
       register(clazz, ObjectSerializer.Default)
     else
