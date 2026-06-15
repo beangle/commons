@@ -17,7 +17,6 @@
 
 package org.beangle.commons
 
-import org.beangle.commons.lang.BitStrings
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.slf4j.Logger
@@ -26,7 +25,7 @@ class VersionTest extends AnyFunSpec, Matchers {
 
   describe("Version") {
     it("find bundle version") {
-      Version.findBundleVersion(classOf[Logger]) should be("2.0.17")
+      Version.findBundleVersion(classOf[Logger]) should be("2.0.18")
     }
   }
 }

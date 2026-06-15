@@ -43,7 +43,6 @@ class IdentitySetTest extends AnyFunSpec, Matchers {
       assert(itor.hasNext)
       assert(null != itor.next())
       assert(itor.hasNext)
-      assert(itor.hasNext)
       assert(null != itor.next())
     }
   }
