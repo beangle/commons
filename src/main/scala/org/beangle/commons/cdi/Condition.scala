@@ -18,7 +18,7 @@
 package org.beangle.commons.cdi
 
 import org.beangle.commons.cdi.Condition.{And, Or}
-import org.beangle.commons.config.Enviroment
+import org.beangle.commons.config.Environment
 import org.beangle.commons.lang.ClassLoaders
 
 /** CDI binding conditions. */

@@ -27,7 +27,7 @@ import java.time.temporal.ChronoUnit
 import scala.collection.mutable
 
 /** Converts WeekTime list to human-readable cycle string (e.g. "2024-01-01~01-31 每周三 09:00~11:00"). */
-object CycleTimeDigest {
+object CycleTimeDigester {
   private val wMap = Map("Mon" -> "一", "Tue" -> "二", "Wed" -> "三", "Thu" -> "四", "Fri" -> "五", "Sat" -> "六", "Sun" -> "日")
   private val format = DateTimeFormatter.ofPattern("yyyy-MM-dd")
   private val format2 = DateTimeFormatter.ofPattern("MM-dd")
@@ -35,10 +35,10 @@ object CycleTimeDigest {
   /** Digests WeekTime list into compact Chinese cycle description.
    *
    * @param times     the WeekTime list
-   * @param delimeter separator between cycle entries (default: ",")
+   * @param delimiter separator between cycle entries (default: ",")
    * @return formatted string
    */
-  def digest(times: collection.Seq[WeekTime], delimeter: String = ","): String = {
+  def digest(times: collection.Seq[WeekTime], delimiter: String = ","): String = {
     if (times.isEmpty) return ""
     val timeList = Collections.newBuffer[String]
     val timeMap = new mutable.HashMap[(HourMinute, HourMinute), mutable.HashSet[LocalDate]]()
@@ -103,7 +103,7 @@ object CycleTimeDigest {
       sb.append(cd.endAt)
       timeList.+=(sb.toString)
     })
-    Strings.join(timeList, delimeter)
+    Strings.join(timeList, delimiter)
   }
 
   private def calcIntervals(dates: collection.Seq[LocalDate]): Map[Int, Int] = {

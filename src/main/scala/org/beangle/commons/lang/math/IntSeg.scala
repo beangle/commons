@@ -55,18 +55,18 @@ object IntSeg {
   /** Formats number sequence as range string (e.g. "1-10 12-20单").
    *
    * @param nums     number sequence
-   * @param strigula range separator (default "-")
+   * @param separator range separator (default "-")
    * @param sep      segment separator (default " ")
    * @return formatted string
    */
-  def digest(nums: Iterable[Int], strigula: String = "-", sep: String = " "): String = {
+  def digest(nums: Iterable[Int], separator: String = "-", sep: String = " "): String = {
     val seqs = IntSeg.assemble(nums).map { s =>
       if (s.step == 1) {
         if (s.start == s.end) s.start.toString
-        else s"${s.start}${strigula}${s.end}"
+        else s"${s.start}${separator}${s.end}"
       } else if (s.step == 2) {
-        if (s.start % 2 == 1) s"${s.start}${strigula}${s.end}单"
-        else s"${s.start}${strigula}${s.end}双"
+        if (s.start % 2 == 1) s"${s.start}${separator}${s.end}单"
+        else s"${s.start}${separator}${s.end}双"
       } else {
         s.toString
       }

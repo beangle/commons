@@ -754,19 +754,19 @@ object Strings {
   /** Converts camelCase to the specified separator style (e.g. camelCase with '_' -> camel_case).
    *
    * @param str       the camelCase string to convert
-   * @param seperator the separator character to insert between words
+   * @param separator the separator character to insert between words
    * @return the converted string
    */
-  def unCamel(str: String, seperator: Char): String = unCamel(str, seperator, true)
+  def unCamel(str: String, separator: Char): String = unCamel(str, separator, true)
 
   /** Converts camelCase to separated format (e.g. underscore lowercase).
    *
    * @param str       the camelCase string to convert
-   * @param seperator the separator character to insert between words
+   * @param separator the separator character to insert between words
    * @param lowercase whether to convert to lowercase
    * @return the converted string
    */
-  def unCamel(str: String, seperator: Char, lowercase: Boolean): String = {
+  def unCamel(str: String, separator: Char, lowercase: Boolean): String = {
     if (3 > str.length) return if (lowercase) str.toLowerCase else str
     val ca = str.toCharArray
     val build = new StringBuilder(ca.length + 5)
@@ -779,7 +779,7 @@ object Strings {
       val upper2 = isUpper(cur)
       val lower3 = isLower(next)
       if (lower1 && upper2 && lower3) {
-        build.append(seperator)
+        build.append(separator)
         build.append(if (lowercase) toLowerCase(cur) else cur)
         build.append(next)
         i += 2
@@ -791,7 +791,7 @@ object Strings {
       }
     }
     if (i == ca.length - 1) {
-      if (isLower(ca(i - 1)) && isUpper(ca(i))) build.append(seperator)
+      if (isLower(ca(i - 1)) && isUpper(ca(i))) build.append(separator)
       build.append(if (lowercase) toLowerCase(ca(i)) else ca(i))
     }
     build.toString

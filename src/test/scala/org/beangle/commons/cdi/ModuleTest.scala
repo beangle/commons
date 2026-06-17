@@ -17,7 +17,7 @@
 
 package org.beangle.commons.cdi
 
-import org.beangle.commons.config.Enviroment
+import org.beangle.commons.config.Environment
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -28,11 +28,11 @@ class ModuleTest extends AnyFunSpec, Matchers {
       val module = new BindModule {
         protected override def binding(): Unit = {}
       }
-      System.setProperty(Enviroment.ProfileKey, "dev")
+      System.setProperty(Environment.ProfileKey, "dev")
       assert(module.devEnabled)
-      System.clearProperty(Enviroment.ProfileKey)
+      System.clearProperty(Environment.ProfileKey)
       assert(!module.devEnabled)
-      System.setProperty(Enviroment.ProfileKey, "dev,other")
+      System.setProperty(Environment.ProfileKey, "dev,other")
       assert(module.devEnabled)
     }
   }

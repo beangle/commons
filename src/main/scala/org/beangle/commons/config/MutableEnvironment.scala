@@ -20,9 +20,9 @@ package org.beangle.commons.config
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.Strings
 
-object MutableEnviroment {
-  def system: Enviroment = {
-    val env = new MutableEnviroment
+object MutableEnvironment {
+  def system: Environment = {
+    val env = new MutableEnvironment
     env.addConfig(ConfigFactory.SystemEnvironment)
     env.addConfig(ConfigFactory.SystemProperties)
     env
@@ -30,7 +30,7 @@ object MutableEnviroment {
 }
 
 /** Environment config container (profiles, property lookup, cache). */
-class MutableEnviroment extends Enviroment {
+class MutableEnvironment extends Environment {
   private val configs = Collections.newBuffer[Config]
 
   private val cache = Collections.newMap[String, Any]
@@ -140,7 +140,7 @@ class MutableEnviroment extends Enviroment {
    * @param cfg the config to add
    * @return this for chaining
    */
-  def addConfig(cfg: Config): Enviroment = {
+  def addConfig(cfg: Config): Environment = {
     configs.addOne(cfg)
     this
   }
@@ -150,7 +150,7 @@ class MutableEnviroment extends Enviroment {
    * @param properties the properties to add
    * @return this for chaining
    */
-  def addProperties(properties: collection.Map[String, String]): Enviroment = {
+  def addProperties(properties: collection.Map[String, String]): Environment = {
     if (properties.nonEmpty) {
       configs.addOne(new SimpleConfig(properties))
     }
@@ -162,7 +162,7 @@ class MutableEnviroment extends Enviroment {
    * @param processor the processor to add
    * @return this for chaining
    */
-  def addProcessor(processor: Config.Processor): Enviroment = {
+  def addProcessor(processor: Config.Processor): Environment = {
     this.processors.addOne(processor)
     this
   }
@@ -172,7 +172,7 @@ class MutableEnviroment extends Enviroment {
    * @param processors the processors to add
    * @return this for chaining
    */
-  def addProcessors(processors: Iterable[Config.Processor]): Enviroment = {
+  def addProcessors(processors: Iterable[Config.Processor]): Environment = {
     this.processors.addAll(processors)
     this
   }

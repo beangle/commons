@@ -33,7 +33,7 @@ object Logback {
 
   /** Configures Logback. In dev mode, uses logback-dev.xml if present. */
   def configure(config: LogConfig): Unit = {
-    installJul2Sfl4j()
+    installJul2Slf4j()
     config.configFile.foreach(url => refreshConfig(url.openStream()))
     val factory = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
     config.levels foreach { case (name, level) =>
@@ -86,7 +86,7 @@ object Logback {
   }
 
   /** Installs JUL-to-SLF4J bridge so java.util.logging is routed to SLF4J. */
-  def installJul2Sfl4j(): Unit = {
+  def installJul2Slf4j(): Unit = {
     if (ClassLoaders.get("org.slf4j.bridge.SLF4JBridgeHandler").isDefined) {
       if (!SLF4JBridgeHandler.isInstalled) {
         SLF4JBridgeHandler.removeHandlersForRootLogger()

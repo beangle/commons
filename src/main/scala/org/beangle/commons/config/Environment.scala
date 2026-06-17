@@ -20,7 +20,7 @@ package org.beangle.commons.config
 import org.beangle.commons.lang.{JVM, Strings}
 
 /** Environment config (profiles, property lookup). */
-object Enviroment {
+object Environment {
 
   /** System property key for active profiles (comma-separated). */
   final val ProfileKey: String = "beangle.config.profiles"
@@ -42,7 +42,7 @@ object Enviroment {
   final def isTestMode: Boolean = profiles.contains("test")
 }
 
-trait Enviroment {
+trait Environment {
   /** Gets property value by name; supports nested keys and returns a map when multiple keys match.
    *
    * @param name the property name (may contain wildcards for nested lookup)

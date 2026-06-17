@@ -20,7 +20,7 @@ package org.beangle.commons.cdi
 import org.beangle.commons.bean.{Disposable, Factory, Initializing}
 import org.beangle.commons.cdi.Binder.*
 import org.beangle.commons.collection.Collections
-import org.beangle.commons.config.Enviroment
+import org.beangle.commons.config.Environment
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.annotation.description
 
@@ -257,11 +257,11 @@ object Binder {
      */
     def isPrimary(name: String, clazz: Class[_]): Boolean
 
-    /** Provide enviroment
+    /** Provide environment
      *
      * @return
      */
-    def env: Enviroment
+    def env: Environment
   }
 
   /** Helper for binding single or multiple bean classes.

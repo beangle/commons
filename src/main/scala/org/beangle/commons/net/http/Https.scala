@@ -17,7 +17,7 @@
 
 package org.beangle.commons.net.http
 
-import org.beangle.commons.config.Enviroment
+import org.beangle.commons.config.Environment
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.{Strings, SystemInfo}
 
