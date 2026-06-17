@@ -12,7 +12,7 @@
   "d.overrideDfmtEditorconfig": false,
   "dfmt.braceStyle": "otbs",
   "files.watcherExclude": {
-    "**/target": true
+    "**/target/**": true
   },
   "files.exclude": {
     "**/.*": true,
