@@ -31,6 +31,8 @@ object HttpMethods {
 
   val OPTIONS = "OPTIONS"
 
+  val PATCH = "PATCH"
+
   val PUT = "PUT"
 
   val DELETE = "DELETE"
