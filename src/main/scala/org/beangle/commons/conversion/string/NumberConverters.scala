@@ -19,10 +19,11 @@ package org.beangle.commons.conversion.string
 
 import org.beangle.commons.conversion.Converter
 import org.beangle.commons.lang.Numbers
+import org.beangle.commons.lang.math.{Decimal5, TinyDecimal5}
 
 import java.{lang as jl, math as jm}
 
-/** Converts string to Short/Integer/Long/Float/Double/BigInteger/BigDecimal.
+/** Converts string to Short/Integer/Long/Float/Double/BigInteger/BigDecimal/Decimal5/TinyDecimal5.
  *
  * @author chaostone
  * @since 3.2.0
@@ -57,6 +58,18 @@ object NumberConverters extends StringConverterFactory[String, Number] {
     override def apply(str: String): jm.BigDecimal = Numbers.convert2BigDecimal(str, null)
   }
 
+  private object Decimal5Converter extends Converter[String, Decimal5] {
+    override def apply(str: String): Decimal5 =
+      try Decimal5.of(str)
+      catch case _: NumberFormatException | _: ArithmeticException => null
+  }
+
+  private object TinyDecimal5Converter extends Converter[String, TinyDecimal5] {
+    override def apply(str: String): TinyDecimal5 =
+      try TinyDecimal5.of(str)
+      catch case _: NumberFormatException | _: ArithmeticException => null
+  }
+
   register(classOf[jl.Short], ShortConverter)
 
   register(classOf[jl.Integer], IntConverter)
@@ -70,4 +83,8 @@ object NumberConverters extends StringConverterFactory[String, Number] {
   register(classOf[jm.BigInteger], BigIntegerConverter)
 
   register(classOf[jm.BigDecimal], BigDecimalConverter)
+
+  register(classOf[Decimal5], Decimal5Converter)
+
+  register(classOf[TinyDecimal5], TinyDecimal5Converter)
 }

@@ -18,6 +18,7 @@
 package org.beangle.commons.conversion
 
 import org.beangle.commons.conversion.impl.DefaultConversion
+import org.beangle.commons.lang.math.{Decimal5, TinyDecimal5}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -42,6 +43,18 @@ class ConversionTest extends AnyFunSpec, Matchers {
     it("Convert Primitive Array") {
       val con = DefaultConversion.Instance
       con.convert(Array("2", "3.4"), classOf[Array[Float]]).asInstanceOf[Array[Float]]
+    }
+
+    it("Convert String to Decimal5") {
+      val d = con.convert("12.34567", classOf[Decimal5])
+      d.toString should equal("12.34567")
+      con.convert("", classOf[Decimal5]) should be(null)
+    }
+
+    it("Convert String to TinyDecimal5") {
+      val d = con.convert("3.14159", classOf[TinyDecimal5])
+      d.toString should equal("3.14159")
+      con.convert("", classOf[TinyDecimal5]) should be(null)
     }
   }
 }
