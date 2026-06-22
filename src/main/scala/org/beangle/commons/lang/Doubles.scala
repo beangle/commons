@@ -85,24 +85,72 @@ object Doubles {
     b1.divide(b2, scale, RoundingMode.HALF_UP).doubleValue
   }
 
+  /** Tests whether a value is zero within default epsilon (1e-6).
+   *
+   * @param x the value to test
+   * @return `true` if `x` is zero or within 1e-6 of zero
+   */
   def isZero(x: Double): Boolean = {
     equals(x, 0, 1e-6)
   }
 
+  /** Compares two doubles using ULP distance (max 1 ULP counts as equal).
+   *
+   * @param x first value
+   * @param y second value
+   * @return `-1`, `0`, or `1` as in [[java.lang.Double.compare]]
+   */
+  def compare(x: Double, y: Double): Int = {
+    if ulpEquals(x, y, 1) then 0
+    else if x < y then -1
+    else 1
+  }
+
+  /** Compares two doubles with an absolute epsilon tolerance.
+   *
+   * Values are equal when ULP distance is at most 1 or `|y - x| <= eps`.
+   *
+   * @param x   first value
+   * @param y   second value
+   * @param eps maximum absolute difference for equality
+   * @return `-1`, `0`, or `1` as in [[java.lang.Double.compare]]
+   */
   def compare(x: Double, y: Double, eps: Double): Int = {
     if equals(x, y, eps) then 0
     else if x < y then -1
     else 1
   }
 
+  /** Tests approximate equality with ULP or absolute epsilon tolerance.
+   *
+   * @param x   first value
+   * @param y   second value
+   * @param eps maximum absolute difference for equality
+   * @return `true` if values are equal within tolerance
+   */
   def equals(x: Double, y: Double, eps: Double): Boolean = {
     ulpEquals(x, y, 1) || Math.abs(y - x) <= eps
   }
 
+  /** Tests equality using ULP distance (max 1 ULP).
+   *
+   * @param v1 first value
+   * @param v2 second value
+   * @return `true` if values are equal within one ULP
+   */
   def equals(v1: Double, v2: Double): Boolean = {
     ulpEquals(v1, v2, 1)
   }
 
+  /** Tests equality by units-in-the-last-place (ULP) distance on raw bit representation.
+   *
+   * Treats +0.0 and -0.0 as equal; NaN is never equal; infinities must match in sign.
+   *
+   * @param x       first value
+   * @param y       second value
+   * @param maxUlps maximum allowed ULP distance
+   * @return `true` if bit distance is within `maxUlps`
+   */
   def ulpEquals(x: Double, y: Double, maxUlps: Int): Boolean = {
     // NaN 检查
     if (jl.Double.isNaN(x) || jl.Double.isNaN(y)) return false
