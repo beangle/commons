@@ -71,4 +71,3 @@ private object ScaledDecimal {
 
   def integerPartInt(value: Int): Int = value / FactorInt
 }
-

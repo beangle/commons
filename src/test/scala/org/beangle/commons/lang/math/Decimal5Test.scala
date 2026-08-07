@@ -92,4 +92,3 @@ class Decimal5Test extends AnyFunSpec, Matchers {
     }
   }
 }
-

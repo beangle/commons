@@ -102,4 +102,3 @@ class Decimal5(val value: Long) extends Number, Ordered[Decimal5], Serializable 
 
   override def hashCode: Int = java.lang.Long.hashCode(value)
 }
-
