@@ -32,7 +32,7 @@ object Jexl3 {
 
   /** Creates a Jexl3 Engine with Scala property support. */
   def newEngine(): JexlEngine = {
-    val jexlBuilder = new JexlBuilder().cache(512).strict(true).silent(false).features(JexlBuilder.FULL)
+    val jexlBuilder = new JexlBuilder().cache(512).strict(true).silent(false)
     val uberspect = new ScalaJexlUberspect(JexlUberspect.JEXL_STRATEGY, JexlPermissions.UNRESTRICTED)
     jexlBuilder.uberspect(uberspect)
     jexlBuilder.create()
