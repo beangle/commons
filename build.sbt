@@ -2,7 +2,7 @@ import org.beangle.parent.Dependencies.*
 import org.beangle.parent.Settings.*
 
 organization := "org.beangle.commons"
-version := "6.2.2"
+version := "6.2.3-SNAPSHOT"
 scmInfo := Some(
   ScmInfo(
     uri("https://github.com/beangle/commons"),
