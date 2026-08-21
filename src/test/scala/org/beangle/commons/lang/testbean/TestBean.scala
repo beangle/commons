@@ -114,6 +114,18 @@ abstract class StringIdBean extends Entity[String] {
   var id: String = _
 }
 
+object AAA {
+  private abstract class PrivateIdBean extends Entity[String] {
+    var id: String = _
+  }
+  def main(args: Array[String]): Unit = {
+    val c = classOf[PrivateIdBean]
+    val methods = c.getMethods
+    for(m <- methods){
+      println(m)
+    }
+  }
+}
 class Book extends NumIdBean[java.lang.Long] {
 
   def myId = id

@@ -17,12 +17,9 @@
 
 package org.beangle.commons.lang.reflect
 
-import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.Strings.{capitalize, replace}
 
-import java.lang.reflect.{Constructor, Method, ParameterizedType}
 import scala.collection.immutable.ArraySeq
-import scala.collection.{immutable, mutable}
 import scala.language.existentials
 
 /** Type metadata (class, generic args). */
@@ -160,6 +157,7 @@ object TypeInfo {
   def convert(obj: Any): TypeInfo = {
     obj match {
       case clz: Class[_] => TypeInfo.get(clz, false)
+      case ti: TypeInfo => ti
       case a: Array[Any] =>
         val clz = a(0)
         val argsClz = a(1).asInstanceOf[Array[_]]
