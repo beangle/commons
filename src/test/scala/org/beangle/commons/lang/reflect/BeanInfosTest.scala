@@ -104,11 +104,7 @@ class BeanInfosTest extends AnyFunSpec, Matchers {
 
     it("find correct get") {
       val t = BeanInfos.get(classOf[Menu])
-      val getter = t.properties("id").getter
-      assert(getter.isDefined)
-      getter foreach { g =>
-        assert(g.getName == "id")
-      }
+      assert(t.properties("id").getter.isDefined)
       assert(!t.properties.contains("childrenCount"))
       assert(t.properties.contains("deepSize"))
       assert(t.methods.size == 1)
@@ -152,7 +148,8 @@ class BeanInfosTest extends AnyFunSpec, Matchers {
     it("get generic method") {
       val t = BeanInfos.of(classOf[LongFactory])
       assert(t.properties.contains("result"))
-      assert(t.properties("result").getter.get.getReturnType == classOf[Long])
+      // handle.type() 保留精确签名；reflectAs 对 primitive 返回会恢复成桥接形态（见 PropertyInfo.getterMethod 注）
+      assert(t.properties("result").getter.get.`type`().returnType() == classOf[Long])
     }
     it("get java bean methods") {
       val t = BeanInfos.of(classOf[TestJavaBean])

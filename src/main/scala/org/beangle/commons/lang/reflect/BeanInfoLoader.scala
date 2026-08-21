@@ -17,15 +17,12 @@
 
 package org.beangle.commons.lang.reflect
 
-import org.beangle.commons.collection.{Collections, IdentityCache}
-import org.beangle.commons.lang.Strings.{substringBefore, uncapitalize}
+import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.reflect.BeanInfo
 import org.beangle.commons.lang.reflect.BeanInfo.*
-import org.beangle.commons.lang.reflect.BeanInfo.Builder.filterSameNames
 import org.beangle.commons.lang.reflect.Reflections.deduceParamTypes
 import org.beangle.commons.lang.{ClassLoaders, Primitives, Strings}
 
-import java.beans.Transient
 import java.lang.Character.isUpperCase
 import java.lang.reflect.{Field, Method, Modifier, ParameterizedType, TypeVariable}
 import scala.collection.immutable.ArraySeq
@@ -112,16 +109,12 @@ object BeanInfoLoader {
       val typeinfo = if getter.isEmpty then setter.get.parameterTypes(0) else getter.get.returnType
       val isTransientAnnoted = fields.get(p).exists(x => Modifier.isTransient(x.getModifiers))
       val isTransient = BeanInfo.Builder.isTransient(isTransientAnnoted, setter.isDefined, pCtorParamNames.contains(p))
-      val pd = BeanInfo.PropertyInfo(p, typeinfo, getter.map(_.method), setter.map(_.method), isTransient)
+      val pd = BeanInfo.PropertyInfo(p, typeinfo, getter.map(x => BeanInfo.Builder.unreflect(x.method)),
+        setter.map(x => BeanInfo.Builder.unreflect(x.method)), isTransient)
       properties.put(p, pd)
     }
 
-    // change accessible for none public class
-    if !Modifier.isPublic(clazz.getModifiers) then
-      properties foreach { case (k, v) =>
-        v.getter.foreach { m => m.setAccessible(true) }
-        v.setter.foreach { m => m.setAccessible(true) }
-      }
+    // note: non-public class access is handled inside Builder.unreflect (setAccessible fallback)
 
     //collect other non-access methods
     val methods = new mutable.ArrayBuffer[Method]

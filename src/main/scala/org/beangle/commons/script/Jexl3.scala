@@ -23,6 +23,7 @@ import org.apache.commons.jexl3.{JexlBuilder, JexlEngine, JexlException}
 import org.beangle.commons.lang.Options
 import org.beangle.commons.lang.reflect.BeanInfos
 
+import java.lang.invoke.MethodHandle
 import java.lang.reflect.{InvocationTargetException, Method}
 import java.util as ju
 import scala.jdk.javaapi.CollectionConverters.asJava
@@ -38,9 +39,9 @@ object Jexl3 {
     jexlBuilder.create()
   }
 
-  private class SimplePropertyGet(val clazz: Class[_], val method: Method, val property: String) extends JexlPropertyGet {
+  private class SimplePropertyGet(val clazz: Class[_], val handle: MethodHandle, val property: String) extends JexlPropertyGet {
 
-    override def invoke(obj: Any): AnyRef = method.invoke(obj)
+    override def invoke(obj: Any): AnyRef = handle.invoke(obj).asInstanceOf[AnyRef]
 
     override def isCacheable: Boolean = false
 
@@ -49,10 +50,11 @@ object Jexl3 {
     override def tryInvoke(obj: Any, key: Any): AnyRef = {
       if (obj != null && property == key && clazz == obj.getClass) {
         try {
-          method.invoke(obj)
+          handle.invoke(obj).asInstanceOf[AnyRef]
         } catch {
-          case xill@(_: IllegalAccessException | _: IllegalArgumentException) => JexlEngine.TRY_FAILED // fail
-          case xinvoke: InvocationTargetException => throw JexlException.tryFailed(xinvoke) // throw
+          case _: IllegalArgumentException => JexlEngine.TRY_FAILED // fail
+          // MethodHandle 抛未包装的目标异常，按 JEXL 契约包回 InvocationTargetException
+          case xinvoke: Throwable => throw JexlException.tryFailed(new InvocationTargetException(xinvoke))
         }
       } else {
         JexlEngine.TRY_FAILED
@@ -118,7 +120,7 @@ object Jexl3 {
       if (BeanInfos.cached(clazz)) {
         val info = BeanInfos.get(clazz)
         info.getGetter(property) match
-          case Some(m) => new PropertyGetAdapter(new SimplePropertyGet(clazz, m, property))
+          case Some(h) => new PropertyGetAdapter(new SimplePropertyGet(clazz, h, property))
           case None => null
       } else {
         null

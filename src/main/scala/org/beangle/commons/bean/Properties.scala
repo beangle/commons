@@ -204,7 +204,7 @@ class Properties(conversion: Conversion) {
 
   private def getSimpleProperty(bean: Any, name: String): Any =
     BeanInfos.get(bean.getClass).getGetter(name) match {
-      case Some(method) => method.invoke(bean)
+      case Some(handle) => handle.invoke(bean)
       case _ => throw new RuntimeException("Cannot find " + Strings.capitalize(name) + " Getter in " + bean.getClass)
     }
 
@@ -234,10 +234,10 @@ class Properties(conversion: Conversion) {
 
   private def copySimpleProperty(bean: Any, beanInfo: BeanInfo, name: String, value: Any, conversion: Conversion): Any = {
     beanInfo.getSetter(name) match {
-      case Some(method) =>
+      case Some(handle) =>
         val p = beanInfo.properties(name)
         val converted = convert(value, p.clazz, p.typeinfo, conversion)
-        method.invoke(bean, converted.asInstanceOf[Object])
+        handle.invoke(bean, converted.asInstanceOf[Object])
         converted
       case _ => null
     }

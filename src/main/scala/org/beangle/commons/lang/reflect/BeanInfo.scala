@@ -22,6 +22,7 @@ import org.beangle.commons.lang.Strings.*
 import org.beangle.commons.lang.reflect.BeanInfo.*
 
 import java.lang.Character.isUpperCase
+import java.lang.invoke.{MethodHandle, MethodHandles}
 import java.lang.reflect.{Method, Modifier}
 import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
@@ -35,9 +36,14 @@ object BeanInfo {
     Set("apply", "unApply", "canEqual")
   private val caseIgnores = Set("productArity", "productIterator", "productPrefix", "productElement", "productElementName", "productElementNames", "copy")
 
-  /** Property metadata (name, type, getter, setter). */
-  class PropertyInfo(val name: String, val typeinfo: TypeInfo, val getter: Option[Method],
-                     val setter: Option[Method], val isTransient: Boolean) {
+  /** Property metadata (name, type, getter, setter).
+    *
+    * Accessors are MethodHandles (invocation layer); method names are not kept —
+    * the binary stores declarations only, accessors are re-derived by naming
+    * conventions (getX/setX/x_$eq) at construction.
+    */
+  class PropertyInfo(val name: String, val typeinfo: TypeInfo, val getter: Option[MethodHandle],
+                     val setter: Option[MethodHandle], val isTransient: Boolean) {
     /** Returns true if property has setter. */
     def writable: Boolean = setter.isDefined
 
@@ -49,8 +55,8 @@ object BeanInfo {
 
     override def toString: String = {
       if writable && readable then s"var $name: $typeinfo = _ "
-      else if readable then s"def ${getter.get.getName}: $typeinfo"
-      else s"def ${setter.get.getName}(x1: $typeinfo)"
+      else if readable then s"def $name: $typeinfo"
+      else s"def $name(x1: $typeinfo)"
     }
   }
 
@@ -85,7 +91,7 @@ object BeanInfo {
     /** Returns true if the given args match parameter types. */
     def matches(args: Any*): Boolean = {
       if (parameters.length != args.length) return false
-      !(0 until args.length).exists { i =>
+      !args.indices.exists { i =>
         null != args(i) && !parameters(i).typeinfo.clazz.isInstance(args(i))
       }
     }
@@ -187,6 +193,15 @@ object BeanInfo {
       if (name.length > 1 && isUpperCase(name.charAt(1))) name else uncapitalize(name)
     }
 
+    /** Unreflects a resolved accessor Method into a MethodHandle (setAccessible fallback for non-public classes). */
+    private[reflect] def unreflect(m: Method): MethodHandle = {
+      try MethodHandles.lookup().unreflect(m)
+      catch
+        case _: IllegalAccessException =>
+          m.setAccessible(true)
+          MethodHandles.lookup().unreflect(m)
+    }
+
     /** Parameter holder for Builder.addCtor. */
     class ParamHolder(name: String, typeinfo: Any, defaultValue: Option[Any]) {
       def this(name: String, typeInfo: Any) = {
@@ -273,7 +288,7 @@ object BeanInfo {
           val getter = getters.get(p)
           val setter = setters.get(p)
           val isTransient = Builder.isTransient(transients.contains(p), setter.isDefined, pCtorParamNames.contains(p))
-          val pd = BeanInfo.PropertyInfo(p, fieldInfo, getter, setter, isTransient)
+          val pd = BeanInfo.PropertyInfo(p, fieldInfo, getter.map(unreflect), setter.map(unreflect), isTransient)
           //validProperty(clazz,pd)
           properties.put(p, pd)
         }
@@ -288,8 +303,8 @@ object BeanInfo {
 
   private def validProperty(holderClass: Class[_], pi: BeanInfo.PropertyInfo): Unit = {
     val propertyClazz = pi.typeinfo.clazz
-    pi.getter foreach { g => require(g.getReturnType == propertyClazz, s"${holderClass.getName}.${pi.name}'s type is ${propertyClazz.getName},but get method return ${g.getReturnType.getName}") }
-    pi.setter foreach { g => require(g.getParameterTypes()(0) == propertyClazz, s"${holderClass.getName}.${pi.name}'s type is ${propertyClazz.getName},but set method need ${g.getParameterTypes()(0).getName}") }
+    pi.getter foreach { g => require(g.`type`().returnType() == propertyClazz, s"${holderClass.getName}.${pi.name}'s type is ${propertyClazz.getName},but get method return ${g.`type`().returnType().getName}") }
+    pi.setter foreach { g => require(g.`type`().parameterType(0) == propertyClazz, s"${holderClass.getName}.${pi.name}'s type is ${propertyClazz.getName},but set method need ${g.`type`().parameterType(0).getName}") }
   }
 }
 
@@ -310,10 +325,7 @@ class BeanInfo(val clazz: Class[_], val ctors: ArraySeq[ConstructorInfo], val pr
       }
     }
 
-    val displayed = new mutable.HashSet[Method]
     properties foreach { (name, pi) =>
-      displayed ++= pi.getter
-      displayed ++= pi.setter
       if (pi.setter.nonEmpty || !fieldInCtor.contains(name)) {
         sb += s"  ${pi}"
       }
@@ -335,16 +347,16 @@ class BeanInfo(val clazz: Class[_], val ctors: ArraySeq[ConstructorInfo], val pr
     properties.get(property).map(_.clazz)
   }
 
-  /** Gets getter method for property. */
-  def getGetter(property: String): Option[Method] = {
+  /** Gets getter MethodHandle for property (invocation layer). */
+  def getGetter(property: String): Option[MethodHandle] = {
     properties.get(property) match {
       case Some(p) => p.getter
       case None => None
     }
   }
 
-  /** Gets setter method for property. */
-  def getSetter(property: String): Option[Method] = {
+  /** Gets setter MethodHandle for property (invocation layer). */
+  def getSetter(property: String): Option[MethodHandle] = {
     properties.get(property) match {
       case Some(p) => p.setter
       case None => None
