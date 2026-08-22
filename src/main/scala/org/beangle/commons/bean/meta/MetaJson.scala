@@ -21,7 +21,7 @@ import org.beangle.commons.bean.meta.MetaModel.ClassMeta
 import org.beangle.commons.json.JsonObject
 
 /** JSON serialization of [[MetaModel.ClassMeta]] (debug export only; no reverse parse). */
-object MetaModelJson {
+object MetaJson {
 
   /** Renders a ClassMeta as human-readable JSON.
     *
@@ -49,10 +49,10 @@ object MetaModelJson {
 
   /** CLI: prints each .beaninfo file as JSON (debug). */
   def main(args: Array[String]): Unit = {
-    if args.isEmpty then println("Usage: MetaModelJson <file.beaninfo>...")
+    if args.isEmpty then println("Usage: MetaJson <file.beaninfo>...")
     else args foreach { path =>
       val bytes = java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(path))
-      println(toJson(MetaModelCodec.parse(bytes)))
+      println(toJson(MetaCodec.parse(bytes)))
     }
   }
 }

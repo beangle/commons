@@ -31,13 +31,13 @@ import java.nio.file.{Files, Path}
   * {{{
   * header:    magic "BNIX" + version u16
   * directory: count u32, count × { nameLen u16 + name UTF-8 + offset u32 + length u32 }
-  * blobs:     count × { MetaModelCodec.encode(cm) }   // directory order == blob order
+  * blobs:     count × { MetaCodec.encode(cm) }   // directory order == blob order
   * }}}
   * Each blob is a self-contained v2 blob (own header + pool), so this is a thin
   * wrapper — compatible with the per-class `.beaninfo` files and native-image
   * (register `.*beaninfo\.idx` as one resource instead of many `.beaninfo`).
   */
-object MetaModelIndex {
+object MetaIndex {
 
   private val Magic = "BNIX"
   private val Version = 1
@@ -51,7 +51,7 @@ object MetaModelIndex {
 
   /** Writes multiple ClassMetas into a beaninfo.idx stream. */
   def write(out: OutputStream, metas: Iterable[ClassMeta]): Unit = {
-    val blobs = metas.toSeq.sortBy(_.clazz.getName).map(cm => cm -> MetaModelCodec.encode(cm))
+    val blobs = metas.toSeq.sortBy(_.clazz.getName).map(cm => cm -> MetaCodec.encode(cm))
     val names = blobs.map(_._1.clazz.getName.replace('.', '/'))
     val dirSize = names.map(n => 10 + n.getBytes(StandardCharsets.UTF_8).length).sum
     val d = new DataOutputStream(out)
@@ -83,7 +83,7 @@ object MetaModelIndex {
     entries.map { case (_, _, len) =>
       val blob = new Array[Byte](len)
       d.readFully(blob)
-      MetaModelCodec.parse(blob)
+      MetaCodec.parse(blob)
     }
   }
 
@@ -103,7 +103,7 @@ object MetaModelIndex {
       skipFully(in, off - position)
       val blob = new Array[Byte](len)
       d.readFully(blob)
-      MetaModelCodec.parse(blob)
+      MetaCodec.parse(blob)
     }
   }
 
