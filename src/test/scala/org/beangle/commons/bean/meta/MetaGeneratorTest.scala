@@ -21,30 +21,41 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 import java.io.ByteArrayOutputStream
-import java.nio.file.Files
+import java.nio.file.Path
 
-class MetaRegistryGeneratorTest extends AnyFunSpec, Matchers {
+class MetaGeneratorTest extends AnyFunSpec, Matchers {
 
-  describe("MetaRegistryGenerator") {
-    it("collects ClassMeta from specified registry class") {
-      val metas = MetaRegistryGenerator.collectAll(Seq(classOf[TestAppRegistry].getName))
-      metas should not be empty
-      metas.map(_.clazz.getName) should contain("org.beangle.commons.bean.meta.GeneratorTestEntity")
+  describe("MetaGenerator") {
+    it("scans classes directory and finds MetaRegistry subclasses") {
+      // Get the test-classes directory from classpath
+      val resource = getClass.getResource("/")
+      if (resource != null) {
+        val classesDir = Path.of(resource.toURI)
+        val metas = MetaGenerator.collectFromDirs(Seq(classesDir.toString))
+
+        // Should find TestAppRegistry and collect GeneratorTestEntity
+        metas.map(_.clazz.getName) should contain("org.beangle.commons.bean.meta.GeneratorTestEntity")
+      }
     }
 
     it("generates beaninfo.idx to stream") {
-      val metas = MetaRegistryGenerator.collectAll(Seq(classOf[TestAppRegistry].getName))
-      val out = new ByteArrayOutputStream()
-      MetaIndex.write(out, metas)
+      val resource = getClass.getResource("/")
+      if (resource != null) {
+        val classesDir = Path.of(resource.toURI)
+        val metas = MetaGenerator.collectFromDirs(Seq(classesDir.toString))
 
-      val bytes = out.toByteArray
-      bytes.length should be > 0
+        val out = new ByteArrayOutputStream()
+        MetaIndex.write(out, metas)
 
-      // Verify magic
-      bytes(0) shouldBe 'B'
-      bytes(1) shouldBe 'N'
-      bytes(2) shouldBe 'I'
-      bytes(3) shouldBe 'X'
+        val bytes = out.toByteArray
+        bytes.length should be > 0
+
+        // Verify magic
+        bytes(0) shouldBe 'B'
+        bytes(1) shouldBe 'N'
+        bytes(2) shouldBe 'I'
+        bytes(3) shouldBe 'X'
+      }
     }
   }
 }

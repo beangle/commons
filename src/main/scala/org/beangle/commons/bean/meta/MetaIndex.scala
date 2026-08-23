@@ -23,23 +23,23 @@ import java.io.{BufferedInputStream, BufferedOutputStream, DataInputStream, Data
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path}
 
-/** Multi-class container: a `beaninfo.idx` file holding many self-contained
+/** Multi-class container: a metamodel.idx file holding many self-contained
   * [[MetaModel.ClassMeta]] blobs plus a directory mapping JVM internal class names
   * to blob offset/length, so a single class can be located without scanning.
   *
   * Format (big-endian, lengths u32):
   * {{{
-  * header:    magic "BNIX" + version u16
+  * header:    magic "BMXI" + version u16
   * directory: count u32, count × { nameLen u16 + name UTF-8 + offset u32 + length u32 }
   * blobs:     count × { MetaCodec.encode(cm) }   // directory order == blob order
   * }}}
-  * Each blob is a self-contained v2 blob (own header + pool), so this is a thin
+  * Each blob is a self-contained v1 blob (own header + pool), so this is a thin
   * wrapper — compatible with the per-class `.beaninfo` files and native-image
   * (register `.*beaninfo\.idx` as one resource instead of many `.beaninfo`).
   */
 object MetaIndex {
 
-  private val Magic = "BNIX"
+  private val Magic = "BMXI"
   private val Version = 1
   private val HeaderSize = 4 + 2 + 4 // magic + version + count
 

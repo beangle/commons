@@ -26,7 +26,7 @@ import org.beangle.commons.lang.reflect.TypeInfo
 import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
 
-/** Binary codec for [[MetaModel.ClassMeta]] (v2 format).
+/** Binary codec for [[MetaModel.ClassMeta]] (v1 format).
   *
   * A single class's meta model (properties / ctors / methods) is serialized into a
   * self-contained binary blob: header + string constant pool + length-prefixed sections.
@@ -46,8 +46,8 @@ import scala.collection.mutable
   */
 object MetaCodec {
 
-  private val Magic = "BNI2"
-  private val Version = 2
+  private val Magic = "BMET"
+  private val Version = 1
   private val NoneIdx = 0xFFFF
   private val MaxPool = 0x8000 // explicit indices must be < 0x8000 (typeinfo Form-1 bit7 marker must not collide)
 
