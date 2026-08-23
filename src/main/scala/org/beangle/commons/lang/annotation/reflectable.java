@@ -15,13 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.commons.lang.annotation
+package org.beangle.commons.lang.annotation;
 
-import scala.annotation.StaticAnnotation
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-/** Excludes field from reflection (BeanInfo, Properties, etc.).
- *
- * @author chaostone
- * @since 3.0.2
+/**
+ * Marks a class as reflectable: its properties and public methods may be
+ * introspected into BeanInfo / meta model.
+ * <p>
+ * Default policy is public-only; all public methods are reflectable unless
+ * individually excluded with {@link noreflect} on the method.
  */
-class noreflect extends StaticAnnotation
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface reflectable {
+}
