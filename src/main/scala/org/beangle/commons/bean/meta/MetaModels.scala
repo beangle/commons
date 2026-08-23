@@ -19,126 +19,74 @@ package org.beangle.commons.bean.meta
 
 import org.beangle.commons.bean.meta.MetaModel.ClassMeta
 import org.beangle.commons.io.Resources
+import org.beangle.commons.logging.Logging
 
-import java.io.{BufferedInputStream, DataInputStream, InputStream}
-import java.net.URL
-import java.nio.charset.StandardCharsets
 import scala.collection.mutable
+import scala.quoted.*
 
-/** Global registry for locating [[ClassMeta]] by class name or Class instance.
-  *
-  * Scans `classpath*:META-INF/beangle/metamodel.idx` at startup, builds an
-  * in-memory index mapping class names to their idx file locations and blob
-  * offsets, then resolves ClassMeta on demand without caching.
+/** Global entry point for [[ClassMeta]] — compile-time dig, binary lookup, and runtime reflection.
   *
   * {{{
-  * // Lookup by Class
-  * MetaModels.get(classOf[User]) match {
-  *   case Some(cm) => println(cm.properties)
-  *   case None     => println("not found")
-  * }
+  * // Compile-time dig (macro, preserves generic precision)
+  * val cm = MetaModels.of(classOf[User])
   *
-  * // Lookup by class name (JVM internal or dot-separated)
-  * MetaModels.get("org.example.User")
+  * // Lookup from metamodel.idx (loaded at startup)
+  * MetaModels.get(classOf[User])  // Option[ClassMeta]
+  *
+  * // Runtime reflection fallback
+  * val cm = MetaModels.reflect(classOf[User])
   * }}}
   */
-object MetaModels {
+object MetaModels extends Logging {
 
-  /** Index entry: URL of the idx file + blob offset + blob length. */
-  private case class Entry(url: URL, offset: Int, length: Int)
-
-  /** Class name -> Entry index (lazy initialized). */
-  private lazy val index: Map[String, Entry] = buildIndex()
+  /** Class name (JVM internal) -> ClassMeta, lazy loaded at first access. */
+  private lazy val cache: Map[String, ClassMeta] = buildCache()
 
   /** Returns ClassMeta for the given class, or None if not found. */
   def get(clazz: Class[_]): Option[ClassMeta] = get(clazz.getName)
 
   /** Returns ClassMeta for the given class name (dot-separated or JVM internal), or None. */
-  def get(className: String): Option[ClassMeta] = {
-    val normalized = normalize(className)
-    index.get(normalized).map(load)
-  }
+  def get(className: String): Option[ClassMeta] = cache.get(normalize(className))
 
   /** Returns true if ClassMeta is available for the given class. */
   def contains(clazz: Class[_]): Boolean = contains(clazz.getName)
 
   /** Returns true if ClassMeta is available for the given class name. */
-  def contains(className: String): Boolean = index.contains(normalize(className))
+  def contains(className: String): Boolean = cache.contains(normalize(className))
 
   /** Returns all registered class names. */
-  def classNames: Set[String] = index.keySet.toSet
+  def classNames: Set[String] = cache.keySet
 
-  /** Builds the index by scanning all metamodel.idx files on the classpath. */
-  private def buildIndex(): Map[String, Entry] = {
-    val map = mutable.HashMap.empty[String, Entry]
+  /** Digs ClassMeta for classes at compile time (macro, preserves generic precision). */
+  inline def of(inline clazzes: Class[_]*): List[ClassMeta] = ${ MetaDigger.digInto('clazzes) }
+
+  /** Digs ClassMeta for a single class at compile time (macro). */
+  inline def of[T](clazz: Class[T]): ClassMeta = ${ MetaDigger.digInto('clazz) }
+
+  /** Reflects a class into ClassMeta via runtime reflection (fallback when no binary available). */
+  def reflect(clazz: Class[_]): ClassMeta = MetaLoader.load(clazz)
+
+  /** Loads all metamodel.idx files from classpath into memory. */
+  private def buildCache(): Map[String, ClassMeta] = {
+    val map = mutable.HashMap.empty[String, ClassMeta]
+    val stringPool = mutable.Set.empty[String] // shared dedup across all idx files
     val urls = Resources.load("classpath*:META-INF/beangle/metamodel.idx")
     urls.foreach { url =>
       try {
-        val entries = readDirectory(url)
-        entries.foreach { case (name, offset, length) =>
-          map.put(name, Entry(url, offset, length))
-        }
+        val in = new java.io.BufferedInputStream(url.openStream())
+        try {
+          MetaIndex.read(in, stringPool).foreach { cm =>
+            map.put(normalize(cm.clazz.getName), cm)
+          }
+        } finally in.close()
       } catch {
-        case _: Exception => // skip malformed idx files
+        case e: Exception =>
+          logger.warn(s"Failed to load metamodel.idx from $url: ${e.getMessage}")
       }
     }
     map.toMap
   }
 
-  /** Reads the directory from a metamodel.idx URL, returning (className, offset, length) tuples. */
-  private def readDirectory(url: URL): Seq[(String, Int, Int)] = {
-    val in = new DataInputStream(new BufferedInputStream(url.openStream()))
-    try {
-      val magic = new Array[Byte](4)
-      in.readFully(magic)
-      if (!new String(magic, StandardCharsets.US_ASCII).equals("BNIX"))
-        throw new IllegalArgumentException("Not a beaninfo index")
-      val version = in.readUnsignedShort()
-      if (version != 1)
-        throw new IllegalArgumentException(s"Unsupported beaninfo index version $version")
-      val count = in.readInt()
-      (0 until count).map { _ =>
-        val len = in.readUnsignedShort()
-        val nb = new Array[Byte](len)
-        in.readFully(nb)
-        val name = new String(nb, StandardCharsets.UTF_8)
-        val offset = in.readInt()
-        val length = in.readInt()
-        (name, offset, length)
-      }
-    } finally {
-      in.close()
-    }
-  }
-
-  /** Loads a single ClassMeta from the idx file at the given entry. */
-  private def load(entry: Entry): ClassMeta = {
-    val in = new DataInputStream(new BufferedInputStream(entry.url.openStream()))
-    try {
-      // Skip header + directory to reach blobs
-      skipToOffset(in, entry.offset)
-      val blob = new Array[Byte](entry.length)
-      in.readFully(blob)
-      MetaCodec.parse(blob)
-    } finally {
-      in.close()
-    }
-  }
-
-  /** Skips bytes in the stream to reach the specified offset. */
-  private def skipToOffset(in: InputStream, targetOffset: Int): Unit = {
-    var remaining = targetOffset.toLong
-    while (remaining > 0) {
-      val skipped = in.skip(remaining)
-      if (skipped <= 0) throw new IOException(s"Cannot skip to offset $targetOffset")
-      remaining -= skipped
-    }
-  }
-
   /** Normalizes a class name to JVM internal format (dot-separated -> slash-separated). */
-  private def normalize(className: String): String = {
-    className.replace('.', '/')
-  }
-
-  private class IOException(message: String) extends Exception(message)
+  private def normalize(className: String): String = className.replace('.', '/')
 }
