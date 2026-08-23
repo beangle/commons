@@ -17,6 +17,7 @@
 
 package org.beangle.commons.lang.reflect
 
+import org.beangle.commons.bean.meta.MetaLoader
 import org.beangle.commons.collection.IdentityCache
 
 /** Cache for BeanInfo by class. */
@@ -24,32 +25,27 @@ class BeanInfoCache {
 
   private val cache = new IdentityCache[Class[_], BeanInfo]
 
-  /** Digs BeanInfo for classes at compile-time (macro). */
-  inline def of(inline clazzes: Class[_]*): List[BeanInfo] = ${ BeanInfoDigger.digInto('clazzes, 'this) }
-
-  /** Digs BeanInfo for single class at compile-time (macro). */
-  inline def of[T](clazz: Class[T]): BeanInfo = ${ BeanInfoDigger.digInto('clazz, 'this) ; }
-
   /** Registers BeanInfo. */
   def update(bi: BeanInfo): BeanInfo = {
-    cache.put(bi.clazz, bi)
+    cache.put(bi.meta.clazz, bi)
     bi
   }
 
-  /** Registers BeanInfo for a subclass (clazz must extend bi.clazz). */
+  /** Registers BeanInfo for a subclass (clazz must extend bi.meta.clazz). */
   def update(clazz: Class[_], bi: BeanInfo): BeanInfo = {
-    require(bi.clazz.isAssignableFrom(clazz), s"${clazz.getName} is not a subclass of ${bi.clazz.getName}")
+    require(bi.meta.clazz.isAssignableFrom(clazz), s"${clazz.getName} is not a subclass of ${bi.meta.clazz.getName}")
     cache.put(clazz, bi)
     bi
   }
 
-  /** Loads BeanInfo via reflection. */
+  /** Loads BeanInfo via MetaLoader (ClassMeta) + BeanInfo.from reconstruction. */
   def get(clazz: Class[_]): BeanInfo = {
     val exist = cache.get(clazz)
     if (null != exist) return exist
-    val ci = BeanInfoLoader.load(clazz)
-    cache.put(clazz, ci)
-    ci
+    val cm = MetaLoader.load(clazz)
+    val bi = BeanInfo.from(cm)
+    cache.put(clazz, bi)
+    bi
   }
 
   /** Returns true if BeanInfo is cached for the class. */

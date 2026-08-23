@@ -38,7 +38,7 @@ object BindModule {
            binder: Expr[Binder], wiredEagerly: Expr[Boolean])
           (implicit quotes: Quotes): Expr[BatchBinder] = {
     '{
-      ${ BeanInfoDigger.digInto(clazzesExpr, '{ BeanInfos.cache }) }
+      BeanInfos.of(${ clazzesExpr }: _*)
       ${ binder }.bind(${ clazzesExpr }: _*).wiredEagerly(${ wiredEagerly })
     }
   }
@@ -55,7 +55,7 @@ object BindModule {
                     binder: Expr[Binder], wiredEagerly: Expr[Boolean])
                    (implicit quotes: Quotes): Expr[BatchBinder] = {
     '{
-      ${ BeanInfoDigger.digInto(clazz, '{ BeanInfos.cache }) }
+      BeanInfos.of(${ clazz })
       ${ binder }.bind(${ beanName }, ${ clazz }).wiredEagerly(${ wiredEagerly })
     }
   }
@@ -71,7 +71,7 @@ object BindModule {
                     binder: Expr[Binder], wiredEagerly: Expr[Boolean])
                    (implicit quotes: Quotes): Expr[Definition] = {
     '{
-      ${ BeanInfoDigger.digInto(clazz, '{ BeanInfos.cache }) }
+      BeanInfos.of(${ clazz })
       ${ binder }.bind(${ binder }.newInnerBeanName(${ clazz }), ${ clazz }).head.wiredEagerly(${ wiredEagerly })
     }
   }

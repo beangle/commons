@@ -17,8 +17,11 @@
 
 package org.beangle.commons.lang.reflect
 
+import org.beangle.commons.bean.meta.MetaModel
+import org.beangle.commons.bean.meta.MetaModel.ClassMeta
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.Strings.*
+import org.beangle.commons.lang.annotation.noreflect
 import org.beangle.commons.lang.reflect.BeanInfo.*
 
 import java.lang.Character.isUpperCase
@@ -36,14 +39,22 @@ object BeanInfo {
     Set("apply", "unApply", "canEqual")
   private val caseIgnores = Set("productArity", "productIterator", "productPrefix", "productElement", "productElementName", "productElementNames", "copy")
 
-  /** Property metadata (name, type, getter, setter).
+  /** Property metadata: holds [[MetaModel.Property]] reference + accessor MethodHandles.
     *
-    * Accessors are MethodHandles (invocation layer); method names are not kept —
-    * the binary stores declarations only, accessors are re-derived by naming
-    * conventions (getX/setX/x_$eq) at construction.
+    * Delegates name/typeinfo/isTransient/isOptional to the underlying [[MetaModel.Property]],
+    * avoiding data duplication when both ClassMeta and BeanInfo are in memory.
+    * For optional properties, typeinfo returns the resolved type (Option[X]) by wrapping
+    * the flattened element type stored in MetaModel.Property.
     */
-  class PropertyInfo(val name: String, val typeinfo: TypeInfo, val getter: Option[MethodHandle],
-                     val setter: Option[MethodHandle], val isTransient: Boolean) {
+  class PropertyInfo(val meta: MetaModel.Property, val getter: Option[MethodHandle], val setter: Option[MethodHandle]) {
+    def name: String = meta.name
+
+    def typeinfo: TypeInfo = if meta.isOptional then TypeInfo.get(classOf[Option[_]], List(meta.typeinfo)) else meta.typeinfo
+
+    def isTransient: Boolean = meta.isTransient
+
+    def isOptional: Boolean = meta.isOptional
+
     /** Returns true if property has setter. */
     def writable: Boolean = setter.isDefined
 
@@ -63,48 +74,63 @@ object BeanInfo {
   /** Constructor or method parameter metadata. */
   case class ParamInfo(name: String, typeinfo: TypeInfo, defaultValue: Option[Any])
 
-  /** Method metadata (name, return type, parameters). */
-  case class MethodInfo(method: Method, returnType: TypeInfo, parameters: ArraySeq[ParamInfo])
-    extends Ordered[MethodInfo] {
+  /** Method metadata: holds [[MetaModel.Method]] reference + handler MethodHandle.
+    *
+    * Delegates name and parameter matching to the underlying [[MetaModel.Method]].
+    */
+  case class MethodInfo(meta: MetaModel.Method, handler: MethodHandle) {
+    def name: String = meta.name
 
-    override def compare(o: MethodInfo): Int = this.method.getName.compareTo(o.method.getName)
-
-    /** Returns true if this method is preferred over o (for overload resolution). */
-    def isOver(o: MethodInfo): Boolean = {
-      if o != this && o.method.getName == this.method.getName && o.parameters.size == this.parameters.size then
-        //primary type over Object,but Object.isAssignableFrom(Int) is false
-        if o.method.getReturnType == classOf[AnyRef] || o.method.getReturnType.isAssignableFrom(this.method.getReturnType) then
-          val ps = o.method.getParameterTypes
-          val paramTypeMatch = parameters.indices.forall { i => ps(i) == classOf[AnyRef] || ps(i).isAssignableFrom(parameters(i).typeinfo.clazz) }
-          if paramTypeMatch then
-            o.method.isBridge || o.method.getDeclaringClass.isAssignableFrom(this.method.getDeclaringClass)
-          else false
-        else false
-      else false
-    }
-
-    override def toString: String = {
-      val params = parameters.map(x => x.name + ": " + x.typeinfo).mkString(",")
-      s"def ${method.getName}(${params}): ${returnType}"
-    }
+    override def toString: String = s"def $name(${meta.paramTypes.mkString(", ")})"
 
     /** Returns true if the given args match parameter types. */
-    def matches(args: Any*): Boolean = {
-      if (parameters.length != args.length) return false
-      !args.indices.exists { i =>
-        null != args(i) && !parameters(i).typeinfo.clazz.isInstance(args(i))
-      }
-    }
+    def matches(args: Any*): Boolean = meta.matches(args*)
   }
 
-  /** Constructor metadata (parameter list). */
-  case class ConstructorInfo(parameters: ArraySeq[ParamInfo]) {
-    override def toString: String = {
-      val params = parameters.map { x =>
-        x.name + ": " + x.typeinfo + (if x.defaultValue.nonEmpty then " = " + x.defaultValue.get.toString else "")
-      }
-      s"def this(${params.mkString(",")})"
+  /** Constructs a BeanInfo from a [[ClassMeta]] (binary-decoded or compile-time digged).
+    *
+    * Uses getter/setter names from Property metadata for direct method lookup,
+    * avoiding full method scans for each property.
+    */
+  def from(cm: ClassMeta): BeanInfo = {
+    val clazz = cm.clazz
+
+    // Pre-group all methods by name for O(1) lookup
+    val methodsByName = clazz.getMethods.groupBy(_.getName)
+
+    /** Finds a method by name, preferring non-bridge. */
+    def findByName(name: String): Option[Method] = {
+      methodsByName.get(name).flatMap(cs => cs.find(!_.isBridge).orElse(cs.headOption))
     }
+
+    /** Finds a method by name and parameter type signature. */
+    def findBySignature(name: String, paramTypes: Seq[TypeInfo]): Option[Method] = {
+      methodsByName.getOrElse(name, Array.empty[Method]).find { m =>
+        m.getParameterTypes.length == paramTypes.length &&
+          m.getParameterTypes.zip(paramTypes).forall((pt, expected) => pt == expected.clazz)
+      }
+    }
+
+    // Build properties using getter/setter names for direct lookup.
+    // For Scala 3 macro-generated ClassMeta, getterName may be None for var fields
+    // (var getters are implicit in Scala 3's macro API). Fall back to property name.
+    val properties = cm.properties.map { p =>
+      val getterName = p.getterName.orElse(if p.setterName.isDefined then Some(p.name) else None)
+      val getter = getterName.flatMap(findByName).map(Builder.unreflect)
+      val setter = p.setterName.flatMap(findByName).map(Builder.unreflect)
+      (p.name, PropertyInfo(p, getter, setter))
+    }.toMap
+
+    // Build methods: find matching method for each cm.methods entry
+    val methods = cm.methods.flatMap { m =>
+      findBySignature(m.name, m.paramTypes).map { method =>
+        (m.name, MethodInfo(m, Builder.unreflect(method)))
+      }
+    }.groupBy(_._1).map { case (name, entries) =>
+      (name, ArraySeq.from(entries.map(_._2)))
+    }
+
+    BeanInfo(cm, properties, methods)
   }
 
   object Builder {
@@ -124,7 +150,7 @@ object BeanInfo {
       val name = method.getName
       val ignored = BeanInfo.ignores.contains(name) || isCaseMethod(isCase, name)
       val modifierNice = !Modifier.isStatic(modifiers) && Modifier.isPublic(modifiers)
-      !ignored && modifierNice && isFineMethodName(name) && (!method.isBridge || allowBridge)
+      !method.isAnnotationPresent(classOf[noreflect]) && !ignored && modifierNice && isFineMethodName(name) && (!method.isBridge || allowBridge)
     }
 
     /** Returns true if method name follows getter/setter convention. */
@@ -171,22 +197,38 @@ object BeanInfo {
       }
     }
 
-    /** Filters out bridge and overridden methods. */
-    def filterSameNames(methods: Iterable[MethodInfo]): collection.Seq[MethodInfo] = {
+    /** Filters out bridge and overridden methods using Method info for comparison. */
+    def filterSameNames(methods: Iterable[(Method, MethodInfo)]): collection.Seq[(Method, MethodInfo)] = {
       if (methods.size == 1) {
         methods.toSeq
       } else {
-        val result = Collections.newBuffer[MethodInfo]
-        val paramSizeMap = methods.groupBy(_.parameters.size)
+        val result = Collections.newBuffer[(Method, MethodInfo)]
+        val paramSizeMap = methods.groupBy(_._1.getParameterCount)
         paramSizeMap.values foreach { ml =>
           val reminded = Collections.newBuffer(ml)
-          ml foreach { mi =>
-            reminded.find(x => x.isOver(mi)) foreach (_ => reminded -= mi)
+          ml foreach { case (m, mi) =>
+            reminded.find { case (om, omi) =>
+              isMethodOver(om, m)  // om is preferred over m
+            } foreach (_ => reminded -= ((m, mi)))
           }
           result ++= reminded
         }
         result
       }
+    }
+
+    /** Returns true if method m is preferred over o (for overload resolution). */
+    private def isMethodOver(m: Method, o: Method): Boolean = {
+      if m != o && m.getName == o.getName && m.getParameterCount == o.getParameterCount then
+        if o.getReturnType == classOf[AnyRef] || o.getReturnType.isAssignableFrom(m.getReturnType) then
+          val ps = o.getParameterTypes
+          val mps = m.getParameterTypes
+          val paramTypeMatch = (0 until mps.length).forall { i => ps(i) == classOf[AnyRef] || ps(i).isAssignableFrom(mps(i)) }
+          if paramTypeMatch then
+            o.isBridge || o.getDeclaringClass.isAssignableFrom(m.getDeclaringClass)
+          else false
+        else false
+      else false
     }
 
     private def lower(name: String): String = {
@@ -201,116 +243,20 @@ object BeanInfo {
           m.setAccessible(true)
           MethodHandles.lookup().unreflect(m)
     }
-
-    /** Parameter holder for Builder.addCtor. */
-    class ParamHolder(name: String, typeinfo: Any, defaultValue: Option[Any]) {
-      def this(name: String, typeInfo: Any) = {
-        this(name, typeInfo, None)
-      }
-
-      /** Converts to ParamInfo. */
-      def toParamInfo: ParamInfo = {
-        ParamInfo(name, TypeInfo.convert(typeinfo), defaultValue)
-      }
-    }
-
-  }
-
-  import Builder.*
-
-  /** Builder for BeanInfo. */
-  class Builder(val clazz: Class[_]) {
-    private val fieldInfos = new mutable.HashMap[String, TypeInfo]
-    //head will be primary constructor
-    private val ctorInfos = new mutable.ArrayBuffer[ArraySeq[ParamInfo]]
-
-    private val transients = new mutable.HashSet[String]
-
-    /** Adds transient property names. */
-    def addTransients(names: Array[String]): Unit = transients ++= names
-
-    /** Adds a property with type info. */
-    def addField(name: String, ti: Any): Unit = {
-      val typeinfo = TypeInfo.convert(ti)
-      fieldInfos.put(name, typeinfo)
-    }
-
-    /** Adds a constructor with parameters. */
-    def addCtor(paramInfos: Array[ParamHolder]): Unit = {
-      ctorInfos.addOne(ArraySeq.from(paramInfos.map(_.toParamInfo)))
-    }
-
-    private def registerMethodInfo(methods: mutable.HashMap[String, mutable.Buffer[MethodInfo]], method: Method,
-                                   returnType: TypeInfo, parameters: ArraySeq[ParamInfo]): Unit = {
-      val methodInfo = MethodInfo(method, returnType, parameters)
-      val sameNames = methods.getOrElseUpdate(method.getName, Collections.newBuffer[MethodInfo])
-      sameNames += methodInfo
-    }
-
-    /** Builds the BeanInfo from gathered fields and constructors. */
-    def build(): BeanInfo = {
-      val getters = new mutable.HashMap[String, Method]
-      val setters = new mutable.HashMap[String, Method]
-      val accessMethods = new mutable.HashMap[String, mutable.Buffer[MethodInfo]] //getter and setter
-      val methods = new mutable.ArrayBuffer[Method]
-      val isCase = TypeInfo.isCaseClass(clazz)
-      clazz.getMethods foreach { method =>
-        if (isFineMethod(isCase, method, true)) {
-          var added = false
-          findAccessor(method) foreach { (readable, name) =>
-            fieldInfos.get(name) foreach { field =>
-              added = true
-              if readable then
-                getters.put(name, method)
-                registerMethodInfo(accessMethods, method, field, ArraySeq.empty[ParamInfo])
-              else
-                setters.put(name, method)
-                registerMethodInfo(accessMethods, method, TypeInfo.UnitType, ArraySeq(ParamInfo(name, field, None)))
-            }
-          }
-          if !added then methods += method
-        }
-      }
-      val nonPublic = !Modifier.isPublic(clazz.getModifiers)
-      // make buffer to list and filter duplicated bridge methods
-      accessMethods.foreach { case (x, sameNames) =>
-        val nb = filterSameNames(sameNames)
-        if getters.contains(x) && nb.size == 1 then
-          getters.put(x, nb.head.method)
-          if nonPublic then nb.head.method.setAccessible(true)
-      }
-
-      val pCtorParamNames = if ctorInfos.isEmpty then Set.empty else ctorInfos.head.map(_.name).toSet
-      // organize setter and getter
-      val properties = new mutable.HashMap[String, BeanInfo.PropertyInfo]
-      (getters.keySet ++ setters.keySet) foreach { p =>
-        fieldInfos.get(p) foreach { fieldInfo =>
-          val getter = getters.get(p)
-          val setter = setters.get(p)
-          val isTransient = Builder.isTransient(transients.contains(p), setter.isDefined, pCtorParamNames.contains(p))
-          val pd = BeanInfo.PropertyInfo(p, fieldInfo, getter.map(unreflect), setter.map(unreflect), isTransient)
-          //validProperty(clazz,pd)
-          properties.put(p, pd)
-        }
-      }
-
-      //process constructors,first is primary
-      val ctors = ctorInfos map ConstructorInfo.apply
-      val groupMethods = methods.groupBy(_.getName).map(x => (x._1, ArraySeq.from(x._2)))
-      BeanInfo(clazz, ArraySeq.from(ctors), properties.toMap, groupMethods)
-    }
-  }
-
-  private def validProperty(holderClass: Class[_], pi: BeanInfo.PropertyInfo): Unit = {
-    val propertyClazz = pi.typeinfo.clazz
-    pi.getter foreach { g => require(g.`type`().returnType() == propertyClazz, s"${holderClass.getName}.${pi.name}'s type is ${propertyClazz.getName},but get method return ${g.`type`().returnType().getName}") }
-    pi.setter foreach { g => require(g.`type`().parameterType(0) == propertyClazz, s"${holderClass.getName}.${pi.name}'s type is ${propertyClazz.getName},but set method need ${g.`type`().parameterType(0).getName}") }
   }
 }
 
-/** Introspection info for a Java/Scala class. */
-class BeanInfo(val clazz: Class[_], val ctors: ArraySeq[ConstructorInfo], val properties: Map[String, PropertyInfo],
-               val methods: collection.Map[String, ArraySeq[Method]]) {
+/** Introspection info for a Java/Scala class.
+  *
+  * Holds a [[ClassMeta]] reference as the single source of truth for class metadata.
+  * Properties and methods add accessor MethodHandles on top of the metadata.
+  */
+class BeanInfo(val meta: ClassMeta, val properties: Map[String, PropertyInfo],
+               val methods: Map[String, ArraySeq[MethodInfo]]) {
+
+  def clazz: Class[_] = meta.clazz
+
+  def ctors: Seq[MetaModel.Ctor] = meta.ctors
 
   override def toString: String = {
     val sb = new mutable.ArrayBuffer[String]
@@ -319,9 +265,15 @@ class BeanInfo(val clazz: Class[_], val ctors: ArraySeq[ConstructorInfo], val pr
     if (ctors.isEmpty) {
       sb += s"class ${clazz.getName} {"
     } else {
-      sb += s"${if isCase then "case " else ""}class ${clazz.getName}${replace(ctors.head.toString, "def this", "")} {"
+      val ctorStr = ctors.head.parameters.map(p =>
+        p.name + ": " + p.typeinfo + (if p.defaultValue.nonEmpty then " = " + p.defaultValue.get.toString else "")
+      ).mkString(", ")
+      sb += s"${if isCase then "case " else ""}class ${clazz.getName}($ctorStr) {"
       ctors.tail foreach { ctor =>
-        sb += s"  ${ctor}"
+        val params = ctor.parameters.map(p =>
+          p.name + ": " + p.typeinfo + (if p.defaultValue.nonEmpty then " = " + p.defaultValue.get.toString else "")
+        ).mkString(", ")
+        sb += s"  def this($params)"
       }
     }
 

@@ -17,7 +17,7 @@
 
 package org.beangle.commons.lang.reflect
 
-import scala.quoted.*
+import org.beangle.commons.bean.meta.MetaModels
 
 /** Global BeanInfo cache and of() macros. */
 object BeanInfos {
@@ -28,11 +28,19 @@ object BeanInfos {
   /** Gets BeanInfo from cache or loads by reflection. */
   def get(clazz: Class[_]): BeanInfo = cache.get(clazz)
 
-  /** Digs BeanInfo for classes (macro, compile-time). */
-  inline def of(inline clazzes: Class[_]*): List[BeanInfo] = ${ BeanInfoDigger.digInto('clazzes, 'cache) }
+  /** Digs BeanInfo for classes (compile-time ClassMeta dig + runtime BeanInfo reconstruction). */
+  inline def of(inline clazzes: Class[_]*): List[BeanInfo] = {
+    val bis = MetaModels.of(clazzes: _*).map(BeanInfo.from)
+    bis.foreach(cache.update)
+    bis
+  }
 
-  /** Digs BeanInfo for single class (macro, compile-time). */
-  inline def of[T](clazz: Class[T]): BeanInfo = ${ BeanInfoDigger.digInto('clazz, 'cache) ; }
+  /** Digs BeanInfo for single class (compile-time ClassMeta dig + runtime BeanInfo reconstruction). */
+  inline def of[T](clazz: Class[T]): BeanInfo = {
+    val bi = BeanInfo.from(MetaModels.of(clazz))
+    cache.update(bi)
+    bi
+  }
 
   /** Returns true if BeanInfo is cached for the class. */
   def cached(clazz: Class[_]): Boolean = cache.contains(clazz)
