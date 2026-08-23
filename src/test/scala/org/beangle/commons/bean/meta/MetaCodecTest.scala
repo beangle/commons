@@ -17,6 +17,7 @@
 
 package org.beangle.commons.bean.meta
 
+import org.beangle.commons.bean.meta.MetaModel.{ClassMeta, Property}
 import org.beangle.commons.lang.reflect.TypeInfo.IterableType
 import org.beangle.commons.lang.reflect.{BeanInfo, BeanInfos, TypeInfo}
 import org.scalatest.funspec.AnyFunSpec
@@ -72,8 +73,8 @@ class CodecValue(
 class MetaCodecTest extends AnyFunSpec, Matchers {
 
   it("round-trip parse preserves properties and type precision from compile-time dig") {
-    val bi = BeanInfos.of(classOf[CodecSample])
-    val parsed = MetaCodec.parse(MetaCodec.encode(BeanMetaConverter.from(bi)))
+    val cm = MetaModels.of(classOf[CodecSample])
+    val parsed = MetaCodec.parse(MetaCodec.encode(cm))
 
     parsed.clazz shouldBe classOf[CodecSample]
     parsed.properties.map(_.name) should contain allOf ("id", "name", "age", "roles", "times", "base", "enabled")
@@ -100,11 +101,11 @@ class MetaCodecTest extends AnyFunSpec, Matchers {
     id.isOptional shouldBe false
     parsed.properties.find(_.name == "base").get.isTransient shouldBe false
     // 编码尺寸（JSON v1 同规模约 7KB）
-    MetaCodec.encode(BeanMetaConverter.from(bi)).length should be < 2048
+    MetaCodec.encode(cm).length should be < 2048
   }
 
   it("round-trips constructor parameters with default values") {
-    val parsed = MetaCodec.parse(MetaCodec.encode(BeanMetaConverter.from(BeanInfos.of(classOf[CodecCtor]))))
+    val parsed = MetaCodec.parse(MetaCodec.encode(MetaModels.of(classOf[CodecCtor])))
     parsed.ctors should not be empty
     val primary = parsed.ctors.head
     primary.parameters.map(_.name) shouldBe Seq("id", "name", "enabled")
@@ -112,22 +113,19 @@ class MetaCodecTest extends AnyFunSpec, Matchers {
     primary.parameters(2).defaultValue shouldBe Some(true)
   }
 
-  it("round-trips transient flag and manual BeanInfo") {
-    val clazz = classOf[CodecRole]
-    val ti = TypeInfo.get(classOf[String])
-    val getter = MethodHandles.lookup().unreflect(clazz.getDeclaredMethod("code"))
-    val setter = MethodHandles.lookup().unreflect(clazz.getDeclaredMethod("code_$eq", classOf[String]))
-    val p = new BeanInfo.PropertyInfo("code", ti, Some(getter), Some(setter), isTransient = true)
-    val bi = new BeanInfo(clazz, ArraySeq.empty, Map("code" -> p), Map.empty)
-    val parsed = MetaCodec.parse(MetaCodec.encode(BeanMetaConverter.from(bi)))
+  it("round-trips transient flag") {
+    val cm = ClassMeta(classOf[CodecRole],
+      Seq(MetaModel.Property("code", TypeInfo.get(classOf[String]), isTransient = true, isOptional = false)),
+      Seq.empty, Seq.empty)
+    val parsed = MetaCodec.parse(MetaCodec.encode(cm))
     val code = parsed.properties.find(_.name == "code").get
     code.isTransient shouldBe true
   }
 
   it("serializes methods; parse keeps them as raw records without resolving") {
-    val getter = classOf[CodecRole].getDeclaredMethod("code")
-    val withMethods = new BeanInfo(classOf[CodecRole], ArraySeq.empty, Map.empty, Map("code" -> ArraySeq(getter)))
-    val parsed = MetaCodec.parse(MetaCodec.encode(BeanMetaConverter.from(withMethods)))
+    val cm = ClassMeta(classOf[CodecRole], Seq.empty, Seq.empty,
+      Seq(MetaModel.Method("code", Seq.empty)))
+    val parsed = MetaCodec.parse(MetaCodec.encode(cm))
     parsed.methods shouldBe Seq(MetaModel.Method("code", Seq.empty))
   }
 
@@ -160,7 +158,7 @@ class MetaCodecTest extends AnyFunSpec, Matchers {
   }
 
   it("exports parsed meta model as debug json (no reverse parse)") {
-    val parsed = MetaCodec.parse(MetaCodec.encode(BeanMetaConverter.from(BeanInfos.of(classOf[CodecSample]))))
+    val parsed = MetaCodec.parse(MetaCodec.encode(MetaModels.of(classOf[CodecSample])))
     val json = MetaJson.toJson(parsed)
     json should startWith("{")
     json should endWith("}")
@@ -172,27 +170,27 @@ class MetaCodecTest extends AnyFunSpec, Matchers {
   }
 
   it("round-trips java.time and date types via builtin indices") {
-    val parsed = MetaCodec.parse(MetaCodec.encode(BeanMetaConverter.from(BeanInfos.of(classOf[CodecTime]))))
+    val parsed = MetaCodec.parse(MetaCodec.encode(MetaModels.of(classOf[CodecTime])))
     parsed.properties.find(_.name == "startOn").get.typeinfo.clazz shouldBe classOf[java.time.LocalDate]
     parsed.properties.find(_.name == "created").get.typeinfo.clazz shouldBe classOf[java.util.Date]
-    // 内置索引不占池：显式池只有类名 + 两个属性名
-    val bytes = MetaCodec.encode(BeanMetaConverter.from(BeanInfos.of(classOf[CodecTime])))
-    ((bytes(10) & 0xff) << 8 | (bytes(11) & 0xff)) shouldBe 3
+    // 内置索引不占池：显式池 = 类名 + 2属性名 + 2setter名
+    val bytes = MetaCodec.encode(MetaModels.of(classOf[CodecTime]))
+    ((bytes(10) & 0xff) << 8 | (bytes(11) & 0xff)) shouldBe 5
   }
 
   it("round-trips scala collection types via builtin indices") {
-    val parsed = MetaCodec.parse(MetaCodec.encode(BeanMetaConverter.from(BeanInfos.of(classOf[CodecCollections]))))
+    val parsed = MetaCodec.parse(MetaCodec.encode(MetaModels.of(classOf[CodecCollections])))
     parsed.properties.find(_.name == "roles").get.typeinfo.clazz shouldBe classOf[scala.collection.mutable.Set[_]]
     parsed.properties.find(_.name == "tags").get.typeinfo.clazz shouldBe classOf[scala.collection.immutable.List[_]]
     parsed.properties.find(_.name == "attrs").get.typeinfo.clazz shouldBe classOf[scala.collection.immutable.Map[_, _]]
     parsed.properties.find(_.name == "buffer").get.typeinfo.clazz shouldBe classOf[scala.collection.mutable.ArrayBuffer[_]]
-    // 集合类型全部走内置索引：显式池 = 类名 + 4 个属性名（元素 String/Int 也是内置）
-    val bytes = MetaCodec.encode(BeanMetaConverter.from(BeanInfos.of(classOf[CodecCollections])))
-    ((bytes(10) & 0xff) << 8 | (bytes(11) & 0xff)) shouldBe 5
+    // 集合类型全部走内置索引：显式池 = 类名 + 4属性名 + 4setter名
+    val bytes = MetaCodec.encode(MetaModels.of(classOf[CodecCollections]))
+    ((bytes(10) & 0xff) << 8 | (bytes(11) & 0xff)) shouldBe 9
   }
 
   it("round-trips beangle value types and common data-model types via builtin indices") {
-    val parsed = MetaCodec.parse(MetaCodec.encode(BeanMetaConverter.from(BeanInfos.of(classOf[CodecValue]))))
+    val parsed = MetaCodec.parse(MetaCodec.encode(MetaModels.of(classOf[CodecValue])))
     parsed.properties.find(_.name == "weekTime").get.typeinfo.clazz shouldBe classOf[org.beangle.commons.lang.time.WeekTime]
     parsed.properties.find(_.name == "hourMinute").get.typeinfo.clazz shouldBe classOf[org.beangle.commons.lang.time.HourMinute]
     parsed.properties.find(_.name == "amount").get.typeinfo.clazz shouldBe classOf[org.beangle.commons.lang.math.Decimal5]
@@ -201,28 +199,28 @@ class MetaCodecTest extends AnyFunSpec, Matchers {
     parsed.properties.find(_.name == "total").get.typeinfo.clazz shouldBe classOf[java.math.BigDecimal]
     parsed.properties.find(_.name == "num").get.typeinfo.clazz shouldBe classOf[java.lang.Number]
     parsed.properties.find(_.name == "locale").get.typeinfo.clazz shouldBe classOf[java.util.Locale]
-    // 全部走内置索引：显式池 = 类名 + 8 个属性名
-    val bytes = MetaCodec.encode(BeanMetaConverter.from(BeanInfos.of(classOf[CodecValue])))
-    ((bytes(10) & 0xff) << 8 | (bytes(11) & 0xff)) shouldBe 9
+    // 全部走内置索引：显式池 = 类名 + 8属性名 + 8setter名
+    val bytes = MetaCodec.encode(MetaModels.of(classOf[CodecValue]))
+    ((bytes(10) & 0xff) << 8 | (bytes(11) & 0xff)) shouldBe 17
   }
 
   it("round-trips Properties and commons Json value types via builtin indices") {
-    val parsed = MetaCodec.parse(MetaCodec.encode(BeanMetaConverter.from(BeanInfos.of(classOf[CodecJson]))))
+    val parsed = MetaCodec.parse(MetaCodec.encode(MetaModels.of(classOf[CodecJson])))
     parsed.properties.find(_.name == "attrs").get.typeinfo.clazz shouldBe classOf[org.beangle.commons.json.JsonObject]
     parsed.properties.find(_.name == "list").get.typeinfo.clazz shouldBe classOf[org.beangle.commons.json.JsonArray]
     parsed.properties.find(_.name == "raw").get.typeinfo.clazz shouldBe classOf[org.beangle.commons.json.Json]
     parsed.properties.find(_.name == "value").get.typeinfo.clazz shouldBe classOf[org.beangle.commons.json.JsonValue]
     parsed.properties.find(_.name == "props").get.typeinfo.clazz shouldBe classOf[java.util.Properties]
-    // 全部走内置索引：显式池 = 类名 + 5 个属性名
-    val bytes = MetaCodec.encode(BeanMetaConverter.from(BeanInfos.of(classOf[CodecJson])))
-    ((bytes(10) & 0xff) << 8 | (bytes(11) & 0xff)) shouldBe 6
+    // 全部走内置索引：显式池 = 类名 + 5属性名 + 5setter名
+    val bytes = MetaCodec.encode(MetaModels.of(classOf[CodecJson]))
+    ((bytes(10) & 0xff) << 8 | (bytes(11) & 0xff)) shouldBe 11
   }
 
   it("writes and reads beaninfo index with directory lookup") {
     val metas = Seq(
-      BeanMetaConverter.from(BeanInfos.of(classOf[CodecSample])),
-      BeanMetaConverter.from(BeanInfos.of(classOf[CodecRole])),
-      BeanMetaConverter.from(BeanInfos.of(classOf[CodecCtor])))
+      MetaModels.of(classOf[CodecSample]),
+      MetaModels.of(classOf[CodecRole]),
+      MetaModels.of(classOf[CodecCtor]))
     val file = Files.createTempFile("beaninfo", ".idx")
     try {
       MetaIndex.write(file, metas)
@@ -241,13 +239,13 @@ class MetaCodecTest extends AnyFunSpec, Matchers {
 
   it("rejects bad magic and version") {
     intercept[IllegalArgumentException] { MetaCodec.parse(Array[Byte](1, 2, 3, 4)) }
-    val badVersion = MetaCodec.encode(BeanMetaConverter.from(BeanInfos.of(classOf[CodecRole])))
+    val badVersion = MetaCodec.encode(MetaModels.of(classOf[CodecRole]))
     badVersion(4) = 99.toByte
     intercept[IllegalArgumentException] { MetaCodec.parse(badVersion) }
   }
 
   it("skips unknown sections") {
-    val bytes = MetaCodec.encode(BeanMetaConverter.from(BeanInfos.of(classOf[CodecRole])))
+    val bytes = MetaCodec.encode(MetaModels.of(classOf[CodecRole]))
     val extra = bytes ++ Array[Byte](99.toByte, 0, 0, 0, 0) // unknown tag 99, length 0
     MetaCodec.parse(extra).clazz shouldBe classOf[CodecRole]
   }

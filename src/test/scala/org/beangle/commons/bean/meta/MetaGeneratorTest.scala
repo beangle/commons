@@ -50,11 +50,11 @@ class MetaGeneratorTest extends AnyFunSpec, Matchers {
         val bytes = out.toByteArray
         bytes.length should be > 0
 
-        // Verify magic
+        // Verify magic "BMXI"
         bytes(0) shouldBe 'B'
-        bytes(1) shouldBe 'N'
-        bytes(2) shouldBe 'I'
-        bytes(3) shouldBe 'X'
+        bytes(1) shouldBe 'M'
+        bytes(2) shouldBe 'X'
+        bytes(3) shouldBe 'I'
       }
     }
   }

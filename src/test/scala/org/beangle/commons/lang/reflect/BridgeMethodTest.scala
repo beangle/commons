@@ -34,6 +34,7 @@ class BridgeMethodTest extends AnyFunSpec, Matchers {
     }
     it("Cannot find protected methods") {
       val bi = BeanInfos.of(classOf[QiutianDog])
+
       assert(!bi.properties.contains("skills"))
     }
   }

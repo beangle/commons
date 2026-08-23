@@ -48,8 +48,8 @@ class MetaModelsTest extends AnyFunSpec, Matchers {
 
     it("loads ClassMeta from metamodel.idx via MetaIndex") {
       val metas = Seq(
-        BeanMetaConverter.from(BeanInfos.of(classOf[TestUser])),
-        BeanMetaConverter.from(BeanInfos.of(classOf[TestRole])))
+        MetaModels.of(classOf[TestUser]),
+        MetaModels.of(classOf[TestRole]))
 
       val tmpDir = Files.createTempDirectory("metamodel-test")
       val idxPath = tmpDir.resolve("metamodel.idx")

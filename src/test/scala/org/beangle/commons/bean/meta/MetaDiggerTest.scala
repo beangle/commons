@@ -24,13 +24,13 @@ import org.beangle.commons.lang.reflect.TypeInfo.IterableType
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class ClassMetaDiggerTest extends AnyFunSpec, Matchers {
-  ClassMetas.of(classOf[PersonMeta])
-  ClassMetas.of(classOf[OtherMeta])
+class MetaDiggerTest extends AnyFunSpec, Matchers {
+  MetaModels.of(classOf[PersonMeta])
+  MetaModels.of(classOf[OtherMeta])
 
-  describe("ClassMetas.of") {
+  describe("MetaModels.of") {
     it("digs properties with types, transient and optional flags") {
-      val cm = ClassMetas.of(classOf[PersonMeta])
+      val cm = MetaModels.of(classOf[PersonMeta])
       assert(cm.clazz == classOf[PersonMeta])
       val props = cm.properties.map(_.name)
       assert(props == Seq("age", "email", "name", "nickname", "parents", "scores", "tags", "type"))
@@ -60,7 +60,7 @@ class ClassMetaDiggerTest extends AnyFunSpec, Matchers {
     }
 
     it("digs constructors with defaults, primary first") {
-      val cm = ClassMetas.of(classOf[PersonMeta])
+      val cm = MetaModels.of(classOf[PersonMeta])
       assert(cm.ctors.size == 2)
       val primary = cm.ctors.head
       assert(primary.parameters.map(_.name) == Seq("name", "age", "tags"))
@@ -69,32 +69,36 @@ class ClassMetaDiggerTest extends AnyFunSpec, Matchers {
       assert(cm.ctors(1).parameters.map(_.name) == Seq("name"))
     }
 
-    it("digs methods with erased JVM param types") {
-      val cm = ClassMetas.of(classOf[PersonMeta])
+    it("digs methods with TypeInfo param types") {
+      val cm = MetaModels.of(classOf[PersonMeta])
       val methods = cm.methods.map(m => (m.name, m.paramTypes)).toMap
       assert(methods.keySet == Set("greet", "childrenCount"))
-      assert(methods("greet") == Seq("java/lang/String"))
-      assert(methods("childrenCount") == Seq.empty)
+      assert(methods("greet").size == 1)
+      assert(methods("greet").head.clazz == classOf[String])
+      assert(methods("childrenCount").isEmpty)
       assert(!methods.contains("secret")) // noreflect
       assert(!methods.contains("copy")) // case class ignore
       assert(!methods.contains("canEqual"))
     }
 
     it("supports the varargs form") {
-      val list = ClassMetas.of(classOf[PersonMeta], classOf[OtherMeta])
+      val list = MetaModels.of(classOf[PersonMeta], classOf[OtherMeta])
       assert(list.map(_.clazz) == Seq(classOf[PersonMeta], classOf[OtherMeta]))
     }
 
     it("round-trips through the v2 codec") {
       // defaults must be codec-supported types (List defaults are dropped by writeDefault)
-      val cm = ClassMetas.of(classOf[CodecMeta])
+      val cm = MetaModels.of(classOf[CodecMeta])
       assert(MetaCodec.parse(MetaCodec.encode(cm)) == cm)
     }
 
-    it("agrees with the runtime BeanInfo conversion path") {
-      val macroCm = normalize(ClassMetas.of(classOf[PersonMeta]))
-      val runtimeCm = normalize(BeanMetaConverter.from(BeanInfos.of(classOf[PersonMeta])))
-      assert(macroCm == runtimeCm)
+    it("round-trips PersonMeta properties and methods through the v2 codec") {
+      val cm = MetaModels.of(classOf[PersonMeta])
+      val parsed = MetaCodec.parse(MetaCodec.encode(cm))
+      // Compare properties and methods (ctor defaults of unsupported types like List are dropped during encoding)
+      assert(normalize(parsed).properties == normalize(cm).properties)
+      assert(normalize(parsed).methods == normalize(cm).methods)
+      assert(parsed.clazz == cm.clazz)
     }
   }
 

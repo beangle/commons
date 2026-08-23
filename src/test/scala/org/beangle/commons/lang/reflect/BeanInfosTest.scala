@@ -19,6 +19,8 @@ package org.beangle.commons.lang.reflect
 
 import org.beangle.commons.collection.Properties
 import org.beangle.commons.lang.Primitives
+import org.beangle.commons.lang.annotation.noreflect
+import org.beangle.commons.lang.annotation.reflectable
 import org.beangle.commons.lang.reflect.TypeInfo.*
 import org.beangle.commons.lang.testbean.*
 import org.scalatest.funspec.AnyFunSpec
@@ -148,6 +150,7 @@ class BeanInfosTest extends AnyFunSpec, Matchers {
     it("get generic method") {
       val t = BeanInfos.of(classOf[LongFactory])
       assert(t.properties.contains("result"))
+      assert(!t.properties.contains("typeName"))
       // handle.type() 保留精确签名；reflectAs 对 primitive 返回会恢复成桥接形态（见 PropertyInfo.getterMethod 注）
       assert(t.properties("result").getter.get.`type`().returnType() == classOf[Long])
     }
@@ -179,7 +182,33 @@ class BeanInfosTest extends AnyFunSpec, Matchers {
       assert(m.nonEmpty)
       assert("teaching,research" == m.get.invoke(new Professor(1L)))
     }
+    it("reflectable is class-level runtime annotation") {
+      assert(classOf[ReflectableBean].isAnnotationPresent(classOf[reflectable]))
+      val t = BeanInfos.of(classOf[ReflectableBean])
+      assert(t.properties.contains("name"))
+    }
+    it("noreflect excludes methods at method level") {
+      val t = BeanInfos.of(classOf[ReflectableBean])
+      assert(t.methods.keySet.contains("visible"))
+      assert(!t.methods.keySet.contains("secret"))
+      // getHidden is getter-shaped; without noreflect it would land in methods (no matching field)
+      assert(!t.methods.keySet.contains("getHidden"))
+      assert(!t.properties.contains("hidden"))
+    }
   }
+}
+
+@reflectable
+class ReflectableBean {
+  var name: String = _
+
+  @noreflect def secret(): String = "s"
+
+  def visible(): String = "v"
+
+  private var hidden: String = _
+
+  @noreflect def getHidden(): String = hidden
 }
 
 case class CaseT(name: String)
