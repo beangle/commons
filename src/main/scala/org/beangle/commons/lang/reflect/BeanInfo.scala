@@ -115,7 +115,9 @@ object BeanInfo {
     // For Scala 3 macro-generated ClassMeta, getterName may be None for var fields
     // (var getters are implicit in Scala 3's macro API). Fall back to property name.
     val properties = cm.properties.map { p =>
-      val getterName = p.getterName.orElse(if p.setterName.isDefined then Some(p.name) else None)
+      // Scala 3 macro may not set getterName for var/val fields (getters are implicit).
+      // Always fall back to property name — for both var (has setter) and val (no setter).
+      val getterName = p.getterName.orElse(Some(p.name))
       val getter = getterName.flatMap(findByName).map(Builder.unreflect)
       val setter = p.setterName.flatMap(findByName).map(Builder.unreflect)
       (p.name, PropertyInfo(p, getter, setter))
