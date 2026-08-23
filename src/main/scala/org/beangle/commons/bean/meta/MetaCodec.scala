@@ -35,14 +35,13 @@ import scala.collection.mutable
   * Class names use JVM internal names ('/' separated); primitives use JVM names
   * (int/long/...), restored by [[classFor]].
   *
-  * Input is the reflection-free [[MetaModel.ClassMeta]] (produce it from a BeanInfo
-  * via [[BeanMetaConverter.from]]); decoding yields a [[MetaModel.ClassMeta]] without
-  * any Method resolution. Constructing the actual BeanInfo from parsed data is
-  * deferred to a future reverse-construction via `BeanInfo.Builder`.
+  * Input is the reflection-free [[MetaModel.ClassMeta]] (produced by [[MetaModels.of]]
+  * at compile time or [[MetaLoader.load]] at runtime).
+  * Use [[org.beangle.commons.lang.reflect.BeanInfo.from]] to reconstruct BeanInfo.
   *
   * Precision: generic args keep the exact compile-time types (e.g. Map[Int, X] key is
   * "int", not "java.lang.Object"), so the content MUST be produced from the compile-time
-  * digger ([[org.beangle.commons.lang.reflect.BeanInfos.of]]) rather than runtime reflection.
+  * digger ([[MetaModels.of]]) rather than runtime reflection.
   */
 object MetaCodec {
 
@@ -124,11 +123,14 @@ object MetaCodec {
   /** Encodes a ClassMeta into the v2 binary format. */
   def encode(cm: ClassMeta): Array[Byte] = {
     val pool = new StringPool
+    val sortedProps = cm.properties.sortBy(_.name)
     // pass 1: collect all strings
     pool.index(typeName(cm.clazz))
-    cm.properties.sortBy(_.name) foreach { p =>
+    sortedProps foreach { p =>
       pool.index(p.name)
-      collectType(p.typeinfo, pool) // option 属性已是元素类型（BeanMetaConverter 剥离），isOptional 在 flags
+      collectType(p.typeinfo, pool)
+      p.getterName.foreach(pool.index)
+      p.setterName.foreach(pool.index)
     }
     cm.ctors foreach { c =>
       c.parameters foreach { param =>
@@ -142,7 +144,7 @@ object MetaCodec {
     }
     cm.methods foreach { m =>
       pool.index(m.name)
-      m.paramTypes foreach pool.typeIndex
+      m.paramTypes foreach (ti => pool.typeIndex(typeName(ti.clazz)))
     }
     // pass 2: write header, pool and sections
     val out = new ByteArrayOutputStream()
@@ -157,16 +159,15 @@ object MetaCodec {
       d.writeByte(0); d.writeShort(bytes.length); d.write(bytes)
     }
     writeSection(d, SProperties) { dd =>
-      val props = cm.properties.sortBy(_.name)
-      writeCount(dd, props.size)
-      props foreach (p => writeProperty(dd, p, pool))
+      writeCount(dd, sortedProps.size)
+      sortedProps foreach (p => writeProperty(dd, p, pool))
     }
     writeSection(d, SCtors) { dd =>
       writeCount(dd, cm.ctors.size)
       cm.ctors foreach (c => writeCtor(dd, c, pool))
     }
     writeSection(d, SMethods) { dd =>
-      dd.writeShort(cm.methods.size) // methods count 保持 u16（大型类方法数留余量）
+      dd.writeShort(cm.methods.size) // methods count uses u16 (large classes may exceed 255)
       cm.methods foreach (m => writeMethod(dd, m, pool))
     }
     d.flush()
@@ -179,18 +180,23 @@ object MetaCodec {
     * getter/setter/method are kept as raw pool strings, no Method resolution
     * happens. Constructing a BeanInfo from the result is future work
     * (reverse-construction via `BeanInfo.Builder`), not provided here.
+    *
+    * @param bytes      the binary blob
+    * @param sharedPool optional string deduplication set shared across multiple parse calls;
+    *                   when provided, duplicate strings (e.g. "name", "id") reuse the same
+    *                   String object across blobs, reducing memory in batch-loading scenarios.
     */
-  def parse(bytes: Array[Byte]): ClassMeta = {
+  def parse(bytes: Array[Byte], sharedPool: mutable.Set[String] = mutable.Set.empty): ClassMeta = {
     val in = new DataInputStream(new ByteArrayInputStream(bytes))
     val magic = new Array[Byte](4)
     in.readFully(magic)
     if (!new String(magic, StandardCharsets.US_ASCII).equals(Magic))
-      throw new IllegalArgumentException("Not a beaninfo v2 binary")
+      throw new IllegalArgumentException("Not a metamodel binary")
     val version = in.readUnsignedShort()
-    if version != Version then throw new IllegalArgumentException(s"Unsupported beaninfo version $version,expected $Version")
+    if version != Version then throw new IllegalArgumentException(s"Unsupported metamodel version $version, expected $Version")
     in.readUnsignedShort() // flags, reserved
     val selfIdx = in.readUnsignedShort()
-    if selfIdx == NoneIdx then throw new IllegalArgumentException("Missing clazz in beaninfo header")
+    if selfIdx == NoneIdx then throw new IllegalArgumentException("Missing clazz in metamodel header")
     val poolSize = in.readUnsignedShort()
     if poolSize == 0 then throw new IllegalArgumentException("Empty string pool")
     val pool = new Array[String](poolSize)
@@ -201,7 +207,7 @@ object MetaCodec {
       val len = in.readUnsignedShort()
       val b = new Array[Byte](len)
       in.readFully(b)
-      pool(i) = new String(b, StandardCharsets.UTF_8)
+      pool(i) = intern(b, sharedPool)
       i += 1
     val clazz = classFor(nameOf(selfIdx, pool))
     var properties = Seq.empty[Property]
@@ -233,9 +239,12 @@ object MetaCodec {
 
   private def writeProperty(d: DataOutputStream, p: Property, pool: StringPool): Unit = {
     d.writeShort(pool.index(p.name))
-    writeType(d, p.typeinfo, pool) // option 属性已是元素类型
+    writeType(d, p.typeinfo, pool) // Option properties store element type
     val flags = (if p.isTransient then 1 else 0) | (if p.isOptional then 2 else 0)
     d.writeByte(flags)
+    // getter/setter names (0xFFFF = none)
+    d.writeShort(p.getterName.map(pool.index).getOrElse(NoneIdx))
+    d.writeShort(p.setterName.map(pool.index).getOrElse(NoneIdx))
   }
 
   private def writeCtor(d: DataOutputStream, c: Ctor, pool: StringPool): Unit = {
@@ -250,7 +259,7 @@ object MetaCodec {
   private def writeMethod(d: DataOutputStream, m: Method, pool: StringPool): Unit = {
     d.writeShort(pool.index(m.name))
     d.writeByte(m.paramTypes.size)
-    m.paramTypes foreach (t => d.writeShort(pool.typeIndex(t)))
+    m.paramTypes foreach (ti => d.writeShort(pool.typeIndex(typeName(ti.clazz))))
   }
 
   /** Flattened TypeInfo with a builtin fast form (big-endian friendly: high byte bit7 marker).
@@ -307,7 +316,11 @@ object MetaCodec {
       val name = nameOf(in.readUnsignedShort(), pool)
       val ti = readType(in, pool)
       val flags = in.readUnsignedByte()
-      out(i) = Property(name, ti, (flags & 1) != 0, (flags & 2) != 0)
+      val getterIdx = in.readUnsignedShort()
+      val setterIdx = in.readUnsignedShort()
+      val getterName = if getterIdx == NoneIdx then None else Some(nameOf(getterIdx, pool))
+      val setterName = if setterIdx == NoneIdx then None else Some(nameOf(setterIdx, pool))
+      out(i) = Property(name, ti, (flags & 1) != 0, (flags & 2) != 0, getterName, setterName)
       i += 1
     out.toSeq
   }
@@ -338,11 +351,11 @@ object MetaCodec {
     while i < count do
       val name = nameOf(in.readUnsignedShort(), pool)
       val n = in.readUnsignedByte()
-      val params = new Array[String](n)
+      val params = new Array[TypeInfo](n)
       var j = 0
       while j < n do
-        params(j) = nameOf(in.readUnsignedShort(), pool); j += 1
-      out(i) = Method(name, ArraySeq.from(params))
+        params(j) = TypeInfo.get(classFor(nameOf(in.readUnsignedShort(), pool))); j += 1
+      out(i) = Method(name, ArraySeq.unsafeWrapArray(params))
       i += 1
     out.toSeq
   }
@@ -358,7 +371,10 @@ object MetaCodec {
       else
         val lo = in.readUnsignedByte()
         (classFor(nameOf((first << 8) | lo, pool)), in.readUnsignedByte())
-    TypeInfo.get(clazz, ArraySeq.from((0 until n).map(_ => readType(in, pool))))
+    val argsArr = new Array[TypeInfo](n)
+    var j = 0
+    while j < n do { argsArr(j) = readType(in, pool); j += 1 }
+    TypeInfo.get(clazz, ArraySeq.unsafeWrapArray(argsArr))
   }
 
   private def readDefault(in: DataInputStream, pool: Array[String], paramClazz: Class[_]): Option[Any] = {
@@ -389,22 +405,19 @@ object MetaCodec {
   private def typeName(clazz: Class[_]): String = clazz.getName.replace('.', '/')
 
   /** Restores a Class from a JVM internal name ('/' separators) or a primitive name. */
-  private def classFor(name: String): Class[_] = {
-    val jvm = name.replace('/', '.')
-    jvm match
-      case "int" => java.lang.Integer.TYPE
-      case "long" => java.lang.Long.TYPE
-      case "short" => java.lang.Short.TYPE
-      case "boolean" => java.lang.Boolean.TYPE
-      case "byte" => java.lang.Byte.TYPE
-      case "char" => java.lang.Character.TYPE
-      case "float" => java.lang.Float.TYPE
-      case "double" => java.lang.Double.TYPE
-      case "void" => java.lang.Void.TYPE
-      case other =>
-        val loader = Option(Thread.currentThread.getContextClassLoader).getOrElse(getClass.getClassLoader)
-        Class.forName(other, false, loader)
-  }
+  private def classFor(name: String): Class[_] = name match
+    case "int" => java.lang.Integer.TYPE
+    case "long" => java.lang.Long.TYPE
+    case "short" => java.lang.Short.TYPE
+    case "boolean" => java.lang.Boolean.TYPE
+    case "byte" => java.lang.Byte.TYPE
+    case "char" => java.lang.Character.TYPE
+    case "float" => java.lang.Float.TYPE
+    case "double" => java.lang.Double.TYPE
+    case "void" => java.lang.Void.TYPE
+    case other =>
+      val loader = Option(Thread.currentThread.getContextClassLoader).getOrElse(getClass.getClassLoader)
+      Class.forName(other.replace('/', '.'), false, loader)
 
   /** Resolves an enum constant by name. Returns None if clazz is not an enum or name is invalid. */
   private def enumValueOf(clazz: Class[_], name: String): Option[Any] = {
@@ -413,8 +426,18 @@ object MetaCodec {
         val m = clazz.getMethod("valueOf", classOf[String])
         Some(m.invoke(null, name))
       catch
-        case _: Exception => None
+        case _: NoSuchMethodException => None
+        case _: IllegalArgumentException => None
+        case _: java.lang.reflect.InvocationTargetException => None
     } else None
+  }
+
+  /** Returns a String from the bytes, reusing an existing equal String in the shared pool if present. */
+  private def intern(bytes: Array[Byte], pool: mutable.Set[String]): String = {
+    val s = new String(bytes, StandardCharsets.UTF_8)
+    pool.find(_ == s) match
+      case Some(existing) => existing
+      case None => pool += s; s
   }
 
   private final class StringPool {

@@ -19,6 +19,7 @@ package org.beangle.commons.bean.meta
 
 import org.beangle.commons.bean.meta.MetaModel.ClassMeta
 import org.beangle.commons.json.{JsonArray, JsonObject}
+import org.beangle.commons.logging.Logging
 
 import java.io.{File, FileOutputStream}
 import java.net.URLClassLoader
@@ -44,7 +45,7 @@ import scala.collection.mutable
   * The tool scans the specified classes directory, finds all MetaRegistry subclasses,
   * collects their ClassMeta entries, and generates metamodel.idx file.
   */
-object MetaGenerator {
+object MetaGenerator extends Logging {
 
   private val DefaultOutputPath = "META-INF/beangle/metamodel.idx"
 
@@ -52,7 +53,7 @@ object MetaGenerator {
     val (classesDirs, outputPath, graalvmMode) = parseArgs(args)
 
     if (classesDirs.isEmpty) {
-      println("Error: No classes directory specified.")
+      logger.error("No classes directory specified.")
       printUsage()
       System.exit(1)
     }
@@ -60,7 +61,7 @@ object MetaGenerator {
     val metas = collectFromDirs(classesDirs)
 
     if (metas.isEmpty) {
-      println("No ClassMeta collected. Check classes directory.")
+      logger.error("No ClassMeta collected. Check classes directory.")
       System.exit(1)
     }
 
@@ -75,7 +76,7 @@ object MetaGenerator {
     try {
       MetaIndex.write(out, metas)
       if (outputPath != "-") {
-        println(s"Generated $outputPath with ${metas.size} ClassMeta entries")
+        logger.info(s"Generated $outputPath with ${metas.size} ClassMeta entries")
       }
     } finally {
       if (out ne System.out) out.close()
@@ -93,12 +94,12 @@ object MetaGenerator {
     // 1. Generate reflect-config.json
     val reflectPath = outputDir.resolve("reflect-config.json")
     generateReflectConfig(reflectPath, metas)
-    println(s"Generated $reflectPath")
+    logger.info(s"Generated $reflectPath")
 
     // 2. Generate resource-config.json
     val resourcePath = outputDir.resolve("resource-config.json")
     generateResourceConfig(resourcePath, metamodelPath)
-    println(s"Generated $resourcePath")
+    logger.info(s"Generated $resourcePath")
   }
 
   /** Generates reflect-config.json for GraalVM native-image. */
@@ -142,7 +143,7 @@ object MetaGenerator {
     classesDirs.foreach { dir =>
       val dirPath = Path.of(dir)
       if (!Files.isDirectory(dirPath)) {
-        println(s"Warning: $dir is not a directory")
+        logger.warn(s"$dir is not a directory")
       } else {
         val metas = collectFromDir(dirPath)
         allMetas ++= metas
@@ -156,42 +157,42 @@ object MetaGenerator {
   private def collectFromDir(classesDir: Path): Seq[ClassMeta] = {
     val classFiles = findClassFiles(classesDir)
     if (classFiles.isEmpty) {
-      println(s"No .class files found in $classesDir")
+      logger.info(s"No .class files found in $classesDir")
       return Seq.empty
     }
 
-    // Create a URLClassLoader for the classes directory
     val classLoader = new URLClassLoader(Array(classesDir.toUri.toURL), getClass.getClassLoader)
+    try {
+      val allMetas = new mutable.ArrayBuffer[ClassMeta]
+      var registryCount = 0
 
-    val allMetas = new mutable.ArrayBuffer[ClassMeta]
-    var registryCount = 0
+      classFiles.foreach { classFile =>
+        try {
+          val relativePath = classesDir.relativize(classFile)
+          val className = relativePath.toString
+            .replace(File.separatorChar, '/')
+            .stripSuffix(".class")
+            .replace('/', '.')
 
-    classFiles.foreach { classFile =>
-      try {
-        val relativePath = classesDir.relativize(classFile)
-        val className = relativePath.toString
-          .replace(File.separatorChar, '/')
-          .stripSuffix(".class")
-          .replace('/', '.')
-
-        val clazz = classLoader.loadClass(className)
-        if (classOf[MetaRegistry].isAssignableFrom(clazz) && !clazz.isInterface) {
-          val registry = clazz.getDeclaredConstructor().newInstance().asInstanceOf[MetaRegistry]
-          val metas = registry.collect()
-          allMetas ++= metas
-          registryCount += 1
-          println(s"Collected ${metas.size} ClassMeta from $className")
+          val clazz = classLoader.loadClass(className)
+          if (classOf[MetaRegistry].isAssignableFrom(clazz) && !clazz.isInterface) {
+            val registry = clazz.getDeclaredConstructor().newInstance().asInstanceOf[MetaRegistry]
+            val metas = registry.collect()
+            allMetas ++= metas
+            registryCount += 1
+            logger.info(s"Collected ${metas.size} ClassMeta from $className")
+          }
+        } catch {
+          case _: ClassNotFoundException =>
+          case _: NoClassDefFoundError =>
+          case e: Exception =>
+            logger.warn(s"Error loading ${classFile}: ${e.getMessage}")
         }
-      } catch {
-        case _: ClassNotFoundException =>
-        case _: NoClassDefFoundError =>
-        case e: Exception =>
-          println(s"Warning: Error loading ${classFile}: ${e.getMessage}")
       }
-    }
 
-    println(s"Found $registryCount MetaRegistry subclasses in $classesDir")
-    allMetas.toSeq
+      logger.info(s"Found $registryCount MetaRegistry subclasses in $classesDir")
+      allMetas.toSeq
+    } finally classLoader.close()
   }
 
   /** Finds all .class files in a directory recursively. */
@@ -228,7 +229,7 @@ object MetaGenerator {
           printUsage()
           System.exit(0)
         case arg if arg.startsWith("-") =>
-          println(s"Unknown option: $arg")
+          logger.error(s"Unknown option: $arg")
           printUsage()
           System.exit(1)
         case dir =>

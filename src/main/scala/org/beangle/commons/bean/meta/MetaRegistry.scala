@@ -23,8 +23,9 @@ import java.io.OutputStream
 import scala.collection.mutable
 import scala.quoted.*
 
-/** 类元数据注册表：子类覆写 [[registering]] 模板方法、内部调用 [[register]] 注册类，
-  * 收集后经 [[encode]] 将 ClassMeta 写入调用者指定的流（beaninfo.idx）。
+/** Class metadata registry: subclasses override [[registering]] template method
+  * and call [[register]] to register classes; [[encode]] writes collected ClassMeta
+  * to the caller-specified stream (metamodel.idx).
   *
   * {{{
   * class AppRegistry extends MetaRegistry {
@@ -32,27 +33,27 @@ import scala.quoted.*
   *     register(classOf[User], classOf[Role])
   *   }
   * }
-  * val out = new FileOutputStream("beaninfo.idx")
+  * val out = new FileOutputStream("metamodel.idx")
   * new AppRegistry().encode(out)
   * }}}
   *
-  * [[register]] 是 inline 宏：在子类调用点（编译期字面量）直接经 ClassMetaDigger
-  * 挖掘 ClassMeta，保持泛型精度（如 Map[Int,X] 键、ctor 泛型参数）。
+  * [[register]] is an inline macro: at the subclass call site (compile-time literal)
+  * it invokes MetaDigger to dig ClassMeta, preserving generic precision.
   */
 abstract class MetaRegistry {
 
-  /** 父类成员变量：已注册类的元数据（含 clazz）。 */
+  /** Registered class metadata. */
   private val metas = new mutable.ArrayBuffer[ClassMeta]
 
   private var registered = false
 
-  /** 模板方法：子类覆写，内部调用 [[register]] 注册类。 */
+  /** Template method: subclasses override to call [[register]]. */
   protected def registering(): Unit = ()
 
-  /** 将类（编译期字面量）注册到本注册表（宏：编译期挖掘 ClassMeta，保持精度）。 */
+  /** Registers classes at compile time (macro: digs ClassMeta, preserves precision). */
   protected inline def register(inline clazzes: Class[_]*): Unit = ${ MetaRegistry.registerImpl('clazzes, 'this) }
 
-  /** 收集所有已注册的类元数据（首次调用触发 registering 模板方法）。 */
+  /** Collects all registered class metadata (first call triggers registering). */
   def collect(): Seq[ClassMeta] = {
     if !registered then
       registering()
@@ -60,19 +61,19 @@ abstract class MetaRegistry {
     metas.toSeq
   }
 
-  /** 将收集的类元数据编码写入指定流（beaninfo.idx）。 */
+  /** Encodes collected class metadata to the specified stream (metamodel.idx). */
   def encode(out: OutputStream): Unit = MetaIndex.write(out, collect())
 
-  /** 宏展开用：将挖掘出的 ClassMeta 加入成员变量。 */
+  /** Adds dug ClassMeta to internal buffer (used by macro expansion). */
   protected def addMetas(cms: Iterable[ClassMeta]): Unit = metas ++= cms
 }
 
 object MetaRegistry {
 
-  /** 宏：挖掘 class 字面量列表并注册到 registry。 */
+  /** Macro: digs class literal list and registers to registry. */
   def registerImpl(clazzes: Expr[Seq[Class[_]]], registry: Expr[MetaRegistry])(using Quotes): Expr[Unit] = {
     '{
-      ${ registry }.addMetas(${ ClassMetaDigger.digInto(clazzes) })
+      ${ registry }.addMetas(${ MetaDigger.digInto(clazzes) })
     }
   }
 }

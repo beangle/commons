@@ -43,13 +43,13 @@ object MetaJson {
           "default" -> pm.defaultValue.map(v => if null == v then null else v.toString))))),
       "methods" -> cm.methods.map(m => JsonObject(
         "name" -> m.name,
-        "params" -> m.paramTypes))
+        "params" -> m.paramTypes.map(_.name)))
     ).toJson
   }
 
-  /** CLI: prints each .beaninfo file as JSON (debug). */
+  /** CLI: prints each metamodel blob file as JSON (debug). */
   def main(args: Array[String]): Unit = {
-    if args.isEmpty then println("Usage: MetaJson <file.beaninfo>...")
+    if args.isEmpty then println("Usage: MetaJson <file>...")
     else args foreach { path =>
       val bytes = java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(path))
       println(toJson(MetaCodec.parse(bytes)))
