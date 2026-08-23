@@ -21,7 +21,7 @@ import org.beangle.commons.bean.meta.MetaModel.ParamHolder
 import org.beangle.commons.bean.meta.MetaModel.ClassMeta
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.annotation.noreflect
-import org.beangle.commons.lang.reflect.BeanInfo.Builder.getPropertyName
+import org.beangle.commons.bean.meta.MetaLoader.getPropertyName
 
 import scala.collection.mutable
 import scala.quoted.*
@@ -65,10 +65,6 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
 
   /** The TypeRepr being digested. */
   val typeRepr = trr.asInstanceOf[TypeRepr]
-
-  /** Methods ignored like BeanInfo.ignores (runtime isFineMethod). */
-  private val ignores = Set("hashCode", "toString", "wait", "clone", "equals", "getClass", "notify", "notifyAll", "apply", "unapply", "canEqual")
-  private val caseIgnores = Set("productArity", "productIterator", "productPrefix", "productElement", "productElementName", "productElementNames", "copy")
 
   /** Produces Expr[ClassMeta] for the type. */
   def dig(): Expr[ClassMeta] = {
@@ -170,13 +166,15 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
         val noreflect = mm.hasAnnotation(Symbol.classSymbol(classOf[noreflect].getName))
         val isPublic = !mm.flags.is(Flags.Protected) && !mm.flags.is(Flags.Private)
         val isInnerType = mm.name == Strings.substringBetween(mm.tree.show, "this.", ".type")
-        if isPublic && isNormal(mm.name) && !noreflect && !isInnerType then fieldMap.put(mm.name, FieldExpr(mm.name, resolveType(tpe, params), transnt, true, true))
+        // In Scala 3, var/val getters are implicit (not in declaredMethods).
+        // Set getterName = field name since the getter method name matches the field name.
+        if isPublic && isNormal(mm.name) && !noreflect && !isInnerType then fieldMap.put(mm.name, FieldExpr(mm.name, resolveType(tpe, params), transnt, true, true, getterName = Some(mm.name)))
       }
 
       base.typeSymbol.declaredMethods foreach { mm =>
         val defdef = mm.tree.asInstanceOf[DefDef]
         val isPublic = !defdef.symbol.flags.is(Flags.Protected) && !defdef.symbol.flags.is(Flags.Private)
-        val ignored = isCaseClass && caseIgnores.contains(defdef.name) || ignores.contains(defdef.name)
+        val ignored = isCaseClass && MetaLoader.caseIgnores.contains(defdef.name) || MetaLoader.ignores.contains(defdef.name)
         val noreflect = defdef.symbol.hasAnnotation(Symbol.classSymbol(classOf[noreflect].getName))
         val isStatic = defdef.symbol.flags.is(Flags.JavaStatic)
         if (isPublic && isNormal(defdef.name) && !ignored && !noreflect && !isStatic) {

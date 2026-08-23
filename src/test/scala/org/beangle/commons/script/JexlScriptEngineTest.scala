@@ -25,7 +25,7 @@ import org.scalatest.matchers.should.Matchers
 class JexlScriptEngineTest extends AnyFunSpec, Matchers {
 
   describe("JexlScriptEngine evaluate expression") {
-    val a = BeanInfos.of(classOf[Depart])
+    BeanInfos.of(classOf[Depart])
     val evaluator = ExprEvaluator.get(ExprEvaluator.Jexl3Engine)
     val data = Map("depart" -> Depart("销售部", "三楼"), "score" -> 95)
     assert("三楼" == evaluator.eval("depart.office", data))

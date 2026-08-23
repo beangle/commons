@@ -32,7 +32,37 @@ import scala.collection.mutable
 object MetaModel {
 
   /** Class metadata: properties, constructors, and methods. */
-  case class ClassMeta(clazz: Class[_], properties: Seq[Property], ctors: Seq[Ctor], methods: Seq[Method])
+  case class ClassMeta(clazz: Class[_], properties: Seq[Property], ctors: Seq[Ctor], methods: Seq[Method]) {
+    override def toString: String = {
+      val sb = new scala.collection.mutable.ArrayBuffer[String]
+      val isCase = TypeInfo.isCaseClass(clazz)
+      val fieldInCtor = if ctors.isEmpty then Set.empty else ctors.head.parameters.map(_.name).toSet
+      if (ctors.isEmpty) {
+        sb += s"class ${clazz.getName} {"
+      } else {
+        val ctorStr = ctors.head.parameters.map(p =>
+          p.name + ": " + p.typeinfo + (if p.defaultValue.nonEmpty then " = " + p.defaultValue.get.toString else "")
+        ).mkString(", ")
+        sb += s"${if isCase then "case " else ""}class ${clazz.getName}($ctorStr) {"
+        ctors.tail foreach { ctor =>
+          val params = ctor.parameters.map(p =>
+            p.name + ": " + p.typeinfo + (if p.defaultValue.nonEmpty then " = " + p.defaultValue.get.toString else "")
+          ).mkString(", ")
+          sb += s"  def this($params)"
+        }
+      }
+      properties foreach { p =>
+        if (p.setterName.nonEmpty || !fieldInCtor.contains(p.name)) {
+          val tpe = if p.isOptional then TypeInfo.get(classOf[Option[_]], List(p.typeinfo)) else p.typeinfo
+          if p.getterName.nonEmpty && p.setterName.nonEmpty then sb += s"  var ${p.name}: $tpe = _"
+          else if p.getterName.nonEmpty then sb += s"  def ${p.name}: $tpe"
+          else sb += s"  def ${p.name}(x1: $tpe)"
+        }
+      }
+      sb += "}"
+      sb.mkString("\n")
+    }
+  }
 
   /** Property declaration: name, type, flags, and optional accessor method names.
     *

@@ -20,7 +20,8 @@ package org.beangle.commons.bean.meta
 import org.beangle.commons.bean.meta.MetaModel.{ClassMeta, Ctor, Method, Param, Property}
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.reflect.{BeanInfo, Reflections, TypeInfo}
+import org.beangle.commons.lang.annotation.noreflect
+import org.beangle.commons.lang.reflect.{Reflections, TypeInfo}
 
 import java.lang.Character.isUpperCase
 import java.lang.reflect.{Field, Method => JMethod, Modifier, ParameterizedType, TypeVariable}
@@ -100,7 +101,7 @@ object MetaLoader {
       val setter = setters.get(name)
       val typeinfo = if getter.isEmpty then setter.get.returnType else getter.get.returnType
       val isTransientAnnotated = fields.get(name).exists(f => Modifier.isTransient(f.getModifiers))
-      val isTransient = BeanInfo.Builder.isTransient(isTransientAnnotated, setter.isDefined, primaryCtorParamNames.contains(name))
+      val isTransient = checkTransient(isTransientAnnotated, setter.isDefined, primaryCtorParamNames.contains(name))
       val getterName = getter.map(_.method.getName)
       val setterName = setter.map(_.method.getName)
       // Check for Option type
@@ -197,8 +198,8 @@ object MetaLoader {
     nonAccessorMethods: mutable.LinkedHashMap[String, Method],
     paramTypes: collection.Map[String, Class[_]]
   ): Unit = {
-    if (BeanInfo.Builder.isFineMethod(isCase, method, false)) {
-      BeanInfo.Builder.findAccessor(method) match {
+    if (isFineMethod(isCase, method, false)) {
+      findAccessor(method) match {
         case Some((readable, name)) =>
           if (readable) {
             val puttable = getters.get(name).forall(x => isJavaBeanGetter(x.method))
@@ -263,5 +264,62 @@ object MetaLoader {
         }
       case _ => classOf[AnyRef]
     }
+  }
+
+  // --- Method classification utilities (used by MetaLoader and MetaDigger) ---
+
+  val ignores = Set("hashCode", "toString", "wait", "clone", "equals", "getClass", "notify", "notifyAll") ++
+    Set("apply", "unapply", "unApply", "canEqual")
+  val caseIgnores = Set("productArity", "productIterator", "productPrefix", "productElement", "productElementName", "productElementNames", "copy")
+
+  /** Returns true if property should be treated as transient. */
+  def checkTransient(transientAnnotated: Boolean, hasSetter: Boolean, usedInPrimaryCtor: Boolean): Boolean = {
+    if transientAnnotated then true else !usedInPrimaryCtor && !hasSetter
+  }
+
+  /** Returns true if method is a candidate for property accessor discovery. */
+  def isFineMethod(isCase: Boolean, method: JMethod, allowBridge: Boolean = false): Boolean = {
+    val modifiers = method.getModifiers
+    val name = method.getName
+    val ignored = ignores.contains(name) || (isCase && caseIgnores.contains(name))
+    val modifierNice = !Modifier.isStatic(modifiers) && Modifier.isPublic(modifiers)
+    !method.isAnnotationPresent(classOf[noreflect]) && !ignored && modifierNice && isFineMethodName(name) && (!method.isBridge || allowBridge)
+  }
+
+  /** Returns true if method name follows getter/setter convention. */
+  private def isFineMethodName(name: String): Boolean = {
+    if name.startsWith("_") then false
+    else if name.endsWith("_$eq") then !name.substring(0, name.length - 4).contains("$")
+    else !name.contains("$")
+  }
+
+  /** Returns (true, propertyName) for getter, (false, propertyName) for setter, or None. */
+  def findAccessor(method: JMethod): Option[(Boolean, String)] = {
+    val name = method.getName
+    val parameterTypes = method.getParameterTypes
+    if (0 == parameterTypes.length && method.getReturnType != classOf[Unit]) {
+      Some((true, getPropertyName(name, true)))
+    } else if (1 == parameterTypes.length) {
+      val propertyName = getPropertyName(name, false)
+      if (null != propertyName && !propertyName.contains("$")) Some((false, propertyName)) else None
+    } else None
+  }
+
+  /** Extracts property name from getter/setter method name. */
+  def getPropertyName(name: String, getter: Boolean): String = {
+    if (getter) {
+      if (name.startsWith("get") && name.length > 3 && isUpperCase(name.charAt(3))) lower(name.substring(3))
+      else if (name.startsWith("is") && name.length > 2 && isUpperCase(name.charAt(2))) lower(name.substring(2))
+      else name
+    } else {
+      if (name.startsWith("set") && name.length > 3 && isUpperCase(name.charAt(3))) lower(name.substring(3))
+      else if (name.endsWith("_$eq")) Strings.substringBefore(name, "_$eq")
+      else if (name.endsWith("_=")) Strings.substringBefore(name, "_=")
+      else null
+    }
+  }
+
+  private def lower(name: String): String = {
+    if (name.length > 1 && isUpperCase(name.charAt(1))) name else Strings.uncapitalize(name)
   }
 }

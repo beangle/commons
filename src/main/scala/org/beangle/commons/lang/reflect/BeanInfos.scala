@@ -17,31 +17,37 @@
 
 package org.beangle.commons.lang.reflect
 
-import org.beangle.commons.bean.meta.MetaModels
+import org.beangle.commons.bean.meta.{MetaLoader, MetaModel, MetaModels}
+import org.beangle.commons.collection.IdentityCache
 
-/** Global BeanInfo cache and of() macros. */
+/** Global BeanInfo cache with compile-time macro and runtime reflection entry points. */
 object BeanInfos {
 
-  /** Shared BeanInfo cache. */
-  val cache = new BeanInfoCache
+  private val cache = new IdentityCache[Class[_], BeanInfo]
 
-  /** Gets BeanInfo from cache or loads by reflection. */
-  def get(clazz: Class[_]): BeanInfo = cache.get(clazz)
-
-  /** Digs BeanInfo for classes (compile-time ClassMeta dig + runtime BeanInfo reconstruction). */
-  inline def of(inline clazzes: Class[_]*): List[BeanInfo] = {
-    val bis = MetaModels.of(clazzes: _*).map(BeanInfo.from)
-    bis.foreach(cache.update)
-    bis
+  /** Gets BeanInfo from cache. On miss, tries MetaModels (binary) then MetaLoader (reflection). */
+  def get(clazz: Class[_]): BeanInfo = {
+    val exist = cache.get(clazz)
+    if (null != exist) return exist
+    build(clazz, MetaModels.get(clazz).getOrElse(MetaLoader.load(clazz)))
   }
 
-  /** Digs BeanInfo for single class (compile-time ClassMeta dig + runtime BeanInfo reconstruction). */
+  /** Digs BeanInfo for classes. Binary lookup first, compile-time macro dig as fallback. */
+  inline def of(inline clazzes: Class[_]*): List[BeanInfo] = {
+    clazzes.toList.map(of)
+  }
+
+  /** Digs BeanInfo for single class. Binary lookup first, compile-time macro dig as fallback. */
   inline def of[T](clazz: Class[T]): BeanInfo = {
-    val bi = BeanInfo.from(MetaModels.of(clazz))
-    cache.update(bi)
-    bi
+    build(clazz, MetaModels.get(clazz).getOrElse(MetaModels.of(clazz)))
   }
 
   /** Returns true if BeanInfo is cached for the class. */
   def cached(clazz: Class[_]): Boolean = cache.contains(clazz)
+
+  def build(clazz: Class[_], cm: MetaModel.ClassMeta): BeanInfo = {
+    val bi = BeanInfo.from(cm)
+    cache.put(clazz, bi)
+    bi
+  }
 }
