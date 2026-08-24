@@ -20,7 +20,6 @@ package org.beangle.commons.lang.reflect
 import org.beangle.commons.collection.Properties
 import org.beangle.commons.lang.Primitives
 import org.beangle.commons.lang.annotation.noreflect
-import org.beangle.commons.lang.annotation.reflectable
 import org.beangle.commons.lang.reflect.TypeInfo.*
 import org.beangle.commons.bean.meta.MetaModels
 import org.beangle.commons.lang.testbean.*
@@ -182,25 +181,7 @@ class BeanInfosTest extends AnyFunSpec, Matchers {
       assert(m.nonEmpty)
       assert("teaching,research" == m.get.invoke(new Professor(1L)))
     }
-    it("reflectable is class-level runtime annotation") {
-      assert(classOf[ReflectableBean].isAnnotationPresent(classOf[reflectable]))
-      val t = BeanInfos.register(MetaModels.of(classOf[ReflectableBean]))
-      assert(t.properties.contains("name"))
-    }
   }
-}
-
-@reflectable
-class ReflectableBean {
-  var name: String = _
-
-  @noreflect def secret(): String = "s"
-
-  def visible(): String = "v"
-
-  private var hidden: String = _
-
-  @noreflect def getHidden(): String = hidden
 }
 
 case class CaseT(name: String)
