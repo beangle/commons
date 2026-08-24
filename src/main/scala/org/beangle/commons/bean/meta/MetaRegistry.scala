@@ -17,14 +17,14 @@
 
 package org.beangle.commons.bean.meta
 
-import org.beangle.commons.bean.meta.MetaModel.ClassMeta
+import org.beangle.commons.bean.meta.MetaModel.BeanMeta
 
 import java.io.OutputStream
 import scala.collection.mutable
 import scala.quoted.*
 
 /** Class metadata registry: subclasses override [[registering]] template method
-  * and call [[register]] to register classes; [[encode]] writes collected ClassMeta
+  * and call [[register]] to register classes; [[encode]] writes collected BeanMeta
   * to the caller-specified stream (metamodel.idx).
   *
   * {{{
@@ -38,23 +38,23 @@ import scala.quoted.*
   * }}}
   *
   * [[register]] is an inline macro: at the subclass call site (compile-time literal)
-  * it invokes MetaDigger to dig ClassMeta, preserving generic precision.
+  * it invokes MetaDigger to dig BeanMeta, preserving generic precision.
   */
 abstract class MetaRegistry {
 
   /** Registered class metadata. */
-  private val metas = new mutable.ArrayBuffer[ClassMeta]
+  private val metas = new mutable.ArrayBuffer[BeanMeta]
 
   private var registered = false
 
   /** Template method: subclasses override to call [[register]]. */
   protected def registering(): Unit = ()
 
-  /** Registers classes at compile time (macro: digs ClassMeta, preserves precision). */
+  /** Registers classes at compile time (macro: digs BeanMeta, preserves precision). */
   protected inline def register(inline clazzes: Class[_]*): Unit = ${ MetaRegistry.registerImpl('clazzes, 'this) }
 
   /** Collects all registered class metadata (first call triggers registering). */
-  def collect(): Seq[ClassMeta] = {
+  def collect(): Seq[BeanMeta] = {
     if !registered then
       registering()
       registered = true
@@ -64,8 +64,8 @@ abstract class MetaRegistry {
   /** Encodes collected class metadata to the specified stream (metamodel.idx). */
   def encode(out: OutputStream): Unit = MetaIndex.write(out, collect())
 
-  /** Adds dug ClassMeta to internal buffer (used by macro expansion). */
-  protected def addMetas(cms: Iterable[ClassMeta]): Unit = metas ++= cms
+  /** Adds BeanMeta to internal buffer (used by macro expansion). */
+  def addMetas(cms: Iterable[BeanMeta]): Unit = metas ++= cms
 }
 
 object MetaRegistry {

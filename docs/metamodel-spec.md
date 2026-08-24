@@ -1,6 +1,6 @@
 # Beangle Metamodel Binary Specification
 
-> Compact, self-contained, random-accessible binary format for class metadata (properties / ctors / methods).
+> Compact, self-contained, random-accessible binary format for bean metadata (properties / ctors).
 
 ## 1. Overview
 
@@ -22,7 +22,7 @@ Single class blob (MetaCodec format):
 │ Constant pool: poolSize u16 + UTF8 entries    │  All strings deduplicated
 ├───────────────────────────────────────────────┤
 │ Sections (any order, unknown by length skip): │
-│   tag=1 properties │ tag=2 ctors │ tag=3 methods
+│   tag=1 properties │ tag=2 ctors              │
 └───────────────────────────────────────────────┘
 ```
 
@@ -122,19 +122,6 @@ payload: count u8, count × {
 }
 ```
 
-### 6.3 Methods (tag=3)
-
-```
-payload: count u16, count × {
-  nameIdx       u16   Method name (pool index)
-  paramCount    u8
-  paramCount × TypeInfo    // Parameter types with full generic precision
-}
-```
-
-- **count is u16** (may exceed 255 for large classes); other counts are u8;
-- **Parameter types stored as TypeInfo** — preserves generic precision (e.g., `Map[Int, String]` key is `int`, not `Object`).
-
 ## 7. MetaIndex Format (metamodel.idx)
 
 ```
@@ -150,13 +137,12 @@ Blobs:     count × { self-contained MetaCodec blob }
 ## 8. Byte-Level Example (User class, 3 properties)
 
 > Simplified example with 3 representative properties (primitive / reference / option wrapper).
-> Actual encoding is 123B. Each line is 16 bytes, hex offset on the left.
+> Actual encoding is 116B. Each line is 16 bytes, hex offset on the left.
 
 ```scala
 class User(var id: Long, var name: String, var nick: Option[String])
 // 3 properties: id: Long, name: String, nick: Option[String]
-// var → scalac generates getter id()/name()/nick() and setter id_$eq/name_$eq/nick_$eq
-// primary ctor 3 params (no defaults); no other public methods → methods count=0
+// primary ctor 3 params (no defaults)
 ```
 
 ```
@@ -168,7 +154,7 @@ Offset  Hex bytes                                                       ASCII
 0040    00 00 04 6E 69 63 6B 01 00 00 00 10 03 00 81 80  |...nick.........|
 0050    01 00 00 82 80 08 00 00 83 80 08 02 02 00 00 00  |................|
 0060    13 01 03 00 81 80 01 00 00 82 80 08 00 00 83 81  |................|
-0070    09 80 08 00 03 00 00 00 02 00 00                 |...........|
+0070    09 80 08 00                                         |....|
 ```
 
 ### 8.1 Header (offset 0x00–0x09, 10B)
@@ -263,16 +249,7 @@ Payload: `01` (1 ctor, u8) → `03` (3 params, u8) → each param = nameIdx + Ty
 - Param nick's Option stored as **flattened clazz+args** (`scala/Option` builtin 9 + element `String` builtin 8; argCount=1 u8);
 - With defaults: e.g. `name: String = "default"` → `00 0A <pool idx>` (tag=10 string).
 
-### 8.5 Methods Section (offset 0x74, tag=3, 2B payload)
-
-```
-03 | 00 00 00 02 | 00 00
-tag    length u32   count=0
-```
-
-`00 00` = count 0 (u16): no non-accessor public methods.
-
-### 8.6 Size Breakdown
+### 8.5 Size Breakdown
 
 | Part | Bytes |
 |------|-------|
@@ -281,8 +258,7 @@ tag    length u32   count=0
 | Pool entries | 59 |
 | Properties section | 21 |
 | Constructors section | 24 |
-| Methods section | 7 |
-| **Total** | **123** |
+| **Total** | **116** |
 
 - Single property record: 5B
 - Single ctor param: 5–7B (builtin TypeInfo Form 1 saves 1B)

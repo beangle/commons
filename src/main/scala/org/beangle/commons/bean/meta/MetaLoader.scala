@@ -17,7 +17,7 @@
 
 package org.beangle.commons.bean.meta
 
-import org.beangle.commons.bean.meta.MetaModel.{ClassMeta, Ctor, Method, Param, Property}
+import org.beangle.commons.bean.meta.MetaModel.{BeanMeta, Ctor, Param, Property}
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.annotation.noreflect
@@ -29,10 +29,10 @@ import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
 import scala.reflect.*
 
-/** Runtime reflection counterpart of [[MetaDigger]]: reflects a Class into [[ClassMeta]].
+/** Runtime reflection counterpart of [[MetaDigger]]: reflects a Class into [[BeanMeta]].
   *
   * This is the fallback path when no pre-built metamodel.idx is available.
-  * The returned ClassMeta is pure metadata (no MethodHandles); use
+  * The returned BeanMeta is pure metadata (no MethodHandles); use
   * [[org.beangle.commons.lang.reflect.BeanInfo.from]] to reconstruct
   * a BeanInfo with accessor MethodHandles.
   *
@@ -45,12 +45,12 @@ object MetaLoader {
 
   private case class Accessor(method: JMethod, returnType: TypeInfo)
 
-  /** Reflects a class into ClassMeta.
+  /** Reflects a class into BeanMeta.
     *
-    * Single-pass over class hierarchy: collects fields, getters/setters, and
-    * non-accessor methods in one walk, avoiding repeated scans.
+    * Single-pass over class hierarchy: collects fields, getters/setters
+    * in one walk, avoiding repeated scans.
     */
-  def load(clazz: Class[_]): ClassMeta = {
+  def load(clazz: Class[_]): BeanMeta = {
     val className = clazz.getName
     if (className.startsWith("java.") || className.startsWith("scala.") || className.contains("$$"))
       throw new RuntimeException("Cannot reflect class: " + clazz.getName)
@@ -59,18 +59,17 @@ object MetaLoader {
     val getters = new mutable.HashMap[String, Accessor]
     val setters = new mutable.HashMap[String, Accessor]
     val fields = new mutable.HashMap[String, Field]
-    val nonAccessorMethods = new mutable.LinkedHashMap[String, Method] // dedup by name+sig
     val accessed = new mutable.HashSet[Class[_]]
     var nextClass = clazz
     var paramTypes: collection.Map[String, Class[_]] = Map.empty
 
-    // Single pass: walk class hierarchy to discover fields, accessors, and methods
+    // Single pass: walk class hierarchy to discover fields and accessors
     while (null != nextClass && classOf[AnyRef] != nextClass) {
       nextClass.getDeclaredFields foreach { f => fields += (f.getName -> f) }
       nextClass.getDeclaredMethods foreach { m =>
-        processMethod(isCase, m, getters, setters, nonAccessorMethods, paramTypes)
+        processMethod(isCase, m, getters, setters, fields, paramTypes)
       }
-      navInterfaces(nextClass, accessed, getters, setters, nonAccessorMethods, paramTypes)
+      navInterfaces(nextClass, accessed, getters, setters, fields, paramTypes)
       val nextType = nextClass.getGenericSuperclass
       nextClass = nextClass.getSuperclass
       paramTypes = Reflections.deduceParamTypes(nextClass, nextType, paramTypes)
@@ -84,7 +83,7 @@ object MetaLoader {
     // Build property declarations from single-pass results
     val properties = buildProperties(getters, setters, fields, primaryCtorParamNames, isCase)
 
-    ClassMeta(clazz, properties, ctors, nonAccessorMethods.values.toSeq)
+    BeanMeta(clazz, properties, ctors)
   }
 
   /** Builds property declarations from discovered getters/setters. */
@@ -168,7 +167,7 @@ object MetaLoader {
     accessed: mutable.HashSet[Class[_]],
     getters: mutable.HashMap[String, Accessor],
     setters: mutable.HashMap[String, Accessor],
-    nonAccessorMethods: mutable.LinkedHashMap[String, Method],
+    fields: collection.Map[String, Field],
     paramTypes: collection.Map[String, Class[_]]
   ): Unit = {
     if (null == clazz || classOf[AnyRef] == clazz) return
@@ -183,9 +182,9 @@ object MetaLoader {
         accessed.add(interface)
         val interfaceParamTypes = Reflections.deduceParamTypes(interface, interfaceTypes(i), paramTypes)
         interface.getDeclaredMethods foreach { m =>
-          processMethod(isCase, m, getters, setters, nonAccessorMethods, interfaceParamTypes)
+          processMethod(isCase, m, getters, setters, fields, interfaceParamTypes)
         }
-        navInterfaces(interface, accessed, getters, setters, nonAccessorMethods, paramTypes)
+        navInterfaces(interface, accessed, getters, setters, fields, paramTypes)
       }
     }
   }
@@ -195,11 +194,11 @@ object MetaLoader {
     method: JMethod,
     getters: mutable.HashMap[String, Accessor],
     setters: mutable.HashMap[String, Accessor],
-    nonAccessorMethods: mutable.LinkedHashMap[String, Method],
+    fields: collection.Map[String, Field],
     paramTypes: collection.Map[String, Class[_]]
   ): Unit = {
     if (isFineMethod(isCase, method, false)) {
-      findAccessor(method) match {
+      findAccessor(method, fields) match {
         case Some((readable, name)) =>
           if (readable) {
             val puttable = getters.get(name).forall(x => isJavaBeanGetter(x.method))
@@ -212,13 +211,7 @@ object MetaLoader {
             (0 until types.length) foreach { j => paramTypeInfos(j) = typeof(clazzes(j), types(j), paramTypes) }
             setters.put(name, Accessor(method, paramTypeInfos(0)))
           }
-        case None =>
-          // Non-accessor method: collect during walk
-          val paramTypeInfos = method.getGenericParameterTypes.zip(method.getParameterTypes).map { (gt, pt) =>
-            typeof(pt, gt, paramTypes)
-          }
-          val sig = method.getName + paramTypeInfos.map(_.clazz.getName).mkString("(", ",", ")")
-          nonAccessorMethods.getOrElseUpdate(sig, Method(method.getName, paramTypeInfos.toSeq))
+        case None => // skip non-accessor methods
       }
     }
   }
@@ -294,11 +287,18 @@ object MetaLoader {
   }
 
   /** Returns (true, propertyName) for getter, (false, propertyName) for setter, or None. */
-  def findAccessor(method: JMethod): Option[(Boolean, String)] = {
+  /** Identifies accessor methods. For getters, only accepts JavaBean-style (getXxx/isXxx)
+    * or methods matching a known field name — Scala parameterless methods like `def parents`
+    * cannot be distinguished from empty-parens methods like `def size()` at bytecode level,
+    * so they are excluded unless backed by a field.
+    */
+  def findAccessor(method: JMethod, fields: collection.Map[String, Field]): Option[(Boolean, String)] = {
     val name = method.getName
     val parameterTypes = method.getParameterTypes
     if (0 == parameterTypes.length && method.getReturnType != classOf[Unit]) {
-      Some((true, getPropertyName(name, true)))
+      if (isJavaBeanGetter(method) || fields.contains(name)) then
+        Some((true, getPropertyName(name, true)))
+      else None
     } else if (1 == parameterTypes.length) {
       val propertyName = getPropertyName(name, false)
       if (null != propertyName && !propertyName.contains("$")) Some((false, propertyName)) else None

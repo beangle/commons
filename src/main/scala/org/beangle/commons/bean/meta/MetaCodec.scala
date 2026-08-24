@@ -19,14 +19,14 @@ package org.beangle.commons.bean.meta
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, DataInputStream, DataOutputStream}
 import java.nio.charset.StandardCharsets
-import org.beangle.commons.bean.meta.MetaModel.{ClassMeta, Ctor, Method, Param, Property}
+import org.beangle.commons.bean.meta.MetaModel.{BeanMeta, Ctor, Param, Property}
 import org.beangle.commons.lang.Enums
 import org.beangle.commons.lang.reflect.TypeInfo
 
 import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
 
-/** Binary codec for [[MetaModel.ClassMeta]] (v1 format).
+/** Binary codec for [[MetaModel.BeanMeta]] (v1 format).
   *
   * A single class's meta model (properties / ctors / methods) is serialized into a
   * self-contained binary blob: header + string constant pool + length-prefixed sections.
@@ -35,7 +35,7 @@ import scala.collection.mutable
   * Class names use JVM internal names ('/' separated); primitives use JVM names
   * (int/long/...), restored by [[classFor]].
   *
-  * Input is the reflection-free [[MetaModel.ClassMeta]] (produced by [[MetaModels.of]]
+  * Input is the reflection-free [[MetaModel.BeanMeta]] (produced by [[MetaModels.of]]
   * at compile time or [[MetaLoader.load]] at runtime).
   * Use [[org.beangle.commons.lang.reflect.BeanInfo.from]] to reconstruct BeanInfo.
   *
@@ -105,7 +105,6 @@ object MetaCodec {
   // section tags
   private val SProperties = 1
   private val SCtors = 2
-  private val SMethods = 3
   // ctor default value tags
   private val DNone = 0
   private val DNull = 1
@@ -120,8 +119,8 @@ object MetaCodec {
   private val DString = 10
   private val DEnum = 11
 
-  /** Encodes a ClassMeta into the v2 binary format. */
-  def encode(cm: ClassMeta): Array[Byte] = {
+  /** Encodes a BeanMeta into the v2 binary format. */
+  def encode(cm: BeanMeta): Array[Byte] = {
     val pool = new StringPool
     val sortedProps = cm.properties.sortBy(_.name)
     // pass 1: collect all strings
@@ -141,10 +140,6 @@ object MetaCodec {
           case _ =>
         }
       }
-    }
-    cm.methods foreach { m =>
-      pool.index(m.name)
-      m.paramTypes foreach (ti => pool.typeIndex(typeName(ti.clazz)))
     }
     // pass 2: write header, pool and sections
     val out = new ByteArrayOutputStream()
@@ -166,15 +161,11 @@ object MetaCodec {
       writeCount(dd, cm.ctors.size)
       cm.ctors foreach (c => writeCtor(dd, c, pool))
     }
-    writeSection(d, SMethods) { dd =>
-      dd.writeShort(cm.methods.size) // methods count uses u16 (large classes may exceed 255)
-      cm.methods foreach (m => writeMethod(dd, m, pool))
-    }
     d.flush()
     out.toByteArray
   }
 
-  /** Parses a v2 binary blob into a reflection-free [[MetaModel.ClassMeta]].
+  /** Parses a v2 binary blob into a reflection-free [[MetaModel.BeanMeta]].
     *
     * Only classes and types are resolved (TypeInfo carries Class references);
     * getter/setter/method are kept as raw pool strings, no Method resolution
@@ -186,7 +177,7 @@ object MetaCodec {
     *                   when provided, duplicate strings (e.g. "name", "id") reuse the same
     *                   String object across blobs, reducing memory in batch-loading scenarios.
     */
-  def parse(bytes: Array[Byte], sharedPool: mutable.Set[String] = mutable.Set.empty): ClassMeta = {
+  def parse(bytes: Array[Byte], sharedPool: mutable.Set[String] = mutable.Set.empty): BeanMeta = {
     val in = new DataInputStream(new ByteArrayInputStream(bytes))
     val magic = new Array[Byte](4)
     in.readFully(magic)
@@ -212,7 +203,6 @@ object MetaCodec {
     val clazz = classFor(nameOf(selfIdx, pool))
     var properties = Seq.empty[Property]
     var ctors = Seq.empty[Ctor]
-    var methods = Seq.empty[Method]
     while in.available() > 0 do
       val tag = in.readUnsignedByte()
       val len = in.readInt()
@@ -222,9 +212,8 @@ object MetaCodec {
       tag match
         case SProperties => properties = readProperties(pin, pool)
         case SCtors => ctors = readCtors(pin, pool)
-        case SMethods => methods = readMethods(pin, pool)
-        case _ => // skip unknown section
-    ClassMeta(clazz, properties, ctors, methods)
+        case _ => // skip unknown section (e.g. legacy SMethods)
+    BeanMeta(clazz, properties, ctors)
   }
 
   private def writeSection(out: DataOutputStream, tag: Int)(write: DataOutputStream => Unit): Unit = {
@@ -254,12 +243,6 @@ object MetaCodec {
       writeType(d, param.typeinfo, pool)
       writeDefault(d, param.defaultValue, pool)
     }
-  }
-
-  private def writeMethod(d: DataOutputStream, m: Method, pool: StringPool): Unit = {
-    d.writeShort(pool.index(m.name))
-    d.writeByte(m.paramTypes.size)
-    m.paramTypes foreach (ti => d.writeShort(pool.typeIndex(typeName(ti.clazz))))
   }
 
   /** Flattened TypeInfo with a builtin fast form (big-endian friendly: high byte bit7 marker).
@@ -340,22 +323,6 @@ object MetaCodec {
         params(j) = Param(name, ti, dv)
         j += 1
       out(i) = Ctor(ArraySeq.from(params))
-      i += 1
-    out.toSeq
-  }
-
-  private def readMethods(in: DataInputStream, pool: Array[String]): Seq[Method] = {
-    val count = in.readUnsignedShort()
-    val out = new Array[Method](count)
-    var i = 0
-    while i < count do
-      val name = nameOf(in.readUnsignedShort(), pool)
-      val n = in.readUnsignedByte()
-      val params = new Array[TypeInfo](n)
-      var j = 0
-      while j < n do
-        params(j) = TypeInfo.get(classFor(nameOf(in.readUnsignedShort(), pool))); j += 1
-      out(i) = Method(name, ArraySeq.unsafeWrapArray(params))
       i += 1
     out.toSeq
   }

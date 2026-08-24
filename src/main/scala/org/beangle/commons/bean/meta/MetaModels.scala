@@ -17,21 +17,21 @@
 
 package org.beangle.commons.bean.meta
 
-import org.beangle.commons.bean.meta.MetaModel.ClassMeta
+import org.beangle.commons.bean.meta.MetaModel.BeanMeta
 import org.beangle.commons.io.Resources
 import org.beangle.commons.logging.Logging
 
 import scala.collection.mutable
 import scala.quoted.*
 
-/** Global entry point for [[ClassMeta]] — compile-time dig, binary lookup, and runtime reflection.
+/** Global entry point for [[BeanMeta]] — compile-time dig, binary lookup, and runtime reflection.
   *
   * {{{
   * // Compile-time dig (macro, preserves generic precision)
   * val cm = MetaModels.of(classOf[User])
   *
   * // Lookup from metamodel.idx (loaded at startup)
-  * MetaModels.get(classOf[User])  // Option[ClassMeta]
+  * MetaModels.get(classOf[User])  // Option[BeanMeta]
   *
   * // Runtime reflection fallback
   * val cm = MetaModels.reflect(classOf[User])
@@ -39,36 +39,36 @@ import scala.quoted.*
   */
 object MetaModels extends Logging {
 
-  /** Class name (JVM internal) -> ClassMeta, lazy loaded at first access. */
-  private lazy val cache: Map[String, ClassMeta] = buildCache()
+  /** Class name (JVM internal) -> BeanMeta, lazy loaded at first access. */
+  private lazy val cache: Map[String, BeanMeta] = buildCache()
 
-  /** Returns ClassMeta for the given class, or None if not found. */
-  def get(clazz: Class[_]): Option[ClassMeta] = get(clazz.getName)
+  /** Returns BeanMeta for the given class, or None if not found. */
+  def get(clazz: Class[_]): Option[BeanMeta] = get(clazz.getName)
 
-  /** Returns ClassMeta for the given class name (dot-separated or JVM internal), or None. */
-  def get(className: String): Option[ClassMeta] = cache.get(normalize(className))
+  /** Returns BeanMeta for the given class name (dot-separated or JVM internal), or None. */
+  def get(className: String): Option[BeanMeta] = cache.get(normalize(className))
 
-  /** Returns true if ClassMeta is available for the given class. */
+  /** Returns true if BeanMeta is available for the given class. */
   def contains(clazz: Class[_]): Boolean = contains(clazz.getName)
 
-  /** Returns true if ClassMeta is available for the given class name. */
+  /** Returns true if BeanMeta is available for the given class name. */
   def contains(className: String): Boolean = cache.contains(normalize(className))
 
   /** Returns all registered class names. */
   def classNames: Set[String] = cache.keySet
 
-  /** Digs ClassMeta for classes at compile time (macro, preserves generic precision). */
-  inline def of(inline clazzes: Class[_]*): List[ClassMeta] = ${ MetaDigger.digInto('clazzes) }
+  /** Digs BeanMeta for classes at compile time (macro, preserves generic precision). */
+  inline def of(inline clazzes: Class[_]*): List[BeanMeta] = ${ MetaDigger.digInto('clazzes) }
 
-  /** Digs ClassMeta for a single class at compile time (macro). */
-  inline def of[T](clazz: Class[T]): ClassMeta = ${ MetaDigger.digInto('clazz) }
+  /** Digs BeanMeta for a single class at compile time (macro). */
+  inline def of[T](clazz: Class[T]): BeanMeta = ${ MetaDigger.digInto('clazz) }
 
-  /** Reflects a class into ClassMeta via runtime reflection (fallback when no binary available). */
-  def reflect(clazz: Class[_]): ClassMeta = MetaLoader.load(clazz)
+  /** Reflects a class into BeanMeta via runtime reflection (fallback when no binary available). */
+  def reflect(clazz: Class[_]): BeanMeta = MetaLoader.load(clazz)
 
   /** Loads all metamodel.idx files from classpath into memory. */
-  private def buildCache(): Map[String, ClassMeta] = {
-    val map = mutable.HashMap.empty[String, ClassMeta]
+  private def buildCache(): Map[String, BeanMeta] = {
+    val map = mutable.HashMap.empty[String, BeanMeta]
     val stringPool = mutable.Set.empty[String] // shared dedup across all idx files
     val urls = Resources.load("classpath*:META-INF/beangle/metamodel.idx")
     urls.foreach { url =>

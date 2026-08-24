@@ -17,13 +17,13 @@
 
 package org.beangle.commons.bean.meta
 
+import org.beangle.commons.json.JsonObject
 import org.beangle.commons.lang.reflect.TypeInfo
 import org.beangle.commons.lang.reflect.TypeInfo.OptionType
 
-import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
 
-/** Pure data model for a single class's metadata (properties / ctors / methods).
+/** Pure data model for a single class's metadata (properties / ctors).
   *
   * Produced by [[MetaCodec.parse]] (binary decode) or [[MetaLoader.load]] (reflection).
   * Use [[org.beangle.commons.lang.reflect.BeanInfo.from]] to reconstruct BeanInfo
@@ -31,37 +31,22 @@ import scala.collection.mutable
   */
 object MetaModel {
 
-  /** Class metadata: properties, constructors, and methods. */
-  case class ClassMeta(clazz: Class[_], properties: Seq[Property], ctors: Seq[Ctor], methods: Seq[Method]) {
-    override def toString: String = {
-      val sb = new scala.collection.mutable.ArrayBuffer[String]
-      val isCase = TypeInfo.isCaseClass(clazz)
-      val fieldInCtor = if ctors.isEmpty then Set.empty else ctors.head.parameters.map(_.name).toSet
-      if (ctors.isEmpty) {
-        sb += s"class ${clazz.getName} {"
-      } else {
-        val ctorStr = ctors.head.parameters.map(p =>
-          p.name + ": " + p.typeinfo + (if p.defaultValue.nonEmpty then " = " + p.defaultValue.get.toString else "")
-        ).mkString(", ")
-        sb += s"${if isCase then "case " else ""}class ${clazz.getName}($ctorStr) {"
-        ctors.tail foreach { ctor =>
-          val params = ctor.parameters.map(p =>
-            p.name + ": " + p.typeinfo + (if p.defaultValue.nonEmpty then " = " + p.defaultValue.get.toString else "")
-          ).mkString(", ")
-          sb += s"  def this($params)"
-        }
-      }
-      properties foreach { p =>
-        if (p.setterName.nonEmpty || !fieldInCtor.contains(p.name)) {
-          val tpe = if p.isOptional then TypeInfo.get(classOf[Option[_]], List(p.typeinfo)) else p.typeinfo
-          if p.getterName.nonEmpty && p.setterName.nonEmpty then sb += s"  var ${p.name}: $tpe = _"
-          else if p.getterName.nonEmpty then sb += s"  def ${p.name}: $tpe"
-          else sb += s"  def ${p.name}(x1: $tpe)"
-        }
-      }
-      sb += "}"
-      sb.mkString("\n")
-    }
+  /** Bean metadata: properties and constructors. */
+  case class BeanMeta(clazz: Class[_], properties: Seq[Property], ctors: Seq[Ctor]) {
+    /** Renders as human-readable JSON. */
+    override def toString: String = JsonObject(
+      "clazz" -> clazz.getName,
+      "properties" -> properties.map(p => JsonObject(
+        "name" -> p.name,
+        "type" -> p.typeinfo.name,
+        "transient" -> p.isTransient,
+        "optional" -> p.isOptional)),
+      "ctors" -> ctors.map(c => JsonObject(
+        "parameters" -> c.parameters.map(pm => JsonObject(
+          "name" -> pm.name,
+          "type" -> pm.typeinfo.name,
+          "default" -> pm.defaultValue.map(v => if null == v then null else v.toString)))))
+    ).toJson
   }
 
   /** Property declaration: name, type, flags, and optional accessor method names.
@@ -84,18 +69,6 @@ object MetaModel {
   /** Constructor parameter declaration. */
   case class Param(name: String, typeinfo: TypeInfo, defaultValue: Option[Any])
 
-  /** Method declaration: name + parameter types (TypeInfo preserves generic precision). */
-  case class Method(name: String, paramTypes: Seq[TypeInfo]) {
-
-    /** Returns true if the given args match parameter types. */
-    def matches(args: Any*): Boolean = {
-      if (paramTypes.length != args.length) return false
-      !args.indices.exists { i =>
-        null != args(i) && !paramTypes(i).clazz.isInstance(args(i))
-      }
-    }
-  }
-
   /** Constructor parameter holder for [[Builder.addCtor]]. */
   class ParamHolder(name: String, typeinfo: Any, defaultValue: Option[Any]) {
     def this(name: String, typeInfo: Any) = this(name, typeInfo, None)
@@ -104,16 +77,15 @@ object MetaModel {
     def toParam: Param = Param(name, TypeInfo.convert(typeinfo), defaultValue)
   }
 
-  /** ClassMeta builder — driven by compile-time digger [[MetaDigger]].
+  /** BeanMeta builder — driven by compile-time digger [[MetaDigger]].
     *
-    * The macro resolves fields, constructors, and methods at compile time;
+    * The macro resolves fields and constructors at compile time;
     * runtime only performs type conversion and assembly.
-    * Properties are sorted by name, methods by (name, params), ensuring deterministic binary output.
+    * Properties are sorted by name, ensuring deterministic binary output.
     */
   class Builder(val clazz: Class[_]) {
     private val properties = new mutable.ArrayBuffer[Property]
     private val ctors = new mutable.ArrayBuffer[Ctor]
-    private val methods = new mutable.ArrayBuffer[Method]
 
     /** Adds a property; Option type is peeled to its element type with isOptional=true
       * (same shape as [[MetaModels.of]]).
@@ -129,13 +101,8 @@ object MetaModel {
     def addCtor(paramInfos: Array[ParamHolder]): Unit =
       ctors += Ctor(paramInfos.toSeq.map(_.toParam))
 
-    /** Adds a method record with parameter type infos (Any for macro compatibility). */
-    def addMethod(name: String, paramTypes: Array[Any]): Unit =
-      methods += Method(name, ArraySeq.from(paramTypes.map(TypeInfo.convert)))
-
-    /** Assembles the ClassMeta (properties sorted by name, methods by name+params). */
-    def build(): ClassMeta =
-      ClassMeta(clazz, properties.toSeq.sortBy(_.name), ctors.toSeq,
-        methods.toSeq.sortBy(m => (m.name, m.paramTypes.map(_.clazz.getName).mkString("|"))))
+    /** Assembles the BeanMeta (properties sorted by name). */
+    def build(): BeanMeta =
+      BeanMeta(clazz, properties.toSeq.sortBy(_.name), ctors.toSeq)
   }
 }

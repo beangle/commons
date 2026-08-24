@@ -17,7 +17,7 @@
 
 package org.beangle.commons.bean.meta
 
-import org.beangle.commons.bean.meta.MetaModel.ClassMeta
+import org.beangle.commons.bean.meta.MetaModel.BeanMeta
 
 import java.io.{BufferedInputStream, BufferedOutputStream, DataInputStream, DataOutputStream, IOException, InputStream, OutputStream}
 import java.nio.charset.StandardCharsets
@@ -25,7 +25,7 @@ import java.nio.file.{Files, Path}
 import scala.collection.mutable
 
 /** Multi-class container: a metamodel.idx file holding many self-contained
-  * [[MetaModel.ClassMeta]] blobs plus a directory mapping JVM internal class names
+  * [[MetaModel.BeanMeta]] blobs plus a directory mapping JVM internal class names
   * to blob offset/length, so a single class can be located without scanning.
   *
   * Format (big-endian, lengths u32):
@@ -43,14 +43,14 @@ object MetaIndex {
   private val Version = 1
   private val HeaderSize = 4 + 2 + 4 // magic + version + count
 
-  /** Writes multiple ClassMetas into a metamodel.idx file (directory sorted by class name). */
-  def write(file: Path, metas: Iterable[ClassMeta]): Unit = {
+  /** Writes multiple BeanMetas into a metamodel.idx file (directory sorted by class name). */
+  def write(file: Path, metas: Iterable[BeanMeta]): Unit = {
     val out = new BufferedOutputStream(Files.newOutputStream(file))
     try write(out, metas) finally out.close()
   }
 
-  /** Writes multiple ClassMetas into a metamodel.idx stream. */
-  def write(out: OutputStream, metas: Iterable[ClassMeta]): Unit = {
+  /** Writes multiple BeanMetas into a metamodel.idx stream. */
+  def write(out: OutputStream, metas: Iterable[BeanMeta]): Unit = {
     val blobs = metas.toSeq.sortBy(_.clazz.getName).map(cm => cm -> MetaCodec.encode(cm))
     val nameBytes = blobs.map(_._1.clazz.getName.replace('.', '/').getBytes(StandardCharsets.UTF_8))
     val dirSize = nameBytes.map(nb => 10 + nb.length).sum
@@ -69,23 +69,23 @@ object MetaIndex {
     d.flush()
   }
 
-  /** Reads all ClassMetas from a metamodel.idx file. */
-  def read(file: Path): Seq[ClassMeta] = read(file, mutable.Set.empty)
+  /** Reads all BeanMetas from a metamodel.idx file. */
+  def read(file: Path): Seq[BeanMeta] = read(file, mutable.Set.empty)
 
-  /** Reads all ClassMetas from a metamodel.idx file with string deduplication pool. */
-  def read(file: Path, pool: mutable.Set[String]): Seq[ClassMeta] = {
+  /** Reads all BeanMetas from a metamodel.idx file with string deduplication pool. */
+  def read(file: Path, pool: mutable.Set[String]): Seq[BeanMeta] = {
     val in = new BufferedInputStream(Files.newInputStream(file))
     try read(in, pool) finally in.close()
   }
 
-  /** Reads all ClassMetas from a metamodel.idx stream. */
-  def read(in: InputStream): Seq[ClassMeta] = read(in, mutable.Set.empty)
+  /** Reads all BeanMetas from a metamodel.idx stream. */
+  def read(in: InputStream): Seq[BeanMeta] = read(in, mutable.Set.empty)
 
-  /** Reads all ClassMetas from a metamodel.idx stream with string deduplication pool.
+  /** Reads all BeanMetas from a metamodel.idx stream with string deduplication pool.
     *
     * @param pool string deduplication set shared across blobs within this idx file.
     */
-  def read(in: InputStream, pool: mutable.Set[String]): Seq[ClassMeta] = {
+  def read(in: InputStream, pool: mutable.Set[String]): Seq[BeanMeta] = {
     val d = new DataInputStream(in)
     val count = readHeader(d)
     val entries = readDirectory(d, count)
@@ -96,20 +96,20 @@ object MetaIndex {
     }
   }
 
-  /** Finds a single ClassMeta by JVM internal class name (e.g. "org/example/User"). */
-  def find(file: Path, className: String): Option[ClassMeta] = find(file, className, mutable.Set.empty)
+  /** Finds a single BeanMeta by JVM internal class name (e.g. "org/example/User"). */
+  def find(file: Path, className: String): Option[BeanMeta] = find(file, className, mutable.Set.empty)
 
-  /** Finds a single ClassMeta by JVM internal class name with string deduplication pool. */
-  def find(file: Path, className: String, pool: mutable.Set[String]): Option[ClassMeta] = {
+  /** Finds a single BeanMeta by JVM internal class name with string deduplication pool. */
+  def find(file: Path, className: String, pool: mutable.Set[String]): Option[BeanMeta] = {
     val in = new BufferedInputStream(Files.newInputStream(file))
     try find(in, className, pool) finally in.close()
   }
 
-  /** Finds a single ClassMeta by JVM internal class name from a metamodel.idx stream. */
-  def find(in: InputStream, className: String): Option[ClassMeta] = find(in, className, mutable.Set.empty)
+  /** Finds a single BeanMeta by JVM internal class name from a metamodel.idx stream. */
+  def find(in: InputStream, className: String): Option[BeanMeta] = find(in, className, mutable.Set.empty)
 
-  /** Finds a single ClassMeta by JVM internal class name from a metamodel.idx stream with string deduplication pool. */
-  def find(in: InputStream, className: String, pool: mutable.Set[String]): Option[ClassMeta] = {
+  /** Finds a single BeanMeta by JVM internal class name from a metamodel.idx stream with string deduplication pool. */
+  def find(in: InputStream, className: String, pool: mutable.Set[String]): Option[BeanMeta] = {
     val d = new DataInputStream(in)
     val count = readHeader(d)
     val entries = readDirectory(d, count)

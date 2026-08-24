@@ -17,7 +17,7 @@
 
 package org.beangle.commons.bean.meta
 
-import org.beangle.commons.bean.meta.MetaModel.ClassMeta
+import org.beangle.commons.bean.meta.MetaModel.BeanMeta
 import org.beangle.commons.json.{JsonArray, JsonObject}
 import org.beangle.commons.logging.Logging
 
@@ -43,7 +43,7 @@ import scala.collection.mutable
   * }}}
   *
   * The tool scans the specified classes directory, finds all MetaRegistry subclasses,
-  * collects their ClassMeta entries, and generates metamodel.idx file.
+  * collects their BeanMeta entries, and generates metamodel.idx file.
   */
 object MetaGenerator extends Logging {
 
@@ -61,7 +61,7 @@ object MetaGenerator extends Logging {
     val metas = collectFromDirs(classesDirs)
 
     if (metas.isEmpty) {
-      logger.error("No ClassMeta collected. Check classes directory.")
+      logger.error("No BeanMeta collected. Check classes directory.")
       System.exit(1)
     }
 
@@ -76,7 +76,7 @@ object MetaGenerator extends Logging {
     try {
       MetaIndex.write(out, metas)
       if (outputPath != "-") {
-        logger.info(s"Generated $outputPath with ${metas.size} ClassMeta entries")
+        logger.info(s"Generated $outputPath with ${metas.size} BeanMeta entries")
       }
     } finally {
       if (out ne System.out) out.close()
@@ -90,7 +90,7 @@ object MetaGenerator extends Logging {
   }
 
   /** Generates GraalVM native-image config files. */
-  private def generateGraalvmConfigs(outputDir: Path, metamodelPath: String, metas: Seq[ClassMeta]): Unit = {
+  private def generateGraalvmConfigs(outputDir: Path, metamodelPath: String, metas: Seq[BeanMeta]): Unit = {
     // 1. Generate reflect-config.json
     val reflectPath = outputDir.resolve("reflect-config.json")
     generateReflectConfig(reflectPath, metas)
@@ -103,7 +103,7 @@ object MetaGenerator extends Logging {
   }
 
   /** Generates reflect-config.json for GraalVM native-image. */
-  private def generateReflectConfig(outputPath: Path, metas: Seq[ClassMeta]): Unit = {
+  private def generateReflectConfig(outputPath: Path, metas: Seq[BeanMeta]): Unit = {
     val entries = metas.map { cm =>
       JsonObject(
         "name" -> cm.clazz.getName,
@@ -136,9 +136,9 @@ object MetaGenerator extends Logging {
     Files.write(outputPath, json.getBytes(StandardCharsets.UTF_8))
   }
 
-  /** Collects ClassMeta by scanning classes directories for MetaRegistry subclasses. */
-  def collectFromDirs(classesDirs: Seq[String]): Seq[ClassMeta] = {
-    val allMetas = new mutable.ArrayBuffer[ClassMeta]
+  /** Collects BeanMeta by scanning classes directories for MetaRegistry subclasses. */
+  def collectFromDirs(classesDirs: Seq[String]): Seq[BeanMeta] = {
+    val allMetas = new mutable.ArrayBuffer[BeanMeta]
 
     classesDirs.foreach { dir =>
       val dirPath = Path.of(dir)
@@ -154,7 +154,7 @@ object MetaGenerator extends Logging {
   }
 
   /** Scans a single directory for MetaRegistry subclasses. */
-  private def collectFromDir(classesDir: Path): Seq[ClassMeta] = {
+  private def collectFromDir(classesDir: Path): Seq[BeanMeta] = {
     val classFiles = findClassFiles(classesDir)
     if (classFiles.isEmpty) {
       logger.info(s"No .class files found in $classesDir")
@@ -163,7 +163,7 @@ object MetaGenerator extends Logging {
 
     val classLoader = new URLClassLoader(Array(classesDir.toUri.toURL), getClass.getClassLoader)
     try {
-      val allMetas = new mutable.ArrayBuffer[ClassMeta]
+      val allMetas = new mutable.ArrayBuffer[BeanMeta]
       var registryCount = 0
 
       classFiles.foreach { classFile =>
@@ -180,7 +180,7 @@ object MetaGenerator extends Logging {
             val metas = registry.collect()
             allMetas ++= metas
             registryCount += 1
-            logger.info(s"Collected ${metas.size} ClassMeta from $className")
+            logger.info(s"Collected ${metas.size} BeanMeta from $className")
           }
         } catch {
           case _: ClassNotFoundException =>

@@ -18,7 +18,7 @@
 package org.beangle.commons.bean.meta
 
 import org.beangle.commons.bean.meta.MetaModel.ParamHolder
-import org.beangle.commons.bean.meta.MetaModel.ClassMeta
+import org.beangle.commons.bean.meta.MetaModel.BeanMeta
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.annotation.noreflect
 import org.beangle.commons.bean.meta.MetaLoader.getPropertyName
@@ -26,16 +26,16 @@ import org.beangle.commons.bean.meta.MetaLoader.getPropertyName
 import scala.collection.mutable
 import scala.quoted.*
 
-/** Compile-time ClassMeta digger (quoted macro).
+/** Compile-time BeanMeta digger (quoted macro).
   *
-  * MetaDigger: compile-time ClassMeta digger: same field discovery,
+  * MetaDigger: compile-time BeanMeta digger: same field discovery,
   * accessor detection and constructor/default resolution, but it drives a
-  * [[MetaModel.Builder]] to produce [[ClassMeta]] directly — the future main
-  * construction path of BeanInfo will rely on ClassMeta.
+  * [[MetaModel.Builder]] to produce [[BeanMeta]] directly — the future main
+  * construction path of BeanInfo will rely on BeanMeta.
   */
 object MetaDigger {
-  /** Macro: digs ClassMeta for each class. */
-  def digInto(argsExpr: Expr[Seq[Class[_]]])(using Quotes): Expr[List[ClassMeta]] = {
+  /** Macro: digs BeanMeta for each class. */
+  def digInto(argsExpr: Expr[Seq[Class[_]]])(using Quotes): Expr[List[BeanMeta]] = {
     import quotes.reflect.*
     argsExpr match {
       case Varargs(cls) =>
@@ -51,14 +51,14 @@ object MetaDigger {
     }
   }
 
-  /** Macro: digs ClassMeta for type T. */
-  def digInto[T: Type](ec: Expr[Class[T]])(using Quotes): Expr[ClassMeta] = {
+  /** Macro: digs BeanMeta for type T. */
+  def digInto[T: Type](ec: Expr[Class[T]])(using Quotes): Expr[BeanMeta] = {
     val digger = new MetaDigger[quotes.type](quotes.reflect.TypeRepr.of[T])
     digger.dig()
   }
 }
 
-/** Macro-time type digger for ClassMeta. */
+/** Macro-time type digger for BeanMeta. */
 class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
 
   import q.reflect.*
@@ -66,8 +66,8 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
   /** The TypeRepr being digested. */
   val typeRepr = trr.asInstanceOf[TypeRepr]
 
-  /** Produces Expr[ClassMeta] for the type. */
-  def dig(): Expr[ClassMeta] = {
+  /** Produces Expr[BeanMeta] for the type. */
+  def dig(): Expr[BeanMeta] = {
     '{
       val b = new MetaModel.Builder(${ typeOf(typeRepr) })
       ${ Expr.block(addMemberBody('b), 'b) }.build()
@@ -149,7 +149,6 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     }
 
     val superBases = Set("scala.Any", "scala.Matchable", "java.lang.Object", "scala.Equals", "scala.Product", "java.io.Serializable")
-    val methodDecls = new mutable.LinkedHashMap[String, (String, List[Expr[AnyRef]])] // dedup by name+signature, most-derived first
     for (bc <- typeRepr.baseClasses if !superBases.contains(bc.fullName)) {
       val base = typeRepr.baseType(bc)
       var params = Map.empty[String, TypeRepr]
@@ -198,16 +197,7 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
                            else FieldExpr(name, paramList.head.typeinfo, transnt, false, true, setterName = Some(methodName))
                   fieldMap.put(name, fe)
               }
-            case None =>
-              // non-accessor method: collect name + TypeInfo for each param
-              val paramTypeInfos = defdef.paramss.flatMap {
-                case TermParamClause(ps: List[ValDef]) =>
-                  ps.map(vl => resolveType(vl.tpt.tpe, params))
-                case _ => Nil
-              }
-              val bytecodeName = encodeBytecodeName(defdef.name)
-              val dedupKey = bytecodeName + paramTypeInfos.map(_.show).mkString("(", ",", ")")
-              methodDecls.put(dedupKey, (bytecodeName, paramTypeInfos))
+            case None => // skip non-accessor methods
           }
         }
       }
@@ -233,9 +223,6 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       val getterExpr = x.getterName.map(n => '{ Some(${ Expr(n) }) }).getOrElse('{ None })
       val setterExpr = x.setterName.map(n => '{ Some(${ Expr(n) }) }).getOrElse('{ None })
       '{ ${ t }.addProperty(${ Expr(x.name) }, ${ x.typeinfo }, ${ Expr(transients.contains(x.name)) }, $getterExpr, $setterExpr) }
-    }
-    members ++= methodDecls.values.map { case (name, paramTypeInfos) =>
-      '{ ${ t }.addMethod(${ Expr(name) }, Array(${ Varargs(paramTypeInfos) }: _*)) }
     }
     members.toList
   }
