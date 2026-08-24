@@ -30,7 +30,7 @@ import scala.quoted.*
   * // Compile-time dig (macro, preserves generic precision)
   * val cm = MetaModels.of(classOf[User])
   *
-  * // Lookup from metamodel.idx (loaded at startup)
+  * // Lookup from beanmeta.idx (loaded at startup)
   * MetaModels.get(classOf[User])  // Option[BeanMeta]
   *
   * // Runtime reflection fallback
@@ -66,11 +66,11 @@ object MetaModels extends Logging {
   /** Reflects a class into BeanMeta via runtime reflection (fallback when no binary available). */
   def reflect(clazz: Class[_]): BeanMeta = MetaLoader.load(clazz)
 
-  /** Loads all metamodel.idx files from classpath into memory. */
+  /** Loads all beanmeta.idx files from classpath into memory. */
   private def buildCache(): Map[String, BeanMeta] = {
     val map = mutable.HashMap.empty[String, BeanMeta]
     val stringPool = mutable.Set.empty[String] // shared dedup across all idx files
-    val urls = Resources.load("classpath*:META-INF/beangle/metamodel.idx")
+    val urls = Resources.load("classpath*:META-INF/beangle/beanmeta.idx")
     urls.foreach { url =>
       try {
         val in = new java.io.BufferedInputStream(url.openStream())
@@ -81,7 +81,7 @@ object MetaModels extends Logging {
         } finally in.close()
       } catch {
         case e: Exception =>
-          logger.warn(s"Failed to load metamodel.idx from $url: ${e.getMessage}")
+          logger.warn(s"Failed to load beanmeta.idx from $url: ${e.getMessage}")
       }
     }
     map.toMap

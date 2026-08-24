@@ -45,7 +45,7 @@ import scala.collection.mutable
   */
 object MetaCodec {
 
-  private val Magic = "BMET"
+  private val Magic = "BBET"
   private val Version = 1
   private val NoneIdx = 0xFFFF
   private val MaxPool = 0x8000 // explicit indices must be < 0x8000 (typeinfo Form-1 bit7 marker must not collide)

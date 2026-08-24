@@ -46,7 +46,7 @@ class MetaModelsTest extends AnyFunSpec, Matchers {
       names shouldBe a[Set[_]]
     }
 
-    it("loads ClassMeta from metamodel.idx via MetaIndex") {
+    it("loads BeanMeta from metamodel.idx via MetaIndex") {
       val metas = Seq(
         MetaModels.of(classOf[TestUser]),
         MetaModels.of(classOf[TestRole]))

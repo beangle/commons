@@ -17,21 +17,18 @@
 
 package org.beangle.commons.bean.meta
 
-import org.beangle.commons.bean.meta.MetaModel.ClassMeta
 import org.beangle.commons.json.{Json, JsonObject}
-import org.beangle.commons.lang.reflect.{BeanInfo, BeanInfos, TypeInfo}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 import java.nio.charset.StandardCharsets
-import scala.collection.immutable.ArraySeq
 
-/** MetaJson 调试导出测试（只出不入，无反向解析）。 */
+/** BeanMeta JSON 调试导出测试（只出不入，无反向解析）。 */
 class MetaJsonTest extends AnyFunSpec, Matchers {
 
-  it("renders all sections of a ClassMeta as json") {
+  it("renders all sections of a BeanMeta as json") {
     val cm = MetaModels.of(classOf[CodecSample])
-    val json = MetaJson.toJson(cm)
+    val json = cm.toString
     json should startWith("{")
     json should endWith("}")
     json should include("\"clazz\":\"org.beangle.commons.bean.meta.CodecSample\"")
@@ -45,29 +42,21 @@ class MetaJsonTest extends AnyFunSpec, Matchers {
 
   it("renders ctor parameter defaults as strings") {
     val cm = MetaModels.of(classOf[CodecCtor])
-    val json = MetaJson.toJson(cm)
+    val json = cm.toString
     json should include("\"default\":\"default\"") // name = "default"
     json should include("\"default\":\"true\"") // enabled = true
     json should include("\"default\":null") // id 无默认值
   }
 
-  it("renders methods with params") {
-    val cm = ClassMeta(classOf[CodecRole], Seq.empty, Seq.empty,
-      Seq(MetaModel.Method("code", Seq.empty)))
-    val json = MetaJson.toJson(cm)
-    json should include("\"methods\":[{\"name\":\"code\"")
-    json should include("\"params\":[]")
-  }
-
   it("produces parseable json") {
-    val json = MetaJson.toJson(MetaModels.of(classOf[CodecSample]))
+    val json = MetaModels.of(classOf[CodecSample]).toString
     Json.parse(json) shouldBe a[JsonObject]
   }
 
   it("binary form is much smaller than json form") {
     val cm = MetaModels.of(classOf[CodecSample])
     val binary = MetaCodec.encode(cm).length
-    val json = MetaJson.toJson(cm).getBytes(StandardCharsets.UTF_8).length
+    val json = cm.toString.getBytes(StandardCharsets.UTF_8).length
     json should be > (binary * 2)
   }
 }

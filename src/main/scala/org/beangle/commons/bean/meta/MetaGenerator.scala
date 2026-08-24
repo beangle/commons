@@ -28,11 +28,11 @@ import java.nio.file.{FileVisitResult, Files, Path, SimpleFileVisitor}
 import java.nio.file.attribute.BasicFileAttributes
 import scala.collection.mutable
 
-/** Tool for scanning MetaRegistry subclasses from classes directory and generating metamodel.idx.
+/** Tool for scanning MetaRegistry subclasses from classes directory and generating beanmeta.idx.
   *
   * Usage:
   * {{{
-  * // Scan classes directory and generate metamodel.idx
+  * // Scan classes directory and generate beanmeta.idx
   * java -cp <classpath> org.beangle.commons.bean.meta.MetaGenerator /path/to/classes
   *
   * // Generate to custom output path
@@ -43,11 +43,11 @@ import scala.collection.mutable
   * }}}
   *
   * The tool scans the specified classes directory, finds all MetaRegistry subclasses,
-  * collects their BeanMeta entries, and generates metamodel.idx file.
+  * collects their BeanMeta entries, and generates beanmeta.idx file.
   */
 object MetaGenerator extends Logging {
 
-  private val DefaultOutputPath = "META-INF/beangle/metamodel.idx"
+  private val DefaultOutputPath = "META-INF/beangle/beanmeta.idx"
 
   def main(args: Array[String]): Unit = {
     val (classesDirs, outputPath, graalvmMode) = parseArgs(args)
@@ -65,7 +65,7 @@ object MetaGenerator extends Logging {
       System.exit(1)
     }
 
-    // Generate metamodel.idx
+    // Generate beanmeta.idx
     val out = if (outputPath == "-") System.out
     else {
       val path = Path.of(outputPath)
@@ -244,10 +244,10 @@ object MetaGenerator extends Logging {
   private def printUsage(): Unit = {
     println("""Usage: MetaGenerator [options] <classes-dir> [classes-dir...]
               |
-              |Scans classes directories for MetaRegistry subclasses and generates metamodel.idx.
+              |Scans classes directories for MetaRegistry subclasses and generates beanmeta.idx.
               |
               |Options:
-              |  -o, --output <path>   Output path (default: META-INF/beangle/metamodel.idx)
+              |  -o, --output <path>   Output path (default: META-INF/beangle/beanmeta.idx)
               |  --graalvm             Also generate GraalVM native-image config files:
               |                        - reflect-config.json (reflection metadata)
               |                        - resource-config.json (resource inclusion)

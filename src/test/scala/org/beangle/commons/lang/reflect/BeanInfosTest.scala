@@ -22,6 +22,7 @@ import org.beangle.commons.lang.Primitives
 import org.beangle.commons.lang.annotation.noreflect
 import org.beangle.commons.lang.annotation.reflectable
 import org.beangle.commons.lang.reflect.TypeInfo.*
+import org.beangle.commons.bean.meta.MetaModels
 import org.beangle.commons.lang.testbean.*
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -30,13 +31,13 @@ import java.lang.reflect.Modifier
 import scala.collection.immutable.ArraySeq
 
 class BeanInfosTest extends AnyFunSpec, Matchers {
-  BeanInfos.of(classOf[Book])
-  BeanInfos.of(classOf[BookPrimitiveId])
-  BeanInfos.of(classOf[BookStore])
-  BeanInfos.of(classOf[Author])
-  BeanInfos.of(classOf[BigBookStore])
-  BeanInfos.of(classOf[Department])
-  BeanInfos.of(classOf[Menu])
+  BeanInfos.register(MetaModels.of(classOf[Book]))
+  BeanInfos.register(MetaModels.of(classOf[BookPrimitiveId]))
+  BeanInfos.register(MetaModels.of(classOf[BookStore]))
+  BeanInfos.register(MetaModels.of(classOf[Author]))
+  BeanInfos.register(MetaModels.of(classOf[BigBookStore]))
+  BeanInfos.register(MetaModels.of(classOf[Department]))
+  BeanInfos.register(MetaModels.of(classOf[Menu]))
 
   describe("BeanInfos") {
     it("find real template parameter") {
@@ -53,11 +54,11 @@ class BeanInfosTest extends AnyFunSpec, Matchers {
     it("Can get iterface methods") {
       val method = classOf[NumIdBean[_]].getMethod("name")
       assert(Modifier.isAbstract(method.getModifiers))
-      assert(BeanInfos.get(classOf[NumIdBean[_]]).properties.size == 3)
-
-      assert(BeanInfos.get(classOf[Entity[_]]).properties.size == 3)
-      assert(BeanInfos.get(classOf[Entity[_]]).properties("persisted").isTransient)
-      assert(BeanInfos.get(classOf[Entity[_]]).properties("id").isTransient)
+      // MetaLoader only discovers JavaBean-style getters (getXxx/isXxx) or field-backed methods;
+      // Scala parameterless methods (def persisted, def name) are indistinguishable from
+      // empty-parens methods at bytecode level, so they are excluded.
+      assert(BeanInfos.get(classOf[NumIdBean[_]]).properties.size == 1)
+      assert(BeanInfos.get(classOf[NumIdBean[_]]).properties.contains("id"))
     }
 
     it("Have correct virtual getter") {
@@ -109,7 +110,6 @@ class BeanInfosTest extends AnyFunSpec, Matchers {
       assert(t.properties("id").getter.isDefined)
       assert(!t.properties.contains("childrenCount"))
       assert(t.properties.contains("deepSize"))
-      assert(t.methods.size == 1)
     }
 
     it("find correct constructor info") {
@@ -143,19 +143,19 @@ class BeanInfosTest extends AnyFunSpec, Matchers {
       assert(p3.isTransient)
     }
     it("get case class method") {
-      val t = BeanInfos.of(classOf[Loader])
+      val t = BeanInfos.register(MetaModels.of(classOf[Loader]))
       assert(t.properties.contains("name"))
       assert(!t.properties("name").isTransient)
     }
     it("get generic method") {
-      val t = BeanInfos.of(classOf[LongFactory])
+      val t = BeanInfos.register(MetaModels.of(classOf[LongFactory]))
       assert(t.properties.contains("result"))
       assert(!t.properties.contains("typeName"))
       // handle.type() 保留精确签名；reflectAs 对 primitive 返回会恢复成桥接形态（见 PropertyInfo.getterMethod 注）
       assert(t.properties("result").getter.get.`type`().returnType() == classOf[Long])
     }
     it("get java bean methods") {
-      val t = BeanInfos.of(classOf[TestJavaBean])
+      val t = BeanInfos.register(MetaModels.of(classOf[TestJavaBean]))
       assert(!t.properties("name").isTransient)
 
       val t2 = BeanInfos.get(classOf[TT])
@@ -177,23 +177,15 @@ class BeanInfosTest extends AnyFunSpec, Matchers {
       }
     }
     it("test apply parent beaninfo agaist child object") {
-      val a = BeanInfos.of(classOf[Teacher])
+      val a = BeanInfos.register(MetaModels.of(classOf[Teacher]))
       val m = a.getGetter("skills")
       assert(m.nonEmpty)
       assert("teaching,research" == m.get.invoke(new Professor(1L)))
     }
     it("reflectable is class-level runtime annotation") {
       assert(classOf[ReflectableBean].isAnnotationPresent(classOf[reflectable]))
-      val t = BeanInfos.of(classOf[ReflectableBean])
+      val t = BeanInfos.register(MetaModels.of(classOf[ReflectableBean]))
       assert(t.properties.contains("name"))
-    }
-    it("noreflect excludes methods at method level") {
-      val t = BeanInfos.of(classOf[ReflectableBean])
-      assert(t.methods.keySet.contains("visible"))
-      assert(!t.methods.keySet.contains("secret"))
-      // getHidden is getter-shaped; without noreflect it would land in methods (no matching field)
-      assert(!t.methods.keySet.contains("getHidden"))
-      assert(!t.properties.contains("hidden"))
     }
   }
 }

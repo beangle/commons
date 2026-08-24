@@ -1,4 +1,4 @@
-# Beangle Metamodel Usage Guide
+# Beangle Beanmodel Usage Guide
 
 > Usage, architecture, and tooling for the beangle metamodel system.
 > For the binary format specification, see [metamodel-spec.md](metamodel-spec.md).
@@ -8,13 +8,13 @@
 ```
 org.beangle.commons.bean.meta
 ├── MetaModel          # Core data model (ClassMeta, Property, Ctor, Method)
-├── MetaCodec          # Binary codec for single class blob (BMET magic)
-├── MetaIndex          # Multi-class container format (BMXI magic)
+├── MetaCodec          # Binary codec for single class blob (BBET magic)
+├── MetaIndex          # Multi-class container format (BBXI magic)
 ├── MetaModels         # Global lookup (full-load-at-startup)
 ├── MetaLoader         # Runtime reflection → ClassMeta (fallback)
 ├── MetaJson           # Debug JSON export (one-way)
 ├── MetaRegistry       # Abstract registry for collecting ClassMeta
-├── MetaGenerator      # CLI tool for generating metamodel.idx
+├── MetaGenerator      # CLI tool for generating beanmeta.idx
 ├── ClassMetas         # Compile-time entry point (macros)
 └── MetaDigger         # Compile-time macro digger
 ```
@@ -26,7 +26,7 @@ Compile time:
   MetaDigger → ClassMeta → MetaCodec.encode → binary blob
 
 Runtime (with binary):
-  metamodel.idx → MetaModels → ClassMeta → BeanInfo.from → BeanInfo
+  beanmeta.idx → MetaModels → ClassMeta → BeanInfo.from → BeanInfo
 
 Runtime (reflection fallback):
   Class → MetaLoader → ClassMeta → BeanInfo.from → BeanInfo
@@ -37,7 +37,7 @@ BeanInfo.from reconstructs BeanInfo with accessor MethodHandles.
 
 ## 2. Global Lookup (MetaModels)
 
-`MetaModels` scans `classpath*:META-INF/beangle/metamodel.idx` at startup and loads all ClassMeta into memory:
+`MetaModels` scans `classpath*:META-INF/beangle/beanmeta.idx` at startup and loads all ClassMeta into memory:
 
 ```scala
 import org.beangle.commons.bean.meta.MetaModels
@@ -104,7 +104,7 @@ println(cm.methods)     // Seq[Method]
 import org.beangle.commons.bean.meta.MetaModels
 import org.beangle.commons.lang.reflect.BeanInfo
 
-// Get ClassMeta from metamodel.idx
+// Get ClassMeta from beanmeta.idx
 val cm = MetaModels.get(classOf[User]).get
 
 // Reconstruct BeanInfo with MethodHandles
@@ -131,10 +131,10 @@ java -cp <classpath> org.beangle.commons.bean.meta.MetaJson <file.beaninfo>...
 
 ## 7. MetaGenerator Tool
 
-Scans classes directory for MetaRegistry subclasses and generates metamodel.idx:
+Scans classes directory for MetaRegistry subclasses and generates beanmeta.idx:
 
 ```bash
-# Generate metamodel.idx
+# Generate beanmeta.idx
 MetaGenerator target/classes
 
 # Generate to custom path
@@ -151,7 +151,7 @@ With `--graalvm` option, generates:
 | File | Purpose |
 |------|---------|
 | `reflect-config.json` | Declares classes needing reflection access |
-| `resource-config.json` | Declares metamodel.idx as resource to include |
+| `resource-config.json` | Declares beanmeta.idx as resource to include |
 
 ## 8. Memory Footprint
 

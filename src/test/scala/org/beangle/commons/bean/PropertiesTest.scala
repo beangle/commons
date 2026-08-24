@@ -18,6 +18,7 @@
 package org.beangle.commons.bean
 
 import org.beangle.commons.lang.reflect.BeanInfos
+import org.beangle.commons.bean.meta.MetaModels
 import org.beangle.commons.lang.testbean.{Dog, TestBean}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -26,7 +27,7 @@ import java.util
 
 class PropertiesTest extends AnyFunSpec, Matchers {
 
-  BeanInfos.of(classOf[TestBean])
+  BeanInfos.register(MetaModels.of(classOf[TestBean]))
   describe("Properties") {
     it("Get or Set property") {
       BeanInfos.get(classOf[TestBean]).properties("javaMap")

@@ -31,7 +31,7 @@ import scala.reflect.*
 
 /** Runtime reflection counterpart of [[MetaDigger]]: reflects a Class into [[BeanMeta]].
   *
-  * This is the fallback path when no pre-built metamodel.idx is available.
+  * This is the fallback path when no pre-built beanmeta.idx is available.
   * The returned BeanMeta is pure metadata (no MethodHandles); use
   * [[org.beangle.commons.lang.reflect.BeanInfo.from]] to reconstruct
   * a BeanInfo with accessor MethodHandles.

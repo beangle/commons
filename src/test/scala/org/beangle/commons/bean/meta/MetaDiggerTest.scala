@@ -17,7 +17,7 @@
 
 package org.beangle.commons.bean.meta
 
-import org.beangle.commons.bean.meta.MetaModel.ClassMeta
+import org.beangle.commons.bean.meta.MetaModel.BeanMeta
 import org.beangle.commons.lang.annotation.noreflect
 import org.beangle.commons.lang.reflect.{BeanInfos, TypeInfo}
 import org.beangle.commons.lang.reflect.TypeInfo.IterableType
@@ -69,18 +69,6 @@ class MetaDiggerTest extends AnyFunSpec, Matchers {
       assert(cm.ctors(1).parameters.map(_.name) == Seq("name"))
     }
 
-    it("digs methods with TypeInfo param types") {
-      val cm = MetaModels.of(classOf[PersonMeta])
-      val methods = cm.methods.map(m => (m.name, m.paramTypes)).toMap
-      assert(methods.keySet == Set("greet", "childrenCount"))
-      assert(methods("greet").size == 1)
-      assert(methods("greet").head.clazz == classOf[String])
-      assert(methods("childrenCount").isEmpty)
-      assert(!methods.contains("secret")) // noreflect
-      assert(!methods.contains("copy")) // case class ignore
-      assert(!methods.contains("canEqual"))
-    }
-
     it("supports the varargs form") {
       val list = MetaModels.of(classOf[PersonMeta], classOf[OtherMeta])
       assert(list.map(_.clazz) == Seq(classOf[PersonMeta], classOf[OtherMeta]))
@@ -92,18 +80,13 @@ class MetaDiggerTest extends AnyFunSpec, Matchers {
       assert(MetaCodec.parse(MetaCodec.encode(cm)) == cm)
     }
 
-    it("round-trips PersonMeta properties and methods through the v2 codec") {
+    it("round-trips PersonMeta properties through the v2 codec") {
       val cm = MetaModels.of(classOf[PersonMeta])
       val parsed = MetaCodec.parse(MetaCodec.encode(cm))
-      // Compare properties and methods (ctor defaults of unsupported types like List are dropped during encoding)
-      assert(normalize(parsed).properties == normalize(cm).properties)
-      assert(normalize(parsed).methods == normalize(cm).methods)
+      assert(parsed.properties == cm.properties)
       assert(parsed.clazz == cm.clazz)
     }
   }
-
-  /** Sorts methods for order-insensitive comparison (properties already sorted by name). */
-  private def normalize(cm: ClassMeta): ClassMeta = cm.copy(methods = cm.methods.sortBy(m => (m.name, m.paramTypes.mkString("|"))))
 }
 
 case class PersonMeta(name: String, age: Int = 18, tags: List[String] = Nil) {

@@ -17,6 +17,7 @@
 
 package org.beangle.commons.cdi
 
+import org.beangle.commons.bean.meta.{MetaDigger, MetaRegistry}
 import org.beangle.commons.cdi.Binder.*
 import org.beangle.commons.config.{Environment, PlaceHolder}
 import org.beangle.commons.lang.reflect.*
@@ -24,62 +25,75 @@ import org.beangle.commons.lang.reflect.*
 import java.util as ju
 import scala.quoted.*
 
-/** Compile-time binding macros. */
+/** Compile-time binding macros.
+  *
+  * Each macro calls [[MetaRegistry.registerImpl]] to dig BeanMeta at compile time
+  * and register it with the owning [[BindModule]] (a MetaRegistry subclass).
+  * The binder call is guarded so that [[MetaRegistry.collect]] can trigger
+  * registration without a live binder (e.g. during MetaGenerator scanning).
+  */
 object BindModule {
 
   /** Binds the given classes to the binder.
-   *
-   * @param clazzesExpr  the classes to bind
-   * @param binder       the Binder
-   * @param wiredEagerly whether to wire eagerly
-   * @return the BatchBinder
-   */
+    *
+    * When binder is null (MetaGenerator scan), only registers BeanMeta.
+    * When binder is set (normal CDI binding), only performs the bind.
+    */
   def bind(clazzesExpr: Expr[Seq[Class[_]]],
+           registry: Expr[MetaRegistry],
            binder: Expr[Binder], wiredEagerly: Expr[Boolean])
           (implicit quotes: Quotes): Expr[BatchBinder] = {
     '{
-      BeanInfos.of(${ clazzesExpr }: _*)
-      ${ binder }.bind(${ clazzesExpr }: _*).wiredEagerly(${ wiredEagerly })
+      val b = ${ binder }
+      if b == null then
+        ${ MetaRegistry.registerImpl(clazzesExpr, registry) }
+        null.asInstanceOf[BatchBinder]
+      else
+        b.bind(${ clazzesExpr }: _*).wiredEagerly(${ wiredEagerly })
     }
   }
 
-  /** Binds the given class with the specified bean name.
-   *
-   * @param beanName     the bean name
-   * @param clazz        the class to bind
-   * @param binder       the Binder
-   * @param wiredEagerly whether to wire eagerly
-   * @return the BatchBinder
-   */
+  /** Binds the given class with the specified bean name. */
   def bind[T: Type](beanName: Expr[String], clazz: Expr[Class[T]],
+                    registry: Expr[MetaRegistry],
                     binder: Expr[Binder], wiredEagerly: Expr[Boolean])
                    (implicit quotes: Quotes): Expr[BatchBinder] = {
     '{
-      BeanInfos.of(${ clazz })
-      ${ binder }.bind(${ beanName }, ${ clazz }).wiredEagerly(${ wiredEagerly })
+      val b = ${ binder }
+      if b == null then
+        ${ MetaRegistry.registerImpl(Varargs(Seq(clazz)), registry) }
+        null.asInstanceOf[BatchBinder]
+      else
+        b.bind(${ beanName }, ${ clazz }).wiredEagerly(${ wiredEagerly })
     }
   }
 
-  /** Creates a bean definition for the given class.
-   *
-   * @param clazz        the class
-   * @param binder       the Binder
-   * @param wiredEagerly whether to wire eagerly
-   * @return the Definition
-   */
+  /** Creates a bean definition for the given class. */
   def bean[T: Type](clazz: Expr[Class[T]],
+                    registry: Expr[MetaRegistry],
                     binder: Expr[Binder], wiredEagerly: Expr[Boolean])
                    (implicit quotes: Quotes): Expr[Definition] = {
     '{
-      BeanInfos.of(${ clazz })
-      ${ binder }.bind(${ binder }.newInnerBeanName(${ clazz }), ${ clazz }).head.wiredEagerly(${ wiredEagerly })
+      val b = ${ binder }
+      if b == null then
+        ${ MetaRegistry.registerImpl(Varargs(Seq(clazz)), registry) }
+        null.asInstanceOf[Definition]
+      else
+        b.bind(b.newInnerBeanName(${ clazz }), ${ clazz }).head.wiredEagerly(${ wiredEagerly })
     }
   }
 
 }
 
-/** Abstract CDI binding module. Subclasses can be registered in /META-INF/beangle/cdi.xml via modules=com.your.Class. */
-abstract class BindModule {
+/** Abstract CDI binding module. Subclasses can be registered in /META-INF/beangle/cdi.xml via modules=com.your.Class.
+  *
+  * Extends [[MetaRegistry]] so that [[MetaGenerator]] can scan BindModule subclasses
+  * and produce beanmeta.idx at build time. The binder call is guarded for null
+  * to support MetaGenerator's no-binder scan path.
+  */
+abstract class BindModule extends MetaRegistry {
+
+  override protected def registering(): Unit = binding()
 
   private var binder: Binder = _
 
@@ -97,7 +111,7 @@ abstract class BindModule {
   }
 
   /** Binds the given classes. */
-  protected inline def bind(inline classes: Class[_]*): BatchBinder = ${ BindModule.bind('classes, 'binder, 'wiredEagerly) }
+  protected inline def bind(inline classes: Class[_]*): BatchBinder = ${ BindModule.bind('classes, 'this, 'binder, 'wiredEagerly) }
 
   /** Returns a reference to a bean by name. */
   protected final def ref(name: String): Reference = Reference(name)
@@ -109,7 +123,7 @@ abstract class BindModule {
   protected final def entry(key: Any, value: Any): (_, _) = Tuple2(key, value)
 
   /** Creates an inner bean definition. */
-  protected inline def bean[T](clazz: Class[T]): Definition = ${ BindModule.bean('clazz, 'binder, 'wiredEagerly) }
+  protected inline def bean[T](clazz: Class[T]): Definition = ${ BindModule.bean('clazz, 'this, 'binder, 'wiredEagerly) }
 
   protected final def inject[T](clazz: Class[T]): Injection[T] = {
     Injection(clazz)
@@ -175,7 +189,7 @@ abstract class BindModule {
 
   /** Binds the class with the given bean name. */
   protected inline def bind[T](beanName: String, clazz: Class[T]): BatchBinder =
-    ${ BindModule.bind('beanName, 'clazz, 'binder, 'wiredEagerly) }
+    ${ BindModule.bind('beanName, 'clazz, 'this, 'binder, 'wiredEagerly) }
 
   /** Binds a singleton instance with the given name. */
   protected final def bind(beanName: String, singleton: AnyRef): Singleton = {

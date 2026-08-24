@@ -25,7 +25,7 @@ import scala.quoted.*
 
 /** Class metadata registry: subclasses override [[registering]] template method
   * and call [[register]] to register classes; [[encode]] writes collected BeanMeta
-  * to the caller-specified stream (metamodel.idx).
+  * to the caller-specified stream (beanmeta.idx).
   *
   * {{{
   * class AppRegistry extends MetaRegistry {
@@ -33,7 +33,7 @@ import scala.quoted.*
   *     register(classOf[User], classOf[Role])
   *   }
   * }
-  * val out = new FileOutputStream("metamodel.idx")
+  * val out = new FileOutputStream("beanmeta.idx")
   * new AppRegistry().encode(out)
   * }}}
   *
@@ -61,7 +61,7 @@ abstract class MetaRegistry {
     metas.toSeq
   }
 
-  /** Encodes collected class metadata to the specified stream (metamodel.idx). */
+  /** Encodes collected class metadata to the specified stream (beanmeta.idx). */
   def encode(out: OutputStream): Unit = MetaIndex.write(out, collect())
 
   /** Adds BeanMeta to internal buffer (used by macro expansion). */

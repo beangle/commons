@@ -17,7 +17,7 @@
 
 package org.beangle.commons.bean.meta
 
-import org.beangle.commons.bean.meta.MetaModel.{ClassMeta, Property}
+import org.beangle.commons.bean.meta.MetaModel.{BeanMeta, Property}
 import org.beangle.commons.lang.reflect.TypeInfo.IterableType
 import org.beangle.commons.lang.reflect.{BeanInfo, BeanInfos, TypeInfo}
 import org.scalatest.funspec.AnyFunSpec
@@ -114,23 +114,16 @@ class MetaCodecTest extends AnyFunSpec, Matchers {
   }
 
   it("round-trips transient flag") {
-    val cm = ClassMeta(classOf[CodecRole],
+    val cm = BeanMeta(classOf[CodecRole],
       Seq(MetaModel.Property("code", TypeInfo.get(classOf[String]), isTransient = true, isOptional = false)),
-      Seq.empty, Seq.empty)
+      Seq.empty)
     val parsed = MetaCodec.parse(MetaCodec.encode(cm))
     val code = parsed.properties.find(_.name == "code").get
     code.isTransient shouldBe true
   }
 
-  it("serializes methods; parse keeps them as raw records without resolving") {
-    val cm = ClassMeta(classOf[CodecRole], Seq.empty, Seq.empty,
-      Seq(MetaModel.Method("code", Seq.empty)))
-    val parsed = MetaCodec.parse(MetaCodec.encode(cm))
-    parsed.methods shouldBe Seq(MetaModel.Method("code", Seq.empty))
-  }
-
   it("property handles read and write bean properties") {
-    val bi = BeanInfos.of(classOf[CodecSample])
+    val bi = BeanInfos.register(MetaModels.of(classOf[CodecSample]))
     val sample = new CodecSample(5L, "n")
     val idGetter = bi.getGetter("id").get
     val nameGetter = bi.getGetter("name").get
@@ -159,7 +152,7 @@ class MetaCodecTest extends AnyFunSpec, Matchers {
 
   it("exports parsed meta model as debug json (no reverse parse)") {
     val parsed = MetaCodec.parse(MetaCodec.encode(MetaModels.of(classOf[CodecSample])))
-    val json = MetaJson.toJson(parsed)
+    val json = parsed.toString
     json should startWith("{")
     json should endWith("}")
     json should include("\"clazz\":\"org.beangle.commons.bean.meta.CodecSample\"")

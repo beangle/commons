@@ -1,22 +1,22 @@
-# Beangle Metamodel Binary Specification
+# Beangle Beanmodel Binary Specification
 
 > Compact, self-contained, random-accessible binary format for bean metadata (properties / ctors).
 
 ## 1. Overview
 
 ```
-metamodel.idx (multi-class container)
+beanmeta.idx (multi-class container)
 ┌───────────────────────────────────────────────┐
-│ Header: magic "BMXI" + version u16            │  6B
+│ Header: magic "BBXI" + version u16            │  6B
 ├───────────────────────────────────────────────┤
 │ Directory: count u32 + entries...             │  Random access by class name
 ├───────────────────────────────────────────────┤
-│ Blobs: count × { self-contained v1 blob }     │  Each starts with magic "BMET"
+│ Blobs: count × { self-contained v1 blob }     │  Each starts with magic "BBET"
 └───────────────────────────────────────────────┘
 
 Single class blob (MetaCodec format):
 ┌───────────────────────────────────────────────┐
-│ Header: magic "BMET" + version u16 + flags u16│  10B
+│ Header: magic "BBET" + version u16 + flags u16│  10B
 │         + nameIdx u16 (class name, pool index)│
 ├───────────────────────────────────────────────┤
 │ Constant pool: poolSize u16 + UTF8 entries    │  All strings deduplicated
@@ -35,14 +35,14 @@ Single class blob (MetaCodec format):
 
 | Component | Magic | Version | Description |
 |-----------|-------|---------|-------------|
-| **MetaCodec** (single class blob) | `BMET` | 1 | Beangle Meta |
-| **MetaIndex** (multi-class container) | `BMXI` | 1 | Beangle Meta Index |
+| **MetaCodec** (single class blob) | `BBET` | 1 | Beangle Bean |
+| **MetaIndex** (multi-class container) | `BBXI` | 1 | Beangle Bean Index |
 
 ## 3. Single Class Blob Header (10B)
 
 | Field | Size | Description |
 |-------|------|-------------|
-| magic | 4B | `"BMET"` (0x42 0x4D 0x45 0x54) |
+| magic | 4B | `"BBET"` (0x42 0x4D 0x45 0x54) |
 | version | u16 | = 1 |
 | flags | u16 | Reserved, = 0 |
 | nameIdx | u16 | Class name index in constant pool |
@@ -122,10 +122,10 @@ payload: count u8, count × {
 }
 ```
 
-## 7. MetaIndex Format (metamodel.idx)
+## 7. MetaIndex Format (beanmeta.idx)
 
 ```
-Header:    magic "BMXI" + version u16
+Header:    magic "BBXI" + version u16
 Directory: count u32, count × { nameLen u16 + name UTF-8 + offset u32 + length u32 }
 Blobs:     count × { self-contained MetaCodec blob }
 ```
@@ -147,7 +147,7 @@ class User(var id: Long, var name: String, var nick: Option[String])
 
 ```
 Offset  Hex bytes                                                       ASCII
-0000    42 4D 45 54 00 01 00 00 00 80 00 04 00 00 25 6F  |BMET..........%o|
+0000    42 42 45 54 00 01 00 00 00 80 00 04 00 00 25 6F  |BBET..........%o|
 0010    72 67 2F 62 65 61 6E 67 6C 65 2F 64 61 74 61 2F  |rg/beangle/data/|
 0020    68 69 62 65 72 6E 61 74 65 2F 6D 6F 64 65 6C 2F  |hibernate/model/|
 0030    55 73 65 72 00 00 02 69 64 00 00 04 6E 61 6D 65  |User...id...name|
@@ -160,12 +160,12 @@ Offset  Hex bytes                                                       ASCII
 ### 8.1 Header (offset 0x00–0x09, 10B)
 
 ```
-42 4D 45 54 | 00 01 | 00 00 | 00 80
+42 42 45 54 | 00 01 | 00 00 | 00 80
 ```
 
 | Bytes | Value | Meaning |
 |-------|-------|---------|
-| `42 4D 45 54` | `"BMET"` | magic (0x42 0x4D 0x45 0x54) |
+| `42 42 45 54` | `"BBET"` | magic (0x42 0x4D 0x45 0x54) |
 | `00 01` | version = 1 | big-endian u16 |
 | `00 00` | flags = 0 | reserved |
 | `00 80` | nameIdx = 128 | class name = first explicit pool entry (after builtin zone 0–127) |

@@ -19,13 +19,14 @@ package org.beangle.commons.script
 
 import org.beangle.commons.json.{JsonArray, JsonObject}
 import org.beangle.commons.lang.reflect.BeanInfos
+import org.beangle.commons.bean.meta.MetaModels
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class JexlScriptEngineTest extends AnyFunSpec, Matchers {
 
   describe("JexlScriptEngine evaluate expression") {
-    BeanInfos.of(classOf[Depart])
+    BeanInfos.register(MetaModels.of(classOf[Depart]))
     val evaluator = ExprEvaluator.get(ExprEvaluator.Jexl3Engine)
     val data = Map("depart" -> Depart("销售部", "三楼"), "score" -> 95)
     assert("三楼" == evaluator.eval("depart.office", data))

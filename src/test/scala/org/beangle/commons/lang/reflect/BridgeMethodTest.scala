@@ -18,6 +18,7 @@
 package org.beangle.commons.lang.reflect
 
 import org.beangle.commons.lang.testbean.{Dog, QiutianDog}
+import org.beangle.commons.bean.meta.MetaModels
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -33,7 +34,7 @@ class BridgeMethodTest extends AnyFunSpec, Matchers {
       }
     }
     it("Cannot find protected methods") {
-      val bi = BeanInfos.of(classOf[QiutianDog])
+      val bi = BeanInfos.register(MetaModels.of(classOf[QiutianDog]))
 
       assert(!bi.properties.contains("skills"))
     }

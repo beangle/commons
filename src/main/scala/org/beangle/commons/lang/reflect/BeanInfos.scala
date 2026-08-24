@@ -20,7 +20,7 @@ package org.beangle.commons.lang.reflect
 import org.beangle.commons.bean.meta.{MetaLoader, MetaModel, MetaModels}
 import org.beangle.commons.collection.IdentityCache
 
-/** Global BeanInfo cache with compile-time macro and runtime reflection entry points. */
+/** Global BeanInfo cache. Runtime entry point; compile-time dig goes through [[MetaModels.of]]. */
 object BeanInfos {
 
   private val cache = new IdentityCache[Class[_], BeanInfo]
@@ -29,25 +29,31 @@ object BeanInfos {
   def get(clazz: Class[_]): BeanInfo = {
     val exist = cache.get(clazz)
     if (null != exist) return exist
-    build(clazz, MetaModels.get(clazz).getOrElse(MetaLoader.load(clazz)))
-  }
-
-  /** Digs BeanInfo for classes. Binary lookup first, compile-time macro dig as fallback. */
-  inline def of(inline clazzes: Class[_]*): List[BeanInfo] = {
-    clazzes.toList.map(of)
-  }
-
-  /** Digs BeanInfo for single class. Binary lookup first, compile-time macro dig as fallback. */
-  inline def of[T](clazz: Class[T]): BeanInfo = {
-    build(clazz, MetaModels.get(clazz).getOrElse(MetaModels.of(clazz)))
+    register(MetaModels.get(clazz).getOrElse(MetaLoader.load(clazz)))
   }
 
   /** Returns true if BeanInfo is cached for the class. */
   def cached(clazz: Class[_]): Boolean = cache.contains(clazz)
 
-  def build(clazz: Class[_], cm: MetaModel.ClassMeta): BeanInfo = {
-    val bi = BeanInfo.from(cm)
+  /** Registers a pre-built BeanInfo into the cache. */
+  def update(bi: BeanInfo): BeanInfo = {
+    cache.put(bi.meta.clazz, bi)
+    bi
+  }
+
+  /** Registers a BeanInfo for a specific class (e.g. subclass sharing parent's BeanInfo). */
+  def update(clazz: Class[_], bi: BeanInfo): BeanInfo = {
     cache.put(clazz, bi)
+    bi
+  }
+
+  /** Clears all cached BeanInfo. */
+  def clear(): Unit = cache.clear()
+
+  /** Registers BeanInfo from BeanMeta into the cache. */
+  def register(cm: MetaModel.BeanMeta): BeanInfo = {
+    val bi = BeanInfo.from(cm)
+    cache.put(bi.clazz, bi)
     bi
   }
 }
