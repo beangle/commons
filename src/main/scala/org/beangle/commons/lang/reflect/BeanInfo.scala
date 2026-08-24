@@ -18,13 +18,11 @@
 package org.beangle.commons.lang.reflect
 
 import org.beangle.commons.bean.meta.MetaModel
-import org.beangle.commons.bean.meta.MetaModel.ClassMeta
-
+import org.beangle.commons.bean.meta.MetaModel.BeanMeta
 import org.beangle.commons.lang.reflect.BeanInfo.*
 
 import java.lang.invoke.{MethodHandle, MethodHandles}
 import java.lang.reflect.Method
-import scala.collection.immutable.ArraySeq
 
 /** BeanInfo introspection and PropertyInfo. */
 object BeanInfo {
@@ -32,7 +30,7 @@ object BeanInfo {
   /** Property metadata: holds [[MetaModel.Property]] reference + accessor MethodHandles.
     *
     * Delegates name/typeinfo/isTransient/isOptional to the underlying [[MetaModel.Property]],
-    * avoiding data duplication when both ClassMeta and BeanInfo are in memory.
+    * avoiding data duplication when both BeanMeta and BeanInfo are in memory.
     * For optional properties, typeinfo returns the resolved type (Option[X]) by wrapping
     * the flattened element type stored in MetaModel.Property.
     */
@@ -61,25 +59,12 @@ object BeanInfo {
     }
   }
 
-  /** Method metadata: holds [[MetaModel.Method]] reference + handler MethodHandle.
-    *
-    * Delegates name and parameter matching to the underlying [[MetaModel.Method]].
-    */
-  case class MethodInfo(meta: MetaModel.Method, handler: MethodHandle) {
-    def name: String = meta.name
-
-    override def toString: String = s"def $name(${meta.paramTypes.mkString(", ")})"
-
-    /** Returns true if the given args match parameter types. */
-    def matches(args: Any*): Boolean = meta.matches(args*)
-  }
-
-  /** Constructs a BeanInfo from a [[ClassMeta]] (binary-decoded or compile-time digged).
+  /** Constructs a BeanInfo from a [[BeanMeta]] (binary-decoded or compile-time digged).
     *
     * Uses getter/setter names from Property metadata for direct method lookup,
     * avoiding full method scans for each property.
     */
-  def from(cm: ClassMeta): BeanInfo = {
+  def from(cm: BeanMeta): BeanInfo = {
     val clazz = cm.clazz
 
     // Pre-group all methods by name for O(1) lookup
@@ -90,31 +75,14 @@ object BeanInfo {
       methodsByName.get(name).flatMap(cs => cs.find(!_.isBridge).orElse(cs.headOption))
     }
 
-    /** Finds a method by name and parameter type signature. */
-    def findBySignature(name: String, paramTypes: Seq[TypeInfo]): Option[Method] = {
-      methodsByName.getOrElse(name, Array.empty[Method]).find { m =>
-        m.getParameterTypes.length == paramTypes.length &&
-          m.getParameterTypes.zip(paramTypes).forall((pt, expected) => pt == expected.clazz)
-      }
-    }
-
-    // Build properties using getter/setter names from ClassMeta for direct lookup.
+    // Build properties using getter/setter names from BeanMeta for direct lookup.
     val properties = cm.properties.map { p =>
       val getter = p.getterName.flatMap(findByName).map(unreflect)
       val setter = p.setterName.flatMap(findByName).map(unreflect)
       (p.name, PropertyInfo(p, getter, setter))
     }.toMap
 
-    // Build methods: find matching method for each cm.methods entry
-    val methods = cm.methods.flatMap { m =>
-      findBySignature(m.name, m.paramTypes).map { method =>
-        (m.name, MethodInfo(m, unreflect(method)))
-      }
-    }.groupBy(_._1).map { case (name, entries) =>
-      (name, ArraySeq.from(entries.map(_._2)))
-    }
-
-    BeanInfo(cm, properties, methods)
+    BeanInfo(cm, properties)
   }
 
   /** Unreflects a Method into a MethodHandle (setAccessible fallback for non-public classes). */
@@ -129,11 +97,10 @@ object BeanInfo {
 
 /** Introspection info for a Java/Scala class.
   *
-  * Holds a [[ClassMeta]] reference as the single source of truth for class metadata.
-  * Properties and methods add accessor MethodHandles on top of the metadata.
+  * Holds a [[BeanMeta]] reference as the single source of truth for class metadata.
+  * Properties add accessor MethodHandles on top of the metadata.
   */
-class BeanInfo(val meta: ClassMeta, val properties: Map[String, PropertyInfo],
-               val methods: Map[String, ArraySeq[MethodInfo]]) {
+class BeanInfo(val meta: BeanMeta, val properties: Map[String, PropertyInfo]) {
 
   def clazz: Class[_] = meta.clazz
 
