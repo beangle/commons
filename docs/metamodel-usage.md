@@ -13,7 +13,7 @@ org.beangle.commons.bean.meta
 ├── MetaModels         # Global lookup (full-load-at-startup)
 ├── MetaLoader         # Runtime reflection → ClassMeta (fallback)
 ├── MetaJson           # Debug JSON export (one-way)
-├── MetaRegistry       # Abstract registry for collecting ClassMeta
+├── MetaRegistrar       # Abstract registry for collecting ClassMeta
 ├── MetaGenerator      # CLI tool for generating beanmeta.idx
 ├── ClassMetas         # Compile-time entry point (macros)
 └── MetaDigger         # Compile-time macro digger
@@ -64,12 +64,12 @@ MetaModels.classNames  // Set[String]
 - **String pool deduplication**: shared across all idx files (common strings like "id", "name" stored once);
 - **O(1) lookup**: subsequent `get()` calls are hash table hits with no I/O.
 
-## 3. Compile-Time Registration (MetaRegistry)
+## 3. Compile-Time Registration (MetaRegistrar)
 
 ```scala
-import org.beangle.commons.bean.meta.MetaRegistry
+import org.beangle.commons.bean.meta.MetaRegistrar
 
-class AppRegistry extends MetaRegistry {
+class AppRegistry extends MetaRegistrar {
   override protected def registering(): Unit = {
     register(classOf[User], classOf[Role])
   }
@@ -131,7 +131,7 @@ java -cp <classpath> org.beangle.commons.bean.meta.MetaJson <file.beaninfo>...
 
 ## 7. MetaGenerator Tool
 
-Scans classes directory for MetaRegistry subclasses and generates beanmeta.idx:
+Scans classes directory for MetaRegistrar subclasses and generates beanmeta.idx:
 
 ```bash
 # Generate beanmeta.idx
@@ -139,21 +139,22 @@ MetaGenerator target/classes
 
 # Generate to custom path
 MetaGenerator -o output.idx target/classes
-
-# Also generate GraalVM native-image config files
-MetaGenerator --graalvm target/classes
 ```
 
-### GraalVM Native Image Support
+## 8. AotHintGenerator (GraalVM Native Image)
 
-With `--graalvm` option, generates:
+For detailed AOT/native-image usage, see [aot-usage.md](aot-usage.md).
 
-| File | Purpose |
-|------|---------|
-| `reflect-config.json` | Declares classes needing reflection access |
-| `resource-config.json` | Declares beanmeta.idx as resource to include |
+Quick start — enable the SBT plugin:
 
-## 8. Memory Footprint
+```scala
+lazy val myModule = (project in file(".")).enablePlugins(AotPlugin)
+```
+
+This scans compiled classes for `AotHintRegistrar` implementations and generates
+GraalVM configs as managed resources automatically.
+
+## 9. Memory Footprint
 
 | Component | 1000 classes |
 |-----------|--------------|
@@ -166,7 +167,7 @@ With `--graalvm` option, generates:
 - PropertyInfo/MethodInfo hold MetaModel references, avoiding duplicate storage;
 - Compared to ClassLoader loading 1000 classes (50–200MB bytecode), metamodel footprint is negligible.
 
-## 9. Size Comparison
+## 10. Size Comparison
 
 | Class | Properties | Binary | JSON | Ratio |
 |-------|------------|--------|------|-------|

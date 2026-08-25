@@ -18,17 +18,15 @@
 package org.beangle.commons.bean.meta
 
 import org.beangle.commons.bean.meta.MetaModel.BeanMeta
-import org.beangle.commons.json.{JsonArray, JsonObject}
 import org.beangle.commons.logging.Logging
 
 import java.io.{File, FileOutputStream}
 import java.net.URLClassLoader
-import java.nio.charset.StandardCharsets
 import java.nio.file.{FileVisitResult, Files, Path, SimpleFileVisitor}
 import java.nio.file.attribute.BasicFileAttributes
 import scala.collection.mutable
 
-/** Tool for scanning MetaRegistry subclasses from classes directory and generating beanmeta.idx.
+/** Tool for scanning MetaRegistrar subclasses from classes directory and generating beanmeta.idx.
   *
   * Usage:
   * {{{
@@ -37,20 +35,19 @@ import scala.collection.mutable
   *
   * // Generate to custom output path
   * java -cp <classpath> org.beangle.commons.bean.meta.MetaGenerator -o /path/to/output.idx /path/to/classes
-  *
-  * // Also generate GraalVM native-image config files
-  * java -cp <classpath> org.beangle.commons.bean.meta.MetaGenerator --graalvm /path/to/classes
   * }}}
   *
-  * The tool scans the specified classes directory, finds all MetaRegistry subclasses,
+  * The tool scans the specified classes directory, finds all MetaRegistrar subclasses,
   * collects their BeanMeta entries, and generates beanmeta.idx file.
+  *
+  * For GraalVM native-image configuration, see [[org.beangle.commons.aot.AotHintGenerator]].
   */
 object MetaGenerator extends Logging {
 
   private val DefaultOutputPath = "META-INF/beangle/beanmeta.idx"
 
   def main(args: Array[String]): Unit = {
-    val (classesDirs, outputPath, graalvmMode) = parseArgs(args)
+    val (classesDirs, outputPath) = parseArgs(args)
 
     if (classesDirs.isEmpty) {
       logger.error("No classes directory specified.")
@@ -81,62 +78,9 @@ object MetaGenerator extends Logging {
     } finally {
       if (out ne System.out) out.close()
     }
-
-    // Generate GraalVM config files if requested
-    if (graalvmMode && outputPath != "-") {
-      val parentDir = Path.of(outputPath).getParent
-      generateGraalvmConfigs(parentDir, outputPath, metas)
-    }
   }
 
-  /** Generates GraalVM native-image config files. */
-  private def generateGraalvmConfigs(outputDir: Path, metamodelPath: String, metas: Seq[BeanMeta]): Unit = {
-    // 1. Generate reflect-config.json
-    val reflectPath = outputDir.resolve("reflect-config.json")
-    generateReflectConfig(reflectPath, metas)
-    logger.info(s"Generated $reflectPath")
-
-    // 2. Generate resource-config.json
-    val resourcePath = outputDir.resolve("resource-config.json")
-    generateResourceConfig(resourcePath, metamodelPath)
-    logger.info(s"Generated $resourcePath")
-  }
-
-  /** Generates reflect-config.json for GraalVM native-image. */
-  private def generateReflectConfig(outputPath: Path, metas: Seq[BeanMeta]): Unit = {
-    val entries = metas.map { cm =>
-      JsonObject(
-        "name" -> cm.clazz.getName,
-        "allDeclaredFields" -> true,
-        "allDeclaredConstructors" -> true,
-        "allDeclaredMethods" -> true)
-    }
-
-    val json = JsonArray(entries).toJson
-    Files.write(outputPath, json.getBytes(StandardCharsets.UTF_8))
-  }
-
-  /** Generates resource-config.json for GraalVM native-image. */
-  private def generateResourceConfig(outputPath: Path, metamodelPath: String): Unit = {
-    // Normalize path to use forward slashes for GraalVM
-    val normalizedPath = metamodelPath.replace('\\', '/')
-
-    val resources = JsonObject(
-      "resources" -> JsonObject(
-        "includes" -> JsonArray(
-          JsonObject("pattern" -> "META-INF/beangle/metamodel\\.idx"),
-          JsonObject("pattern" -> normalizedPath)
-        ),
-        "excludes" -> JsonArray()
-      ),
-      "bundles" -> JsonArray()
-    )
-
-    val json = resources.toJson
-    Files.write(outputPath, json.getBytes(StandardCharsets.UTF_8))
-  }
-
-  /** Collects BeanMeta by scanning classes directories for MetaRegistry subclasses. */
+  /** Collects BeanMeta by scanning classes directories for MetaRegistrar subclasses. */
   def collectFromDirs(classesDirs: Seq[String]): Seq[BeanMeta] = {
     val allMetas = new mutable.ArrayBuffer[BeanMeta]
 
@@ -153,7 +97,7 @@ object MetaGenerator extends Logging {
     allMetas.toSeq
   }
 
-  /** Scans a single directory for MetaRegistry subclasses. */
+  /** Scans a single directory for MetaRegistrar subclasses. */
   private def collectFromDir(classesDir: Path): Seq[BeanMeta] = {
     val classFiles = findClassFiles(classesDir)
     if (classFiles.isEmpty) {
@@ -175,9 +119,9 @@ object MetaGenerator extends Logging {
             .replace('/', '.')
 
           val clazz = classLoader.loadClass(className)
-          if (classOf[MetaRegistry].isAssignableFrom(clazz) && !clazz.isInterface) {
-            val registry = clazz.getDeclaredConstructor().newInstance().asInstanceOf[MetaRegistry]
-            val metas = registry.collect()
+          if (classOf[MetaRegistrar].isAssignableFrom(clazz) && !clazz.isInterface) {
+            val registry = clazz.getDeclaredConstructor().newInstance().asInstanceOf[MetaRegistrar]
+            val metas = registry.metas
             allMetas ++= metas
             registryCount += 1
             logger.info(s"Collected ${metas.size} BeanMeta from $className")
@@ -190,7 +134,7 @@ object MetaGenerator extends Logging {
         }
       }
 
-      logger.info(s"Found $registryCount MetaRegistry subclasses in $classesDir")
+      logger.info(s"Found $registryCount MetaRegistrar subclasses in $classesDir")
       allMetas.toSeq
     } finally classLoader.close()
   }
@@ -212,9 +156,8 @@ object MetaGenerator extends Logging {
   }
 
   /** Parses command-line arguments. */
-  private def parseArgs(args: Array[String]): (Seq[String], String, Boolean) = {
+  private def parseArgs(args: Array[String]): (Seq[String], String) = {
     var outputPath = DefaultOutputPath
-    var graalvmMode = false
     val classesDirs = new mutable.ListBuffer[String]
 
     var i = 0
@@ -223,8 +166,6 @@ object MetaGenerator extends Logging {
         case "-o" | "--output" =>
           i += 1
           if (i < args.length) outputPath = args(i)
-        case "--graalvm" | "--reflect" =>
-          graalvmMode = true
         case "-h" | "--help" =>
           printUsage()
           System.exit(0)
@@ -238,25 +179,21 @@ object MetaGenerator extends Logging {
       i += 1
     }
 
-    (classesDirs.toSeq, outputPath, graalvmMode)
+    (classesDirs.toSeq, outputPath)
   }
 
   private def printUsage(): Unit = {
     println("""Usage: MetaGenerator [options] <classes-dir> [classes-dir...]
               |
-              |Scans classes directories for MetaRegistry subclasses and generates beanmeta.idx.
+              |Scans classes directories for MetaRegistrar subclasses and generates beanmeta.idx.
               |
               |Options:
               |  -o, --output <path>   Output path (default: META-INF/beangle/beanmeta.idx)
-              |  --graalvm             Also generate GraalVM native-image config files:
-              |                        - reflect-config.json (reflection metadata)
-              |                        - resource-config.json (resource inclusion)
               |  -h, --help            Show this help
               |
               |Examples:
               |  MetaGenerator target/classes
               |  MetaGenerator -o output.idx target/classes
-              |  MetaGenerator --graalvm target/classes
               |  MetaGenerator target/classes target/test-classes
               |""".stripMargin)
   }

@@ -26,7 +26,7 @@ import java.nio.file.Path
 class MetaGeneratorTest extends AnyFunSpec, Matchers {
 
   describe("MetaGenerator") {
-    it("scans classes directory and finds MetaRegistry subclasses") {
+    it("scans classes directory and finds MetaRegistrar subclasses") {
       // Get the test-classes directory from classpath
       val resource = getClass.getResource("/")
       if (resource != null) {
@@ -64,8 +64,6 @@ class MetaGeneratorTest extends AnyFunSpec, Matchers {
 case class GeneratorTestEntity(id: Long, name: String, value: Int = 0)
 
 /** Test registry for generator testing. */
-class TestAppRegistry extends MetaRegistry {
-  override protected def registering(): Unit = {
-    register(classOf[GeneratorTestEntity])
-  }
+class TestAppRegistry extends MetaRegistrar {
+  register(classOf[GeneratorTestEntity])
 }

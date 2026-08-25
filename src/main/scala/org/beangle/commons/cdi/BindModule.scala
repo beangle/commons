@@ -17,36 +17,35 @@
 
 package org.beangle.commons.cdi
 
-import org.beangle.commons.bean.meta.{MetaDigger, MetaRegistry}
+import org.beangle.commons.bean.meta.MetaRegistrar
 import org.beangle.commons.cdi.Binder.*
 import org.beangle.commons.config.{Environment, PlaceHolder}
-import org.beangle.commons.lang.reflect.*
 
 import java.util as ju
 import scala.quoted.*
 
 /** Compile-time binding macros.
-  *
-  * Each macro calls [[MetaRegistry.registerImpl]] to dig BeanMeta at compile time
-  * and register it with the owning [[BindModule]] (a MetaRegistry subclass).
-  * The binder call is guarded so that [[MetaRegistry.collect]] can trigger
-  * registration without a live binder (e.g. during MetaGenerator scanning).
-  */
+ *
+ * Each macro calls [[MetaRegistrar.registerImpl]] to dig BeanMeta at compile time
+ * and register it with the owning [[BindModule]] (a MetaRegistrar subclass).
+ * The binder call is guarded so that [[MetaRegistrar.collect]] can trigger
+ * registration without a live binder (e.g. during MetaGenerator scanning).
+ */
 object BindModule {
 
   /** Binds the given classes to the binder.
-    *
-    * When binder is null (MetaGenerator scan), only registers BeanMeta.
-    * When binder is set (normal CDI binding), only performs the bind.
-    */
+   *
+   * When binder is null (MetaGenerator scan), only registers BeanMeta.
+   * When binder is set (normal CDI binding), only performs the bind.
+   */
   def bind(clazzesExpr: Expr[Seq[Class[_]]],
-           registry: Expr[MetaRegistry],
+           registry: Expr[MetaRegistrar],
            binder: Expr[Binder], wiredEagerly: Expr[Boolean])
           (implicit quotes: Quotes): Expr[BatchBinder] = {
     '{
       val b = ${ binder }
       if b == null then
-        ${ MetaRegistry.registerImpl(clazzesExpr, registry) }
+        ${ MetaRegistrar.registerImpl(clazzesExpr, registry) }
         null.asInstanceOf[BatchBinder]
       else
         b.bind(${ clazzesExpr }: _*).wiredEagerly(${ wiredEagerly })
@@ -55,13 +54,13 @@ object BindModule {
 
   /** Binds the given class with the specified bean name. */
   def bind[T: Type](beanName: Expr[String], clazz: Expr[Class[T]],
-                    registry: Expr[MetaRegistry],
+                    registry: Expr[MetaRegistrar],
                     binder: Expr[Binder], wiredEagerly: Expr[Boolean])
                    (implicit quotes: Quotes): Expr[BatchBinder] = {
     '{
       val b = ${ binder }
       if b == null then
-        ${ MetaRegistry.registerImpl(Varargs(Seq(clazz)), registry) }
+        ${ MetaRegistrar.registerImpl(Varargs(Seq(clazz)), registry) }
         null.asInstanceOf[BatchBinder]
       else
         b.bind(${ beanName }, ${ clazz }).wiredEagerly(${ wiredEagerly })
@@ -70,13 +69,13 @@ object BindModule {
 
   /** Creates a bean definition for the given class. */
   def bean[T: Type](clazz: Expr[Class[T]],
-                    registry: Expr[MetaRegistry],
+                    registry: Expr[MetaRegistrar],
                     binder: Expr[Binder], wiredEagerly: Expr[Boolean])
                    (implicit quotes: Quotes): Expr[Definition] = {
     '{
       val b = ${ binder }
       if b == null then
-        ${ MetaRegistry.registerImpl(Varargs(Seq(clazz)), registry) }
+        ${ MetaRegistrar.registerImpl(Varargs(Seq(clazz)), registry) }
         null.asInstanceOf[Definition]
       else
         b.bind(b.newInnerBeanName(${ clazz }), ${ clazz }).head.wiredEagerly(${ wiredEagerly })
@@ -86,14 +85,14 @@ object BindModule {
 }
 
 /** Abstract CDI binding module. Subclasses can be registered in /META-INF/beangle/cdi.xml via modules=com.your.Class.
-  *
-  * Extends [[MetaRegistry]] so that [[MetaGenerator]] can scan BindModule subclasses
-  * and produce beanmeta.idx at build time. The binder call is guarded for null
-  * to support MetaGenerator's no-binder scan path.
-  */
-abstract class BindModule extends MetaRegistry {
+ *
+ * Extends [[MetaRegistrar]] so that [[MetaGenerator]] can scan BindModule subclasses
+ * and produce beanmeta.idx at build time. The binder call is guarded for null
+ * to support MetaGenerator's no-binder scan path.
+ */
+abstract class BindModule extends MetaRegistrar {
 
-  override protected def registering(): Unit = binding()
+  override final def registering(): Unit = binding()
 
   private var binder: Binder = _
 

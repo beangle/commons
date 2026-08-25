@@ -23,16 +23,14 @@ import org.scalatest.matchers.should.Matchers
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-class AppRegistry extends MetaRegistry {
-  override def registering(): Unit = {
-    register(classOf[PersonMeta], classOf[OtherMeta])
-    register(classOf[CodecMeta])
-  }
+class AppRegistry extends MetaRegistrar {
+  register(classOf[PersonMeta], classOf[OtherMeta])
+  register(classOf[CodecMeta])
 }
 
-class MetaRegistryTest extends AnyFunSpec, Matchers {
+class MetaRegistrarTest extends AnyFunSpec, Matchers {
 
-  describe("MetaRegistry") {
+  describe("MetaRegistrar") {
     it("collects registered classes through the registering template method") {
       val r = new AppRegistry
       val metas = r.collect()
