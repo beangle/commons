@@ -17,12 +17,11 @@
 
 package org.beangle.commons.bean.meta
 
-import org.beangle.commons.aot.{AotHintRegistrar, AotHints}
+import org.beangle.commons.aot.AotHintRegistrar
 import org.beangle.commons.bean.meta.MetaModel.BeanMeta
 import org.beangle.commons.collection.Collections
 
 import java.io.OutputStream
-import scala.collection.mutable
 import scala.quoted.*
 
 /** Class metadata registry: subclasses call [[register]] to register classes;
@@ -56,12 +55,10 @@ abstract class MetaRegistrar extends AotHintRegistrar {
 
   /** Adds BeanMeta to internal buffer (used by macro expansion). */
   private def addMetas(cms: Iterable[BeanMeta]): Unit = {
-    cms foreach { c => metaMap.put(c.clazz, c) }
-  }
-
-  /** Bridges registered metamodel classes into [[hints]] for GraalVM config generation. */
-  override def registering(): Unit = {
-    metaMap.keys.foreach(c => hints.registerType(c))
+    cms foreach { c =>
+      metaMap.put(c.clazz, c)
+      hints.registerType(c.clazz)
+    }
   }
 }
 
