@@ -81,7 +81,7 @@ class BeanInfosTest extends AnyFunSpec, Matchers {
     }
     it("find escaped key method") {
       val t = BeanInfos.get(classOf[Author]).properties("type")
-      assert(t.getter.isDefined)
+      assert(t.getter != null)
     }
     it("find list author") {
       val t = BeanInfos.get(classOf[Book]).properties("authors")
@@ -106,7 +106,7 @@ class BeanInfosTest extends AnyFunSpec, Matchers {
 
     it("find correct get") {
       val t = BeanInfos.get(classOf[Menu])
-      assert(t.properties("id").getter.isDefined)
+      assert(t.properties("id").getter != null)
       assert(!t.properties.contains("childrenCount"))
       assert(t.properties.contains("deepSize"))
     }
@@ -151,11 +151,12 @@ class BeanInfosTest extends AnyFunSpec, Matchers {
       assert(t.properties.contains("result"))
       assert(!t.properties.contains("typeName"))
       // handle.type() 保留精确签名；reflectAs 对 primitive 返回会恢复成桥接形态（见 PropertyInfo.getterMethod 注）
-      assert(t.properties("result").getter.get.`type`().returnType() == classOf[Long])
+      assert(t.properties("result").getter.`type`().returnType() == classOf[Long])
     }
     it("get java bean methods") {
+      // TestJavaBean has only setName (no getName) — no getter, no property
       val t = BeanInfos.register(MetaModels.of(classOf[TestJavaBean]))
-      assert(!t.properties("name").isTransient)
+      assert(!t.properties.contains("name"))
 
       val t2 = BeanInfos.get(classOf[TT])
       assert(!t2.properties("name").isTransient)

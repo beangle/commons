@@ -34,7 +34,7 @@ object BeanInfo {
     * For optional properties, typeinfo returns the resolved type (Option[X]) by wrapping
     * the flattened element type stored in MetaModel.Property.
     */
-  class PropertyInfo(val meta: MetaModel.Property, val getter: Option[MethodHandle], val setter: Option[MethodHandle]) {
+  class PropertyInfo(val meta: MetaModel.Property, val getter: MethodHandle, val setter: Option[MethodHandle]) {
     def name: String = meta.name
 
     def typeinfo: TypeInfo = if meta.isOptional then TypeInfo.get(classOf[Option[_]], List(meta.typeinfo)) else meta.typeinfo
@@ -49,13 +49,9 @@ object BeanInfo {
     /** Property type class. */
     def clazz: Class[_] = typeinfo.clazz
 
-    /** Returns true if property has getter. */
-    def readable: Boolean = getter.isDefined
-
     override def toString: String = {
-      if writable && readable then s"var $name: $typeinfo = _ "
-      else if readable then s"def $name: $typeinfo"
-      else s"def $name(x1: $typeinfo)"
+      if writable then s"var $name: $typeinfo = _ "
+      else s"def $name: $typeinfo"
     }
   }
 
@@ -76,10 +72,12 @@ object BeanInfo {
     }
 
     // Build properties using getter/setter names from BeanMeta for direct lookup.
-    val properties = cm.properties.map { p =>
-      val getter = p.getterName.flatMap(findByName).map(unreflect)
-      val setter = p.setterName.flatMap(findByName).map(unreflect)
-      (p.name, PropertyInfo(p, getter, setter))
+    // Only properties with a resolved getter are included.
+    val properties = cm.properties.flatMap { p =>
+      findByName(p.getterName).map { getterMethod =>
+        val setter = p.setterName.flatMap(findByName).map(unreflect)
+        (p.name, PropertyInfo(p, unreflect(getterMethod), setter))
+      }
     }.toMap
 
     BeanInfo(cm, properties)
@@ -118,18 +116,31 @@ class BeanInfo(val meta: BeanMeta, val properties: Map[String, PropertyInfo]) {
     properties.get(property).map(_.clazz)
   }
 
-  /** Gets getter MethodHandle for property (invocation layer). */
+  /** Gets getter MethodHandle for property. */
   def getGetter(property: String): Option[MethodHandle] = {
-    properties.get(property).flatMap(_.getter)
+    properties.get(property).map(_.getter)
   }
 
-  /** Gets setter MethodHandle for property (invocation layer). */
+  /** Gets setter MethodHandle for property. */
   def getSetter(property: String): Option[MethodHandle] = {
     properties.get(property).flatMap(_.setter)
   }
 
-  /** Properties with getters. */
-  def readables: Map[String, PropertyInfo] = properties.filter(x => x._2.readable)
+  /** Gets the getter Method for a property by name.
+    * Uses Class.getMethod which returns the most specific (non-bridge) overload.
+    */
+  def getGetterMethod(property: String): Option[Method] = {
+    properties.get(property).flatMap(p => findMethod(p.meta.getterName))
+  }
+
+  /** Gets the setter Method for a property by name. */
+  def getSetterMethod(property: String): Option[Method] = {
+    properties.get(property).flatMap(p => p.meta.setterName.flatMap(findMethod))
+  }
+
+  private def findMethod(name: String): Option[Method] = {
+    try Some(clazz.getMethod(name)) catch case _: NoSuchMethodException => None
+  }
 
   /** Properties with setters. */
   def writables: Map[String, PropertyInfo] = properties.filter(x => x._2.writable)
