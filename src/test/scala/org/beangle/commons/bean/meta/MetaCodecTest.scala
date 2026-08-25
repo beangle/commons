@@ -115,7 +115,7 @@ class MetaCodecTest extends AnyFunSpec, Matchers {
 
   it("round-trips transient flag") {
     val cm = BeanMeta(classOf[CodecRole],
-      Seq(MetaModel.Property("code", TypeInfo.get(classOf[String]), isTransient = true, isOptional = false)),
+      Seq(MetaModel.Property("code", TypeInfo.get(classOf[String]), isTransient = true, isOptional = false, getterName = "getCode")),
       Seq.empty)
     val parsed = MetaCodec.parse(MetaCodec.encode(cm))
     val code = parsed.properties.find(_.name == "code").get

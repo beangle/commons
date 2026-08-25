@@ -59,7 +59,7 @@ object MetaModel {
     typeinfo: TypeInfo,
     isTransient: Boolean,
     isOptional: Boolean,
-    getterName: Option[String] = None,
+    getterName: String,
     setterName: Option[String] = None
   )
 
@@ -91,7 +91,7 @@ object MetaModel {
       * (same shape as [[MetaModels.of]]).
       */
     def addProperty(name: String, ti: Any, isTransient: Boolean,
-                    getterName: Option[String] = None, setterName: Option[String] = None): Unit = {
+                    getterName: String, setterName: Option[String] = None): Unit = {
       TypeInfo.convert(ti) match
         case o: OptionType => properties += Property(name, o.elementType, isTransient, isOptional = true, getterName, setterName)
         case other         => properties += Property(name, other, isTransient, isOptional = false, getterName, setterName)

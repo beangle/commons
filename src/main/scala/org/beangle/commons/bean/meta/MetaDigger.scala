@@ -85,7 +85,7 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     transntAnnotated: Boolean,
     hasGet: Boolean,
     hasSet: Boolean,
-    getterName: Option[String] = None,
+    getterName: String,
     setterName: Option[String] = None
   ) {
     /** Returns true if this field should be transient. */
@@ -167,7 +167,7 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
         val isInnerType = mm.name == Strings.substringBetween(mm.tree.show, "this.", ".type")
         // In Scala 3, var/val getters are implicit (not in declaredMethods).
         // Set getterName = field name since the getter method name matches the field name.
-        if isPublic && isNormal(mm.name) && !noreflect && !isInnerType then fieldMap.put(mm.name, FieldExpr(mm.name, resolveType(tpe, params), transnt, true, true, getterName = Some(mm.name)))
+        if isPublic && isNormal(mm.name) && !noreflect && !isInnerType then fieldMap.put(mm.name, FieldExpr(mm.name, resolveType(tpe, params), transnt, true, true, getterName = mm.name))
       }
 
       base.typeSymbol.declaredMethods foreach { mm =>
@@ -185,18 +185,18 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
           val methodName = encodeBytecodeName(defdef.name)
           this.findAccessor(defdef) match {
             case Some((readable, name)) =>
-              fieldMap.get(name) match {
-                case Some(fx) =>
-                  if readable then fieldMap.put(name, fx.copy(hasGet = true, getterName = Some(methodName)))
-                  else fieldMap.put(name, fx.copy(hasSet = true, setterName = Some(methodName)))
-                case None =>
-                  val rtType = resolveType(defdef.returnTpt.tpe, params)
-                  val paramList = resolveDefParams(defdef, params, Map.empty)
-                  val transnt = defdef.symbol.annotations exists (x => x.show.toLowerCase.contains("transient"))
-                  val fe = if readable then FieldExpr(name, rtType, transnt, true, false, getterName = Some(methodName))
-                           else FieldExpr(name, paramList.head.typeinfo, transnt, false, true, setterName = Some(methodName))
-                  fieldMap.put(name, fe)
-              }
+              if readable then
+                fieldMap.get(name) match {
+                  case Some(fx) => fieldMap.put(name, fx.copy(hasGet = true, getterName = methodName))
+                  case None =>
+                    val rtType = resolveType(defdef.returnTpt.tpe, params)
+                    val transnt = defdef.symbol.annotations exists (x => x.show.toLowerCase.contains("transient"))
+                    fieldMap.put(name, FieldExpr(name, rtType, transnt, true, false, getterName = methodName))
+                }
+              else
+                fieldMap.get(name).foreach { fx =>
+                  fieldMap.put(name, fx.copy(hasSet = true, setterName = Some(methodName)))
+                }
             case None => // skip non-accessor methods
           }
         }
@@ -220,9 +220,8 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
 
     val transients = fieldMap.values.filter(x => x.transnt(primaryCtorParamNames)).map(_.name).toSet
     members ++= fieldMap.values.map { x =>
-      val getterExpr = x.getterName.map(n => '{ Some(${ Expr(n) }) }).getOrElse('{ None })
       val setterExpr = x.setterName.map(n => '{ Some(${ Expr(n) }) }).getOrElse('{ None })
-      '{ ${ t }.addProperty(${ Expr(x.name) }, ${ x.typeinfo }, ${ Expr(transients.contains(x.name)) }, $getterExpr, $setterExpr) }
+      '{ ${ t }.addProperty(${ Expr(x.name) }, ${ x.typeinfo }, ${ Expr(transients.contains(x.name)) }, ${ Expr(x.getterName) }, $setterExpr) }
     }
     members.toList
   }

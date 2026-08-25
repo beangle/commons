@@ -128,7 +128,7 @@ object MetaCodec {
     sortedProps foreach { p =>
       pool.index(p.name)
       collectType(p.typeinfo, pool)
-      p.getterName.foreach(pool.index)
+      pool.index(p.getterName)
       p.setterName.foreach(pool.index)
     }
     cm.ctors foreach { c =>
@@ -231,8 +231,7 @@ object MetaCodec {
     writeType(d, p.typeinfo, pool) // Option properties store element type
     val flags = (if p.isTransient then 1 else 0) | (if p.isOptional then 2 else 0)
     d.writeByte(flags)
-    // getter/setter names (0xFFFF = none)
-    d.writeShort(p.getterName.map(pool.index).getOrElse(NoneIdx))
+    d.writeShort(pool.index(p.getterName))
     d.writeShort(p.setterName.map(pool.index).getOrElse(NoneIdx))
   }
 
@@ -299,9 +298,8 @@ object MetaCodec {
       val name = nameOf(in.readUnsignedShort(), pool)
       val ti = readType(in, pool)
       val flags = in.readUnsignedByte()
-      val getterIdx = in.readUnsignedShort()
+      val getterName = nameOf(in.readUnsignedShort(), pool)
       val setterIdx = in.readUnsignedShort()
-      val getterName = if getterIdx == NoneIdx then None else Some(nameOf(getterIdx, pool))
       val setterName = if setterIdx == NoneIdx then None else Some(nameOf(setterIdx, pool))
       out(i) = Property(name, ti, (flags & 1) != 0, (flags & 2) != 0, getterName, setterName)
       i += 1

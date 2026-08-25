@@ -86,7 +86,7 @@ object MetaLoader {
     BeanMeta(clazz, properties, ctors)
   }
 
-  /** Builds property declarations from discovered getters/setters. */
+  /** Builds property declarations from discovered getters (with optional setters). */
   private def buildProperties(
     getters: mutable.HashMap[String, Accessor],
     setters: mutable.HashMap[String, Accessor],
@@ -94,19 +94,15 @@ object MetaLoader {
     primaryCtorParamNames: Set[String],
     isCase: Boolean
   ): Seq[Property] = {
-    val allProps = getters.keySet ++ setters.keySet
-    allProps.map { name =>
-      val getter = getters.get(name)
+    getters.map { (name, getter) =>
       val setter = setters.get(name)
-      val typeinfo = if getter.isEmpty then setter.get.returnType else getter.get.returnType
       val isTransientAnnotated = fields.get(name).exists(f => Modifier.isTransient(f.getModifiers))
       val isTransient = checkTransient(isTransientAnnotated, setter.isDefined, primaryCtorParamNames.contains(name))
-      val getterName = getter.map(_.method.getName)
       val setterName = setter.map(_.method.getName)
       // Check for Option type
-      typeinfo match
-        case o: TypeInfo.OptionType => Property(name, o.elementType, isTransient, isOptional = true, getterName, setterName)
-        case other => Property(name, other, isTransient, isOptional = false, getterName, setterName)
+      getter.returnType match
+        case o: TypeInfo.OptionType => Property(name, o.elementType, isTransient, isOptional = true, getter.method.getName, setterName)
+        case other => Property(name, other, isTransient, isOptional = false, getter.method.getName, setterName)
     }.toSeq.sortBy(_.name)
   }
 
