@@ -34,6 +34,7 @@ import scala.collection.mutable
  *  - `resource-config.json` — resource patterns to include
  *  - `proxy-config.json` — JDK dynamic proxy interfaces
  *  - `serialization-config.json` — classes supporting Java serialization
+ *  - `native-image.properties` — extra native-image args (runtime class initialization)
  *
  * Stale config files from previous runs are automatically deleted when the
  * corresponding hint category is empty.
@@ -95,7 +96,7 @@ object AotHintGenerator {
       System.exit(1)
     }
     write(outputDir, merged)
-    System.out.println(s"Generated GraalVM configs in $outputDir (${merged.getTypes.size} types, ${merged.getPatterns.size} patterns, ${merged.getProxies.size} proxies, ${merged.getSerializables.size} serializables)")
+    System.out.println(s"Generated GraalVM configs in $outputDir (${merged.getTypes.size} types, ${merged.getPatterns.size} patterns, ${merged.getProxies.size} proxies, ${merged.getSerializables.size} serializables, ${merged.getRuntimeInitialized.size} runtime-initialized)")
   }
 
   /** 读取清单文件：每行一个类名，# 开头为注释，忽略空行。 */
@@ -117,6 +118,7 @@ object AotHintGenerator {
     writeOrDelete(outDir.resolve("resource-config.json"), hints.getPatterns.nonEmpty)(writeResource(_, hints.getPatterns))
     writeOrDelete(outDir.resolve("proxy-config.json"), hints.getProxies.nonEmpty)(writeProxy(_, hints.getProxies))
     writeOrDelete(outDir.resolve("serialization-config.json"), hints.getSerializables.nonEmpty)(writeSerializable(_, hints.getSerializables))
+    writeOrDelete(outDir.resolve("native-image.properties"), hints.getRuntimeInitialized.nonEmpty)(writeNativeImageProperties(_, hints.getRuntimeInitialized))
   }
 
   private def writeOrDelete(file: Path, nonEmpty: Boolean)(write: Path => Unit): Unit = {
@@ -162,6 +164,14 @@ object AotHintGenerator {
       JsonObject("name" -> clazz.getName)
     }
     Files.write(out, JsonArray(entries *).toJson.getBytes(StandardCharsets.UTF_8))
+  }
+
+  /** Writes native-image.properties carrying extra build args, e.g.
+   *  `--initialize-at-run-time` for classes whose static initializers
+   *  must run at runtime (SecureRandom users etc.). */
+  def writeNativeImageProperties(out: Path, classes: collection.Set[Class[_]]): Unit = {
+    val args = "--initialize-at-run-time=" + classes.toSeq.sortBy(_.getName).map(_.getName).mkString(",")
+    Files.write(out, s"Args = $args\n".getBytes(StandardCharsets.UTF_8))
   }
 
   private def parseArgs(args: Array[String]): (Path, Seq[String], Option[Path]) = {

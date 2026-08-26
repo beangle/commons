@@ -22,8 +22,9 @@ import org.beangle.commons.collection.Collections
 /** Mutable container for ahead-of-time hints used by GraalVM native-image.
   *
   * Subclasses or callers register types, resource patterns, proxy interfaces,
-  * and serializable classes via the register methods, then pass this container
-  * to [[AotHintGenerator]] for JSON config file generation.
+  * serializable classes, and runtime-initialized classes via the register
+  * methods, then pass this container to [[AotHintGenerator]] for config file
+  * generation.
   *
   * {{{
   * val hints = new AotHints
@@ -40,6 +41,7 @@ class AotHints {
   private val patterns = Collections.newSet[String]
   private val proxies = Collections.newSet[List[Class[_]]]
   private val serializables = Collections.newSet[Class[_]]
+  private val runtimeInitialized = Collections.newSet[Class[_]]
 
   /** Packages whose reflection metadata GraalVM already provides; skipped by
    *  the recursive hierarchy registration in [[registerType]]. */
@@ -85,6 +87,14 @@ class AotHints {
     while it.hasNext do serializables.add(it.next())
   }
 
+  /** Registers classes whose static initializers must run at runtime, not at
+   *  native-image build time (e.g. SecureRandom users); emitted as
+   *  `--initialize-at-run-time` in native-image.properties. */
+  def registerRuntimeInitialized(classes: Class[_]*): Unit = {
+    val it = classes.iterator
+    while it.hasNext do runtimeInitialized.add(it.next())
+  }
+
   /** Returns all registered reflection types. */
   def getTypes: collection.Set[Class[_]] = types
 
@@ -97,9 +107,12 @@ class AotHints {
   /** Returns all registered serializable classes. */
   def getSerializables: collection.Set[Class[_]] = serializables
 
+  /** Returns all classes registered for runtime initialization. */
+  def getRuntimeInitialized: collection.Set[Class[_]] = runtimeInitialized
+
   /** Returns true if no hints have been registered. */
   def isEmpty: Boolean =
-    types.isEmpty && patterns.isEmpty && proxies.isEmpty && serializables.isEmpty
+    types.isEmpty && patterns.isEmpty && proxies.isEmpty && serializables.isEmpty && runtimeInitialized.isEmpty
 
   /** Merges all hints from another [[AotHints]] into this one. */
   def addAll(other: AotHints): Unit = {
@@ -107,5 +120,6 @@ class AotHints {
     patterns.addAll(other.patterns)
     proxies.addAll(other.proxies)
     serializables.addAll(other.serializables)
+    runtimeInitialized.addAll(other.runtimeInitialized)
   }
 }
