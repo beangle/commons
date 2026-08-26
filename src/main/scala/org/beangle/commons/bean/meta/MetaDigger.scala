@@ -37,13 +37,18 @@ object MetaDigger {
   /** Macro: digs BeanMeta for each class. */
   def digInto(argsExpr: Expr[Seq[Class[_]]])(using Quotes): Expr[List[BeanMeta]] = {
     import quotes.reflect.*
+
+    /** Extracts the static type from a class literal, unwrapping inline/constant forms. */
+    def classTypeOf(term: Term): TypeRepr = term match {
+      case TypeApply(_, trees) => trees.head.tpe
+      case Literal(ClassOfConstant(tpe)) => tpe
+      case Inlined(_, _, expansion) => classTypeOf(expansion)
+      case other => report.errorAndAbort(s"Unsupported class argument: ${other.show}")
+    }
+
     argsExpr match {
       case Varargs(cls) =>
-        val cmList = cls.map { cl =>
-          cl.asTerm match {
-            case TypeApply(term, trees) => new MetaDigger[quotes.type](trees.head.tpe).dig()
-          }
-        }
+        val cmList = cls.map { cl => new MetaDigger[quotes.type](classTypeOf(cl.asTerm)).dig() }
         Expr.ofList(cmList)
       case _ =>
         report.error(s"Args must be explicit", argsExpr)
@@ -66,12 +71,17 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
   /** The TypeRepr being digested. */
   val typeRepr = trr.asInstanceOf[TypeRepr]
 
-  /** Produces Expr[BeanMeta] for the type. */
+  /** Produces Expr[BeanMeta] for the type.
+   * Java-defined types (no source tree, no Scala conventions) yield an empty BeanMeta.
+   */
   def dig(): Expr[BeanMeta] = {
-    '{
-      val b = new MetaModel.Builder(${ typeOf(typeRepr) })
-      ${ Expr.block(addMemberBody('b), 'b) }.build()
-    }
+    if typeRepr.dealias.typeSymbol.flags.is(Flags.JavaDefined) then
+      '{ new MetaModel.Builder(${ typeOf(typeRepr) }).build() }
+    else
+      '{
+        val b = new MetaModel.Builder(${ typeOf(typeRepr) })
+        ${ Expr.block(addMemberBody('b), 'b) }.build()
+      }
   }
 
   /** Converts TypeRepr to Expr[Class[?]]. */
@@ -160,46 +170,48 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       //Some fields declared in primary constructor will by ignored due to missing public access methods.
       //So we discover declared fields,they may appear in that collection.
       base.typeSymbol.declaredFields foreach { mm =>
-        val tpe = mm.tree.asInstanceOf[ValDef].tpt.tpe
-        val transnt = mm.annotations exists (x => x.show.toLowerCase.contains("transient"))
-        val noreflect = mm.hasAnnotation(Symbol.classSymbol(classOf[noreflect].getName))
-        val isPublic = !mm.flags.is(Flags.Protected) && !mm.flags.is(Flags.Private)
-        val isInnerType = mm.name == Strings.substringBetween(mm.tree.show, "this.", ".type")
-        // In Scala 3, var/val getters are implicit (not in declaredMethods).
-        // Set getterName = field name since the getter method name matches the field name.
-        if isPublic && isNormal(mm.name) && !noreflect && !isInnerType then fieldMap.put(mm.name, FieldExpr(mm.name, resolveType(tpe, params), transnt, true, true, getterName = mm.name))
+        if !mm.flags.is(Flags.JavaDefined) then
+          val tpe = mm.tree.asInstanceOf[ValDef].tpt.tpe
+          val transnt = mm.annotations exists (x => x.show.toLowerCase.contains("transient"))
+          val noreflect = mm.hasAnnotation(Symbol.classSymbol(classOf[noreflect].getName))
+          val isPublic = !mm.flags.is(Flags.Protected) && !mm.flags.is(Flags.Private)
+          val isInnerType = mm.name == Strings.substringBetween(mm.tree.show, "this.", ".type")
+          // In Scala 3, var/val getters are implicit (not in declaredMethods).
+          // Set getterName = field name since the getter method name matches the field name.
+          if isPublic && isNormal(mm.name) && !noreflect && !isInnerType then fieldMap.put(mm.name, FieldExpr(mm.name, resolveType(tpe, params), transnt, true, true, getterName = mm.name))
       }
 
       base.typeSymbol.declaredMethods foreach { mm =>
-        val defdef = mm.tree.asInstanceOf[DefDef]
-        val isPublic = !defdef.symbol.flags.is(Flags.Protected) && !defdef.symbol.flags.is(Flags.Private)
-        val ignored = isCaseClass && MetaLoader.caseIgnores.contains(defdef.name) || MetaLoader.ignores.contains(defdef.name)
-        val noreflect = defdef.symbol.hasAnnotation(Symbol.classSymbol(classOf[noreflect].getName))
-        val isStatic = defdef.symbol.flags.is(Flags.JavaStatic)
-        if (isPublic && isNormal(defdef.name) && !ignored && !noreflect && !isStatic) {
-          var paramSize = 0
-          defdef.paramss.foreach {
-            case TermParamClause(ps) => paramSize += ps.size
-            case _ =>
+        if !mm.flags.is(Flags.JavaDefined) then
+          val defdef = mm.tree.asInstanceOf[DefDef]
+          val isPublic = !defdef.symbol.flags.is(Flags.Protected) && !defdef.symbol.flags.is(Flags.Private)
+          val ignored = isCaseClass && MetaLoader.caseIgnores.contains(defdef.name) || MetaLoader.ignores.contains(defdef.name)
+          val noreflect = defdef.symbol.hasAnnotation(Symbol.classSymbol(classOf[noreflect].getName))
+          val isStatic = defdef.symbol.flags.is(Flags.JavaStatic)
+          if (isPublic && isNormal(defdef.name) && !ignored && !noreflect && !isStatic) {
+            var paramSize = 0
+            defdef.paramss.foreach {
+              case TermParamClause(ps) => paramSize += ps.size
+              case _ =>
+            }
+            val methodName = encodeBytecodeName(defdef.name)
+            this.findAccessor(defdef) match {
+              case Some((readable, name)) =>
+                if readable then
+                  fieldMap.get(name) match {
+                    case Some(fx) => fieldMap.put(name, fx.copy(hasGet = true, getterName = methodName))
+                    case None =>
+                      val rtType = resolveType(defdef.returnTpt.tpe, params)
+                      val transnt = defdef.symbol.annotations exists (x => x.show.toLowerCase.contains("transient"))
+                      fieldMap.put(name, FieldExpr(name, rtType, transnt, true, false, getterName = methodName))
+                  }
+                else
+                  fieldMap.get(name).foreach { fx =>
+                    fieldMap.put(name, fx.copy(hasSet = true, setterName = Some(methodName)))
+                  }
+              case None => // skip non-accessor methods
+            }
           }
-          val methodName = encodeBytecodeName(defdef.name)
-          this.findAccessor(defdef) match {
-            case Some((readable, name)) =>
-              if readable then
-                fieldMap.get(name) match {
-                  case Some(fx) => fieldMap.put(name, fx.copy(hasGet = true, getterName = methodName))
-                  case None =>
-                    val rtType = resolveType(defdef.returnTpt.tpe, params)
-                    val transnt = defdef.symbol.annotations exists (x => x.show.toLowerCase.contains("transient"))
-                    fieldMap.put(name, FieldExpr(name, rtType, transnt, true, false, getterName = methodName))
-                }
-              else
-                fieldMap.get(name).foreach { fx =>
-                  fieldMap.put(name, fx.copy(hasSet = true, setterName = Some(methodName)))
-                }
-            case None => // skip non-accessor methods
-          }
-        }
       }
     }
     val members = new mutable.ArrayBuffer[Expr[_]]()
@@ -275,12 +287,16 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
   def resolveCtorDefaults(symbol: Symbol): Map[Int, Expr[Any]] = {
     val comp = symbol.companionClass
     if (comp != Symbol.noSymbol) {
-      val body = comp.tree.asInstanceOf[ClassDef].body
-      val idents: List[(Int, Expr[Any])] =
-        for case deff@DefDef(name, _, _, _) <- body
-            if name.startsWith("$lessinit$greater$default$")
-        yield (name.substring("$lessinit$greater$default$".length).toInt, Ref(deff.symbol).asExpr)
-      idents.toMap
+      try {
+        val body = comp.tree.asInstanceOf[ClassDef].body
+        val idents: List[(Int, Expr[Any])] =
+          for case deff@DefDef(name, _, _, _) <- body
+              if name.startsWith("$lessinit$greater$default$")
+          yield (name.substring("$lessinit$greater$default$".length).toInt, Ref(deff.symbol).asExpr)
+        idents.toMap
+      } catch {
+        case _: Throwable => Map.empty
+      }
     } else {
       Map.empty
     }

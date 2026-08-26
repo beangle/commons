@@ -74,6 +74,22 @@ class MetaDiggerTest extends AnyFunSpec, Matchers {
       assert(list.map(_.clazz) == Seq(classOf[PersonMeta], classOf[OtherMeta]))
     }
 
+    it("digs class literals passed through inline wrappers") {
+      inline def digOne(inline c: Class[_]): List[BeanMeta] = MetaModels.of(c)
+      val list = digOne(classOf[PersonMeta])
+      assert(list.map(_.clazz) == Seq(classOf[PersonMeta]))
+    }
+
+    it("digs JDK classes into an empty BeanMeta without crashing") {
+      val cm = MetaModels.of(classOf[java.lang.String])
+      assert(cm.clazz == classOf[java.lang.String])
+      assert(cm.properties.isEmpty && cm.ctors.isEmpty)
+
+      val alias = MetaModels.of(classOf[String])
+      assert(alias.clazz == classOf[String])
+      assert(alias.properties.isEmpty && alias.ctors.isEmpty)
+    }
+
     it("round-trips through the v2 codec") {
       // defaults must be codec-supported types (List defaults are dropped by writeDefault)
       val cm = MetaModels.of(classOf[CodecMeta])

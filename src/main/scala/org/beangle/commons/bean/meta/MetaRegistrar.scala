@@ -29,14 +29,16 @@ import scala.quoted.*
  *
  * {{{
  * class AppRegistry extends MetaRegistrar {
- *   register(classOf[User], classOf[Role])
+ *   override def registering(): Unit = register(classOf[User], classOf[Role])
  * }
  * val out = new FileOutputStream("beanmeta.idx")
  * new AppRegistry().encode(out)
  * val hints: AotHints = new AppRegistry().aotHints
  * }}}
  *
- * [[register]] is an inline macro: at the subclass call site (compile-time literal)
+ * Subclasses implement `org.beangle.commons.lang.Registrar.registering`
+ * and call [[register]] there;
+ * [[register]] is an inline macro: at the call site (compile-time literal)
  * it invokes MetaDigger to dig BeanMeta, preserving generic precision.
  */
 abstract class MetaRegistrar extends AotHintRegistrar {

@@ -35,5 +35,32 @@ class ModuleTest extends AnyFunSpec, Matchers {
       System.setProperty(Environment.ProfileKey, "dev,other")
       assert(module.devEnabled)
     }
+
+    it("registers BeanMeta when binder is null (compile-time dig)") {
+      val module = new TestBindModule
+      module.registering()
+      assert(module.metas.map(_.clazz).toSet == Set(classOf[BindModuleEntity], classOf[BindModuleInner], classOf[BindModuleExtra]))
+    }
+  }
+}
+
+class BindModuleEntity {
+  var name: String = _
+  var age: Int = _
+}
+
+class BindModuleInner {
+  var code: String = _
+}
+
+class BindModuleExtra {
+  var enabled: Boolean = _
+}
+
+class TestBindModule extends BindModule {
+  protected override def binding(): Unit = {
+    bind("demo", classOf[BindModuleEntity])
+    bean(classOf[BindModuleInner])
+    bind(classOf[BindModuleExtra])
   }
 }

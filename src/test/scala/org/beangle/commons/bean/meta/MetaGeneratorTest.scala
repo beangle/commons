@@ -21,41 +21,56 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 import java.io.ByteArrayOutputStream
-import java.nio.file.Path
+import java.net.{JarURLConnection, URI}
+import java.nio.file.{Files, Path, StandardCopyOption}
 
 class MetaGeneratorTest extends AnyFunSpec, Matchers {
 
+  /** Locates the test classes: a directory on the classpath, or a jar bundle
+   * (e.g. sbt's cached test classes) extracted to a temp directory.
+   */
+  private def testClassesRoot: Path = {
+    val loc = getClass.getProtectionDomain.getCodeSource.getLocation
+    if loc.toString.startsWith("file:") && Files.isDirectory(Path.of(loc.toURI)) then Path.of(loc.toURI)
+    else {
+      val jarUri = if loc.toString.startsWith("jar:") then loc.toURI else URI.create("jar:" + loc.toURI + "!/")
+      val conn = jarUri.toURL.openConnection().asInstanceOf[JarURLConnection]
+      val dir = Files.createTempDirectory("test-classes")
+      val it = conn.getJarFile.entries()
+      while it.hasMoreElements do
+        val e = it.nextElement()
+        if !e.isDirectory then
+          val target = dir.resolve(e.getName)
+          Files.createDirectories(target.getParent)
+          Files.copy(conn.getJarFile.getInputStream(e), target, StandardCopyOption.REPLACE_EXISTING)
+      dir
+    }
+  }
+
   describe("MetaGenerator") {
     it("scans classes directory and finds MetaRegistrar subclasses") {
-      // Get the test-classes directory from classpath
-      val resource = getClass.getResource("/")
-      if (resource != null) {
-        val classesDir = Path.of(resource.toURI)
-        val metas = MetaGenerator.collectFromDirs(Seq(classesDir.toString))
+      val classesDir = testClassesRoot
+      val metas = MetaGenerator.collectFromDirs(Seq(classesDir.toString))
 
-        // Should find TestAppRegistry and collect GeneratorTestEntity
-        metas.map(_.clazz.getName) should contain("org.beangle.commons.bean.meta.GeneratorTestEntity")
-      }
+      // Should find TestAppRegistry and collect GeneratorTestEntity
+      metas.map(_.clazz.getName) should contain("org.beangle.commons.bean.meta.GeneratorTestEntity")
     }
 
     it("generates beaninfo.idx to stream") {
-      val resource = getClass.getResource("/")
-      if (resource != null) {
-        val classesDir = Path.of(resource.toURI)
-        val metas = MetaGenerator.collectFromDirs(Seq(classesDir.toString))
+      val classesDir = testClassesRoot
+      val metas = MetaGenerator.collectFromDirs(Seq(classesDir.toString))
 
-        val out = new ByteArrayOutputStream()
-        MetaIndex.write(out, metas)
+      val out = new ByteArrayOutputStream()
+      MetaIndex.write(out, metas)
 
-        val bytes = out.toByteArray
-        bytes.length should be > 0
+      val bytes = out.toByteArray
+      bytes.length should be > 0
 
-        // Verify magic "BMXI"
-        bytes(0) shouldBe 'B'
-        bytes(1) shouldBe 'M'
-        bytes(2) shouldBe 'X'
-        bytes(3) shouldBe 'I'
-      }
+      // Verify magic "BBXI"
+      bytes(0) shouldBe 'B'
+      bytes(1) shouldBe 'B'
+      bytes(2) shouldBe 'X'
+      bytes(3) shouldBe 'I'
     }
   }
 }
@@ -65,5 +80,8 @@ case class GeneratorTestEntity(id: Long, name: String, value: Int = 0)
 
 /** Test registry for generator testing. */
 class TestAppRegistry extends MetaRegistrar {
-  register(classOf[GeneratorTestEntity])
+
+  override def registering(): Unit = {
+    register(classOf[GeneratorTestEntity])
+  }
 }

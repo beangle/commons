@@ -37,8 +37,8 @@ import org.beangle.commons.lang.Registrar
  * }}}
  *
  * [[org.beangle.commons.bean.meta.MetaRegistrar]] extends this trait, adding
- * compile-time BeanMeta registration via `register` macro. Its `registering()`
- * bridges metamodel classes into [[hints]] automatically.
+ * compile-time BeanMeta registration via the `register` macro; every `register`
+ * call also adds the type to [[hints]].
  */
 abstract class AotHintRegistrar extends Registrar {
 

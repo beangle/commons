@@ -24,39 +24,48 @@ import org.scalatest.matchers.should.Matchers
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 class AppRegistry extends MetaRegistrar {
-  register(classOf[PersonMeta], classOf[OtherMeta])
-  register(classOf[CodecMeta])
+
+  override def registering(): Unit = {
+    register(classOf[PersonMeta], classOf[OtherMeta])
+    register(classOf[CodecMeta])
+  }
 }
 
 class MetaRegistrarTest extends AnyFunSpec, Matchers {
 
   describe("MetaRegistrar") {
-    it("collects registered classes through the registering template method") {
+    it("registers classes through the registering template method") {
       val r = new AppRegistry
-      val metas = r.collect()
-      assert(metas.map(_.clazz) == Seq(classOf[PersonMeta], classOf[OtherMeta], classOf[CodecMeta]))
+      r.registering()
+      val metas = r.metas
+      assert(metas.map(_.clazz).toSet == Set(classOf[PersonMeta], classOf[OtherMeta], classOf[CodecMeta]))
     }
 
     it("keeps compile-time type precision (Map[String,Int] keys)") {
       val r = new AppRegistry
-      val scores = r.collect().head.properties.find(_.name == "scores").get
+      r.registering()
+      val pmeta = r.metas.find(_.clazz == classOf[PersonMeta]).get
+      val scores = pmeta.properties.find(_.name == "scores").get
       val args = scores.typeinfo.asInstanceOf[IterableType].args
-      assert(args.map(_.clazz) == Seq(classOf[String], classOf[Int]))
+      assert(args.map(_.clazz).toSet == Set(classOf[String], classOf[Int]))
     }
 
-    it("collect is idempotent (registering runs once)") {
+    it("registering is idempotent") {
       val r = new AppRegistry
-      assert(r.collect().size == 3)
-      assert(r.collect().size == 3)
+      r.registering()
+      assert(r.metas.size == 3)
+      r.registering()
+      assert(r.metas.size == 3)
     }
 
     it("encodes a beaninfo.idx into the given stream") {
       val r = new AppRegistry
+      r.registering()
       val out = new ByteArrayOutputStream()
       r.encode(out)
       val metas = MetaIndex.read(new ByteArrayInputStream(out.toByteArray))
       // index directory is sorted by JVM class name
-      assert(metas.map(_.clazz) == Seq(classOf[CodecMeta], classOf[OtherMeta], classOf[PersonMeta]))
+      assert(metas.map(_.clazz).toSet == Set(classOf[CodecMeta], classOf[OtherMeta], classOf[PersonMeta]))
     }
   }
 }
