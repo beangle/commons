@@ -18,6 +18,7 @@
 package org.beangle.commons.aot
 
 import org.beangle.commons.json.{JsonArray, JsonObject}
+import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.reflect.Reflections
 
 import java.net.URLClassLoader
@@ -80,14 +81,23 @@ object AotHintGenerator {
     }
     val merged = new AotHints
     val failures = new mutable.ListBuffer[String]
+    val missing = new mutable.ListBuffer[String]
     names foreach { name =>
       Reflections.tryGetInstance[AotHintRegistrar](name, classLoader) match {
         case Some(registrar) =>
-          registrar.registering()
-          merged.addAll(registrar.aotHints)
-          System.out.println(s"Imported hints from $name")
+          try {
+            registrar.registering()
+            merged.addAll(registrar.aotHints)
+            System.out.println(s"Imported hints from $name")
+          } catch {
+            // 编译未完成/引用类缺失：静默归类为缺失，交由调用方决定是否重试
+            case _: ClassNotFoundException | _: LinkageError => missing += name
+            case e: Throwable =>
+              failures += s"$name failed while registering(): ${e.getClass.getName}: ${e.getMessage}"
+          }
         case None =>
-          failures += s"$name is not an AotHintRegistrar"
+          if (classExists(name, classLoader)) failures += s"$name is not an AotHintRegistrar"
+          else missing += name
       }
     }
     if (failures.nonEmpty) {
@@ -95,9 +105,19 @@ object AotHintGenerator {
       System.err.println(msg)
       System.exit(1)
     }
+    if (missing.nonEmpty) {
+      val msg = s"${missing.size} of ${names.size} declared AotHintRegistrar classes not found" +
+        " (compilation may still be in progress):\n" + missing.mkString("\n")
+      System.err.println(msg)
+      System.exit(2)
+    }
     write(outputDir, merged)
     System.out.println(s"Generated GraalVM configs in $outputDir (${merged.getTypes.size} types, ${merged.getPatterns.size} patterns, ${merged.getProxies.size} proxies, ${merged.getSerializables.size} serializables, ${merged.getRuntimeInitialized.size} runtime-initialized)")
   }
+
+  /** 类或其 Scala object 伴生类是否已存在（存在但加载失败视为缺失，可重试）。 */
+  private def classExists(name: String, classLoader: ClassLoader): Boolean =
+    ClassLoaders.exists(name, classLoader) || ClassLoaders.exists(name + "$", classLoader)
 
   /** 读取清单文件：每行一个类名，# 开头为注释，忽略空行。 */
   private def readLines(file: Path): Seq[String] = {

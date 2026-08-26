@@ -18,6 +18,7 @@
 package org.beangle.commons.bean.meta
 
 import org.beangle.commons.bean.meta.MetaModel.BeanMeta
+import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.reflect.Reflections
 
 import java.io.{File, FileOutputStream}
@@ -78,16 +79,25 @@ object MetaGenerator {
     val classLoader = new URLClassLoader(classpath.map(p => Path.of(p).toUri.toURL).toArray, getClass.getClassLoader)
     val metas = new mutable.ArrayBuffer[BeanMeta]
     val failures = new mutable.ListBuffer[String]
+    val missing = new mutable.ListBuffer[String]
     try {
       classNames foreach { name =>
         Reflections.tryGetInstance[MetaRegistrar](name, classLoader) match {
           case Some(registrar) =>
-            registrar.registering()
-            val m = registrar.metas
-            metas ++= m
-            System.out.println(s"Collected ${m.size} BeanMeta from $name")
+            try {
+              registrar.registering()
+              val m = registrar.metas
+              metas ++= m
+              System.out.println(s"Collected ${m.size} BeanMeta from $name")
+            } catch {
+              // 编译未完成/引用类缺失：静默归类为缺失，交由调用方决定是否重试
+              case _: ClassNotFoundException | _: LinkageError => missing += name
+              case e: Throwable =>
+                failures += s"$name failed while registering(): ${e.getClass.getName}: ${e.getMessage}"
+            }
           case None =>
-            failures += s"$name is not a MetaRegistrar"
+            if (classExists(name, classLoader)) failures += s"$name is not a MetaRegistrar"
+            else missing += name
         }
       }
     } finally classLoader.close()
@@ -96,8 +106,18 @@ object MetaGenerator {
       System.err.println(msg)
       System.exit(1)
     }
+    if (missing.nonEmpty) {
+      val msg = s"${missing.size} of ${classNames.size} declared MetaRegistrar classes not found" +
+        " (compilation may still be in progress):\n" + missing.mkString("\n")
+      System.err.println(msg)
+      System.exit(2)
+    }
     metas.toSeq
   }
+
+  /** 类或其 Scala object 伴生类是否已存在（存在但加载失败视为缺失，可重试）。 */
+  private def classExists(name: String, classLoader: ClassLoader): Boolean =
+    ClassLoaders.exists(name, classLoader) || ClassLoaders.exists(name + "$", classLoader)
 
   /** 读取清单文件：每行一个类名，# 开头为注释，忽略空行。 */
   private def readLines(file: File): Seq[String] = {
