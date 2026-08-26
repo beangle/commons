@@ -53,8 +53,9 @@ abstract class MetaRegistrar extends AotHintRegistrar {
   /** Returns all registered BeanMeta entries. */
   def metas: Iterable[BeanMeta] = metaMap.values
 
-  /** Adds BeanMeta to internal buffer (used by macro expansion). */
-  private def addMetas(cms: Iterable[BeanMeta]): Unit = {
+  /** Adds BeanMeta to internal buffer (used by macro expansion).
+   * Dont change to protected or private due to substream library may invoke it by registerImpl macro*/
+  def addMetas(cms: Iterable[BeanMeta]): Unit = {
     cms foreach { c =>
       metaMap.put(c.clazz, c)
       hints.registerType(c.clazz)

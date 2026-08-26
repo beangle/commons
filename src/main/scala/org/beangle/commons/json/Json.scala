@@ -96,7 +96,7 @@ object Json {
       var i = 0
       while (i < path.length) {
         path.charAt(i) match
-          case '.' | '[' | ']' =>
+          case '.' | '[' | ']' | '/' =>
             if current.nonEmpty then
               parts += current.toString
               current.clear()

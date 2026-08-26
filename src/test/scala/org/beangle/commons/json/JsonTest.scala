@@ -240,5 +240,13 @@ class JsonTest extends AnyFunSpec, Matchers {
       bytes(0) = 'X'
       copy.value.asInstanceOf[Array[Byte]](0) should be('p'.toByte)
     }
+
+    it("query chat completion content") {
+      val jsonText = """{"created":1700000000,"usage":{"completion_tokens":48,"prompt_tokens":256,"prompt_cache_hit_tokens":200,"prompt_cache_miss_tokens":56,"prompt_tokens_details":{"cached_tokens":200},"total_tokens":304},"model":"demo-chat","id":"chatcmpl-demo01","system_fingerprint":"fp_demo01","choices":[{"finish_reason":"stop","index":0,"message":{"role":"assistant","content":"alpha\nbeta\ngamma"},"logprobs":null}],"object":"chat.completion"}"""
+      val obj = Json.parseObject(jsonText)
+      info("choices/0/message/content = " + obj.query("choices/0/message/content"))
+      obj.query("choices/0/message/content") should be(defined)
+      obj.query("choices/0/message/content").get should equal("alpha\nbeta\ngamma")
+    }
   }
 }

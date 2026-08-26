@@ -128,10 +128,15 @@ object ClassLoaders {
   def get(className: String, classLoader: ClassLoader = null): Option[Class[_]] = {
     val loader = if (classLoader == null) defaultClassLoader else classLoader
     if buildins.contains(className) then buildins.get(className)
-    else if null != loader.getResource(Strings.replace(className, ".", "/") + ".class") then
-      Some(loader.loadClass(className))
-    else
-      None
+    else {
+      // First try getResource (works on JVM), then fallback to loadClass (works on native-image)
+      if null != loader.getResource(Strings.replace(className, ".", "/") + ".class") then
+        Some(loader.loadClass(className))
+      else {
+        try Some(loader.loadClass(className))
+        catch { case _: ClassNotFoundException => None }
+      }
+    }
   }
 
   /** Returns true if the class can be loaded.
