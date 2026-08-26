@@ -84,17 +84,16 @@ lazy val myModule = (project in file(".")).enablePlugins(AotPlugin)
 ```
 
 The plugin:
-1. Scans compiled classes for `AotHintRegistrar` implementations
-2. Calls `registering()` on each, collects `AotHints`
-3. Writes GraalVM config files to `Compile / resourceManaged`
-4. Files are included in the packaged JAR automatically
+1. Reads `src/main/resources/META-INF/beangle/aot-registrars.txt` as the contract:
+   one `AotHintRegistrar` class name per line (`#` comments and blank lines allowed)
+2. Calls `registering()` on each listed registrar, collects `AotHints`
+3. Fails the build if any declared class is missing/invalid, or if the run does not
+   stabilize after retries — a clean build must always embed the full config
+4. Writes GraalVM config files to `Compile / resourceManaged`; files are included
+   in the packaged JAR automatically
 
-### Configuration
-
-```scala
-// Custom output directory (default: META-INF/native-image)
-AotPlugin / aotOutputDir := "META-INF/native-image"
-```
+If `aot-registrars.txt` is absent or empty, generation is skipped (the project has
+no AOT hints) and stale configs from previous runs are removed.
 
 ### How It Works
 
