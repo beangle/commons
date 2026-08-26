@@ -25,9 +25,19 @@ import org.beangle.commons.lang.testbean.{Book, Entity, Professor, TestChild2Bea
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
+import java.nio.file.{Files, Path}
 import javax.sql.DataSource
 
 class ReflectionsTest extends AnyFunSpec, Matchers {
+
+  private def deleteRecursively(dir: Path): Unit = {
+    if (Files.isDirectory(dir)) {
+      val it = Files.list(dir)
+      try it.forEach(p => deleteRecursively(p))
+      finally it.close()
+    }
+    Files.deleteIfExists(dir)
+  }
 
   describe("Reflections") {
     it("getSuperClassParamType") {
@@ -84,6 +94,24 @@ class ReflectionsTest extends AnyFunSpec, Matchers {
       assert(Reflections.tryGetInstance[AnyRef]("java.lang.ProcessBuilder").isEmpty)
       assert(Reflections.tryGetInstance[AnyRef]("no.such.Class").isEmpty)
     }
+    it("tryGetInstance swallows missing referenced types") {
+      // 模拟"classes 不全"：Child.class 存在但父类 Base.class 缺失，不抛异常而是返回 None
+      val dir = Files.createTempDirectory("reflections-test")
+      try {
+        val base = dir.resolve("Base.java")
+        Files.writeString(base, "public class Base {}\n")
+        val child = dir.resolve("Child.java")
+        Files.writeString(child, "public class Child extends Base {}\n")
+        val result = javax.tools.ToolProvider.getSystemJavaCompiler()
+          .run(null, null, null, "-d", dir.toString, base.toString, child.toString)
+        result should be(0)
+        Files.delete(dir.resolve("Base.class"))
+        val loader = new java.net.URLClassLoader(Array(dir.toUri.toURL), getClass.getClassLoader)
+        Reflections.tryGetInstance[AnyRef]("Child", loader) shouldBe None
+      } finally {
+        deleteRecursively(dir)
+      }
+    }
     it("getField") {
       val p = new Professor(2L)
       p.depart = "r&d"
@@ -91,6 +119,7 @@ class ReflectionsTest extends AnyFunSpec, Matchers {
       assert(f.nonEmpty)
       assert(f.get.get(p) == "r&d")
     }
+
   }
 }
 

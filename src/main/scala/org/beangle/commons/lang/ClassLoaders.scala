@@ -129,12 +129,10 @@ object ClassLoaders {
     val loader = if (classLoader == null) defaultClassLoader else classLoader
     if buildins.contains(className) then buildins.get(className)
     else {
-      // First try getResource (works on JVM), then fallback to loadClass (works on native-image)
-      if null != loader.getResource(Strings.replace(className, ".", "/") + ".class") then
-        Some(loader.loadClass(className))
-      else {
-        try Some(loader.loadClass(className))
-        catch { case _: ClassNotFoundException => None }
+      try Some(loader.loadClass(className))
+      catch {
+        // 类缺失或引用类型缺失（如编译未完成）时视为不存在
+        case _: ClassNotFoundException | _: LinkageError => None
       }
     }
   }

@@ -105,24 +105,24 @@ object Reflections {
    * @param classLoader optional loader; default if null
    */
   def tryGetInstance[T: ClassTag](name: String, classLoader: ClassLoader): Option[T] = {
-    val targetClass = classTag[T].runtimeClass
-    val companionClass = if name.endsWith("$") then name else name + "$"
-    ClassLoaders.get(companionClass, classLoader) match {
-      case Some(clazz) =>
-        if clazz.getConstructors.length > 0 then classTag[T].unapply(newInstance(clazz))
-        else
-          try classTag[T].unapply(clazz.getDeclaredField("MODULE$").get(null))
-          catch { case _: Exception => None }
-      case None =>
-        try {
+    try {
+      val targetClass = classTag[T].runtimeClass
+      val companionClass = if name.endsWith("$") then name else name + "$"
+      ClassLoaders.get(companionClass, classLoader) match {
+        case Some(clazz) =>
+          if clazz.getConstructors.length > 0 then classTag[T].unapply(newInstance(clazz))
+          else
+            try classTag[T].unapply(clazz.getDeclaredField("MODULE$").get(null))
+            catch { case _: Exception => None }
+        case None =>
           val clazz = ClassLoaders.load(name, classLoader)
           if targetClass.isAssignableFrom(clazz) && !clazz.isInterface then
             classTag[T].unapply(newInstance(clazz))
           else None
-        }
-        catch {
-          case _: ClassNotFoundException => None
-        }
+      }
+    } catch {
+      // 类或引用类型缺失（如编译未完成）时视为不存在，静默返回 None
+      case _: ClassNotFoundException | _: LinkageError | _: TypeNotPresentException => None
     }
   }
 
