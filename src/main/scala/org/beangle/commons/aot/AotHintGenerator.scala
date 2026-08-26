@@ -115,9 +115,11 @@ object AotHintGenerator {
     System.out.println(s"Generated GraalVM configs in $outputDir (${merged.getTypes.size} types, ${merged.getPatterns.size} patterns, ${merged.getProxies.size} proxies, ${merged.getSerializables.size} serializables, ${merged.getRuntimeInitialized.size} runtime-initialized)")
   }
 
-  /** 类或其 Scala object 伴生类是否已存在（存在但加载失败视为缺失，可重试）。 */
+  /** Scala object 伴生类（`$`）是否已存在：普通 registrar 类在 tryGetInstance 中经 load(name)
+   *  即可命中，不会走到 case None；走到 case None 时只有伴生类存在才是确定性的"不是 registrar"，
+   *  伴生类缺失视为编译未完成，应归类为可重试的缺失。 */
   private def classExists(name: String, classLoader: ClassLoader): Boolean =
-    ClassLoaders.exists(name, classLoader) || ClassLoaders.exists(name + "$", classLoader)
+    ClassLoaders.exists(name + "$", classLoader)
 
   /** 读取清单文件：每行一个类名，# 开头为注释，忽略空行。 */
   private def readLines(file: Path): Seq[String] = {
