@@ -41,11 +41,32 @@ class AotHints {
   private val proxies = Collections.newSet[List[Class[_]]]
   private val serializables = Collections.newSet[Class[_]]
 
-  /** Registers classes for reflection access in native-image. */
+  /** Packages whose reflection metadata GraalVM already provides; skipped by
+   *  the recursive hierarchy registration in [[registerType]]. */
+  private val jdkPrefixes = Seq("java.", "javax.", "jdk.", "sun.", "com.sun.", "scala.")
+
+  /** Registers classes for reflection access in native-image.
+   *
+   * Superclasses and interfaces are registered recursively as well, so
+   * inherited fields/methods/constructors are reachable for reflection;
+   * JDK classes are skipped.
+   */
   def registerType(classes: Class[_]*): Unit = {
     val it = classes.iterator
-    while it.hasNext do types.add(it.next())
+    while it.hasNext do addType(it.next())
   }
+
+  /** Adds a class and, recursively, its non-JDK superclass and interfaces. */
+  private def addType(clazz: Class[_]): Unit = {
+    if (clazz == null || !types.add(clazz)) return
+    val superclass = clazz.getSuperclass
+    if (superclass != null && !isJdk(superclass)) addType(superclass)
+    clazz.getInterfaces foreach { iface => if (!isJdk(iface)) addType(iface) }
+  }
+
+  private def isJdk(clazz: Class[_]): Boolean =
+    val name = clazz.getName
+    jdkPrefixes.exists(name.startsWith)
 
   /** Registers resource inclusion patterns (ant-style globs). */
   def registerPattern(patterns: String*): Unit = {
