@@ -41,7 +41,8 @@ object BeanInfos {
     bi
   }
 
-  /** Registers a BeanInfo for a specific class (e.g. subclass sharing parent's BeanInfo). */
+  /** FIXME why need to args
+   * Registers a BeanInfo for a specific class (e.g. subclass sharing parent's BeanInfo). */
   def update(clazz: Class[_], bi: BeanInfo): BeanInfo = {
     cache.put(clazz, bi)
     bi
