@@ -19,7 +19,6 @@ package org.beangle.commons.bean.meta
 
 import org.beangle.commons.bean.meta.MetaModel.BeanMeta
 import org.beangle.commons.io.Resources
-import org.beangle.commons.logging.Logging
 
 import scala.collection.mutable
 import scala.quoted.*
@@ -37,7 +36,7 @@ import scala.quoted.*
   * val cm = MetaModels.reflect(classOf[User])
   * }}}
   */
-object MetaModels extends Logging {
+object MetaModels {
 
   /** Class name (JVM internal) -> BeanMeta, lazy loaded at first access. */
   private lazy val cache: Map[String, BeanMeta] = buildCache()
@@ -72,17 +71,12 @@ object MetaModels extends Logging {
     val stringPool = mutable.Set.empty[String] // shared dedup across all idx files
     val urls = Resources.load("classpath*:META-INF/beangle/beanmeta.idx")
     urls.foreach { url =>
+      val in = new java.io.BufferedInputStream(url.openStream())
       try {
-        val in = new java.io.BufferedInputStream(url.openStream())
-        try {
-          MetaIndex.read(in, stringPool).foreach { cm =>
-            map.put(normalize(cm.clazz.getName), cm)
-          }
-        } finally in.close()
-      } catch {
-        case e: Exception =>
-          logger.warn(s"Failed to load beanmeta.idx from $url: ${e.getMessage}")
-      }
+        MetaIndex.read(in, stringPool).foreach { cm =>
+          map.put(normalize(cm.clazz.getName), cm)
+        }
+      } finally in.close()
     }
     map.toMap
   }
