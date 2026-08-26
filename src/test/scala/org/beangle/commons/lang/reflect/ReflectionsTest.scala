@@ -72,6 +72,18 @@ class ReflectionsTest extends AnyFunSpec, Matchers {
       val a = Reflections.getInstance[Co.type]("org.beangle.commons.lang.reflect.Co$")
       assert(a.isInstanceOf[Co.type])
     }
+    it("tryGetInstance") {
+      val co1 = Reflections.tryGetInstance[Co.type]("org.beangle.commons.lang.reflect.Co")
+      assert(co1.contains(Co))
+      val co2 = Reflections.tryGetInstance[Co.type]("org.beangle.commons.lang.reflect.Co$")
+      assert(co2.contains(Co))
+      assert(Reflections.tryGetInstance[String]("org.beangle.commons.lang.reflect.Co").isEmpty)
+
+      assert(Reflections.tryGetInstance[String]("java.lang.String").contains(""))
+      assert(Reflections.tryGetInstance[Integer]("java.lang.String").isEmpty)
+      assert(Reflections.tryGetInstance[AnyRef]("java.lang.ProcessBuilder").isEmpty)
+      assert(Reflections.tryGetInstance[AnyRef]("no.such.Class").isEmpty)
+    }
     it("getField") {
       val p = new Professor(2L)
       p.depart = "r&d"

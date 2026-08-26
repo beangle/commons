@@ -18,27 +18,28 @@
 package org.beangle.commons.aot
 
 import org.beangle.commons.json.{JsonArray, JsonObject}
+import org.beangle.commons.lang.reflect.Reflections
 import org.beangle.commons.logging.Logging
 
 import java.io.File
 import java.net.URLClassLoader
 import java.nio.charset.StandardCharsets
-import java.nio.file.{FileVisitResult, Files, Path, SimpleFileVisitor}
 import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.{FileVisitResult, Files, Path, SimpleFileVisitor}
 import scala.collection.mutable
 
 /** Scans classpath for [[AotHintRegistrar]] implementations and writes
-  * GraalVM native-image configuration files.
-  *
-  * Generated files:
-  *  - `reflect-config.json` — classes needing reflection access
-  *  - `resource-config.json` — resource patterns to include
-  *  - `proxy-config.json` — JDK dynamic proxy interfaces
-  *  - `serialization-config.json` — classes supporting Java serialization
-  *
-  * Stale config files from previous runs are automatically deleted when the
-  * corresponding hint category is empty.
-  */
+ * GraalVM native-image configuration files.
+ *
+ * Generated files:
+ *  - `reflect-config.json` — classes needing reflection access
+ *  - `resource-config.json` — resource patterns to include
+ *  - `proxy-config.json` — JDK dynamic proxy interfaces
+ *  - `serialization-config.json` — classes supporting Java serialization
+ *
+ * Stale config files from previous runs are automatically deleted when the
+ * corresponding hint category is empty.
+ */
 object AotHintGenerator extends Logging {
 
   def main(args: Array[String]): Unit = {
@@ -60,9 +61,7 @@ object AotHintGenerator extends Logging {
     try {
       findClassFiles(classLoader) foreach { className =>
         try {
-          val clazz = classLoader.loadClass(className)
-          if (classOf[AotHintRegistrar].isAssignableFrom(clazz) && !clazz.isInterface) {
-            val registrar = clazz.getDeclaredConstructor().newInstance().asInstanceOf[AotHintRegistrar]
+          Reflections.tryGetInstance[AotHintRegistrar](className, classLoader) foreach { registrar =>
             registrar.registering()
             merged.addAll(registrar.aotHints)
             count += 1
@@ -115,7 +114,7 @@ object AotHintGenerator extends Logging {
         "allDeclaredConstructors" -> true,
         "allDeclaredMethods" -> true)
     }
-    Files.write(out, JsonArray(entries*).toJson.getBytes(StandardCharsets.UTF_8))
+    Files.write(out, JsonArray(entries *).toJson.getBytes(StandardCharsets.UTF_8))
   }
 
   /** Writes resource-config.json for resource inclusion patterns. */
@@ -123,7 +122,7 @@ object AotHintGenerator extends Logging {
     val includes = patterns.toSeq.sorted.map(p => JsonObject("pattern" -> p.replace('\\', '/')))
     val json = JsonObject(
       "resources" -> JsonObject(
-        "includes" -> JsonArray(includes*),
+        "includes" -> JsonArray(includes *),
         "excludes" -> JsonArray()),
       "bundles" -> JsonArray())
     Files.write(out, json.toJson.getBytes(StandardCharsets.UTF_8))
@@ -132,9 +131,9 @@ object AotHintGenerator extends Logging {
   /** Writes proxy-config.json for JDK dynamic proxy interfaces. */
   def writeProxy(out: Path, proxies: collection.Set[List[Class[_]]]): Unit = {
     val entries = proxies.toSeq.sortBy(_.headOption.map(_.getName).getOrElse("")).map { ifaces =>
-      JsonObject("interfaces" -> JsonArray(ifaces.map(c => c.getName)*))
+      JsonObject("interfaces" -> JsonArray(ifaces.map(c => c.getName) *))
     }
-    Files.write(out, JsonArray(entries*).toJson.getBytes(StandardCharsets.UTF_8))
+    Files.write(out, JsonArray(entries *).toJson.getBytes(StandardCharsets.UTF_8))
   }
 
   /** Writes serialization-config.json for classes supporting Java serialization. */
@@ -142,7 +141,7 @@ object AotHintGenerator extends Logging {
     val entries = classes.toSeq.sortBy(_.getName).map { clazz =>
       JsonObject("name" -> clazz.getName)
     }
-    Files.write(out, JsonArray(entries*).toJson.getBytes(StandardCharsets.UTF_8))
+    Files.write(out, JsonArray(entries *).toJson.getBytes(StandardCharsets.UTF_8))
   }
 
   private def findClassFiles(classLoader: ClassLoader): Seq[String] = {
@@ -198,22 +197,23 @@ object AotHintGenerator extends Logging {
   }
 
   private def printUsage(): Unit = {
-    println("""Usage: AotHintGenerator [options] <classpath-entry> [classpath-entry...]
-              |
-              |Scans classpath for AotHintRegistrar implementations and generates
-              |GraalVM native-image configuration files:
-              |  reflect-config.json       (reflection metadata)
-              |  resource-config.json      (resource inclusion)
-              |  proxy-config.json         (dynamic proxy interfaces)
-              |  serialization-config.json (Java serialization)
-              |
-              |Options:
-              |  -o, --output <dir>   Output directory (default: META-INF/native-image)
-              |  -h, --help           Show this help
-              |
-              |Examples:
-              |  AotHintGenerator target/classes
-              |  AotHintGenerator -o src/main/resources/META-INF/native-image target/classes
-              |""".stripMargin)
+    println(
+      """Usage: AotHintGenerator [options] <classpath-entry> [classpath-entry...]
+        |
+        |Scans classpath for AotHintRegistrar implementations and generates
+        |GraalVM native-image configuration files:
+        |  reflect-config.json       (reflection metadata)
+        |  resource-config.json      (resource inclusion)
+        |  proxy-config.json         (dynamic proxy interfaces)
+        |  serialization-config.json (Java serialization)
+        |
+        |Options:
+        |  -o, --output <dir>   Output directory (default: META-INF/native-image)
+        |  -h, --help           Show this help
+        |
+        |Examples:
+        |  AotHintGenerator target/classes
+        |  AotHintGenerator -o src/main/resources/META-INF/native-image target/classes
+        |""".stripMargin)
   }
 }

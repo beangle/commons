@@ -18,6 +18,7 @@
 package org.beangle.commons.bean.meta
 
 import org.beangle.commons.bean.meta.MetaModel.BeanMeta
+import org.beangle.commons.lang.reflect.Reflections
 import org.beangle.commons.logging.Logging
 
 import java.io.{File, FileOutputStream}
@@ -118,10 +119,9 @@ object MetaGenerator extends Logging {
             .stripSuffix(".class")
             .replace('/', '.')
 
-          val clazz = classLoader.loadClass(className)
-          if (classOf[MetaRegistrar].isAssignableFrom(clazz) && !clazz.isInterface) {
-            val registry = clazz.getDeclaredConstructor().newInstance().asInstanceOf[MetaRegistrar]
-            val metas = registry.metas
+          Reflections.tryGetInstance[MetaRegistrar](className, classLoader) foreach { registrar =>
+            registrar.registering()
+            val metas = registrar.metas
             allMetas ++= metas
             registryCount += 1
             logger.info(s"Collected ${metas.size} BeanMeta from $className")

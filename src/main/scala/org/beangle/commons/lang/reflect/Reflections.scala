@@ -24,7 +24,7 @@ import java.lang.reflect.*
 import scala.collection.immutable.ArraySeq
 import scala.collection.{immutable, mutable}
 import scala.language.existentials
-import scala.reflect.ClassTag
+import scala.reflect.{ClassTag, classTag}
 
 /** Reflection utilities. */
 object Reflections {
@@ -90,6 +90,39 @@ object Reflections {
         else clazz.getDeclaredField("MODULE$").get(null).asInstanceOf[T]
       case None =>
         newInstance(ClassLoaders.load(name).asInstanceOf[Class[T]])
+    }
+  }
+
+  /** Gets singleton or creates instance (for companion objects or classes) using the
+   * default class loader; returns None if the class is absent or not of type T.
+   */
+  def tryGetInstance[T: ClassTag](name: String): Option[T] = tryGetInstance(name, null)
+
+  /** Gets singleton or creates instance (for companion objects or classes) using the
+   * given class loader; returns None if the class is absent or not of type T.
+   *
+   * @param name        fully qualified class name
+   * @param classLoader optional loader; default if null
+   */
+  def tryGetInstance[T: ClassTag](name: String, classLoader: ClassLoader): Option[T] = {
+    val targetClass = classTag[T].runtimeClass
+    val companionClass = if name.endsWith("$") then name else name + "$"
+    ClassLoaders.get(companionClass, classLoader) match {
+      case Some(clazz) =>
+        if clazz.getConstructors.length > 0 then classTag[T].unapply(newInstance(clazz))
+        else
+          try classTag[T].unapply(clazz.getDeclaredField("MODULE$").get(null))
+          catch { case _: Exception => None }
+      case None =>
+        try {
+          val clazz = ClassLoaders.load(name, classLoader)
+          if targetClass.isAssignableFrom(clazz) && !clazz.isInterface then
+            classTag[T].unapply(newInstance(clazz))
+          else None
+        }
+        catch {
+          case _: ClassNotFoundException => None
+        }
     }
   }
 
