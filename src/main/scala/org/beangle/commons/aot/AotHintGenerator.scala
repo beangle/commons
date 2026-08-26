@@ -86,8 +86,7 @@ object AotHintGenerator extends Logging {
           merged.addAll(registrar.aotHints)
           logger.info(s"Imported hints from $name")
         case None =>
-          val clazzFound = findClass(name, classLoader)
-          failures += (if clazzFound then s"$name is not an AotHintRegistrar" else s"$name not found on classpath")
+          failures += s"$name is not an AotHintRegistrar"
       }
     }
     if (failures.nonEmpty) {
@@ -98,20 +97,6 @@ object AotHintGenerator extends Logging {
     }
     write(outputDir, merged)
     logger.info(s"Generated GraalVM configs in $outputDir (${merged.getTypes.size} types, ${merged.getPatterns.size} patterns, ${merged.getProxies.size} proxies, ${merged.getSerializables.size} serializables)")
-  }
-
-  /** 类或其 Scala object 伴生类（`$`）是否存在于 classpath。 */
-  private def findClass(name: String, classLoader: ClassLoader): Boolean = {
-    try {
-      Class.forName(name, false, classLoader)
-      true
-    } catch {
-      case _: ClassNotFoundException =>
-        try {
-          Class.forName(name + "$", false, classLoader)
-          true
-        } catch { case _: ClassNotFoundException => false }
-    }
   }
 
   /** 扫描模式：在 classpath 上查找 AotHintRegistrar 实现（保留用于手工调用）。 */

@@ -97,8 +97,7 @@ object MetaGenerator extends Logging {
             metas ++= m
             logger.info(s"Collected ${m.size} BeanMeta from $name")
           case None =>
-            val clazzFound = findClass(name, classLoader)
-            failures += (if clazzFound then s"$name is not a MetaRegistrar" else s"$name not found on classpath")
+            failures += s"$name is not a MetaRegistrar"
         }
       }
     } finally classLoader.close()
@@ -109,20 +108,6 @@ object MetaGenerator extends Logging {
       System.exit(1)
     }
     writeMetas(outputPath, metas.toSeq)
-  }
-
-  /** 类或其 Scala object 伴生类（`$`）是否存在于 classpath。 */
-  private def findClass(name: String, classLoader: ClassLoader): Boolean = {
-    try {
-      Class.forName(name, false, classLoader)
-      true
-    } catch {
-      case _: ClassNotFoundException =>
-        try {
-          Class.forName(name + "$", false, classLoader)
-          true
-        } catch { case _: ClassNotFoundException => false }
-    }
   }
 
   /** 读取清单文件：每行一个类名，# 开头为注释，忽略空行。 */
