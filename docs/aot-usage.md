@@ -76,11 +76,13 @@ class AppRegistry extends MetaRegistrar {
 
 ## 3. SBT Integration (AotPlugin)
 
-Enable `AotPlugin` in your project to auto-generate configs at build time:
+`AotPlugin` is auto-enabled on every JVM project (no `enablePlugins` needed).
+Generation is driven by the anchor file — presence of
+`src/main/resources/META-INF/beangle/aot-registrars.txt` controls whether the
+plugin does anything:
 
-```scala
-// build.sbt
-lazy val myModule = (project in file(".")).enablePlugins(AotPlugin)
+```text
+src/main/resources/META-INF/beangle/aot-registrars.txt   # one AotHintRegistrar class per line
 ```
 
 The plugin:
