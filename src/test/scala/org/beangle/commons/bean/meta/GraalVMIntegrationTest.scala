@@ -34,7 +34,8 @@ class GraalVMIntegrationTest extends AnyFunSpec, Matchers {
   describe("GraalVM Integration") {
     it("MetaGenerator generates valid configs") {
       val classesDir = testClassesDir
-      val metas = MetaGenerator.collectFromDirs(Seq(classesDir))
+      val metas = MetaGenerator.collectMetas(
+        Seq("org.beangle.commons.bean.meta.TestAppRegistry"), Seq(classesDir))
       metas should not be empty
 
       // Generate beanmeta.idx
@@ -56,7 +57,8 @@ class GraalVMIntegrationTest extends AnyFunSpec, Matchers {
 
     it("BeanInfo read/write roundtrip") {
       val classesDir = testClassesDir
-      val metas = MetaGenerator.collectFromDirs(Seq(classesDir))
+      val metas = MetaGenerator.collectMetas(
+        Seq("org.beangle.commons.bean.meta.TestAppRegistry"), Seq(classesDir))
       metas should not be empty
 
       // Encode to binary

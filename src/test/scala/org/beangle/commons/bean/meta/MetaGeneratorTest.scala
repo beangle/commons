@@ -48,17 +48,19 @@ class MetaGeneratorTest extends AnyFunSpec, Matchers {
   }
 
   describe("MetaGenerator") {
-    it("scans classes directory and finds MetaRegistrar subclasses") {
+    it("loads declared MetaRegistrar classes and collects BeanMeta") {
       val classesDir = testClassesRoot
-      val metas = MetaGenerator.collectFromDirs(Seq(classesDir.toString))
+      val metas = MetaGenerator.collectMetas(
+        Seq("org.beangle.commons.bean.meta.TestAppRegistry"), Seq(classesDir.toString))
 
-      // Should find TestAppRegistry and collect GeneratorTestEntity
+      // Should load TestAppRegistry and collect GeneratorTestEntity
       metas.map(_.clazz.getName) should contain("org.beangle.commons.bean.meta.GeneratorTestEntity")
     }
 
     it("generates beaninfo.idx to stream") {
       val classesDir = testClassesRoot
-      val metas = MetaGenerator.collectFromDirs(Seq(classesDir.toString))
+      val metas = MetaGenerator.collectMetas(
+        Seq("org.beangle.commons.bean.meta.TestAppRegistry"), Seq(classesDir.toString))
 
       val out = new ByteArrayOutputStream()
       MetaIndex.write(out, metas)

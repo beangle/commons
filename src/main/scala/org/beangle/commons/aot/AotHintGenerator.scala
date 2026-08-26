@@ -19,17 +19,15 @@ package org.beangle.commons.aot
 
 import org.beangle.commons.json.{JsonArray, JsonObject}
 import org.beangle.commons.lang.reflect.Reflections
-import org.beangle.commons.logging.Logging
 
-import java.io.File
 import java.net.URLClassLoader
 import java.nio.charset.StandardCharsets
-import java.nio.file.attribute.BasicFileAttributes
-import java.nio.file.{FileVisitResult, Files, Path, SimpleFileVisitor}
+import java.nio.file.{Files, Path}
 import scala.collection.mutable
 
-/** Scans classpath for [[AotHintRegistrar]] implementations and writes
- * GraalVM native-image configuration files.
+/** Generates GraalVM native-image configuration files from the
+ * [[AotHintRegistrar]] implementations listed in a registrars file
+ * (one class name per line, `#` comments allowed).
  *
  * Generated files:
  *  - `reflect-config.json` — classes needing reflection access
@@ -40,14 +38,13 @@ import scala.collection.mutable
  * Stale config files from previous runs are automatically deleted when the
  * corresponding hint category is empty.
  */
-object AotHintGenerator extends Logging {
+object AotHintGenerator {
 
   def main(args: Array[String]): Unit = {
     val (outputDir, classpath, registrarsFile) = parseArgs(args)
 
     if (classpath.isEmpty) {
       val msg = "No classpath specified.\n"
-      logger.error(msg)
       System.err.println(msg)
       printUsage()
       System.exit(1)
@@ -58,23 +55,26 @@ object AotHintGenerator extends Logging {
       getClass.getClassLoader)
 
     try {
-      registrarsFile match {
-        case Some(file) => generateFromList(file, outputDir, classLoader)
-        case None => generateFromScan(outputDir, classLoader)
+      val listFile = registrarsFile match {
+        case Some(f) => f
+        case None =>
+          System.err.println("Missing --registrars: AotHintRegistrar class list file is required.\n")
+          printUsage()
+          sys.exit(1)
       }
+      generateFromList(listFile, outputDir, classLoader)
     } finally classLoader.close()
   }
 
   /** 清单模式：以 --registrars 文件罗列的 AotHintRegistrar 类为契约，全部找到并导入才算成功。 */
   private def generateFromList(listFile: Path, outputDir: Path, classLoader: ClassLoader): Unit = {
     if (!Files.isRegularFile(listFile)) {
-      logger.error(s"Registrars file does not exist: $listFile")
       System.err.println(s"Registrars file does not exist: $listFile")
       System.exit(1)
     }
     val names = readLines(listFile)
     if (names.isEmpty) {
-      logger.info(s"No registrars declared in $listFile; GraalVM config generation skipped")
+      System.out.println(s"No registrars declared in $listFile; GraalVM config generation skipped")
       return
     }
     val merged = new AotHints
@@ -84,55 +84,18 @@ object AotHintGenerator extends Logging {
         case Some(registrar) =>
           registrar.registering()
           merged.addAll(registrar.aotHints)
-          logger.info(s"Imported hints from $name")
+          System.out.println(s"Imported hints from $name")
         case None =>
           failures += s"$name is not an AotHintRegistrar"
       }
     }
     if (failures.nonEmpty) {
       val msg = "Failed to load declared AotHintRegistrar implementations:\n" + failures.mkString("\n")
-      logger.error(msg)
       System.err.println(msg)
       System.exit(1)
     }
     write(outputDir, merged)
-    logger.info(s"Generated GraalVM configs in $outputDir (${merged.getTypes.size} types, ${merged.getPatterns.size} patterns, ${merged.getProxies.size} proxies, ${merged.getSerializables.size} serializables)")
-  }
-
-  /** 扫描模式：在 classpath 上查找 AotHintRegistrar 实现（保留用于手工调用）。 */
-  private def generateFromScan(outputDir: Path, classLoader: ClassLoader): Unit = {
-    var merged = new AotHints
-    var count = 0
-
-    findClassFiles(classLoader) foreach { className =>
-      try {
-        Reflections.tryGetInstance[AotHintRegistrar](className, classLoader) foreach { registrar =>
-          registrar.registering()
-          merged.addAll(registrar.aotHints)
-          count += 1
-          logger.info(s"Imported hints from $className")
-        }
-      } catch {
-        case _: ClassNotFoundException =>
-        case _: NoClassDefFoundError =>
-        case e: Exception =>
-          logger.warn(s"Error loading $className: ${e.getMessage}")
-      }
-    }
-
-    if (count == 0) {
-      logger.warn("No AotHintRegistrar implementations found.")
-      return
-    }
-
-    logger.info(s"Found $count AotHintRegistrar implementations")
-
-    if (merged.isEmpty) {
-      logger.warn("No hints registered. Skipping config generation.")
-    } else {
-      write(outputDir, merged)
-      logger.info(s"Generated GraalVM configs in $outputDir (${merged.getTypes.size} types, ${merged.getPatterns.size} patterns, ${merged.getProxies.size} proxies, ${merged.getSerializables.size} serializables)")
-    }
+    System.out.println(s"Generated GraalVM configs in $outputDir (${merged.getTypes.size} types, ${merged.getPatterns.size} patterns, ${merged.getProxies.size} proxies, ${merged.getSerializables.size} serializables)")
   }
 
   /** 读取清单文件：每行一个类名，# 开头为注释，忽略空行。 */
@@ -201,32 +164,6 @@ object AotHintGenerator extends Logging {
     Files.write(out, JsonArray(entries *).toJson.getBytes(StandardCharsets.UTF_8))
   }
 
-  private def findClassFiles(classLoader: ClassLoader): Seq[String] = {
-    val classes = new mutable.ListBuffer[String]
-    val urls = classLoader.getResources("")
-    while (urls.hasMoreElements) {
-      val url = urls.nextElement()
-      if (url.getProtocol == "file") {
-        val dir = Path.of(url.toURI)
-        if (Files.isDirectory(dir)) {
-          Files.walkFileTree(dir, new SimpleFileVisitor[Path] {
-            override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = {
-              if (file.toString.endsWith(".class")) {
-                val relative = dir.relativize(file).toString
-                  .replace(File.separatorChar, '/')
-                  .stripSuffix(".class")
-                  .replace('/', '.')
-                classes += relative
-              }
-              FileVisitResult.CONTINUE
-            }
-          })
-        }
-      }
-    }
-    classes.toSeq
-  }
-
   private def parseArgs(args: Array[String]): (Path, Seq[String], Option[Path]) = {
     var outputDir = Path.of("META-INF/native-image")
     var registrarsFile = Option.empty[Path]
@@ -242,7 +179,6 @@ object AotHintGenerator extends Logging {
           i += 1
           if (i < args.length) registrarsFile = Some(Path.of(args(i)))
           else {
-            logger.error("Missing value for --registrars")
             System.err.println("Missing value for --registrars")
             printUsage()
             System.exit(1)
@@ -251,7 +187,7 @@ object AotHintGenerator extends Logging {
           printUsage()
           System.exit(0)
         case arg if arg.startsWith("-") =>
-          logger.error(s"Unknown option: $arg")
+          System.err.println(s"Unknown option: $arg")
           printUsage()
           System.exit(1)
         case entry =>
@@ -268,7 +204,7 @@ object AotHintGenerator extends Logging {
       """Usage: AotHintGenerator [options] <classpath-entry> [classpath-entry...]
         |
         |Generates GraalVM native-image configuration files from AotHintRegistrar
-        |implementations declared in a registrars list file (or by classpath scan):
+        |implementations declared in a registrars list file:
         |  reflect-config.json       (reflection metadata)
         |  resource-config.json      (resource inclusion)
         |  proxy-config.json         (dynamic proxy interfaces)
@@ -283,7 +219,6 @@ object AotHintGenerator extends Logging {
         |
         |Examples:
         |  AotHintGenerator --registrars aot-registrars.txt -o out target/classes
-        |  AotHintGenerator -o src/main/resources/META-INF/native-image target/classes
         |""".stripMargin)
   }
 }

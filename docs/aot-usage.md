@@ -101,6 +101,7 @@ no AOT hints) and stale configs from previous runs are removed.
 
 ```bash
 java -cp <classpath> org.beangle.commons.aot.AotHintGenerator \
+  --registrars src/main/resources/META-INF/beangle/aot-registrars.txt \
   -o target/resource_managed/main/META-INF/native-image \
   target/classes
 ```
@@ -110,15 +111,23 @@ java -cp <classpath> org.beangle.commons.aot.AotHintGenerator \
 Run directly without SBT:
 
 ```bash
-# Generate configs from compiled classes
-AotHintGenerator target/classes
+# Generate configs from a registrars list file
+AotHintGenerator --registrars aot-registrars.txt target/classes
 
 # Custom output directory
-AotHintGenerator -o src/main/resources/META-INF/native-image target/classes
+AotHintGenerator --registrars aot-registrars.txt \
+  -o src/main/resources/META-INF/native-image target/classes
 
 # Multiple classpath entries
-AotHintGenerator target/classes lib/dependency.jar
+AotHintGenerator --registrars aot-registrars.txt target/classes lib/dependency.jar
+
+# Help
+AotHintGenerator -h
 ```
+
+The registrars list file declares the `AotHintRegistrar` class names to load,
+one per line (`#` comments allowed). Every declared class must be found and
+loaded, otherwise the tool exits with a non-zero code.
 
 ### Generated Files
 
