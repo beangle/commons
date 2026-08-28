@@ -87,7 +87,7 @@ object Reflections {
     ClassLoaders.get(companionClass) match {
       case Some(clazz) =>
         if clazz.getConstructors.length > 0 then newInstance(clazz).asInstanceOf[T]
-        else clazz.getDeclaredField("MODULE$").get(null).asInstanceOf[T]
+        else clazz.getField("MODULE$").get(null).asInstanceOf[T]
       case None =>
         newInstance(ClassLoaders.load(name).asInstanceOf[Class[T]])
     }
@@ -112,7 +112,7 @@ object Reflections {
         case Some(clazz) =>
           if clazz.getConstructors.length > 0 then classTag[T].unapply(newInstance(clazz))
           else
-            try classTag[T].unapply(clazz.getDeclaredField("MODULE$").get(null))
+            try classTag[T].unapply(clazz.getField("MODULE$").get(null))
             catch { case _: Exception => None }
         case None =>
           val clazz = ClassLoaders.load(name, classLoader)

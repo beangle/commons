@@ -88,6 +88,7 @@ object AotHintGenerator {
           try {
             registrar.registering()
             merged.addAll(registrar.aotHints)
+            registerRegistrarClass(name, classLoader, merged)
             System.out.println(s"Imported hints from $name")
           } catch {
             // 编译未完成/引用类缺失：静默归类为缺失，交由调用方决定是否重试
@@ -113,6 +114,25 @@ object AotHintGenerator {
     }
     write(outputDir, merged)
     System.out.println(s"Generated GraalVM configs in $outputDir (${merged.getTypes.size} types, ${merged.getPatterns.size} patterns, ${merged.getProxies.size} proxies, ${merged.getSerializables.size} serializables, ${merged.getRuntimeInitialized.size} runtime-initialized)")
+  }
+
+  /** 注册 registrar 类自身，保证运行期按名实例化（Reflections.getInstance/tryGetInstance）
+   *  在 native 镜像中可用：镜像只收录静态可达的类，仅靠 beangle.xml/清单里的字符串
+   *  无法把 registrar 类带进闭包，必须显式登记。
+   *
+   *  普通类（无伴生）：运行时经 `getDeclaredConstructor().newInstance()` 实例化，注册构造器；
+   *  Scala object（存在 `$` 伴生）：运行时经 `getDeclaredField("MODULE$").get(null)` 取单例，
+   *  伴生类注册声明构造器 + 声明字段。类自身也注册构造器，覆盖 `$` 缺失的兜底路径。
+   */
+  private def registerRegistrarClass(name: String, classLoader: ClassLoader, merged: AotHints): Unit = {
+    import AotPolicy.Category.*
+    val companion = name + "$"
+    ClassLoaders.get(companion, classLoader) foreach { clazz =>
+      merged.registerType(clazz, AotPolicy(Set(DeclaredConstructors, DeclaredFields)))
+    }
+    ClassLoaders.get(name, classLoader) foreach { clazz =>
+      merged.registerType(clazz, AotPolicy(Set(DeclaredConstructors)))
+    }
   }
 
   /** Scala object 伴生类（`$`）是否已存在：普通 registrar 类在 tryGetInstance 中经 load(name)

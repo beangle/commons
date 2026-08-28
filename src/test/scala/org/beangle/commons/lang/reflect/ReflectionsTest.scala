@@ -20,8 +20,9 @@ package org.beangle.commons.lang.reflect
 import org.beangle.commons.bean.Factory
 import org.beangle.commons.io.BinarySerializer
 import org.beangle.commons.jndi.JndiDataSourceFactory
+import org.beangle.commons.lang.Enums
 import org.beangle.commons.lang.annotation.description
-import org.beangle.commons.lang.testbean.{Book, Entity, Professor, TestChild2Bean}
+import org.beangle.commons.lang.testbean.{Book, Entity, Professor, TestChild2Bean, TestEnum}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -118,6 +119,11 @@ class ReflectionsTest extends AnyFunSpec, Matchers {
       val f = Reflections.getField(classOf[Professor], "depart")
       assert(f.nonEmpty)
       assert(f.get.get(p) == "r&d")
+    }
+    it("getInstance returns Scala 3 enum companion via public MODULE$ field") {
+      val enm = Reflections.getInstance[AnyRef](classOf[TestEnum].getName)
+      assert(enm eq TestEnum)
+      assert(Enums.values(enm).size == 3)
     }
 
   }

@@ -19,6 +19,7 @@ package org.beangle.commons.aot
 
 import org.beangle.commons.aot.AotPolicy.Category.*
 import org.beangle.commons.json.{Json, JsonObject}
+import org.beangle.commons.lang.testbean.TestEnum
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -107,6 +108,20 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       val entry = reflectEntries(hints).head
       entry("allPublicMethods") shouldBe true
       entry("allDeclaredFields") shouldBe true
+    }
+
+    it("enum types automatically gain public fields for MODULE$/values") {
+      val hints = new AotHints
+      hints.registerType(classOf[TestEnum], classOf[TestEnum.type])
+      val entries = reflectEntries(hints)
+      entries.map(e => e("name").toString) should contain allOf (
+        classOf[TestEnum].getName, classOf[TestEnum.type].getName)
+      entries foreach { e =>
+        e("allPublicMethods") shouldBe true
+        e("allPublicConstructors") shouldBe true
+        e("allPublicFields") shouldBe true
+        e.get("allDeclaredFields") shouldBe None
+      }
     }
   }
 

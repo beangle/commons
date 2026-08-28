@@ -66,11 +66,23 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
    *  superclass and interface hierarchy with the same policy. */
   private def addType(clazz: Class[_], p: AotPolicy): Unit = {
     if (clazz == null || isJdk(clazz)) return
-    merge(clazz, p)
-    if p.recursive then
-      addType(clazz.getSuperclass, p)
-      clazz.getInterfaces foreach (addType(_, p))
+    val effective = if isEnumType(clazz) then p.merge(enumPolicy) else p
+    merge(clazz, effective)
+    if effective.recursive then
+      addType(clazz.getSuperclass, effective)
+      clazz.getInterfaces foreach (addType(_, effective))
   }
+
+  /** 枚举运行期需要读取字段：Scala 3 enum 经 `MODULE$` 取伴生单例、Java enum 经
+   *  `$VALUES` 取常量，`EnumConverters`/`Enums`/`Reflections.getInstance` 都依赖字段
+   *  反射。这些字段均为 public static（`MODULE$`/`$VALUES`），注册 enum 类型
+   *  （含 Scala 3 枚举伴生 `Mirror.Sum`）时自动补 public 字段即可，避免每个应用
+   *  为枚举伴生额外定制策略。 */
+  private val enumPolicy = AotPolicy(Set(AotPolicy.Category.PublicFields))
+
+  private def isEnumType(clazz: Class[_]): Boolean =
+    clazz.isEnum || classOf[scala.reflect.Enum].isAssignableFrom(clazz) ||
+      classOf[scala.deriving.Mirror.Sum].isAssignableFrom(clazz)
 
   private def merge(clazz: Class[_], p: AotPolicy): Unit = {
     typePolicies.get(clazz) match {

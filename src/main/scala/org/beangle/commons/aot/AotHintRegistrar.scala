@@ -50,6 +50,13 @@ abstract class AotHintRegistrar extends Registrar {
   /** 本 registrar 的默认注册策略；覆写可整体调整 `registerType` 的展开方式。 */
   protected def aotPolicy: AotPolicy = AotPolicy.default
 
+  /** 收集注册的容器，必须保持单一实例（注册会累积），故不能是 `def`。
+   *
+   * 用 `lazy` 而非 `val`：`aotPolicy` 是可覆写的开放方法，若在基类构造期间
+   * 求值会动态分派到子类覆写，而此时子类字段尚未初始化（可能读到 null 或
+   * 默认值）。`lazy` 将求值推迟到首次真正访问（`registering()`/`aotHints`），
+   * 此时对象已完整构造，子类覆写引用任何状态都安全。
+   */
   protected lazy val hints = new AotHints(aotPolicy)
 
   /** Returns the collected hints for config file generation. */
