@@ -17,6 +17,7 @@
 
 package org.beangle.commons.lang.reflect
 
+import org.beangle.commons.bean.meta.MetaModel.BeanMeta
 import org.beangle.commons.bean.meta.{MetaLoader, MetaModel, MetaModels}
 import org.beangle.commons.collection.IdentityCache
 
@@ -29,7 +30,30 @@ object BeanInfos {
   def get(clazz: Class[_]): BeanInfo = {
     val exist = cache.get(clazz)
     if (null != exist) return exist
-    register(MetaModels.get(clazz).getOrElse(MetaLoader.load(clazz)))
+    MetaModels.get(clazz) match
+      case Some(meta) => register(meta)
+      case None =>
+        val parent = parentOf(clazz)
+        if (null == parent) register(MetaLoader.load(clazz))
+        else
+          MetaModels.get(parent) match
+            case Some(pm) => register(pm.copy(clazz = clazz, ctors = Seq.empty))
+            case None => register(MetaLoader.load(clazz))
+  }
+
+  /** 父类 `$` 子类的父类判定（如 Hibernate 懒加载代理 `<Entity>$HibernateProxy`）：
+   * 类名中 `$` 前缀与父类全名一致时返回父类。命中时复用父类 BeanMeta（此类无自有
+   * bean 属性，仅继承父类）；native 下需该类已注册 allPublicMethods（构建期生成器
+   * 按命名约定输出），供 `BeanInfo.from` 的 `getMethods` 查询。
+   */
+  private def parentOf(clazz: Class[_]): Class[_] = {
+    val name = clazz.getName
+    val idx = name.lastIndexOf("$")
+    if (idx <= 0) null
+    else {
+      val parent = clazz.getSuperclass
+      if (null != parent && name.substring(0, idx) == parent.getName) parent else null
+    }
   }
 
   /** Returns true if BeanInfo is cached for the class. */
@@ -38,13 +62,6 @@ object BeanInfos {
   /** Registers a pre-built BeanInfo into the cache. */
   def update(bi: BeanInfo): BeanInfo = {
     cache.put(bi.meta.clazz, bi)
-    bi
-  }
-
-  /** FIXME why need to args
-   * Registers a BeanInfo for a specific class (e.g. subclass sharing parent's BeanInfo). */
-  def update(clazz: Class[_], bi: BeanInfo): BeanInfo = {
-    cache.put(clazz, bi)
     bi
   }
 
