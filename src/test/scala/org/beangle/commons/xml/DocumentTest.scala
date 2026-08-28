@@ -23,7 +23,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class DocumentTest extends AnyFunSpec, Matchers {
-  val doc = Document.parse(IOs.readString(ClassLoaders.getResource("beangle.xml").get.openStream()))
+  val doc = Document.parse(IOs.readString(ClassLoaders.getResource("document-test.xml").get.openStream()))
 
   describe("Document") {
     it("parse") {

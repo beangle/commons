@@ -1,64 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <beangle>
-  <ems app-name="platform-cas"/>
-  <cdi>
-    <module class="org.beangle.ems.app.dao.DaoModule"/>
-    <module class="org.beangle.ems.app.web.HibernateModule"/>
-    <module class="org.beangle.ems.app.web.DefaultModule"/>
-    <module class="org.beangle.ems.app.log.DefaultModule"/>
-    <module class="org.beangle.ems.app.cache.DefaultModule"/>
-    <module class="org.beangle.ems.cas.action.DefaultModule"/>
-    <module class="org.beangle.ems.cas.action.SmsModule"/>
-    <module class="org.beangle.ems.core.cas.DefaultModule"/>
-    <module class="org.beangle.ems.core.cas.TicketModule"/>
-    <module class="org.beangle.ems.core.cas.SessionModule"/>
-    <module class="org.beangle.ems.core.cas.DaoRealmModule"/>
-    <module class="org.beangle.ems.core.cas.CredentialModule"/>
-    <module class="org.beangle.ems.core.WebReconfigModule"/>
-    <module class="org.beangle.ems.core.user.service.DefaultModule"/>
-    <module class="org.beangle.ems.core.config.service.DefaultModule"/>
-    <module class="org.beangle.ems.core.security.service.DefaultModule"/>
-    <module class="org.beangle.webmvc.view.freemarker.DefaultModule"/>
-  </cdi>
-  <mvc>
-    <profile package="org.beangle.ems.cas.action">
-      <url path="/" style="seo" suffix=""/>
-      <interceptor name="web.Interceptor.security"/>
-      <interceptor name="web.Interceptor.hibernate"/>
-    </profile>
-    <profile package="org.beangle.ids.cas.web.action">
-      <url path="/" style="seo" suffix=""/>
-      <interceptor name="web.Interceptor.security"/>
-      <interceptor name="web.Interceptor.hibernate"/>
-    </profile>
-    <profile package="org.beangle.ids.cas.web.ws">
-      <url path="/" style="seo" suffix=""/>
-      <interceptor name="web.Interceptor.hibernate"/>
-    </profile>
-  </mvc>
-  <orm>
-    <mapping class="org.beangle.ems.core.oa.model.DefaultMapping"/>
-    <mapping class="org.beangle.ems.core.config.model.DefaultMapping"/>
-    <mapping class="org.beangle.ems.core.security.model.DefaultMapping"/>
-    <mapping class="org.beangle.ems.core.user.model.DefaultMapping"/>
-    <mapping class="org.beangle.ems.core.blob.model.DefaultMapping"/>
-    <mapping class="org.beangle.ems.core.log.model.DefaultMapping"/>
-    <naming>
-      <profile schema="ems" package="org.beangle.ems.core" pluralize="true">
-        <profile package="config" prefix="cfg_"/>
-        <profile package="user" prefix="usr_"/>
-        <profile package="oa" prefix="oa_"/>
-        <profile package="security" prefix="se_">
-          <annotation schema="log" prefix="ems_" pluralize="true" class="org.beangle.data.model.annotation.log"/>
-        </profile>
-        <profile package="blob" prefix="blb_"/>
-        <profile package="log" prefix="log_">
-          <annotation schema="log" prefix="ems_" pluralize="true" class="org.beangle.data.model.annotation.log"/>
-        </profile>
-        <profile package="job" prefix="jb_"/>
-      </profile>
-    </naming>
-  </orm>
   <mvc>
     <static>
       <bundle name="local" version="default"/>
@@ -74,11 +15,6 @@
   <web>
     <initializer class="org.beangle.webmvc.init.WebmvcInitializer"/>
   </web>
-  <cdi>
-    <module class="org.beangle.webmvc.DefaultModule"/>
-    <module class="org.beangle.webmvc.ViewModule"/>
-    <module class="org.beangle.webmvc.DevModule"/>
-  </cdi>
   <mvc>
     <static>
       <bundle name="jquery" version="3.6.0">
@@ -140,9 +76,6 @@
       <bundle name="pdfjs" version="1.9.426"/>
     </static>
   </mvc>
-  <cdi>
-    <module class="org.beangle.bui.DefaultModule"/>
-  </cdi>
   <template>
     <freemarker>
       <props default="true">
