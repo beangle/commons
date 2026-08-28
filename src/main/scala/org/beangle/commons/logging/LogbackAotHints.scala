@@ -34,6 +34,7 @@ import org.beangle.commons.aot.AotHintRegistrar
   */
 class LogbackAotHints extends AotHintRegistrar {
   override def registering(): Unit = {
+    hints.registerPattern("logback\\.xml")
     hints.registerType(
       classOf[ch.qos.logback.classic.Logger],
       classOf[ch.qos.logback.classic.BasicConfigurator],

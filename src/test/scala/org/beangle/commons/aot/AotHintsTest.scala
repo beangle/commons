@@ -125,6 +125,20 @@ class AotHintsTest extends AnyFunSpec, Matchers {
     }
   }
 
+  describe("resource patterns") {
+    it("MetaAotHints registers beanmeta.idx pattern") {
+      val registrar = new org.beangle.commons.bean.meta.MetaAotHints
+      registrar.registering()
+      registrar.aotHints.getPatterns should contain("META-INF/beangle/beanmeta.idx")
+    }
+
+    it("LogbackAotHints registers logback.xml pattern") {
+      val registrar = new org.beangle.commons.logging.LogbackAotHints
+      registrar.registering()
+      registrar.aotHints.getPatterns should contain("logback\\.xml")
+    }
+  }
+
   describe("AotHintRegistrar") {
     it("hints use the overridable default policy") {
       val policy = AotPolicy(Set(DeclaredMethods, DeclaredConstructors, DeclaredFields), recursive = true)

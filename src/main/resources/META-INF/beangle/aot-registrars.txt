@@ -1,3 +1,2 @@
-# beangle-commons 的 GraalVM AOT 提示注册器（AotHintRegistrar 子类）
-# AotPlugin 以此为契约：所有列出的类必须能在 classpath 上找到，否则构建报错。
 org.beangle.commons.logging.LogbackAotHints
+org.beangle.commons.bean.meta.MetaAotHints
