@@ -19,6 +19,8 @@ package org.beangle.commons.aot
 
 import org.beangle.commons.collection.Collections
 
+import scala.collection.mutable
+
 /** Mutable container for ahead-of-time hints used by GraalVM native-image.
   *
   * Subclasses or callers register types, resource patterns, proxy interfaces,
@@ -34,41 +36,53 @@ import org.beangle.commons.collection.Collections
   * hints.registerSerializable(classOf[UserDto])
   * AotHintGenerator.write(outDir, hints)
   * }}}
+  *
+  * 反射类型按 [[AotPolicy]] 逐类登记：简单路径 `registerType(clazz)` 使用容器默认策略
+  * （通常来自 [[AotHintRegistrar.aotPolicy]]，默认 public 方法 + public 构造器、无字段、
+  * 不递归）；定制路径 `registerType(clazz, policy)` 对单个类显式指定策略。
   */
-class AotHints {
+class AotHints(val policy: AotPolicy = AotPolicy.default) {
 
-  private val types = Collections.newSet[Class[_]]
+  private val typePolicies = mutable.LinkedHashMap.empty[Class[_], AotPolicy]
   private val patterns = Collections.newSet[String]
   private val proxies = Collections.newSet[List[Class[_]]]
   private val serializables = Collections.newSet[Class[_]]
   private val runtimeInitialized = Collections.newSet[Class[_]]
 
   /** Packages whose reflection metadata GraalVM already provides; skipped by
-   *  the recursive hierarchy registration in [[registerType]]. */
+   *  the recursive hierarchy expansion in [[addType]]. */
   private val jdkPrefixes = Seq("java.", "javax.", "jdk.", "sun.", "com.sun.", "scala.")
 
-  /** Registers classes for reflection access in native-image.
-   *
-   * Superclasses and interfaces are registered recursively as well, so
-   * inherited fields/methods/constructors are reachable for reflection;
-   * JDK classes are skipped.
-   */
+  /** 简单路径：按容器默认策略（通常来自 registrar 的 `aotPolicy`）注册反射类型。 */
   def registerType(classes: Class[_]*): Unit = {
     val it = classes.iterator
-    while it.hasNext do addType(it.next())
+    while it.hasNext do addType(it.next(), policy)
   }
 
-  /** Adds a class and, recursively, its non-JDK superclass and interfaces. */
-  private def addType(clazz: Class[_]): Unit = {
-    if (clazz == null || !types.add(clazz)) return
-    val superclass = clazz.getSuperclass
-    if (superclass != null && !isJdk(superclass)) addType(superclass)
-    clazz.getInterfaces foreach { iface => if (!isJdk(iface)) addType(iface) }
+  /** 定制路径：对单个类显式指定策略，例如 declared 成员、字段或递归父类。 */
+  def registerType(clazz: Class[_], custom: AotPolicy): Unit = addType(clazz, custom)
+
+  /** Adds a class with the given policy; when recursive, expands the non-JDK
+   *  superclass and interface hierarchy with the same policy. */
+  private def addType(clazz: Class[_], p: AotPolicy): Unit = {
+    if (clazz == null || isJdk(clazz)) return
+    merge(clazz, p)
+    if p.recursive then
+      addType(clazz.getSuperclass, p)
+      clazz.getInterfaces foreach (addType(_, p))
   }
 
-  private def isJdk(clazz: Class[_]): Boolean =
+  private def merge(clazz: Class[_], p: AotPolicy): Unit = {
+    typePolicies.get(clazz) match {
+      case Some(existing) => typePolicies.update(clazz, existing.merge(p))
+      case None           => typePolicies.put(clazz, p)
+    }
+  }
+
+  private def isJdk(clazz: Class[_]): Boolean = {
     val name = clazz.getName
     jdkPrefixes.exists(name.startsWith)
+  }
 
   /** Registers resource inclusion patterns (ant-style globs). */
   def registerPattern(patterns: String*): Unit = {
@@ -96,7 +110,10 @@ class AotHints {
   }
 
   /** Returns all registered reflection types. */
-  def getTypes: collection.Set[Class[_]] = types
+  def getTypes: collection.Set[Class[_]] = typePolicies.keySet
+
+  /** Returns all registered reflection types with their policies. */
+  def getTypePolicies: collection.Map[Class[_], AotPolicy] = typePolicies
 
   /** Returns all registered resource patterns. */
   def getPatterns: collection.Set[String] = patterns
@@ -112,11 +129,11 @@ class AotHints {
 
   /** Returns true if no hints have been registered. */
   def isEmpty: Boolean =
-    types.isEmpty && patterns.isEmpty && proxies.isEmpty && serializables.isEmpty && runtimeInitialized.isEmpty
+    typePolicies.isEmpty && patterns.isEmpty && proxies.isEmpty && serializables.isEmpty && runtimeInitialized.isEmpty
 
   /** Merges all hints from another [[AotHints]] into this one. */
   def addAll(other: AotHints): Unit = {
-    types.addAll(other.types)
+    other.typePolicies foreach { case (clazz, p) => merge(clazz, p) }
     patterns.addAll(other.patterns)
     proxies.addAll(other.proxies)
     serializables.addAll(other.serializables)

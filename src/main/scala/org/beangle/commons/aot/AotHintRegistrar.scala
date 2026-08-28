@@ -36,13 +36,21 @@ import org.beangle.commons.lang.Registrar
  * }
  * }}}
  *
+ * [[hints]] 使用 [[aotPolicy]] 作为默认注册策略（默认 public 方法 + public 构造器、
+ * 无字段、不递归）。绝大多数 registrar 无需改动；需要放宽（declared 成员、字段、
+ * 递归父类）或收紧（仅 introspection）时覆写 [[aotPolicy]]，或对个别类走
+ * `hints.registerType(clazz, customPolicy)` 显式定制。
+ *
  * [[org.beangle.commons.bean.meta.MetaRegistrar]] extends this trait, adding
  * compile-time BeanMeta registration via the `register` macro; every `register`
  * call also adds the type to [[hints]].
  */
 abstract class AotHintRegistrar extends Registrar {
 
-  protected val hints = new AotHints
+  /** 本 registrar 的默认注册策略；覆写可整体调整 `registerType` 的展开方式。 */
+  protected def aotPolicy: AotPolicy = AotPolicy.default
+
+  protected lazy val hints = new AotHints(aotPolicy)
 
   /** Returns the collected hints for config file generation. */
   final def aotHints: AotHints = hints

@@ -6,6 +6,7 @@
 
 ```
 org.beangle.commons.aot
+├── AotPolicy            # Registration strategy (visibility × access depth)
 ├── AotHints             # Mutable container for hint data
 ├── AotHintRegistrar     # Trait for registering hints
 └── AotHintGenerator     # CLI tool / writer for GraalVM config files
@@ -74,7 +75,7 @@ class AppRegistry extends MetaRegistrar {
 }
 ```
 
-## 3. SBT Integration (AotPlugin)
+## 4. SBT Integration (AotPlugin)
 
 `AotPlugin` is auto-enabled on every JVM project (no `enablePlugins` needed).
 Generation is driven by the anchor file — presence of
@@ -108,7 +109,7 @@ java -cp <classpath> org.beangle.commons.aot.AotHintGenerator \
   target/classes
 ```
 
-## 4. CLI Usage (AotHintGenerator)
+## 5. CLI Usage (AotHintGenerator)
 
 Run directly without SBT:
 
@@ -143,31 +144,38 @@ loaded, otherwise the tool exits with a non-zero code.
 Stale files from previous runs are automatically deleted when the corresponding
 hint category becomes empty.
 
-## 5. AotHints API
+## 6. AotHints API
 
 ```scala
-val hints = new AotHints
+val hints = new AotHints(AotPolicy.default)
 
-// Register
+// Register (simple: default policy)
 hints.registerType(classOf[User])
+
+// Register (custom: explicit policy per class)
+hints.registerType(classOf[Role], AotPolicy(Set(AotPolicy.Category.DeclaredMethods),
+  recursive = true))
+
 hints.registerPattern("META-INF/custom.idx")
 hints.registerProxy(classOf[UserService])
 hints.registerSerializable(classOf[UserDto])
 
 // Read
-hints.getTypes        // Set[Class[_]]
-hints.getPatterns     // Set[String]
-hints.getProxies      // Set[List[Class[_]]]
-hints.getSerializables // Set[Class[_]]
+hints.policy             // AotPolicy (container default)
+hints.getTypes           // Set[Class[_]]
+hints.getTypePolicies    // Map[Class[_], AotPolicy]
+hints.getPatterns        // Set[String]
+hints.getProxies         // Set[List[Class[_]]]
+hints.getSerializables   // Set[Class[_]]
 
 // Merge
 hints.addAll(otherHints)
 
 // Check
-hints.isEmpty         // Boolean
+hints.isEmpty            // Boolean
 ```
 
-## 6. Full Example
+## 7. Full Example
 
 ```scala
 // 1. Define hints
@@ -184,7 +192,53 @@ class ServiceHints extends AotHintRegistrar {
   }
 }
 
-// 2. SBT: enable AotPlugin
+## 3. Registration Strategy (AotPolicy)
+
+`registerType(clazz)` 默认按「安全 + 高性能」策略展开，无需任何配置：
+不注册字段、只开放 public 方法 + public 构造器（可反射调用）、不递归父类。
+`Public` 可见性依赖 GraalVM `allPublic*` 语义，天然覆盖继承链上的 public 成员，
+因此不需要递归也能完整支持对继承方法的反射调用。
+
+两个正交维度（编码在 `AotPolicy.Category` 的命名中）：
+
+| 维度 | 取值 | 说明 |
+|------|------|------|
+| 可见性 | `Public*` / `Declared*` | `Public*` 含继承链（GraalVM `allPublic*`）；`Declared*` 仅本类声明，继承成员需 `recursive = true` |
+| 访问深度 | 无前缀 / `Query*` | 无前缀（如 `PublicMethods`）可反射调用（`method.invoke`/`field.get`/`set`），对应 `all*` 标志；`Query*`（如 `QueryPublicMethods`）仅登记元数据（`getMethod`/`getAnnotation`，调用会失败），对应 `queryAll*` 标志，镜像更小 |
+
+> **invoke vs introspect（Query）**：`getMethod`/`getDeclaredMethods`/`getAnnotation` 这类
+> 「查元数据」只需 introspect 级登记；`Method.invoke`、`Field.get/set` 需要 invoke 级登记。
+> `queryAll*` 只登记元数据，不登记方法体/invoker stub，镜像更小、构建更快，但运行时
+> 反射调用会抛异常。Spring AOT 的 `MemberCategory` 即按此映射（`INTROSPECT_*` → `queryAll*`，
+> `INVOKE_*` → `all*`）。字段在本版本 GraalVM（21.x）没有 query-only 批量标志：
+> 注册了字段即可读写。
+
+默认策略可通过两种方式定制（均比默认调用繁琐）：
+
+```scala
+// 方式一：整个 registrar 换默认策略（覆写 aotPolicy）
+class WideHints extends AotHintRegistrar {
+  override protected def aotPolicy: AotPolicy =
+    AotPolicy(Set(AotPolicy.Category.DeclaredMethods,
+                  AotPolicy.Category.DeclaredConstructors,
+                  AotPolicy.Category.DeclaredFields), recursive = true)
+  override def registering(): Unit = hints.registerType(classOf[User])
+}
+
+// 方式二：对个别类显式指定策略
+class MixedHints extends AotHintRegistrar {
+  override def registering(): Unit = {
+    hints.registerType(classOf[User]) // 默认：public 方法+构造器、无字段、不递归
+    hints.registerType(classOf[Role],
+      AotPolicy(Set(AotPolicy.Category.DeclaredMethods, AotPolicy.Category.DeclaredFields),
+                recursive = true))
+  }
+}
+```
+
+同一个类被多次注册时策略取并集（类别合并、`recursive`/`unsafeAllocated` 取或）。
+
+### With MetaRegistrar (metamodel)
 // build.sbt
 lazy val app = (project in file(".")).enablePlugins(AotPlugin)
 

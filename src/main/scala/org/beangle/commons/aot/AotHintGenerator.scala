@@ -136,7 +136,7 @@ object AotHintGenerator {
   /** Writes non-empty config files and deletes stale ones from previous runs. */
   def write(outDir: Path, hints: AotHints): Unit = {
     Files.createDirectories(outDir)
-    writeOrDelete(outDir.resolve("reflect-config.json"), hints.getTypes.nonEmpty)(writeReflect(_, hints.getTypes))
+    writeOrDelete(outDir.resolve("reflect-config.json"), hints.getTypePolicies.nonEmpty)(writeReflect(_, hints.getTypePolicies))
     writeOrDelete(outDir.resolve("resource-config.json"), hints.getPatterns.nonEmpty)(writeResource(_, hints.getPatterns))
     writeOrDelete(outDir.resolve("proxy-config.json"), hints.getProxies.nonEmpty)(writeProxy(_, hints.getProxies))
     writeOrDelete(outDir.resolve("serialization-config.json"), hints.getSerializables.nonEmpty)(writeSerializable(_, hints.getSerializables))
@@ -148,16 +148,31 @@ object AotHintGenerator {
     else Files.deleteIfExists(file)
   }
 
-  /** Writes reflect-config.json for classes needing reflection access. */
-  def writeReflect(out: Path, types: collection.Set[Class[_]]): Unit = {
-    val entries = types.toSeq.sortBy(_.getName).map { clazz =>
-      JsonObject(
-        "name" -> clazz.getName,
-        "allDeclaredFields" -> true,
-        "allDeclaredConstructors" -> true,
-        "allDeclaredMethods" -> true)
-    }
+  /** Writes reflect-config.json for classes needing reflection access, one entry
+   *  per type with the flags derived from its [[AotPolicy]]. */
+  def writeReflect(out: Path, types: collection.Map[Class[_], AotPolicy]): Unit = {
+    val entries = types.toSeq.sortBy(_._1.getName).map { case (clazz, policy) => reflectEntry(clazz, policy) }
     Files.write(out, JsonArray(entries *).toJson.getBytes(StandardCharsets.UTF_8))
+  }
+
+  /** Builds a reflect-config.json entry from the class and its policy. */
+  private def reflectEntry(clazz: Class[_], policy: AotPolicy): JsonObject = {
+    import AotPolicy.Category.*
+    val entry = JsonObject("name" -> clazz.getName)
+    policy.categories foreach {
+      case PublicMethods            => entry.add("allPublicMethods", true)
+      case DeclaredMethods          => entry.add("allDeclaredMethods", true)
+      case PublicConstructors       => entry.add("allPublicConstructors", true)
+      case DeclaredConstructors     => entry.add("allDeclaredConstructors", true)
+      case PublicFields             => entry.add("allPublicFields", true)
+      case DeclaredFields           => entry.add("allDeclaredFields", true)
+      case QueryPublicMethods       => entry.add("queryAllPublicMethods", true)
+      case QueryDeclaredMethods     => entry.add("queryAllDeclaredMethods", true)
+      case QueryPublicConstructors  => entry.add("queryAllPublicConstructors", true)
+      case QueryDeclaredConstructors => entry.add("queryAllDeclaredConstructors", true)
+    }
+    if (policy.unsafeAllocated) entry.add("unsafeAllocated", true)
+    entry
   }
 
   /** Writes resource-config.json for resource inclusion patterns. */
