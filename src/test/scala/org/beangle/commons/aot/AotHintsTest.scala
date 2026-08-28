@@ -110,9 +110,9 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       entry("allDeclaredFields") shouldBe true
     }
 
-    it("enum types automatically gain public fields for MODULE$/values") {
+    it("enum types register companion automatically with public fields") {
       val hints = new AotHints
-      hints.registerType(classOf[TestEnum], classOf[TestEnum.type])
+      hints.registerType(classOf[TestEnum])
       val entries = reflectEntries(hints)
       entries.map(e => e("name").toString) should contain allOf (
         classOf[TestEnum].getName, classOf[TestEnum.type].getName)

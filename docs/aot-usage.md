@@ -121,16 +121,17 @@ class MixedHints extends AotHintRegistrar {
 
 同一个类被多次注册时策略取并集（类别合并、`recursive`/`unsafeAllocated` 取或）。
 
-### 枚举类型自动补 public 字段
+### 枚举类型自动注册（含伴生对象）
 
 枚举的运行期反射路径（`EnumConverters`/`Enums`/`Reflections.getInstance`）需要读取字段：
 Scala 3 enum 经伴生对象 `MODULE$` 取单例、Java enum 经 `$VALUES` 取常量。这些字段均为
 `public static`，因此 `AotHints.registerType` 对 enum 类型自动合并 `PublicFields`
-（`allPublicFields`），无需应用为枚举伴生逐类定制策略。判定规则：
+（`allPublicFields`）；对 Scala 3 enum 还会**自动增量注册伴生对象**——应用只需注册枚举
+类型本身，无需再写 `classOf[Color.type]`。判定规则：
 
 - Java enum：`clazz.isEnum`；
 - Scala 3 enum：`scala.reflect.Enum` 可赋值；
-- Scala 3 枚举伴生：实现 `scala.deriving.Mirror.Sum`。
+- Scala 3 枚举伴生（自动增量注册，同样命中规则）：实现 `scala.deriving.Mirror.Sum`。
 
 ```scala
 enum Color(val id: Int) {
@@ -140,8 +141,9 @@ enum Color(val id: Int) {
 
 class AppHints extends AotHintRegistrar {
   override def registering(): Unit = {
-    // Color 与 Color$（伴生）都会自动带上 allPublicFields（覆盖 MODULE$）
-    hints.registerType(classOf[Color], classOf[Color.type])
+    // 只注册 Color；Color$（伴生，MODULE$ 单例入口）由 AotHints 自动增量注册，
+    // 两者都自动带上 allPublicFields
+    hints.registerType(classOf[Color])
   }
 }
 ```

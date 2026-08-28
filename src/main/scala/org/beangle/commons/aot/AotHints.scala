@@ -68,9 +68,22 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
     if (clazz == null || isJdk(clazz)) return
     val effective = if isEnumType(clazz) then p.merge(enumPolicy) else p
     merge(clazz, effective)
+    // Scala 3 enum：应用只需注册枚举类型本身，伴生对象（`MODULE$` 单例入口）自动增量注册
+    if classOf[scala.reflect.Enum].isAssignableFrom(clazz) then registerCompanion(clazz, effective)
     if effective.recursive then
       addType(clazz.getSuperclass, effective)
       clazz.getInterfaces foreach (addType(_, effective))
+  }
+
+  /** 按 `clazz.getName + "$"` 加载伴生类并注册（伴生实现 `Mirror.Sum`，同样命中
+   *  [[isEnumType]] 自动补 public 字段）；伴生类缺失（罕见）时静默跳过。 */
+  private def registerCompanion(clazz: Class[_], p: AotPolicy): Unit = {
+    try {
+      val companion = Class.forName(clazz.getName + "$", false, clazz.getClassLoader)
+      if !companion.isInterface then addType(companion, p)
+    } catch {
+      case _: ClassNotFoundException | _: LinkageError => ()
+    }
   }
 
   /** 枚举运行期需要读取字段：Scala 3 enum 经 `MODULE$` 取伴生单例、Java enum 经
