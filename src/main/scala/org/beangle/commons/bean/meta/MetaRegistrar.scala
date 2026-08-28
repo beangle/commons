@@ -18,8 +18,10 @@
 package org.beangle.commons.bean.meta
 
 import org.beangle.commons.aot.AotHintRegistrar
+import org.beangle.commons.bean.component
 import org.beangle.commons.bean.meta.MetaModel.BeanMeta
 import org.beangle.commons.collection.Collections
+import org.beangle.commons.lang.reflect.{BeanInfos, TypeInfo}
 
 import java.io.OutputStream
 import scala.quoted.*
@@ -58,10 +60,30 @@ abstract class MetaRegistrar extends AotHintRegistrar {
   /** Adds BeanMeta to internal buffer (used by macro expansion).
    * Dont change to protected or private due to substream library may invoke it by registerImpl macro*/
   def addMetas(cms: Iterable[BeanMeta]): Unit = {
+    val visited = Collections.newSet[Class[_]]
     cms foreach { c =>
       metaMap.put(c.clazz, c)
       hints.registerType(c.clazz)
+      registerEnumProperties(c, visited)
     }
+  }
+
+  /** 注册实体属性树中出现的 Scala 3 enum：遍历属性，遇到 `@component` 值类型递归其属性，
+   *  集合/Map 深入元素类型。应用只需注册实体，枚举属性（及伴生对象）自动随 `registerType`
+   *  一并登记，无需手工 `registerType(classOf[枚举])`。构建期调用（`addMetas` 仅经
+   *  `registering()` 由生成器触发），此处用反射 dig component 是安全的。 */
+  private def registerEnumProperties(cm: BeanMeta, visited: scala.collection.mutable.Set[Class[_]]): Unit = {
+    def dig(bm: BeanMeta): Unit = {
+      if (visited.add(bm.clazz)) bm.properties foreach (p => visit(p.typeinfo))
+    }
+    def visit(ti: TypeInfo): Unit = {
+      if (ti == null) return
+      val clazz = ti.clazz
+      if (classOf[scala.reflect.Enum].isAssignableFrom(clazz)) hints.registerType(clazz)
+      else if (clazz.isAnnotationPresent(classOf[component])) dig(BeanInfos.get(clazz).meta)
+      ti.args foreach visit
+    }
+    dig(cm)
   }
 }
 

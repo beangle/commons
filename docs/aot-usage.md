@@ -62,13 +62,15 @@ class MyHints extends AotHintRegistrar {
 ### With MetaRegistrar (metamodel)
 
 `MetaRegistrar` extends `AotHintRegistrar` — metamodel classes are automatically
-registered as reflection types:
+registered as reflection types; their property types are also scanned for
+Scala 3 enums (recursing into `@component` value types and collection element
+types), so enum properties need no manual registration at all:
 
 ```scala
 import org.beangle.commons.bean.meta.MetaRegistrar
 
 class AppRegistry extends MetaRegistrar {
-  register(classOf[User], classOf[Role])
+  register(classOf[User], classOf[Role]) // User 的 enum 属性自动注册（含伴生对象）
   // Optional: additional AOT hints
   hints.registerPattern("META-INF/custom.idx")
   hints.registerProxy(classOf[UserService])
@@ -127,7 +129,15 @@ class MixedHints extends AotHintRegistrar {
 Scala 3 enum 经伴生对象 `MODULE$` 取单例、Java enum 经 `$VALUES` 取常量。这些字段均为
 `public static`，因此 `AotHints.registerType` 对 enum 类型自动合并 `PublicFields`
 （`allPublicFields`）；对 Scala 3 enum 还会**自动增量注册伴生对象**——应用只需注册枚举
-类型本身，无需再写 `classOf[Color.type]`。判定规则：
+类型本身，无需再写 `classOf[Color.type]`。
+
+经 `MetaRegistrar`（`MappingModule`/`BindModule` 等）注册的类，其属性树会被自动扫描：
+遍历属性（含集合/Map 元素类型）、递归 `@component` 值类型，发现 Scala 3 enum 即自动注册
+（同样携带伴生对象）。因此 ORM 实体只要 `bind`/`register`，枚举属性**完全无需手工注册**。
+仅当枚举不出现在任何已注册类的属性中（如仅作方法参数）时，才需要显式
+`hints.registerType(classOf[枚举])`。
+
+判定规则：
 
 - Java enum：`clazz.isEnum`；
 - Scala 3 enum：`scala.reflect.Enum` 可赋值；
