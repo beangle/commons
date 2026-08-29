@@ -313,6 +313,7 @@ object Binder {
 
     /** Wires property to inner bean of type clazz. */
     def proxy(property: String, clazz: Class[_]): this.type = {
+      if (null == binder) return this // build-time scan no-op
       val targetBean = binder.newInnerBeanName(clazz)
       val targetDefinition = new Definition(targetBean, clazz, Scope.Singleton.name)
       val an = clazz.getAnnotation(classOf[description])
@@ -327,6 +328,7 @@ object Binder {
 
     /** Wires property to target definition. */
     def proxy(property: String, target: Definition): this.type = {
+      if (null == binder) return this // build-time scan no-op
       binder.add(target)
       for (definition <- beans) {
         definition.targetClass = Some(target.clazz)
@@ -450,6 +452,7 @@ object Binder {
 
     /** Binds a named bean. */
     def bind(name: String, clazz: Class[_]): this.type = {
+      if (null == binder) return this // build-time scan no-op
       val dfn = new Definition(name, clazz, Scope.Singleton.name)
       if (classOf[Factory[_]].isAssignableFrom(clazz)) {
         dfn.targetClass = Some(Factory.getObjectType(clazz))

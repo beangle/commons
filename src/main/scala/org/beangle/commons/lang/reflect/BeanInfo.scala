@@ -159,9 +159,15 @@ class BeanInfo(val meta: BeanMeta, val properties: Map[String, PropertyInfo]) {
 
   /** Gets the setter Method for a property by name. */
   def getSetterMethod(property: String): Option[Method] = {
-    properties.get(property).flatMap(p => p.meta.setterName.flatMap(findMethod))
+    properties.get(property).flatMap { p =>
+      p.meta.setterName.flatMap { setterName =>
+        try Some(clazz.getMethod(setterName, p.typeinfo.clazz))
+        catch case _: NoSuchMethodException => None
+      }
+    }
   }
 
+  /** 零参方法查找：`Class.getMethod(name)` 只匹配无参方法，适用于 getter。 */
   private def findMethod(name: String): Option[Method] = {
     try Some(clazz.getMethod(name)) catch case _: NoSuchMethodException => None
   }

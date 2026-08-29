@@ -182,6 +182,28 @@ class BeanInfosTest extends AnyFunSpec, Matchers {
       assert(m.nonEmpty)
       assert("teaching,research" == m.get.invoke(new Professor(1L)))
     }
+
+    it("find setter method of primitive property") {
+      val setter = BeanInfos.get(classOf[Menu]).getSetterMethod("id")
+      assert(setter.isDefined)
+      assert(setter.get.getName == "id_$eq")
+      assert(setter.get.getParameterTypes.head == classOf[Long])
+    }
+
+    it("find setter method of option property") {
+      val ageSetter = BeanInfos.get(classOf[Author]).getSetterMethod("age")
+      assert(ageSetter.isDefined)
+      assert(ageSetter.get.getName == "age_$eq")
+      assert(ageSetter.get.getParameterTypes.head == classOf[Option[_]])
+
+      val parentSetter = BeanInfos.get(classOf[Department]).getSetterMethod("parent")
+      assert(parentSetter.isDefined)
+      assert(parentSetter.get.getParameterTypes.head == classOf[Option[_]])
+    }
+
+    it("read-only property has no setter method") {
+      assert(BeanInfos.get(classOf[Book]).getSetterMethod("empty").isEmpty)
+    }
   }
 }
 

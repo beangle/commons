@@ -17,6 +17,7 @@
 
 package org.beangle.commons.aot
 
+import org.beangle.commons.cdi.ReconfigModule
 import org.beangle.commons.json.{JsonArray, JsonObject}
 import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.reflect.Reflections
@@ -97,8 +98,15 @@ object AotHintGenerator {
               failures += s"$name failed while registering(): ${e.getClass.getName}: ${e.getMessage}"
           }
         case None =>
-          if (classExists(name, classLoader)) failures += s"$name is not an AotHintRegistrar"
-          else missing += name
+          ClassLoaders.get(name, classLoader) match {
+            case Some(clazz) if classOf[ReconfigModule].isAssignableFrom(clazz) =>
+              System.out.println(s"Skipped runtime-only ReconfigModule $name (no AOT hints)")
+            case Some(_) =>
+              failures += s"$name is not an AotHintRegistrar"
+            case None =>
+              if (classExists(name, classLoader)) failures += s"$name is not an AotHintRegistrar"
+              else missing += name
+          }
       }
     }
     if (failures.nonEmpty) {
@@ -135,9 +143,9 @@ object AotHintGenerator {
     }
   }
 
-  /** Scala object 伴生类（`$`）是否已存在：普通 registrar 类在 tryGetInstance 中经 load(name)
-   *  即可命中，不会走到 case None；走到 case None 时只有伴生类存在才是确定性的"不是 registrar"，
-   *  伴生类缺失视为编译未完成，应归类为可重试的缺失。 */
+  /** Scala object 伴生类（`$`）是否已存在：走到 case None 且 `name` 本身加载失败时，
+   *  伴生类存在才是确定性的"不是 registrar"（companion-only 对象），伴生类缺失视为
+   *  编译未完成，应归类为可重试的缺失。 */
   private def classExists(name: String, classLoader: ClassLoader): Boolean =
     ClassLoaders.exists(name + "$", classLoader)
 

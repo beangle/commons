@@ -18,6 +18,7 @@
 package org.beangle.commons.bean.meta
 
 import org.beangle.commons.bean.meta.MetaModel.BeanMeta
+import org.beangle.commons.cdi.ReconfigModule
 import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.reflect.Reflections
 
@@ -96,8 +97,15 @@ object MetaGenerator {
                 failures += s"$name failed while registering(): ${e.getClass.getName}: ${e.getMessage}"
             }
           case None =>
-            if (classExists(name, classLoader)) failures += s"$name is not a MetaRegistrar"
-            else missing += name
+            ClassLoaders.get(name, classLoader) match {
+              case Some(clazz) if classOf[ReconfigModule].isAssignableFrom(clazz) =>
+                System.out.println(s"Skipped runtime-only ReconfigModule $name (no BeanMeta)")
+              case Some(_) =>
+                failures += s"$name is not a MetaRegistrar"
+              case None =>
+                if (classExists(name, classLoader)) failures += s"$name is not a MetaRegistrar"
+                else missing += name
+            }
         }
       }
     } finally classLoader.close()
@@ -115,9 +123,9 @@ object MetaGenerator {
     metas.toSeq
   }
 
-  /** Scala object 伴生类（`$`）是否已存在：普通 registrar 类在 tryGetInstance 中经 load(name)
-   *  即可命中，不会走到 case None；走到 case None 时只有伴生类存在才是确定性的"不是 registrar"，
-   *  伴生类缺失视为编译未完成，应归类为可重试的缺失。 */
+  /** Scala object 伴生类（`$`）是否已存在：走到 case None 且 `name` 本身加载失败时，
+   *  伴生类存在才是确定性的"不是 registrar"（companion-only 对象），伴生类缺失视为
+   *  编译未完成，应归类为可重试的缺失。 */
   private def classExists(name: String, classLoader: ClassLoader): Boolean =
     ClassLoaders.exists(name + "$", classLoader)
 
