@@ -33,52 +33,55 @@ import scala.quoted.*
  */
 object BindModule {
 
+  /** 构建期（buildTime）扫描路径下的无操作 BatchBinder：
+   * BeanMeta 已由 [[MetaRegistrar.registerImpl]] 注册，返回空 BatchBinder
+   * 以支持 `.onMissing`/`.property` 等链式调用（空 beans 遍历即安全跳过）。
+   */
+  private val noopBatchBinder = new BatchBinder(null)
+
   /** Binds the given classes to the binder.
    *
-   * When binder is null (MetaGenerator scan), only registers BeanMeta.
-   * When binder is set (normal CDI binding), only performs the bind.
+   * Build-time (buildTime) only registers BeanMeta via the registry;
+   * runtime performs the actual bind against the binder.
    */
   def bind(clazzesExpr: Expr[Seq[Class[_]]],
-           registry: Expr[MetaRegistrar],
+           registry: Expr[BindModule],
            binder: Expr[Binder], wiredEagerly: Expr[Boolean])
           (implicit quotes: Quotes): Expr[BatchBinder] = {
     '{
-      val b = ${ binder }
-      if b == null then
+      if ${ registry }.buildTime then
         ${ MetaRegistrar.registerImpl(clazzesExpr, registry) }
-        null.asInstanceOf[BatchBinder]
+        BindModule.noopBatchBinder
       else
-        b.bind(${ clazzesExpr }: _*).wiredEagerly(${ wiredEagerly })
+        ${ binder }.bind(${ clazzesExpr }: _*).wiredEagerly(${ wiredEagerly })
     }
   }
 
   /** Binds the given class with the specified bean name. */
   def bind[T: Type](beanName: Expr[String], clazz: Expr[Class[T]],
-                    registry: Expr[MetaRegistrar],
+                    registry: Expr[BindModule],
                     binder: Expr[Binder], wiredEagerly: Expr[Boolean])
                    (implicit quotes: Quotes): Expr[BatchBinder] = {
     '{
-      val b = ${ binder }
-      if b == null then
+      if ${ registry }.buildTime then
         ${ MetaRegistrar.registerImpl(Varargs(Seq(clazz)), registry) }
-        null.asInstanceOf[BatchBinder]
+        BindModule.noopBatchBinder
       else
-        b.bind(${ beanName }, ${ clazz }).wiredEagerly(${ wiredEagerly })
+        ${ binder }.bind(${ beanName }, ${ clazz }).wiredEagerly(${ wiredEagerly })
     }
   }
 
   /** Creates a bean definition for the given class. */
   def bean[T: Type](clazz: Expr[Class[T]],
-                    registry: Expr[MetaRegistrar],
+                    registry: Expr[BindModule],
                     binder: Expr[Binder], wiredEagerly: Expr[Boolean])
                    (implicit quotes: Quotes): Expr[Definition] = {
     '{
-      val b = ${ binder }
-      if b == null then
+      if ${ registry }.buildTime then
         ${ MetaRegistrar.registerImpl(Varargs(Seq(clazz)), registry) }
-        null.asInstanceOf[Definition]
+        new Definition(null, ${ clazz }, Scope.Singleton.name)
       else
-        b.bind(b.newInnerBeanName(${ clazz }), ${ clazz }).head.wiredEagerly(${ wiredEagerly })
+        ${ binder }.bind(${ binder }.newInnerBeanName(${ clazz }), ${ clazz }).head.wiredEagerly(${ wiredEagerly })
     }
   }
 
@@ -92,7 +95,15 @@ object BindModule {
  */
 abstract class BindModule extends MetaRegistrar {
 
-  override final def registering(): Unit = binding()
+  /** 构建期标记：registering()（生成器独立实例化）置真，运行期 configure() 走 binding() 保持假。 */
+  private[cdi] var buildTime = false
+
+  override final def registering(): Unit = {
+    if (null == binder) {
+      this.buildTime = true
+    }
+    binding()
+  }
 
   private var binder: Binder = _
 
@@ -192,7 +203,7 @@ abstract class BindModule extends MetaRegistrar {
 
   /** Binds a singleton instance with the given name. */
   protected final def bind(beanName: String, singleton: AnyRef): Singleton = {
-    binder.bind(beanName, singleton)
+    if buildTime then new Singleton(beanName, singleton) else binder.bind(beanName, singleton)
   }
 
   /** Override to perform binding. */
@@ -203,9 +214,12 @@ abstract class BindModule extends MetaRegistrar {
   }
 
   private def buildInnerReference(clazz: Class[_]): Reference = {
-    val targetBean = binder.newInnerBeanName(clazz)
-    binder.add(new Definition(targetBean, clazz, Scope.Singleton.name))
-    Reference(targetBean)
+    if buildTime then Reference(clazz.getName)
+    else {
+      val targetBean = binder.newInnerBeanName(clazz)
+      binder.add(new Definition(targetBean, clazz, Scope.Singleton.name))
+      Reference(targetBean)
+    }
   }
 
   /** Condition: class missing bean of clazz. */

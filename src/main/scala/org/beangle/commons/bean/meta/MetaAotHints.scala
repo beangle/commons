@@ -23,7 +23,7 @@ import org.beangle.commons.aot.AotHintRegistrar
   *
   * MetaPlugin 生成的 `META-INF/beangle/beanmeta.idx` 在运行期由
   * [[MetaModels]] 通过 `classpath*:` 加载，因此 native 镜像需要内嵌该资源。
-  * 此处集中注册资源 pattern，使用方无需在 resource-config.json 中手写。
+  * 使用方无需在 resource-config.json 中手写。
   */
 class MetaAotHints extends AotHintRegistrar {
   override def registering(): Unit = {

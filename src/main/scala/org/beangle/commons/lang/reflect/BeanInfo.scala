@@ -22,10 +22,20 @@ import org.beangle.commons.bean.meta.MetaModel.BeanMeta
 import org.beangle.commons.lang.reflect.BeanInfo.*
 
 import java.lang.invoke.{MethodHandle, MethodHandles}
-import java.lang.reflect.Method
+import java.lang.reflect.{Method, Modifier}
 
 /** BeanInfo introspection and PropertyInfo. */
 object BeanInfo {
+
+  private val ignoredNames = Set("hashCode", "toString", "wait", "clone", "equals", "getClass", "notify",
+    "notifyAll", "apply", "unApply", "canEqual", "productArity", "productIterator", "productPrefix",
+    "productElement", "productElementName", "productElementNames", "copy")
+
+  private def isFineMethodName(name: String): Boolean = {
+    if name.startsWith("_") then false
+    else if name.endsWith("_$eq") then !name.substring(0, name.length - 4).contains("$")
+    else !name.contains("$")
+  }
 
   /** Property metadata: holds [[MetaModel.Property]] reference + accessor MethodHandles.
     *
@@ -103,6 +113,20 @@ class BeanInfo(val meta: BeanMeta, val properties: Map[String, PropertyInfo]) {
   def clazz: Class[_] = meta.clazz
 
   def ctors: Seq[MetaModel.Ctor] = meta.ctors
+
+  /** 按方法名分组的实例方法（public、非 static、排除属性 accessor 与 object/case 内置方法）。
+    *
+    * 惰性计算：仅在使用方需要方法表时反射 `clazz.getMethods`（native 下依赖
+    * allPublicMethods 注册，见 AotPlugin 生成物）。
+    */
+  lazy val methods: Map[String, Seq[Method]] = {
+    val accessorNames = meta.properties.flatMap(p => p.getterName :: p.setterName.toList).toSet
+    clazz.getMethods.toSeq
+      .filter(m => !Modifier.isStatic(m.getModifiers) &&
+        !BeanInfo.ignoredNames.contains(m.getName) && BeanInfo.isFineMethodName(m.getName) &&
+        !accessorNames.contains(m.getName))
+      .groupBy(_.getName)
+  }
 
   override def toString: String = meta.toString
 

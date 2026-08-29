@@ -1,2 +1,3 @@
 org.beangle.commons.logging.LogbackAotHints
+org.beangle.commons.aot.BuiltinAotHints
 org.beangle.commons.bean.meta.MetaAotHints
