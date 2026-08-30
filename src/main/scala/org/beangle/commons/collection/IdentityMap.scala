@@ -18,15 +18,24 @@
 package org.beangle.commons.collection
 
 /** Identity-based map similar to java.util.IdentityHashMap, using chaining buckets.
- * Does not support null key or null value. Not thread-safe.
+ * Grows by doubling the table when the load factor is exceeded. Does not support
+ * null key or null value. Not thread-safe.
  *
  * @param capacity initial bucket count (must be even)
  */
-final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
-  require(capacity % 2 == 0)
+final class IdentityMap[K <: AnyRef, V](capacity: Int = 16) {
+  require(capacity >= 2 && capacity % 2 == 0, "capacity must be even and at least 2")
 
-  private val table = new Array[Entry[K, V]](capacity)
-  private val mask = capacity - 1
+  private var table = new Array[Entry[K, V]](capacity)
+  private var mask = capacity - 1
+  private var count = 0
+  private val loadFactor = 0.75
+
+  /** IdentityHashMap 式散列：`(h << 1) - (h << 8)` 打散 identityHashCode 低位，减少碰撞。 */
+  private def bucket(key: K): Int = {
+    val h = System.identityHashCode(key)
+    ((h << 1) - (h << 8)) & mask
+  }
 
   /** Gets the value for the key (identity-based lookup).
    *
@@ -34,8 +43,7 @@ final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
    * @return the value, or null if not found
    */
   final def get(key: K): V = {
-    val bucket = System.identityHashCode(key) & mask
-    var entry = table(bucket)
+    var entry = table(bucket(key))
     while (null != entry) {
       if (key eq entry.key) return entry.value
       entry = entry.next
@@ -51,6 +59,7 @@ final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
       tab(i) = null
       i += 1
     }
+    count = 0
   }
 
   /** Returns true if the key exists.
@@ -68,7 +77,7 @@ final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
    * @return true if replaced existing, false if new
    */
   def put(key: K, value: V): Boolean = {
-    val hash = System.identityHashCode(key) & mask
+    val hash = bucket(key)
     val tab = table
     var entry = tab(hash)
     while (null != entry) {
@@ -78,8 +87,34 @@ final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
       }
       entry = entry.next
     }
-    tab(hash) = new Entry(key, value, tab(hash))
+    if count + 1 > (table.length * loadFactor).toInt then
+      resize()
+      val h = bucket(key)
+      table(h) = new Entry(key, value, table(h))
+    else
+      table(hash) = new Entry(key, value, tab(hash))
+    count += 1
     false
+  }
+
+  /** Doubles the table and rehashes all entries. */
+  private def resize(): Unit = {
+    val old = table
+    val newTable = new Array[Entry[K, V]](old.length << 1)
+    table = newTable
+    mask = newTable.length - 1
+    var i = 0
+    while (i < old.length) {
+      var e = old(i)
+      while (null != e) {
+        val next = e.next
+        val h = bucket(e.key)
+        e.next = newTable(h)
+        newTable(h) = e
+        e = next
+      }
+      i += 1
+    }
   }
 
   /** Removes the key and returns its value.
@@ -90,7 +125,7 @@ final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
   def remove(key: K): V = {
     val tab = table
 
-    val hash = System.identityHashCode(key) & mask
+    val hash = bucket(key)
     var e = tab(hash)
     var prev: Entry[K, V] = null
     while (null != e) {
@@ -100,6 +135,7 @@ final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
 
         val oldValue = e.value
         e.value = null.asInstanceOf[V]
+        count -= 1
         return oldValue
       }
       prev = e
@@ -109,17 +145,7 @@ final class IdentityMap[K <: AnyRef, V](capacity: Int = 1024) {
   }
 
   /** Returns the number of entries. */
-  def size(): Int = {
-    var size = 0
-    (0 until table.length) foreach { bucket =>
-      var entry = table(bucket)
-      while (null != entry) {
-        size += 1
-        entry = entry.next
-      }
-    }
-    size
-  }
+  def size(): Int = count
 
   /** Returns iterator over keys. */
   def keysIterator: Iterator[K] =

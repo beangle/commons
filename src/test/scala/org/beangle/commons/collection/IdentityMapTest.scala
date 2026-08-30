@@ -30,5 +30,31 @@ class IdentityMapTest extends AnyFunSpec, Matchers {
       assert("CHINA" == cache.get("cn"))
       cache.get("us")
     }
+
+    it("grow and keep entries") {
+      val map = new IdentityMap[String, String]
+      val keys = (0 until 2000).map(i => s"k$i")
+      keys.foreach(k => map.put(k, "v"))
+      assert(map.size() == 2000)
+      keys.foreach(k => assert(map.get(k) == "v"))
+    }
+
+    it("remove after grow") {
+      val map = new IdentityMap[String, String]
+      val keys = (0 until 100).map(i => s"k$i")
+      keys.foreach(k => map.put(k, "v"))
+      keys.take(50).foreach(k => map.remove(k))
+      assert(map.size() == 50)
+      keys.drop(50).foreach(k => assert(map.get(k) == "v"))
+      keys.take(50).foreach(k => assert(!map.contains(k)))
+    }
+
+    it("clear resets size") {
+      val map = new IdentityMap[String, String]
+      (0 until 100).foreach(i => map.put(s"k$i", "v"))
+      map.clear()
+      assert(map.size() == 0)
+      assert(map.get("k0") == null)
+    }
   }
 }
