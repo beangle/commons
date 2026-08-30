@@ -83,23 +83,15 @@ object BeanInfo {
 
     // Build properties using getter/setter names from BeanMeta for direct lookup.
     // Only properties with a resolved getter are included.
+    val lookup = MethodHandles.lookup()
     val properties = cm.properties.flatMap { p =>
       findByName(p.getterName).map { getterMethod =>
-        val setter = p.setterName.flatMap(findByName).map(unreflect)
-        (p.name, PropertyInfo(p, unreflect(getterMethod), setter))
+        val setter = p.setterName.flatMap(findByName).map(m => Invokers.unreflect(lookup, m))
+        (p.name, PropertyInfo(p, Invokers.unreflect(lookup, getterMethod), setter))
       }
     }.toMap
 
     BeanInfo(cm, properties)
-  }
-
-  /** Unreflects a Method into a MethodHandle (setAccessible fallback for non-public classes). */
-  private def unreflect(m: Method): MethodHandle = {
-    try MethodHandles.lookup().unreflect(m)
-    catch
-      case _: IllegalAccessException =>
-        m.setAccessible(true)
-        MethodHandles.lookup().unreflect(m)
   }
 }
 

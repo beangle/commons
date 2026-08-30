@@ -19,26 +19,52 @@ package org.beangle.commons.lang.reflect
 
 import org.beangle.commons.bean.meta.MetaModel.BeanMeta
 import org.beangle.commons.bean.meta.{MetaLoader, MetaModel, MetaModels}
-import org.beangle.commons.collection.IdentityCache
+
+import java.lang.invoke.{MethodHandles, VarHandle}
 
 /** Global BeanInfo cache. Runtime entry point; compile-time dig goes through [[MetaModels.of]]. */
 object BeanInfos {
 
-  private val cache = new IdentityCache[Class[_], BeanInfo]
+  /** 进程级 BeanInfo 缓存：volatile 字段 + VarHandle CAS。
+   *  Class 不重写 equals/hashCode，键比较即引用相等（identity 语义）。
+   *  读路径无锁（volatile load），写路径 CAS 重试，无 monitor（虚拟线程友好）。
+   */
+  @volatile private var cache: Map[Class[_], BeanInfo] = scala.collection.immutable.HashMap.empty
+
+  private val CACHE: VarHandle =
+    Invokers.findStaticVarHandle(MethodHandles.lookup(), classOf[BeanInfos.type], "cache", classOf[Map[Class[_], BeanInfo]])
 
   /** Gets BeanInfo from cache. On miss, tries MetaModels (binary) then MetaLoader (reflection). */
   def get(clazz: Class[_]): BeanInfo = {
-    val exist = cache.get(clazz)
-    if (null != exist) return exist
+    cache.get(clazz) match {
+      case Some(bi) => bi
+      case None =>
+        val bi = load(clazz)
+        put(clazz, bi)
+        bi
+    }
+  }
+
+  /** CAS 写：基于当前快照合并新条目，失败说明被并发修改则重试（写频率低，几乎不重试）。 */
+  private def put(clazz: Class[_], bi: BeanInfo): Unit = {
+    var done = false
+    while (!done) {
+      val old = cache
+      done = CACHE.compareAndSet(old, old + (clazz -> bi))
+    }
+  }
+
+  /** 从 MetaModels（二进制索引）或 MetaLoader（运行时反射）加载 BeanMeta 并构造 BeanInfo。 */
+  private def load(clazz: Class[_]): BeanInfo = {
     MetaModels.get(clazz) match
-      case Some(meta) => register(meta)
+      case Some(meta) => BeanInfo.from(meta)
       case None =>
         val parent = parentOf(clazz)
-        if (null == parent) register(MetaLoader.load(clazz))
+        if (null == parent) BeanInfo.from(MetaLoader.load(clazz))
         else
           MetaModels.get(parent) match
-            case Some(pm) => register(pm.copy(clazz = clazz, ctors = Seq.empty))
-            case None => register(MetaLoader.load(clazz))
+            case Some(pm) => BeanInfo.from(pm.copy(clazz = clazz, ctors = Seq.empty))
+            case None => BeanInfo.from(MetaLoader.load(clazz))
   }
 
   /** 父类 `$` 子类的父类判定（如 Hibernate 懒加载代理 `<Entity>$HibernateProxy`）：
@@ -61,17 +87,17 @@ object BeanInfos {
 
   /** Registers a pre-built BeanInfo into the cache. */
   def update(bi: BeanInfo): BeanInfo = {
-    cache.put(bi.meta.clazz, bi)
+    put(bi.meta.clazz, bi)
     bi
   }
 
   /** Clears all cached BeanInfo. */
-  def clear(): Unit = cache.clear()
+  def clear(): Unit = CACHE.set(scala.collection.immutable.HashMap.empty[Class[_], BeanInfo])
 
   /** Registers BeanInfo from BeanMeta into the cache. */
   def register(cm: MetaModel.BeanMeta): BeanInfo = {
     val bi = BeanInfo.from(cm)
-    cache.put(bi.clazz, bi)
+    put(bi.clazz, bi)
     bi
   }
 }
