@@ -26,7 +26,32 @@
   },
   {
     "allPublicConstructors": true,
+    "name": "ch.qos.logback.core.OutputStreamAppender",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "ch.qos.logback.core.encoder.Encoder",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
     "name": "ch.qos.logback.core.encoder.LayoutWrappingEncoder",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "ch.qos.logback.core.pattern.PatternLayoutEncoderBase",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "ch.qos.logback.core.spi.ContextAware",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.activation.MediaType",
     "allPublicMethods": true
   },
   {
@@ -34,8 +59,68 @@
     "name": "org.beangle.commons.aot.BuiltinAotHints"
   },
   {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.bean.Disposable",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.bean.Factory",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.bean.Initializing",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.bean.Refreshable",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.bean.Scheduled",
+    "allPublicMethods": true
+  },
+  {
     "allDeclaredConstructors": true,
     "name": "org.beangle.commons.bean.meta.MetaAotHints"
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.bean.meta.MetaModels$",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.cache.Cache",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.cache.CacheManager",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.cdi.Container",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.collection.page.Page",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.collection.page.SinglePage",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.config.XmlConfigs",
+    "allPublicMethods": true
   },
   {
     "allPublicConstructors": true,
@@ -109,6 +194,51 @@
   },
   {
     "allPublicConstructors": true,
+    "name": "org.beangle.commons.event.DefaultEventMulticaster",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.event.EventListener",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.event.EventMulticaster",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.event.EventPublisher",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.io.BinarySerializer",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.io.Serializer",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.json.JsonArray",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.json.JsonObject",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.lang.JVM$",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
     "name": "org.beangle.commons.lang.annotation.default_value",
     "allPublicMethods": true
   },
@@ -130,6 +260,21 @@
   {
     "allDeclaredConstructors": true,
     "name": "org.beangle.commons.logging.LogbackAotHints"
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.script.ExprEvaluator",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.text.i18n.TextBundleLoader",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.text.i18n.TextFormatter",
+    "allPublicMethods": true
   },
   {
     "allPublicConstructors": true,

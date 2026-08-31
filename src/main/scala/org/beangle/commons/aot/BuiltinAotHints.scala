@@ -46,19 +46,56 @@ class BuiltinAotHints extends AotHintRegistrar {
     // 转换器对象：ConverterRegistry.add 经 converter.getClass.getMethods 反射解析
     // apply 参数/返回类型对，native 下需注册对象类的 public 方法（含 apply）。
     hints.registerType(
-      org.beangle.commons.conversion.string.BooleanConverter.getClass,
-      org.beangle.commons.conversion.string.NumberConverters.getClass,
-      org.beangle.commons.conversion.string.DateConverter.getClass,
-      org.beangle.commons.conversion.string.TemporalConverter.getClass,
-      org.beangle.commons.conversion.string.TimeConverter.getClass,
-      org.beangle.commons.conversion.string.JavaEnumConverters.getClass,
-      org.beangle.commons.conversion.string.EnumConverters.getClass,
-      org.beangle.commons.conversion.string.LocaleConverter.getClass,
-      org.beangle.commons.conversion.string.ToStringConverter.getClass,
-      org.beangle.commons.conversion.string.JsonConverter.getClass,
-      org.beangle.commons.conversion.string.DurationConverter.getClass,
-      org.beangle.commons.conversion.converter.Number2NumberConverter.getClass,
-      org.beangle.commons.conversion.converter.IterableConverterFactory.getClass,
-      org.beangle.commons.conversion.converter.DateTimeConverterFactory.getClass)
+      classOf[org.beangle.commons.conversion.string.BooleanConverter.type],
+      classOf[org.beangle.commons.conversion.string.NumberConverters.type],
+      classOf[org.beangle.commons.conversion.string.DateConverter.type],
+      classOf[org.beangle.commons.conversion.string.TemporalConverter.type],
+      classOf[org.beangle.commons.conversion.string.TimeConverter.type],
+      classOf[org.beangle.commons.conversion.string.JavaEnumConverters.type],
+      classOf[org.beangle.commons.conversion.string.EnumConverters.type],
+      classOf[org.beangle.commons.conversion.string.LocaleConverter.type],
+      classOf[org.beangle.commons.conversion.string.ToStringConverter.type],
+      classOf[org.beangle.commons.conversion.string.JsonConverter.type],
+      classOf[org.beangle.commons.conversion.string.DurationConverter.type],
+      classOf[org.beangle.commons.conversion.converter.Number2NumberConverter.type],
+      classOf[org.beangle.commons.conversion.converter.IterableConverterFactory.type],
+      classOf[org.beangle.commons.conversion.converter.DateTimeConverterFactory.type])
+
+    // bean 生命周期接口：Spring/cdi 通过 getDeclaredFields/getDeclaredMethods 反射
+    // 检测实现类，native 下需注册接口及伴生对象的字段。
+    hints.registerType(classOf[org.beangle.commons.bean.Disposable])
+    hints.registerType(classOf[org.beangle.commons.bean.Factory[?]])
+    hints.registerType(classOf[org.beangle.commons.bean.Initializing])
+    hints.registerType(classOf[org.beangle.commons.bean.Refreshable])
+    hints.registerType(classOf[org.beangle.commons.bean.Scheduled])
+    hints.registerType(classOf[org.beangle.commons.bean.meta.MetaModels.type])
+
+    // 事件机制：EventMulticaster 经 getDeclaredFields 扫描监听器字段
+    hints.registerType(
+      classOf[org.beangle.commons.event.DefaultEventMulticaster],
+      classOf[org.beangle.commons.event.EventListener[?]],
+      classOf[org.beangle.commons.event.EventMulticaster],
+      classOf[org.beangle.commons.event.EventPublisher])
+
+    // cdi 容器事件：Spring ApplicationListener 机制反射实例化
+    hints.registerType(
+      classOf[org.beangle.commons.cdi.Container])
+
+    // 其他 commons 类：序列化、JSON、分页、配置等
+    hints.registerType(
+      classOf[org.beangle.commons.activation.MediaType],
+      classOf[org.beangle.commons.cache.Cache[?, ?]],
+      classOf[org.beangle.commons.cache.CacheManager],
+      classOf[org.beangle.commons.collection.page.Page[?]],
+      classOf[org.beangle.commons.collection.page.SinglePage[?]],
+      classOf[org.beangle.commons.config.XmlConfigs],
+      classOf[org.beangle.commons.io.BinarySerializer],
+      classOf[org.beangle.commons.io.Serializer],
+      classOf[org.beangle.commons.json.JsonArray],
+      classOf[org.beangle.commons.json.JsonObject],
+      classOf[org.beangle.commons.script.ExprEvaluator],
+      classOf[org.beangle.commons.text.i18n.TextBundleLoader],
+      classOf[org.beangle.commons.text.i18n.TextFormatter])
+    hints.registerType(classOf[org.beangle.commons.lang.JVM.type])
   }
 }

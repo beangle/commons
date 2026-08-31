@@ -47,8 +47,9 @@ object AotPolicy {
    * 兼顾可用性（public 成员可正常反射调用）与体积/性能（不递归、不登记
    * private/protected/字段元数据）。
    */
-  val default: AotPolicy =
+  val default: AotPolicy = {
     AotPolicy(Set(Category.PublicMethods, Category.PublicConstructors))
+  }
 }
 
 /** 不可变的注册策略，描述 [[AotHints.registerType]] 对类的展开方式。
