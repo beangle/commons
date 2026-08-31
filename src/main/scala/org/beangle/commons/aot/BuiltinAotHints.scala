@@ -42,5 +42,23 @@ class BuiltinAotHints extends AotHintRegistrar {
     hints.registerType(classOf[org.beangle.commons.lang.annotation.value])
     hints.registerType(classOf[org.beangle.commons.lang.annotation.spi])
     hints.registerType(classOf[org.beangle.commons.lang.annotation.default_value])
+
+    // 转换器对象：ConverterRegistry.add 经 converter.getClass.getMethods 反射解析
+    // apply 参数/返回类型对，native 下需注册对象类的 public 方法（含 apply）。
+    hints.registerType(
+      org.beangle.commons.conversion.string.BooleanConverter.getClass,
+      org.beangle.commons.conversion.string.NumberConverters.getClass,
+      org.beangle.commons.conversion.string.DateConverter.getClass,
+      org.beangle.commons.conversion.string.TemporalConverter.getClass,
+      org.beangle.commons.conversion.string.TimeConverter.getClass,
+      org.beangle.commons.conversion.string.JavaEnumConverters.getClass,
+      org.beangle.commons.conversion.string.EnumConverters.getClass,
+      org.beangle.commons.conversion.string.LocaleConverter.getClass,
+      org.beangle.commons.conversion.string.ToStringConverter.getClass,
+      org.beangle.commons.conversion.string.JsonConverter.getClass,
+      org.beangle.commons.conversion.string.DurationConverter.getClass,
+      org.beangle.commons.conversion.converter.Number2NumberConverter.getClass,
+      org.beangle.commons.conversion.converter.IterableConverterFactory.getClass,
+      org.beangle.commons.conversion.converter.DateTimeConverterFactory.getClass)
   }
 }
