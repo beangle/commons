@@ -199,9 +199,13 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
           val noreflect = mm.hasAnnotation(Symbol.classSymbol(classOf[noreflect].getName))
           val isPublic = !mm.flags.is(Flags.Protected) && !mm.flags.is(Flags.Private)
           val isInnerType = mm.name == Strings.substringBetween(mm.tree.show, "this.", ".type")
+          // TASTy 把嵌套类/对象表示为合成 lazy val 模块字段（Flags.Module），
+          // 不是真实 bean 属性（其类型为单例 TermRef，运行期 classOf 会引用不存在的
+          // `$` 伴生类），直接跳过。
+          val isModuleField = mm.flags.is(Flags.Module)
           // In Scala 3, var/val getters are implicit (not in declaredMethods).
           // Set getterName = field name since the getter method name matches the field name.
-          if isPublic && isNormal(mm.name) && !noreflect && !isInnerType then fieldMap.put(mm.name, FieldExpr(mm.name, resolveType(tpe, params), transnt, true, true, getterName = mm.name))
+          if isPublic && isNormal(mm.name) && !noreflect && !isInnerType && !isModuleField then fieldMap.put(mm.name, FieldExpr(mm.name, resolveType(tpe, params), transnt, true, true, getterName = mm.name))
       }
 
       base.typeSymbol.declaredMethods foreach { mm =>

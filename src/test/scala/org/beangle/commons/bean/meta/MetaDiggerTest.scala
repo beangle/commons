@@ -284,6 +284,14 @@ class MetaDiggerTest extends AnyFunSpec, Matchers {
       assert(p.typeinfo.clazz == MathOpsMeta.getClass)
     }
   }
+
+  describe("module class (object) dig") {
+    it("digs classOf[ModuleWithNested.type] without nested-class module fields") {
+      val cm = MetaModels.of(classOf[ModuleWithNested.type])
+      assert(cm.clazz == ModuleWithNested.getClass)
+      assert(cm.properties.map(_.name) == Seq("value"))
+    }
+  }
 }
 
 /** Scala 子类继承 Java 父类的 write-only setter（对应 Spring TransactionProxyFactoryBean 场景）。 */
@@ -353,3 +361,16 @@ class OtherMeta {
 }
 
 case class CodecMeta(name: String, size: Int = 10, ratio: Double = 0.5)
+
+
+/** 模块类（object）dig：TASTy 把嵌套类/对象表示为合成 lazy val 模块字段
+ *  （Flags.Module），不得作为 bean 属性（其单例类型运行期会引用不存在的 `$` 伴生类）。 */
+object ModuleWithNested {
+  class Nested1
+  class Nested2
+  var value: String = _
+}
+
+class ModuleWithNestedUser {
+  def module: ModuleWithNested.type = ModuleWithNested
+}
