@@ -34,14 +34,25 @@ object BeanInfos {
   private val CACHE: VarHandle =
     Invokers.findStaticVarHandle(MethodHandles.lookup(), classOf[BeanInfos.type], "cache", classOf[Map[Class[_], BeanInfo]])
 
-  /** Gets BeanInfo from cache. On miss, tries MetaModels (binary) then MetaLoader (reflection). */
+  /** Gets BeanInfo from cache. On miss, tries MetaModels (binary) then MetaLoader (reflection).
+   *  Throws for non-reflectable classes (see [[MetaLoader.supports]]). */
   def get(clazz: Class[_]): BeanInfo = {
-    cache.get(clazz) match {
+    find(clazz) match
       case Some(bi) => bi
+      case None => throw new RuntimeException("Cannot reflect class: " + clazz.getName)
+  }
+
+  /** Like [[get]], but returns None for non-reflectable classes instead of throwing. */
+  def find(clazz: Class[_]): Option[BeanInfo] = {
+    cache.get(clazz) match {
+      case d@Some(bi) => d
       case None =>
-        val bi = load(clazz)
-        put(clazz, bi)
-        bi
+        load(clazz) match {
+          case d@Some(bi) =>
+            put(clazz, bi)
+            d
+          case None => None
+        }
     }
   }
 
@@ -55,17 +66,21 @@ object BeanInfos {
   }
 
   /** 从 MetaModels（二进制索引）或 MetaLoader（运行时反射）加载 BeanMeta 并构造 BeanInfo。 */
-  private def load(clazz: Class[_]): BeanInfo = {
+  private def load(clazz: Class[_]): Option[BeanInfo] = {
     MetaModels.get(clazz) match
-      case Some(meta) => BeanInfo.from(meta)
+      case Some(meta) => Some(BeanInfo.from(meta))
       case None =>
         val parent = parentOf(clazz)
-        if (null == parent) BeanInfo.from(MetaLoader.load(clazz))
+        if (null == parent) reflectLoad(clazz)
         else
           MetaModels.get(parent) match
-            case Some(pm) => BeanInfo.from(pm.copy(clazz = clazz, ctors = Seq.empty))
-            case None => BeanInfo.from(MetaLoader.load(clazz))
+            case Some(pm) => Some(BeanInfo.from(pm.copy(clazz = clazz, ctors = Seq.empty)))
+            case None => reflectLoad(clazz)
   }
+
+  /** 经 MetaLoader 反射加载（仅支持可反射的应用类，见 [[MetaLoader.supports]]）。 */
+  private def reflectLoad(clazz: Class[_]): Option[BeanInfo] =
+    if MetaLoader.supports(clazz) then Some(BeanInfo.from(MetaLoader.load(clazz))) else None
 
   /** 父类 `$` 子类的父类判定（如 Hibernate 懒加载代理 `<Entity>$HibernateProxy`）：
    * 类名中 `$` 前缀与父类全名一致时返回父类。命中时复用父类 BeanMeta（此类无自有

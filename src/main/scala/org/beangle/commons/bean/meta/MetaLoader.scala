@@ -45,15 +45,21 @@ object MetaLoader {
 
   private case class Accessor(method: JMethod, returnType: TypeInfo)
 
+  /** True when a class can be reflected into BeanMeta: application classes only.
+   *  JDK (`java.*`), Scala runtime (`scala.*`) and JVM-generated classes (name
+   *  containing `$$`, e.g. anonymous/lambda classes) are excluded. */
+  def supports(clazz: Class[_]): Boolean = {
+    val className = clazz.getName
+    !(className.startsWith("java.") || className.startsWith("scala.") || className.contains("$$"))
+  }
+
   /** Reflects a class into BeanMeta.
     *
     * Single-pass over class hierarchy: collects fields, getters/setters
     * in one walk, avoiding repeated scans.
     */
   def load(clazz: Class[_]): BeanMeta = {
-    val className = clazz.getName
-    if (className.startsWith("java.") || className.startsWith("scala.") || className.contains("$$"))
-      throw new RuntimeException("Cannot reflect class: " + clazz.getName)
+    if (!supports(clazz)) throw new RuntimeException("Cannot reflect class: " + clazz.getName)
 
     val isCase = TypeInfo.isCaseClass(clazz)
     val getters = new mutable.HashMap[String, Accessor]
@@ -282,8 +288,8 @@ object MetaLoader {
     else !name.contains("$")
   }
 
-  /** Returns (true, propertyName) for getter, (false, propertyName) for setter, or None. */
-  /** Identifies accessor methods. For getters, only accepts JavaBean-style (getXxx/isXxx)
+  /** Returns (true, propertyName) for getter, (false, propertyName) for setter, or None.
+    * Identifies accessor methods. For getters, only accepts JavaBean-style (getXxx/isXxx)
     * or methods matching a known field name — Scala parameterless methods like `def parents`
     * cannot be distinguished from empty-parens methods like `def size()` at bytecode level,
     * so they are excluded unless backed by a field.

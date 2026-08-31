@@ -204,6 +204,17 @@ class BeanInfosTest extends AnyFunSpec, Matchers {
     it("read-only property has no setter method") {
       assert(BeanInfos.get(classOf[Book]).getSetterMethod("empty").isEmpty)
     }
+
+    it("find returns None for non-reflectable classes without throwing") {
+      assert(BeanInfos.find(classOf[String]).isEmpty)
+      assert(BeanInfos.find(classOf[scala.collection.immutable.List[_]]).isEmpty)
+      assert(BeanInfos.find(classOf[Book]).isDefined)
+    }
+
+    it("get throws a clear error for non-reflectable classes") {
+      val e = intercept[RuntimeException](BeanInfos.get(classOf[String]))
+      assert(e.getMessage.contains("Cannot reflect class"))
+    }
   }
 }
 
