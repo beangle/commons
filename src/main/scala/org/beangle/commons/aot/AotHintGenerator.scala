@@ -17,7 +17,6 @@
 
 package org.beangle.commons.aot
 
-import org.beangle.commons.cdi.ReconfigModule
 import org.beangle.commons.json.{JsonArray, JsonObject}
 import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.reflect.Reflections
@@ -28,8 +27,9 @@ import java.nio.file.{Files, Path}
 import scala.collection.mutable
 
 /** Generates GraalVM native-image configuration files from the
- * [[AotHintRegistrar]] implementations listed in a registrars file
- * (one class name per line, `#` comments allowed).
+ * [[AotHintRegistrar]] implementations listed in a registrars file and the
+ * by-name-loaded classes listed in a classes file (one class name per line,
+ * `#` comments allowed).
  *
  * Generated files:
  *  - `reflect-config.json` — classes needing reflection access
@@ -44,10 +44,16 @@ import scala.collection.mutable
 object AotHintGenerator {
 
   def main(args: Array[String]): Unit = {
-    val (outputDir, classpath, registrarsFile) = parseArgs(args)
+    val (outputDir, classpath, registrarsFile, classesFile) = parseArgs(args)
 
     if (classpath.isEmpty) {
       val msg = "No classpath specified.\n"
+      System.err.println(msg)
+      printUsage()
+      System.exit(1)
+    }
+    if (registrarsFile.isEmpty && classesFile.isEmpty) {
+      val msg = "Missing --registrars/--classes: at least one class list file is required.\n"
       System.err.println(msg)
       printUsage()
       System.exit(1)
@@ -57,56 +63,59 @@ object AotHintGenerator {
       classpath.map(p => Path.of(p).toUri.toURL).toArray,
       getClass.getClassLoader)
 
-    try {
-      val listFile = registrarsFile match {
-        case Some(f) => f
-        case None =>
-          System.err.println("Missing --registrars: AotHintRegistrar class list file is required.\n")
-          printUsage()
-          sys.exit(1)
-      }
-      generateFromList(listFile, outputDir, classLoader)
-    } finally classLoader.close()
+    try generateFromLists(registrarsFile, classesFile, outputDir, classLoader)
+    finally classLoader.close()
   }
 
-  /** 清单模式：以 --registrars 文件罗列的 AotHintRegistrar 类为契约，全部找到并导入才算成功。 */
-  private def generateFromList(listFile: Path, outputDir: Path, classLoader: ClassLoader): Unit = {
-    if (!Files.isRegularFile(listFile)) {
-      System.err.println(s"Registrars file does not exist: $listFile")
-      System.exit(1)
-    }
-    val names = readLines(listFile)
-    if (names.isEmpty) {
-      System.out.println(s"No registrars declared in $listFile; GraalVM config generation skipped")
-      return
-    }
+  /** 清单模式：--registrars 文件罗列的 AotHintRegistrar 类与 --classes 罗列的
+   *  按名加载类（如 web initializer）均为契约，全部找到并注册才算成功。 */
+  private def generateFromLists(registrarsFile: Option[Path], classesFile: Option[Path],
+      outputDir: Path, classLoader: ClassLoader): Unit = {
     val merged = new AotHints
     val failures = new mutable.ListBuffer[String]
     val missing = new mutable.ListBuffer[String]
-    names foreach { name =>
-      Reflections.tryGetInstance[AotHintRegistrar](name, classLoader) match {
-        case Some(registrar) =>
-          try {
-            registrar.registering()
-            merged.addAll(registrar.aotHints)
-            registerRegistrarClass(name, classLoader, merged)
-            System.out.println(s"Imported hints from $name")
-          } catch {
-            // 编译未完成/引用类缺失：静默归类为缺失，交由调用方决定是否重试
-            case _: ClassNotFoundException | _: LinkageError => missing += name
-            case e: Throwable =>
-              failures += s"$name failed while registering(): ${e.getClass.getName}: ${e.getMessage}"
-          }
-        case None =>
-          ClassLoaders.get(name, classLoader) match {
-            case Some(clazz) if classOf[ReconfigModule].isAssignableFrom(clazz) =>
-              System.out.println(s"Skipped runtime-only ReconfigModule $name (no AOT hints)")
-            case Some(_) =>
-              failures += s"$name is not an AotHintRegistrar"
-            case None =>
-              if (classExists(name, classLoader)) failures += s"$name is not an AotHintRegistrar"
-              else missing += name
-          }
+    var declaredCount = 0
+    registrarsFile foreach { listFile =>
+      if (!Files.isRegularFile(listFile)) {
+        System.err.println(s"Registrars file does not exist: $listFile")
+        System.exit(1)
+      }
+      val names = readLines(listFile)
+      declaredCount += names.size
+      names foreach { name =>
+        Reflections.tryGetInstance[AotHintRegistrar](name, classLoader) match {
+          case Some(registrar) =>
+            try {
+              registrar.registering()
+              merged.addAll(registrar.aotHints)
+              registerRegistrarClass(name, classLoader, merged)
+              System.out.println(s"Imported hints from $name")
+            } catch {
+              // 编译未完成/引用类缺失：静默归类为缺失，交由调用方决定是否重试
+              case _: ClassNotFoundException | _: LinkageError => missing += name
+              case e: Throwable =>
+                failures += s"$name failed while registering(): ${e.getClass.getName}: ${e.getMessage}"
+            }
+          case None =>
+            ClassLoaders.get(name, classLoader) match {
+              case Some(_) =>
+                failures += s"$name is not an AotHintRegistrar"
+              case None =>
+                if (classExists(name, classLoader)) failures += s"$name is not an AotHintRegistrar"
+                else missing += name
+            }
+        }
+      }
+    }
+    classesFile foreach { listFile =>
+      if (!Files.isRegularFile(listFile)) {
+        System.err.println(s"Classes file does not exist: $listFile")
+        System.exit(1)
+      }
+      val names = readLines(listFile)
+      declaredCount += names.size
+      names foreach { name =>
+        if (!registerClass(name, classLoader, merged)) missing += name
       }
     }
     if (failures.nonEmpty) {
@@ -115,10 +124,14 @@ object AotHintGenerator {
       System.exit(1)
     }
     if (missing.nonEmpty) {
-      val msg = s"${missing.size} of ${names.size} declared AotHintRegistrar classes not found" +
+      val msg = s"${missing.size} of $declaredCount declared classes not found" +
         " (compilation may still be in progress):\n" + missing.mkString("\n")
       System.err.println(msg)
       System.exit(2)
+    }
+    if (merged.isEmpty) {
+      System.out.println("No hints registered; GraalVM config generation skipped")
+      return
     }
     write(outputDir, merged)
     System.out.println(s"Generated GraalVM configs in $outputDir (${merged.getTypes.size} types, ${merged.getPatterns.size} patterns, ${merged.getProxies.size} proxies, ${merged.getSerializables.size} serializables, ${merged.getRuntimeInitialized.size} runtime-initialized)")
@@ -141,6 +154,29 @@ object AotHintGenerator {
     ClassLoaders.get(name, classLoader) foreach { clazz =>
       merged.registerType(clazz, AotPolicy(Set(DeclaredConstructors)))
     }
+  }
+
+  /** 注册 --classes 清单中的按名加载类（如 web initializer）：不要求是
+   *  AotHintRegistrar。用户声明的类名不带 `$`，但实际可能是 Scala object（运行期
+   *  经伴生类 `MODULE$` 字段取单例），故伴生类（`name + "$"`）也要登记，否则 native
+   *  镜像读不到单例入口。
+   *
+   *  主类登记 public 构造器（运行期 `getDeclaredConstructor().newInstance()` 实例化）；
+   *  伴生类登记声明构造器 + 声明字段（`MODULE$` 字段反射读取）。类与伴生都缺失视为
+   *  编译未完成，返回 false 交由调用方归类为可重试的缺失。
+   */
+  private[aot] def registerClass(name: String, classLoader: ClassLoader, merged: AotHints): Boolean = {
+    import AotPolicy.Category.*
+    var found = false
+    ClassLoaders.get(name + "$", classLoader) foreach { clazz =>
+      merged.registerType(clazz, AotPolicy(Set(DeclaredConstructors, DeclaredFields)))
+      found = true
+    }
+    ClassLoaders.get(name, classLoader) foreach { clazz =>
+      merged.registerType(clazz, AotPolicy(Set(PublicConstructors)))
+      found = true
+    }
+    found
   }
 
   /** Scala object 伴生类（`$`）是否已存在：走到 case None 且 `name` 本身加载失败时，
@@ -239,9 +275,10 @@ object AotHintGenerator {
     Files.write(out, s"Args = $args\n".getBytes(StandardCharsets.UTF_8))
   }
 
-  private def parseArgs(args: Array[String]): (Path, Seq[String], Option[Path]) = {
+  private def parseArgs(args: Array[String]): (Path, Seq[String], Option[Path], Option[Path]) = {
     var outputDir = Path.of("META-INF/native-image")
     var registrarsFile = Option.empty[Path]
+    var classesFile = Option.empty[Path]
     val classpath = new mutable.ListBuffer[String]
 
     var i = 0
@@ -258,6 +295,14 @@ object AotHintGenerator {
             printUsage()
             System.exit(1)
           }
+        case "-c" | "--classes" =>
+          i += 1
+          if (i < args.length) classesFile = Some(Path.of(args(i)))
+          else {
+            System.err.println("Missing value for --classes")
+            printUsage()
+            System.exit(1)
+          }
         case "-h" | "--help" =>
           printUsage()
           System.exit(0)
@@ -271,15 +316,20 @@ object AotHintGenerator {
       i += 1
     }
 
-    (outputDir, classpath.toSeq, registrarsFile)
+    (outputDir, classpath.toSeq, registrarsFile, classesFile)
   }
 
   private def printUsage(): Unit = {
     println(
       """Usage: AotHintGenerator [options] <classpath-entry> [classpath-entry...]
         |
-        |Generates GraalVM native-image configuration files from AotHintRegistrar
-        |implementations declared in a registrars list file:
+        |Generates GraalVM native-image configuration files from:
+        |  - AotHintRegistrar implementations declared in a registrars list file
+        |    (hints for reflection, resources, proxies, serialization), and
+        |  - classes loaded by name at runtime (e.g. web initializers) declared in
+        |    a classes list file; they need not be AotHintRegistrar.
+        |
+        |Generated files:
         |  reflect-config.json       (reflection metadata)
         |  resource-config.json      (resource inclusion)
         |  proxy-config.json         (dynamic proxy interfaces)
@@ -290,10 +340,22 @@ object AotHintGenerator {
         |  -r, --registrars <file>  List of AotHintRegistrar class names, one per line
         |                           (# comments allowed). All listed classes must be
         |                           found, otherwise exit with a non-zero code.
+        |  -c, --classes <file> List of classes loaded by name at runtime (web
+        |                       initializers etc.), one per line; the class and its
+        |                       Scala object companion (`$`) are registered into
+        |                       reflect-config.json. All must be found.
         |  -h, --help           Show this help
+        |
+        |At least one of --registrars/--classes is required.
+        |
+        |Exit codes:
+        |  0  success
+        |  1  deterministic failure (bad declaration or loading error)
+        |  2  declared class not found (compilation may still be in progress)
         |
         |Examples:
         |  AotHintGenerator --registrars aot-registrars.txt -o out target/classes
+        |  AotHintGenerator --classes aot-classes.txt -o out target/classes
         |""".stripMargin)
   }
 }

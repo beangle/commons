@@ -26,6 +26,12 @@ import org.scalatest.matchers.should.Matchers
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 
+object TestInitializer
+
+class PlainInitializer
+
+private val TestInitializerName = "org.beangle.commons.aot.TestInitializer"
+
 class AotHintsTest extends AnyFunSpec, Matchers {
 
   class AotParent
@@ -153,6 +159,35 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       entries.map(e => e("name").toString) should contain allOf (
         classOf[AotChild].getName, classOf[AotParent].getName, classOf[AotTrait].getName)
       entries.head("allDeclaredMethods") shouldBe true
+    }
+  }
+
+  describe("registerClass") {
+    it("registers an object initializer with its $ companion") {
+      val hints = new AotHints
+      val registered = AotHintGenerator.registerClass(TestInitializerName, getClass.getClassLoader, hints)
+      registered shouldBe true
+      val names = hints.getTypePolicies.keySet.map(_.getName)
+      names should contain allOf (TestInitializerName, TestInitializerName + "$")
+      hints.getTypePolicies(Class.forName(TestInitializerName)).categories shouldBe Set(PublicConstructors)
+      hints.getTypePolicies(Class.forName(TestInitializerName + "$")).categories shouldBe
+        Set(DeclaredConstructors, DeclaredFields)
+    }
+
+    it("registers a plain class without companion") {
+      val hints = new AotHints
+      val registered = AotHintGenerator.registerClass(
+        classOf[PlainInitializer].getName, getClass.getClassLoader, hints)
+      registered shouldBe true
+      hints.getTypes.map(_.getName) should contain only classOf[PlainInitializer].getName
+      hints.getTypePolicies(classOf[PlainInitializer]).categories shouldBe Set(PublicConstructors)
+    }
+
+    it("returns false for a missing class") {
+      val hints = new AotHints
+      AotHintGenerator.registerClass("org.beangle.commons.aot.NoSuchInitializer",
+        getClass.getClassLoader, hints) shouldBe false
+      hints.isEmpty shouldBe true
     }
   }
 }

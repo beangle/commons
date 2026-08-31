@@ -17,15 +17,25 @@
 
 package org.beangle.commons.cdi
 
+import org.beangle.commons.aot.AotHintRegistrar
 import org.beangle.commons.cdi.Binder.Reference
 
 import java.util as ju
 
 /** Abstract module for runtime CDI reconfiguration. */
-abstract class ReconfigModule {
+abstract class ReconfigModule extends AotHintRegistrar {
   var cfg: Reconfig = _
   var configUrl: String = _
   var ignoreMissing: Boolean = true
+  private var buildTime = false
+
+  override def registering(): Unit = {
+    if (null == cfg) {
+      this.buildTime = true
+      this.cfg = new Reconfig()
+    }
+    config()
+  }
 
   /** Configures this module with Reconfig. */
   final def configure(reconfig: Reconfig): Unit = {
