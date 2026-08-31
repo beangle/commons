@@ -79,35 +79,50 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
     }
   }
 
+  /** 注册 Scala 3 枚举：枚举类、伴生对象（`MODULE$` + `values()`）以及全部值类
+   *  （含带主体的匿名子类），并同步登记序列化（枚举值可能作为实体/缓存的一部分被
+   *  序列化）。仅接受 [[scala.reflect.Enum]] 的下游类，其余类型抛
+   *  `IllegalArgumentException`。
+   *
+   *  与 `registerType` 的区别：`registerType` 按给定策略只注册类本身，不感知枚举
+   *  特性；`registerEnum` 显式注册枚举类、伴生对象、全部值类并同步序列化登记
+   *  （反射按值读 id/ordinal 需要值类元数据）。
+   *
+   *  值类枚举通过伴生对象的静态 `MODULE$` 单例 + `values()` 反射获取，因此适用于
+   *  顶层枚举；嵌套枚举（伴生无静态 `MODULE$`）无法枚举值类时静默跳过值注册。 */
+  def registerEnum(enumType: Class[_]): Unit = {
+    if !classOf[scala.reflect.Enum].isAssignableFrom(enumType) then
+      throw new IllegalArgumentException(
+        s"registerEnum requires a Scala 3 enum (scala.reflect.Enum subclass), got $enumType")
+    try {
+      val loader = enumType.getClassLoader
+      addType(enumType, enumPolicy)
+      registerSerializable(enumType)
+      val companion = Class.forName(enumType.getName + "$", false, loader)
+      addType(companion, enumPolicy)
+      val values = companion.getMethod("values").invoke(companion.getField("MODULE$").get(null))
+      values.asInstanceOf[Array[AnyRef]] foreach { v =>
+        addType(v.getClass, enumPolicy)
+        registerSerializable(v.getClass)
+      }
+    } catch {
+      case _: Throwable => ()
+    }
+  }
+
   /** Adds a class with the given policy; when recursive, expands the non-JDK
    *  superclass and interface hierarchy with the same policy. */
   private def addType(clazz: Class[_], p: AotPolicy): Unit = {
     if (clazz == null || isJdk(clazz)) return
-    val effective = if isEnumType(clazz) then p.merge(enumPolicy) else p
-    merge(clazz, effective)
-    // Scala 3 enum：应用只需注册枚举类型本身，伴生对象（`MODULE$` 单例入口）自动增量注册
-    if classOf[scala.reflect.Enum].isAssignableFrom(clazz) then registerCompanion(clazz, effective)
-    if effective.recursive then
-      addType(clazz.getSuperclass, effective)
-      clazz.getInterfaces foreach (addType(_, effective))
-  }
-
-  /** 按 `clazz.getName + "$"` 加载伴生类并注册（伴生实现 `Mirror.Sum`，同样命中
-   *  [[isEnumType]] 自动补 public 字段）；伴生类缺失（罕见）时静默跳过。 */
-  private def registerCompanion(clazz: Class[_], p: AotPolicy): Unit = {
-    try {
-      val companion = Class.forName(clazz.getName + "$", false, clazz.getClassLoader)
-      if !companion.isInterface then addType(companion, p)
-    } catch {
-      case _: ClassNotFoundException | _: LinkageError => ()
-    }
+    merge(clazz, p)
+    if p.recursive then
+      addType(clazz.getSuperclass, p)
+      clazz.getInterfaces foreach (addType(_, p))
   }
 
   /** 枚举运行期需要读取字段：Scala 3 enum 经 `MODULE$` 取伴生单例、Java enum 经
    *  `$VALUES` 取常量，`EnumConverters`/`Enums`/`Reflections.getInstance` 都依赖字段
-   *  反射。这些字段均为 public static（`MODULE$`/`$VALUES`），注册 enum 类型
-   *  （含 Scala 3 枚举伴生 `Mirror.Sum`）时自动补 public 字段即可，避免每个应用
-   *  为枚举伴生额外定制策略。 */
+   *  反射。`registerEnum` 对枚举类、伴生对象与值类显式补 public 字段。 */
   private val enumPolicy = AotPolicy(Set(AotPolicy.Category.PublicFields))
 
   /** 数组类型注册策略：无成员类别，仅标记 unsafeAllocated（GraalVM 允许在镜像中
@@ -118,10 +133,6 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
   private val primitiveDescriptors = Map(
     "boolean" -> "Z", "byte" -> "B", "char" -> "C", "short" -> "S",
     "int" -> "I", "long" -> "J", "float" -> "F", "double" -> "D")
-
-  private def isEnumType(clazz: Class[_]): Boolean =
-    clazz.isEnum || classOf[scala.reflect.Enum].isAssignableFrom(clazz) ||
-      classOf[scala.deriving.Mirror.Sum].isAssignableFrom(clazz)
 
   private def merge(clazz: Class[_], p: AotPolicy): Unit = {
     typePolicies.get(clazz) match {

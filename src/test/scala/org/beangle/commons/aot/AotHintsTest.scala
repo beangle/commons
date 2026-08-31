@@ -32,6 +32,11 @@ class PlainInitializer
 
 private val TestInitializerName = "org.beangle.commons.aot.TestInitializer"
 
+enum TestBodyEnum(val label: String) {
+  case Plain extends TestBodyEnum("plain")
+  case WithBody extends TestBodyEnum("body")
+}
+
 class AotHintsTest extends AnyFunSpec, Matchers {
 
   class AotParent
@@ -116,18 +121,15 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       entry("allDeclaredFields") shouldBe true
     }
 
-    it("enum types register companion automatically with public fields") {
+    it("registerType ignores enum specifics; use registerEnum for full registration") {
       val hints = new AotHints
       hints.registerType(classOf[TestEnum])
       val entries = reflectEntries(hints)
-      entries.map(e => e("name").toString) should contain allOf (
-        classOf[TestEnum].getName, classOf[TestEnum.type].getName)
-      entries foreach { e =>
-        e("allPublicMethods") shouldBe true
-        e("allPublicConstructors") shouldBe true
-        e("allPublicFields") shouldBe true
-        e.get("allDeclaredFields") shouldBe None
-      }
+      entries.map(e => e("name").toString) should contain only classOf[TestEnum].getName
+      val entry = entries.head
+      entry("allPublicMethods") shouldBe true
+      entry("allPublicConstructors") shouldBe true
+      entry.get("allPublicFields") shouldBe None
     }
   }
 
@@ -152,6 +154,39 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       hints.registerArrayOf("[Ljava.lang.String;", getClass.getClassLoader)
       hints.registerArrayOf("no.such.ArrayClass", getClass.getClassLoader)
       reflectEntries(hints).map(e => e("name").toString) should contain only "[Ljava.lang.String;"
+    }
+  }
+
+  describe("AotHints.registerEnum") {
+    it("registers enum, companion and value classes with public fields") {
+      val hints = new AotHints
+      hints.registerEnum(classOf[TestEnum])
+      val entries = reflectEntries(hints)
+      entries.map(e => e("name").toString) should contain allOf (
+        classOf[TestEnum].getName, classOf[TestEnum.type].getName)
+      entries foreach { e =>
+        e("allPublicFields") shouldBe true
+        e.get("allDeclaredFields") shouldBe None
+      }
+    }
+
+    it("registers anonymous value classes and serialization entries") {
+      val hints = new AotHints
+      hints.registerEnum(classOf[TestBodyEnum])
+      reflectEntries(hints).map(e => e("name").toString) should contain allOf (
+        classOf[TestBodyEnum].getName,
+        classOf[TestBodyEnum.type].getName,
+        TestBodyEnum.WithBody.getClass.getName)
+      val dir = Files.createTempDirectory("aot-serializable")
+      AotHintGenerator.write(dir, hints)
+      val json = Files.readString(dir.resolve("serialization-config.json"), StandardCharsets.UTF_8)
+      Json.parseArray(json).toVector.map(_.asInstanceOf[JsonObject]("name").toString) should contain allOf (
+        classOf[TestBodyEnum].getName, TestBodyEnum.WithBody.getClass.getName)
+    }
+
+    it("rejects non-Scala3-enum classes") {
+      val hints = new AotHints
+      an [IllegalArgumentException] should be thrownBy hints.registerEnum(classOf[String])
     }
   }
 

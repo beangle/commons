@@ -94,6 +94,7 @@ class MetaRegistrarTest extends AnyFunSpec, Matchers {
       types should contain allOf (classOf[EnumEntity], classOf[TestEnum], classOf[TestEnum.type])
       val enumPolicy = r.aotHints.getTypePolicies(classOf[TestEnum])
       enumPolicy.categories should contain(AotPolicy.Category.PublicFields)
+      r.aotHints.getSerializables should contain allOf (classOf[TestEnum], TestEnum.Public.getClass)
     }
   }
 }
