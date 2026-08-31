@@ -1,0 +1,128 @@
+[
+  {
+    "name": "scala.Equals"
+  },
+  {
+    "name": "scala.Function1"
+  },
+  {
+    "name": "scala.Option"
+  },
+  {
+    "name": "scala.PartialFunction"
+  },
+  {
+    "name": "scala.Product"
+  },
+  {
+    "name": "scala.collection.Iterable"
+  },
+  {
+    "name": "scala.collection.IterableFactoryDefaults"
+  },
+  {
+    "name": "scala.collection.IterableOnce"
+  },
+  {
+    "name": "scala.collection.IterableOnceOps"
+  },
+  {
+    "name": "scala.collection.IterableOps"
+  },
+  {
+    "name": "scala.collection.Seq"
+  },
+  {
+    "name": "scala.collection.SeqOps"
+  },
+  {
+    "name": "scala.collection.concurrent.CNodeBase",
+    "fields": [
+      {
+        "name": "NODE",
+        "allowWrite": true
+      }
+    ]
+  },
+  {
+    "name": "scala.collection.concurrent.INodeBase",
+    "fields": [
+      {
+        "name": "CTABLE",
+        "allowWrite": true
+      }
+    ]
+  },
+  {
+    "name": "scala.collection.concurrent.MainNode",
+    "fields": [
+      {
+        "name": "WRITE",
+        "allowWrite": true
+      }
+    ]
+  },
+  {
+    "name": "scala.collection.concurrent.TrieMap",
+    "fields": [
+      {
+        "name": "root",
+        "allowWrite": true
+      }
+    ]
+  },
+  {
+    "name": "scala.collection.convert.JavaCollectionWrappers$MapWrapper"
+  },
+  {
+    "name": "scala.collection.immutable.Iterable"
+  },
+  {
+    "name": "scala.collection.immutable.List"
+  },
+  {
+    "name": "scala.collection.immutable.Map"
+  },
+  {
+    "name": "scala.collection.immutable.Seq"
+  },
+  {
+    "name": "scala.collection.immutable.SeqOps"
+  },
+  {
+    "name": "scala.collection.immutable.Set"
+  },
+  {
+    "name": "scala.collection.mutable.Buffer"
+  },
+  {
+    "name": "scala.collection.mutable.HashMap"
+  },
+  {
+    "name": "scala.collection.mutable.Map"
+  },
+  {
+    "name": "scala.collection.mutable.Seq"
+  },
+  {
+    "name": "scala.collection.mutable.Set"
+  },
+  {
+    "name": "scala.deriving.Mirror"
+  },
+  {
+    "name": "scala.deriving.Mirror$Product"
+  },
+  {
+    "name": "scala.deriving.Mirror$Singleton"
+  },
+  {
+    "name": "scala.math.Ordered"
+  },
+  {
+    "name": "scala.reflect.Enum"
+  },
+  {
+    "name": "scala.runtime.EnumValue"
+  }
+]
