@@ -252,9 +252,9 @@ object AotHintGenerator {
   }
 
   /** Writes proxy-config.json for JDK dynamic proxy interfaces. */
-  def writeProxy(out: Path, proxies: collection.Set[List[Class[_]]]): Unit = {
-    val entries = proxies.toSeq.sortBy(_.headOption.map(_.getName).getOrElse("")).map { ifaces =>
-      JsonObject("interfaces" -> JsonArray(ifaces.map(c => c.getName) *))
+  def writeProxy(out: Path, proxies: collection.Set[List[String]]): Unit = {
+    val entries = proxies.toSeq.sortBy(_.headOption.getOrElse("")).map { ifaces =>
+      JsonObject("interfaces" -> JsonArray(ifaces *))
     }
     Files.write(out, JsonArray(entries *).toJson.getBytes(StandardCharsets.UTF_8))
   }

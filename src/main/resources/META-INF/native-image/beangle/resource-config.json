@@ -1,0 +1,29 @@
+{
+  "bundles": [],
+  "resources": {
+    "excludes": [],
+    "includes": [
+      {
+        "pattern": ".*\\.zh_CN"
+      },
+      {
+        "pattern": "META-INF/beangle/beanmeta.idx"
+      },
+      {
+        "pattern": "META-INF/services/.*"
+      },
+      {
+        "pattern": "beangle\\.xml"
+      },
+      {
+        "pattern": "logback\\.xml"
+      },
+      {
+        "pattern": "org/beangle/commons/activation/mime-default\\.types"
+      },
+      {
+        "pattern": "org/beangle/commons/activation/mime\\.types"
+      }
+    ]
+  }
+}

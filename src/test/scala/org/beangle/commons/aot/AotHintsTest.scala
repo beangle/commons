@@ -131,6 +131,30 @@ class AotHintsTest extends AnyFunSpec, Matchers {
     }
   }
 
+  describe("AotHints.registerArrayOf") {
+    it("registers array type from simple class name with unsafeAllocated") {
+      val hints = new AotHints
+      hints.registerArrayOf("java.sql.Statement", getClass.getClassLoader)
+      val entries = reflectEntries(hints)
+      entries.map(e => e("name").toString) should contain only "[Ljava.sql.Statement;"
+      entries.head("unsafeAllocated") shouldBe true
+    }
+
+    it("registers primitive arrays from simple type names") {
+      val hints = new AotHints
+      hints.registerArrayOf("int", getClass.getClassLoader)
+      hints.registerArrayOf("boolean", getClass.getClassLoader)
+      reflectEntries(hints).map(e => e("name").toString) should contain only ("[I", "[Z")
+    }
+
+    it("passes through descriptors and skips missing classes") {
+      val hints = new AotHints
+      hints.registerArrayOf("[Ljava.lang.String;", getClass.getClassLoader)
+      hints.registerArrayOf("no.such.ArrayClass", getClass.getClassLoader)
+      reflectEntries(hints).map(e => e("name").toString) should contain only "[Ljava.lang.String;"
+    }
+  }
+
   describe("resource patterns") {
     it("MetaAotHints registers beanmeta.idx pattern") {
       val registrar = new org.beangle.commons.bean.meta.MetaAotHints

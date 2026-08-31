@@ -45,7 +45,7 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
 
   private val typePolicies = mutable.LinkedHashMap.empty[Class[_], AotPolicy]
   private val patterns = Collections.newSet[String]
-  private val proxies = Collections.newSet[List[Class[_]]]
+  private val proxies = Collections.newSet[List[String]]
   private val serializables = Collections.newSet[Class[_]]
   private val runtimeInitialized = Collections.newSet[Class[_]]
 
@@ -61,6 +61,23 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
 
   /** 定制路径：对单个类显式指定策略，例如 declared 成员、字段或递归父类。 */
   def registerType(clazz: Class[_], custom: AotPolicy): Unit = addType(clazz, custom)
+
+  /** 按简单类名注册数组类型（`"java.sql.Statement"` → `[Ljava.sql.Statement;`），
+   *  自动标记 unsafeAllocated，供 `Array.newInstance`/`Array.get` 等按名反射
+   *  创建/访问数组元素。已是指针数组描述符（`[L...;`）时原样透传；基础类型名
+   *  （如 `"int"` → `[I`）同样支持。类缺失（如 optional 依赖未引入）时静默跳过。 */
+  def registerArrayOf(className: String, loader: ClassLoader): Unit = {
+    val descriptor =
+      if className.startsWith("[") then className
+      else if primitiveDescriptors.contains(className) then "[" + primitiveDescriptors(className)
+      else "[L" + className + ";"
+    try {
+      val clazz = Class.forName(descriptor, false, loader)
+      addType(clazz, arrayPolicy)
+    } catch {
+      case _: Throwable => ()
+    }
+  }
 
   /** Adds a class with the given policy; when recursive, expands the non-JDK
    *  superclass and interface hierarchy with the same policy. */
@@ -93,6 +110,15 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
    *  为枚举伴生额外定制策略。 */
   private val enumPolicy = AotPolicy(Set(AotPolicy.Category.PublicFields))
 
+  /** 数组类型注册策略：无成员类别，仅标记 unsafeAllocated（GraalVM 允许在镜像中
+   *  分配该数组类型，供 `Array.newInstance` 使用）。 */
+  private val arrayPolicy = AotPolicy(Set.empty[AotPolicy.Category], unsafeAllocated = true)
+
+  /** Java 基础类型名 → JVM 数组描述符元素码（如 `"int"` → `"I"`，数组描述符 `"[I"`）。 */
+  private val primitiveDescriptors = Map(
+    "boolean" -> "Z", "byte" -> "B", "char" -> "C", "short" -> "S",
+    "int" -> "I", "long" -> "J", "float" -> "F", "double" -> "D")
+
   private def isEnumType(clazz: Class[_]): Boolean =
     clazz.isEnum || classOf[scala.reflect.Enum].isAssignableFrom(clazz) ||
       classOf[scala.deriving.Mirror.Sum].isAssignableFrom(clazz)
@@ -115,8 +141,18 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
     while it.hasNext do this.patterns.add(it.next())
   }
 
-  /** Registers a set of interfaces for JDK dynamic proxy. */
+  /** Registers a set of interfaces for JDK dynamic proxy (by class reference). */
   def registerProxy(interfaces: Class[_]*): Unit = {
+    proxies.add(interfaces.toList.map(_.getName))
+  }
+
+  /** Registers a set of interfaces for JDK dynamic proxy by name.
+   *
+   *  用于无法直接引用（如包级私有/`private[core]`）的接口类，例如 Spring
+   *  `SerializableTypeWrapper.SerializableTypeProxy`。接口顺序与运行期创建
+   *  代理时一致（代理类按接口列表缓存）。
+   */
+  def registerProxyByName(interfaces: String*): Unit = {
     proxies.add(interfaces.toList)
   }
 
@@ -143,8 +179,8 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
   /** Returns all registered resource patterns. */
   def getPatterns: collection.Set[String] = patterns
 
-  /** Returns all registered proxy interface sets. */
-  def getProxies: collection.Set[List[Class[_]]] = proxies
+  /** Returns all registered proxy interface sets (interface names, in order). */
+  def getProxies: collection.Set[List[String]] = proxies
 
   /** Returns all registered serializable classes. */
   def getSerializables: collection.Set[Class[_]] = serializables

@@ -1,0 +1,149 @@
+[
+  {
+    "allPublicConstructors": true,
+    "name": "ch.qos.logback.classic.BasicConfigurator",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "ch.qos.logback.classic.Logger",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "ch.qos.logback.classic.encoder.PatternLayoutEncoder",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "ch.qos.logback.classic.util.DefaultJoranConfigurator",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "ch.qos.logback.core.ConsoleAppender",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "ch.qos.logback.core.encoder.LayoutWrappingEncoder",
+    "allPublicMethods": true
+  },
+  {
+    "allDeclaredConstructors": true,
+    "name": "org.beangle.commons.aot.BuiltinAotHints"
+  },
+  {
+    "allDeclaredConstructors": true,
+    "name": "org.beangle.commons.bean.meta.MetaAotHints"
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.conversion.converter.DateTimeConverterFactory$",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.conversion.converter.IterableConverterFactory$",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.conversion.converter.Number2NumberConverter$",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.conversion.string.BooleanConverter$",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.conversion.string.DateConverter$",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.conversion.string.DurationConverter$",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.conversion.string.EnumConverters$",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.conversion.string.JavaEnumConverters$",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.conversion.string.JsonConverter$",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.conversion.string.LocaleConverter$",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.conversion.string.NumberConverters$",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.conversion.string.TemporalConverter$",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.conversion.string.TimeConverter$",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.conversion.string.ToStringConverter$",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.lang.annotation.default_value",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.lang.annotation.description",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.lang.annotation.spi",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.beangle.commons.lang.annotation.value",
+    "allPublicMethods": true
+  },
+  {
+    "allDeclaredConstructors": true,
+    "name": "org.beangle.commons.logging.LogbackAotHints"
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.slf4j.Logger",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.slf4j.LoggerFactory",
+    "allPublicMethods": true
+  },
+  {
+    "allPublicConstructors": true,
+    "name": "org.slf4j.spi.LocationAwareLogger",
+    "allPublicMethods": true
+  }
+]
