@@ -285,6 +285,7 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       case d: AnnotatedType => tpe = d.underlying
       case c: ConstantType =>
       case n: OrType =>
+      case t: TermRef => tpe = t.widen
       case _ => throw new RuntimeException("Unsupported type: " + tpe)
     }
     if args.isEmpty then typeOf(tpe)

@@ -275,6 +275,15 @@ class MetaDiggerTest extends AnyFunSpec, Matchers {
       assert(bi.getGetter("base").get.invoke(m) == "hello")
     }
   }
+
+  describe("singleton-typed property (TermRef)") {
+    it("digs a TermRef property by widening to its underlying class") {
+      val cm = MetaModels.of(classOf[TermRefMeta])
+      val p = cm.properties.find(_.name == "math").get
+      info(s"math typeinfo = ${p.typeinfo}")
+      assert(p.typeinfo.clazz == MathOpsMeta.getClass)
+    }
+  }
 }
 
 /** Scala 子类继承 Java 父类的 write-only setter（对应 Spring TransactionProxyFactoryBean 场景）。 */
@@ -297,6 +306,16 @@ class VirtualPropsMeta2 {
   private var _base: String = _
   def base: String = _base
   def base_=(n: String): Unit = _base = n
+}
+
+/** 单例（TermRef）类型属性：`def math: MathOpsMeta.type = MathOpsMeta`，
+ *  回归 MetaDigger 对 TermRef 的解析（此前会直接抛 Unsupported type）。 */
+object MathOpsMeta {
+  def ceil(n: java.lang.Number): Int = n.intValue
+}
+
+class TermRefMeta {
+  def math: MathOpsMeta.type = MathOpsMeta
 }
 
 /** var name 与 JavaBean 风格 getName 叠加：字段访问器优先，beanmeta（编译期 MetaDigger）
