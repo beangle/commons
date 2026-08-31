@@ -72,11 +72,19 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
   val typeRepr = trr.asInstanceOf[TypeRepr]
 
   /** Produces Expr[BeanMeta] for the type.
-   * Java-defined types (no source tree, no Scala conventions) yield an empty BeanMeta.
+   * Scala types are dug at compile time from symbol trees; Java-defined types follow
+   * the standard JavaBean convention (getXxx/isXxx/setXxx) via runtime reflection
+   * ([[MetaLoader]]), since their member trees are unavailable to the macro.
+   * JDK/Scala library types (java./scala. prefix or $$) yield an empty BeanMeta.
    */
   def dig(): Expr[BeanMeta] = {
-    if typeRepr.dealias.typeSymbol.flags.is(Flags.JavaDefined) then
-      '{ new MetaModel.Builder(${ typeOf(typeRepr) }).build() }
+    val sym = typeRepr.dealias.typeSymbol
+    if sym.flags.is(Flags.JavaDefined) then
+      val className = sym.fullName
+      if className.startsWith("java.") || className.startsWith("scala.") || className.contains("$$") then
+        '{ new MetaModel.Builder(${ typeOf(typeRepr) }).build() }
+      else
+        '{ MetaLoader.load(${ typeOf(typeRepr) }) }
     else
       '{
         val b = new MetaModel.Builder(${ typeOf(typeRepr) })
@@ -120,6 +128,12 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     scala.reflect.NameTransformer.encode(name)
   }
 
+  /** JavaBean 风格 getter 名（getXxx/isXxx），与 MetaLoader.isJavaBeanGetter 对齐。 */
+  private def isJavaBeanGetterName(name: String): Boolean = {
+    if name.startsWith("get") && name.length > 3 && name.charAt(3).isUpper then true
+    else name.startsWith("is") && name.length > 2 && name.charAt(2).isUpper
+  }
+
   /** Extracts (isGetter, propertyName) from DefDef if it is an accessor. */
   def findAccessor(m: DefDef): Option[(Boolean, String)] = {
     val name = m.name
@@ -142,6 +156,8 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
 
   private def addMemberBody(t: Expr[MetaModel.Builder]): List[Expr[_]] = {
     val fieldMap = new mutable.HashMap[String, FieldExpr]
+    val setterMap = new mutable.HashMap[String, String]
+    val javaBases = new mutable.ArrayBuffer[TypeRepr]
     val typeSymbol = typeRepr.typeSymbol
     val isScalaClass = !typeSymbol.flags.is(Flags.JavaDefined)
     val isCaseClass = typeRepr.typeSymbol.caseFields.nonEmpty
@@ -166,6 +182,13 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
         case a: AppliedType => params = resolveClassTypes(a)
         case _ =>
       }
+
+      // Java 父类/接口的成员树不可用，运行期经 MetaLoader 反射合并其可读属性，
+      // 使编译期 dig 出的 BeanMeta（写入 beanmeta.idx）覆盖继承的 JavaBean 属性。
+      if bc.flags.is(Flags.JavaDefined) then
+        val baseName = bc.fullName
+        if !baseName.startsWith("java.") && !baseName.startsWith("scala.") && !baseName.contains("$$") then
+          javaBases += base
 
       //Some fields declared in primary constructor will by ignored due to missing public access methods.
       //So we discover declared fields,they may appear in that collection.
@@ -199,21 +222,32 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
               case Some((readable, name)) =>
                 if readable then
                   fieldMap.get(name) match {
-                    case Some(fx) => fieldMap.put(name, fx.copy(hasGet = true, getterName = methodName))
+                    case Some(fx) =>
+                      // 与 MetaLoader 的 puttable 守卫对齐：字段访问器（getterName == 属性名）优先，
+                      // 仅 JavaBean 风格 getter 可被覆盖，保证 beanmeta 与运行期反射的 getterName 一致。
+                      if isJavaBeanGetterName(fx.getterName) then
+                        fieldMap.put(name, fx.copy(hasGet = true, getterName = methodName))
+                      else fieldMap.put(name, fx.copy(hasGet = true))
                     case None =>
                       val rtType = resolveType(defdef.returnTpt.tpe, params)
                       val transnt = defdef.symbol.annotations exists (x => x.show.toLowerCase.contains("transient"))
                       fieldMap.put(name, FieldExpr(name, rtType, transnt, true, false, getterName = methodName))
                   }
                 else
-                  fieldMap.get(name).foreach { fx =>
-                    fieldMap.put(name, fx.copy(hasSet = true, setterName = Some(methodName)))
-                  }
+                  setterMap.put(name, methodName)
               case None => // skip non-accessor methods
             }
           }
       }
     }
+
+    // 虚拟属性（def x; def x_=）的 setter 可能在 getter 之前声明，统一收集后回填，保证顺序无关。
+    setterMap.foreach { (name, methodName) =>
+      fieldMap.get(name).foreach { fx =>
+        fieldMap.put(name, fx.copy(hasSet = true, setterName = Some(methodName)))
+      }
+    }
+
     val members = new mutable.ArrayBuffer[Expr[_]]()
     if !(ctors.size == 1 && ctors.head.isEmpty) then
       members ++= ctors.map { m =>
@@ -234,6 +268,9 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     members ++= fieldMap.values.map { x =>
       val setterExpr = x.setterName.map(n => '{ Some(${ Expr(n) }) }).getOrElse('{ None })
       '{ ${ t }.addProperty(${ Expr(x.name) }, ${ x.typeinfo }, ${ Expr(transients.contains(x.name)) }, ${ Expr(x.getterName) }, $setterExpr) }
+    }
+    members ++= javaBases.map { base =>
+      '{ ${ t }.addProperties(MetaLoader.load(${ typeOf(base) }).properties) }
     }
     members.toList
   }

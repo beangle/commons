@@ -101,6 +101,14 @@ object MetaModel {
     def addCtor(paramInfos: Array[ParamHolder]): Unit =
       ctors += Ctor(paramInfos.toSeq.map(_.toParam))
 
+    /** 追加其他 BeanMeta 的属性；已有命名（本类优先）跳过。
+     *  供 MetaDigger 合并 Java 父类的可读 JavaBean 属性，使 partial meta 得以写入 beanmeta.idx。
+     */
+    def addProperties(others: Seq[Property]): Unit = {
+      val existing = properties.map(_.name).toSet
+      others.filterNot(p => existing.contains(p.name)).foreach(properties += _)
+    }
+
     /** Assembles the BeanMeta (properties sorted by name). */
     def build(): BeanMeta =
       BeanMeta(clazz, properties.toSeq.sortBy(_.name), ctors.toSeq)

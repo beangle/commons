@@ -19,7 +19,7 @@ package org.beangle.commons.bean.meta
 
 import org.beangle.commons.bean.meta.MetaModel.BeanMeta
 import org.beangle.commons.lang.annotation.noreflect
-import org.beangle.commons.lang.reflect.{BeanInfos, TypeInfo}
+import org.beangle.commons.lang.reflect.{BeanInfo, BeanInfos, TypeInfo}
 import org.beangle.commons.lang.reflect.TypeInfo.IterableType
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -103,6 +103,213 @@ class MetaDiggerTest extends AnyFunSpec, Matchers {
       assert(parsed.clazz == cm.clazz)
     }
   }
+
+  describe("getterName for var name plus override def getName") {
+    it("compile-time dig keeps the field-backed getter name") {
+      val cm = MetaModels.of(classOf[GetterNameMeta])
+      val p = cm.properties.find(_.name == "name").get
+      info(s"beanmeta getterName = ${p.getterName}")
+      assert(p.getterName == "name")
+    }
+
+    it("runtime reflection keeps the field-backed getter name") {
+      val cm = MetaLoader.load(classOf[GetterNameMeta])
+      val p = cm.properties.find(_.name == "name").get
+      info(s"runtime getterName = ${p.getterName}")
+      assert(p.getterName == "name")
+    }
+  }
+
+  describe("getterName for var writable plus override def isWritable") {
+    it("compile-time dig keeps the field-backed getter name") {
+      val cm = MetaModels.of(classOf[IsWritableMeta])
+      val p = cm.properties.find(_.name == "writable").get
+      info(s"beanmeta getterName = ${p.getterName}")
+      assert(p.getterName == "writable")
+    }
+
+    it("runtime reflection keeps the field-backed getter name") {
+      val cm = MetaLoader.load(classOf[IsWritableMeta])
+      val p = cm.properties.find(_.name == "writable").get
+      info(s"runtime getterName = ${p.getterName}")
+      assert(p.getterName == "writable")
+    }
+
+    it("getter is invocable via BeanInfos") {
+      val bi = BeanInfos.register(MetaModels.of(classOf[IsWritableMeta]))
+      val getter = bi.getGetter("writable")
+      assert(getter.isDefined)
+      val m = new IsWritableMeta
+      m.writable = true
+      assert(getter.get.invoke(m).asInstanceOf[Boolean])
+    }
+  }
+
+  describe("plain java bean") {
+    it("MetaDig digs plain java bean properties following the JavaBean convention") {
+      val cm = MetaModels.of(classOf[PlainJavaBean])
+      val byName = cm.properties.map(p => (p.name, p)).toMap
+      info(s"java bean properties = ${byName.keySet.toSeq.sorted}")
+      assert(byName.keySet == Set("name", "age", "writable"))
+      assert(byName("name").getterName == "getName")
+      assert(byName("name").setterName.contains("setName"))
+      assert(byName("age").getterName == "getAge")
+      assert(byName("age").setterName.contains("setAge"))
+      assert(byName("writable").getterName == "isWritable")
+      assert(byName("writable").setterName.contains("setWritable"))
+    }
+
+    it("MetaLoader digs java bean properties with getterName") {
+      val cm = MetaLoader.load(classOf[PlainJavaBean])
+      val byName = cm.properties.map(p => (p.name, p)).toMap
+      info(s"java bean properties = ${byName.keySet.toSeq.sorted}")
+      assert(byName.keySet == Set("name", "age", "writable"))
+      assert(byName("name").getterName == "getName")
+      assert(byName("name").setterName.contains("setName"))
+      assert(byName("age").getterName == "getAge")
+      assert(byName("age").setterName.contains("setAge"))
+      assert(byName("writable").getterName == "isWritable")
+      assert(byName("writable").setterName.contains("setWritable"))
+    }
+  }
+
+  describe("write-only java bean") {
+    it("MetaLoader keeps BeanMeta.properties readable-only, setter-only properties excluded") {
+      val cm = MetaLoader.load(classOf[WriteOnlyBean])
+      val byName = cm.properties.map(p => (p.name, p)).toMap
+      assert(byName.keySet == Set("name"))
+      assert(byName("name").getterName == "getName")
+      assert(byName("name").setterName.contains("setName"))
+    }
+
+    it("BeanInfos collects write-only properties into writeOnlys") {
+      val bi = BeanInfos.get(classOf[WriteOnlyBean])
+      info(s"writeOnlys = ${bi.writeOnlys}")
+      assert(bi.writeOnlys.keySet == Set("secret", "enabled", "proxyInterfaces"))
+      assert(bi.writeOnlys("secret").getName == "setSecret")
+      assert(bi.writeOnlys("enabled").getName == "setEnabled")
+      assert(bi.writeOnlys("proxyInterfaces").getName == "setProxyInterfaces")
+      assert(!bi.properties.contains("secret"))
+      assert(bi.getGetter("secret").isEmpty)
+      assert(bi.getSetterMethod("secret").map(_.getName).contains("setSecret"))
+      assert(bi.getSetterMethod("enabled").map(_.getName).contains("setEnabled"))
+      assert(!bi.writeOnlys.contains("name"))
+    }
+
+    it("scala subclass inherits write-only setters like TransactionProxyFactoryBean") {
+      val bi = BeanInfos.get(classOf[WriteOnlySubBean])
+      info(s"writeOnlys = ${bi.writeOnlys}")
+      assert(bi.writeOnlys.keySet == Set("secret", "enabled", "proxyInterfaces"))
+      assert(bi.writeOnlys("proxyInterfaces").getName == "setProxyInterfaces")
+      assert(bi.getSetterMethod("proxyInterfaces").isDefined)
+    }
+
+    it("BeanInfo.from enriches readable JavaBean properties missing from the meta") {
+      val full = MetaLoader.load(classOf[PlainJavaBean])
+      val partial = full.copy(properties = Seq(full.properties.find(_.name == "name").get))
+      val bi = BeanInfo.from(partial)
+      info(s"enriched props = ${bi.properties.keySet.toSeq.sorted}")
+      assert(bi.properties.keySet == Set("name", "age", "writable"))
+      assert(bi.properties("age").setter.isDefined)
+      assert(bi.writeOnlys.isEmpty)
+    }
+  }
+
+  describe("inherited readable java properties (partial meta into idx)") {
+    it("MetaDig merges readable JavaBean properties from java parents into BeanMeta") {
+      val cm = MetaModels.of(classOf[ScalaChildBean])
+      val byName = cm.properties.map(p => (p.name, p)).toMap
+      info(s"BeanMeta properties = ${byName.keySet.toSeq.sorted}")
+      assert(byName.keySet == Set("id", "title"))
+      assert(byName("id").getterName == "id")
+      assert(byName("title").getterName == "getTitle")
+      assert(byName("title").setterName.contains("setTitle"))
+    }
+
+    it("BeanInfo.from resolves merged inherited getters and setters") {
+      val cm = MetaModels.of(classOf[ScalaChildBean])
+      val bi = BeanInfo.from(cm)
+      info(s"BeanInfo properties = ${bi.properties.keySet.toSeq.sorted}")
+      assert(bi.properties.keySet == Set("id", "title"))
+      assert(bi.getGetter("title").isDefined)
+      assert(bi.getSetter("title").isDefined)
+      val s = new ScalaChildBean
+      s.setTitle("t")
+      assert(bi.getGetter("title").get.invoke(s) == "t")
+      assert(bi.getSetter("id").isDefined)
+    }
+
+    it("BeanMeta of write-only subclass keeps readable parent property, write-only stays excluded") {
+      val cm = MetaModels.of(classOf[WriteOnlySubBean])
+      val names = cm.properties.map(_.name)
+      info(s"BeanMeta properties = $names")
+      assert(names == Seq("name"))
+      val bi = BeanInfo.from(cm)
+      assert(bi.writeOnlys.keySet == Set("secret", "enabled", "proxyInterfaces"))
+      assert(bi.getGetter("name").isDefined)
+    }
+  }
+
+  describe("virtual properties (def x; def x_=)") {
+    it("digs setter-first virtual property pair") {
+      val cm = MetaModels.of(classOf[VirtualPropsMeta])
+      val p = cm.properties.find(_.name == "base").get
+      assert(p.getterName == "base")
+      assert(p.setterName.contains("base_$eq"))
+      assert(!p.isTransient)
+    }
+
+    it("digs getter-first virtual property pair") {
+      val cm = MetaModels.of(classOf[VirtualPropsMeta2])
+      val p = cm.properties.find(_.name == "base").get
+      assert(p.getterName == "base")
+      assert(p.setterName.contains("base_$eq"))
+      assert(!p.isTransient)
+    }
+
+    it("virtual property getter/setter are invocable via BeanInfo") {
+      val cm = MetaModels.of(classOf[VirtualPropsMeta])
+      val bi = BeanInfo.from(cm)
+      val m = new VirtualPropsMeta
+      bi.getSetter("base").get.invoke(m, "hello")
+      assert(bi.getGetter("base").get.invoke(m) == "hello")
+    }
+  }
+}
+
+/** Scala 子类继承 Java 父类的 write-only setter（对应 Spring TransactionProxyFactoryBean 场景）。 */
+class WriteOnlySubBean extends WriteOnlyBean
+
+/** Scala 子类继承 Java 父类：BeanMeta 应合并父类可读属性（进入 beanmeta.idx）。 */
+class ScalaChildBean extends JavaParentBean {
+  var id: Long = _
+}
+
+/** 虚拟属性（无字段）：setter 先于 getter 声明，验证 MetaDigger 发现顺序无关。 */
+class VirtualPropsMeta {
+  private var _base: String = _
+  def base_=(n: String): Unit = _base = n
+  def base: String = _base
+}
+
+/** 虚拟属性（无字段）：getter 先于 setter 声明，对照用例。 */
+class VirtualPropsMeta2 {
+  private var _base: String = _
+  def base: String = _base
+  def base_=(n: String): Unit = _base = n
+}
+
+/** var name 与 JavaBean 风格 getName 叠加：字段访问器优先，beanmeta（编译期 MetaDigger）
+ * 与运行期 MetaLoader 的 getterName 保持一致，用于固定该契约。 */
+class GetterNameMeta {
+  var name: String = _
+  def getName: String = name
+}
+
+/** var writable 与 JavaBean 风格 isWritable 叠加（boolean 属性）：同样字段访问器优先。 */
+class IsWritableMeta {
+  var writable: Boolean = _
+  def isWritable: Boolean = writable
 }
 
 case class PersonMeta(name: String, age: Int = 18, tags: List[String] = Nil) {
