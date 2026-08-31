@@ -62,20 +62,6 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
   /** 定制路径：对单个类显式指定策略，例如 declared 成员、字段或递归父类。 */
   def registerType(clazz: Class[_], custom: AotPolicy): Unit = addType(clazz, custom)
 
-  /** 按类名字符串注册反射类型（用于第三方库类，无法直接引用 classOf）。
-   *  类缺失时静默跳过。 */
-  def registerTypeByName(names: String*): Unit = {
-    val loader = classOf[AotHints].getClassLoader
-    names.foreach { name =>
-      try {
-        val clazz = Class.forName(name, false, loader)
-        addType(clazz, policy)
-      } catch {
-        case _: Throwable => ()
-      }
-    }
-  }
-
   /** 按简单类名注册数组类型（`"java.sql.Statement"` → `[Ljava.sql.Statement;`），
    *  自动标记 unsafeAllocated，供 `Array.newInstance`/`Array.get` 等按名反射
    *  创建/访问数组元素。已是指针数组描述符（`[L...;`）时原样透传；基础类型名
