@@ -17,7 +17,7 @@
 
 package org.beangle.commons.aot
 
-import org.beangle.commons.json.{JsonArray, JsonObject}
+import org.beangle.commons.json.{Json, JsonArray, JsonObject}
 import org.beangle.commons.lang.ClassLoaders
 import org.beangle.commons.lang.reflect.Reflections
 
@@ -216,7 +216,7 @@ object AotHintGenerator {
    *  per type with the flags derived from its [[AotPolicy]]. */
   def writeReflect(out: Path, types: collection.Map[Class[_], AotPolicy]): Unit = {
     val entries = types.toSeq.sortBy(_._1.getName).map { case (clazz, policy) => reflectEntry(clazz, policy) }
-    Files.write(out, JsonArray(entries *).toJson.getBytes(StandardCharsets.UTF_8))
+    writeJson(out, JsonArray(entries *))
   }
 
   /** Builds a reflect-config.json entry from the class and its policy. */
@@ -248,7 +248,7 @@ object AotHintGenerator {
         "includes" -> JsonArray(includes *),
         "excludes" -> JsonArray()),
       "bundles" -> JsonArray())
-    Files.write(out, json.toJson.getBytes(StandardCharsets.UTF_8))
+    writeJson(out, json)
   }
 
   /** Writes proxy-config.json for JDK dynamic proxy interfaces. */
@@ -256,7 +256,7 @@ object AotHintGenerator {
     val entries = proxies.toSeq.sortBy(_.headOption.getOrElse("")).map { ifaces =>
       JsonObject("interfaces" -> JsonArray(ifaces *))
     }
-    Files.write(out, JsonArray(entries *).toJson.getBytes(StandardCharsets.UTF_8))
+    writeJson(out, JsonArray(entries *))
   }
 
   /** Writes serialization-config.json for classes supporting Java serialization. */
@@ -264,8 +264,12 @@ object AotHintGenerator {
     val entries = classes.toSeq.sortBy(_.getName).map { clazz =>
       JsonObject("name" -> clazz.getName)
     }
-    Files.write(out, JsonArray(entries *).toJson.getBytes(StandardCharsets.UTF_8))
+    writeJson(out, JsonArray(entries *))
   }
+
+  /** Writes a JSON node pretty-printed with 2-space indent, ending with a newline. */
+  private def writeJson(out: Path, json: Json): Unit =
+    Files.write(out, (Json.toPretty(json) + "\n").getBytes(StandardCharsets.UTF_8))
 
   /** Writes native-image.properties carrying extra build args, e.g.
    *  `--initialize-at-run-time` for classes whose static initializers

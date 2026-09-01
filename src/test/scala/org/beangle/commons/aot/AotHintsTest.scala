@@ -97,6 +97,16 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       entry.get("allPublicFields") shouldBe None
     }
 
+    it("writes pretty-printed json with two-space indent") {
+      val hints = new AotHints
+      hints.registerType(classOf[AotChild])
+      val dir = Files.createTempDirectory("aot-hints")
+      AotHintGenerator.write(dir, hints)
+      val raw = Files.readString(dir.resolve("reflect-config.json"), StandardCharsets.UTF_8)
+      raw should include ("\n    \"name\": \"" + classOf[AotChild].getName)
+      raw should include ("\n    \"allPublicMethods\": true")
+    }
+
     it("bean policy: declared fields + query declared methods, recursive hierarchy") {
       val hints = new AotHints
       hints.registerType(classOf[AotChild], AotPolicy.bean)

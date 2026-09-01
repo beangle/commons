@@ -207,6 +207,65 @@ object Json {
     value.toJson
   }
 
+  /** Serializes a JSON node with indentation (default 2 spaces).
+   *
+   * @param j the JSON node
+   * @param indent the number of spaces per level
+   * @return the pretty-printed JSON string
+   */
+  def toPretty(j: Json, indent: Int = 2): String = {
+    val sb = new StringBuilder
+    def pad(level: Int): Unit = sb.append(" " * (level * indent))
+
+    def write(v: Any, level: Int): Unit = {
+      Options.unwrap(v) match {
+        case o: JsonObject => writeObject(o, level)
+        case a: JsonArray => writeArray(a, level)
+        case x => sb.append(toLiteral(x))
+      }
+    }
+
+    def writeObject(o: JsonObject, level: Int): Unit = {
+      val it = o.iterator
+      if (!it.hasNext) sb.append("{}")
+      else {
+        sb.append("{\n")
+        var first = true
+        while (it.hasNext) {
+          val (k, v) = it.next()
+          if (!first) sb.append(",\n")
+          first = false
+          pad(level + 1)
+          sb.append('"').append(k).append("\": ")
+          write(v, level + 1)
+        }
+        sb.append('\n')
+        pad(level)
+        sb.append('}')
+      }
+    }
+
+    def writeArray(a: JsonArray, level: Int): Unit = {
+      if (a.isEmpty) sb.append("[]")
+      else {
+        sb.append("[\n")
+        var first = true
+        a.iterator foreach { v =>
+          if (!first) sb.append(",\n")
+          first = false
+          pad(level + 1)
+          write(v, level + 1)
+        }
+        sb.append('\n')
+        pad(level)
+        sb.append(']')
+      }
+    }
+
+    write(j, 0)
+    sb.toString()
+  }
+
   /** Converts an Iterable to its JSON array string representation.
    *
    * @param data the iterable to convert

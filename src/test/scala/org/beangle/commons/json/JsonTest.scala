@@ -39,6 +39,25 @@ class JsonTest extends AnyFunSpec, Matchers {
       val b = Json.parseObject("""{"name":"课堂测验","percent":20.3,"count":5}""")
       assert(b.toJson.contains(""""percent":20.3"""))
     }
+    it("toPretty indents with two spaces") {
+      val json = JsonObject(
+        "id" -> 3,
+        "nested" -> JsonObject("a" -> true, "list" -> JsonArray(1, "x")),
+        "empty" -> JsonObject(),
+        "arr" -> JsonArray())
+      val pretty = Json.toPretty(json)
+      assert(pretty.startsWith("{\n"))
+      assert(pretty.endsWith("\n}"))
+      assert(pretty.contains("\n  \"nested\": {\n"))
+      assert(pretty.contains("\n    \"a\": true"))
+      assert(pretty.contains("\n    \"list\": [\n      1,\n      \"x\"\n    ]"))
+      assert(pretty.contains("\n  \"empty\": {}"))
+      assert(pretty.contains("\n  \"arr\": []"))
+      Json.toPretty(JsonObject("a" -> 1)) should equal("{\n  \"a\": 1\n}")
+      Json.toPretty(JsonObject("a" -> 1), 4) should equal("{\n    \"a\": 1\n}")
+      Json.toPretty(JsonObject()) should equal("{}")
+      Json.toPretty(JsonArray()) should equal("[]")
+    }
     it("update nested creation") {
       val json = new JsonObject()
       json.update("/query/term/std/0/skills/0/name", "Play Basketball")
