@@ -70,22 +70,29 @@ object BeanInfos {
     MetaModels.get(clazz) match
       case Some(meta) => Some(BeanInfo.from(meta))
       case None =>
-        val parent = parentOf(clazz)
-        if (null == parent) reflectLoad(clazz)
-        else
-          MetaModels.get(parent) match
-            case Some(pm) => Some(BeanInfo.from(pm.copy(clazz = clazz, ctors = Seq.empty)))
-            case None => reflectLoad(clazz)
+        // $ 子类/匿名类（如 Scala 3 枚举值类 NoticeStatus$$anon$1）复用父类（枚举本体）元数据
+        val source = parentOf(clazz) match
+          case null => clazz
+          case parent => parent
+
+        loadMeta(source).map { m =>
+          val meta = if (m.clazz == clazz) m else m.copy(clazz = clazz, ctors = Seq.empty)
+          BeanInfo.from(meta)
+        }
   }
 
-  /** 经 MetaLoader 反射加载（仅支持可反射的应用类，见 [[MetaLoader.supports]]）。 */
-  private def reflectLoad(clazz: Class[_]): Option[BeanInfo] =
-    if MetaLoader.supports(clazz) then Some(BeanInfo.from(MetaLoader.load(clazz))) else None
+  /** 依次尝试二进制索引与运行时反射，返回来源类的 BeanMeta。 */
+  private def loadMeta(source: Class[_]): Option[BeanMeta] =
+    MetaModels.get(source).orElse(reflectMeta(source))
 
-  /** 父类 `$` 子类的父类判定（如 Hibernate 懒加载代理 `<Entity>$HibernateProxy`）：
-   * 类名中 `$` 前缀与父类全名一致时返回父类。命中时复用父类 BeanMeta（此类无自有
-   * bean 属性，仅继承父类）；native 下需该类已注册 allPublicMethods（构建期生成器
-   * 按命名约定输出），供 `BeanInfo.from` 的 `getMethods` 查询。
+  /** 经 MetaLoader 反射加载（仅支持可反射的应用类，见 [[MetaLoader.supports]]）。 */
+  private def reflectMeta(clazz: Class[_]): Option[BeanMeta] =
+    if MetaLoader.supports(clazz) then Some(MetaLoader.load(clazz)) else None
+
+  /** 定位 `$` 子类的父类，命中后复用父类 BeanMeta：
+   *  - Hibernate 代理（`Entity$HibernateProxy`）：类名前缀与父类全名一致；
+   *  - Scala 3 枚举值类（`NoticeStatus$$anon$1`）：父类可反射时直接取父类。
+   * 这类子类没有自有属性，仅继承父类；native 下需已注册 allPublicMethods 供 getMethods 查询。
    */
   private def parentOf(clazz: Class[_]): Class[_] = {
     val name = clazz.getName
@@ -93,7 +100,9 @@ object BeanInfos {
     if (idx <= 0) null
     else {
       val parent = clazz.getSuperclass
-      if (null != parent && name.substring(0, idx) == parent.getName) parent else null
+      if (null != parent &&
+        (name.substring(0, idx) == parent.getName || (name.contains("$$") && MetaLoader.supports(parent)))) parent
+      else null
     }
   }
 

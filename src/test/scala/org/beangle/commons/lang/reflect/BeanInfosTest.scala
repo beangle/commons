@@ -29,6 +29,13 @@ import org.scalatest.matchers.should.Matchers
 import java.lang.reflect.Modifier
 import scala.collection.immutable.ArraySeq
 
+enum NoticeStatus(val title: String) {
+  case Draft extends NoticeStatus("草稿")
+  case Submited extends NoticeStatus("已提交")
+  case Unpassed extends NoticeStatus("审核不通过")
+  case Passed extends NoticeStatus("审核通过")
+}
+
 class BeanInfosTest extends AnyFunSpec, Matchers {
   BeanInfos.register(MetaModels.of(classOf[Book]))
   BeanInfos.register(MetaModels.of(classOf[BookPrimitiveId]))
@@ -58,6 +65,15 @@ class BeanInfosTest extends AnyFunSpec, Matchers {
       // empty-parens methods at bytecode level, so they are excluded.
       assert(BeanInfos.get(classOf[NumIdBean[_]]).properties.size == 1)
       assert(BeanInfos.get(classOf[NumIdBean[_]]).properties.contains("id"))
+    }
+
+    it("fallback to enum meta for anonymous value class") {
+      val valueClass = NoticeStatus.Passed.getClass
+      assert(valueClass.getName.contains("$$anon"))
+      val bi = BeanInfos.get(valueClass)
+      assert(bi.clazz == valueClass)
+      assert(bi.properties.contains("title"))
+      assert(bi.getGetter("title").get.invoke(NoticeStatus.Passed) == "审核通过")
     }
 
     it("Have correct virtual getter") {
