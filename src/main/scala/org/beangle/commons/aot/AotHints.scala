@@ -74,7 +74,7 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
       else "[L" + className + ";"
     try {
       val clazz = Class.forName(descriptor, false, loader)
-      addType(clazz, arrayPolicy)
+      addType(clazz, AotPolicy.array)
     } catch {
       case _: Throwable => ()
     }
@@ -97,13 +97,13 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
         s"registerEnum requires a Scala 3 enum (scala.reflect.Enum subclass), got $enumType")
     try {
       val loader = enumType.getClassLoader
-      addType(enumType, enumPolicy)
+      addType(enumType, AotPolicy.enumPolicy)
       registerSerializable(enumType)
       val companion = Class.forName(enumType.getName + "$", false, loader)
-      addType(companion, enumPolicy)
+      addType(companion, AotPolicy.enumPolicy)
       val values = companion.getMethod("values").invoke(companion.getField("MODULE$").get(null))
       values.asInstanceOf[Array[AnyRef]] foreach { v =>
-        addType(v.getClass, enumPolicy)
+        addType(v.getClass, AotPolicy.enumPolicy)
         registerSerializable(v.getClass)
       }
     } catch {
@@ -120,15 +120,6 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
       addType(clazz.getSuperclass, p)
       clazz.getInterfaces foreach (addType(_, p))
   }
-
-  /** 枚举运行期需要读取字段：Scala 3 enum 经 `MODULE$` 取伴生单例、Java enum 经
-   *  `$VALUES` 取常量，`EnumConverters`/`Enums`/`Reflections.getInstance` 都依赖字段
-   *  反射。`registerEnum` 对枚举类、伴生对象与值类显式补 public 字段。 */
-  private val enumPolicy = AotPolicy(Set(AotPolicy.Category.PublicFields))
-
-  /** 数组类型注册策略：无成员类别，仅标记 unsafeAllocated（GraalVM 允许在镜像中
-   *  分配该数组类型，供 `Array.newInstance` 使用）。 */
-  private val arrayPolicy = AotPolicy(Set.empty[AotPolicy.Category], unsafeAllocated = true)
 
   /** Java 基础类型名 → JVM 数组描述符元素码（如 `"int"` → `"I"`，数组描述符 `"[I"`）。 */
   private val primitiveDescriptors = Map(

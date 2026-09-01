@@ -63,6 +63,16 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       AotPolicy.bean.unsafeAllocated shouldBe false
     }
 
+    it("enum adds public fields to bean policy") {
+      AotPolicy.enumPolicy.categories shouldBe AotPolicy.bean.categories + PublicFields
+      AotPolicy.enumPolicy.recursive shouldBe true
+    }
+
+    it("array is unsafeAllocated only") {
+      AotPolicy.array.categories shouldBe empty
+      AotPolicy.array.unsafeAllocated shouldBe true
+    }
+
     it("merge unions categories and flags") {
       val a = AotPolicy(Set(PublicMethods, PublicConstructors))
       val b = AotPolicy(Set(DeclaredMethods, DeclaredFields), recursive = true, unsafeAllocated = true)
@@ -179,7 +189,7 @@ class AotHintsTest extends AnyFunSpec, Matchers {
   }
 
   describe("AotHints.registerEnum") {
-    it("registers enum, companion and value classes with public fields") {
+    it("registers enum, companion and value classes with bean + public fields policy") {
       val hints = new AotHints
       hints.registerEnum(classOf[TestEnum])
       val entries = reflectEntries(hints)
@@ -187,7 +197,10 @@ class AotHintsTest extends AnyFunSpec, Matchers {
         classOf[TestEnum].getName, classOf[TestEnum.type].getName)
       entries foreach { e =>
         e("allPublicFields") shouldBe true
-        e.get("allDeclaredFields") shouldBe None
+        e("allPublicMethods") shouldBe true
+        e("allPublicConstructors") shouldBe true
+        e("allDeclaredFields") shouldBe true
+        e("queryAllDeclaredMethods") shouldBe true
       }
     }
 

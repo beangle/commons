@@ -70,6 +70,22 @@ object AotPolicy {
       Category.DeclaredFields, Category.QueryDeclaredMethods
     ), recursive = true)
   }
+
+  /** 枚举注册策略：在 [[bean]] 基础上保留 public 字段。
+   *
+   *  枚举运行期除了反射方法/构造器（`Enums` 的 `valueOf`/`values`/`id`、
+   *  `BeanInfos` 的属性 getter），还要读 `MODULE$`/`$VALUES` 等 public 字段
+   *  （`EnumConverters`/`Reflections` 取单例/常量），供 [[AotHints.registerEnum]]
+   *  对枚举类、伴生对象与值类统一应用。 */
+  val enumPolicy: AotPolicy = {
+    bean.merge(AotPolicy(Set(Category.PublicFields)))
+  }
+
+  /** 数组类型注册策略：无成员类别，仅标记 unsafeAllocated（GraalVM 允许在镜像中
+   *  分配该数组类型，供 `Array.newInstance` 使用）。 */
+  val array: AotPolicy = {
+    AotPolicy(Set.empty[Category], unsafeAllocated = true)
+  }
 }
 
 /** 不可变的注册策略，描述 [[AotHints.registerType]] 对类的展开方式。

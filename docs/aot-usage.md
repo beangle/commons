@@ -153,17 +153,20 @@ class MixedHints extends AotHintRegistrar {
 
 ### 枚举类型自动注册（含伴生对象）
 
-枚举的运行期反射路径（`EnumConverters`/`Enums`/`Reflections.getInstance`）需要读取字段：
-Scala 3 enum 经伴生对象 `MODULE$` 取单例、Java enum 经 `$VALUES` 取常量。这些字段均为
-`public static`，因此 `AotHints.registerType` 对 enum 类型自动合并 `PublicFields`
-（`allPublicFields`）；对 Scala 3 enum 还会**自动增量注册伴生对象**——应用只需注册枚举
-类型本身，无需再写 `classOf[Color.type]`。
+枚举的运行期反射路径不止读字段（Scala 3 enum 经伴生对象 `MODULE$` 取单例、Java enum 经
+`$VALUES` 取常量），还会反射方法（`Enums` 的 `valueOf`/`values`/`id`）与属性（带属性的
+枚举如 `enum Color(val id: Int)`，`BeanInfos`/`MetaLoader` 会读取字段和 getter）。因此
+`registerEnum` 对枚举类、伴生对象与全部值类统一应用 **`AotPolicy.enumPolicy`** 策略
+（即 bean + public 字段）
+（public 方法/构造器可调用、declared 字段、查询级 declared 方法、递归父类链），
+应用只需注册枚举类型本身，无需再写 `classOf[Color.type]`。
 
 经 `MetaRegistrar`（`MappingModule`/`BindModule` 等）注册的类，其属性树会被自动扫描：
 遍历属性（含集合/Map 元素类型）、递归 `@component` 值类型，发现 Scala 3 enum 即自动注册
 （同样携带伴生对象）。因此 ORM 实体只要 `bind`/`register`，枚举属性**完全无需手工注册**。
 仅当枚举不出现在任何已注册类的属性中（如仅作方法参数）时，才需要显式
-`hints.registerType(classOf[枚举])`。
+`hints.registerEnum(classOf[枚举])`（简单路径 `registerType` 不感知枚举特性，
+不注册伴生对象与值类）。
 
 判定规则：
 
