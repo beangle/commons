@@ -182,12 +182,26 @@ enum Color(val id: Int) {
 
 class AppHints extends AotHintRegistrar {
   override def registering(): Unit = {
-    // 只注册 Color；Color$（伴生，MODULE$ 单例入口）由 AotHints 自动增量注册，
-    // 两者都自动带上 allPublicFields
-    hints.registerType(classOf[Color])
+    // 用 registerEnum：Color、Color$（伴生，MODULE$ 单例入口）与全部值类
+    // 都按 AotPolicy.enumPolicy（bean + public 字段）注册
+    hints.registerEnum(classOf[Color])
   }
 }
 ```
+
+### 代理类与枚举值类的元数据回退
+
+`BeanInfos` 对框架/编译器生成的 `$` 子类会复用父类 BeanMeta 并绑定到子类：
+
+- Hibernate 懒加载代理：`Entity$HibernateProxy`；
+- Scala 3 枚举值类：`NoticeStatus$$anon$1`（每个带参 case 的匿名子类）。
+
+回退路径下 `BeanInfo.from` 仍会对子类调用 `getMethods` 绑定 MethodHandle，因此 native 镜像中
+需保证父类已登记 public 方法：
+
+- Scala 3 枚举：`registerEnum` 用 `AotPolicy.enumPolicy`（bean + public 字段）注册枚举类、
+  伴生对象与全部值类，天然覆盖；
+- Hibernate 代理：代理无自有属性，随实体类注册（`AotPolicy.bean`）即可覆盖。
 
 ## 4. SBT Integration (AotPlugin)
 
