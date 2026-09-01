@@ -29,6 +29,8 @@ package org.beangle.commons.aot
  *    镜像更小，但运行时反射调用会失败。
  *
  * 默认 [[AotPolicy.default]]：public 方法 + public 构造器（可调用）、无字段、不递归。
+ * [[AotPolicy.bean]]：在默认基础上增加 declared 字段 + 查询级 declared 方法、递归父类/接口，
+ * 为运行时反射工具（如 [[org.beangle.commons.bean.meta.MetaLoader]]）设计。
  */
 object AotPolicy {
 
@@ -49,6 +51,24 @@ object AotPolicy {
    */
   val default: AotPolicy = {
     AotPolicy(Set(Category.PublicMethods, Category.PublicConstructors))
+  }
+
+  /** Bean 属性发现策略：在 [[default]] 基础上增加 declared 字段 + 查询级 declared 方法，
+   *  并递归展开父类/接口层级。
+   *
+   *  为 [[org.beangle.commons.bean.meta.MetaLoader]] 等运行时反射工具设计：
+   *  - `DeclaredFields`：对应 GraalVM `allDeclaredFields`，支持 `getDeclaredFields` 读取字段名
+   *    和修饰符（GraalVM 21.x 字段无 query-only 批量标志，注册即可读写）。
+   *  - `QueryDeclaredMethods`：对应 `queryAllDeclaredMethods`，支持 `getDeclaredMethods` /
+   *    `getModifiers` / `isAnnotationPresent` 等元数据查询，不登记 invoker stub，镜像更小。
+   *  - `recursive = true`：`Declared*` / `QueryDeclared*` 仅覆盖本类声明的成员，
+   *    MetaLoader 需要遍历整个继承链（父类 + 接口）来收集全部字段和方法。
+   */
+  val bean: AotPolicy = {
+    AotPolicy(Set(
+      Category.PublicMethods, Category.PublicConstructors,
+      Category.DeclaredFields, Category.QueryDeclaredMethods
+    ), recursive = true)
   }
 }
 

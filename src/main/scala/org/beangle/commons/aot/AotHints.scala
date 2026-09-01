@@ -38,8 +38,9 @@ import scala.collection.mutable
   * }}}
   *
   * 反射类型按 [[AotPolicy]] 逐类登记：简单路径 `registerType(clazz)` 使用容器默认策略
-  * （通常来自 [[AotHintRegistrar.aotPolicy]]，默认 public 方法 + public 构造器、无字段、
-  * 不递归）；定制路径 `registerType(clazz, policy)` 对单个类显式指定策略。
+  * （通常来自 [[AotHintRegistrar.aotPolicy]]，默认 public 方法 + public 构造器、
+  * 无字段、不递归）；定制路径 `registerType(clazz, policy)` 对单个类显式指定策略。
+  * 需要运行时反射字段/方法元数据的场景可使用 [[AotPolicy.bean]] 策略。
   */
 class AotHints(val policy: AotPolicy = AotPolicy.default) {
 

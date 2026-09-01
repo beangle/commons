@@ -57,6 +57,12 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       AotPolicy.default.unsafeAllocated shouldBe false
     }
 
+    it("bean adds declared fields + query declared methods + recursion") {
+      AotPolicy.bean.categories shouldBe Set(PublicMethods, PublicConstructors, DeclaredFields, QueryDeclaredMethods)
+      AotPolicy.bean.recursive shouldBe true
+      AotPolicy.bean.unsafeAllocated shouldBe false
+    }
+
     it("merge unions categories and flags") {
       val a = AotPolicy(Set(PublicMethods, PublicConstructors))
       val b = AotPolicy(Set(DeclaredMethods, DeclaredFields), recursive = true, unsafeAllocated = true)
@@ -79,6 +85,21 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       entry.get("allDeclaredConstructors") shouldBe None
       entry.get("allDeclaredFields") shouldBe None
       entry.get("allPublicFields") shouldBe None
+    }
+
+    it("bean policy: declared fields + query declared methods, recursive hierarchy") {
+      val hints = new AotHints
+      hints.registerType(classOf[AotChild], AotPolicy.bean)
+      val entries = reflectEntries(hints)
+      entries.map(e => e("name").toString) should contain allOf (
+        classOf[AotChild].getName, classOf[AotParent].getName, classOf[AotTrait].getName)
+      entries foreach { entry =>
+        entry("allPublicMethods") shouldBe true
+        entry("allPublicConstructors") shouldBe true
+        entry("allDeclaredFields") shouldBe true
+        entry("queryAllDeclaredMethods") shouldBe true
+        entry.get("allDeclaredMethods") shouldBe None
+      }
     }
 
     it("custom policy: declared members, fields, recursion expands hierarchy") {

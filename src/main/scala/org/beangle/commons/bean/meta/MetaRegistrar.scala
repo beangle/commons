@@ -58,7 +58,7 @@ abstract class MetaRegistrar extends AotHintRegistrar {
   def metas: Iterable[BeanMeta] = metaMap.values
 
   /** Adds BeanMeta to internal buffer (used by macro expansion).
-   * Dont change to protected or private due to substream library may invoke it by registerImpl macro*/
+   * Dont change to protected or private due to substream library may invoke it by registerImpl macro */
   def addMetas(cms: Iterable[BeanMeta]): Unit = {
     val visited = Collections.newSet[Class[_]]
     cms foreach { c =>
@@ -69,14 +69,15 @@ abstract class MetaRegistrar extends AotHintRegistrar {
   }
 
   /** 注册实体属性树中出现的 Scala 3 enum：遍历属性，遇到 `@component` 值类型递归其属性，
-   *  集合/Map 深入元素类型。应用只需注册实体，枚举属性经 [[AotHints.registerEnum]]
-   *  一并登记枚举类、伴生对象、全部值类与序列化，无需手工 `registerType(classOf[枚举])`。
-   *  构建期调用（`addMetas` 仅经 `registering()` 由生成器触发），此处用反射 dig
-   *  component 是安全的。 */
+   * 集合/Map 深入元素类型。应用只需注册实体，枚举属性经 [[AotHints.registerEnum]]
+   * 一并登记枚举类、伴生对象、全部值类与序列化，无需手工 `registerType(classOf[枚举])`。
+   * 构建期调用（`addMetas` 仅经 `registering()` 由生成器触发），此处用反射 dig
+   * component 是安全的。 */
   private def registerEnumProperties(cm: BeanMeta, visited: scala.collection.mutable.Set[Class[_]]): Unit = {
     def dig(bm: BeanMeta): Unit = {
       if (visited.add(bm.clazz)) bm.properties foreach (p => visit(p.typeinfo))
     }
+
     def visit(ti: TypeInfo): Unit = {
       if (ti == null) return
       val clazz = ti.clazz
@@ -84,6 +85,7 @@ abstract class MetaRegistrar extends AotHintRegistrar {
       else if (clazz.isAnnotationPresent(classOf[component])) dig(BeanInfos.get(clazz).meta)
       ti.args foreach visit
     }
+
     dig(cm)
   }
 }
