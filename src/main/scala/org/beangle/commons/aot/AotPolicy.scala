@@ -28,9 +28,11 @@ package org.beangle.commons.aot
  *    `queryAll*` 标志，只登记元数据（可 `getMethod`/`getAnnotation`，不可 invoke），
  *    镜像更小，但运行时反射调用会失败。
  *
- * 默认 [[AotPolicy.default]]：public 方法 + public 构造器（可调用）、无字段、不递归。
+ * 默认 [[AotPolicy.default]]：public 方法 + public 构造器（可调用）、无字段、不递归，
+ * 即 native 下 [[org.beangle.commons.bean.meta.MetaLoaderLite]] 所需的最小注册。
  * [[AotPolicy.bean]]：在默认基础上增加 declared 字段 + 查询级 declared 方法、递归父类/接口，
  * 为运行时反射工具（如 [[org.beangle.commons.bean.meta.MetaLoader]]）设计。
+ * [[AotPolicy.full]]：全部 public/declared 方法、构造器与字段（均可调用），递归父类/接口。
  */
 object AotPolicy {
 
@@ -68,6 +70,22 @@ object AotPolicy {
     AotPolicy(Set(
       Category.PublicMethods, Category.PublicConstructors,
       Category.DeclaredFields, Category.QueryDeclaredMethods
+    ), recursive = true)
+  }
+
+  /** 全量注册策略：public/declared 的方法、构造器、字段全部可调用，并递归展开父类/接口。
+   *
+   *  对应 GraalVM `allPublic*` / `allDeclared*` 标志，适合需要完整反射访问
+   *  （可 `invoke` / `get` / `set`）的场景：
+   *  - `Declared*` 类别覆盖本类声明的非 public 成员；
+   *  - `Public*` 类别天然覆盖继承链上的 public 成员；
+   *  - `recursive = true` 让 `Declared*` 成员同样覆盖父类与接口层级。
+   */
+  val full: AotPolicy = {
+    AotPolicy(Set(
+      Category.PublicMethods, Category.DeclaredMethods,
+      Category.PublicConstructors, Category.DeclaredConstructors,
+      Category.PublicFields, Category.DeclaredFields
     ), recursive = true)
   }
 

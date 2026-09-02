@@ -18,17 +18,17 @@
 package org.beangle.commons.aot
 
 /** commons 内置机制面的 GraalVM native-image 提示。
-  *
-  * 集中注册不归属任何特定子库的 commons 机制项：
-  *  - `META-INF/services/` 下文件：`ServiceLoader`/`spi` 机制下 classpath 上的 SPI 文件；
-  *  - `beangle.xml`：`XmlConfigs`/`XmlProfileProvider` 经 `classpath*:` 读取的 cdi 模块声明；
-  *  - `description` 注解：cdi `Binder` 绑定 bean 时经 `getAnnotation(classOf[description])` 读取；
-  *  - `*.zh_CN`：i18n message bundle（`Messages` 加载的本地化资源）；
-  *  - mime 类型表：`MediaTypes` 经 `Resources.load` 加载的
-  *    `org/beangle/commons/activation/mime.types` 与 `mime-default.types`。
-  *
-  * 使用方无需在 resource-config.json/reflect-config.json 中手写这些项。
-  */
+ *
+ * 集中注册不归属任何特定子库的 commons 机制项：
+ *  - `META-INF/services/` 下文件：`ServiceLoader`/`spi` 机制下 classpath 上的 SPI 文件；
+ *  - `beangle.xml`：`XmlConfigs`/`XmlProfileProvider` 经 `classpath*:` 读取的 cdi 模块声明；
+ *  - `description` 注解：cdi `Binder` 绑定 bean 时经 `getAnnotation(classOf[description])` 读取；
+ *  - `*.zh_CN`：i18n message bundle（`Messages` 加载的本地化资源）；
+ *  - mime 类型表：`MediaTypes` 经 `Resources.load` 加载的
+ *    `org/beangle/commons/activation/mime.types` 与 `mime-default.types`。
+ *
+ * 使用方无需在 resource-config.json/reflect-config.json 中手写这些项。
+ */
 class BuiltinAotHints extends AotHintRegistrar {
 
   override def registering(): Unit = {
@@ -96,6 +96,7 @@ class BuiltinAotHints extends AotHintRegistrar {
       classOf[org.beangle.commons.script.ExprEvaluator],
       classOf[org.beangle.commons.text.i18n.TextBundleLoader],
       classOf[org.beangle.commons.text.i18n.TextFormatter])
+
     hints.registerType(classOf[org.beangle.commons.lang.JVM.type])
   }
 }

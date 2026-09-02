@@ -85,9 +85,10 @@ object BeanInfos {
   private def loadMeta(source: Class[_]): Option[BeanMeta] =
     MetaModels.get(source).orElse(reflectMeta(source))
 
-  /** 经 MetaLoader 反射加载（仅支持可反射的应用类，见 [[MetaLoader.supports]]）。 */
+  /** 经 [[MetaModels.reflect]] 反射加载（native 下自动切换轻量 [[org.beangle.commons.bean.meta.MetaLoaderLite]]，
+   * 仅支持可反射的应用类，见 [[MetaLoader.supports]]）。 */
   private def reflectMeta(clazz: Class[_]): Option[BeanMeta] =
-    if MetaLoader.supports(clazz) then Some(MetaLoader.load(clazz)) else None
+    if MetaLoader.supports(clazz) then Some(MetaModels.reflect(clazz)) else None
 
   /** 定位 `$` 子类的父类，命中后复用父类 BeanMeta：
    *  - Hibernate 代理（`Entity$HibernateProxy`）：类名前缀与父类全名一致；

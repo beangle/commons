@@ -274,7 +274,7 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       '{ ${ t }.addProperty(${ Expr(x.name) }, ${ x.typeinfo }, ${ Expr(transients.contains(x.name)) }, ${ Expr(x.getterName) }, $setterExpr) }
     }
     members ++= javaBases.map { base =>
-      '{ ${ t }.addProperties(MetaLoader.load(${ typeOf(base) }).properties) }
+      '{ ${ t }.addProperties(MetaModels.reflect(${ typeOf(base) }).properties) }
     }
     members.toList
   }

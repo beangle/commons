@@ -19,6 +19,7 @@ package org.beangle.commons.bean.meta
 
 import org.beangle.commons.bean.meta.MetaModel.BeanMeta
 import org.beangle.commons.io.Resources
+import org.beangle.commons.lang.JVM
 
 import scala.collection.mutable
 import scala.quoted.*
@@ -62,8 +63,13 @@ object MetaModels {
   /** Digs BeanMeta for a single class at compile time (macro). */
   inline def of[T](clazz: Class[T]): BeanMeta = ${ MetaDigger.digInto('clazz) }
 
-  /** Reflects a class into BeanMeta via runtime reflection (fallback when no binary available). */
-  def reflect(clazz: Class[_]): BeanMeta = MetaLoader.load(clazz)
+  /** Reflects a class into BeanMeta via runtime reflection (fallback when no binary available).
+   *
+   * GraalVM native-image 下走轻量 [[MetaLoaderLite]]（仅 public 构造器/方法，对应
+   * [[org.beangle.commons.aot.AotPolicy.default]] 注册策略），否则走全量 [[MetaLoader]]。
+   */
+  def reflect(clazz: Class[_]): BeanMeta =
+    if JVM.isGraal then MetaLoaderLite.load(clazz) else MetaLoader.load(clazz)
 
   /** Loads all beanmeta.idx files from classpath into memory. */
   private def buildCache(): Map[String, BeanMeta] = {

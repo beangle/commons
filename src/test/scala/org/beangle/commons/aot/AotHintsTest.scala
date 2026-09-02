@@ -63,6 +63,15 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       AotPolicy.bean.unsafeAllocated shouldBe false
     }
 
+    it("full registers all public + declared members with recursion") {
+      AotPolicy.full.categories shouldBe Set(
+        PublicMethods, DeclaredMethods,
+        PublicConstructors, DeclaredConstructors,
+        PublicFields, DeclaredFields)
+      AotPolicy.full.recursive shouldBe true
+      AotPolicy.full.unsafeAllocated shouldBe false
+    }
+
     it("enum adds public fields to bean policy") {
       AotPolicy.enumPolicy.categories shouldBe AotPolicy.bean.categories + PublicFields
       AotPolicy.enumPolicy.recursive shouldBe true

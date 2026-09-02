@@ -79,7 +79,7 @@ class AppRegistry extends MetaRegistrar {
 
 ## 3. Registration Strategy (AotPolicy)
 
-`AotPolicy` 提供两个预定义策略：
+`AotPolicy` 提供三个预定义策略：
 
 ```text
 AotPolicy.default:                       AotPolicy.bean:
@@ -87,6 +87,12 @@ AotPolicy.default:                       AotPolicy.bean:
   无字段                                   DeclaredFields
   不递归                                   QueryDeclaredMethods
                                           recursive = true
+
+AotPolicy.full:
+  PublicMethods + DeclaredMethods
+  PublicConstructors + DeclaredConstructors
+  PublicFields + DeclaredFields
+  recursive = true
 ```
 
 `registerType(clazz)` 使用 `AotPolicy.default`，适用于大多数场景。需要运行时反射

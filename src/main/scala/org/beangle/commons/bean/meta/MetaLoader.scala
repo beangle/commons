@@ -43,7 +43,7 @@ import scala.reflect.*
   */
 object MetaLoader {
 
-  private case class Accessor(method: JMethod, returnType: TypeInfo)
+  private[meta] case class Accessor(method: JMethod, returnType: TypeInfo)
 
   /** True when a class can be reflected into BeanMeta: application classes only.
    *  JDK (`java.*`), Scala runtime (`scala.*`) and JVM-generated classes (name
@@ -93,7 +93,7 @@ object MetaLoader {
   }
 
   /** Builds property declarations from discovered getters (with optional setters). */
-  private def buildProperties(
+  private[meta] def buildProperties(
     getters: mutable.HashMap[String, Accessor],
     setters: mutable.HashMap[String, Accessor],
     fields: mutable.HashMap[String, Field],
@@ -191,7 +191,7 @@ object MetaLoader {
     }
   }
 
-  private def processMethod(
+  private[meta] def processMethod(
     isCase: Boolean,
     method: JMethod,
     getters: mutable.HashMap[String, Accessor],

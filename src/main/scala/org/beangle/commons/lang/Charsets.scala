@@ -35,6 +35,10 @@ object Charsets {
   /** UTF-16: sixteen-bit UCS Transformation Format, byte order identified by an optional byte-order-mark. */
   val UTF_16: Charset = Charset.forName("UTF-16")
 
-  /** GBK: Chinese Internal Code Specification (Guo Biao Kuo Zhan). */
-  val GBK: Charset = Charset.forName("GBK")
+  /** GBK: Chinese Internal Code Specification (Guo Biao Kuo Zhan).
+   *
+   * Lazy-loaded: GraalVM Native Image does not bundle GBK by default, so callers
+   * that need it must register it themselves (for example with -H:+AddAllCharsets).
+   */
+  lazy val GBK: Charset = Charset.forName("GBK")
 }
