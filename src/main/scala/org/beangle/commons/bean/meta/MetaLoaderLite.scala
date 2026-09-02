@@ -24,25 +24,14 @@ import org.beangle.commons.lang.reflect.TypeInfo
 import java.lang.reflect.Field
 import scala.collection.mutable
 
-/** 轻量运行时反射加载器：仅读取 public 构造器与 public 方法。
+/** 轻量反射加载器：仅用 public 构造器/方法，对应 [[org.beangle.commons.aot.AotPolicy.default]]，
+  * 显著降低 GraalVM native 的反射配置（[[MetaLoader]] 需 declared 成员递归注册）。
   *
-  * [[MetaLoader]] 的全量反射需要遍历继承链的 declared 字段/方法、反射伴生对象取默认参数，
-  * 在 GraalVM native-image 下要求注册 `allDeclaredFields` + `queryAllDeclaredMethods`（递归）。
-  * 本加载器只使用 `getMethods`/`getConstructors`（public，天然含继承的 public 成员），
-  * 对应注册策略 [[org.beangle.commons.aot.AotPolicy.default]]
-  * （`allPublicMethods` + `allPublicConstructors`），显著降低 native 下的反射配置要求。
-  *
-  * 与 [[MetaLoader]] 的行为差异：
-  *  - 只读属性识别更宽松：public 参数less 非 Unit 方法都注册为只读 getter。`getX`/`isX`
-  *    前缀转 JavaBean 属性名（`getObjectType`→`objectType`、`isEmpty`→`empty`），其余保留
-  *    方法名（`size`/`pageIndex`/`items` 原样作为属性）；bridge 方法放行——泛型集合继承的
-  *    `isEmpty`/`isTraversableAgain` 在子类字节码里以 bridge 呈现；
-  *  - setter 仍限 JavaBean 形态：`setX` 与 Scala 赋值器 `x_$eq`/`x_=`，纯 write-only
-  *    （无同名 getter）不成属性；
-  *  - 无字段信息，isTransient 仅按 setter/主构造器推断；
-  *  - 构造器无默认参数值（defaultValue = None），不反射伴生对象；
-  *  - 对纯 JavaBean 类结果与 [[MetaLoader]] 一致；Scala 类上 lite 比 MetaLoader 多识别
-  *    无字段的参数less 方法（如 `size`/`length`）。
+  * 与 [[MetaLoader]] 的差异：
+  *  - getter 宽松：public 参数less 非 Unit 方法均视为只读属性，`getX`/`isX` 转属性名，
+  *    其余保留原名（`size`/`pageIndex`），bridge 放行（`isEmpty`→`empty`）；
+  *  - setter 仅认 `setX`/`x_$eq`/`x_=`，write-only 不成属性；
+  *  - 无字段信息；构造器无默认参数值。
   */
 object MetaLoaderLite {
 
@@ -58,12 +47,8 @@ object MetaLoaderLite {
     val setters = new mutable.HashMap[String, Accessor]
     val fields = new mutable.HashMap[String, Field]
 
-    // getMethods 已含继承的 public 方法（含接口），无需手动遍历层级。
-    // 访问器判定不沿用 MetaLoader.processMethod（其要求 JavaBean getter 或字段名回退且排除 bridge）：
-    //  - 任何 public 参数less 非 Unit 方法都视为只读 getter；
-    //  - setter 只认 JavaBean 形态：setX、x_$eq、x_=；
-    //  - bridge 放行，否则泛型集合继承的 isEmpty 等进不来；
-    //  - 同名属性冲突时 JavaBean 命名（getX/isX）优先，保证 isEmpty 胜过 empty() 这类默认方法。
+    // getMethods 含继承的 public 方法；参数less 方法（含 bridge）即 getter，
+    // JavaBean 命名（getX/isX）优先，setter 仅认 setX/x_$eq/x_=。
     clazz.getMethods foreach { m =>
       if (isFineMethod(isCase, m, allowBridge = true)) {
         val paramCount = m.getParameterCount
