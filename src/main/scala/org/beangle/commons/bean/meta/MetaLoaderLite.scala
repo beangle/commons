@@ -18,7 +18,7 @@
 package org.beangle.commons.bean.meta
 
 import org.beangle.commons.bean.meta.MetaModel.{BeanMeta, Ctor, Param}
-import org.beangle.commons.bean.meta.MetaLoader.{Accessor, buildProperties, isFineMethod, processMethod, typeof}
+import org.beangle.commons.bean.meta.MetaLoader.{Accessor, buildProperties, getPropertyName, isFineMethod, typeof}
 import org.beangle.commons.lang.reflect.TypeInfo
 
 import java.lang.reflect.Field
@@ -33,13 +33,16 @@ import scala.collection.mutable
   * （`allPublicMethods` + `allPublicConstructors`），显著降低 native 下的反射配置要求。
   *
   * 与 [[MetaLoader]] 的行为差异：
-  *  - Scala 属性经"setter 触发"识别：`var target` 的字节码是参数less 的 `target()` 与
-  *    `target_$eq` 赋值器；setter 的出现证明同名参数less 方法是字段访问器，随即按 getter 注册
-  *    （getter 支持 getX/isX/属性名三种形态）；只读的 Scala `val`/普通参数less `def`
-  *    （无 setter）仍不识别——字节码层无法与 `size()` 式方法区分，且 lite 不扫描 declared 字段；
+  *  - 只读属性识别更宽松：public 参数less 非 Unit 方法都注册为只读 getter。`getX`/`isX`
+  *    前缀转 JavaBean 属性名（`getObjectType`→`objectType`、`isEmpty`→`empty`），其余保留
+  *    方法名（`size`/`pageIndex`/`items` 原样作为属性）；bridge 方法放行——泛型集合继承的
+  *    `isEmpty`/`isTraversableAgain` 在子类字节码里以 bridge 呈现；
+  *  - setter 仍限 JavaBean 形态：`setX` 与 Scala 赋值器 `x_$eq`/`x_=`，纯 write-only
+  *    （无同名 getter）不成属性；
   *  - 无字段信息，isTransient 仅按 setter/主构造器推断；
   *  - 构造器无默认参数值（defaultValue = None），不反射伴生对象；
-  *  - 对纯 JavaBean 类结果与 [[MetaLoader]] 一致。
+  *  - 对纯 JavaBean 类结果与 [[MetaLoader]] 一致；Scala 类上 lite 比 MetaLoader 多识别
+  *    无字段的参数less 方法（如 `size`/`length`）。
   */
 object MetaLoaderLite {
 
@@ -55,19 +58,24 @@ object MetaLoaderLite {
     val setters = new mutable.HashMap[String, Accessor]
     val fields = new mutable.HashMap[String, Field]
 
-    // getMethods 已含继承的 public 方法（含接口），无需手动遍历层级
+    // getMethods 已含继承的 public 方法（含接口），无需手动遍历层级。
+    // 访问器判定不沿用 MetaLoader.processMethod（其要求 JavaBean getter 或字段名回退且排除 bridge）：
+    //  - 任何 public 参数less 非 Unit 方法都视为只读 getter；
+    //  - setter 只认 JavaBean 形态：setX、x_$eq、x_=；
+    //  - bridge 放行，否则泛型集合继承的 isEmpty 等进不来；
+    //  - 同名属性冲突时 JavaBean 命名（getX/isX）优先，保证 isEmpty 胜过 empty() 这类默认方法。
     clazz.getMethods foreach { m =>
-      processMethod(isCase, m, getters, setters, fields, Map.empty)
-    }
-
-    // Scala 属性补齐：第一遍只识别了 JavaBean 形态（getX/isX 与 setX/x_$eq）；对仅有 setter
-    // 的属性，若存在同名参数less public 方法（Scala var 生成的字段访问器），即其 getter，注册之。
-    val setterOnlyNames = setters.keySet -- getters.keySet
-    if (setterOnlyNames.nonEmpty) {
-      clazz.getMethods foreach { m =>
-        if (m.getParameterCount == 0 && m.getReturnType != classOf[Unit] &&
-          setterOnlyNames.contains(m.getName) && isFineMethod(isCase, m)) {
-          getters.put(m.getName, Accessor(m, typeof(m.getReturnType, m.getGenericReturnType, Map.empty)))
+      if (isFineMethod(isCase, m, allowBridge = true)) {
+        val paramCount = m.getParameterCount
+        if (paramCount == 0 && m.getReturnType != classOf[Unit]) {
+          val name = getPropertyName(m.getName, getter = true)
+          val javaBean = name != m.getName
+          if (!getters.contains(name) || javaBean)
+            getters.put(name, Accessor(m, typeof(m.getReturnType, m.getGenericReturnType, Map.empty)))
+        } else if (paramCount == 1) {
+          val name = getPropertyName(m.getName, getter = false)
+          if (null != name && !name.contains("$"))
+            setters.put(name, Accessor(m, typeof(m.getParameterTypes()(0), m.getGenericParameterTypes()(0), Map.empty)))
         }
       }
     }

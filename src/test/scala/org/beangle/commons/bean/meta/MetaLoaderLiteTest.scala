@@ -19,6 +19,7 @@ package org.beangle.commons.bean.meta
 
 import org.beangle.commons.lang.reflect.BeanInfo
 import org.beangle.commons.bean.Factory
+import org.beangle.commons.collection.page.SinglePage
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -57,11 +58,31 @@ class MetaLoaderLiteTest extends AnyFunSpec, Matchers {
       byName("title").setterName should contain("setTitle")
     }
 
-    it("keeps read-only scala vals out (no setter trigger)") {
+    it("discovers read-only scala val accessors as properties") {
       val lite = MetaLoaderLite.load(classOf[LiteReadOnlyBean])
-      lite.properties.map(_.name) should not contain "code"
-      // 全量 MetaLoader 经字段名回退可识别，用于固定差异
-      MetaLoader.load(classOf[LiteReadOnlyBean]).properties.map(_.name) should contain("code")
+      val byName = lite.properties.map(p => (p.name, p)).toMap
+      byName.keySet shouldBe Set("code")
+      byName("code").getterName shouldBe "code"
+      byName("code").setterName shouldBe None
+    }
+
+    it("discovers read-only accessors on SinglePage (size-style and is-bridges)") {
+      val cm = MetaLoaderLite.load(classOf[SinglePage[String]])
+      val byName = cm.properties.map(p => (p.name, p)).toMap
+      byName.keySet should contain allOf(
+        "pageIndex", "pageSize", "totalItems", "items", "totalPages",
+        "hasNext", "hasPrevious", "size", "length", "empty", "traversableAgain")
+      byName("pageIndex").getterName shouldBe "pageIndex"
+      byName("pageIndex").setterName shouldBe None
+      byName("items").getterName shouldBe "items"
+      byName("size").getterName shouldBe "size"
+      byName("empty").getterName shouldBe "isEmpty"
+      byName("traversableAgain").getterName shouldBe "isTraversableAgain"
+      // 主构造器参数形成的属性非 transient；size/is 型继承方法无 setter、非主构造器参数 → transient
+      byName("pageIndex").isTransient shouldBe false
+      byName("items").isTransient shouldBe false
+      byName("size").isTransient shouldBe true
+      byName("empty").isTransient shouldBe true
     }
 
     it("discovers public constructors without default values") {
@@ -118,7 +139,7 @@ class MetaLoaderLiteTest extends AnyFunSpec, Matchers {
 
 case class LiteCtorBean(id: Long, name: String)
 
-/** 只读 Scala val：无 setter，lite 不识别；全量 MetaLoader 经字段名回退识别。 */
+/** 只读 Scala val：无 setter，验证参数less 方法也注册为只读 getter。 */
 class LiteReadOnlyBean {
   val code: String = "x"
 }
