@@ -18,7 +18,7 @@
 package org.beangle.commons.aot
 
 import org.beangle.commons.aot.AotPolicy.Category.*
-import org.beangle.commons.json.{Json, JsonObject}
+import org.beangle.commons.json.{Json, JsonArray, JsonObject}
 import org.beangle.commons.lang.testbean.TestEnum
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -45,9 +45,11 @@ class AotHintsTest extends AnyFunSpec, Matchers {
 
   private def reflectEntries(hints: AotHints): Vector[JsonObject] = {
     val dir = Files.createTempDirectory("aot-hints")
-    AotHintGenerator.write(dir, hints)
-    val json = Files.readString(dir.resolve("reflect-config.json"), StandardCharsets.UTF_8)
-    Json.parseArray(json).toVector.map(_.asInstanceOf[JsonObject])
+    AotHintGenerator.writeReachabilityMetadata(dir, hints)
+    val json = Files.readString(dir.resolve("reachability-metadata.json"), StandardCharsets.UTF_8)
+    val root = Json.parseObject(json)
+    val reflection = root.get("reflection").get.asInstanceOf[JsonArray]
+    reflection.toVector.map(_.asInstanceOf[JsonObject])
   }
 
   describe("AotPolicy") {
@@ -96,7 +98,7 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       val hints = new AotHints
       hints.registerType(classOf[AotChild])
       val entries = reflectEntries(hints)
-      entries.map(e => e("name").toString) should contain only classOf[AotChild].getName
+      entries.map(e => e("type").toString) should contain only classOf[AotChild].getName
       val entry = entries.head
       entry("allPublicMethods") shouldBe true
       entry("allPublicConstructors") shouldBe true
@@ -110,17 +112,18 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       val hints = new AotHints
       hints.registerType(classOf[AotChild])
       val dir = Files.createTempDirectory("aot-hints")
-      AotHintGenerator.write(dir, hints)
-      val raw = Files.readString(dir.resolve("reflect-config.json"), StandardCharsets.UTF_8)
-      raw should include ("\n    \"name\": \"" + classOf[AotChild].getName)
-      raw should include ("\n    \"allPublicMethods\": true")
+      AotHintGenerator.writeReachabilityMetadata(dir, hints)
+      val raw = Files.readString(dir.resolve("reachability-metadata.json"), StandardCharsets.UTF_8)
+      raw should include ("\"type\": \"" + classOf[AotChild].getName)
+      raw should include ("\"allPublicMethods\": true")
+      raw should startWith ("{\n  \"reflection\":")
     }
 
     it("bean policy: declared fields + query declared methods, recursive hierarchy") {
       val hints = new AotHints
       hints.registerType(classOf[AotChild], AotPolicy.bean)
       val entries = reflectEntries(hints)
-      entries.map(e => e("name").toString) should contain allOf (
+      entries.map(e => e("type").toString) should contain allOf (
         classOf[AotChild].getName, classOf[AotParent].getName, classOf[AotTrait].getName)
       entries foreach { entry =>
         entry("allPublicMethods") shouldBe true
@@ -136,7 +139,7 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       val policy = AotPolicy(Set(DeclaredMethods, DeclaredConstructors, DeclaredFields), recursive = true)
       hints.registerType(classOf[AotChild], policy)
       val entries = reflectEntries(hints)
-      entries.map(e => e("name").toString) should contain allOf (
+      entries.map(e => e("type").toString) should contain allOf (
         classOf[AotChild].getName, classOf[AotParent].getName, classOf[AotTrait].getName)
       entries foreach { e =>
         e("allDeclaredMethods") shouldBe true
@@ -175,7 +178,7 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       val hints = new AotHints
       hints.registerType(classOf[TestEnum])
       val entries = reflectEntries(hints)
-      entries.map(e => e("name").toString) should contain only classOf[TestEnum].getName
+      entries.map(e => e("type").toString) should contain only classOf[TestEnum].getName
       val entry = entries.head
       entry("allPublicMethods") shouldBe true
       entry("allPublicConstructors") shouldBe true
@@ -188,7 +191,7 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       val hints = new AotHints
       hints.registerArrayOf("java.sql.Statement", getClass.getClassLoader)
       val entries = reflectEntries(hints)
-      entries.map(e => e("name").toString) should contain only "[Ljava.sql.Statement;"
+      entries.map(e => e("type").toString) should contain only "[Ljava.sql.Statement;"
       entries.head("unsafeAllocated") shouldBe true
     }
 
@@ -196,14 +199,14 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       val hints = new AotHints
       hints.registerArrayOf("int", getClass.getClassLoader)
       hints.registerArrayOf("boolean", getClass.getClassLoader)
-      reflectEntries(hints).map(e => e("name").toString) should contain only ("[I", "[Z")
+      reflectEntries(hints).map(e => e("type").toString) should contain only ("[I", "[Z")
     }
 
     it("passes through descriptors and skips missing classes") {
       val hints = new AotHints
       hints.registerArrayOf("[Ljava.lang.String;", getClass.getClassLoader)
       hints.registerArrayOf("no.such.ArrayClass", getClass.getClassLoader)
-      reflectEntries(hints).map(e => e("name").toString) should contain only "[Ljava.lang.String;"
+      reflectEntries(hints).map(e => e("type").toString) should contain only "[Ljava.lang.String;"
     }
   }
 
@@ -212,7 +215,7 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       val hints = new AotHints
       hints.registerEnum(classOf[TestEnum])
       val entries = reflectEntries(hints)
-      entries.map(e => e("name").toString) should contain allOf (
+      entries.map(e => e("type").toString) should contain allOf (
         classOf[TestEnum].getName, classOf[TestEnum.type].getName)
       entries foreach { e =>
         e("allPublicFields") shouldBe true
@@ -226,14 +229,19 @@ class AotHintsTest extends AnyFunSpec, Matchers {
     it("registers anonymous value classes and serialization entries") {
       val hints = new AotHints
       hints.registerEnum(classOf[TestBodyEnum])
-      reflectEntries(hints).map(e => e("name").toString) should contain allOf (
+      val dir = Files.createTempDirectory("aot-serializable")
+      AotHintGenerator.writeReachabilityMetadata(dir, hints)
+      val json = Files.readString(dir.resolve("reachability-metadata.json"), StandardCharsets.UTF_8)
+      val root = Json.parseObject(json)
+      val reflection = root.get("reflection").get.asInstanceOf[JsonArray]
+      reflection.toVector.map(_.asInstanceOf[JsonObject]("type").toString) should contain allOf (
         classOf[TestBodyEnum].getName,
         classOf[TestBodyEnum.type].getName,
         TestBodyEnum.WithBody.getClass.getName)
-      val dir = Files.createTempDirectory("aot-serializable")
-      AotHintGenerator.write(dir, hints)
-      val json = Files.readString(dir.resolve("serialization-config.json"), StandardCharsets.UTF_8)
-      Json.parseArray(json).toVector.map(_.asInstanceOf[JsonObject]("name").toString) should contain allOf (
+      val serializableEntries = reflection.toVector.map(_.asInstanceOf[JsonObject]).filter { e =>
+        e.get("serializable").exists(_.asInstanceOf[Boolean])
+      }
+      serializableEntries.map(e => e("type").toString) should contain allOf (
         classOf[TestBodyEnum].getName, TestBodyEnum.WithBody.getClass.getName)
     }
 
@@ -268,7 +276,7 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       registrar.aotHints.policy shouldBe policy
       registrar.registering()
       val entries = reflectEntries(registrar.aotHints)
-      entries.map(e => e("name").toString) should contain allOf (
+      entries.map(e => e("type").toString) should contain allOf (
         classOf[AotChild].getName, classOf[AotParent].getName, classOf[AotTrait].getName)
       entries.head("allDeclaredMethods") shouldBe true
     }

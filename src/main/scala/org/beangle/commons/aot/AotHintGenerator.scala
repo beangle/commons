@@ -32,10 +32,7 @@ import scala.collection.mutable
  * `#` comments allowed).
  *
  * Generated files:
- *  - `reflect-config.json` — classes needing reflection access
- *  - `resource-config.json` — resource patterns to include
- *  - `proxy-config.json` — JDK dynamic proxy interfaces
- *  - `serialization-config.json` — classes supporting Java serialization
+ *  - `reachability-metadata.json` — consolidated metadata in GraalVM 25 schema
  *  - `native-image.properties` — extra native-image args (runtime class initialization)
  *
  * Stale config files from previous runs are automatically deleted when the
@@ -133,8 +130,8 @@ object AotHintGenerator {
       System.out.println("No hints registered; GraalVM config generation skipped")
       return
     }
-    write(outputDir, merged)
-    System.out.println(s"Generated GraalVM configs in $outputDir (${merged.getTypes.size} types, ${merged.getPatterns.size} patterns, ${merged.getProxies.size} proxies, ${merged.getSerializables.size} serializables, ${merged.getRuntimeInitialized.size} runtime-initialized)")
+    writeReachabilityMetadata(outputDir, merged)
+    System.out.println(s"Generated GraalVM reachability-metadata.json in $outputDir (${merged.getTypes.size} types, ${merged.getPatterns.size} patterns, ${merged.getProxies.size} proxies, ${merged.getSerializables.size} serializables, ${merged.getRuntimeInitialized.size} runtime-initialized)")
   }
 
   /** 注册 registrar 类自身，保证运行期按名实例化（Reflections.getInstance/tryGetInstance）
@@ -197,32 +194,77 @@ object AotHintGenerator {
     result.toSeq
   }
 
-  /** Writes non-empty config files and deletes stale ones from previous runs. */
-  def write(outDir: Path, hints: AotHints): Unit = {
+  /** Writes a single consolidated reachability-metadata.json file in GraalVM 25 format.
+   *
+   *  The output follows the GraalVM reachability-metadata-json-schema-v1.2.0:
+   *  - `reflection` array: contains type entries with access flags, proxy definitions,
+   *    and serialization registrations
+   *  - `resources` array: contains glob patterns for resource inclusion
+   *
+   *  Runtime-initialized classes are still written to native-image.properties as
+   *  `--initialize-at-run-time` is a build argument, not metadata.
+   */
+  def writeReachabilityMetadata(outDir: Path, hints: AotHints): Unit = {
     Files.createDirectories(outDir)
-    writeOrDelete(outDir.resolve("reflect-config.json"), hints.getTypePolicies.nonEmpty)(writeReflect(_, hints.getTypePolicies))
-    writeOrDelete(outDir.resolve("resource-config.json"), hints.getPatterns.nonEmpty)(writeResource(_, hints.getPatterns))
-    writeOrDelete(outDir.resolve("proxy-config.json"), hints.getProxies.nonEmpty)(writeProxy(_, hints.getProxies))
-    writeOrDelete(outDir.resolve("serialization-config.json"), hints.getSerializables.nonEmpty)(writeSerializable(_, hints.getSerializables))
-    writeOrDelete(outDir.resolve("native-image.properties"), hints.getRuntimeInitialized.nonEmpty)(writeNativeImageProperties(_, hints.getRuntimeInitialized))
+
+    // Build reflection entries (includes proxy and serialization)
+    val reflectionEntries = new mutable.ListBuffer[JsonObject]
+
+    // Regular type entries
+    hints.getTypePolicies.toSeq.sortBy(_._1.getName).foreach { case (clazz, policy) =>
+      reflectionEntries += reflectEntryGraalvm25(clazz, policy)
+    }
+
+    // Proxy entries (GraalVM 25 format: type as object with proxy array)
+    hints.getProxies.toSeq.sortBy(_.headOption.getOrElse("")).foreach { ifaces =>
+      reflectionEntries += JsonObject(
+        "type" -> JsonObject("proxy" -> JsonArray(ifaces *))
+      )
+    }
+
+    // Serialization entries (classes not already in typePolicies)
+    val serializableClasses = hints.getSerializables -- hints.getTypes
+    serializableClasses.toSeq.sortBy(_.getName).foreach { clazz =>
+      reflectionEntries += JsonObject(
+        "type" -> clazz.getName,
+        "serializable" -> true
+      )
+    }
+
+    // Build resources entries
+    val resourceEntries = hints.getPatterns.toSeq.sorted.map { pattern =>
+      JsonObject("glob" -> pattern)
+    }
+
+    // Build the consolidated JSON
+    val json = JsonObject(
+      "reflection" -> JsonArray(reflectionEntries.toSeq *),
+      "resources" -> JsonArray(resourceEntries *)
+    )
+
+    writeJson(outDir.resolve("reachability-metadata.json"), json)
+
+    // Runtime-initialized classes still go to native-image.properties
+    if (hints.getRuntimeInitialized.nonEmpty) {
+      writeNativeImageProperties(outDir.resolve("native-image.properties"), hints.getRuntimeInitialized)
+    } else {
+      Files.deleteIfExists(outDir.resolve("native-image.properties"))
+    }
+
+    // Clean up legacy files
+    Files.deleteIfExists(outDir.resolve("reflect-config.json"))
+    Files.deleteIfExists(outDir.resolve("resource-config.json"))
+    Files.deleteIfExists(outDir.resolve("proxy-config.json"))
+    Files.deleteIfExists(outDir.resolve("serialization-config.json"))
   }
 
-  private def writeOrDelete(file: Path, nonEmpty: Boolean)(write: Path => Unit): Unit = {
-    if (nonEmpty) write(file)
-    else Files.deleteIfExists(file)
-  }
-
-  /** Writes reflect-config.json for classes needing reflection access, one entry
-   *  per type with the flags derived from its [[AotPolicy]]. */
-  def writeReflect(out: Path, types: collection.Map[Class[_], AotPolicy]): Unit = {
-    val entries = types.toSeq.sortBy(_._1.getName).map { case (clazz, policy) => reflectEntry(clazz, policy) }
-    writeJson(out, JsonArray(entries *))
-  }
-
-  /** Builds a reflect-config.json entry from the class and its policy. */
-  private def reflectEntry(clazz: Class[_], policy: AotPolicy): JsonObject = {
+  /** Builds a reachability-metadata.json reflection entry in GraalVM 25 format.
+   *
+   *  Uses "type" instead of "name" as the key for the class identifier.
+   */
+  private def reflectEntryGraalvm25(clazz: Class[_], policy: AotPolicy): JsonObject = {
     import AotPolicy.Category.*
-    val entry = JsonObject("name" -> clazz.getName)
+    val entry = JsonObject("type" -> clazz.getName)
     policy.categories foreach {
       case PublicMethods            => entry.add("allPublicMethods", true)
       case DeclaredMethods          => entry.add("allDeclaredMethods", true)
@@ -236,35 +278,8 @@ object AotHintGenerator {
       case QueryDeclaredConstructors => entry.add("queryAllDeclaredConstructors", true)
     }
     if (policy.unsafeAllocated) entry.add("unsafeAllocated", true)
+    if (clazz.isInstanceOf[java.io.Serializable]) entry.add("serializable", true)
     entry
-  }
-
-  /** Writes resource-config.json for resource inclusion patterns. */
-  def writeResource(out: Path, patterns: collection.Set[String]): Unit = {
-    // patterns are regexes: keep escapes intact (e.g. ".*\\.zh_CN"); do not rewrite backslashes
-    val includes = patterns.toSeq.sorted.map(p => JsonObject("pattern" -> p))
-    val json = JsonObject(
-      "resources" -> JsonObject(
-        "includes" -> JsonArray(includes *),
-        "excludes" -> JsonArray()),
-      "bundles" -> JsonArray())
-    writeJson(out, json)
-  }
-
-  /** Writes proxy-config.json for JDK dynamic proxy interfaces. */
-  def writeProxy(out: Path, proxies: collection.Set[List[String]]): Unit = {
-    val entries = proxies.toSeq.sortBy(_.headOption.getOrElse("")).map { ifaces =>
-      JsonObject("interfaces" -> JsonArray(ifaces *))
-    }
-    writeJson(out, JsonArray(entries *))
-  }
-
-  /** Writes serialization-config.json for classes supporting Java serialization. */
-  def writeSerializable(out: Path, classes: collection.Set[Class[_]]): Unit = {
-    val entries = classes.toSeq.sortBy(_.getName).map { clazz =>
-      JsonObject("name" -> clazz.getName)
-    }
-    writeJson(out, JsonArray(entries *))
   }
 
   /** Writes a JSON node pretty-printed with 2-space indent, ending with a newline. */
@@ -334,10 +349,8 @@ object AotHintGenerator {
         |    a classes list file; they need not be AotHintRegistrar.
         |
         |Generated files:
-        |  reflect-config.json       (reflection metadata)
-        |  resource-config.json      (resource inclusion)
-        |  proxy-config.json         (dynamic proxy interfaces)
-        |  serialization-config.json (Java serialization)
+        |  reachability-metadata.json (consolidated metadata in GraalVM 25 schema)
+        |  native-image.properties    (--initialize-at-run-time for runtime classes)
         |
         |Options:
         |  -o, --output <dir>   Output directory (default: META-INF/native-image)
@@ -347,7 +360,7 @@ object AotHintGenerator {
         |  -c, --classes <file> List of classes loaded by name at runtime (web
         |                       initializers etc.), one per line; the class and its
         |                       Scala object companion (`$`) are registered into
-        |                       reflect-config.json. All must be found.
+        |                       reachability-metadata.json. All must be found.
         |  -h, --help           Show this help
         |
         |At least one of --registrars/--classes is required.
