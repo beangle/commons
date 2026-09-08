@@ -207,12 +207,16 @@ object AotHintGenerator {
   def writeReachabilityMetadata(outDir: Path, hints: AotHints): Unit = {
     Files.createDirectories(outDir)
 
+    val serializables = hints.getSerializables
+
     // Build reflection entries (includes proxy and serialization)
     val reflectionEntries = new mutable.ListBuffer[JsonObject]
 
     // Regular type entries
     hints.getTypePolicies.toSeq.sortBy(_._1.getName).foreach { case (clazz, policy) =>
-      reflectionEntries += reflectEntryGraalvm25(clazz, policy)
+      val entry = reflectEntryGraalvm25(clazz, policy)
+      if (serializables.contains(clazz)) entry.add("serializable", true)
+      reflectionEntries += entry
     }
 
     // Proxy entries (GraalVM 25 format: type as object with proxy array)
@@ -223,7 +227,7 @@ object AotHintGenerator {
     }
 
     // Serialization entries (classes not already in typePolicies)
-    val serializableClasses = hints.getSerializables -- hints.getTypes
+    val serializableClasses = serializables -- hints.getTypes
     serializableClasses.toSeq.sortBy(_.getName).foreach { clazz =>
       reflectionEntries += JsonObject(
         "type" -> clazz.getName,
@@ -278,7 +282,6 @@ object AotHintGenerator {
       case QueryDeclaredConstructors => entry.add("queryAllDeclaredConstructors", true)
     }
     if (policy.unsafeAllocated) entry.add("unsafeAllocated", true)
-    if (clazz.isInstanceOf[java.io.Serializable]) entry.add("serializable", true)
     entry
   }
 
