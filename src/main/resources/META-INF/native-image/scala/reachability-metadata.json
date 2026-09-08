@@ -1,0 +1,131 @@
+{
+  "reflection": [
+    {
+      "type": "scala.Equals"
+    },
+    {
+      "type": "scala.Function1"
+    },
+    {
+      "type": "scala.Option"
+    },
+    {
+      "type": "scala.PartialFunction"
+    },
+    {
+      "type": "scala.Product"
+    },
+    {
+      "type": "scala.collection.Iterable"
+    },
+    {
+      "type": "scala.collection.IterableFactoryDefaults"
+    },
+    {
+      "type": "scala.collection.IterableOnce"
+    },
+    {
+      "type": "scala.collection.IterableOnceOps"
+    },
+    {
+      "type": "scala.collection.IterableOps"
+    },
+    {
+      "type": "scala.collection.Seq"
+    },
+    {
+      "type": "scala.collection.SeqOps"
+    },
+    {
+      "type": "scala.collection.concurrent.CNodeBase",
+      "fields": [
+        {
+          "name": "NODE",
+          "allowWrite": true
+        }
+      ]
+    },
+    {
+      "type": "scala.collection.concurrent.INodeBase",
+      "fields": [
+        {
+          "name": "CTABLE",
+          "allowWrite": true
+        }
+      ]
+    },
+    {
+      "type": "scala.collection.concurrent.MainNode",
+      "fields": [
+        {
+          "name": "WRITE",
+          "allowWrite": true
+        }
+      ]
+    },
+    {
+      "type": "scala.collection.concurrent.TrieMap",
+      "fields": [
+        {
+          "name": "root",
+          "allowWrite": true
+        }
+      ]
+    },
+    {
+      "type": "scala.collection.convert.JavaCollectionWrappers$MapWrapper"
+    },
+    {
+      "type": "scala.collection.immutable.Iterable"
+    },
+    {
+      "type": "scala.collection.immutable.List"
+    },
+    {
+      "type": "scala.collection.immutable.Map"
+    },
+    {
+      "type": "scala.collection.immutable.Seq"
+    },
+    {
+      "type": "scala.collection.immutable.SeqOps"
+    },
+    {
+      "type": "scala.collection.immutable.Set"
+    },
+    {
+      "type": "scala.collection.mutable.Buffer"
+    },
+    {
+      "type": "scala.collection.mutable.HashMap"
+    },
+    {
+      "type": "scala.collection.mutable.Map"
+    },
+    {
+      "type": "scala.collection.mutable.Seq"
+    },
+    {
+      "type": "scala.collection.mutable.Set"
+    },
+    {
+      "type": "scala.deriving.Mirror"
+    },
+    {
+      "type": "scala.deriving.Mirror$Product"
+    },
+    {
+      "type": "scala.deriving.Mirror$Singleton"
+    },
+    {
+      "type": "scala.math.Ordered"
+    },
+    {
+      "type": "scala.reflect.Enum"
+    },
+    {
+      "type": "scala.runtime.EnumValue"
+    }
+  ],
+  "resources": []
+}
