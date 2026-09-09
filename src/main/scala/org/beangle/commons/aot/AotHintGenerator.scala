@@ -35,8 +35,8 @@ import scala.collection.mutable
  *  - `reachability-metadata.json` — consolidated metadata in GraalVM 25 schema
  *  - `native-image.properties` — extra native-image args (runtime class initialization)
  *
- * Stale config files from previous runs are automatically deleted when the
- * corresponding hint category is empty.
+ * Regeneration deletes legacy per-category config files (reflect-config.json,
+ * resource-config.json, proxy-config.json, serialization-config.json).
  */
 object AotHintGenerator {
 
@@ -211,12 +211,28 @@ object AotHintGenerator {
 
     // Build reflection entries (includes proxy and serialization)
     val reflectionEntries = new mutable.ListBuffer[JsonObject]
+    val entryByName = mutable.LinkedHashMap.empty[String, JsonObject]
 
     // Regular type entries
     hints.getTypePolicies.toSeq.sortBy(_._1.getName).foreach { case (clazz, policy) =>
       val entry = reflectEntryGraalvm25(clazz, policy)
       if (serializables.contains(clazz)) entry.add("serializable", true)
+      entryByName.put(clazz.getName, entry)
       reflectionEntries += entry
+    }
+
+    // Precise no-arg constructor entries (registerConstructor, e.g. JDK URL protocol
+    // handlers): merged into the same type's entry when one exists, otherwise emitted
+    // as a standalone `methods: [{ "name": "<init>", "parameterTypes": [] }]` entry.
+    hints.getConstructors.toSeq.sorted foreach { name =>
+      val initMethod = JsonObject("name" -> "<init>", "parameterTypes" -> JsonArray())
+      entryByName.get(name) match {
+        case Some(entry) => entry.add("methods", JsonArray(initMethod))
+        case None =>
+          val entry = JsonObject("type" -> name, "methods" -> JsonArray(initMethod))
+          entryByName.put(name, entry)
+          reflectionEntries += entry
+      }
     }
 
     // Proxy entries (GraalVM 25 format: type as object with proxy array)

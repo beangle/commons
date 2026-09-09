@@ -47,11 +47,15 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
   private val typePolicies = mutable.LinkedHashMap.empty[Class[_], AotPolicy]
   private val patterns = Collections.newSet[String]
   private val proxies = Collections.newSet[List[String]]
+  private val constructors = Collections.newSet[String]
   private val serializables = Collections.newSet[Class[_]]
   private val runtimeInitialized = Collections.newSet[Class[_]]
 
-  /** Packages whose reflection metadata GraalVM already provides; skipped by
-   *  the recursive hierarchy expansion in [[addType]]. */
+  /** Packages whose reflection metadata GraalVM already provides; any
+   *  `java.*`/`javax.*`/`jdk.*`/`sun.*`/`com.sun.*`/`scala.*` class is skipped in
+   *  [[addType]] (recursive expansion and plain `registerType`) to avoid implicit
+   *  JDK registrations. Explicit by-name registration of such types is still
+   *  possible via [[registerConstructor]] (e.g. JDK URL protocol handlers). */
   private val jdkPrefixes = Seq("java.", "javax.", "jdk.", "sun.", "com.sun.", "scala.")
 
   /** 简单路径：按容器默认策略（通常来自 registrar 的 `aotPolicy`）注册反射类型。 */
@@ -159,6 +163,22 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
     proxies.add(interfaces.toList)
   }
 
+  /** Registers the no-arg constructor of a type by class name.
+   *
+   *  按类名定点登记无参构造器（生成官方格式的
+   *  `"methods": [{ "name": "<init>", "parameterTypes": [] }]` 条目），供编译期无法
+   *  `classOf` 引用、或会被 [[addType]] 的 JDK 前缀过滤吞掉的类型使用——典型场景是
+   *  GraalVM native-image 的 JDK URL 协议 handler：运行期 URL 机制按
+   *  `sun.net.www.protocol.<protocol>.Handler` 名字反射
+   *  `getDeclaredConstructor().newInstance()`，类与无参构造器必须显式进镜像
+   *  （见 beangle/build docs/graalvm-reachability-metadata.md）。显式点名登记即有意
+   *  为之，不走 `isJdk` 过滤；类不存在时静默忽略（native-image 构建期会校验类型名）。
+   */
+  def registerConstructor(typeNames: String*): Unit = {
+    val it = typeNames.iterator
+    while it.hasNext do constructors.add(it.next())
+  }
+
   /** Registers classes supporting Java serialization. */
   def registerSerializable(classes: Class[_]*): Unit = {
     val it = classes.iterator
@@ -185,6 +205,9 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
   /** Returns all registered proxy interface sets (interface names, in order). */
   def getProxies: collection.Set[List[String]] = proxies
 
+  /** Returns all class names with a registered no-arg constructor. */
+  def getConstructors: collection.Set[String] = constructors
+
   /** Returns all registered serializable classes. */
   def getSerializables: collection.Set[Class[_]] = serializables
 
@@ -193,13 +216,15 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
 
   /** Returns true if no hints have been registered. */
   def isEmpty: Boolean =
-    typePolicies.isEmpty && patterns.isEmpty && proxies.isEmpty && serializables.isEmpty && runtimeInitialized.isEmpty
+    typePolicies.isEmpty && patterns.isEmpty && proxies.isEmpty && constructors.isEmpty &&
+      serializables.isEmpty && runtimeInitialized.isEmpty
 
   /** Merges all hints from another [[AotHints]] into this one. */
   def addAll(other: AotHints): Unit = {
     other.typePolicies foreach { case (clazz, p) => merge(clazz, p) }
     patterns.addAll(other.patterns)
     proxies.addAll(other.proxies)
+    constructors.addAll(other.constructors)
     serializables.addAll(other.serializables)
     runtimeInitialized.addAll(other.runtimeInitialized)
   }

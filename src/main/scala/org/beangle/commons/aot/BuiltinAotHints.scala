@@ -23,20 +23,26 @@ package org.beangle.commons.aot
  *  - `META-INF/services/` 下文件：`ServiceLoader`/`spi` 机制下 classpath 上的 SPI 文件；
  *  - `beangle.xml`：`XmlConfigs`/`XmlProfileProvider` 经 `classpath*:` 读取的 cdi 模块声明；
  *  - `description` 注解：cdi `Binder` 绑定 bean 时经 `getAnnotation(classOf[description])` 读取；
- *  - `*.zh_CN`：i18n message bundle（`Messages` 加载的本地化资源）；
+ *  - 跨目录 `.zh_CN` 资源：i18n message bundle（`Messages` 经 globstar 跨层加载）；
  *  - mime 类型表：`MediaTypes` 经 `Resources.load` 加载的
- *    `org/beangle/commons/activation/mime.types` 与 `mime-default.types`。
+ *    `org/beangle/commons/activation/mime.types` 与 `mime-default.types`；
+ *  - JDK URL 协议（http/https）handler：native 下 URL 机制按名反射实例化 handler，
+ *    不注册则运行期 `openConnection` 抛 MalformedURLException。
+ *
+ * 资源一律按 glob 语义书写（非正则）：`.` 是普通字符不转义、`*` 单层、`**` 跨层，
+ * 详见 beangle/build docs/graalvm-reachability-metadata.md §6.1。
  *
  * 使用方无需在 resource-config.json/reflect-config.json 中手写这些项。
  */
 class BuiltinAotHints extends AotHintRegistrar {
 
   override def registering(): Unit = {
-    hints.registerPattern("META-INF/services/.*")
-    hints.registerPattern("beangle\\.xml")
-    hints.registerPattern(".*\\.zh_CN")
-    hints.registerPattern("org/beangle/commons/activation/mime\\.types")
-    hints.registerPattern("org/beangle/commons/activation/mime-default\\.types")
+    hints.registerPattern("META-INF/services/*")
+    hints.registerPattern("beangle.xml")
+    hints.registerPattern("**/*.zh_CN")
+    hints.registerPattern("**/*.properties")
+    hints.registerPattern("org/beangle/commons/activation/mime.types")
+    hints.registerPattern("org/beangle/commons/activation/mime-default.types")
 
     hints.registerType(classOf[org.beangle.commons.lang.annotation.description])
     hints.registerType(classOf[org.beangle.commons.lang.annotation.value])
@@ -98,5 +104,17 @@ class BuiltinAotHints extends AotHintRegistrar {
       classOf[org.beangle.commons.text.i18n.TextFormatter])
 
     hints.registerType(classOf[org.beangle.commons.lang.JVM.type])
+
+    // JDK URL 协议（http/https）handler：GraalVM 25 起 --enable-url-protocols 弃用，
+    // 运行期 URL 机制按 `sun.net.www.protocol.<protocol>.Handler` 名字经
+    // `Class.forName(...).getDeclaredConstructor().newInstance()` 反射实例化
+    // （JavaNetSubstitutions），类与无参构造器必须进镜像，否则抛
+    // "Accessing a URL protocol that was not enabled" MalformedURLException。
+    // 包不在 java.base 导出列表（编译期无法 classOf 引用），且 isJdk 过滤会丢弃
+    // sun.*，故经 registerConstructor 按类名显式登记；官方格式同款见
+    // beangle/build docs/graalvm-reachability-metadata.md。
+    hints.registerConstructor(
+      "sun.net.www.protocol.http.Handler",
+      "sun.net.www.protocol.https.Handler")
   }
 }

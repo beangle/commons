@@ -210,6 +210,42 @@ class AotHintsTest extends AnyFunSpec, Matchers {
     }
   }
 
+  describe("AotHints.registerConstructor") {
+    it("emits precise <init> method entries for named JDK types") {
+      val hints = new AotHints
+      hints.registerConstructor("sun.net.www.protocol.http.Handler")
+      hints.registerConstructor("sun.net.www.protocol.https.Handler")
+      val entries = reflectEntries(hints)
+      entries.map(e => e("type").toString) should contain only (
+        "sun.net.www.protocol.http.Handler", "sun.net.www.protocol.https.Handler")
+      entries foreach { e =>
+        val methods = e("methods").asInstanceOf[JsonArray].toVector.map(_.asInstanceOf[JsonObject])
+        methods.map(m => (m("name").toString, m("parameterTypes").asInstanceOf[JsonArray].isEmpty)) should
+          contain (("<init>", true))
+      }
+    }
+
+    it("merges into the existing entry when the type is also registered by class") {
+      val hints = new AotHints
+      hints.registerType(classOf[AotChild])
+      hints.registerConstructor(classOf[AotChild].getName)
+      val entries = reflectEntries(hints)
+      entries should have size 1
+      val entry = entries.head
+      entry("allPublicMethods") shouldBe true
+      val methods = entry("methods").asInstanceOf[JsonArray].toVector.map(_.asInstanceOf[JsonObject])
+      methods.map(m => (m("name").toString, m("parameterTypes").asInstanceOf[JsonArray].isEmpty)) should
+        contain (("<init>", true))
+    }
+
+    it("BuiltinAotHints registers JDK URL protocol handlers") {
+      val registrar = new BuiltinAotHints
+      registrar.registering()
+      registrar.aotHints.getConstructors should contain allOf (
+        "sun.net.www.protocol.http.Handler", "sun.net.www.protocol.https.Handler")
+    }
+  }
+
   describe("AotHints.registerEnum") {
     it("registers enum, companion and value classes with bean + public fields policy") {
       val hints = new AotHints
@@ -261,7 +297,7 @@ class AotHintsTest extends AnyFunSpec, Matchers {
     it("LogbackAotHints registers logback.xml pattern") {
       val registrar = new org.beangle.commons.logging.LogbackAotHints
       registrar.registering()
-      registrar.aotHints.getPatterns should contain("logback\\.xml")
+      registrar.aotHints.getPatterns should contain("logback.xml")
     }
   }
 
