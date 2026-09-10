@@ -21,7 +21,7 @@ org.beangle.build.sbt
 AotHintRegistrar.registering()
         │
         ▼
-    AotHints  (types, patterns, proxies, serializables)
+    AotHints  (types, patterns, proxies, serializables, jni)
         │
         ▼
 AotHintGenerator.write(outDir, hints)
@@ -285,12 +285,13 @@ loaded, otherwise the tool exits with a non-zero code.
 ### Generated Files
 
 只生成**一个** `reachability-metadata.json`（GraalVM 25 schema v1.2.0），所有类别
-都写进这个文件的同名顶层键或条目字段：
+（reflection / resources / JNI / 序列化 / 代理）都写进这个文件的同名顶层键或条目字段：
 
 | 顶层键 / 条目字段 | 来源 | 何时写入 |
 |------------------|------|---------|
 | `reflection`（`allPublic*`/`allDeclared*`/`methods`/`fields`） | `types`/`typePolicies`/`constructors` | `types` 或 `constructors` 非空 |
 | `reflection[].unsafeAllocated` | `AotPolicy.unsafeAllocated` | 策略置位 |
+| `reflection[].jniAccessible` + `methods`/`fields` | `AotPolicy.jniAccessible` / `registerJni*` | 见第 7 节 |
 | `reflection[].type.proxy` | `proxies` | `proxies` 非空 |
 | `reflection[].serializable` | `serializables` | `serializables` 非空 |
 | `resources[].glob` | `patterns` | `patterns` 非空 |
@@ -315,6 +316,11 @@ hints.registerPattern("META-INF/custom.idx")
 hints.registerProxy(classOf[UserService])
 hints.registerSerializable(classOf[UserDto])
 
+// JNI（GraalVM 25，见第 7 节）：JDK 内部类按名字登记，绕过 isJdk 过滤
+hints.registerJniMethod("sun.font.Font2D", "charToGlyphRaw", "int")
+hints.registerJniField("sun.font.GlyphList", "gposx", "len")
+hints.registerJniType("com.example.NativeBridge")
+
 // Read
 hints.policy             // AotPolicy (container default)
 hints.getTypes           // Set[Class[_]]
@@ -323,6 +329,9 @@ hints.getPatterns        // Set[String]
 hints.getProxies         // Set[List[Class[_]]]
 hints.getSerializables   // Set[Class[_]]
 hints.getConstructors    // Set[String]
+hints.getJniTypes        // Set[String]
+hints.getJniMethods      // Map[String, Set[(String, List[String])]]
+hints.getJniFields       // Map[String, Set[String]]
 
 // Merge
 hints.addAll(otherHints)
@@ -331,7 +340,72 @@ hints.addAll(otherHints)
 hints.isEmpty            // Boolean
 ```
 
-## 7. Full Example
+## 7. JNI 可达注册（GraalVM 25 `jniAccessible`）
+
+JNI 元数据 **只能写在 `reachability-metadata.json`**（旧 `jni-config.json` 仍被兼容读取，
+但不再生成）。GraalVM 25 起 JNI 注册折叠为 `reflection` 条目的 `jniAccessible` 字段：
+
+```json
+{
+  "reflection": [
+    { "type": "sun.font.Font2D",
+      "jniAccessible": true,
+      "methods": [ { "name": "charToGlyphRaw", "parameterTypes": ["int"] } ] }
+  ]
+}
+```
+
+两条必须记住的语义：
+
+1. **只登记类型不足以 `GetMethodID`/`GetFieldID`**。`jniAccessible: true` 只让本机代码能
+   `FindClass` 到该类型；通过 `GetMethodID` 查方法时，该方法必须已在同一条目里用
+   `methods` 列出（或由 `allDeclared*`/`allPublic*` 批量覆盖）。漏掉方法名的典型报错：
+
+   ```text
+   java.lang.NoSuchMethodError: sun.font.Font2D.charToGlyphRaw(I)I
+     at ...JNIFunctions$Support.getMethodID(JNIFunctions.java:1948)
+   ```
+
+   反向地，只写 `methods` 而不写 `jniAccessible`（且未按 `AotPolicy` 展开）也不会开 JNI。
+2. `unsafeAllocated` 与 JNI 的 `AllocObject` 对应，但它是**独立字段**，不需要
+   `jniAccessible`。
+
+### 两种登记方式
+
+| 方式 | 写法 | 适用 |
+|------|------|------|
+| 粗粒度 | `hints.registerType(clazz, AotPolicy(Set(...), jniAccessible = true))` | 能 `classOf` 引用的自有类；成员由 `categories` 展开（`allDeclared*`/`allPublic*` 对 JNI 同样生效） |
+| 定点 | `registerJniType` / `registerJniMethod` / `registerJniField` | JDK 内部类、agent 采集的 C→Java 回调；只注册真正被查的名字，镜像最小 |
+
+```scala
+class NativeHints extends AotHintRegistrar {
+  override def registering(): Unit = {
+    // 1) 自有类型：粗粒度，开放全部 public 方法给 JNI
+    hints.registerType(classOf[NativeBridge], AotPolicy(Set.empty, jniAccessible = true))
+
+    // 2) JDK 内部类：只能按名字登记（包未导出，classOf 不可用），且必须逐成员列出
+    hints.registerJniMethod("sun.font.Font2D", "charToGlyphRaw", "int")
+    hints.registerJniMethod("sun.font.Font2D", "charToVariationGlyphRaw", "int", "int")
+    hints.registerJniMethod("sun.font.Font2D", "getMapper")
+    hints.registerJniField("sun.font.Font2D", "font", "style")
+  }
+}
+```
+
+要点：
+
+- 参数类型按 JSON 写法给（`"int"`、`"char"`、`"java.lang.String"`、
+  `"sun.java2d.loops.CompositeType"`）；**构造器用 `"<init>"`**；
+- `registerJniMethod`/`registerJniField` **隐式包含该类型的 `jniAccessible`**，
+  无需再调 `registerJniType`；
+- `registerJni*` 按类名记录、**不走 `isJdk` 前缀过滤**，因此可以登记
+  `sun.*`/`com.sun.*` 等 `classOf` 引用不到的内部类；
+- `AotPolicy.jniAccessible` 参与 `merge`（取或），同一个类被多次注册时只要有一次置位即生效；
+- 精确成员清单建议直接抄 native-image agent 输出，或对 `lib*.so` 做
+  `strings` + `javap` 核对（ems 的 `sun.font.Font2D` 回调名即在 JDK 25 由
+  `charToGlyph` 更名为 `charToGlyphRaw`，只按旧名登记会在运行期报 `NoSuchMethodError`）。
+
+## 8. Full Example
 
 ```scala
 // 1. Define hints
@@ -355,7 +429,7 @@ class ServiceHints extends AotHintRegistrar {
 // 3. Build (AotPlugin auto-enabled)
 // sbt compile
 // → target/resource_managed/main/META-INF/native-image/
-//   └── reachability-metadata.json   # reflection + resources + 代理 + 序列化
+//   └── reachability-metadata.json   # reflection + resources + 代理 + 序列化 + JNI
 
 // 4. Native build
 // native-image -jar app.jar
