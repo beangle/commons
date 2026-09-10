@@ -59,8 +59,8 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       AotPolicy.default.unsafeAllocated shouldBe false
     }
 
-    it("bean adds declared fields + query declared methods + recursion") {
-      AotPolicy.bean.categories shouldBe Set(PublicMethods, PublicConstructors, DeclaredFields, QueryDeclaredMethods)
+    it("bean adds declared fields + declared methods + recursion") {
+      AotPolicy.bean.categories shouldBe Set(PublicMethods, PublicConstructors, DeclaredFields, DeclaredMethods)
       AotPolicy.bean.recursive shouldBe true
       AotPolicy.bean.unsafeAllocated shouldBe false
     }
@@ -119,7 +119,7 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       raw should startWith ("{\n  \"reflection\":")
     }
 
-    it("bean policy: declared fields + query declared methods, recursive hierarchy") {
+    it("bean policy: declared fields + declared methods, recursive hierarchy") {
       val hints = new AotHints
       hints.registerType(classOf[AotChild], AotPolicy.bean)
       val entries = reflectEntries(hints)
@@ -129,8 +129,7 @@ class AotHintsTest extends AnyFunSpec, Matchers {
         entry("allPublicMethods") shouldBe true
         entry("allPublicConstructors") shouldBe true
         entry("allDeclaredFields") shouldBe true
-        entry("queryAllDeclaredMethods") shouldBe true
-        entry.get("allDeclaredMethods") shouldBe None
+        entry("allDeclaredMethods") shouldBe true
       }
     }
 
@@ -148,14 +147,15 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       }
     }
 
-    it("query categories emit queryAll flags without invoke flags") {
+    it("never emits legacy queryAll* flags (GraalVM 25 schema has no query-only registration)") {
       val hints = new AotHints
-      hints.registerType(classOf[AotChild], AotPolicy(Set(QueryPublicMethods, QueryPublicConstructors)))
-      val entry = reflectEntries(hints).head
-      entry("queryAllPublicMethods") shouldBe true
-      entry("queryAllPublicConstructors") shouldBe true
-      entry.get("allPublicMethods") shouldBe None
-      entry.get("allPublicConstructors") shouldBe None
+      hints.registerType(classOf[AotChild], AotPolicy.bean)
+      hints.registerType(classOf[AotParent], AotPolicy.full)
+      val dir = Files.createTempDirectory("aot-hints")
+      AotHintGenerator.writeReachabilityMetadata(dir, hints)
+      val raw = Files.readString(dir.resolve("reachability-metadata.json"), StandardCharsets.UTF_8)
+      raw.contains("queryAll") shouldBe false
+      raw should include ("\"allDeclaredMethods\": true")
     }
 
     it("unsafeAllocated is emitted when requested") {
@@ -187,11 +187,11 @@ class AotHintsTest extends AnyFunSpec, Matchers {
   }
 
   describe("AotHints.registerArrayOf") {
-    it("registers array type from simple class name with unsafeAllocated") {
+    it("registers array type from simple class name with unsafeAllocated (source form in json)") {
       val hints = new AotHints
       hints.registerArrayOf("java.sql.Statement", getClass.getClassLoader)
       val entries = reflectEntries(hints)
-      entries.map(e => e("type").toString) should contain only "[Ljava.sql.Statement;"
+      entries.map(e => e("type").toString) should contain only "java.sql.Statement[]"
       entries.head("unsafeAllocated") shouldBe true
     }
 
@@ -199,14 +199,22 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       val hints = new AotHints
       hints.registerArrayOf("int", getClass.getClassLoader)
       hints.registerArrayOf("boolean", getClass.getClassLoader)
-      reflectEntries(hints).map(e => e("type").toString) should contain only ("[I", "[Z")
+      reflectEntries(hints).map(e => e("type").toString) should contain only ("int[]", "boolean[]")
     }
 
     it("passes through descriptors and skips missing classes") {
       val hints = new AotHints
       hints.registerArrayOf("[Ljava.lang.String;", getClass.getClassLoader)
       hints.registerArrayOf("no.such.ArrayClass", getClass.getClassLoader)
-      reflectEntries(hints).map(e => e("type").toString) should contain only "[Ljava.lang.String;"
+      reflectEntries(hints).map(e => e("type").toString) should contain only "java.lang.String[]"
+    }
+
+    it("normalizes serializable array types to source form") {
+      val hints = new AotHints
+      hints.registerSerializable(
+        classOf[Array[String]], classOf[Array[Int]], classOf[Array[Object]], classOf[Array[Array[Int]]])
+      reflectEntries(hints).map(e => e("type").toString) should contain only (
+        "java.lang.String[]", "int[]", "java.lang.Object[]", "int[][]")
     }
   }
 
@@ -258,7 +266,7 @@ class AotHintsTest extends AnyFunSpec, Matchers {
         e("allPublicMethods") shouldBe true
         e("allPublicConstructors") shouldBe true
         e("allDeclaredFields") shouldBe true
-        e("queryAllDeclaredMethods") shouldBe true
+        e("allDeclaredMethods") shouldBe true
       }
     }
 

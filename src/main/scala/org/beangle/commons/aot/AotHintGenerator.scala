@@ -214,10 +214,10 @@ object AotHintGenerator {
     val entryByName = mutable.LinkedHashMap.empty[String, JsonObject]
 
     // Regular type entries
-    hints.getTypePolicies.toSeq.sortBy(_._1.getName).foreach { case (clazz, policy) =>
+    hints.getTypePolicies.toSeq.sortBy(c => typeName(c._1)).foreach { case (clazz, policy) =>
       val entry = reflectEntryGraalvm25(clazz, policy)
       if (serializables.contains(clazz)) entry.add("serializable", true)
-      entryByName.put(clazz.getName, entry)
+      entryByName.put(typeName(clazz), entry)
       reflectionEntries += entry
     }
 
@@ -244,9 +244,9 @@ object AotHintGenerator {
 
     // Serialization entries (classes not already in typePolicies)
     val serializableClasses = serializables -- hints.getTypes
-    serializableClasses.toSeq.sortBy(_.getName).foreach { clazz =>
+    serializableClasses.toSeq.sortBy(typeName).foreach { clazz =>
       reflectionEntries += JsonObject(
-        "type" -> clazz.getName,
+        "type" -> typeName(clazz),
         "serializable" -> true
       )
     }
@@ -280,25 +280,56 @@ object AotHintGenerator {
 
   /** Builds a reachability-metadata.json reflection entry in GraalVM 25 format.
    *
-   *  Uses "type" instead of "name" as the key for the class identifier.
+   *  Array types are normalized to the source form, and only the `all*` flags are
+   *  emitted: reachability-metadata-schema-v1.2.0 (GraalVM 25) has no query-only
+   *  registration and only accepts `all*` flags. Writing the legacy `queryAll*`
+   *  keys here makes native-image log "Unknown attribute(s) ... in reflection
+   *  class descriptor object" and silently drop the whole registration, so they
+   *  must never be emitted (see [[AotPolicy]]).
    */
   private def reflectEntryGraalvm25(clazz: Class[_], policy: AotPolicy): JsonObject = {
     import AotPolicy.Category.*
-    val entry = JsonObject("type" -> clazz.getName)
+    val entry = JsonObject("type" -> typeName(clazz))
     policy.categories foreach {
-      case PublicMethods            => entry.add("allPublicMethods", true)
-      case DeclaredMethods          => entry.add("allDeclaredMethods", true)
-      case PublicConstructors       => entry.add("allPublicConstructors", true)
-      case DeclaredConstructors     => entry.add("allDeclaredConstructors", true)
-      case PublicFields             => entry.add("allPublicFields", true)
-      case DeclaredFields           => entry.add("allDeclaredFields", true)
-      case QueryPublicMethods       => entry.add("queryAllPublicMethods", true)
-      case QueryDeclaredMethods     => entry.add("queryAllDeclaredMethods", true)
-      case QueryPublicConstructors  => entry.add("queryAllPublicConstructors", true)
-      case QueryDeclaredConstructors => entry.add("queryAllDeclaredConstructors", true)
+      case PublicMethods        => entry.add("allPublicMethods", true)
+      case DeclaredMethods      => entry.add("allDeclaredMethods", true)
+      case PublicConstructors   => entry.add("allPublicConstructors", true)
+      case DeclaredConstructors => entry.add("allDeclaredConstructors", true)
+      case PublicFields    => entry.add("allPublicFields", true)
+      case DeclaredFields  => entry.add("allDeclaredFields", true)
     }
     if (policy.unsafeAllocated) entry.add("unsafeAllocated", true)
     entry
+  }
+
+  /** Type descriptor as written into reachability-metadata.json.
+   *
+   *  Array types must use the source form (`java.lang.String[]`, `int[][]`) rather
+   *  than the JVM descriptor (`[Ljava.lang.String;`, `[[I`): the v1.2.0 schema's
+   *  `typeName` pattern is `^[^.;\[/]+(\.[^.;\[/]+)*(\[])*$`, which rejects `[`/`;`.
+   *  native-image happens to resolve both spellings (registered type counts are
+   *  identical), but the descriptor form fails schema validation, so normalize here.
+   */
+  private def typeName(clazz: Class[_]): String = {
+    val name = clazz.getName
+    if name.charAt(0) != '[' then name
+    else {
+      var i = 0
+      while i < name.length && name.charAt(i) == '[' do i += 1
+      val component = name.charAt(i) match {
+        case 'L' => name.substring(i + 1, name.length - 1)
+        case 'Z' => "boolean"
+        case 'B' => "byte"
+        case 'C' => "char"
+        case 'S' => "short"
+        case 'I' => "int"
+        case 'J' => "long"
+        case 'F' => "float"
+        case 'D' => "double"
+        case _   => name.substring(i)
+      }
+      component + "[]" * i
+    }
   }
 
   /** Writes a JSON node pretty-printed with 2-space indent, ending with a newline. */

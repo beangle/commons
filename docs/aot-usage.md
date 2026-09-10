@@ -85,7 +85,7 @@ class AppRegistry extends MetaRegistrar {
 AotPolicy.default:                       AotPolicy.bean:
   PublicMethods + PublicConstructors       PublicMethods + PublicConstructors
   无字段                                   DeclaredFields
-  不递归                                   QueryDeclaredMethods
+  不递归                                   DeclaredMethods
                                           recursive = true
 
 AotPolicy.full:
@@ -110,32 +110,37 @@ hints.registerType(classOf[User], AotPolicy.bean)
 | 反射 API | MetaLoader 用途 | 所需 Category |
 |----------|----------------|---------------|
 | `getDeclaredFields` | 读字段名（用于 `findAccessor` 判断 getter）、读 `@transient` 修饰符 | `DeclaredFields` |
-| `getDeclaredMethods` | 读方法名、修饰符、返回类型、泛型签名、注解（`@noreflect`） | `QueryDeclaredMethods` |
+| `getDeclaredMethods` | 读方法名、修饰符、返回类型、泛型签名、注解（`@noreflect`） | `DeclaredMethods` |
 | `getGenericSuperclass` / `getGenericInterfaces` | 推导泛型参数类型（`deduceParamTypes`） | 递归 + 元数据查询 |
 | `Method.invoke`（`BeanInfo.from` 阶段） | 通过 `MethodHandle` 调用 getter/setter | `PublicMethods`（已覆盖） |
 
-**字段用 `DeclaredFields` 而非 `QueryDeclaredFields`**：GraalVM 21.x 的字段反射没有
-query-only 批量标志（`queryAllDeclaredFields` 不存在），注册了字段即开放完整读写。
+**字段用 `DeclaredFields`、方法用 `DeclaredMethods`**：MetaLoader 只查询方法元数据
+（不 invoke），但这不需要专门的类别——GraalVM 25 的 reachability-metadata v1.2.0
+已删除 query-only 注册，登记即同时开放查找与调用（见下）。
 
-**方法用 `QueryDeclaredMethods`**：MetaLoader 只查询方法元数据，不直接 invoke。
-`QueryDeclaredMethods` 不登记 invoker stub，镜像更小。
-
-递归（`recursive = true`）是必须的：`Declared*` / `QueryDeclared*` 仅覆盖本类声明的成员，
+递归（`recursive = true`）是必须的：`Declared*` 仅覆盖本类声明的成员，
 而 `MetaLoader` 需要遍历整个继承链（父类 + 接口）来收集全部字段和方法。
 
-### 两个正交维度（编码在 `AotPolicy.Category` 命名中）
+### 类别只表达可见性
 
 | 维度 | 取值 | 说明 |
 |------|------|------|
 | 可见性 | `Public*` / `Declared*` | `Public*` 含继承链（GraalVM `allPublic*`）；`Declared*` 仅本类声明，继承成员需 `recursive = true` |
-| 访问深度 | 无前缀 / `Query*` | 无前缀（如 `PublicMethods`）可反射调用（`method.invoke`/`field.get`/`set`），对应 `all*` 标志；`Query*`（如 `QueryDeclaredMethods`）仅登记元数据（`getMethod`/`getAnnotation`，调用会失败），对应 `queryAll*` 标志，镜像更小 |
 
-> **invoke vs introspect（Query）**：`getMethod`/`getDeclaredMethods`/`getAnnotation` 这类
-> 「查元数据」只需 introspect 级登记；`Method.invoke`、`Field.get/set` 需要 invoke 级登记。
-> `queryAll*` 只登记元数据，不登记方法体/invoker stub，镜像更小、构建更快，但运行时
-> 反射调用会抛异常。Spring AOT 的 `MemberCategory` 即按此映射（`INTROSPECT_*` → `queryAll*`，
-> `INVOKE_*` → `all*`）。字段在本版本 GraalVM（21.x）没有 query-only 批量标志：
-> 注册了字段即可读写。
+`Category` 只保留 `PublicMethods/DeclaredMethods`、`PublicConstructors/DeclaredConstructors`、
+`PublicFields/DeclaredFields` 六个值，一一对应 GraalVM 的 `allPublic*` / `allDeclared*` 批量标志。
+
+> **为什么不再有 introspect-only 类别**：`getMethod`/`getDeclaredMethods`/`getAnnotation`
+> 这类「查元数据」在 GraalVM 21 时代可以用 `queryAll*` 做仅 introspect 登记（不登记
+> invoker stub，镜像更小、构建更快，但运行时 `Method.invoke` 会抛异常；Spring AOT 的
+> `MemberCategory` 即按 `INTROSPECT_*` → `queryAll*`、`INVOKE_*` → `all*` 映射）。
+> **GraalVM 25 的 reachability-metadata v1.2.0 删除了 `queryAll*`**：反射条目只接受
+> `allDeclaredConstructors`/`allPublicMethods` 等 `all*` 标志，且 schema 明确定义为
+> "for reflective invocation"（登记即可查找并调用）。若在新格式里继续写 `queryAll*`，
+> native-image 会打印 `Warning: Unknown attribute(s) [queryAllXxx] in reflection class
+> descriptor object` 并**整条丢弃**，于是 `getDeclaredMethods` 等元数据查询在镜像里失败。
+> 因此 beangle 在迁移到新格式时直接把 `Query*` 类别删除，而不是保留成同义别名：
+> 需要更小镜像时改用 `methods` 定点注册，而不是退回 `queryAll*`。
 
 可通过预定义策略或自定义策略定制：
 
