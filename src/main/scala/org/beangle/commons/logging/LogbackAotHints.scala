@@ -20,21 +20,24 @@ package org.beangle.commons.logging
 import org.beangle.commons.aot.AotHintRegistrar
 
 /** Logback/SLF4J 的 GraalVM native-image 反射提示。
-  *
-  * 集中注册 logback-classic/core 与 slf4j-api 在 native 下需要的反射点：
-  *  - `org.slf4j.spi.LocationAwareLogger`：jboss-logging 选定 SLF4J 后端时经
-  *    `LocationAwareLogger.class.getDeclaredMethods()` 反射查找 `log` 方法，漏注册会抛
-  *    `NoSuchMethodError` 并被静默捕获回退 JUL（`JDKLoggerProvider`）；
-  *  - `ch.qos.logback.classic.Logger`：jboss-logging 探测日志后端用的探测类；
-  *  - Joran 按 `class=` 属性反射实例化的 appender/encoder/layout，以及
-  *    `DefaultJoranConfigurator`/`BasicConfigurator`。
-  *
-  * 生成物随 beangle-commons.jar 内嵌的 `META-INF/native-image/beangle` 被 GraalVM
-  * 自动发现并合并，使用方无需手写 logback/slf4j 反射项。
-  */
+ *
+ * 集中注册 logback-classic/core 与 slf4j-api 在 native 下需要的反射点：
+ *  - `org.slf4j.spi.LocationAwareLogger`：jboss-logging 选定 SLF4J 后端时经
+ *    `LocationAwareLogger.class.getDeclaredMethods()` 反射查找 `log` 方法，漏注册会抛
+ *    `NoSuchMethodError` 并被静默捕获回退 JUL（`JDKLoggerProvider`）；
+ *  - `ch.qos.logback.classic.Logger`：jboss-logging 探测日志后端用的探测类；
+ *  - Joran 按 `class=` 属性反射实例化的 appender/encoder/layout，以及
+ *    `DefaultJoranConfigurator`/`BasicConfigurator`。
+ *
+ * 生成物随 beangle-commons.jar 内嵌的 `META-INF/native-image/beangle` 被 GraalVM
+ * 自动发现并合并，使用方无需手写 logback/slf4j 反射项。
+ */
 class LogbackAotHints extends AotHintRegistrar {
   override def registering(): Unit = {
     hints.registerPattern("logback.xml")
+    // logback 各 jar 内嵌的版本属性（运行期经 classloader 读取）
+    hints.registerPattern("ch/**/*.properties")
+    hints.registerPattern("Log4j-charsets.properties")
     hints.registerType(
       classOf[ch.qos.logback.classic.Logger],
       classOf[ch.qos.logback.classic.BasicConfigurator],

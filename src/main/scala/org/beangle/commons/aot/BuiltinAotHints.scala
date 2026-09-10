@@ -39,8 +39,13 @@ class BuiltinAotHints extends AotHintRegistrar {
   override def registering(): Unit = {
     hints.registerPattern("META-INF/services/*")
     hints.registerPattern("beangle.xml")
-    hints.registerPattern("**/*.zh_CN")
-    hints.registerPattern("**/*.properties")
+    // i18n bundle：Messages 按 globstar 跨层加载 org/beangle 各库包级消息，
+    // 另有 jar 根下的 application/beangle 消息文件
+    hints.registerPattern("org/beangle/**/*.zh_CN", "beangle.zh_CN", "application.zh_CN")
+    hints.registerPattern(
+      "META-INF/**/*.properties", "org/**/*.properties", "jakarta/**/*.properties",
+      "assets/**/*.properties",
+      "library.properties", "font_metrics.properties")
     hints.registerPattern("org/beangle/commons/activation/mime.types")
     hints.registerPattern("org/beangle/commons/activation/mime-default.types")
 
