@@ -28,10 +28,7 @@ AotHintGenerator.write(outDir, hints)
         │
         ▼
   META-INF/native-image/
-  ├── reflect-config.json
-  ├── resource-config.json
-  ├── proxy-config.json
-  └── serialization-config.json
+  └── reachability-metadata.json    # GraalVM 25 单一合并文件（reflection/resources 同文件）
 ```
 
 ## 2. Creating a Registrar
@@ -287,15 +284,20 @@ loaded, otherwise the tool exits with a non-zero code.
 
 ### Generated Files
 
-| File | Purpose | When Generated |
-|------|---------|----------------|
-| `reflect-config.json` | Classes needing reflection access | `types` non-empty |
-| `resource-config.json` | Resource patterns to include | `patterns` non-empty |
-| `proxy-config.json` | JDK dynamic proxy interfaces | `proxies` non-empty |
-| `serialization-config.json` | Java serialization support | `serializables` non-empty |
+只生成**一个** `reachability-metadata.json`（GraalVM 25 schema v1.2.0），所有类别
+都写进这个文件的同名顶层键或条目字段：
 
-Stale files from previous runs are automatically deleted when the corresponding
-hint category becomes empty.
+| 顶层键 / 条目字段 | 来源 | 何时写入 |
+|------------------|------|---------|
+| `reflection`（`allPublic*`/`allDeclared*`/`methods`/`fields`） | `types`/`typePolicies`/`constructors` | `types` 或 `constructors` 非空 |
+| `reflection[].unsafeAllocated` | `AotPolicy.unsafeAllocated` | 策略置位 |
+| `reflection[].type.proxy` | `proxies` | `proxies` 非空 |
+| `reflection[].serializable` | `serializables` | `serializables` 非空 |
+| `resources[].glob` | `patterns` | `patterns` 非空 |
+
+历史遗留的分文件产物（`reflect-config.json`、`resource-config.json`、
+`proxy-config.json`、`serialization-config.json`）在重新生成时会被自动删除，
+避免 native-image 同时读新旧两种格式造成重复注册。
 
 ## 6. AotHints API
 
@@ -320,6 +322,7 @@ hints.getTypePolicies    // Map[Class[_], AotPolicy]
 hints.getPatterns        // Set[String]
 hints.getProxies         // Set[List[Class[_]]]
 hints.getSerializables   // Set[Class[_]]
+hints.getConstructors    // Set[String]
 
 // Merge
 hints.addAll(otherHints)
@@ -352,10 +355,7 @@ class ServiceHints extends AotHintRegistrar {
 // 3. Build (AotPlugin auto-enabled)
 // sbt compile
 // → target/resource_managed/main/META-INF/native-image/
-//   ├── reflect-config.json
-//   ├── resource-config.json
-//   ├── proxy-config.json
-//   └── serialization-config.json
+//   └── reachability-metadata.json   # reflection + resources + 代理 + 序列化
 
 // 4. Native build
 // native-image -jar app.jar
