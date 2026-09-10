@@ -91,6 +91,13 @@ class AotHintsTest extends AnyFunSpec, Matchers {
         Set(PublicMethods, PublicConstructors, DeclaredMethods, DeclaredFields),
         recursive = true, unsafeAllocated = true)
     }
+
+    it("merge keeps jniAccessible sticky") {
+      val a = AotPolicy(Set(PublicMethods), jniAccessible = true)
+      val b = AotPolicy(Set(DeclaredFields))
+      a.merge(b).jniAccessible shouldBe true
+      b.merge(a).jniAccessible shouldBe true
+    }
   }
 
   describe("AotHints.registerType") {
@@ -251,6 +258,80 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       registrar.registering()
       registrar.aotHints.getConstructors should contain allOf (
         "sun.net.www.protocol.http.Handler", "sun.net.www.protocol.https.Handler")
+    }
+  }
+
+  describe("AotHints JNI registration") {
+    def jniEntry(hints: AotHints, name: String): JsonObject =
+      reflectEntries(hints).find(e => e("type").toString == name).get
+
+    it("policy jniAccessible flag marks coarse members as JNI accessible") {
+      val hints = new AotHints
+      hints.registerType(classOf[AotChild], AotPolicy(Set(DeclaredMethods), jniAccessible = true))
+      val entry = reflectEntries(hints).head
+      entry("jniAccessible") shouldBe true
+      entry("allDeclaredMethods") shouldBe true
+      entry.get("methods") shouldBe None
+    }
+
+    it("emits precise JNI methods and fields for by-name JDK types") {
+      val hints = new AotHints
+      hints.registerJniType("sun.font.Font2D")
+      hints.registerJniMethod("sun.font.Font2D", "charToGlyphRaw", "int")
+      hints.registerJniMethod("sun.font.Font2D", "charToVariationGlyphRaw", "int", "int")
+      hints.registerJniMethod("sun.font.Font2D", "getMapper")
+      hints.registerJniField("sun.font.GlyphList", "gposx", "len")
+
+      val entries = reflectEntries(hints)
+      entries.map(e => e("type").toString) should contain only (
+        "sun.font.Font2D", "sun.font.GlyphList")
+
+      val font2d = jniEntry(hints, "sun.font.Font2D")
+      font2d("jniAccessible") shouldBe true
+      val methods = font2d("methods").asInstanceOf[JsonArray].toVector.map(_.asInstanceOf[JsonObject])
+      methods.map(m => (m("name").toString,
+        m("parameterTypes").asInstanceOf[JsonArray].toVector.map(_.toString))) should contain allOf (
+        ("charToGlyphRaw", Vector("int")),
+        ("charToVariationGlyphRaw", Vector("int", "int")),
+        ("getMapper", Vector.empty[String]))
+
+      val glyphList = jniEntry(hints, "sun.font.GlyphList")
+      glyphList("jniAccessible") shouldBe true
+      glyphList("fields").asInstanceOf[JsonArray].toVector
+        .map(_.asInstanceOf[JsonObject]("name").toString) should contain only ("gposx", "len")
+    }
+
+    it("merges JNI members into an existing reflection entry and constructor methods") {
+      val hints = new AotHints
+      hints.registerType(classOf[AotChild])
+      hints.registerConstructor(classOf[AotChild].getName)
+      hints.registerJniMethod(classOf[AotChild].getName, "run")
+      val entries = reflectEntries(hints)
+      entries should have size 1
+      val entry = entries.head
+      entry("allPublicMethods") shouldBe true
+      entry("jniAccessible") shouldBe true
+      entry("methods").asInstanceOf[JsonArray].toVector
+        .map(_.asInstanceOf[JsonObject]("name").toString) should contain only ("<init>", "run")
+    }
+
+    it("addAll merges JNI types, methods and fields") {
+      val a = new AotHints
+      a.registerJniMethod("sun.font.Font2D", "charToGlyphRaw", "int")
+      val b = new AotHints
+      b.registerJniField("sun.font.Font2D", "nope")
+      b.registerJniType("sun.font.GlyphList")
+      a.addAll(b)
+      a.getJniTypes should contain allOf ("sun.font.Font2D", "sun.font.GlyphList")
+      a.getJniMethods("sun.font.Font2D") should contain (("charToGlyphRaw", List("int")))
+      a.getJniFields("sun.font.Font2D") should contain ("nope")
+    }
+
+    it("isEmpty accounts for JNI-only hints") {
+      val hints = new AotHints
+      hints.isEmpty shouldBe true
+      hints.registerJniType("sun.font.Font2D")
+      hints.isEmpty shouldBe false
     }
   }
 

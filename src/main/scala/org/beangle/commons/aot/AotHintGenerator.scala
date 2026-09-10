@@ -225,14 +225,19 @@ object AotHintGenerator {
     // handlers): merged into the same type's entry when one exists, otherwise emitted
     // as a standalone `methods: [{ "name": "<init>", "parameterTypes": [] }]` entry.
     hints.getConstructors.toSeq.sorted foreach { name =>
-      val initMethod = JsonObject("name" -> "<init>", "parameterTypes" -> JsonArray())
-      entryByName.get(name) match {
-        case Some(entry) => entry.add("methods", JsonArray(initMethod))
-        case None =>
-          val entry = JsonObject("type" -> name, "methods" -> JsonArray(initMethod))
-          entryByName.put(name, entry)
-          reflectionEntries += entry
-      }
+      appendMethods(entryFor(name, entryByName, reflectionEntries), Seq("<init>" -> Nil))
+    }
+
+    // Precise JNI registrations (registerJniType/Method/Field). JNI metadata can only be
+    // provided via reachability-metadata.json, and registering a type alone does not
+    // allow GetMethodID/GetFieldID: the looked-up methods/fields must be listed as well.
+    hints.getJniTypes.toSeq.sorted foreach { name =>
+      val entry = entryFor(name, entryByName, reflectionEntries)
+      entry.add("jniAccessible", true)
+      val methods = hints.getJniMethods.getOrElse(name, collection.Set.empty[(String, List[String])])
+      appendMethods(entry, methods.toSeq.sortBy { case (m, params) => (m, params.mkString(",")) })
+      val fields = hints.getJniFields.getOrElse(name, collection.Set.empty[String])
+      appendFields(entry, fields.toSeq.sorted)
     }
 
     // Proxy entries (GraalVM 25 format: type as object with proxy array)
@@ -299,7 +304,37 @@ object AotHintGenerator {
       case DeclaredFields  => entry.add("allDeclaredFields", true)
     }
     if (policy.unsafeAllocated) entry.add("unsafeAllocated", true)
+    if (policy.jniAccessible) entry.add("jniAccessible", true)
     entry
+  }
+
+  /** Returns the reflection entry for `name`, creating (and emitting) a standalone
+   *  `{ "type": name }` entry when the type was not registered through [[AotPolicy]]. */
+  private def entryFor(name: String,
+      entryByName: mutable.LinkedHashMap[String, JsonObject],
+      entries: mutable.ListBuffer[JsonObject]): JsonObject =
+    entryByName.getOrElseUpdate(name, {
+      val entry = JsonObject("type" -> name)
+      entries += entry
+      entry
+    })
+
+  /** Appends precise `methods` entries, merging with an existing `methods` array. */
+  private def appendMethods(entry: JsonObject, methods: Seq[(String, List[String])]): Unit =
+    appendMembers(entry, "methods", methods.map { case (name, params) =>
+      JsonObject("name" -> name, "parameterTypes" -> JsonArray(params *))
+    })
+
+  /** Appends precise `fields` entries, merging with an existing `fields` array. */
+  private def appendFields(entry: JsonObject, fields: Seq[String]): Unit =
+    appendMembers(entry, "fields", fields.map(name => JsonObject("name" -> name)))
+
+  private def appendMembers(entry: JsonObject, key: String, values: Seq[JsonObject]): Unit = {
+    if (values.isEmpty) return
+    entry.get(key) match {
+      case Some(existing: JsonArray) => values.foreach(existing.add)
+      case _                         => entry.add(key, JsonArray(values *))
+    }
   }
 
   /** Type descriptor as written into reachability-metadata.json.

@@ -115,13 +115,22 @@ object AotPolicy {
  * AotPolicy(Set(Category.DeclaredMethods, Category.DeclaredConstructors,
  *               Category.DeclaredFields), recursive = true)
  * }}}
+ *
+ * `unsafeAllocated`：允许 `Unsafe.allocateInstance`/JNI `AllocObject` 无构造器实例化。
+ * `jniAccessible`：把该类型连同其上登记的成员开放给 JNI（GraalVM 25 的
+ * `reflection` 条目 `jniAccessible` 字段），供本机代码 `FindClass`/`GetMethodID`
+ * 等反查；成员仍按 `categories` 展开（`allDeclared*`/`allPublic*` 对 JNI 同样生效）。
+ * 需要精确成员清单（如 JDK 内部类、agent 采集的 C→Java 回调）时改用
+ * [[AotHints.registerJniMethod]]/[[AotHints.registerJniField]]。
  */
 final case class AotPolicy(
     categories: Set[AotPolicy.Category],
     recursive: Boolean = false,
-    unsafeAllocated: Boolean = false) {
+    unsafeAllocated: Boolean = false,
+    jniAccessible: Boolean = false) {
 
-  /** 合并另一个策略：类别取并集，recursive/unsafeAllocated 取或。 */
+  /** 合并另一个策略：类别取并集，recursive/unsafeAllocated/jniAccessible 取或。 */
   def merge(other: AotPolicy): AotPolicy =
-    AotPolicy(categories ++ other.categories, recursive || other.recursive, unsafeAllocated || other.unsafeAllocated)
+    AotPolicy(categories ++ other.categories, recursive || other.recursive,
+      unsafeAllocated || other.unsafeAllocated, jniAccessible || other.jniAccessible)
 }

@@ -48,6 +48,9 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
   private val patterns = Collections.newSet[String]
   private val proxies = Collections.newSet[List[String]]
   private val constructors = Collections.newSet[String]
+  private val jniTypes = mutable.LinkedHashSet.empty[String]
+  private val jniMethods = mutable.LinkedHashMap.empty[String, mutable.LinkedHashSet[(String, List[String])]]
+  private val jniFields = mutable.LinkedHashMap.empty[String, mutable.LinkedHashSet[String]]
   private val serializables = Collections.newSet[Class[_]]
   private val runtimeInitialized = Collections.newSet[Class[_]]
 
@@ -55,7 +58,8 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
    *  `java.*`/`javax.*`/`jdk.*`/`sun.*`/`com.sun.*`/`scala.*` class is skipped in
    *  [[addType]] (recursive expansion and plain `registerType`) to avoid implicit
    *  JDK registrations. Explicit by-name registration of such types is still
-   *  possible via [[registerConstructor]] (e.g. JDK URL protocol handlers). */
+   *  possible via [[registerConstructor]] / [[registerJniType]] (e.g. JDK URL
+   *  protocol handlers, JNI callbacks into `sun.font.*`). */
   private val jdkPrefixes = Seq("java.", "javax.", "jdk.", "sun.", "com.sun.", "scala.")
 
   /** 简单路径：按容器默认策略（通常来自 registrar 的 `aotPolicy`）注册反射类型。 */
@@ -179,6 +183,43 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
     while it.hasNext do constructors.add(it.next())
   }
 
+  /** Registers a type as reachable from JNI (native code `FindClass`).
+   *
+   *  按类名登记 JNI 可达类型（生成 GraalVM 25 `reflection` 条目的
+   *  `"jniAccessible": true`）。JNI 元数据只能写在 `reachability-metadata.json`，
+   *  且仅登记类型**不足以**让本机代码 `GetMethodID`/`GetFieldID` —— 方法/字段还需
+   *  [[registerJniMethod]]/[[registerJniField]]（或按策略粗粒度展开，见
+   *  [[AotPolicy.jniAccessible]]）。显式点名登记即有意为之，不走 `isJdk` 过滤，
+   *  适用于 `classOf` 无法引用的 JDK 内部类（如 `sun.font.Font2D`）。
+   */
+  def registerJniType(typeNames: String*): Unit = {
+    val it = typeNames.iterator
+    while it.hasNext do jniTypes.add(it.next())
+  }
+
+  /** Registers a method of a JNI-accessible type (`GetMethodID`/`GetStaticMethodID`).
+   *
+   *  参数类型按 JSON 里的写法给出（`"int"`、`"char"`、`"java.lang.String"`、
+   *  `"sun.java2d.loops.CompositeType"` …）；构造器用名字 `<init>`。示例：
+   *  {{{
+   *  hints.registerJniMethod("sun.font.Font2D", "charToGlyphRaw", "int")
+   *  hints.registerJniMethod("sun.font.Font2D", "charToVariationGlyphRaw", "int", "int")
+   *  hints.registerJniMethod("sun.font.Font2D", "getMapper")
+   *  }}}
+   *  登记即隐式包含该类型的 `jniAccessible`。
+   */
+  def registerJniMethod(typeName: String, methodName: String, parameterTypeNames: String*): Unit = {
+    jniTypes.add(typeName)
+    jniMethods.getOrElseUpdate(typeName, mutable.LinkedHashSet.empty)
+      .add((methodName, parameterTypeNames.toList))
+  }
+
+  /** Registers a field of a JNI-accessible type (`GetFieldID`/`GetStaticFieldID`). */
+  def registerJniField(typeName: String, fieldNames: String*): Unit = {
+    jniTypes.add(typeName)
+    jniFields.getOrElseUpdate(typeName, mutable.LinkedHashSet.empty).addAll(fieldNames)
+  }
+
   /** Registers classes supporting Java serialization. */
   def registerSerializable(classes: Class[_]*): Unit = {
     val it = classes.iterator
@@ -208,6 +249,15 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
   /** Returns all class names with a registered no-arg constructor. */
   def getConstructors: collection.Set[String] = constructors
 
+  /** Returns all class names registered as JNI-accessible. */
+  def getJniTypes: collection.Set[String] = jniTypes
+
+  /** Returns JNI methods per type as `(methodName, parameterTypeNames)`. */
+  def getJniMethods: collection.Map[String, collection.Set[(String, List[String])]] = jniMethods
+
+  /** Returns JNI fields per type. */
+  def getJniFields: collection.Map[String, collection.Set[String]] = jniFields
+
   /** Returns all registered serializable classes. */
   def getSerializables: collection.Set[Class[_]] = serializables
 
@@ -217,7 +267,7 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
   /** Returns true if no hints have been registered. */
   def isEmpty: Boolean =
     typePolicies.isEmpty && patterns.isEmpty && proxies.isEmpty && constructors.isEmpty &&
-      serializables.isEmpty && runtimeInitialized.isEmpty
+      jniTypes.isEmpty && serializables.isEmpty && runtimeInitialized.isEmpty
 
   /** Merges all hints from another [[AotHints]] into this one. */
   def addAll(other: AotHints): Unit = {
@@ -225,6 +275,15 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
     patterns.addAll(other.patterns)
     proxies.addAll(other.proxies)
     constructors.addAll(other.constructors)
+    other.jniTypes.foreach(jniTypes.add)
+    other.jniMethods foreach { case (t, ms) =>
+      val target = jniMethods.getOrElseUpdate(t, mutable.LinkedHashSet.empty)
+      ms.foreach(target.add)
+    }
+    other.jniFields foreach { case (t, fs) =>
+      val target = jniFields.getOrElseUpdate(t, mutable.LinkedHashSet.empty)
+      fs.foreach(target.add)
+    }
     serializables.addAll(other.serializables)
     runtimeInitialized.addAll(other.runtimeInitialized)
   }
