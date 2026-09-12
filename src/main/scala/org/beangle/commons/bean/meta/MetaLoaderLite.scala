@@ -18,7 +18,7 @@
 package org.beangle.commons.bean.meta
 
 import org.beangle.commons.bean.meta.MetaModel.{BeanMeta, Ctor, Param}
-import org.beangle.commons.bean.meta.MetaLoader.{Accessor, buildProperties, getPropertyName, isFineMethod, typeof}
+import org.beangle.commons.bean.meta.MetaLoader.{Accessor, annotatedPropertyName, buildProperties, getPropertyName, isExplicitProperty, isFineMethod, typeof}
 import org.beangle.commons.lang.reflect.TypeInfo
 
 import java.lang.reflect.Field
@@ -30,6 +30,7 @@ import scala.collection.mutable
   * 与 [[MetaLoader]] 的差异：
   *  - getter 宽松：public 参数less 非 Unit 方法均视为只读属性，`getX`/`isX` 转属性名，
   *    其余保留原名（`size`/`pageIndex`），bridge 放行（`isEmpty`→`empty`）；
+  *    `@property` 标注的零参方法按注解命名（value 为空取方法名），与 [[MetaLoader]] 一致；
   *  - setter 仅认 `setX`/`x_$eq`/`x_=`，write-only 不成属性；
   *  - 无字段信息；构造器无默认参数值。
   */
@@ -50,14 +51,16 @@ object MetaLoaderLite {
     // getMethods 含继承的 public 方法；参数less 方法（含 bridge）即 getter，
     // JavaBean 命名（getX/isX）优先，setter 仅认 setX/x_$eq/x_=。
     clazz.getMethods foreach { m =>
-      if (isFineMethod(isCase, m, allowBridge = true)) {
+      if (isFineMethod(isCase, m, allowBridge = true) || isExplicitProperty(m)) {
         val paramCount = m.getParameterCount
         if (paramCount == 0 && m.getReturnType != classOf[Unit]) {
-          val name = getPropertyName(m.getName, getter = true)
-          val javaBean = name != m.getName
-          if (!getters.contains(name) || javaBean)
+          val annotated = annotatedPropertyName(m)
+          val name = annotated.getOrElse(getPropertyName(m.getName, getter = true))
+          // 显式注解与 JavaBean 命名（getX/isX）均可覆盖同名的弱 getter
+          if (!getters.contains(name) || annotated.isDefined || name != m.getName)
             getters.put(name, Accessor(m, typeof(m.getReturnType, m.getGenericReturnType, Map.empty)))
         } else if (paramCount == 1) {
+          // 注解只作用于零参方法，setter 仍按 setX/x_$eq/x_= 规则识别
           val name = getPropertyName(m.getName, getter = false)
           if (null != name && !name.contains("$"))
             setters.put(name, Accessor(m, typeof(m.getParameterTypes()(0), m.getGenericParameterTypes()(0), Map.empty)))

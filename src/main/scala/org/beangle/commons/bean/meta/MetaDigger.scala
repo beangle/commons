@@ -20,7 +20,7 @@ package org.beangle.commons.bean.meta
 import org.beangle.commons.bean.meta.MetaModel.ParamHolder
 import org.beangle.commons.bean.meta.MetaModel.BeanMeta
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.annotation.noreflect
+import org.beangle.commons.lang.annotation.{noreflect, property}
 import org.beangle.commons.bean.meta.MetaLoader.getPropertyName
 
 import scala.collection.mutable
@@ -134,6 +134,40 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     else name.startsWith("is") && name.length > 2 && name.charAt(2).isUpper
   }
 
+  /** `@property` 注解声明的属性名：value 为空取方法名，否则取 value。
+    *
+    * 注解只作用于参数个数为 0（非 Unit 返回）的方法；带参方法上的注解一律忽略。
+    * 与 [[MetaLoader.annotatedPropertyName]] 对齐：显式注解允许源码上的 `def foo(): T`
+    * 也被识别（字节码层面同样是 0 参）。
+    */
+  private def annotatedPropertyName(m: DefDef, paramSize: Int): Option[String] = {
+    if (0 != paramSize || isUnitType(m.returnTpt)) None
+    else
+      m.symbol.getAnnotation(Symbol.classSymbol(classOf[property].getName)) match {
+        case Some(term) =>
+          val value = annotationValue(term)
+          Some(if (value.isEmpty) m.name else value)
+        case None => None
+      }
+  }
+
+  /** 取注解实参中的 value 字面量；无显式实参（走默认值）时返回空串。 */
+  private def annotationValue(term: Term): String = term match {
+    case Apply(_, args) =>
+      args.collectFirst {
+        case NamedArg("value", Literal(StringConstant(v))) => v
+        case Literal(StringConstant(v)) => v
+      }.getOrElse("")
+    case Typed(inner, _) => annotationValue(inner)
+    case Inlined(_, _, inner) => annotationValue(inner)
+    case _ => ""
+  }
+
+  /** 是否为 Unit 返回类型。注意 `classOf[Unit].getName` 是 "void"，
+    * 在 TASTy 中匹配不到 `scala.Unit`，需按类型比较。 */
+  private def isUnitType(tpt: TypeTree): Boolean =
+    tpt.tpe =:= TypeRepr.of[Unit]
+
   /** Extracts (isGetter, propertyName) from DefDef if it is an accessor. */
   def findAccessor(m: DefDef): Option[(Boolean, String)] = {
     val name = m.name
@@ -143,14 +177,18 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       case _ =>
     }
     if isNormal(name) then
-      // Getter: no parameter lists at all (paramss is empty), non-Unit return
-      // Method with empty params like `def foo(): Int` has paramss.size == 1 but paramSize == 0
-      if (m.paramss.isEmpty && m.returnTpt.tpe.typeSymbol != Symbol.classSymbol(classOf[Unit].getName)) {
-        Some((true, getPropertyName(name, true)))
-      } else if (1 == paramSize) {
-        val propertyName = getPropertyName(name, false)
-        if (null != propertyName) Some((false, propertyName)) else None
-      } else None
+      annotatedPropertyName(m, paramSize) match {
+        case Some(propertyName) => Some((true, propertyName))
+        case None =>
+          // Getter: no parameter lists at all (paramss is empty), non-Unit return
+          // Method with empty params like `def foo(): Int` has paramss.size == 1 but paramSize == 0
+          if (m.paramss.isEmpty && !isUnitType(m.returnTpt)) {
+            Some((true, getPropertyName(name, true)))
+          } else if (1 == paramSize) {
+            val propertyName = getPropertyName(name, false)
+            if (null != propertyName) Some((false, propertyName)) else None
+          } else None
+      }
     else None
   }
 

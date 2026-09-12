@@ -20,7 +20,7 @@ package org.beangle.commons.bean.meta
 import org.beangle.commons.bean.meta.MetaModel.{BeanMeta, Ctor, Param, Property}
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.lang.annotation.noreflect
+import org.beangle.commons.lang.annotation.{noreflect, property}
 import org.beangle.commons.lang.reflect.{Reflections, TypeInfo}
 
 import java.lang.Character.isUpperCase
@@ -199,7 +199,7 @@ object MetaLoader {
     fields: collection.Map[String, Field],
     paramTypes: collection.Map[String, Class[_]]
   ): Unit = {
-    if (isFineMethod(isCase, method, false)) {
+    if (isFineMethod(isCase, method, false) || isExplicitProperty(method)) {
       findAccessor(method, fields) match {
         case Some((readable, name)) =>
           if (readable) {
@@ -288,23 +288,49 @@ object MetaLoader {
     else !name.contains("$")
   }
 
+  /** `@property` 声明的属性名：value 为空时取方法名，否则取 value。
+    *
+    * 注解只用于零参（非 Unit 返回）方法，即 Scala 中无法按 JavaBean 约定识别的
+    * 参数less def（`def hasPrevious: Boolean`，字节码上与 `def size()` 无差别）；
+    * 带参方法上的注解（含 setter）一律忽略，仍按原有规则识别。
+    */
+  private[meta] def annotatedPropertyName(method: JMethod): Option[String] = {
+    if (0 != method.getParameterCount || method.getReturnType == classOf[Unit]) None
+    else {
+      val annotation = method.getAnnotation(classOf[property])
+      if (null == annotation) None
+      else if (annotation.value.isEmpty) Some(method.getName) else Some(annotation.value)
+    }
+  }
+
+  /** 显式属性：`@property` 标注的 public 实例零参方法，`@noreflect` 仍可排除。 */
+  private[meta] def isExplicitProperty(method: JMethod): Boolean = {
+    annotatedPropertyName(method).isDefined &&
+      !Modifier.isStatic(method.getModifiers) && Modifier.isPublic(method.getModifiers) &&
+      !method.isAnnotationPresent(classOf[noreflect])
+  }
+
   /** Returns (true, propertyName) for getter, (false, propertyName) for setter, or None.
     * Identifies accessor methods. For getters, only accepts JavaBean-style (getXxx/isXxx)
     * or methods matching a known field name — Scala parameterless methods like `def parents`
     * cannot be distinguished from empty-parens methods like `def size()` at bytecode level,
-    * so they are excluded unless backed by a field.
+    * so they are excluded unless backed by a field or annotated with `@property`.
     */
   def findAccessor(method: JMethod, fields: collection.Map[String, Field]): Option[(Boolean, String)] = {
     val name = method.getName
     val parameterTypes = method.getParameterTypes
-    if (0 == parameterTypes.length && method.getReturnType != classOf[Unit]) {
-      if (isJavaBeanGetter(method) || fields.contains(name)) then
-        Some((true, getPropertyName(name, true)))
-      else None
-    } else if (1 == parameterTypes.length) {
-      val propertyName = getPropertyName(name, false)
-      if (null != propertyName && !propertyName.contains("$")) Some((false, propertyName)) else None
-    } else None
+    annotatedPropertyName(method) match {
+      case Some(propertyName) => Some((true, propertyName))
+      case None =>
+        if (0 == parameterTypes.length && method.getReturnType != classOf[Unit]) {
+          if (isJavaBeanGetter(method) || fields.contains(name)) then
+            Some((true, getPropertyName(name, true)))
+          else None
+        } else if (1 == parameterTypes.length) {
+          val propertyName = getPropertyName(name, false)
+          if (null != propertyName && !propertyName.contains("$")) Some((false, propertyName)) else None
+        } else None
+    }
   }
 
   /** Extracts property name from getter/setter method name. */
