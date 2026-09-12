@@ -53,6 +53,8 @@ class BuiltinAotHints extends AotHintRegistrar {
     hints.registerType(classOf[org.beangle.commons.lang.annotation.value])
     hints.registerType(classOf[org.beangle.commons.lang.annotation.spi])
     hints.registerType(classOf[org.beangle.commons.lang.annotation.default_value])
+    // BeanMeta 加载器经 method.getAnnotation(classOf[property]) 识别显式属性
+    hints.registerType(classOf[org.beangle.commons.lang.annotation.property])
 
     // 转换器对象：ConverterRegistry.add 经 converter.getClass.getMethods 反射解析
     // apply 参数/返回类型对，native 下需注册对象类的 public 方法（含 apply）。
@@ -92,13 +94,16 @@ class BuiltinAotHints extends AotHintRegistrar {
     hints.registerType(
       classOf[org.beangle.commons.cdi.Container])
 
-    // 其他 commons 类：序列化、JSON、分页、配置等
+    // 其他 commons 类：序列化、JSON、分页、配置等。
+    // Page 实现既是序列也是 bean：模板（SeqModel）经 BeanInfo.methods 反射调用
+    // hasPrevious/hasNext/totalPages 等 def 属性，native 下需注册 public 方法。
     hints.registerType(
       classOf[org.beangle.commons.activation.MediaType],
       classOf[org.beangle.commons.cache.Cache[?, ?]],
       classOf[org.beangle.commons.cache.CacheManager],
       classOf[org.beangle.commons.collection.page.Page[?]],
       classOf[org.beangle.commons.collection.page.SinglePage[?]],
+      classOf[org.beangle.commons.collection.page.PagedSeq[?]],
       classOf[org.beangle.commons.config.XmlConfigs],
       classOf[org.beangle.commons.io.BinarySerializer],
       classOf[org.beangle.commons.io.Serializer],

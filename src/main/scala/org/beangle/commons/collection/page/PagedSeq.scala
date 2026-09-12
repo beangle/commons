@@ -18,6 +18,7 @@
 package org.beangle.commons.collection.page
 
 import org.beangle.commons.collection.page.PagedSeq.*
+import org.beangle.commons.lang.annotation.property
 
 /** PagedSeq factory and helpers. */
 object PagedSeq {
@@ -77,9 +78,11 @@ class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends Page[E]() {
   override def totalItems: Int = datas.size
 
   /** Returns true if there is a next page. */
+  @property
   override def hasNext: Boolean = pageIndex < totalPages
 
   /** Returns true if there is a previous page. */
+  @property
   override def hasPrevious: Boolean = pageIndex > 1
 
   /** Advances to next page. */

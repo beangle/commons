@@ -17,6 +17,8 @@
 
 package org.beangle.commons.collection.page
 
+import org.beangle.commons.lang.annotation.property
+
 /** Single-page paging model (no cursor for next/previous).
  *
  * @author chaostone
@@ -24,6 +26,7 @@ package org.beangle.commons.collection.page
 class SinglePage[E](val pageIndex: Int, val pageSize: Int, val totalItems: Int, val items: collection.Seq[E]) extends Page[E] {
 
   /** Total number of pages. */
+  @property
   def totalPages: Int = {
     if totalItems < pageSize then 1
     else
@@ -33,9 +36,11 @@ class SinglePage[E](val pageIndex: Int, val pageSize: Int, val totalItems: Int, 
   }
 
   /** Returns true if a next page exists. */
+  @property
   def hasNext: Boolean = totalPages > pageIndex
 
   /** Returns true if a previous page exists. */
+  @property
   def hasPrevious: Boolean = pageIndex > 1
 
   /** Returns this (single page has no next). */
@@ -59,6 +64,7 @@ class SinglePage[E](val pageIndex: Int, val pageSize: Int, val totalItems: Int, 
   def apply(index: Int): E = items(index)
 
   /** Number of items on this page. */
+  @property
   def length: Int = items.size
 
   /** Iterator over page items. */

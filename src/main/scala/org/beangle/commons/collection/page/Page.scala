@@ -17,6 +17,8 @@
 
 package org.beangle.commons.collection.page
 
+import org.beangle.commons.lang.annotation.property
+
 /** Page factory and constants. */
 object Page {
 
@@ -42,8 +44,10 @@ object Page {
 
     def totalItems: Int = 0
 
+    @property
     def hasNext: Boolean = false
 
+    @property
     def hasPrevious: Boolean = false
 
     def next(): Page[Any] = this
@@ -84,12 +88,14 @@ trait Page[E] extends collection.immutable.Seq[E] {
   def next(): Page[E]
 
   /** True if next page exists. */
+  @property
   def hasNext: Boolean
 
   /** Previous page. */
   def previous(): Page[E]
 
   /** True if previous page exists. */
+  @property
   def hasPrevious: Boolean
 
   /** Page at given index. */

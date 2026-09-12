@@ -259,6 +259,28 @@ class AotHintsTest extends AnyFunSpec, Matchers {
       registrar.aotHints.getConstructors should contain allOf (
         "sun.net.www.protocol.http.Handler", "sun.net.www.protocol.https.Handler")
     }
+
+    it("BuiltinAotHints registers Page implementations for bean-style access") {
+      val registrar = new BuiltinAotHints
+      registrar.registering()
+      val entries = reflectEntries(registrar.aotHints)
+      val pages = entries
+        .filter(e => e("type").toString.startsWith("org.beangle.commons.collection.page."))
+        .map(e => (e("type").toString, e("allPublicMethods")))
+        .toMap
+      pages should contain allOf (
+        "org.beangle.commons.collection.page.SinglePage" -> true,
+        "org.beangle.commons.collection.page.PagedSeq" -> true)
+    }
+
+    it("BuiltinAotHints registers runtime-visible bean annotations") {
+      val registrar = new BuiltinAotHints
+      registrar.registering()
+      val types = reflectEntries(registrar.aotHints).map(e => e("type").toString).toSet
+      types should contain allOf (
+        "org.beangle.commons.lang.annotation.description",
+        "org.beangle.commons.lang.annotation.property")
+    }
   }
 
   describe("AotHints JNI registration") {
