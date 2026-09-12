@@ -66,22 +66,22 @@ class MetaLoaderLiteTest extends AnyFunSpec, Matchers {
       byName("code").setterName shouldBe None
     }
 
-    it("discovers read-only accessors on SinglePage (size-style and is-bridges)") {
+    it("keeps page accessors on SinglePage and drops inherited collection api") {
       val cm = MetaLoaderLite.load(classOf[SinglePage[String]])
       val byName = cm.properties.map(p => (p.name, p)).toMap
       byName.keySet should contain allOf(
         "pageIndex", "pageSize", "totalItems", "items", "totalPages",
-        "hasNext", "hasPrevious", "size", "length", "empty", "traversableAgain")
+        "hasNext", "hasPrevious", "length", "empty", "traversableAgain")
+      // scala.collection 的方法（含 Scala 3 mixin forwarder）不是 Bean 属性
+      byName.keySet should contain noneOf ("size", "head", "tail", "toList", "seq", "mkString")
       byName("pageIndex").getterName shouldBe "pageIndex"
       byName("pageIndex").setterName shouldBe None
       byName("items").getterName shouldBe "items"
-      byName("size").getterName shouldBe "size"
       byName("empty").getterName shouldBe "isEmpty"
       byName("traversableAgain").getterName shouldBe "isTraversableAgain"
-      // 主构造器参数形成的属性非 transient；size/is 型继承方法无 setter、非主构造器参数 → transient
+      // 主构造器参数形成的属性非 transient；is 型继承方法无 setter、非主构造器参数 → transient
       byName("pageIndex").isTransient shouldBe false
       byName("items").isTransient shouldBe false
-      byName("size").isTransient shouldBe true
       byName("empty").isTransient shouldBe true
     }
 

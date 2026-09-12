@@ -218,7 +218,7 @@ object MetaLoader {
     }
   }
 
-  private def isJavaBeanGetter(method: JMethod): Boolean = {
+  private[meta] def isJavaBeanGetter(method: JMethod): Boolean = {
     val name = method.getName
     if name.startsWith("get") && name.length > 3 && isUpperCase(name.charAt(3)) then true
     else if name.startsWith("is") && name.length > 2 && isUpperCase(name.charAt(2)) then true

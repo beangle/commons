@@ -134,6 +134,10 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     else name.startsWith("is") && name.length > 2 && name.charAt(2).isUpper
   }
 
+  /** JavaBean 风格 setter 名（setXxx）。 */
+  private def isJavaBeanSetterName(name: String): Boolean =
+    name.startsWith("set") && name.length > 3 && name.charAt(3).isUpper
+
   /** `@property` 注解声明的属性名：value 为空取方法名，否则取 value。
     *
     * 注解只作用于参数个数为 0（非 Unit 返回）的方法；带参方法上的注解一律忽略。
@@ -167,6 +171,15 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     * 在 TASTy 中匹配不到 `scala.Unit`，需按类型比较。 */
   private def isUnitType(tpt: TypeTree): Boolean =
     tpt.tpe =:= TypeRepr.of[Unit]
+
+  /** scala./java. 标准库基类。其中大部分是集合与框架方法（Seq 的 head/toList/size
+    * 会把 Page 实现膨胀成几十个属性），但仍可能有 JavaBean 命名的成员（isEmpty/isTraversableAgain），
+    * 这类成员与 [[MetaLoader]]/[[MetaLoaderLite]] 保持一致，不因定义在标准库而被丢弃。
+    *
+    * java.* 基类在编译期拿不到成员树，dig 不扫（[[MetaLoader.supports]] 也拒绝把 JDK 类
+    * 作为运行期反射入口），其 JavaBean 属性由上层、且是工程内的 Java 父类经 javaBases 合并。 */
+  private def isLibraryBase(fullName: String): Boolean =
+    fullName.startsWith("scala.") || fullName.startsWith("java.")
 
   /** Extracts (isGetter, propertyName) from DefDef if it is an accessor. */
   def findAccessor(m: DefDef): Option[(Boolean, String)] = {
@@ -212,9 +225,10 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       resolveDefParams(defdef, Map.empty, if i == 1 then ctorDefaults else Map.empty)
     }
 
-    val superBases = Set("scala.Any", "scala.Matchable", "java.lang.Object", "scala.Equals", "scala.Product", "java.io.Serializable")
-    for (bc <- typeRepr.baseClasses if !superBases.contains(bc.fullName)) {
+    // scala.* 基类按 JavaBean 名称收录（见 isLibraryBase）；java.* 基类无成员树，直接跳过。
+    for (bc <- typeRepr.baseClasses if !bc.fullName.startsWith("java.")) {
       val base = typeRepr.baseType(bc)
+      val libraryBase = isLibraryBase(bc.fullName)
       var params = Map.empty[String, TypeRepr]
       base match {
         case a: AppliedType => params = resolveClassTypes(a)
@@ -230,7 +244,7 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
 
       //Some fields declared in primary constructor will by ignored due to missing public access methods.
       //So we discover declared fields,they may appear in that collection.
-      base.typeSymbol.declaredFields foreach { mm =>
+      if !libraryBase then base.typeSymbol.declaredFields foreach { mm =>
         if !mm.flags.is(Flags.JavaDefined) then
           val tpe = mm.tree.asInstanceOf[ValDef].tpt.tpe
           val transnt = mm.annotations exists (x => x.show.toLowerCase.contains("transient"))
@@ -253,7 +267,8 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
           val ignored = isCaseClass && MetaLoader.caseIgnores.contains(defdef.name) || MetaLoader.ignores.contains(defdef.name)
           val noreflect = defdef.symbol.hasAnnotation(Symbol.classSymbol(classOf[noreflect].getName))
           val isStatic = defdef.symbol.flags.is(Flags.JavaStatic)
-          if (isPublic && isNormal(defdef.name) && !ignored && !noreflect && !isStatic) {
+          if (isPublic && isNormal(defdef.name) && !ignored && !noreflect && !isStatic
+            && (!libraryBase || isJavaBeanGetterName(defdef.name) || isJavaBeanSetterName(defdef.name))) {
             var paramSize = 0
             defdef.paramss.foreach {
               case TermParamClause(ps) => paramSize += ps.size

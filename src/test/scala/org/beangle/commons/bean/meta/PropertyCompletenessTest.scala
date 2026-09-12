@@ -30,9 +30,10 @@ import org.scalatest.matchers.should.Matchers
   *
   * 约定：
   *  - 能三路对齐的类（Java bean、普通 Scala bean、注解属性）三路严格相等；
-  *  - Page 实现继承自 scala.collection.Seq，lite/dig 天然更宽松（全部参数less 方法），
-  *    因此只对 strict 严格相等，lite 校验「包含 + 同名同类同访问器 + 无垃圾属性」；
-  *  - dig 目前无法处理 Seq 子类（`resolveType` 不支持 `ThisType`），故不列入 dig 校验。
+  *  - Page 实现继承自 scala.collection.Seq，lite/dig 对工程内声明的参数less 方法更宽松，
+  *    因此 strict 精确校验、lite 校验「包含 strict + 同名同类同访问器 + 无库方法」，
+  *    dig 对标准库基类只收录 JavaBean 命名的成员（java.* 基类无成员树，不参与 dig）；
+  *  - 任何提取器都不得把 scala.collection 的集合 API 变成 Bean 属性。
   */
 class PropertyCompletenessTest extends AnyFunSpec, Matchers {
 
@@ -49,14 +50,26 @@ class PropertyCompletenessTest extends AnyFunSpec, Matchers {
     "canEqual", "copy", "productArity", "productIterator", "productPrefix", "productElement",
     "productElementName", "productElementNames", "apply", "unapply", "unApply")
 
+  /** scala.collection 一类标准库方法，绝不能作为 Bean 属性出现（含 Scala 3 mixin forwarder）。 */
+  private val libraryApi = Set(
+    "size", "knownSize", "hasDefiniteSize", "lengthIs", "sizeIs", "head", "headOption", "tail",
+    "init", "last", "lastOption", "toList", "toSeq", "toSet", "toVector", "toStream", "toBuffer",
+    "toIndexedSeq", "toIterable", "toIterator", "toTraversable", "mkString", "nonEmpty", "seq",
+    "view", "permutations", "combinations", "distinct", "reverse", "reversed", "reverseIterator",
+    "indices", "lift", "lifted", "zipWithIndex", "repr", "stringPrefix", "coll", "companion",
+    "iterableFactory", "collectionClassName", "className", "newSpecificBuilder", "inits", "tails")
+
+  private def checkClean(label: String, names: collection.Set[String]): Unit = {
+    withClue(s"$label junk properties: ") { names.intersect(junk) shouldBe empty }
+    withClue(s"$label library api: ") { names.intersect(libraryApi) shouldBe empty }
+  }
+
   private def check(label: String, cm: MetaModel.BeanMeta, expected: Map[String, Exp]): Unit = {
     val actual = cm.properties.map(p => (p.name, p)).toMap
     withClue(s"$label property names: ") {
       actual.keySet shouldBe expected.keySet
     }
-    withClue(s"$label junk properties: ") {
-      actual.keySet.intersect(junk) shouldBe empty
-    }
+    checkClean(label, actual.keySet)
     expected.foreach { case (name, ex) =>
       withClue(s"$label.$name: ") {
         val p = actual(name)
@@ -73,9 +86,7 @@ class PropertyCompletenessTest extends AnyFunSpec, Matchers {
     withClue(s"$label missing properties: ") {
       actual.keySet.intersect(expected.keySet) shouldBe expected.keySet
     }
-    withClue(s"$label junk properties: ") {
-      actual.keySet.intersect(junk) shouldBe empty
-    }
+    checkClean(label, actual.keySet)
     expected.foreach { case (name, ex) =>
       withClue(s"$label.$name: ") {
         val p = actual(name)
@@ -196,5 +207,73 @@ class PropertyCompletenessTest extends AnyFunSpec, Matchers {
       check("EmptyPage.strict", MetaLoader.load(clazz), expected)
       checkSuperset("EmptyPage.lite", MetaLoaderLite.load(clazz), expected)
     }
+
+    it("继承 JDK bean 基类: lite 的 getter/setter 与 strict 一致（库收窄只作用于 getter）") {
+      // java.util.Date 提供 getTime/setTime 等 JavaBean 访问器，用于验证库基类的 setter 不被丢弃
+      class DateBean extends java.util.Date
+      val strict = MetaLoader.load(classOf[DateBean]).properties.map(p => (p.name, p.getterName, p.setterName))
+      val lite = MetaLoaderLite.load(classOf[DateBean]).properties.map(p => (p.name, p.getterName, p.setterName))
+      lite shouldBe strict
+      strict.map(_._1).contains("time") shouldBe true
+    }
+
+    it("工程内参数less 方法: strict 只认字段，lite/dig 全部收录（文档 4.1 示例）") {
+      val strictProps = exp(
+        e("items", classOf[collection.Seq[_]], "items"),
+        e("pageIndex", classOf[Int], "pageIndex"))
+      val lenientProps = strictProps ++ exp(
+        e("hasNext", classOf[Boolean], "hasNext"),
+        e("iterator", classOf[collection.Iterator[_]], "iterator"),
+        e("size", classOf[Int], "size"),
+        e("totalPages", classOf[Int], "totalPages"))
+      check("PageBean.strict", MetaLoader.load(classOf[PageBean]), strictProps)
+      // 工程内声明的参数less 方法（含 size）不受 libraryApi 黑名单约束，这里不复用 check
+      val expectedNames = lenientProps.values.map(_.name).toSeq.sorted
+      Seq(
+        ("PageBean.lite", MetaLoaderLite.load(classOf[PageBean])),
+        ("PageBean.dig", MetaModels.of(classOf[PageBean]))
+      ).foreach { case (label, cm) =>
+        withClue(s"$label property names: ") { cm.properties.map(_.name) shouldBe expectedNames }
+        withClue(s"$label setters: ") { cm.properties.flatMap(_.setterName) shouldBe empty }
+        cm.properties.find(_.name == "size").get.typeinfo.clazz shouldBe classOf[Int]
+      }
+    }
+
+    it("Page 实现的 dig：JavaBean 风格属性与 strict 对齐，不含集合 API") {
+      val pageProps = exp(
+        e("hasNext", classOf[Boolean], "hasNext"),
+        e("hasPrevious", classOf[Boolean], "hasPrevious"),
+        e("items", classOf[collection.Seq[_]], "items"),
+        e("iterator", classOf[collection.Iterator[_]], "iterator"),
+        e("length", classOf[Int], "length"),
+        e("pageIndex", classOf[Int], "pageIndex"),
+        e("pageSize", classOf[Int], "pageSize"),
+        e("totalItems", classOf[Int], "totalItems"),
+        e("totalPages", classOf[Int], "totalPages"))
+      // 标准库基类中 JavaBean 命名的成员（isEmpty/isTraversableAgain）照常收录，与 strict 一致
+      val libraryProps = exp(
+        e("empty", classOf[Boolean], "isEmpty"),
+        e("traversableAgain", classOf[Boolean], "isTraversableAgain"))
+      check("SinglePage.dig", MetaModels.of(classOf[SinglePage[String]]), pageProps ++ libraryProps)
+      check("BarePage.dig", MetaModels.of(classOf[BarePage]), pageProps ++ libraryProps)
+      check(
+        "PagedSeq.dig",
+        MetaModels.of(classOf[PagedSeq[String]]),
+        pageProps ++ libraryProps ++ exp(
+          e("datas", classOf[collection.immutable.Seq[_]], "datas"),
+          e("page", classOf[Page[_]], "page", "page_$eq"),
+          e("pageIndex", classOf[Int], "pageIndex", "pageIndex_$eq")))
+      // dig 是 lite 的子集：dig 不含 lite 从工程内参数less 方法多认出来的成员
+      val lite = MetaLoaderLite.load(classOf[SinglePage[String]]).properties.map(_.name).toSet
+      (pageProps.keySet ++ libraryProps.keySet).subsetOf(lite) shouldBe true
+    }
   }
+}
+
+/** 工程内参数less 方法示例，固定 strict/lite/dig 差异（见 docs/metamodel-loader-rules.md 4.1）。 */
+class PageBean(val pageIndex: Int, val items: collection.Seq[String]) {
+  def totalPages: Int = 1
+  def hasNext: Boolean = false
+  def iterator: Iterator[String] = items.iterator
+  def size: Int = items.size
 }
