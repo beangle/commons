@@ -99,6 +99,9 @@ AotPolicy.full:
 hints.registerType(classOf[User], AotPolicy.bean)
 ```
 
+`AotPolicy.default` 对应 `MetaLoaderLite`（只用 public 成员），`AotPolicy.bean` 对应
+`MetaLoader`。两者的属性识别差异见 [metamodel-loader-rules.md](metamodel-loader-rules.md)。
+
 ### 为什么需要 AotPolicy.bean
 
 `MetaLoader` 是 beangle 的运行时反射工具（当没有预构建的 `beanmeta.idx` 时的回退路径）。

@@ -2,6 +2,7 @@
 
 > Usage, architecture, and tooling for the beangle metamodel system.
 > For the binary format specification, see [metamodel-spec.md](metamodel-spec.md).
+> For property extraction rules of the three loaders, see [metamodel-loader-rules.md](metamodel-loader-rules.md).
 
 ## 1. Architecture
 
@@ -12,6 +13,7 @@ org.beangle.commons.bean.meta
 ├── MetaIndex          # Multi-class container format (BBXI magic)
 ├── MetaModels         # Global lookup (full-load-at-startup)
 ├── MetaLoader         # Runtime reflection → ClassMeta (fallback)
+├── MetaLoaderLite     # Native-friendly reflection (public members only)
 ├── MetaJson           # Debug JSON export (one-way)
 ├── MetaRegistrar       # Abstract registry for collecting ClassMeta
 ├── MetaGenerator      # CLI tool for generating beanmeta.idx
