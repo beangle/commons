@@ -42,17 +42,32 @@ strict 需要 declared 字段与方法并递归父类/接口（`AotPolicy.bean`�
    字符大写时保持原样，避免 `getURL` → `uRL`）；
 2. **同名字段**：方法名与已发现的字段同名（Scala `val`/`var` 的访问器）；
 3. **`@property` 显式声明**：`value` 为空取方法名，否则取 `value`；只作用于 0 参非 `Unit`
-   方法，带参/`Unit` 方法上的注解一律忽略。
+   方法，带参/`Unit` 方法上的注解一律忽略；
+4. **配对 setter**：继承链上存在同名 setter（`setXxx` / `x_$eq` / `x_=`），即
+   `def x: T` 配 `def x_=(v: T)` 的读写访问器对。这类属性没有同名字段，字节码层面
+   `def x` 与空括号方法 `def x()` 无法区分，因此以「配对 setter」作为佐证。setter 属性名由
+   `MetaLoader.collectSetterNames` 预扫描得到，与声明顺序、getter 与 setter 是否分处
+   父子类/trait 无关。
+
+条件 4 的边界：
+
+- 只放行**有配对 setter** 的参数less 方法：单独的参数less `def x: T`（无字段、无 setter）
+  在 strict 下仍不是属性，避免把 `def size: Int` 一类空括号方法误当属性（见 4.1）；
+- 只作用于**应用类自身声明**的成员：getter 与 setter 都在非 `scala.*`/`java.*` 类中才算配对。
+  库基类的参数less 方法仍只按 JavaBean 命名/同名字段识别，保持 strict 不引入 lite/dig 看不到
+  的属性（`lite ⊇ strict`）。
 
 `MetaLoaderLite` 在**工程内声明**的方法上更宽松：public 参数less 非 `Unit` 方法即使不满足
-1–3 也登记为属性（属性名保留方法名，如 `iterator`），因此 lite 会多出 strict 看不到的工程内
-参数less 属性。
+1–4 也登记为属性（属性名保留方法名，如 `iterator`），因此 lite 会多出 strict 看不到的工程内
+参数less 属性；`MetaDigger`（dig）同样收录工程内所有参数less 方法。三条路径对满足条件 4 的
+虚拟属性对结果一致（见 4.3）。
 
 ### 2.2 setter
 
 仅识别 `setXxx`（第 4 字符大写）、`x_$eq`（Scala 方法的 JVM 名）、`x_=` 三种形态。
 属性名与 getter 对齐后回填 `setterName`；`checkTransient` 会把「无 setter 且不在主构造参数
-中」的属性标记为 transient，所以 setter 丢失会连带影响 transient 标记。
+中」的属性标记为 transient，所以 setter 丢失会连带影响 transient 标记。setter 自身不产生属性
+（write-only 不成属性），但会参与 getter 识别：见 2.1 条件 4。
 
 ### 2.3 忽略名单
 
@@ -73,13 +88,14 @@ strict 需要 declared 字段与方法并递归父类/接口（`AotPolicy.bean`�
 | `getXxx(): T` | ✔ | ✔ | ✔（`scala.*`）；`java.*` 编译期不可见 |
 | `isXxx(): T`（惯例 Boolean，不校验返回类型） | ✔ | ✔ | ✔（`scala.*`）；`java.*` 编译期不可见 |
 | `setXxx(v)` | ✔ | ✔ | ✔（`scala.*`）；`java.*` 编译期不可见 |
-| 参数less `def x: T`（非 JavaBean 名） | ✘ | ✘ | ✘ |
+| 参数less `def x: T`（非 JavaBean 名，库基类；应用类配对 setter 见 2.1 条件 4） | ✘ | ✘ | ✘ |
 | `@property` 标注在库基类方法 | ✔ | ✔ | ✘（只认 JavaBean 命名） |
 
 ### 3.1 MetaLoader（strict）：不按包排除，只按命名判定
 
 strict 会遍历整个继承链（父类一路到 `AnyRef`，接口全部递归），不做 `scala.`/`java.` 包过滤。
-限制属性数量的是 getter 的命名门槛（`isJavaBeanGetter` 或同名字段）。因此：
+限制属性数量的是 getter 的命名门槛（`isJavaBeanGetter`、同名字段、`@property`，或
+「应用类内配对 setter」，见 2.1）。因此：
 
 ```scala
 class DateBean extends java.util.Date
@@ -175,6 +191,41 @@ strict/lite 都能拿到 JDK 基类的 JavaBean 属性，且 `setDate`/`setHours
 > `MetaModels.of(classOf[X])` 是 inline 宏，参数必须是类字面量；用 `Class[_]` 变量传入会在
 > 编译期宏展开时报错。
 
+### 4.3 虚拟属性对 `def x` / `def x_=`
+
+```scala
+class BaseMeta {
+  private var stored: String = _
+  def base: String = stored
+  def base_=(v: String): Unit = stored = v
+}
+```
+
+| 路径 | 属性 |
+|---|---|
+| strict | `base`（getterName `base`，setterName `base_$eq`，非 transient） |
+| lite | `base` |
+| dig | `base` |
+
+这类属性没有同名字段（`stored` 是私有字段，名字也不相同），strict 依据 2.1 条件 4 的
+「配对 setter」识别，因此与 lite/dig 一致。配对判定在遍历前预扫描继承链上的应用类 setter
+（`collectSetterNames`），所以 setter 先声明、getter 先声明、乃至 getter 在 trait、setter 在
+实现类，结果都相同。
+
+对照：只有参数less getter、没有配对 setter 时，strict 仍不收录（lite/dig 收录）：
+
+```scala
+class GetterOnly {
+  def nothing: String = "n"
+}
+```
+
+| 路径 | 属性 |
+|---|---|
+| strict | 无 |
+| lite | `nothing` |
+| dig | `nothing` |
+
 ## 5. 已知差异
 
 ### 5.1 lite 相对 strict 的信息缺失
@@ -213,9 +264,10 @@ class DefaultedBean(val id: Long = 1L, val name: String = "n")
 ### 5.2 其他
 
 - **dig 不产出 `java.*` 基类属性**（见 3.3），strict/lite 有；
-- **lite/dig 比 strict 多认工程内参数less 方法**（如 `Page.iterator`），是有意放宽；
-- **空括号方法 `def x(): T`**：字节码与参数less 方法同为 0 参，lite 收录、strict 需同名字段
-  或 `@property`、dig 不收录（`paramss` 非空）；
+- **lite/dig 比 strict 多认工程内参数less 方法**（如 `Page.iterator`），是有意放宽；例外是
+  2.1 条件 4 的虚拟属性对（`def x`/`def x_=`），三条路径一致；
+- **空括号方法 `def x(): T`**：字节码与参数less 方法同为 0 参，lite 收录、strict 需同名字段、
+  `@property` 或配对 setter（见 2.1 条件 4）、dig 不收录（`paramss` 非空）；
 - **库基类上的 `@property`**：strict/lite 生效，dig 只认 JavaBean 命名；
 - **属性名集合**：黄金测试覆盖的用例里 lite ⊇ strict（lite 只多不少），setter 与 getterName 优先级两者一致。
 

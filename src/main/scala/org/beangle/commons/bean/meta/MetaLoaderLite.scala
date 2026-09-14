@@ -18,7 +18,7 @@
 package org.beangle.commons.bean.meta
 
 import org.beangle.commons.bean.meta.MetaModel.{BeanMeta, Ctor, Param}
-import org.beangle.commons.bean.meta.MetaLoader.{Accessor, annotatedPropertyName, buildProperties, getPropertyName, isExplicitProperty, isFineMethod, isJavaBeanGetter, typeof}
+import org.beangle.commons.bean.meta.MetaLoader.{Accessor, annotatedPropertyName, buildProperties, getPropertyName, isExplicitProperty, isFineMethod, isJavaBeanGetter, isLibraryDeclared, typeof}
 import org.beangle.commons.lang.reflect.TypeInfo
 
 import java.lang.reflect.{Field, Method}
@@ -94,10 +94,5 @@ object MetaLoaderLite {
     if (method.getParameterCount == 1) true
     else if (!method.isBridge && !isLibraryDeclared(method)) true
     else isJavaBeanGetter(method) || annotatedPropertyName(method).isDefined
-  }
-
-  private def isLibraryDeclared(method: Method): Boolean = {
-    val declaring = method.getDeclaringClass.getName
-    declaring.startsWith("scala.") || declaring.startsWith("java.")
   }
 }

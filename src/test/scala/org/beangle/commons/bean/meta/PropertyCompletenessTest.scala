@@ -131,6 +131,13 @@ class PropertyCompletenessTest extends AnyFunSpec, Matchers {
       check("LiteReadOnlyBean.dig", MetaModels.of(classOf[LiteReadOnlyBean]), expected)
     }
 
+    it("虚拟属性 def x / def x_=: 无字段但有配对 setter，三路一致") {
+      val expected = exp(e("base", classOf[String], "base", "base_$eq"))
+      check("VirtualPropsMeta.strict", MetaLoader.load(classOf[VirtualPropsMeta]), expected)
+      check("VirtualPropsMeta.lite", MetaLoaderLite.load(classOf[VirtualPropsMeta]), expected)
+      check("VirtualPropsMeta.dig", MetaModels.of(classOf[VirtualPropsMeta]), expected)
+    }
+
     it("case class: 主构造参数成为属性，case 样板方法不进 getter") {
       val expected = exp(
         e("id", classOf[Long], "id"),
@@ -215,6 +222,16 @@ class PropertyCompletenessTest extends AnyFunSpec, Matchers {
       val lite = MetaLoaderLite.load(classOf[DateBean]).properties.map(p => (p.name, p.getterName, p.setterName))
       lite shouldBe strict
       strict.map(_._1).contains("time") shouldBe true
+    }
+
+    it("应用类参数less getter 不继承库 setter 配对：库成员仍按 JavaBean 规则") {
+      // java.util.Date 有 setTime/setYear...，但库声明的 setter 不作为应用类 getter 的配对佐证
+      class OrderBean extends java.util.Date {
+        def title: String = "t"
+      }
+      val strictNames = MetaLoader.load(classOf[OrderBean]).properties.map(_.name)
+      strictNames should not contain "title"
+      MetaLoaderLite.load(classOf[OrderBean]).properties.map(_.name) should contain("title")
     }
 
     it("工程内参数less 方法: strict 只认字段，lite/dig 全部收录（文档 4.1 示例）") {

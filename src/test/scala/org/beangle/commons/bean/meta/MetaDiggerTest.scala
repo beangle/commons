@@ -267,6 +267,26 @@ class MetaDiggerTest extends AnyFunSpec, Matchers {
       assert(!p.isTransient)
     }
 
+    it("strict reflection finds the pair by its setter, without a same-named field") {
+      val cm = MetaLoader.load(classOf[VirtualPropsMeta2])
+      val p = cm.properties.find(_.name == "base").get
+      assert(p.getterName == "base")
+      assert(p.setterName.contains("base_$eq"))
+      assert(!p.isTransient)
+    }
+
+    it("strict reflection pairs a getter declared in a trait with a setter in the subclass") {
+      val cm = MetaLoader.load(classOf[VirtualPropImpl])
+      val p = cm.properties.find(_.name == "code").get
+      assert(p.getterName == "code")
+      assert(p.setterName.contains("code_$eq"))
+    }
+
+    it("a parameterless method without a paired setter stays out of strict reflection") {
+      val cm = MetaLoader.load(classOf[VirtualGetterOnly])
+      assert(cm.properties.isEmpty)
+    }
+
     it("virtual property getter/setter are invocable via BeanInfo") {
       val cm = MetaModels.of(classOf[VirtualPropsMeta])
       val bi = BeanInfo.from(cm)
@@ -314,6 +334,22 @@ class VirtualPropsMeta2 {
   private var _base: String = _
   def base: String = _base
   def base_=(n: String): Unit = _base = n
+}
+
+/** 虚拟属性：getter 在 trait、setter 在实现类，验证 strict 的 setter 预扫描跨继承链生效。 */
+trait VirtualPropTrait {
+  def code: String
+}
+
+class VirtualPropImpl extends VirtualPropTrait {
+  private var stored: String = "c"
+  def code: String = stored
+  def code_=(v: String): Unit = stored = v
+}
+
+/** 只有参数less getter、没有配对 setter：strict 仍按原规则排除（无同名字段）。 */
+class VirtualGetterOnly {
+  def nothing: String = "n"
 }
 
 /** 单例（TermRef）类型属性：`def math: MathOpsMeta.type = MathOpsMeta`，

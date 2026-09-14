@@ -66,6 +66,9 @@ object MetaLoader {
     val setters = new mutable.HashMap[String, Accessor]
     val fields = new mutable.HashMap[String, Field]
     val accessed = new mutable.HashSet[Class[_]]
+    // 先收集 setter 属性名，主遍历时据此放行「无同名字段但有配对 setter」的参数less getter，
+    // 避免依赖 getDeclaredMethods 的返回顺序。
+    val setterNames = collectSetterNames(clazz)
     var nextClass = clazz
     var paramTypes: collection.Map[String, Class[_]] = Map.empty
 
@@ -73,9 +76,9 @@ object MetaLoader {
     while (null != nextClass && classOf[AnyRef] != nextClass) {
       nextClass.getDeclaredFields foreach { f => fields += (f.getName -> f) }
       nextClass.getDeclaredMethods foreach { m =>
-        processMethod(isCase, m, getters, setters, fields, paramTypes)
+        processMethod(isCase, m, getters, setters, fields, paramTypes, setterNames)
       }
-      navInterfaces(nextClass, accessed, getters, setters, fields, paramTypes)
+      navInterfaces(nextClass, accessed, getters, setters, fields, paramTypes, setterNames)
       val nextType = nextClass.getGenericSuperclass
       nextClass = nextClass.getSuperclass
       paramTypes = Reflections.deduceParamTypes(nextClass, nextType, paramTypes)
@@ -170,7 +173,8 @@ object MetaLoader {
     getters: mutable.HashMap[String, Accessor],
     setters: mutable.HashMap[String, Accessor],
     fields: collection.Map[String, Field],
-    paramTypes: collection.Map[String, Class[_]]
+    paramTypes: collection.Map[String, Class[_]],
+    setterNames: collection.Set[String]
   ): Unit = {
     if (null == clazz || classOf[AnyRef] == clazz) return
     val isCase = TypeInfo.isCaseClass(clazz)
@@ -184,9 +188,9 @@ object MetaLoader {
         accessed.add(interface)
         val interfaceParamTypes = Reflections.deduceParamTypes(interface, interfaceTypes(i), paramTypes)
         interface.getDeclaredMethods foreach { m =>
-          processMethod(isCase, m, getters, setters, fields, interfaceParamTypes)
+          processMethod(isCase, m, getters, setters, fields, interfaceParamTypes, setterNames)
         }
-        navInterfaces(interface, accessed, getters, setters, fields, paramTypes)
+        navInterfaces(interface, accessed, getters, setters, fields, paramTypes, setterNames)
       }
     }
   }
@@ -197,12 +201,15 @@ object MetaLoader {
     getters: mutable.HashMap[String, Accessor],
     setters: mutable.HashMap[String, Accessor],
     fields: collection.Map[String, Field],
-    paramTypes: collection.Map[String, Class[_]]
+    paramTypes: collection.Map[String, Class[_]],
+    setterNames: collection.Set[String] = Set.empty
   ): Unit = {
     if (isFineMethod(isCase, method, false) || isExplicitProperty(method)) {
-      findAccessor(method, fields) match {
+      findAccessor(method, fields, setterNames) match {
         case Some((readable, name)) =>
           if (readable) {
+            // 属性名访问器（字段访问器，或 def x / def x_$eq 配对）优先，仅 JavaBean 风格 getter 可被覆盖，
+            // 保证 beanmeta 与运行期反射的 getterName 一致。
             val puttable = getters.get(name).forall(x => isJavaBeanGetter(x.method))
             if puttable then
               getters.put(name, Accessor(method, typeof(method.getReturnType, method.getGenericReturnType, paramTypes)))
@@ -317,13 +324,29 @@ object MetaLoader {
     * so they are excluded unless backed by a field or annotated with `@property`.
     */
   def findAccessor(method: JMethod, fields: collection.Map[String, Field]): Option[(Boolean, String)] = {
+    findAccessor(method, fields, Set.empty)
+  }
+
+  /** Extends [[findAccessor]] with pairing evidence: a parameterless method also counts as a
+    * getter when a same-named setter (`setXxx`/`x_$eq`/`x_=`) exists, i.e. a Scala-style
+    * read-write accessor pair without a backing field (`def p1: T` + `def p1_=(v: T)`).
+    * `setterNames` is the property-name set of setters declared anywhere in the hierarchy
+    * (see [[collectSetterNames]]), so the verdict does not depend on declaration order.
+    * Only members declared by the application class itself qualify: `scala.*`/`java.*` base
+    * classes keep the JavaBean-naming / same-named-field rules (see [[pairsWithAppSetter]]).
+    */
+  def findAccessor(
+    method: JMethod,
+    fields: collection.Map[String, Field],
+    setterNames: collection.Set[String]
+  ): Option[(Boolean, String)] = {
     val name = method.getName
     val parameterTypes = method.getParameterTypes
     annotatedPropertyName(method) match {
       case Some(propertyName) => Some((true, propertyName))
       case None =>
         if (0 == parameterTypes.length && method.getReturnType != classOf[Unit]) {
-          if (isJavaBeanGetter(method) || fields.contains(name)) then
+          if (isJavaBeanGetter(method) || fields.contains(name) || pairsWithAppSetter(method, name, setterNames)) then
             Some((true, getPropertyName(name, true)))
           else None
         } else if (1 == parameterTypes.length) {
@@ -331,6 +354,50 @@ object MetaLoader {
           if (null != propertyName && !propertyName.contains("$")) Some((false, propertyName)) else None
         } else None
     }
+  }
+
+  /** 应用类内声明的一参 setter 佐证：getter 与 setter 都出自应用类时，才用「配对 setter」
+    * 放行参数less getter；`scala.*`/`java.*` 基类仍只按 JavaBean 命名或同名字段识别，
+    * 以保持 strict 与 lite/dig 的既有约定（lite ⊇ strict）。 */
+  private def pairsWithAppSetter(method: JMethod, name: String, setterNames: collection.Set[String]): Boolean =
+    setterNames.contains(name) && !isLibraryDeclared(method)
+
+  /** 成员是否由 `scala.*`/`java.*` 基类声明（应用类自身的 trait 不算）。 */
+  private[meta] def isLibraryDeclared(method: JMethod): Boolean = isLibraryClass(method.getDeclaringClass)
+
+  /** 继承链（含接口）上**应用类**声明的一参 setter 属性名集合：`setXxx` → `xxx`，
+    * `x_$eq`/`x_=` → `x`。
+    *
+    * 用于 [[findAccessor]] 放行「无同名字段、但有配对 setter」的参数less getter
+    * （`def p1: T` 配 `def p1_=(v: T)`）。字节码层面参数less `def x` 与空括号 `def x()`
+    * 无法区分，因此仍需 setter 作为佐证；必须在主遍历前完成，保证与声明顺序无关。
+    */
+  private def collectSetterNames(clazz: Class[_]): collection.Set[String] = {
+    val names = new mutable.HashSet[String]
+    val visited = new mutable.HashSet[Class[_]]
+    def visit(c: Class[_]): Unit = {
+      if (null != c && classOf[AnyRef] != c && !visited.contains(c)) {
+        visited.add(c)
+        if (!isLibraryClass(c)) {
+          val isCase = TypeInfo.isCaseClass(c)
+          c.getDeclaredMethods foreach { m =>
+            if (1 == m.getParameterCount && isFineMethod(isCase, m, false)) {
+              val name = getPropertyName(m.getName, false)
+              if (null != name && !name.contains("$")) names.add(name)
+            }
+          }
+        }
+        c.getInterfaces foreach visit
+        visit(c.getSuperclass)
+      }
+    }
+    visit(clazz)
+    names
+  }
+
+  private def isLibraryClass(clazz: Class[_]): Boolean = {
+    val name = clazz.getName
+    name.startsWith("scala.") || name.startsWith("java.")
   }
 
   /** Extracts property name from getter/setter method name. */
