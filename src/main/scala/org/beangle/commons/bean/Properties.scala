@@ -118,7 +118,7 @@ class Properties(conversion: Conversion) {
    *
    * @param inputBean    the bean or Map
    * @param propertyName the property path (supports nested, indexed, mapped)
-   * @return the property value
+   * @return the property value, or null if the path leads to a null value or a write-only property
    */
   def get[T: ClassTag](inputBean: Any, propertyName: String): T = {
     var result = inputBean
@@ -154,18 +154,17 @@ class Properties(conversion: Conversion) {
 
   /** Returns true if the property is writable. */
   def isWriteable(bean: AnyRef, name: String): Boolean = {
-    val bi = BeanInfos.get(bean.getClass)
-    bi.getSetter(name).isDefined || bi.writeOnlys.contains(name)
+    BeanInfos.get(bean.getClass).isWriteable(name)
   }
 
   /** Returns the property type. */
-  def getType(clazz: Class[_], name: String): Class[_] =
+  def getType(clazz: Class[_], name: String): Class[_] = {
     BeanInfos.get(clazz).getPropertyType(name).orNull
+  }
 
   /** Returns the set of writable property names for the class. */
   def writables(clazz: Class[_]): Set[String] = {
-    val bi = BeanInfos.get(clazz)
-    bi.writables.keySet ++ bi.writeOnlys.keySet
+    BeanInfos.get(clazz).writables
   }
 
   private def copy(bean: AnyRef, beanInfo: BeanInfo, propertyName: String, value: Any, conversion: Conversion): Any = {
@@ -206,11 +205,14 @@ class Properties(conversion: Conversion) {
     else getSimpleProperty(result, name)
   }
 
-  private def getSimpleProperty(bean: Any, name: String): Any =
-    BeanInfos.get(bean.getClass).getGetter(name) match {
+  private def getSimpleProperty(bean: Any, name: String): Any = {
+    val bi = BeanInfos.get(bean.getClass)
+    bi.getGetter(name) match {
       case Some(handle) => handle.invoke(bean)
+      case _ if bi.isWriteOnly(name) => null
       case _ => throw new RuntimeException("Cannot find " + Strings.capitalize(name) + " Getter in " + bean.getClass)
     }
+  }
 
   private def getPropertyOfMap(bean: Any, propertyName: String): Any = {
     var name = resolver.getProperty(propertyName)
@@ -320,7 +322,7 @@ class Properties(conversion: Conversion) {
     var pname = propertyName
     if (resolver.isMapped(propertyName)) {
       val name = resolver.getProperty(propertyName)
-      if (name == null || name.length() == 0)
+      if (name == null || name.isEmpty)
         pname = resolver.getKey(propertyName)
     }
     if (resolver.isIndexed(pname) || resolver.isMapped(pname)) throw new IllegalArgumentException(

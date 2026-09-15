@@ -120,7 +120,8 @@ bi.getSetter("name").get.invoke(user, "new name")  // write property
 只写属性（仅 setter、无 getter，如 `setProxyInterfaces`）不进入 `properties`，而是收集到
 `writeOnlys`，可由 `getSetterMethod` 取回对应 setter。`Properties.set` / `Properties.copy`
 先取 `getSetter`，未命中时回退到 `getSetterMethod`，因此同样支持只写属性，并按 setter
-形参类型做转换。
+形参类型做转换。反向读取时，`Properties.get` 对只写属性返回 null（属性名不存在仍然抛异常），
+因此 `Properties.writables` 枚举出的属性名可以逐个安全读取。
 
 ## 6. BeanInfos Lookup and `$` Subclass Fallback
 

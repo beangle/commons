@@ -79,10 +79,10 @@ object BeanInfo {
 
     /** 按方法名 + 元数定位访问器：getter 无参，setter 单参，优先非 bridge。
      *
-     *  同名重载在 `getMethods` 中的顺序未定义 —— 例如 Scala 的
-     *  `def stdTypeNames: String` 与 `def stdTypeNames(sep: String): String`，
-     *  部分 JVM 先返回带参重载。只按名字取首个会拿到带参方法，生成的 MethodHandle
-     *  与属性语义不符（invoke 时抛 WrongMethodTypeException），故必须按元数筛选。
+     * 同名重载在 `getMethods` 中的顺序未定义 —— 例如 Scala 的
+     * `def stdTypeNames: String` 与 `def stdTypeNames(sep: String): String`，
+     * 部分 JVM 先返回带参重载。只按名字取首个会拿到带参方法，生成的 MethodHandle
+     * 与属性语义不符（invoke 时抛 WrongMethodTypeException），故必须按元数筛选。
      */
     def findByName(name: String, getter: Boolean): Option[Method] = {
       def arityMatches(m: Method): Boolean =
@@ -216,6 +216,16 @@ class BeanInfo(val meta: BeanMeta, val properties: Map[String, PropertyInfo], va
     try Some(clazz.getMethod(name)) catch case _: NoSuchMethodException => None
   }
 
-  /** Properties with setters. */
-  def writables: Map[String, PropertyInfo] = properties.filter(x => x._2.writable)
+  /** Names of writable properties, including write-only ones. */
+  def writables: Set[String] = {
+    properties.filter(x => x._2.writable).keySet ++ writeOnlys.keySet
+  }
+
+  /** Returns true if the property is writable, including write-only properties. */
+  def isWriteable(name: String): Boolean =
+    properties.get(name).exists(_.setter.isDefined) || writeOnlys.contains(name)
+
+  /** Returns true if the property is write-only: has a setter but no getter. */
+  def isWriteOnly(name: String): Boolean = writeOnlys.contains(name)
+
 }

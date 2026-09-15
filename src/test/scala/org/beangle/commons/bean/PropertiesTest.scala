@@ -101,6 +101,16 @@ class PropertiesTest extends AnyFunSpec, Matchers {
 
       Properties.writables(classOf[WriteOnlyBean]) should contain allOf ("secret", "enabled", "name")
     }
+    it("get write-only property returns null") {
+      val bean = new WriteOnlyBean
+      assert(Properties.get[Any](bean, "secret") == null)
+      assert(Properties.get[Any](bean, "secret.length") == null)
+
+      // 未知属性仍然报错，避免把拼写错误静默为 null
+      intercept[RuntimeException] {
+        Properties.get[Any](bean, "unexpected")
+      }
+    }
     it("test scala map") {
       val p = new org.beangle.commons.collection.Properties("id" -> 1, "name" -> "mike")
       assert(Properties.get[Any](p, "id") == 1)
