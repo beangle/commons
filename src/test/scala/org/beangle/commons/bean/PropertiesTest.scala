@@ -18,7 +18,7 @@
 package org.beangle.commons.bean
 
 import org.beangle.commons.lang.reflect.BeanInfos
-import org.beangle.commons.bean.meta.MetaModels
+import org.beangle.commons.bean.meta.{MetaModels, WriteOnlyBean}
 import org.beangle.commons.lang.testbean.{Dog, TestBean}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -89,6 +89,18 @@ class PropertiesTest extends AnyFunSpec, Matchers {
       Properties.set(bean, "age", null)
       assert(bean.age.isEmpty)
     }
+    it("set write-only property") {
+      val bean = new WriteOnlyBean
+      assert(Properties.isWriteable(bean, "secret"))
+
+      Properties.set(bean, "secret", "top-secret")
+      assert(field(bean, "secret") == "top-secret")
+
+      Properties.copy(bean, "enabled", "true")
+      assert(field(bean, "enabled") == java.lang.Boolean.TRUE)
+
+      Properties.writables(classOf[WriteOnlyBean]) should contain allOf ("secret", "enabled", "name")
+    }
     it("test scala map") {
       val p = new org.beangle.commons.collection.Properties("id" -> 1, "name" -> "mike")
       assert(Properties.get[Any](p, "id") == 1)
@@ -116,5 +128,11 @@ class PropertiesTest extends AnyFunSpec, Matchers {
       assert(Properties.get[Any](bean, "dogs(name# )") == "dog1 dog2")
       assert(Properties.get[Any](bean, "dogs(name)") == "dog1,dog2")
     }
+  }
+
+  private def field(bean: AnyRef, name: String): Any = {
+    val f = bean.getClass.getDeclaredField(name)
+    f.setAccessible(true)
+    f.get(bean)
   }
 }

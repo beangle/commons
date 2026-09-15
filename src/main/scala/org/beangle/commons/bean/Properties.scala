@@ -153,16 +153,20 @@ class Properties(conversion: Conversion) {
     copy(bean, beanInfo, propertyName, value, this.conversion)
 
   /** Returns true if the property is writable. */
-  def isWriteable(bean: AnyRef, name: String): Boolean =
-    BeanInfos.get(bean.getClass).getSetter(name).isDefined
+  def isWriteable(bean: AnyRef, name: String): Boolean = {
+    val bi = BeanInfos.get(bean.getClass)
+    bi.getSetter(name).isDefined || bi.writeOnlys.contains(name)
+  }
 
   /** Returns the property type. */
   def getType(clazz: Class[_], name: String): Class[_] =
     BeanInfos.get(clazz).getPropertyType(name).orNull
 
   /** Returns the set of writable property names for the class. */
-  def writables(clazz: Class[_]): Set[String] =
-    BeanInfos.get(clazz).writables.keySet
+  def writables(clazz: Class[_]): Set[String] = {
+    val bi = BeanInfos.get(clazz)
+    bi.writables.keySet ++ bi.writeOnlys.keySet
+  }
 
   private def copy(bean: AnyRef, beanInfo: BeanInfo, propertyName: String, value: Any, conversion: Conversion): Any = {
     var result: Any = bean
@@ -239,7 +243,16 @@ class Properties(conversion: Conversion) {
         val converted = convert(value, p.clazz, p.typeinfo, conversion)
         handle.invoke(bean, converted.asInstanceOf[Object])
         converted
-      case _ => null
+      case _ =>
+        // write-only 属性无 PropertyInfo 及其 setter handle，回退到 getSetterMethod
+        beanInfo.getSetterMethod(name) match {
+          case Some(setter) =>
+            val paramType = setter.getParameterTypes()(0)
+            val converted = convert(value, paramType, TypeInfo.get(paramType), conversion)
+            setter.invoke(bean, converted.asInstanceOf[Object])
+            converted
+          case _ => null
+        }
     }
   }
 

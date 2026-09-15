@@ -117,6 +117,11 @@ bi.getGetter("id").get.invoke(user)      // read property
 bi.getSetter("name").get.invoke(user, "new name")  // write property
 ```
 
+只写属性（仅 setter、无 getter，如 `setProxyInterfaces`）不进入 `properties`，而是收集到
+`writeOnlys`，可由 `getSetterMethod` 取回对应 setter。`Properties.set` / `Properties.copy`
+先取 `getSetter`，未命中时回退到 `getSetterMethod`，因此同样支持只写属性，并按 setter
+形参类型做转换。
+
 ## 6. BeanInfos Lookup and `$` Subclass Fallback
 
 `BeanInfos` 是进程级入口：先查缓存，未命中时按「二进制索引（`MetaModels`）→ 运行时反射
