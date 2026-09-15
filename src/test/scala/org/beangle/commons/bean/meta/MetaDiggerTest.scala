@@ -312,6 +312,37 @@ class MetaDiggerTest extends AnyFunSpec, Matchers {
       assert(cm.properties.map(_.name) == Seq("value"))
     }
   }
+
+  describe("overloaded accessors") {
+    it("resolves the parameterless getter instead of the same-named method with arguments") {
+      val cm = MetaModels.of(classOf[OverloadedGetterMeta])
+      assert(cm.properties.find(_.name == "text").exists(_.getterName == "text"))
+      val overloads = classOf[OverloadedGetterMeta].getMethods.filter(_.getName == "text")
+      info(s"getMethods param counts = ${overloads.map(_.getParameterCount).mkString(",")}")
+      assert(overloads.map(_.getParameterCount).toSet == Set(0, 1))
+
+      val bi = BeanInfos.register(cm)
+      val getter = bi.getGetter("text")
+      assert(getter.isDefined)
+      assert(getter.get.`type`().parameterCount() == 1) // 仅 receiver，不含 sep
+      assert(bi.getGetterMethod("text").exists(_.getParameterCount == 0))
+
+      val m = new OverloadedGetterMeta
+      m.parts = Set("a", "b")
+      assert(getter.get.invoke(m) == "a,b")
+    }
+
+    it("resolves the single-parameter setter instead of the same-named method with more arguments") {
+      val bi = BeanInfos.register(MetaModels.of(classOf[OverloadedSetterMeta]))
+      val setter = bi.getSetter("value")
+      assert(setter.isDefined)
+      assert(setter.get.`type`().parameterCount() == 2) // receiver + 新值
+
+      val m = new OverloadedSetterMeta
+      setter.get.invoke(m, "hi")
+      assert(m.value == "hi")
+    }
+  }
 }
 
 /** Scala 子类继承 Java 父类的 write-only setter（对应 Spring TransactionProxyFactoryBean 场景）。 */
@@ -409,4 +440,34 @@ object ModuleWithNested {
 
 class ModuleWithNestedUser {
   def module: ModuleWithNested.type = ModuleWithNested
+}
+
+/** 让重载在 getMethods 中真实错序的 trait（回归用例的前提）。 */
+trait OverloadNamed {
+  def name: String
+}
+
+/** 同名重载 getter：`def text: String` 与 `def text(sep: String): String`。
+ *  两者 getterName 都是 "text"，BeanInfo 必须按元数挑选参数less 的那个。 */
+class OverloadedGetterMeta extends OverloadNamed {
+  var parts: Set[String] = Set.empty
+
+  def name: String = "og"
+
+  def text: String = text(",")
+
+  def text(sep: String): String = parts.mkString(sep)
+}
+
+/** 同名重载 setter：`value_=(v: String)` 与 `value_=(v: String, extra: Int)`。 */
+class OverloadedSetterMeta extends OverloadNamed {
+  private var stored: String = _
+
+  def name: String = "os"
+
+  def value: String = stored
+
+  def value_=(v: String): Unit = stored = v
+
+  def value_=(v: String, extra: Int): Unit = stored = v + extra
 }

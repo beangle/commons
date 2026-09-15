@@ -77,17 +77,28 @@ object BeanInfo {
     // Pre-group all methods by name for O(1) lookup
     val methodsByName: Map[String, Seq[Method]] = clazz.getMethods.groupBy(_.getName).view.mapValues(_.toSeq).toMap
 
-    /** Finds a method by name, preferring non-bridge. */
-    def findByName(name: String): Option[Method] = {
-      methodsByName.get(name).flatMap(cs => cs.find(!_.isBridge).orElse(cs.headOption))
+    /** 按方法名 + 元数定位访问器：getter 无参，setter 单参，优先非 bridge。
+     *
+     *  同名重载在 `getMethods` 中的顺序未定义 —— 例如 Scala 的
+     *  `def stdTypeNames: String` 与 `def stdTypeNames(sep: String): String`，
+     *  部分 JVM 先返回带参重载。只按名字取首个会拿到带参方法，生成的 MethodHandle
+     *  与属性语义不符（invoke 时抛 WrongMethodTypeException），故必须按元数筛选。
+     */
+    def findByName(name: String, getter: Boolean): Option[Method] = {
+      def arityMatches(m: Method): Boolean =
+        if getter then m.getParameterCount == 0 else m.getParameterCount == 1
+
+      methodsByName.get(name).flatMap { cs =>
+        cs.find(m => !m.isBridge && arityMatches(m)).orElse(cs.find(arityMatches))
+      }
     }
 
     // Build properties using getter/setter names from BeanMeta for direct lookup.
     // Only properties with a resolved getter are included.
     val lookup = MethodHandles.lookup()
     val properties = cm.properties.flatMap { p =>
-      findByName(p.getterName).map { getterMethod =>
-        val setter = p.setterName.flatMap(findByName).map(m => Invokers.unreflect(lookup, m))
+      findByName(p.getterName, true).map { getterMethod =>
+        val setter = p.setterName.flatMap(findByName(_, false)).map(m => Invokers.unreflect(lookup, m))
         (p.name, PropertyInfo(p, Invokers.unreflect(lookup, getterMethod), setter))
       }
     }.toMap
