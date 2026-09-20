@@ -313,7 +313,7 @@ class HttpUtils private(private val client: HttpClient, fixedUserAgent: Boolean)
     }
   }
 
-  private[this] def error(uri: String, e: Exception): Response = {
+  private def error(uri: String, e: Exception): Response = {
     Response(404, e.getMessage, Map.empty)
   }
 

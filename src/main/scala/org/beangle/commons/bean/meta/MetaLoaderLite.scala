@@ -18,10 +18,10 @@
 package org.beangle.commons.bean.meta
 
 import org.beangle.commons.bean.meta.MetaModel.{BeanMeta, Ctor, Param}
-import org.beangle.commons.bean.meta.MetaLoader.{Accessor, annotatedPropertyName, buildProperties, getPropertyName, isExplicitProperty, isFineMethod, isJavaBeanGetter, isLibraryDeclared, typeof}
+import org.beangle.commons.bean.meta.MetaLoader.{Accessor, annotatedPropertyName, buildProperties, getPropertyName, isExplicitProperty, isFineMethod, isJavaBeanGetter, isLibraryClass, isLibraryDeclared, typeof}
 import org.beangle.commons.lang.reflect.TypeInfo
 
-import java.lang.reflect.{Field, Method}
+import java.lang.reflect.{Field, Method, Modifier}
 import scala.collection.mutable
 
 /** 轻量反射加载器：仅用 public 构造器/方法，对应 [[org.beangle.commons.aot.AotPolicy.default]]，
@@ -41,13 +41,14 @@ import scala.collection.mutable
 object MetaLoaderLite {
 
   /** True when a class can be reflected into BeanMeta: application classes only. */
-  def supports(clazz: Class[_]): Boolean = MetaLoader.supports(clazz)
+  def supports(clazz: Class[?]): Boolean = MetaLoader.supports(clazz)
 
   /** Reflects a class into BeanMeta via public constructors/methods only. */
-  def load(clazz: Class[_]): BeanMeta = {
+  def load(clazz: Class[?]): BeanMeta = {
     if (!supports(clazz)) throw new RuntimeException("Cannot reflect class: " + clazz.getName)
 
     val isCase = TypeInfo.isCaseClass(clazz)
+    val libraryMethods = libraryMethodNames(clazz)
     val getters = new mutable.HashMap[String, Accessor]
     val setters = new mutable.HashMap[String, Accessor]
     val fields = new mutable.HashMap[String, Field]
@@ -56,7 +57,7 @@ object MetaLoaderLite {
     // JavaBean 命名（getX/isX）优先，setter 仅认 setX/x_$eq/x_=；
     // 标准库方法与 mixin forwarder 交给 acceptsInherited 收窄。
     clazz.getMethods foreach { m =>
-      if (acceptsInherited(m) && (isFineMethod(isCase, m, allowBridge = true) || isExplicitProperty(m))) {
+      if (acceptsInherited(m, libraryMethods) && (isFineMethod(isCase, m, allowBridge = true) || isExplicitProperty(m))) {
         val paramCount = m.getParameterCount
         if (paramCount == 0 && m.getReturnType != classOf[Unit]) {
           val annotated = annotatedPropertyName(m)
@@ -88,11 +89,41 @@ object MetaLoaderLite {
     * 时才算属性，避免把集合 API（head/tail/size/seq/toList...）注册成 Bean 属性。
     * setter 不产生新属性，只回填已有 getter 的写访问器，因此放行以保持与 [[MetaLoader]] 一致。
     *
-    * Scala 3 会为继承自 trait 的方法在本类生成 bridge 形式的 forwarder（如 Seq 的 head/size），
-    * 其 declaringClass 是本类，因此必须单独按 bridge 判定。 */
-  private def acceptsInherited(method: Method): Boolean = {
+    * Scala 3 会为继承自 trait 的方法在本类生成 forwarder（如 Seq 的 head/size），其 declaringClass
+    * 是本类，因此必须单独判定。3.7 及更早的 forwarder 带 ACC_BRIDGE|ACC_SYNTHETIC，`isBridge` 即可识别；
+    * **3.8.0 起（scala3#23942，为让 Guice 等跳过 bridge/synthetic 的框架能看见 trait 里的具体方法）
+    * 改为普通 public 方法**，bridge 判据失效，故改用 [[libraryMethodNames]] 按「同名零参方法在库
+    * 超类型里也有声明」识别。 */
+  private def acceptsInherited(method: Method, libraryMethods: collection.Set[String]): Boolean = {
     if (method.getParameterCount == 1) true
-    else if (!method.isBridge && !isLibraryDeclared(method)) true
+    else if (!method.isBridge && !isLibraryDeclared(method) && !libraryMethods.contains(method.getName)) true
     else isJavaBeanGetter(method) || annotatedPropertyName(method).isDefined
+  }
+
+  /** 继承链上 scala./java. 类型声明的**具体（非 abstract）**零参方法名集合。
+    *
+    * 用于识别 Scala 3.9 起不再带 ACC_BRIDGE 的 mixin forwarder：这类方法由编译器生成在应用类里，
+    * declaringClass 是应用类，只能靠「库超类型里同名方法是具体方法」反推。只取具体方法，是因为
+    * 库里的 abstract 方法必须由应用类实现（如 `iterator`、`length`），那属于应用自己的成员，不能收窄；
+    * 而 `Seq`/`Iterable` 里的 head/tail/size/toList... 都是 default 方法，类里出现同名方法只可能是
+    * 编译器补的 forwarder。遇到库类型即取其方法且不再向上递归（getMethods 已含继承成员）；
+    * 应用类型（含本项目的 trait）继续向上找。 */
+  private def libraryMethodNames(clazz: Class[?]): collection.Set[String] = {
+    val names = new mutable.HashSet[String]
+    val visited = new mutable.HashSet[Class[?]]
+    def visit(c: Class[?]): Unit = {
+      if (null != c && c != classOf[AnyRef] && visited.add(c)) {
+        if (isLibraryClass(c))
+          c.getMethods.foreach { m =>
+            if (0 == m.getParameterCount && !Modifier.isAbstract(m.getModifiers)) names.add(m.getName)
+          }
+        else {
+          visit(c.getSuperclass)
+          c.getInterfaces.foreach(visit)
+        }
+      }
+    }
+    visit(clazz)
+    names
   }
 }

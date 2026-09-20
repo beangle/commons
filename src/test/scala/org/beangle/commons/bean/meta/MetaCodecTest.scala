@@ -90,7 +90,7 @@ class MetaCodecTest extends AnyFunSpec, Matchers {
     parsed.properties.find(_.name == "id").get.isOptional shouldBe false
     // precision: Map[Int, Date] key stays int, not Object
     val times = parsed.properties.find(_.name == "times").get.typeinfo.asInstanceOf[IterableType]
-    times.clazz shouldBe classOf[mutable.Map[_, _]]
+    times.clazz shouldBe classOf[mutable.Map[?, ?]]
     times.args(0).clazz shouldBe java.lang.Integer.TYPE
     times.args(1).clazz shouldBe classOf[Date]
     // collection of entity
@@ -173,10 +173,10 @@ class MetaCodecTest extends AnyFunSpec, Matchers {
 
   it("round-trips scala collection types via builtin indices") {
     val parsed = MetaCodec.parse(MetaCodec.encode(MetaModels.of(classOf[CodecCollections])))
-    parsed.properties.find(_.name == "roles").get.typeinfo.clazz shouldBe classOf[scala.collection.mutable.Set[_]]
-    parsed.properties.find(_.name == "tags").get.typeinfo.clazz shouldBe classOf[scala.collection.immutable.List[_]]
-    parsed.properties.find(_.name == "attrs").get.typeinfo.clazz shouldBe classOf[scala.collection.immutable.Map[_, _]]
-    parsed.properties.find(_.name == "buffer").get.typeinfo.clazz shouldBe classOf[scala.collection.mutable.ArrayBuffer[_]]
+    parsed.properties.find(_.name == "roles").get.typeinfo.clazz shouldBe classOf[scala.collection.mutable.Set[?]]
+    parsed.properties.find(_.name == "tags").get.typeinfo.clazz shouldBe classOf[scala.collection.immutable.List[?]]
+    parsed.properties.find(_.name == "attrs").get.typeinfo.clazz shouldBe classOf[scala.collection.immutable.Map[?, ?]]
+    parsed.properties.find(_.name == "buffer").get.typeinfo.clazz shouldBe classOf[scala.collection.mutable.ArrayBuffer[?]]
     // 集合类型全部走内置索引：显式池 = 类名 + 4属性名 + 4setter名
     val bytes = MetaCodec.encode(MetaModels.of(classOf[CodecCollections]))
     ((bytes(10) & 0xff) << 8 | (bytes(11) & 0xff)) shouldBe 9

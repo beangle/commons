@@ -44,15 +44,15 @@ import scala.collection.mutable
   */
 class AotHints(val policy: AotPolicy = AotPolicy.default) {
 
-  private val typePolicies = mutable.LinkedHashMap.empty[Class[_], AotPolicy]
+  private val typePolicies = mutable.LinkedHashMap.empty[Class[?], AotPolicy]
   private val patterns = Collections.newSet[String]
   private val proxies = Collections.newSet[List[String]]
   private val constructors = Collections.newSet[String]
   private val jniTypes = mutable.LinkedHashSet.empty[String]
   private val jniMethods = mutable.LinkedHashMap.empty[String, mutable.LinkedHashSet[(String, List[String])]]
   private val jniFields = mutable.LinkedHashMap.empty[String, mutable.LinkedHashSet[String]]
-  private val serializables = Collections.newSet[Class[_]]
-  private val runtimeInitialized = Collections.newSet[Class[_]]
+  private val serializables = Collections.newSet[Class[?]]
+  private val runtimeInitialized = Collections.newSet[Class[?]]
 
   /** Packages whose reflection metadata GraalVM already provides; any
    *  `java.*`/`javax.*`/`jdk.*`/`sun.*`/`com.sun.*`/`scala.*` class is skipped in
@@ -63,13 +63,13 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
   private val jdkPrefixes = Seq("java.", "javax.", "jdk.", "sun.", "com.sun.", "scala.")
 
   /** 简单路径：按容器默认策略（通常来自 registrar 的 `aotPolicy`）注册反射类型。 */
-  def registerType(classes: Class[_]*): Unit = {
+  def registerType(classes: Class[?]*): Unit = {
     val it = classes.iterator
     while it.hasNext do addType(it.next(), policy)
   }
 
   /** 定制路径：对单个类显式指定策略，例如 declared 成员、字段或递归父类。 */
-  def registerType(clazz: Class[_], custom: AotPolicy): Unit = addType(clazz, custom)
+  def registerType(clazz: Class[?], custom: AotPolicy): Unit = addType(clazz, custom)
 
   /** 按简单类名注册数组类型（`"java.sql.Statement"` → `[Ljava.sql.Statement;`），
    *  自动标记 unsafeAllocated，供 `Array.newInstance`/`Array.get` 等按名反射
@@ -99,7 +99,7 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
    *
    *  值类枚举通过伴生对象的静态 `MODULE$` 单例 + `values()` 反射获取，因此适用于
    *  顶层枚举；嵌套枚举（伴生无静态 `MODULE$`）无法枚举值类时静默跳过值注册。 */
-  def registerEnum(enumType: Class[_]): Unit = {
+  def registerEnum(enumType: Class[?]): Unit = {
     if !classOf[scala.reflect.Enum].isAssignableFrom(enumType) then
       throw new IllegalArgumentException(
         s"registerEnum requires a Scala 3 enum (scala.reflect.Enum subclass), got $enumType")
@@ -121,7 +121,7 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
 
   /** Adds a class with the given policy; when recursive, expands the non-JDK
    *  superclass and interface hierarchy with the same policy. */
-  private def addType(clazz: Class[_], p: AotPolicy): Unit = {
+  private def addType(clazz: Class[?], p: AotPolicy): Unit = {
     if (clazz == null || isJdk(clazz)) return
     merge(clazz, p)
     if p.recursive then
@@ -134,14 +134,14 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
     "boolean" -> "Z", "byte" -> "B", "char" -> "C", "short" -> "S",
     "int" -> "I", "long" -> "J", "float" -> "F", "double" -> "D")
 
-  private def merge(clazz: Class[_], p: AotPolicy): Unit = {
+  private def merge(clazz: Class[?], p: AotPolicy): Unit = {
     typePolicies.get(clazz) match {
       case Some(existing) => typePolicies.update(clazz, existing.merge(p))
       case None           => typePolicies.put(clazz, p)
     }
   }
 
-  private def isJdk(clazz: Class[_]): Boolean = {
+  private def isJdk(clazz: Class[?]): Boolean = {
     val name = clazz.getName
     jdkPrefixes.exists(name.startsWith)
   }
@@ -153,7 +153,7 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
   }
 
   /** Registers a set of interfaces for JDK dynamic proxy (by class reference). */
-  def registerProxy(interfaces: Class[_]*): Unit = {
+  def registerProxy(interfaces: Class[?]*): Unit = {
     proxies.add(interfaces.toList.map(_.getName))
   }
 
@@ -221,7 +221,7 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
   }
 
   /** Registers classes supporting Java serialization. */
-  def registerSerializable(classes: Class[_]*): Unit = {
+  def registerSerializable(classes: Class[?]*): Unit = {
     val it = classes.iterator
     while it.hasNext do serializables.add(it.next())
   }
@@ -229,16 +229,16 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
   /** Registers classes whose static initializers must run at runtime, not at
    *  native-image build time (e.g. SecureRandom users); emitted as
    *  `--initialize-at-run-time` in native-image.properties. */
-  def registerRuntimeInitialized(classes: Class[_]*): Unit = {
+  def registerRuntimeInitialized(classes: Class[?]*): Unit = {
     val it = classes.iterator
     while it.hasNext do runtimeInitialized.add(it.next())
   }
 
   /** Returns all registered reflection types. */
-  def getTypes: collection.Set[Class[_]] = typePolicies.keySet
+  def getTypes: collection.Set[Class[?]] = typePolicies.keySet
 
   /** Returns all registered reflection types with their policies. */
-  def getTypePolicies: collection.Map[Class[_], AotPolicy] = typePolicies
+  def getTypePolicies: collection.Map[Class[?], AotPolicy] = typePolicies
 
   /** Returns all registered resource patterns. */
   def getPatterns: collection.Set[String] = patterns
@@ -259,10 +259,10 @@ class AotHints(val policy: AotPolicy = AotPolicy.default) {
   def getJniFields: collection.Map[String, collection.Set[String]] = jniFields
 
   /** Returns all registered serializable classes. */
-  def getSerializables: collection.Set[Class[_]] = serializables
+  def getSerializables: collection.Set[Class[?]] = serializables
 
   /** Returns all classes registered for runtime initialization. */
-  def getRuntimeInitialized: collection.Set[Class[_]] = runtimeInitialized
+  def getRuntimeInitialized: collection.Set[Class[?]] = runtimeInitialized
 
   /** Returns true if no hints have been registered. */
   def isEmpty: Boolean =

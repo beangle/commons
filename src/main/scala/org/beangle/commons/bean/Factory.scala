@@ -27,8 +27,8 @@ object Factory {
    * @param clazz the Factory class
    * @return the produced object type
    */
-  def getObjectType(clazz: Class[_]): Class[_] = {
-    val objectTypes = Reflections.getGenericParamTypes(clazz, classOf[Factory[_]]).values
+  def getObjectType(clazz: Class[?]): Class[?] = {
+    val objectTypes = Reflections.getGenericParamTypes(clazz, classOf[Factory[?]]).values
     if (objectTypes.isEmpty) throw new RuntimeException(s"Cannot find factory object type of class ${clazz.getName}")
     objectTypes.head
   }
@@ -45,6 +45,6 @@ trait Factory[T] {
 
   /** Infers the produced object type from the generic. */
   def objectType: Class[T] = {
-    Reflections.getGenericParamTypes(this.getClass, classOf[Factory[_]]).values.head.asInstanceOf[Class[T]]
+    Reflections.getGenericParamTypes(this.getClass, classOf[Factory[?]]).values.head.asInstanceOf[Class[T]]
   }
 }

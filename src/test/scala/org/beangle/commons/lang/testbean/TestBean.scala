@@ -23,16 +23,18 @@ import org.beangle.commons.lang.annotation.{default_value, description, noreflec
 
 import java.beans.Transient
 
+import scala.compiletime.uninitialized
+
 class TestBean {
-  var id: Int = _
-  var name: String = _
+  var id: Int = uninitialized
+  var name: String = uninitialized
   @default_value("1")
-  var intValue: Int = _
-  var age: Option[Int] = _
-  var javaMap: java.util.Map[Int, String] = _
-  var titles: Array[String] = _
-  var testEnum: TestEnum = _
-  var dogs: Iterable[Dog] = _
+  var intValue: Int = uninitialized
+  var age: Option[Int] = uninitialized
+  var javaMap: java.util.Map[Int, String] = uninitialized
+  var titles: Array[String] = uninitialized
+  var testEnum: TestEnum = uninitialized
+  var dogs: Iterable[Dog] = uninitialized
   var parent: Option[TestBean] = None
   var tags: Map[String, String] = Map.empty
 
@@ -73,7 +75,7 @@ trait Animal {
 }
 
 class Dog extends Animal {
-  var name: String = _
+  var name: String = uninitialized
 
   def getAge: java.lang.Integer = 0
 
@@ -81,7 +83,7 @@ class Dog extends Animal {
 
   }
 
-  protected var character: String = _
+  protected var character: String = uninitialized
 
   protected def skills: String = {
     "run"
@@ -107,16 +109,16 @@ trait Entity[ID] {
 
 abstract class NumIdBean[ID] extends Entity[ID] {
 
-  var id: ID = _
+  var id: ID = uninitialized
 }
 
 abstract class StringIdBean extends Entity[String] {
-  var id: String = _
+  var id: String = uninitialized
 }
 
 object AAA {
   private abstract class PrivateIdBean extends Entity[String] {
-    var id: String = _
+    var id: String = uninitialized
   }
   def main(args: Array[String]): Unit = {
     val c = classOf[PrivateIdBean]
@@ -132,14 +134,14 @@ class Book extends NumIdBean[java.lang.Long] {
 
   var name = "book"
 
-  var versions: List[Int] = _
+  var versions: List[Int] = uninitialized
 
-  var versionSales: Map[Int, java.lang.Integer] = _
-  var versionSales2: java.util.Map[Int, java.lang.Integer] = _
+  var versionSales: Map[Int, java.lang.Integer] = uninitialized
+  var versionSales2: java.util.Map[Int, java.lang.Integer] = uninitialized
 
   def isEmpty = false
 
-  var authors: List[Author] = _
+  var authors: List[Author] = uninitialized
 }
 
 class BookPrimitiveId extends NumIdBean[Long] {
@@ -155,22 +157,22 @@ class AbstractEntity[ID](val id: ID)
 class NumberIdBean[T <: Number](id: T) extends AbstractEntity[T](id)
 
 class Author(id: Integer) extends NumberIdBean[Integer](id) {
-  var age: Option[Int] = _
+  var age: Option[Int] = uninitialized
 
-  var `type`: String = _
+  var `type`: String = uninitialized
 }
 
 class BigBookStore(val department: Seq[Department], val books: Map[String, Book]) {
-  var properties: java.util.Properties = _
-  var prices: Range = _
-  var properties2: org.beangle.commons.collection.Properties = _
-  @transient var tempName: String = _
+  var properties: java.util.Properties = uninitialized
+  var prices: Range = uninitialized
+  var properties2: org.beangle.commons.collection.Properties = uninitialized
+  @transient var tempName: String = uninitialized
 }
 
 trait Hierarchical[T] {
 
   /** index no */
-  var indexno: String = _
+  var indexno: String = uninitialized
 
   /** 父级菜单 */
   var parent: Option[T] = None
@@ -186,7 +188,7 @@ class Department extends NumIdBean[Long] with Hierarchical[Department] {
 }
 
 class Menu {
-  var id: Long = _
+  var id: Long = uninitialized
 
   def getId: Long = id
 
@@ -215,7 +217,7 @@ class LongFactory extends Factory[Long] {
   }
 
   class Inner {
-    var name: String = _
+    var name: String = uninitialized
   }
 }
 
@@ -228,16 +230,16 @@ class Course(val id: Long) {
     this(id.toLong)
   }
 
-  var name: String = _
+  var name: String = uninitialized
 }
 
 class Room(var id: Long = 0) {
-  var name: String = _
+  var name: String = uninitialized
 }
 
 class Teacher(var id: Long, name: String, genderId: Int = 1) {
 
-  var depart: String = _
+  var depart: String = uninitialized
 
   def this(id: Long, department: Department, genderId: String) = {
     this(id, "", genderId.toInt)

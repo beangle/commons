@@ -84,14 +84,14 @@ object Properties {
    * @param name  the property name
    * @return the property class
    */
-  def getType(clazz: Class[_], name: String): Class[_] = Default.getType(clazz, name)
+  def getType(clazz: Class[?], name: String): Class[?] = Default.getType(clazz, name)
 
   /** Returns the set of writable property names for the class.
    *
    * @param clazz the bean class
    * @return set of writable property names
    */
-  def writables(clazz: Class[_]): Set[String] = Default.writables(clazz)
+  def writables(clazz: Class[?]): Set[String] = Default.writables(clazz)
 }
 
 /** Bean property access with nested, indexed, and mapped support. */
@@ -131,8 +131,8 @@ class Properties(conversion: Conversion) {
         else if (resolver.isIndexed(next)) getIndexedProperty(result, next)
         else getSimpleProperty(result, next)
 
-      if (null != result && result.isInstanceOf[Option[_]])
-        result = result.asInstanceOf[Option[_]].orNull
+      if (null != result && result.isInstanceOf[Option[?]])
+        result = result.asInstanceOf[Option[?]].orNull
       if (null == result) return null.asInstanceOf[T]
       name = resolver.remove(name)
     }
@@ -158,12 +158,12 @@ class Properties(conversion: Conversion) {
   }
 
   /** Returns the property type. */
-  def getType(clazz: Class[_], name: String): Class[_] = {
+  def getType(clazz: Class[?], name: String): Class[?] = {
     BeanInfos.get(clazz).getPropertyType(name).orNull
   }
 
   /** Returns the set of writable property names for the class. */
-  def writables(clazz: Class[_]): Set[String] = {
+  def writables(clazz: Class[?]): Set[String] = {
     BeanInfos.get(clazz).writables
   }
 
@@ -174,8 +174,8 @@ class Properties(conversion: Conversion) {
     while (resolver.hasNested(name)) {
       val next = resolver.next(name)
       result = getDirectProperty(result, next)
-      if (null != result && result.isInstanceOf[Option[_]])
-        result = result.asInstanceOf[Option[_]].orNull
+      if (null != result && result.isInstanceOf[Option[?]])
+        result = result.asInstanceOf[Option[?]].orNull
       if (result == null) throw new RuntimeException("Null property value for '" + name + "' on bean class '" + bean.getClass + "'")
       val nextTypeInfo = currentBeanInfo.getPropertyTypeInfo(next).get
       val nextClazz = nextTypeInfo match {
@@ -295,10 +295,10 @@ class Properties(conversion: Conversion) {
     key
   }
 
-  private def convert(value: Any, clazz: Class[_], typeInfo: TypeInfo, conversion: Conversion): Any =
+  private def convert(value: Any, clazz: Class[?], typeInfo: TypeInfo, conversion: Conversion): Any =
     if (typeInfo.isOptional) {
       if null == value then None
-      else if value.isInstanceOf[Option[_]] then value
+      else if value.isInstanceOf[Option[?]] then value
       else if null != typeInfo then
         if (null == conversion) Option(value) else Option(conversion.convert(value, typeInfo.args.head.clazz))
       else Option(value)
@@ -381,5 +381,5 @@ class Properties(conversion: Conversion) {
     }
 
   private def isMapType(obj: Any): Boolean =
-    obj.isInstanceOf[collection.mutable.Map[_, _]] || obj.isInstanceOf[java.util.Map[_, _]]
+    obj.isInstanceOf[collection.mutable.Map[?, ?]] || obj.isInstanceOf[java.util.Map[?, ?]]
 }

@@ -34,5 +34,5 @@ package object logging {
    * @param clazz class used for logger name
    * @return logger instance
    */
-  def slf4j(clazz: Class[_]): org.slf4j.Logger = LoggerFactory.getLogger(clazz)
+  def slf4j(clazz: Class[?]): org.slf4j.Logger = LoggerFactory.getLogger(clazz)
 }

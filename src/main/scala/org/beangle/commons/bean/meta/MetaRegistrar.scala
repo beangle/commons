@@ -46,10 +46,10 @@ import scala.quoted.*
 abstract class MetaRegistrar extends AotHintRegistrar {
 
   /** Registered class metadata. */
-  private val metaMap = Collections.newMap[Class[_], BeanMeta]
+  private val metaMap = Collections.newMap[Class[?], BeanMeta]
 
   /** Registers classes at compile time (macro: digs BeanMeta, preserves precision). */
-  protected inline def register(inline clazzes: Class[_]*): Unit = ${ MetaRegistrar.registerImpl('clazzes, 'this) }
+  protected inline def register(inline clazzes: Class[?]*): Unit = ${ MetaRegistrar.registerImpl('clazzes, 'this) }
 
   /** Encodes collected class metadata to the specified stream (beanmeta.idx). */
   def encode(out: OutputStream): Unit = MetaIndex.write(out, metas)
@@ -60,7 +60,7 @@ abstract class MetaRegistrar extends AotHintRegistrar {
   /** Adds BeanMeta to internal buffer (used by macro expansion).
    * Dont change to protected or private due to substream library may invoke it by registerImpl macro */
   def addMetas(cms: Iterable[BeanMeta]): Unit = {
-    val visited = Collections.newSet[Class[_]]
+    val visited = Collections.newSet[Class[?]]
     cms foreach { c =>
       metaMap.put(c.clazz, c)
       hints.registerType(c.clazz)
@@ -73,7 +73,7 @@ abstract class MetaRegistrar extends AotHintRegistrar {
    * 一并登记枚举类、伴生对象、全部值类与序列化，无需手工 `registerType(classOf[枚举])`。
    * 构建期调用（`addMetas` 仅经 `registering()` 由生成器触发），此处用反射 dig
    * component 是安全的。 */
-  private def registerEnumProperties(cm: BeanMeta, visited: scala.collection.mutable.Set[Class[_]]): Unit = {
+  private def registerEnumProperties(cm: BeanMeta, visited: scala.collection.mutable.Set[Class[?]]): Unit = {
     def dig(bm: BeanMeta): Unit = {
       if (visited.add(bm.clazz)) bm.properties foreach (p => visit(p.typeinfo))
     }
@@ -93,7 +93,7 @@ abstract class MetaRegistrar extends AotHintRegistrar {
 object MetaRegistrar {
 
   /** Macro: digs class literal list and registers to registry. */
-  def registerImpl(clazzes: Expr[Seq[Class[_]]], registrar: Expr[MetaRegistrar])(using Quotes): Expr[Unit] = {
+  def registerImpl(clazzes: Expr[Seq[Class[?]]], registrar: Expr[MetaRegistrar])(using Quotes): Expr[Unit] = {
     '{
       ${ registrar }.addMetas(${ MetaDigger.digInto(clazzes) })
     }

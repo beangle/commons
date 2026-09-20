@@ -18,6 +18,7 @@
 package org.beangle.commons.lang
 
 import scala.collection.mutable.ListBuffer
+import scala.compiletime.uninitialized
 
 object Objects {
 
@@ -162,7 +163,7 @@ object Objects {
    *
    * @param clazz the Class of the instance
    */
-  def toStringBuilder(clazz: Class[_]): ToStringBuilder = new ToStringBuilder(simpleName(clazz))
+  def toStringBuilder(clazz: Class[?]): ToStringBuilder = new ToStringBuilder(simpleName(clazz))
 
   /** Creates an instance of [[ToStringBuilder]] in the same manner as
    * `toStringBuilder(AnyRef)`, but using `className` instead of using an class instance.
@@ -173,7 +174,7 @@ object Objects {
 
   /** More readable than `Class#getSimpleName`
    */
-  private def simpleName(clazz: Class[_]): String = {
+  private def simpleName(clazz: Class[?]): String = {
     var name = clazz.getName
     // the nth anonymous class has a class name ending in "Outer$n"
     // and local inner classes have names ending in "Outer.$1Inner"
@@ -284,7 +285,7 @@ object Objects {
    * @since 4.2.4
    */
   class CompareBuilder {
-    private var comparison: Int = _
+    private var comparison: Int = uninitialized
 
     /** Adds pair to comparison; stops when first difference found. */
     def add(lhs: Any, rhs: Any, ordering: Ordering[Any] = null): this.type = {
@@ -299,8 +300,8 @@ object Objects {
         return this
       }
       if (lhs.getClass.isArray) {
-        val lhsa = lhs.asInstanceOf[Array[_]]
-        val rhsa = rhs.asInstanceOf[Array[_]]
+        val lhsa = lhs.asInstanceOf[Array[?]]
+        val rhsa = rhs.asInstanceOf[Array[?]]
         if (lhsa.length != rhsa.length) {
           comparison = if (lhsa.length < rhsa.length) -1 else +1
           return this

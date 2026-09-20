@@ -39,7 +39,7 @@ trait Container {
    * @param key the bean key
    * @return Some(bean class) or None
    */
-  def getType(key: String): Option[Class[_]]
+  def getType(key: String): Option[Class[?]]
 
   /** Gets the bean by key.
    *
@@ -63,7 +63,7 @@ trait Container {
   def getBeans[T](clazz: Class[T]): Map[String, T]
 
   /** Returns all bean names and their types. */
-  def beanTypes: collection.Map[String, Class[_]]
+  def beanTypes: collection.Map[String, Class[?]]
 
   /** Closes the container and releases resources. */
   def close(): Unit

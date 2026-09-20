@@ -42,7 +42,7 @@ object WinCmd extends Shell(Charsets.GBK) {
       args.addOne("/c")
     }
     args.addOne(arg)
-    execute(args.toSeq: _*)
+    execute(args.toSeq*)
   }
 
   override def find(exename: String): Option[Path] = {
@@ -55,7 +55,7 @@ object WinCmd extends Shell(Charsets.GBK) {
     // /NH hides table header for simpler parsing
     val rs = execute("tasklist", "/FI", s"IMAGENAME eq $exename", "/NH")
     val pids = rs._2.filter(_.startsWith(exename)).map(x => Strings.split(x, " ").apply(1).toInt)
-    kill(pids.toSeq: _*)
+    kill(pids.toSeq*)
     pids.size
   }
 

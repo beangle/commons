@@ -25,7 +25,7 @@ object Companions {
    * @param clazz the class (e.g. MyClass)
    * @return Some(MyClass$) or None
    */
-  def getCompanionClass(clazz: Class[_]): Option[Class[_]] = {
+  def getCompanionClass(clazz: Class[?]): Option[Class[?]] = {
     val clazzName = clazz.getName
     if clazzName.endsWith("$") then Some(clazz) else ClassLoaders.get(clazz.getName + "$")
   }
@@ -35,7 +35,7 @@ object Companions {
    * @param clazz the class
    * @return Some(companion instance) or None
    */
-  def getCompanion(clazz: Class[_]): Option[Any] = {
+  def getCompanion(clazz: Class[?]): Option[Any] = {
     getCompanionClass(clazz) match
       case None => None
       case Some(ct) => Option(ct.getDeclaredField("MODULE$").get(null))

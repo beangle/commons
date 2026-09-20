@@ -21,6 +21,8 @@ import org.beangle.commons.lang.reflect.BeanInfos
 
 import java.beans.{BeanInfo, Transient}
 
+import scala.compiletime.uninitialized
+
 trait R {
   def title(): String = {
     "r title"
@@ -30,14 +32,14 @@ trait R {
 trait E[A]
 
 class Ap[T, V, S] extends R {
-  var id: T = _
-  var name: V = _
-  var roleIds: collection.mutable.Buffer[S] = _
-  var names: Set[String] = _
-  var jobs: Map[String, S] = _
-  var name2s: Set[E[T]] = _
+  var id: T = uninitialized
+  var name: V = uninitialized
+  var roleIds: collection.mutable.Buffer[S] = uninitialized
+  var names: Set[String] = uninitialized
+  var jobs: Map[String, S] = uninitialized
+  var name2s: Set[E[T]] = uninitialized
   @Transient
-  var persisted: Boolean = _
+  var persisted: Boolean = uninitialized
 
   def findById(id: T): Option[Ap[T, V, S]] = {
     None

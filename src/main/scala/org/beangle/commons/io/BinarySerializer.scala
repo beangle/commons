@@ -30,7 +30,7 @@ trait BinarySerializer extends Serializer, Deserializer {
   override def mediaTypes: Seq[MediaType] = List(MediaTypes.stream)
 
   /** Registers a class for serialization. */
-  def registerClass(clazz: Class[_]): Unit
+  def registerClass(clazz: Class[?]): Unit
 
   /** Serializes object to byte array. */
   def asBytes(data: Any): Array[Byte]
@@ -46,10 +46,10 @@ trait BinarySerializer extends Serializer, Deserializer {
 
 /** Base implementation with register-based ObjectSerializer mapping. */
 abstract class AbstractBinarySerializer extends BinarySerializer {
-  private var serializers = Map.empty[Class[_], ObjectSerializer]
+  private var serializers = Map.empty[Class[?], ObjectSerializer]
 
   /** Registers an ObjectSerializer for the class. */
-  def register(clazz: Class[_], os: ObjectSerializer): Unit = {
+  def register(clazz: Class[?], os: ObjectSerializer): Unit = {
     serializers += (clazz -> os)
   }
 
@@ -86,7 +86,7 @@ abstract class AbstractBinarySerializer extends BinarySerializer {
 
 class DefaultBinarySerializer extends AbstractBinarySerializer {
 
-  override def registerClass(clazz: Class[_]): Unit = {
+  override def registerClass(clazz: Class[?]): Unit = {
     if (classOf[Externalizable].isAssignableFrom(clazz) || classOf[java.io.Serializable].isAssignableFrom(clazz))
       register(clazz, ObjectSerializer.Default)
     else

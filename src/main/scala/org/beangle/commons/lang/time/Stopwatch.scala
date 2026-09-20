@@ -22,6 +22,8 @@ import org.beangle.commons.lang.time.Stopwatch.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.{MICROSECONDS, MILLISECONDS, NANOSECONDS, SECONDS}
 
+import scala.compiletime.uninitialized
+
 /** Stopwatch formatting utilities. */
 object Stopwatch {
 
@@ -69,11 +71,11 @@ object Stopwatch {
 class Stopwatch(val ticker: Ticker = Ticker.systemTicker(), immediately: Boolean = false) {
 
   /** True if stopwatch is currently running. */
-  var running: Boolean = _
+  var running: Boolean = uninitialized
 
-  private var elapsed: Long = _
+  private var elapsed: Long = uninitialized
 
-  private var startTick: Long = _
+  private var startTick: Long = uninitialized
 
   if (immediately) {
     running = true

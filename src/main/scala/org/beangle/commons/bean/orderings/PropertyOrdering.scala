@@ -21,6 +21,7 @@ import org.beangle.commons.bean.Properties
 import org.beangle.commons.lang.{Numbers, Strings}
 
 import scala.collection.mutable.ListBuffer
+import scala.compiletime.uninitialized
 
 /** PropertyOrdering factory. */
 object PropertyOrdering {
@@ -55,7 +56,7 @@ class PropertyOrdering(cmpStr: String) extends Ordering[Any] {
   var nullFirst: Boolean = true
 
   /** Custom comparator for the extracted value. */
-  var comparator: Ordering[Any] = _
+  var comparator: Ordering[Any] = uninitialized
 
   /** Collator for string comparison. */
   var collatorOrdering = new CollatorOrdering(asc)

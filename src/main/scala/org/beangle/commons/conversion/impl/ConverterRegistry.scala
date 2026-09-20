@@ -32,14 +32,14 @@ import scala.collection.mutable
  */
 class ConverterRegistry {
 
-  private val converters = new mutable.HashMap[Class[_], Map[Class[_], GenericConverter]]
+  private val converters = new mutable.HashMap[Class[?], Map[Class[?], GenericConverter]]
 
   /** Registers a converter.
    *
    * @param converter the converter to add
    */
-  def add(converter: Converter[_, _]): Unit = {
-    var key: (Class[_], Class[_]) = null
+  def add(converter: Converter[?, ?]): Unit = {
+    var key: (Class[?], Class[?]) = null
     for (m <- converter.getClass.getMethods if m.getName == "apply" && Modifier.isPublic(m.getModifiers) && !m.isBridge)
       key = (m.getParameterTypes()(0), m.getReturnType)
     if (null == key) throw new IllegalArgumentException("Cannot find convert type pair " + converter.getClass)
@@ -63,5 +63,5 @@ class ConverterRegistry {
   }
 
   /** Freezes registered converters into an immutable map. */
-  def build(): Map[Class[_], Map[Class[_], GenericConverter]] = converters.toMap
+  def build(): Map[Class[?], Map[Class[?], GenericConverter]] = converters.toMap
 }

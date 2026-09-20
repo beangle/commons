@@ -43,7 +43,7 @@ class MetaModelsTest extends AnyFunSpec, Matchers {
 
     it("classNames returns empty set when no idx files exist") {
       val names = MetaModels.classNames
-      names shouldBe a[Set[_]]
+      names shouldBe a[Set[?]]
     }
 
     it("loads BeanMeta from metamodel.idx via MetaIndex") {

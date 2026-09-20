@@ -22,10 +22,10 @@ import org.beangle.commons.bean.{DynamicBean, Properties as BeanProperties}
 /** Mutable Map[String, Any] with DynamicBean and bean property extraction. */
 class Properties extends collection.mutable.Map[String, Any], DynamicBean {
 
-  private[this] val data = Collections.newMap[String, Any]
+  private val data = Collections.newMap[String, Any]
 
   /** Creates from key-value tuples. */
-  def this(tuples: (String, _)*) = {
+  def this(tuples: (String, ?)*) = {
     this()
     tuples foreach { tuple =>
       this.put(tuple._1, tuple._2)
@@ -49,7 +49,7 @@ class Properties extends collection.mutable.Map[String, Any], DynamicBean {
 
   /** Adds nested Properties from obj using attr names (supports attr->rename). */
   def add(attr: String, obj: Object, nestedAttrs: String*): Unit = {
-    if null != obj then put(attr, new Properties(obj, nestedAttrs: _*))
+    if null != obj then put(attr, new Properties(obj, nestedAttrs*))
   }
 
   override def iterator: Iterator[(String, Any)] =

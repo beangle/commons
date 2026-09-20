@@ -49,7 +49,7 @@ object LinuxBash extends Shell(Charsets.UTF_8) {
       args.addOne("-c")
     }
     args.addOne(arg)
-    execute(args.toSeq: _*)
+    execute(args.toSeq*)
   }
 
   override def killall(exename: String): Int = {

@@ -69,15 +69,15 @@ class InStr(val str: String) extends Predicate[String] {
 }
 
 /** Predicate: value is in the given collection. */
-class Contains[T](val objs: ju.Collection[_ <: T]) extends Predicate[T]() {
+class Contains[T](val objs: ju.Collection[? <: T]) extends Predicate[T]() {
 
   def apply(arg0: T): Boolean = objs.contains(arg0)
 }
 
 /** Predicate: collection has at most one element. */
-class Max1Element extends Predicate[ju.Collection[_]] {
+class Max1Element extends Predicate[ju.Collection[?]] {
 
-  def apply(col: ju.Collection[_]): Boolean = {
+  def apply(col: ju.Collection[?]): Boolean = {
     col.size < 2
   }
 }

@@ -32,7 +32,7 @@ import scala.collection.mutable
 object MetaModel {
 
   /** Bean metadata: properties and constructors. */
-  case class BeanMeta(clazz: Class[_], properties: Seq[Property], ctors: Seq[Ctor]) {
+  case class BeanMeta(clazz: Class[?], properties: Seq[Property], ctors: Seq[Ctor]) {
     /** Renders as human-readable JSON. */
     override def toString: String = JsonObject(
       "clazz" -> clazz.getName,
@@ -83,7 +83,7 @@ object MetaModel {
     * runtime only performs type conversion and assembly.
     * Properties are sorted by name, ensuring deterministic binary output.
     */
-  class Builder(val clazz: Class[_]) {
+  class Builder(val clazz: Class[?]) {
     private val properties = new mutable.ArrayBuffer[Property]
     private val ctors = new mutable.ArrayBuffer[Ctor]
 

@@ -23,6 +23,7 @@ import org.beangle.commons.lang.time.CycleTime.{CycleTimeType, ToWeekTimeBuilder
 
 import java.time.LocalDate
 import scala.collection.mutable
+import scala.compiletime.uninitialized
 
 /** CycleTime factory and CycleTimeType. */
 object CycleTime {
@@ -104,17 +105,17 @@ object CycleTime {
 class CycleTime extends Cloneable with Serializable {
 
   /** Start date. */
-  var beginOn: LocalDate = _
+  var beginOn: LocalDate = uninitialized
   /** End date. */
-  var endOn: LocalDate = _
+  var endOn: LocalDate = uninitialized
   /** Start time. */
-  var beginAt: HourMinute = _
+  var beginAt: HourMinute = uninitialized
   /** End time. */
-  var endAt: HourMinute = _
+  var endAt: HourMinute = uninitialized
   /** Cycle unit (Day, Week, Month). */
-  var cycleType: CycleTimeType = _
+  var cycleType: CycleTimeType = uninitialized
   /** Number of units per cycle. */
-  var cycleCount: Int = _
+  var cycleCount: Int = uninitialized
 
   /** Returns true if beginOn == endOn. */
   def isOneDay: Boolean = {

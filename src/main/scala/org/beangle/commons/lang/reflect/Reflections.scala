@@ -44,7 +44,7 @@ object Reflections {
   }
 
   /** Gets field from class or superclass; sets accessible. */
-  def getField(clazz: Class[_], name: String): Option[Field] = {
+  def getField(clazz: Class[?], name: String): Option[Field] = {
     try {
       Some(clazz.getField(name))
     } catch {
@@ -59,7 +59,7 @@ object Reflections {
     }
   }
 
-  private def getDeclaredField(clazz: Class[_], name: String): Option[Field] = {
+  private def getDeclaredField(clazz: Class[?], name: String): Option[Field] = {
     try {
       val f = clazz.getDeclaredField(name)
       f.setAccessible(true)
@@ -127,13 +127,13 @@ object Reflections {
   }
 
   /** Finds generic parameter types for expected interface/superclass. */
-  def getGenericParamTypes(clazz: Class[_], expected: Class[_]): collection.Map[String, Class[_]] = {
+  def getGenericParamTypes(clazz: Class[?], expected: Class[?]): collection.Map[String, Class[?]] = {
     if !expected.isAssignableFrom(clazz) then Map.empty else getGenericParamTypes(clazz, Set(expected))
   }
 
   /** Extracts collection element type from a Collection/Seq class. */
-  def getCollectionParamTypes(clazz: Class[_]): ArraySeq[TypeInfo] = {
-    val collections: Set[Class[_]] = Set(classOf[mutable.Seq[_]], classOf[immutable.Seq[_]], classOf[java.util.Collection[_]])
+  def getCollectionParamTypes(clazz: Class[?]): ArraySeq[TypeInfo] = {
+    val collections: Set[Class[?]] = Set(classOf[mutable.Seq[?]], classOf[immutable.Seq[?]], classOf[java.util.Collection[?]])
     val types = getGenericParamTypes(clazz, collections)
     if types.isEmpty then ArraySeq(TypeInfo.AnyRefType)
     else {
@@ -143,8 +143,8 @@ object Reflections {
   }
 
   /** Extracts key and value type from a Map class. */
-  def getMapParamTypes(clazz: Class[_]): ArraySeq[TypeInfo] = {
-    val maps: Set[Class[_]] = Set(classOf[mutable.Map[_, _]], classOf[immutable.Map[_, _]], classOf[java.util.Map[_, _]])
+  def getMapParamTypes(clazz: Class[?]): ArraySeq[TypeInfo] = {
+    val maps: Set[Class[?]] = Set(classOf[mutable.Map[?, ?]], classOf[immutable.Map[?, ?]], classOf[java.util.Map[?, ?]])
     val types = getGenericParamTypes(clazz, maps)
     if (types.isEmpty) then ArraySeq(TypeInfo.AnyRefType, TypeInfo.AnyRefType)
     else ArraySeq(TypeInfo.get(types("K"), false), TypeInfo.get(types("V"), false))
@@ -156,9 +156,9 @@ object Reflections {
    * @param expects expected supertypes (Collection, Map, etc.)
    * @return map of parameter name to resolved class
    */
-  def getGenericParamTypes(clazz: Class[_], expects: Set[Class[_]]): collection.Map[String, Class[_]] = {
-    var targetParamTypes: collection.Map[String, Class[_]] = Map.empty
-    var paramTypes: collection.Map[String, Class[_]] = Map.empty
+  def getGenericParamTypes(clazz: Class[?], expects: Set[Class[?]]): collection.Map[String, Class[?]] = {
+    var targetParamTypes: collection.Map[String, Class[?]] = Map.empty
+    var paramTypes: collection.Map[String, Class[?]] = Map.empty
     var nextClass = clazz
 
     while (null != nextClass && classOf[AnyRef] != nextClass && targetParamTypes.isEmpty) {
@@ -175,12 +175,12 @@ object Reflections {
     targetParamTypes
   }
 
-  private def isAssignableFrom(targets: Set[Class[_]], source: Class[_]): Boolean = {
+  private def isAssignableFrom(targets: Set[Class[?]], source: Class[?]): Boolean = {
     targets.exists(_.isAssignableFrom(source))
   }
 
-  private def navIterface(clazz: Class[_],
-                          targets: Set[Class[_]], paramTypes: collection.Map[String, Class[_]]): collection.Map[String, Class[_]] = {
+  private def navIterface(clazz: Class[?],
+                          targets: Set[Class[?]], paramTypes: collection.Map[String, Class[?]]): collection.Map[String, Class[?]] = {
     if (null == clazz || classOf[AnyRef] == clazz) return null;
     val interfaceTypes = clazz.getGenericInterfaces
     val canidateIterface = interfaceTypes.find { x =>
@@ -190,11 +190,11 @@ object Reflections {
         case _ => false
       }
     }
-    var result: collection.Map[String, Class[_]] = Map.empty
+    var result: collection.Map[String, Class[?]] = Map.empty
     canidateIterface foreach { ci =>
       ci match {
         case pt: ParameterizedType =>
-          val interface = pt.getRawType.asInstanceOf[Class[_]]
+          val interface = pt.getRawType.asInstanceOf[Class[?]]
           val newParamTypes = Reflections.deduceParamTypes(interface, pt, paramTypes)
           if (targets.contains(interface)) {
             result = newParamTypes
@@ -222,7 +222,7 @@ object Reflections {
       val superClass = delaringClass.getSuperclass
       if (null == superClass) return false
       try
-        isAnnotationPresent(superClass.getMethod(method.getName, method.getParameterTypes: _*), clazz)
+        isAnnotationPresent(superClass.getMethod(method.getName, method.getParameterTypes*), clazz)
       catch {
         case e: NoSuchMethodException => false
       }
@@ -237,7 +237,7 @@ object Reflections {
       val superClass = delaringClass.getSuperclass
       if (null == superClass) return null.asInstanceOf[Tuple2[T, Method]]
       try
-        getAnnotation(superClass.getMethod(method.getName, method.getParameterTypes: _*), clazz)
+        getAnnotation(superClass.getMethod(method.getName, method.getParameterTypes*), clazz)
       catch {
         case e: NoSuchMethodException => null.asInstanceOf[Tuple2[T, Method]]
       }
@@ -251,18 +251,18 @@ object Reflections {
    * @param paramTypes existing parameter type mappings
    * @return map of parameter names to resolved classes
    */
-  def deduceParamTypes(clazz: Class[_], typ: java.lang.reflect.Type,
-                       paramTypes: collection.Map[String, Class[_]]): collection.Map[String, Class[_]] = {
+  def deduceParamTypes(clazz: Class[?], typ: java.lang.reflect.Type,
+                       paramTypes: collection.Map[String, Class[?]]): collection.Map[String, Class[?]] = {
     typ match {
       case ptSuper: ParameterizedType =>
-        val tmp = new collection.mutable.HashMap[String, Class[_]]
+        val tmp = new collection.mutable.HashMap[String, Class[?]]
         val ps = ptSuper.getActualTypeArguments
         val tvs = clazz.getTypeParameters
         (0 until ps.length) foreach { k =>
           val paramType = ps(k) match {
             case c: Class[_] => Some(c)
             case tv: TypeVariable[_] => paramTypes.get(tv.getName)
-            case pt: ParameterizedType => Some(pt.getRawType.asInstanceOf[Class[_]])
+            case pt: ParameterizedType => Some(pt.getRawType.asInstanceOf[Class[?]])
           }
           paramType foreach (pt => tmp.put(tvs(k).getName, pt))
         }

@@ -17,6 +17,8 @@
 
 package org.beangle.commons.collection
 
+import scala.compiletime.uninitialized
+
 /** Identity-based map similar to java.util.IdentityHashMap, using chaining buckets.
  * Grows by doubling the table when the load factor is exceeded. Does not support
  * null key or null value. Not thread-safe.
@@ -154,7 +156,7 @@ final class IdentityMap[K <: AnyRef, V](capacity: Int = 16) {
   class Entry[K, V](val key: K, var value: V, var next: Entry[K, V])
 
   class EntryIterator[K, V](table: Array[Entry[K, V]]) {
-    var entry: Entry[K, V] = _
+    var entry: Entry[K, V] = uninitialized
     var hasNext = false
     var index = -1
 

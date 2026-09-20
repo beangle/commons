@@ -19,6 +19,8 @@ package org.beangle.commons.io
 
 import java.io.Writer
 
+import scala.compiletime.uninitialized
+
 /** Buffered Writer with configurable buffer size.
  *
  * @param out        the underlying writer
@@ -26,7 +28,7 @@ import java.io.Writer
  */
 class BufferedWriter(out: Writer, bufferSize: Int = 8192) extends Writer {
   private val buffer = new Array[Char](bufferSize)
-  private var pointer: Int = _
+  private var pointer: Int = uninitialized
 
   /** Writes a single character. */
   override def write(c: Int): Unit = {

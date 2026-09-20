@@ -44,7 +44,7 @@ class MapConverter(val conversion: Conversion = DefaultConversion.Instance) {
     value match {
       case s: String => if Strings.isEmpty(s) then None else Some(conversion.convert(s, clazz))
       case a: Array[_] => if !clazz.isArray then (if a.length > 0 then convert(a(0), clazz) else None) else Some(conversion.convert(value, clazz))
-      case i: Iterable[_] => if !clazz.isArray then convert(i.head, clazz) else Some(conversion.convert(value.asInstanceOf[Iterable[_]].toArray, clazz))
+      case i: Iterable[_] => if !clazz.isArray then convert(i.head, clazz) else Some(conversion.convert(value.asInstanceOf[Iterable[?]].toArray, clazz))
       case o: Any => Some(conversion.convert(value, clazz))
     }
   }
@@ -55,7 +55,7 @@ class MapConverter(val conversion: Conversion = DefaultConversion.Instance) {
    * @param clazz target element class
    * @return array of converted values, or null if datas is null
    */
-  def convert[T](datas: Array[_], clazz: Class[T]): Array[T] = {
+  def convert[T](datas: Array[?], clazz: Class[T]): Array[T] = {
     if (null == datas) return null
     val newDatas = java.lang.reflect.Array.newInstance(clazz, datas.size).asInstanceOf[Array[T]]
     for (i <- 0 until datas.length) newDatas(i) = convert(datas(i), clazz).getOrElse(Objects.default(clazz))

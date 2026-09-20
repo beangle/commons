@@ -32,7 +32,7 @@ object DataType {
    * @param clazz the Java class
    * @return the corresponding DataType, or String if no match
    */
-  def toType(clazz: Class[_]): DataType = {
+  def toType(clazz: Class[?]): DataType = {
     val clz = Primitives.wrap(clazz)
     if (classOf[java.lang.Boolean].isAssignableFrom(clz)) {
       Boolean

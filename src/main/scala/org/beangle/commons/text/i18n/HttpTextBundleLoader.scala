@@ -24,6 +24,8 @@ import org.beangle.commons.text.i18n.DefaultTextBundleLoader
 import java.io.{ByteArrayInputStream, InputStream}
 import java.util.Locale
 
+import scala.compiletime.uninitialized
+
 /** Loads text bundles from HTTP URL (expects {path} placeholder).
  *
  * @param url     base URL with {path} placeholder
@@ -31,7 +33,7 @@ import java.util.Locale
  */
 class HttpTextBundleLoader(url: String, preload: Boolean = false) extends DefaultTextBundleLoader {
 
-  private var bundles: Set[String] = _
+  private var bundles: Set[String] = uninitialized
 
   if preload then loadList()
 

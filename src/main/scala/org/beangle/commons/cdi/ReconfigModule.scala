@@ -22,10 +22,12 @@ import org.beangle.commons.cdi.Binder.Reference
 
 import java.util as ju
 
+import scala.compiletime.uninitialized
+
 /** Abstract module for runtime CDI reconfiguration. */
 abstract class ReconfigModule extends AotHintRegistrar {
-  var cfg: Reconfig = _
-  var configUrl: String = _
+  var cfg: Reconfig = uninitialized
+  var configUrl: String = uninitialized
   var ignoreMissing: Boolean = true
   private var buildTime = false
 
@@ -62,22 +64,22 @@ abstract class ReconfigModule extends AotHintRegistrar {
   }
 
   /** Builds list from items. */
-  protected final def list(datas: AnyRef*): List[_] = {
+  protected final def list(datas: AnyRef*): List[?] = {
     datas.toList
   }
 
   /** Builds list of class name references. */
-  protected final def listref(classes: Class[_]*): List[_] = {
+  protected final def listref(classes: Class[?]*): List[?] = {
     classes.map(clazz => Reference(clazz.getName)).toList
   }
 
   /** Builds set from items. */
-  protected final def set(datas: AnyRef*): Set[_] = {
+  protected final def set(datas: AnyRef*): Set[?] = {
     datas.toSet
   }
 
   /** Builds map from key-value entries. */
-  protected final def map(entries: (_, _)*): Map[_, _] = {
+  protected final def map(entries: (?, ?)*): Map[?, ?] = {
     entries.toMap
   }
 

@@ -248,7 +248,7 @@ object AotHintGenerator {
     }
 
     // Serialization entries (classes not already in typePolicies)
-    val serializableClasses = serializables -- hints.getTypes
+    val serializableClasses = serializables &~ hints.getTypes
     serializableClasses.toSeq.sortBy(typeName).foreach { clazz =>
       reflectionEntries += JsonObject(
         "type" -> typeName(clazz),
@@ -292,7 +292,7 @@ object AotHintGenerator {
    *  class descriptor object" and silently drop the whole registration, so they
    *  must never be emitted (see [[AotPolicy]]).
    */
-  private def reflectEntryGraalvm25(clazz: Class[_], policy: AotPolicy): JsonObject = {
+  private def reflectEntryGraalvm25(clazz: Class[?], policy: AotPolicy): JsonObject = {
     import AotPolicy.Category.*
     val entry = JsonObject("type" -> typeName(clazz))
     policy.categories foreach {
@@ -345,7 +345,7 @@ object AotHintGenerator {
    *  native-image happens to resolve both spellings (registered type counts are
    *  identical), but the descriptor form fails schema validation, so normalize here.
    */
-  private def typeName(clazz: Class[_]): String = {
+  private def typeName(clazz: Class[?]): String = {
     val name = clazz.getName
     if name.charAt(0) != '[' then name
     else {
@@ -374,7 +374,7 @@ object AotHintGenerator {
   /** Writes native-image.properties carrying extra build args, e.g.
    *  `--initialize-at-run-time` for classes whose static initializers
    *  must run at runtime (SecureRandom users etc.). */
-  def writeNativeImageProperties(out: Path, classes: collection.Set[Class[_]]): Unit = {
+  def writeNativeImageProperties(out: Path, classes: collection.Set[Class[?]]): Unit = {
     val args = "--initialize-at-run-time=" + classes.toSeq.sortBy(_.getName).map(_.getName).mkString(",")
     Files.write(out, s"Args = $args\n".getBytes(StandardCharsets.UTF_8))
   }

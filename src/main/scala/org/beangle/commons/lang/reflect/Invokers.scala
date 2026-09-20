@@ -26,11 +26,11 @@ import java.lang.reflect.Method
 object Invokers {
 
   /** Creates a VarHandle for the named instance field of the given class. */
-  def findVarHandle(lookup: MethodHandles.Lookup, clazz: Class[_], name: String, fieldType: Class[_]): VarHandle =
+  def findVarHandle(lookup: MethodHandles.Lookup, clazz: Class[?], name: String, fieldType: Class[?]): VarHandle =
     lookup.findVarHandle(clazz, name, fieldType)
 
   /** Creates a VarHandle for the named static field of the given class. */
-  def findStaticVarHandle(lookup: MethodHandles.Lookup, clazz: Class[_], name: String, fieldType: Class[_]): VarHandle =
+  def findStaticVarHandle(lookup: MethodHandles.Lookup, clazz: Class[?], name: String, fieldType: Class[?]): VarHandle =
     lookup.findStaticVarHandle(clazz, name, fieldType)
 
   /** Unreflects a Method into a MethodHandle (setAccessible fallback for non-public classes). */

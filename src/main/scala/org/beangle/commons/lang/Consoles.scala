@@ -119,7 +119,7 @@ object Consoles {
   def readPassword(): String = new String(System.console().readPassword())
 
   /** Reads a password with printf-style prompt. */
-  def readPassword(fmt: String, args: Any*): String = io.StdIn.readLine(fmt, args: _*)
+  def readPassword(fmt: String, args: Any*): String = io.StdIn.readLine(fmt, args*)
 
   private def printImmediate(msg: String): Unit = {
     Console.print(msg)

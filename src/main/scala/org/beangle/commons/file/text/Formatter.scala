@@ -25,6 +25,8 @@ import org.beangle.commons.lang.{Charsets, Strings}
 
 import java.io.{File, FileInputStream, FileOutputStream}
 
+import scala.compiletime.uninitialized
+
 /** File/text formatting utilities. */
 object Formatter {
   /** Line feed (Unix-style). */
@@ -65,9 +67,9 @@ class FormatterBuilder {
   var tablength = 2
   /** Line ending for output (LF or CRLF). */
   var eof = Formatter.LF
-  private var tab2space: Boolean = _
-  private var trimTrailingWhiteSpace: Boolean = _
-  private var fixLast: Boolean = _
+  private var tab2space: Boolean = uninitialized
+  private var trimTrailingWhiteSpace: Boolean = uninitialized
+  private var fixLast: Boolean = uninitialized
 
   /** Enables trimming trailing whitespace. */
   def enableTrimTrailingWhiteSpace(): this.type = {

@@ -68,7 +68,7 @@ abstract class Shell(charset: Charset = Charsets.UTF_8) {
    */
   def execute(args: String*): (Int, collection.Seq[String]) = {
     require(args.nonEmpty, "Need command")
-    val processBuilder = new ProcessBuilder(args.toSeq: _*)
+    val processBuilder = new ProcessBuilder(args.toSeq*)
     processBuilder.redirectErrorStream(true)
     val process = processBuilder.start()
     val contents = Collections.newBuffer[String]

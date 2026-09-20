@@ -18,6 +18,7 @@
 package org.beangle.commons.lang.time
 
 import scala.collection.mutable
+import scala.compiletime.uninitialized
 
 /** Timer node for profiling (resource name, start time, children).
  *
@@ -31,7 +32,7 @@ class TimerNode(val resource: String, var startTime: Long) extends Serializable 
   var children = new mutable.ListBuffer[TimerNode]
 
   /** Elapsed milliseconds (set by end()). */
-  var totalTime: Long = _
+  var totalTime: Long = uninitialized
 
   /** Records the start time for this node.
    *

@@ -28,18 +28,18 @@ object Primitives {
 
   /** Primitive types to their corresponding wrapper types.
    */
-  private val primitiveToWrappers: Map[Class[_], Class[_]] = Map(
+  private val primitiveToWrappers: Map[Class[?], Class[?]] = Map(
     (classOf[Boolean], classOf[jl.Boolean]),
     (classOf[Byte], classOf[jl.Byte]), (classOf[Char], classOf[jl.Character]),
     (classOf[Int], classOf[jl.Integer]), (classOf[Short], classOf[jl.Short]),
     (classOf[Long], classOf[jl.Long]), (classOf[Float], classOf[jl.Float]),
     (classOf[Double], classOf[jl.Double]))
 
-  private val defaults: Map[Class[_], Any] = Map((classOf[Boolean], false), (classOf[Char], '\u0000'),
+  private val defaults: Map[Class[?], Any] = Map((classOf[Boolean], false), (classOf[Char], '\u0000'),
     (classOf[Byte], 0.asInstanceOf[Byte]), (classOf[Short], 0.asInstanceOf[Short]),
     (classOf[Int], 0), (classOf[Long], 0L), (classOf[Float], 0F), (classOf[Double], 0D))
 
-  private val defaultLiterals: Map[Class[_], String] = Map((classOf[Boolean], "false"), (classOf[Char], "'\u0000'"),
+  private val defaultLiterals: Map[Class[?], String] = Map((classOf[Boolean], "false"), (classOf[Char], "'\u0000'"),
     (classOf[Byte], "(byte)0"), (classOf[Short], "(short)0"),
     (classOf[Int], "0"), (classOf[Long], "0L"), (classOf[Float], "0F"), (classOf[Double], "0D"))
 
@@ -68,7 +68,7 @@ object Primitives {
    *
    * @see Class#isPrimitive
    */
-  def isWrapperType(clazz: Class[_]): Boolean = wrapperToPrimitives.contains(clazz)
+  def isWrapperType(clazz: Class[?]): Boolean = wrapperToPrimitives.contains(clazz)
 
   /** Returns the corresponding wrapper type of `type` if it is a primitive
    * type; otherwise returns `type` itself. Idempotent.

@@ -26,6 +26,8 @@ import org.scalatest.matchers.should.Matchers
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
+import scala.compiletime.uninitialized
+
 class AppRegistry extends MetaRegistrar {
 
   override def registering(): Unit = {
@@ -36,14 +38,14 @@ class AppRegistry extends MetaRegistrar {
 
 @component
 class EnumComponent {
-  var level: TestEnum = _
+  var level: TestEnum = uninitialized
 }
 
 class EnumEntity {
-  var name: String = _
+  var name: String = uninitialized
   var level: TestEnum = TestEnum.Public
   var levels: Seq[TestEnum] = Seq.empty
-  var detail: EnumComponent = _
+  var detail: EnumComponent = uninitialized
 }
 
 class EnumRegistry extends MetaRegistrar {

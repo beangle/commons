@@ -48,7 +48,7 @@ class MutableEnvironment extends Environment {
     getValue(name) match {
       case e@Some(v) => e
       case None =>
-        val keys = configs.flatten(c => c.keys(name))
+        val keys = configs.flatMap(c => c.keys(name))
         val kvs = keys.map(k => (k, getValue(k).get)).toMap
         if (kvs.isEmpty) None else Some(kvs)
     }
@@ -64,7 +64,7 @@ class MutableEnvironment extends Environment {
       case None => Map.empty
       case Some(m) =>
         val prefixLength = (if (path.endsWith(".")) path else path + ".").length
-        val values = m.asInstanceOf[collection.Map[String, _]]
+        val values = m.asInstanceOf[collection.Map[String, ?]]
         // Prevent underlying layer from doing type conversion
         values.map(x => (x._1.substring(prefixLength), getValue(x._1).get)).toMap
     }

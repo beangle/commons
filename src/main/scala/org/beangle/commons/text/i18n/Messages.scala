@@ -39,7 +39,7 @@ class Messages(locale: Locale, val registry: TextBundleRegistry, val format: Tex
    * @param key   the message key
    * @return the message or key if not found
    */
-  def get(clazz: Class[_], key: String): String = {
+  def get(clazz: Class[?], key: String): String = {
     if key == "class" then
       val bundle = registry.load(locale, clazz.getPackage.getName + ".package")
       bundle.get(clazz.getSimpleName).getOrElse(key)

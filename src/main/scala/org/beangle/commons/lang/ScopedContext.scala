@@ -75,14 +75,14 @@ object ScopedContext {
     context.get.add(key.name, value)
   }
 
-  def remove(key: Key[_]): Unit = {
+  def remove(key: Key[?]): Unit = {
     if (context.isBound) {
       context.get.remove(key.name)
     }
   }
 
   /** Execute body with the given data. */
-  def runWith[A](data: (Key[_], Any)*)(body: => A): A = {
+  def runWith[A](data: (Key[?], Any)*)(body: => A): A = {
     val holder = new Holder(data.map(x => (x._1.name, x._2)).toMap)
     val result = AtomicReference[A]
     //dont using call,for it was changed in JDK25

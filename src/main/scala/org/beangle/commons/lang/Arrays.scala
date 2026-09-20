@@ -37,14 +37,14 @@ object Arrays {
    * @param array the array to test
    * @return `true` if the array is empty or `null`
    */
-  def isEmpty(array: Array[_ <: Any]): Boolean = array == null || array.length == 0
+  def isEmpty(array: Array[? <: Any]): Boolean = array == null || array.length == 0
 
   /** Returns true if the array is null, empty, or all elements are null.
    *
    * @param array the array to test
    * @return true if blank
    */
-  def isBlank(array: Array[_ <: Any]): Boolean = {
+  def isBlank(array: Array[? <: Any]): Boolean = {
     val length = if (null == array) 0 else array.length
     if (0 == length) return true
     var i = 0

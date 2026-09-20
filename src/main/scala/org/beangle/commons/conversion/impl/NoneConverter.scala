@@ -28,5 +28,5 @@ object NoneConverter extends GenericConverter {
 
   override def convert[T](input: Any, targetType: Class[T]): T = Objects.default(targetType)
 
-  override def getTypeinfo: (Class[_], Class[_]) = (classOf[AnyRef], classOf[AnyRef])
+  override def getTypeinfo: (Class[?], Class[?]) = (classOf[AnyRef], classOf[AnyRef])
 }

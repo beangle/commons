@@ -39,7 +39,7 @@ object Jexl3 {
     jexlBuilder.create()
   }
 
-  private class SimplePropertyGet(val clazz: Class[_], val handle: MethodHandle, val property: String) extends JexlPropertyGet {
+  private class SimplePropertyGet(val clazz: Class[?], val handle: MethodHandle, val property: String) extends JexlPropertyGet {
 
     override def invoke(obj: Any): AnyRef = handle.invoke(obj).asInstanceOf[AnyRef]
 

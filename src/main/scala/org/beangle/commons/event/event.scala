@@ -19,6 +19,8 @@ package org.beangle.commons.event
 
 import java.util.EventObject
 
+import scala.compiletime.uninitialized
+
 /** Abstract Event class.
  *
  * @author chaostone
@@ -35,11 +37,11 @@ class BusinessEvent(source: AnyRef) extends Event(source) {
   val timestamp = System.currentTimeMillis()
 
   /** Event subject. */
-  var subject: String = _
+  var subject: String = uninitialized
 
   /** Event details. */
-  var detail: String = _
+  var detail: String = uninitialized
 
   /** Resource where the event occurred. */
-  var resource: String = _
+  var resource: String = uninitialized
 }

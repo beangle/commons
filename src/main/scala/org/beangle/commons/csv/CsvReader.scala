@@ -21,6 +21,8 @@ import org.beangle.commons.csv.internal.CsvParser
 
 import java.io.{BufferedReader, Reader}
 
+import scala.compiletime.uninitialized
+
 /** Reads CSV from a Reader.
  *
  * @author chaostone
@@ -29,7 +31,7 @@ class CsvReader(reader: Reader, format: CsvFormat) {
 
   private var hasNext: Boolean = true
 
-  private var linesSkiped: Boolean = _
+  private var linesSkiped: Boolean = uninitialized
 
   private var skipLines: Int = 0
 

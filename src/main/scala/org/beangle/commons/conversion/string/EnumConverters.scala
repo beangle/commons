@@ -46,7 +46,7 @@ object EnumConverters extends StringConverterFactory[String, ScalaEnum] {
     else converter
   }
 
-  private def newConverter(targetType: Class[_]): EnumConverter[AnyRef] = {
+  private def newConverter(targetType: Class[?]): EnumConverter[AnyRef] = {
     val enm = Reflections.getInstance[AnyRef](targetType.getName)
     new EnumConverter(enm)
   }
@@ -60,11 +60,11 @@ object EnumConverters extends StringConverterFactory[String, ScalaEnum] {
 }
 
 /** Converts string to Java enum by name. */
-object JavaEnumConverters extends StringConverterFactory[String, Enum[_]] {
+object JavaEnumConverters extends StringConverterFactory[String, Enum[?]] {
 
-  private class EnumConverter[T <: Enum[_]](val enumType: Class[_]) extends Converter[String, T] {
+  private class EnumConverter[T <: Enum[?]](val enumType: Class[?]) extends Converter[String, T] {
 
-    def enumValueOf[T <: Enum[T]](cls: Class[_], str: String): T = Enum.valueOf(cls.asInstanceOf[Class[T]], str)
+    def enumValueOf[T <: Enum[T]](cls: Class[?], str: String): T = Enum.valueOf(cls.asInstanceOf[Class[T]], str)
 
     override def apply(input: String): T = enumValueOf(enumType, input)
   }

@@ -21,6 +21,8 @@ import org.beangle.commons.config.Environment
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
+import scala.compiletime.uninitialized
+
 class ModuleTest extends AnyFunSpec, Matchers {
 
   describe("BindModule") {
@@ -45,16 +47,16 @@ class ModuleTest extends AnyFunSpec, Matchers {
 }
 
 class BindModuleEntity {
-  var name: String = _
-  var age: Int = _
+  var name: String = uninitialized
+  var age: Int = uninitialized
 }
 
 class BindModuleInner {
-  var code: String = _
+  var code: String = uninitialized
 }
 
 class BindModuleExtra {
-  var enabled: Boolean = _
+  var enabled: Boolean = uninitialized
 }
 
 class TestBindModule extends BindModule {

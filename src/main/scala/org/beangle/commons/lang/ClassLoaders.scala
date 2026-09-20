@@ -30,7 +30,7 @@ object ClassLoaders {
     "char" -> classOf[Char], "Char" -> classOf[Char], "float" -> classOf[Float], "Float" -> classOf[Float],
     "double" -> classOf[Double], "Double" -> classOf[Double], "Integer" -> classOf[Integer], "String" -> classOf[String],
     "void" -> classOf[Unit], "Unit" -> classOf[Unit],
-    "Option" -> classOf[Option[_]])
+    "Option" -> classOf[Option[?]])
 
   /** Return the default ClassLoader to use
    * typically the thread context ClassLoader, if available; the ClassLoader that loaded the ClassLoaders
@@ -49,7 +49,7 @@ object ClassLoaders {
 
   /** Find class loader sequence
    */
-  private def loaders(callingClass: Class[_] = null): Seq[ClassLoader] = {
+  private def loaders(callingClass: Class[?] = null): Seq[ClassLoader] = {
     val me = getClass.getClassLoader
     val tl = Thread.currentThread().getContextClassLoader
     val cl = if (null == callingClass) null else callingClass.getClassLoader
@@ -71,7 +71,7 @@ object ClassLoaders {
    * @param callingClass optional class for loader resolution
    * @return Some(URL) or None
    */
-  def getResource(resourceName: String, callingClass: Class[_] = null): Option[URL] = {
+  def getResource(resourceName: String, callingClass: Class[?] = null): Option[URL] = {
     val path = normalize(resourceName)
     var url: URL = null
     val iter = loaders(callingClass).iterator
@@ -86,7 +86,7 @@ object ClassLoaders {
    * @param callingClass optional class for loader resolution
    * @return list of URLs
    */
-  def getResources(resourceName: String, callingClass: Class[_] = null): List[URL] = {
+  def getResources(resourceName: String, callingClass: Class[?] = null): List[URL] = {
     val path = normalize(resourceName)
     var em: java.util.Enumeration[URL] = null
     val iter = loaders(callingClass).iterator
@@ -103,7 +103,7 @@ object ClassLoaders {
    * @param callingClass optional class for loader resolution
    * @return Some(InputStream) or None
    */
-  def getResourceAsStream(resourceName: String, callingClass: Class[_] = null): Option[InputStream] = {
+  def getResourceAsStream(resourceName: String, callingClass: Class[?] = null): Option[InputStream] = {
     getResource(resourceName, callingClass).map { r => r.openStream() }
   }
 
@@ -113,7 +113,7 @@ object ClassLoaders {
    * @param classLoader optional loader; default if null
    * @return the Class
    */
-  def load(className: String, classLoader: ClassLoader = null): Class[_] = {
+  def load(className: String, classLoader: ClassLoader = null): Class[?] = {
     val loader = if (classLoader == null) defaultClassLoader else classLoader
     if (buildins.contains(className)) buildins(className)
     else loader.loadClass(className)
@@ -125,7 +125,7 @@ object ClassLoaders {
    * @param classLoader optional loader; default if null
    * @return Some(Class) or None
    */
-  def get(className: String, classLoader: ClassLoader = null): Option[Class[_]] = {
+  def get(className: String, classLoader: ClassLoader = null): Option[Class[?]] = {
     val loader = if (classLoader == null) defaultClassLoader else classLoader
     if buildins.contains(className) then buildins.get(className)
     else {

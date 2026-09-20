@@ -32,19 +32,19 @@ import scala.collection.mutable
  */
 abstract class ConverterFactory[S, R] extends GenericConverter {
 
-  protected val converters = new mutable.HashMap[Class[_], Converter[S, _]]
+  protected val converters = new mutable.HashMap[Class[?], Converter[S, ?]]
 
   def getConverter[T](targetType: Class[T]): Option[Converter[S, T]] =
     converters.get(targetType).asInstanceOf[Option[Converter[S, T]]]
 
-  private def classof(clazz: Type): Class[_] = {
+  private def classof(clazz: Type): Class[?] = {
     clazz match
       case value: Class[_] => value
-      case parameterizedType: ParameterizedType => parameterizedType.getRawType.asInstanceOf[Class[_]]
+      case parameterizedType: ParameterizedType => parameterizedType.getRawType.asInstanceOf[Class[?]]
       case _ => null
   }
 
-  override def getTypeinfo: (Class[_], Class[_]) = {
+  override def getTypeinfo: (Class[?], Class[?]) = {
     val superType = getClass.getGenericSuperclass
     superType match
       case ptype: ParameterizedType =>
@@ -58,5 +58,5 @@ abstract class ConverterFactory[S, R] extends GenericConverter {
       case _ => Objects.default(targetType)
   }
 
-  protected def register(targetType: Class[_], converter: Converter[S, _]): Unit = converters.put(targetType, converter)
+  protected def register(targetType: Class[?], converter: Converter[S, ?]): Unit = converters.put(targetType, converter)
 }

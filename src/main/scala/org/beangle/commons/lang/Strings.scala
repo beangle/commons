@@ -270,7 +270,7 @@ object Strings {
    * @param delimiter the delimiter to use between elements
    * @return the joined string
    */
-  def join(seq: Iterable[_], delimiter: String): String =
+  def join(seq: Iterable[?], delimiter: String): String =
     if (null == seq)
       ""
     else {
@@ -1081,7 +1081,7 @@ object Strings {
    * @return the formatted string
    */
   def format(format: String, args: Any*): String = {
-    new java.util.Formatter().format(format, args.toArray.asInstanceOf[Array[Object]]: _*).toString
+    new java.util.Formatter().format(format, args.toArray.asInstanceOf[Array[Object]]*).toString
   }
 
   /** Converts the string to an InputStream using UTF-8 encoding. */

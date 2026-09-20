@@ -172,7 +172,7 @@ object Json {
    * @param datas the map to convert
    * @return the JSON string
    */
-  def toJson(datas: collection.Map[_, _]): String = {
+  def toJson(datas: collection.Map[?, ?]): String = {
     if (datas.isEmpty) return "{}"
     val sb = new StringBuilder("{")
     val kvs = datas.filter(_._1.isInstanceOf[String])
@@ -271,7 +271,7 @@ object Json {
    * @param data the iterable to convert
    * @return the JSON array string
    */
-  def toJson(data: Iterable[_]): String = {
+  def toJson(data: Iterable[?]): String = {
     val sb = new StringBuilder("[")
     for (li <- data) {
       Options.unwrap(li) match {

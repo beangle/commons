@@ -26,19 +26,19 @@ object Reconfig {
 
   /** Bean reconfiguration definition. */
   class Definition(val beanName: String, var configType: ReconfigType) {
-    var clazz: Option[Class[_]] = None
+    var clazz: Option[Class[?]] = None
     var properties: mutable.Map[String, Any] = Collections.newMap[String, Any]
     var constructorArgs: mutable.Buffer[Any] = Collections.newBuffer[Any]
-    var primaryOf: Set[Class[_]] = Set.empty
+    var primaryOf: Set[Class[?]] = Set.empty
 
     /** Sets the target class. */
-    def setClass(clazz: Class[_]): this.type = {
+    def setClass(clazz: Class[?]): this.type = {
       this.clazz = Some(clazz)
       this
     }
 
     /** Marks this bean as primary for the given types. */
-    def primaryOf(clazz: Class[_]*): Unit = {
+    def primaryOf(clazz: Class[?]*): Unit = {
       this.primaryOf = clazz.toSet
     }
 

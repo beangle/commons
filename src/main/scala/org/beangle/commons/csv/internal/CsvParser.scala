@@ -20,6 +20,7 @@ package org.beangle.commons.csv.internal
 import org.beangle.commons.csv.CsvFormat
 
 import scala.collection.mutable
+import scala.compiletime.uninitialized
 
 /** Simple CSV parser that splits a single line into fields.
  *
@@ -27,7 +28,7 @@ import scala.collection.mutable
  */
 class CsvParser(var format: CsvFormat) {
   private val InitialReadSize = 128
-  private var pending: String = _
+  private var pending: String = uninitialized
   private var inField: Boolean = false
   private val ignoreLeadingWhiteSpace = true
 

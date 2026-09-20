@@ -26,6 +26,7 @@ import org.beangle.commons.lang.annotation.description
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
+import scala.compiletime.uninitialized
 
 /** CDI binding DSL (Reference, Injection, Variable, RegistryItem, BatchBinder). */
 object Binder {
@@ -52,13 +53,13 @@ object Binder {
 
   /** Base class for container registration items. */
   sealed abstract class RegistryItem {
-    def clazz: Class[_]
+    def clazz: Class[?]
 
     def beanName: String
 
-    def beanClass: Class[_]
+    def beanClass: Class[?]
 
-    var targetClass: Option[Class[_]] = None
+    var targetClass: Option[Class[?]] = None
 
     var condition: Condition = Condition.None
 
@@ -66,7 +67,7 @@ object Binder {
 
     var module: Option[String] = None
 
-    var primaryOf: Set[Class[_]] = Set.empty
+    var primaryOf: Set[Class[?]] = Set.empty
 
     var description: Option[String] = None
 
@@ -107,13 +108,13 @@ object Binder {
    * @param singleton the singleton instance
    */
   class Singleton(val beanName: String, val singleton: AnyRef) extends RegistryItem {
-    override def beanClass: Class[_] = targetClass.getOrElse(singleton.getClass)
+    override def beanClass: Class[?] = targetClass.getOrElse(singleton.getClass)
 
-    override def clazz: Class[_] = singleton.getClass
+    override def clazz: Class[?] = singleton.getClass
   }
 
   /** Registry item for a bean that requires configuration-based initialization (Bean Definition). */
-  class Definition(var beanName: String, var clazz: Class[_], scopeName: String) extends RegistryItem {
+  class Definition(var beanName: String, var clazz: Class[?], scopeName: String) extends RegistryItem {
 
     var scope: String = if (null == scopeName) "singleton" else scopeName
 
@@ -123,9 +124,9 @@ object Binder {
 
     var properties = new mutable.HashMap[String, Any]
 
-    var lazyInit: Boolean = _
+    var lazyInit: Boolean = uninitialized
 
-    var abstractFlag: Boolean = _
+    var abstractFlag: Boolean = uninitialized
 
     var parent: Option[String] = None
 
@@ -135,7 +136,7 @@ object Binder {
 
     val optionals = Collections.newSet[String]
 
-    var wiredEagerly: Boolean = _
+    var wiredEagerly: Boolean = uninitialized
 
     var factoryBean: Option[String] = None
 
@@ -143,7 +144,7 @@ object Binder {
 
     def isAbstract: Boolean = abstractFlag
 
-    override def beanClass: Class[_] = {
+    override def beanClass: Class[?] = {
       targetClass.getOrElse(clazz)
     }
 
@@ -234,14 +235,14 @@ object Binder {
      * @param clazz the bean class to check
      * @return true if a bean of this type exists
      */
-    def contains(clazz: Class[_]): Boolean
+    def contains(clazz: Class[?]): Boolean
 
     /** Finds bean names by type.
      *
      * @param clazz the bean class to look up
      * @return list of bean names
      */
-    def getBeanNames(clazz: Class[_]): List[String]
+    def getBeanNames(clazz: Class[?]): List[String]
 
     /** Register bean definition
      *
@@ -255,7 +256,7 @@ object Binder {
      * @param clazz the interface class
      * @return true if primary
      */
-    def isPrimary(name: String, clazz: Class[_]): Boolean
+    def isPrimary(name: String, clazz: Class[?]): Boolean
 
     /** Provide environment
      *
@@ -269,11 +270,11 @@ object Binder {
    * @param binder  the Binder to register with
    * @param classes the bean classes to bind
    */
-  class BatchBinder(val binder: Binder, classes: Class[_]*) {
+  class BatchBinder(val binder: Binder, classes: Class[?]*) {
 
     private val beans = new ListBuffer[Definition]
 
-    bind(classes: _*)
+    bind(classes*)
 
     /** Uses short class name as bean name (e.g. "userService" instead of full FQN).
      *
@@ -312,7 +313,7 @@ object Binder {
     }
 
     /** Wires property to inner bean of type clazz. */
-    def proxy(property: String, clazz: Class[_]): this.type = {
+    def proxy(property: String, clazz: Class[?]): this.type = {
       if (null == binder) return this // build-time scan no-op
       val targetBean = binder.newInnerBeanName(clazz)
       val targetDefinition = new Definition(targetBean, clazz, Scope.Singleton.name)
@@ -338,7 +339,7 @@ object Binder {
     }
 
     /** Marks beans as primary for given types. */
-    def primaryOf(clz: Class[_]*): this.type = {
+    def primaryOf(clz: Class[?]*): this.type = {
       for (definition <- beans) definition.primaryOf = clz.toSet
       this
     }
@@ -378,14 +379,14 @@ object Binder {
     }
 
     /** Adds condition: clazz missing from classpath. */
-    def onMissing(clazz: Class[_]): this.type = {
+    def onMissing(clazz: Class[?]): this.type = {
       val depends = Condition.missing(clazz)
       for (definition <- beans) definition.on(depends)
       this
     }
 
     /** Condition: class exist bean of clazz. */
-    def onExist(clazz: Class[_]): this.type = {
+    def onExist(clazz: Class[?]): this.type = {
       val depends = Condition.exist(clazz)
       for (definition <- beans) definition.on(depends)
       this
@@ -437,13 +438,13 @@ object Binder {
       if (properties.isEmpty) {
         for (definition <- beans) definition.nowire("*")
       } else {
-        for (definition <- beans) definition.nowire(properties: _*)
+        for (definition <- beans) definition.nowire(properties*)
       }
       this
     }
 
     /** Binds classes (one bean per class, default name). */
-    def bind(classes: Class[_]*): this.type = {
+    def bind(classes: Class[?]*): this.type = {
       for (clazz <- classes) {
         bind(getBeanName(clazz, false), clazz)
       }
@@ -451,10 +452,10 @@ object Binder {
     }
 
     /** Binds a named bean. */
-    def bind(name: String, clazz: Class[_]): this.type = {
+    def bind(name: String, clazz: Class[?]): this.type = {
       if (null == binder) return this // build-time scan no-op
       val dfn = new Definition(name, clazz, Scope.Singleton.name)
-      if (classOf[Factory[_]].isAssignableFrom(clazz)) {
+      if (classOf[Factory[?]].isAssignableFrom(clazz)) {
         dfn.targetClass = Some(Factory.getObjectType(clazz))
       }
       val an = clazz.getAnnotation(classOf[description])
@@ -467,7 +468,7 @@ object Binder {
       this
     }
 
-    private def getBeanName(clazz: Class[_], shortName: Boolean): String = {
+    private def getBeanName(clazz: Class[?], shortName: Boolean): String = {
       var className = clazz.getName
       if (shortName) className = Strings.uncapitalize(Strings.substringAfterLast(className, "."))
       className
@@ -497,7 +498,7 @@ class Binder(val module: String) {
    * @param clazz the bean class
    * @return unique name (e.g. "ClassName#hashCode")
    */
-  def newInnerBeanName(clazz: Class[_]): String = {
+  def newInnerBeanName(clazz: Class[?]): String = {
     clazz.getSimpleName + "#" + Math.abs(module.hashCode) + definitions.size
   }
 
@@ -507,7 +508,7 @@ class Binder(val module: String) {
    * @param clazz    the bean class
    * @return BatchBinder for further configuration
    */
-  def bind(beanName: String, clazz: Class[_]): BatchBinder = {
+  def bind(beanName: String, clazz: Class[?]): BatchBinder = {
     new BatchBinder(this).bind(beanName, clazz)
   }
 
@@ -520,7 +521,7 @@ class Binder(val module: String) {
   def bind(beanName: String, singleton: AnyRef): Singleton = {
     val holder = new Singleton(beanName, singleton)
     val clazz = singleton.getClass
-    if (singleton.isInstanceOf[Factory[_]]) {
+    if (singleton.isInstanceOf[Factory[?]]) {
       holder.targetClass = Some(Factory.getObjectType(clazz))
     }
     val an = clazz.getAnnotation(classOf[description])
@@ -535,8 +536,8 @@ class Binder(val module: String) {
    * @param classes the bean classes
    * @return BatchBinder for further configuration
    */
-  def bind(classes: Class[_]*): BatchBinder = {
-    new BatchBinder(this, classes: _*)
+  def bind(classes: Class[?]*): BatchBinder = {
+    new BatchBinder(this, classes*)
   }
 
   protected[cdi] def add(definition: Definition): Unit = {

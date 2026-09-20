@@ -25,7 +25,7 @@ object ProxyResolver {
 
     def isProxy(obj: AnyRef): Boolean = false
 
-    def targetClass(obj: AnyRef): Class[_] = obj.getClass
+    def targetClass(obj: AnyRef): Class[?] = obj.getClass
 
     def unproxy(obj: AnyRef): AnyRef = obj
   }
@@ -38,7 +38,7 @@ trait ProxyResolver {
   def isProxy(obj: AnyRef): Boolean
 
   /** Returns the target (unproxied) class. */
-  def targetClass(obj: AnyRef): Class[_]
+  def targetClass(obj: AnyRef): Class[?]
 
   /** Returns the unproxied instance. */
   def unproxy(obj: AnyRef): AnyRef

@@ -43,13 +43,13 @@ object MetaModels {
   private lazy val cache: Map[String, BeanMeta] = buildCache()
 
   /** Returns BeanMeta for the given class, or None if not found. */
-  def get(clazz: Class[_]): Option[BeanMeta] = get(clazz.getName)
+  def get(clazz: Class[?]): Option[BeanMeta] = get(clazz.getName)
 
   /** Returns BeanMeta for the given class name (dot-separated or JVM internal), or None. */
   def get(className: String): Option[BeanMeta] = cache.get(normalize(className))
 
   /** Returns true if BeanMeta is available for the given class. */
-  def contains(clazz: Class[_]): Boolean = contains(clazz.getName)
+  def contains(clazz: Class[?]): Boolean = contains(clazz.getName)
 
   /** Returns true if BeanMeta is available for the given class name. */
   def contains(className: String): Boolean = cache.contains(normalize(className))
@@ -58,7 +58,7 @@ object MetaModels {
   def classNames: Set[String] = cache.keySet
 
   /** Digs BeanMeta for classes at compile time (macro, preserves generic precision). */
-  inline def of(inline clazzes: Class[_]*): List[BeanMeta] = ${ MetaDigger.digInto('clazzes) }
+  inline def of(inline clazzes: Class[?]*): List[BeanMeta] = ${ MetaDigger.digInto('clazzes) }
 
   /** Digs BeanMeta for a single class at compile time (macro). */
   inline def of[T](clazz: Class[T]): BeanMeta = ${ MetaDigger.digInto('clazz) }
@@ -68,7 +68,7 @@ object MetaModels {
    * GraalVM native-image 下走轻量 [[MetaLoaderLite]]（仅 public 构造器/方法，对应
    * [[org.beangle.commons.aot.AotPolicy.default]] 注册策略），否则走全量 [[MetaLoader]]。
    */
-  def reflect(clazz: Class[_]): BeanMeta =
+  def reflect(clazz: Class[?]): BeanMeta =
     if JVM.isGraal then MetaLoaderLite.load(clazz) else MetaLoader.load(clazz)
 
   /** Loads all beanmeta.idx files from classpath into memory. */

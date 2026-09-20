@@ -57,7 +57,7 @@ object Request {
     require(null != data, "body cannot be empty")
     val datas = data match {
       case t: (_, _) => Seq(t)
-      case i: Iterable[_] => i.asInstanceOf[Iterable[(_, _)]]
+      case i: Iterable[_] => i.asInstanceOf[Iterable[(?, ?)]]
       case s: String => return new Request(Some(s), MediaTypes.formUrlencoded.toString)
       case _ => throw new IllegalArgumentException(s"form data need to string/tuple/tuples,${data.getClass.getName} not supported")
     }
@@ -149,7 +149,7 @@ object Request {
     new ByteArrayInputStream(sb.toString.getBytes(Charsets.UTF_8))
   }
 
-  private def encodeTuples(params: Iterable[(String, _)]): String = {
+  private def encodeTuples(params: Iterable[(String, ?)]): String = {
     val paramBuffer = new mutable.ArrayBuffer[String]
     params foreach { e =>
       if (e._2 != null) {

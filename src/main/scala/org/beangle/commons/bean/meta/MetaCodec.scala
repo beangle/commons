@@ -342,7 +342,7 @@ object MetaCodec {
     TypeInfo.get(clazz, ArraySeq.unsafeWrapArray(argsArr))
   }
 
-  private def readDefault(in: DataInputStream, pool: Array[String], paramClazz: Class[_]): Option[Any] = {
+  private def readDefault(in: DataInputStream, pool: Array[String], paramClazz: Class[?]): Option[Any] = {
     in.readUnsignedByte() match
       case DNone => None
       case DNull => Some(null)
@@ -367,10 +367,10 @@ object MetaCodec {
     else if idx < BuiltinBoundary then throw new IllegalArgumentException(s"Unreserved builtin pool index $idx")
     else pool(idx - BuiltinBoundary)
 
-  private def typeName(clazz: Class[_]): String = clazz.getName.replace('.', '/')
+  private def typeName(clazz: Class[?]): String = clazz.getName.replace('.', '/')
 
   /** Restores a Class from a JVM internal name ('/' separators) or a primitive name. */
-  private def classFor(name: String): Class[_] = name match
+  private def classFor(name: String): Class[?] = name match
     case "int" => java.lang.Integer.TYPE
     case "long" => java.lang.Long.TYPE
     case "short" => java.lang.Short.TYPE
@@ -385,7 +385,7 @@ object MetaCodec {
       Class.forName(other.replace('/', '.'), false, loader)
 
   /** Resolves an enum constant by name. Returns None if clazz is not an enum or name is invalid. */
-  private def enumValueOf(clazz: Class[_], name: String): Option[Any] = {
+  private def enumValueOf(clazz: Class[?], name: String): Option[Any] = {
     if Enums.isEnum(clazz) then {
       try
         val m = clazz.getMethod("valueOf", classOf[String])

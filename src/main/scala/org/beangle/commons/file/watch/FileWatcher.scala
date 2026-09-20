@@ -67,13 +67,13 @@ object FileWatcher {
 
     /** Adds path with optional Ant patterns. */
     def add(path: Path, patterns: AntPathPattern*): Builder = {
-      paths.addOne(WatcherPath(path, patterns: _*))
+      paths.addOne(WatcherPath(path, patterns*))
       this
     }
 
     /** Adds path by string with optional glob patterns. */
     def add(path: String, patterns: String*): Builder = {
-      paths.addOne(WatcherPath(Paths.get(path), patterns.map(x => new AntPathPattern(x)): _*))
+      paths.addOne(WatcherPath(Paths.get(path), patterns.map(x => new AntPathPattern(x))*))
       this
     }
 

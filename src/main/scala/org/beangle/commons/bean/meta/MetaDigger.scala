@@ -35,7 +35,7 @@ import scala.quoted.*
   */
 object MetaDigger {
   /** Macro: digs BeanMeta for each class. */
-  def digInto(argsExpr: Expr[Seq[Class[_]]])(using Quotes): Expr[List[BeanMeta]] = {
+  def digInto(argsExpr: Expr[Seq[Class[?]]])(using Quotes): Expr[List[BeanMeta]] = {
     import quotes.reflect.*
 
     /** Extracts the static type from a class literal, unwrapping inline/constant forms. */
@@ -86,10 +86,14 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       else
         '{ MetaLoader.load(${ typeOf(typeRepr) }) }
     else
-      '{
-        val b = new MetaModel.Builder(${ typeOf(typeRepr) })
-        ${ Expr.block(addMemberBody('b), 'b) }.build()
-      }
+      // 用 Symbol + Ref 引用 builder，而不是引用 quote 内部的 `val b`：
+      // 后者创建的 Expr 绑定在该 splice 的作用域上，跨 splice 复用违反宏卫生
+      // （会触发 ScopeException，-Xcheck-macros 下直接编译失败）。
+      val bSym = Symbol.newVal(Symbol.spliceOwner, "b", TypeRepr.of[MetaModel.Builder], Flags.EmptyFlags, Symbol.noSymbol)
+      val bRef = Ref(bSym).asExprOf[MetaModel.Builder]
+      val bDef = ValDef(bSym, Some('{ new MetaModel.Builder(${ typeOf(typeRepr) }) }.asTerm))
+      val body = Block(bDef :: addMemberBody(bRef).map(_.asTerm), '{ ${ bRef }.build() }.asTerm)
+      body.asExprOf[BeanMeta]
   }
 
   /** Converts TypeRepr to Expr[Class[?]]. */
@@ -205,7 +209,7 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
     else None
   }
 
-  private def addMemberBody(t: Expr[MetaModel.Builder]): List[Expr[_]] = {
+  private def addMemberBody(t: Expr[MetaModel.Builder]): List[Expr[?]] = {
     val fieldMap = new mutable.HashMap[String, FieldExpr]
     val setterMap = new mutable.HashMap[String, String]
     val javaBases = new mutable.ArrayBuffer[TypeRepr]
@@ -305,14 +309,14 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       }
     }
 
-    val members = new mutable.ArrayBuffer[Expr[_]]()
+    val members = new mutable.ArrayBuffer[Expr[?]]()
     if !(ctors.size == 1 && ctors.head.isEmpty) then
       members ++= ctors.map { m =>
         val paramInfos = m.map { p =>
           if (p.defaultValue.isEmpty) '{ new ParamHolder(${ Expr(p.name) }, ${ p.typeinfo }) }
           else '{ new ParamHolder(${ Expr(p.name) }, ${ p.typeinfo }, Some(${ p.defaultValue.get })) }
         }
-        '{ ${ t }.addCtor(Array(${ Varargs(paramInfos) }: _*)) }
+        '{ ${ t }.addCtor(Array(${ Varargs(paramInfos) }*)) }
       }
     end if
 
@@ -346,7 +350,7 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
       case _ => throw new RuntimeException("Unsupported type: " + tpe)
     }
     if args.isEmpty then typeOf(tpe)
-    else '{ Array(${ typeOf(tpe) }, Array(${ Varargs(args) }: _*)) }
+    else '{ Array(${ typeOf(tpe) }, Array(${ Varargs(args) }*)) }
   }
 
   /** Resolves AppliedType's type args to a map of param name -> TypeRepr. */
@@ -371,7 +375,7 @@ class MetaDigger[Q <: Quotes](trr: Any)(using val q: Q) {
           val argType = if arg.typeSymbol.flags.is(Flags.Param) && ctx.contains(arg.typeSymbol.name) then ctx(arg.typeSymbol.name) else d
           params += typeOf(argType)
         case c: AppliedType =>
-          params += '{ Array(${ typeOf(c) }, Array(${ Varargs(resolveParamTypes(c, ctx)) }: _*)) }
+          params += '{ Array(${ typeOf(c) }, Array(${ Varargs(resolveParamTypes(c, ctx)) }*)) }
         case tb: TypeBounds => typeOf(tb)
       }
     }

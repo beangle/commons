@@ -78,7 +78,7 @@ object Formatters {
   private val JtMonthDay = TemporalFormatter("MM-dd")
 
   /** Default formatter mapping by value class. */
-  val Defaults: Map[Class[_], Formatter] =
+  val Defaults: Map[Class[?], Formatter] =
     Map(classOf[jl.Boolean] -> ToStringFormatter, classOf[jl.Short] -> PlainNum,
       classOf[jl.Integer] -> PlainNum, classOf[jl.Long] -> LongNum,
       classOf[jl.Float] -> DecimalNum, classOf[jl.Double] -> DecimalNum,
@@ -98,7 +98,7 @@ object Formatters {
    * @param clazz the value class (e.g. Integer, LocalDate)
    * @return formatter for that type
    */
-  def getDefault(clazz: Class[_]): Formatter = {
+  def getDefault(clazz: Class[?]): Formatter = {
     val clz = Primitives.wrap(clazz)
     Defaults.get(clz) match {
       case None =>

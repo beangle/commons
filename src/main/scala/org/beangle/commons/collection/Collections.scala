@@ -28,11 +28,11 @@ object Collections {
 
   /** Null-safe check if the specified collection is empty. */
   @inline
-  def isEmpty(coll: Iterable[_]): Boolean = (coll == null || coll.isEmpty)
+  def isEmpty(coll: Iterable[?]): Boolean = (coll == null || coll.isEmpty)
 
   /** Null-safe check if the specified collection is not empty. */
   @inline
-  def isNotEmpty(coll: Iterable[_]): Boolean = null != coll && !coll.isEmpty
+  def isNotEmpty(coll: Iterable[?]): Boolean = null != coll && !coll.isEmpty
 
   /** Finds the first element in candidates that exists in source.
    *
@@ -79,7 +79,7 @@ object Collections {
    * @param keyProperty the property name for map keys
    * @return map of key -> object
    */
-  def convertToMap(coll: Seq[AnyRef], keyProperty: String): Map[_, _] =
+  def convertToMap(coll: Seq[AnyRef], keyProperty: String): Map[?, ?] =
     coll.map { obj =>
       (BeanProperties.get[Object](obj, keyProperty), obj)
     }.toMap
@@ -91,7 +91,7 @@ object Collections {
    * @param valueProperty the property name for map values
    * @return map of key -> value
    */
-  def convertToMap(coll: Seq[AnyRef], keyProperty: String, valueProperty: String): Map[_, _] = {
+  def convertToMap(coll: Seq[AnyRef], keyProperty: String, valueProperty: String): Map[?, ?] = {
     val map = new mutable.HashMap[Any, Any]
     coll foreach { obj =>
       val key = BeanProperties.get[AnyRef](obj, keyProperty)

@@ -74,11 +74,11 @@ object Enums {
   }
 
   /** Returns true if the class is a Scala 3 enum or Java enum. */
-  def isEnum(clazz: Class[_]): Boolean = {
+  def isEnum(clazz: Class[?]): Boolean = {
     classOf[_root_.scala.reflect.Enum].isAssignableFrom(clazz) || clazz.isEnum
   }
 
-  private def findIndexMethod(clazz: Class[_]): Method = {
+  private def findIndexMethod(clazz: Class[?]): Method = {
     val method =
       try {
         clazz.getMethod("id")

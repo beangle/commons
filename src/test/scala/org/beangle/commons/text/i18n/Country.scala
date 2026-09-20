@@ -17,10 +17,12 @@
 
 package org.beangle.commons.text.i18n
 
+import scala.compiletime.uninitialized
+
 class Country {
-  var name: String = _
+  var name: String = uninitialized
 }
 
 class City {
-  var name: String = _
+  var name: String = uninitialized
 }

@@ -24,7 +24,7 @@ package org.beangle.commons.conversion.impl
  */
 trait GenericConverter {
 
-  def getTypeinfo: (Class[_], Class[_])
+  def getTypeinfo: (Class[?], Class[?])
 
   def convert[T](input: Any, targetType: Class[T]): T
 }

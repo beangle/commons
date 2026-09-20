@@ -21,7 +21,7 @@ package org.beangle.commons.bean.orderings
  *
  * @author chaostone
  */
-class CollectionSizeOrdering[T <: Iterator[_]] extends Ordering[T] {
+class CollectionSizeOrdering[T <: Iterator[?]] extends Ordering[T] {
 
   /** Compares by element count.
    *

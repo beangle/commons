@@ -65,7 +65,7 @@ class JsonParserTest extends AnyFunSpec, Matchers {
         """
                 {"accountLocked":false,"details":{"isRoot":false},"authorities":[1,2],"accountExpired":false,"description":"duan","principal":"abc","credentialExpired":false,"disabled":false}
                 """)
-      assert(result.get("authorities").orNull.isInstanceOf[Iterable[_]])
+      assert(result.get("authorities").orNull.isInstanceOf[Iterable[?]])
       val a = """[{"roles":[],"scope":"Protected","name":"/config/home","title":"首页","id":94}]"""
       val data = Json.parseArray(a)
       assert(null != data)

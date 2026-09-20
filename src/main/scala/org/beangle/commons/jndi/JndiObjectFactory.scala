@@ -24,6 +24,8 @@ import java.util as ju
 import javax.naming.{InitialContext, NameNotFoundException}
 import javax.sql.DataSource
 
+import scala.compiletime.uninitialized
+
 /** JndiObjectFactory constants. */
 object JndiObjectFactory {
 
@@ -38,7 +40,7 @@ class JndiObjectFactory[T](val jndiName: String) extends Factory[T] {
   var resourceRef = true
 
   /** Optional JNDI environment properties. */
-  var environment: ju.Properties = _
+  var environment: ju.Properties = uninitialized
 
   override def getObject: T = {
     val ctx = new InitialContext

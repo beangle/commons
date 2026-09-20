@@ -20,6 +20,8 @@ package org.beangle.commons.collection.page
 import org.beangle.commons.collection.page.PagedSeq.*
 import org.beangle.commons.lang.annotation.property
 
+import scala.compiletime.uninitialized
+
 /** PagedSeq factory and helpers. */
 object PagedSeq {
 
@@ -40,7 +42,7 @@ object PagedSeq {
 class PagedSeq[E](val datas: Seq[E], limit: PageLimit) extends Page[E]() {
 
   /** Current page slice. */
-  var page: Page[E] = _
+  var page: Page[E] = uninitialized
 
   /** Current page index (0-based). */
   var pageIndex: Int = limit.pageIndex - 1

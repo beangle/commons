@@ -48,7 +48,7 @@ object MetaLoader {
   /** True when a class can be reflected into BeanMeta: application classes only.
    *  JDK (`java.*`), Scala runtime (`scala.*`) and JVM-generated classes (name
    *  containing `$$`, e.g. anonymous/lambda classes) are excluded. */
-  def supports(clazz: Class[_]): Boolean = {
+  def supports(clazz: Class[?]): Boolean = {
     val className = clazz.getName
     !(className.startsWith("java.") || className.startsWith("scala.") || className.contains("$$"))
   }
@@ -58,19 +58,19 @@ object MetaLoader {
     * Single-pass over class hierarchy: collects fields, getters/setters
     * in one walk, avoiding repeated scans.
     */
-  def load(clazz: Class[_]): BeanMeta = {
+  def load(clazz: Class[?]): BeanMeta = {
     if (!supports(clazz)) throw new RuntimeException("Cannot reflect class: " + clazz.getName)
 
     val isCase = TypeInfo.isCaseClass(clazz)
     val getters = new mutable.HashMap[String, Accessor]
     val setters = new mutable.HashMap[String, Accessor]
     val fields = new mutable.HashMap[String, Field]
-    val accessed = new mutable.HashSet[Class[_]]
+    val accessed = new mutable.HashSet[Class[?]]
     // 先收集 setter 属性名，主遍历时据此放行「无同名字段但有配对 setter」的参数less getter，
     // 避免依赖 getDeclaredMethods 的返回顺序。
     val setterNames = collectSetterNames(clazz)
     var nextClass = clazz
-    var paramTypes: collection.Map[String, Class[_]] = Map.empty
+    var paramTypes: collection.Map[String, Class[?]] = Map.empty
 
     // Single pass: walk class hierarchy to discover fields and accessors
     while (null != nextClass && classOf[AnyRef] != nextClass) {
@@ -117,9 +117,9 @@ object MetaLoader {
 
   /** Discovers constructors with default values. */
   private def discoverConstructors(
-    clazz: Class[_],
+    clazz: Class[?],
     defaultCtorParamValues: Map[Int, Any],
-    paramTypes: collection.Map[String, Class[_]]
+    paramTypes: collection.Map[String, Class[?]]
   ): Seq[Ctor] = {
     var foundDefaultCtor = false
     clazz.getConstructors.map { ctor =>
@@ -140,7 +140,7 @@ object MetaLoader {
   }
 
   /** Finds default constructor parameter values from companion object. */
-  private def findDefaultCtorParams(clazz: Class[_]): Map[Int, Any] = {
+  private def findDefaultCtorParams(clazz: Class[?]): Map[Int, Any] = {
     org.beangle.commons.lang.ClassLoaders.get(clazz.getName + "$") match {
       case Some(companionClass) =>
         val singleton = companionClass.getDeclaredField("MODULE$").get(null)
@@ -168,12 +168,12 @@ object MetaLoader {
   }
 
   private def navInterfaces(
-    clazz: Class[_],
-    accessed: mutable.HashSet[Class[_]],
+    clazz: Class[?],
+    accessed: mutable.HashSet[Class[?]],
     getters: mutable.HashMap[String, Accessor],
     setters: mutable.HashMap[String, Accessor],
     fields: collection.Map[String, Field],
-    paramTypes: collection.Map[String, Class[_]],
+    paramTypes: collection.Map[String, Class[?]],
     setterNames: collection.Set[String]
   ): Unit = {
     if (null == clazz || classOf[AnyRef] == clazz) return
@@ -181,7 +181,7 @@ object MetaLoader {
     val interfaceTypes = clazz.getGenericInterfaces
     (0 until interfaceTypes.length) foreach { i =>
       val interface = interfaceTypes(i) match {
-        case pt: ParameterizedType => pt.getRawType.asInstanceOf[Class[_]]
+        case pt: ParameterizedType => pt.getRawType.asInstanceOf[Class[?]]
         case c: Class[_] => c
       }
       if (!accessed.contains(interface)) {
@@ -201,7 +201,7 @@ object MetaLoader {
     getters: mutable.HashMap[String, Accessor],
     setters: mutable.HashMap[String, Accessor],
     fields: collection.Map[String, Field],
-    paramTypes: collection.Map[String, Class[_]],
+    paramTypes: collection.Map[String, Class[?]],
     setterNames: collection.Set[String] = Set.empty
   ): Unit = {
     if (isFineMethod(isCase, method, false) || isExplicitProperty(method)) {
@@ -233,7 +233,7 @@ object MetaLoader {
   }
 
   /** Resolves TypeInfo from Class and generic Type. */
-  def typeof(clazz: Class[_], typ: java.lang.reflect.Type, paramTypes: collection.Map[String, Class[_]]): TypeInfo = {
+  def typeof(clazz: Class[?], typ: java.lang.reflect.Type, paramTypes: collection.Map[String, Class[?]]): TypeInfo = {
     if TypeInfo.isIterableType(clazz) then
       if clazz.isArray then
         TypeInfo.get(clazz, clazz.getComponentType)
@@ -246,7 +246,7 @@ object MetaLoader {
           case _: Class[_] => TypeInfo.get(clazz, false)
           case _ => TypeInfo.get(clazz, classOf[Any], classOf[Any])
         }
-    else if clazz == classOf[Option[_]] then
+    else if clazz == classOf[Option[?]] then
       val innerType = typ match {
         case pt: ParameterizedType => if (pt.getActualTypeArguments.length == 1) typeAt(pt, 0) else classOf[AnyRef]
         case c: Class[_] => classOf[AnyRef]
@@ -256,7 +256,7 @@ object MetaLoader {
       TypeInfo.get(clazz)
   }
 
-  private def typeAt(typ: java.lang.reflect.Type, idx: Int): Class[_] = {
+  private def typeAt(typ: java.lang.reflect.Type, idx: Int): Class[?] = {
     typ match {
       case c: Class[_] => c
       case pt: ParameterizedType =>
@@ -372,10 +372,10 @@ object MetaLoader {
     * （`def p1: T` 配 `def p1_=(v: T)`）。字节码层面参数less `def x` 与空括号 `def x()`
     * 无法区分，因此仍需 setter 作为佐证；必须在主遍历前完成，保证与声明顺序无关。
     */
-  private def collectSetterNames(clazz: Class[_]): collection.Set[String] = {
+  private def collectSetterNames(clazz: Class[?]): collection.Set[String] = {
     val names = new mutable.HashSet[String]
-    val visited = new mutable.HashSet[Class[_]]
-    def visit(c: Class[_]): Unit = {
+    val visited = new mutable.HashSet[Class[?]]
+    def visit(c: Class[?]): Unit = {
       if (null != c && classOf[AnyRef] != c && !visited.contains(c)) {
         visited.add(c)
         if (!isLibraryClass(c)) {
@@ -395,7 +395,7 @@ object MetaLoader {
     names
   }
 
-  private def isLibraryClass(clazz: Class[_]): Boolean = {
+  private[meta] def isLibraryClass(clazz: Class[?]): Boolean = {
     val name = clazz.getName
     name.startsWith("scala.") || name.startsWith("java.")
   }

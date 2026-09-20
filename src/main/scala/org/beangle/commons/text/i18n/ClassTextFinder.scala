@@ -23,11 +23,11 @@ import java.util.Locale
 class ClassTextFinder(locale: Locale, registry: TextBundleRegistry) {
 
   /** Looks up message in class hierarchy: class bundle, interfaces, package, superclass. */
-  def find(clazz: Class[_], key: String): Option[String] = {
+  def find(clazz: Class[?], key: String): Option[String] = {
     find(clazz, key, new collection.mutable.HashSet[String])
   }
 
-  private def bundleName(clazz: Class[_]): String = {
+  private def bundleName(clazz: Class[?]): String = {
     val classFullName = clazz.getName
     val dollarIdx = classFullName.indexOf('$')
     if (dollarIdx == -1) classFullName else classFullName.substring(0, dollarIdx)
@@ -45,7 +45,7 @@ class ClassTextFinder(locale: Locale, registry: TextBundleRegistry) {
    * @param checked checked set
    * @return
    */
-  private def find(clazz: Class[_], key: String, checked: collection.mutable.Set[String]): Option[String] = {
+  private def find(clazz: Class[?], key: String, checked: collection.mutable.Set[String]): Option[String] = {
     val className = bundleName(clazz)
 
     if (checked.contains(className)) return None
@@ -59,7 +59,7 @@ class ClassTextFinder(locale: Locale, registry: TextBundleRegistry) {
     if (msg.nonEmpty) return msg
 
     // check all interfaces class and package
-    val interfaces = new collection.mutable.HashSet[Class[_]]
+    val interfaces = new collection.mutable.HashSet[Class[?]]
     collectInterfaces(clazz, interfaces)
     for (ifc <- interfaces if msg.isEmpty) {
       msg = getClassMessage(ifc.getName, key)
@@ -86,7 +86,7 @@ class ClassTextFinder(locale: Locale, registry: TextBundleRegistry) {
     None
   }
 
-  private def collectInterfaces(me: Class[_], interfaces: collection.mutable.Set[Class[_]]): Unit = {
+  private def collectInterfaces(me: Class[?], interfaces: collection.mutable.Set[Class[?]]): Unit = {
     for (ifc <- me.getInterfaces) {
       if (!ifc.getName.startsWith("java.") && !ifc.getName.startsWith("scala.")) interfaces.add(ifc)
       collectInterfaces(ifc, interfaces)

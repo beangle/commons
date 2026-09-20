@@ -62,14 +62,14 @@ class CsvWriter(val writer: Writer,
   def write(data: Any): Unit = {
     data match {
       case a: Array[_] => writeOne(a)
-      case lines: Iterable[_] => for (line <- lines) writeOne(line.asInstanceOf[Array[_]])
+      case lines: Iterable[_] => for (line <- lines) writeOne(line.asInstanceOf[Array[?]])
     }
   }
 
   /**
    * write.
    */
-  private def writeOne(nextLine: Array[_]): Unit = {
+  private def writeOne(nextLine: Array[?]): Unit = {
     if (nextLine == null) return
     val sb = new StringBuilder(InitialStringSize)
     for (i <- nextLine.indices) {

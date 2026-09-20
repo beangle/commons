@@ -17,17 +17,16 @@
 
 package org.beangle.commons.lang
 
-import scala.annotation.elidable
-import scala.annotation.elidable.ASSERTION
-
-/** Runtime checks (notnull, elidable). */
+/** Runtime checks (notnull). */
 object Checks {
 
-  /** Throws IllegalArgumentException if obj is null. Elidable at ASSERTION level.
+  /** Throws IllegalArgumentException if obj is null.
+   *
+   * 注：原先标注 @elidable(ASSERTION)，但 Scala 3 不支持 elision，该注解一直是空操作，
+   * 自 3.8.0 起被标记弃用（scala.annotation.elidable is not supported by Scala 3），故移除。
    *
    * @param obj the object to check
    */
-  @elidable(ASSERTION)
   @inline
   def notnull(obj: AnyRef): Unit = {
     if (null == obj) throw new IllegalArgumentException("The argument can't be null")

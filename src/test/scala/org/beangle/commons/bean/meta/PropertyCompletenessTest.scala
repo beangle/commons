@@ -37,11 +37,11 @@ import org.scalatest.matchers.should.Matchers
   */
 class PropertyCompletenessTest extends AnyFunSpec, Matchers {
 
-  private case class Exp(name: String, tpe: Class[_], getter: String, setter: Option[String] = None)
+  private case class Exp(name: String, tpe: Class[?], getter: String, setter: Option[String] = None)
 
   private def exp(items: Exp*): Map[String, Exp] = items.map(i => (i.name, i)).toMap
 
-  private def e(name: String, tpe: Class[_], getter: String, setter: String = null): Exp =
+  private def e(name: String, tpe: Class[?], getter: String, setter: String = null): Exp =
     Exp(name, tpe, getter, Option(setter))
 
   /** 绝不能出现在属性里的方法（Object 方法、case class 样板、伴生方法）。 */
@@ -151,14 +151,14 @@ class PropertyCompletenessTest extends AnyFunSpec, Matchers {
       val shared = exp(
         e("object", classOf[Object], "getObject"),
         e("singleton", classOf[Boolean], "isSingleton"),
-        e("target", classOf[org.beangle.commons.bean.Factory[_]], "target", "target_$eq"))
-      val expected = shared ++ exp(e("objectType", classOf[Class[_]], "objectType", "objectType_$eq"))
+        e("target", classOf[org.beangle.commons.bean.Factory[?]], "target", "target_$eq"))
+      val expected = shared ++ exp(e("objectType", classOf[Class[?]], "objectType", "objectType_$eq"))
       check("FactoryBeanProxy.strict", MetaLoader.load(classOf[FactoryBeanProxy[?]]), expected)
       check("FactoryBeanProxy.dig", MetaModels.of(classOf[FactoryBeanProxy[?]]), expected)
       check(
         "FactoryBeanProxy.lite",
         MetaLoaderLite.load(classOf[FactoryBeanProxy[?]]),
-        shared ++ exp(e("objectType", classOf[Class[_]], "getObjectType", "objectType_$eq")))
+        shared ++ exp(e("objectType", classOf[Class[?]], "getObjectType", "objectType_$eq")))
     }
 
     it("@property: 注解改名生效，带参/Unit/无注解方法的边界固定") {
@@ -178,7 +178,7 @@ class PropertyCompletenessTest extends AnyFunSpec, Matchers {
         e("empty", classOf[Boolean], "isEmpty"),
         e("hasNext", classOf[Boolean], "hasNext"),
         e("hasPrevious", classOf[Boolean], "hasPrevious"),
-        e("items", classOf[collection.Seq[_]], "items"),
+        e("items", classOf[collection.Seq[?]], "items"),
         e("length", classOf[Int], "length"),
         e("pageIndex", classOf[Int], "pageIndex"),
         e("pageSize", classOf[Int], "pageSize"),
@@ -191,11 +191,11 @@ class PropertyCompletenessTest extends AnyFunSpec, Matchers {
 
     it("PagedSeq: 页面核心属性一个不少、一个不多") {
       val expected = exp(
-        e("datas", classOf[collection.immutable.Seq[_]], "datas"),
+        e("datas", classOf[collection.immutable.Seq[?]], "datas"),
         e("empty", classOf[Boolean], "isEmpty"),
         e("hasNext", classOf[Boolean], "hasNext"),
         e("hasPrevious", classOf[Boolean], "hasPrevious"),
-        e("page", classOf[Page[_]], "page", "page_$eq"),
+        e("page", classOf[Page[?]], "page", "page_$eq"),
         e("pageIndex", classOf[Int], "pageIndex", "pageIndex_$eq"),
         e("pageSize", classOf[Int], "pageSize"),
         e("totalPages", classOf[Int], "totalPages"),
@@ -236,11 +236,11 @@ class PropertyCompletenessTest extends AnyFunSpec, Matchers {
 
     it("工程内参数less 方法: strict 只认字段，lite/dig 全部收录（文档 4.1 示例）") {
       val strictProps = exp(
-        e("items", classOf[collection.Seq[_]], "items"),
+        e("items", classOf[collection.Seq[?]], "items"),
         e("pageIndex", classOf[Int], "pageIndex"))
       val lenientProps = strictProps ++ exp(
         e("hasNext", classOf[Boolean], "hasNext"),
-        e("iterator", classOf[collection.Iterator[_]], "iterator"),
+        e("iterator", classOf[collection.Iterator[?]], "iterator"),
         e("size", classOf[Int], "size"),
         e("totalPages", classOf[Int], "totalPages"))
       check("PageBean.strict", MetaLoader.load(classOf[PageBean]), strictProps)
@@ -260,8 +260,8 @@ class PropertyCompletenessTest extends AnyFunSpec, Matchers {
       val pageProps = exp(
         e("hasNext", classOf[Boolean], "hasNext"),
         e("hasPrevious", classOf[Boolean], "hasPrevious"),
-        e("items", classOf[collection.Seq[_]], "items"),
-        e("iterator", classOf[collection.Iterator[_]], "iterator"),
+        e("items", classOf[collection.Seq[?]], "items"),
+        e("iterator", classOf[collection.Iterator[?]], "iterator"),
         e("length", classOf[Int], "length"),
         e("pageIndex", classOf[Int], "pageIndex"),
         e("pageSize", classOf[Int], "pageSize"),
@@ -277,8 +277,8 @@ class PropertyCompletenessTest extends AnyFunSpec, Matchers {
         "PagedSeq.dig",
         MetaModels.of(classOf[PagedSeq[String]]),
         pageProps ++ libraryProps ++ exp(
-          e("datas", classOf[collection.immutable.Seq[_]], "datas"),
-          e("page", classOf[Page[_]], "page", "page_$eq"),
+          e("datas", classOf[collection.immutable.Seq[?]], "datas"),
+          e("page", classOf[Page[?]], "page", "page_$eq"),
           e("pageIndex", classOf[Int], "pageIndex", "pageIndex_$eq")))
       // dig 是 lite 的子集：dig 不含 lite 从工程内参数less 方法多认出来的成员
       val lite = MetaLoaderLite.load(classOf[SinglePage[String]]).properties.map(_.name).toSet

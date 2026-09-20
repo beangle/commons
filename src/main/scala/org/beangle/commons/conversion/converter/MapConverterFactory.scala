@@ -24,22 +24,22 @@ import java.util as ju
 import scala.collection.{immutable, mutable}
 
 /** Converts java.util.Map to Scala mutable/immutable Map. */
-object MapConverterFactory extends ConverterFactory[ju.Map[_, _], scala.collection.Map[_, _]] {
+object MapConverterFactory extends ConverterFactory[ju.Map[?, ?], scala.collection.Map[?, ?]] {
 
-  register(classOf[mutable.Map[_, _]], new MapConverter(false))
-  register(classOf[collection.Map[_, _]], new MapConverter(false))
-  register(classOf[immutable.Map[_, _]], new MapConverter(true))
+  register(classOf[mutable.Map[?, ?]], new MapConverter(false))
+  register(classOf[collection.Map[?, ?]], new MapConverter(false))
+  register(classOf[immutable.Map[?, ?]], new MapConverter(true))
 
   import scala.jdk.javaapi.CollectionConverters.asScala
 
-  class MapConverter(immutable: Boolean) extends Converter[ju.Map[_, _], collection.Map[_, _]] {
-    override def apply(it: ju.Map[_, _]): collection.Map[_, _] = {
-      val result: collection.Map[_, _] =
+  class MapConverter(immutable: Boolean) extends Converter[ju.Map[?, ?], collection.Map[?, ?]] {
+    override def apply(it: ju.Map[?, ?]): collection.Map[?, ?] = {
+      val result: collection.Map[?, ?] =
         it match {
           case cm: ju.concurrent.ConcurrentMap[_, _] => asScala(cm)
           case p: ju.Properties => asScala(p)
           case m: ju.Map[_, _] => asScala(m)
-          case null => null.asInstanceOf[collection.Map[_, _]]
+          case null => null.asInstanceOf[collection.Map[?, ?]]
         }
       if immutable then
         if null == result then null else result.toMap

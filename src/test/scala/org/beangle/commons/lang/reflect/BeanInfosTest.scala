@@ -58,13 +58,13 @@ class BeanInfosTest extends AnyFunSpec, Matchers {
     }
 
     it("Can get iterface methods") {
-      val method = classOf[NumIdBean[_]].getMethod("name")
+      val method = classOf[NumIdBean[?]].getMethod("name")
       assert(Modifier.isAbstract(method.getModifiers))
       // MetaLoader only discovers JavaBean-style getters (getXxx/isXxx) or field-backed methods;
       // Scala parameterless methods (def persisted, def name) are indistinguishable from
       // empty-parens methods at bytecode level, so they are excluded.
-      assert(BeanInfos.get(classOf[NumIdBean[_]]).properties.size == 1)
-      assert(BeanInfos.get(classOf[NumIdBean[_]]).properties.contains("id"))
+      assert(BeanInfos.get(classOf[NumIdBean[?]]).properties.size == 1)
+      assert(BeanInfos.get(classOf[NumIdBean[?]]).properties.contains("id"))
     }
 
     it("fallback to enum meta for anonymous value class") {
@@ -210,11 +210,11 @@ class BeanInfosTest extends AnyFunSpec, Matchers {
       val ageSetter = BeanInfos.get(classOf[Author]).getSetterMethod("age")
       assert(ageSetter.isDefined)
       assert(ageSetter.get.getName == "age_$eq")
-      assert(ageSetter.get.getParameterTypes.head == classOf[Option[_]])
+      assert(ageSetter.get.getParameterTypes.head == classOf[Option[?]])
 
       val parentSetter = BeanInfos.get(classOf[Department]).getSetterMethod("parent")
       assert(parentSetter.isDefined)
-      assert(parentSetter.get.getParameterTypes.head == classOf[Option[_]])
+      assert(parentSetter.get.getParameterTypes.head == classOf[Option[?]])
     }
 
     it("read-only property has no setter method") {
@@ -223,7 +223,7 @@ class BeanInfosTest extends AnyFunSpec, Matchers {
 
     it("find returns None for non-reflectable classes without throwing") {
       assert(BeanInfos.find(classOf[String]).isEmpty)
-      assert(BeanInfos.find(classOf[scala.collection.immutable.List[_]]).isEmpty)
+      assert(BeanInfos.find(classOf[scala.collection.immutable.List[?]]).isEmpty)
       assert(BeanInfos.find(classOf[Book]).isDefined)
     }
 

@@ -21,6 +21,8 @@ import org.beangle.commons.lang.{Numbers, Strings}
 
 import java.util.Collections
 
+import scala.compiletime.uninitialized
+
 /** Sequence pattern with style and placeholder levels.
  *
  * @author chaostone
@@ -28,7 +30,7 @@ import java.util.Collections
 class SeqPattern(val seqNumStyle: SeqNumStyle, val pattern: String) {
 
   /** Parent generator for nested levels. */
-  var generator: MultiLevelSeqGenerator = _
+  var generator: MultiLevelSeqGenerator = uninitialized
 
   /** Current nesting level. */
   var level: Int = 0

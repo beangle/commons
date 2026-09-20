@@ -33,7 +33,7 @@ object Version {
    * @param clazz the class (used to locate JAR)
    * @return Bundle-Version, Implementation-Version, or SNAPSHOT/UNKNOWN
    */
-  def findBundleVersion(clazz: Class[_]): String = {
+  def findBundleVersion(clazz: Class[?]): String = {
     val className = "/" + clazz.getName.replace(".", "/") + ".class"
     val classPath = clazz.getResource(className).toString
     if (classPath.startsWith("jar")) {

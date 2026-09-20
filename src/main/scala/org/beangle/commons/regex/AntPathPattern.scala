@@ -23,6 +23,8 @@ import org.beangle.commons.regex.AntPathPattern.DefaultPattern
 
 import java.util.regex.Pattern
 
+import scala.compiletime.uninitialized
+
 /** Ant-style path pattern matching. */
 object AntPathPattern {
 
@@ -78,8 +80,8 @@ object AntPathPattern {
  */
 class AntPathPattern(val text: String) {
 
-  private var pattern: Pattern = _
-  private var exactMatch: Boolean = _
+  private var pattern: Pattern = uninitialized
+  private var exactMatch: Boolean = uninitialized
 
   /** Variable names captured from {name} or {name:regex} in pattern. */
   var variables: List[String] = List.empty

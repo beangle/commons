@@ -23,6 +23,8 @@ import org.beangle.commons.collection.page.SinglePage
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
+import scala.compiletime.uninitialized
+
 /** MetaLoaderLite 契约：仅 public 构造器/方法，与 MetaLoader 在 JavaBean 类上保持一致，
  * 但不识别 Scala 字段访问器、不解析构造器默认值。 */
 class MetaLoaderLiteTest extends AnyFunSpec, Matchers {
@@ -94,7 +96,7 @@ class MetaLoaderLiteTest extends AnyFunSpec, Matchers {
     }
 
     it("discovers FactoryBeanProxy scala vars and java bean getters") {
-      val cm = MetaLoaderLite.load(classOf[FactoryBeanProxy[_]])
+      val cm = MetaLoaderLite.load(classOf[FactoryBeanProxy[?]])
       val byName = cm.properties.map(p => (p.name, p)).toMap
       byName.keySet shouldBe Set("object", "singleton", "objectType", "target")
       byName("object").getterName shouldBe "getObject"
@@ -152,8 +154,8 @@ trait FactoryBean[T] {
 }
 
 class FactoryBeanProxy[T] extends FactoryBean[T] {
-  var target: Factory[T] = _
-  var objectType: Class[T] = _
+  var target: Factory[T] = uninitialized
+  var objectType: Class[T] = uninitialized
 
   override def getObject: T = target.getObject
   override def isSingleton: Boolean = target.singleton

@@ -22,8 +22,8 @@ import org.beangle.commons.conversion.impl.GenericConverter
 import java.lang.reflect.{Constructor, Method}
 
 /** Converts source to target via single-arg constructor. */
-class CtorConverter[T](st: Class[_], tt: Class[_], ctor: Constructor[_]) extends GenericConverter {
-  override def getTypeinfo: (Class[_], Class[_]) = {
+class CtorConverter[T](st: Class[?], tt: Class[?], ctor: Constructor[?]) extends GenericConverter {
+  override def getTypeinfo: (Class[?], Class[?]) = {
     (st, tt)
   }
 
@@ -33,8 +33,8 @@ class CtorConverter[T](st: Class[_], tt: Class[_], ctor: Constructor[_]) extends
 }
 
 /** Converts source to target via companion apply method. */
-class MethodConverter[T](st: Class[_], tt: Class[_], factory: Any, method: Method) extends GenericConverter {
-  override def getTypeinfo: (Class[_], Class[_]) = {
+class MethodConverter[T](st: Class[?], tt: Class[?], factory: Any, method: Method) extends GenericConverter {
+  override def getTypeinfo: (Class[?], Class[?]) = {
     (st, tt)
   }
 

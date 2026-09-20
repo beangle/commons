@@ -48,7 +48,7 @@ object BeanInfo {
   class PropertyInfo(val meta: MetaModel.Property, val getter: MethodHandle, val setter: Option[MethodHandle]) {
     def name: String = meta.name
 
-    def typeinfo: TypeInfo = if meta.isOptional then TypeInfo.get(classOf[Option[_]], List(meta.typeinfo)) else meta.typeinfo
+    def typeinfo: TypeInfo = if meta.isOptional then TypeInfo.get(classOf[Option[?]], List(meta.typeinfo)) else meta.typeinfo
 
     def isTransient: Boolean = meta.isTransient
 
@@ -58,7 +58,7 @@ object BeanInfo {
     def writable: Boolean = setter.isDefined
 
     /** Property type class. */
-    def clazz: Class[_] = typeinfo.clazz
+    def clazz: Class[?] = typeinfo.clazz
 
     override def toString: String = {
       if writable then s"var $name: $typeinfo = _ "
@@ -154,7 +154,7 @@ object BeanInfo {
  */
 class BeanInfo(val meta: BeanMeta, val properties: Map[String, PropertyInfo], val writeOnlys: Map[String, Method] = Map.empty) {
 
-  def clazz: Class[_] = meta.clazz
+  def clazz: Class[?] = meta.clazz
 
   def ctors: Seq[MetaModel.Ctor] = meta.ctors
 
@@ -180,7 +180,7 @@ class BeanInfo(val meta: BeanMeta, val properties: Map[String, PropertyInfo], va
   }
 
   /** Gets property type class. */
-  def getPropertyType(property: String): Option[Class[_]] = {
+  def getPropertyType(property: String): Option[Class[?]] = {
     properties.get(property).map(_.clazz)
   }
 

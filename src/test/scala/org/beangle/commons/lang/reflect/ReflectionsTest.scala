@@ -42,11 +42,11 @@ class ReflectionsTest extends AnyFunSpec, Matchers {
 
   describe("Reflections") {
     it("getSuperClassParamType") {
-      val dataSourceType = Reflections.getGenericParamTypes(classOf[JndiDataSourceFactory], classOf[Factory[_]])
+      val dataSourceType = Reflections.getGenericParamTypes(classOf[JndiDataSourceFactory], classOf[Factory[?]])
       assert(dataSourceType.size == 1)
       assert(dataSourceType.values.head == classOf[DataSource])
 
-      val idType = Reflections.getGenericParamTypes(classOf[Book], classOf[Entity[_]])
+      val idType = Reflections.getGenericParamTypes(classOf[Book], classOf[Entity[?]])
       assert(idType.size == 1)
       assert(idType.values.head == classOf[java.lang.Long])
     }
@@ -58,11 +58,11 @@ class ReflectionsTest extends AnyFunSpec, Matchers {
       assert(null == Reflections.getAnnotation(method2, classOf[description]))
     }
     it("getTraitParamType") {
-      val atypes = Reflections.getGenericParamTypes(classOf[C], Set(classOf[A[_]]))
+      val atypes = Reflections.getGenericParamTypes(classOf[C], Set(classOf[A[?]]))
       assert(atypes.size == 1)
       assert(atypes.get("T").isDefined)
 
-      val btypes = Reflections.getGenericParamTypes(classOf[C], classOf[B[_]])
+      val btypes = Reflections.getGenericParamTypes(classOf[C], classOf[B[?]])
       assert(btypes.size == 1)
       assert(btypes.contains("T1"))
     }

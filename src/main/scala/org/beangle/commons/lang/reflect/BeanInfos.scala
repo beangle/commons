@@ -29,21 +29,21 @@ object BeanInfos {
    *  Class 不重写 equals/hashCode，键比较即引用相等（identity 语义）。
    *  读路径无锁（volatile load），写路径 CAS 重试，无 monitor（虚拟线程友好）。
    */
-  @volatile private var cache: Map[Class[_], BeanInfo] = scala.collection.immutable.HashMap.empty
+  @volatile private var cache: Map[Class[?], BeanInfo] = scala.collection.immutable.HashMap.empty
 
   private val CACHE: VarHandle =
-    Invokers.findStaticVarHandle(MethodHandles.lookup(), classOf[BeanInfos.type], "cache", classOf[Map[Class[_], BeanInfo]])
+    Invokers.findStaticVarHandle(MethodHandles.lookup(), classOf[BeanInfos.type], "cache", classOf[Map[Class[?], BeanInfo]])
 
   /** Gets BeanInfo from cache. On miss, tries MetaModels (binary) then MetaLoader (reflection).
    *  Throws for non-reflectable classes (see [[MetaLoader.supports]]). */
-  def get(clazz: Class[_]): BeanInfo = {
+  def get(clazz: Class[?]): BeanInfo = {
     find(clazz) match
       case Some(bi) => bi
       case None => throw new RuntimeException("Cannot reflect class: " + clazz.getName)
   }
 
   /** Like [[get]], but returns None for non-reflectable classes instead of throwing. */
-  def find(clazz: Class[_]): Option[BeanInfo] = {
+  def find(clazz: Class[?]): Option[BeanInfo] = {
     cache.get(clazz) match {
       case d@Some(bi) => d
       case None =>
@@ -57,7 +57,7 @@ object BeanInfos {
   }
 
   /** CAS 写：基于当前快照合并新条目，失败说明被并发修改则重试（写频率低，几乎不重试）。 */
-  private def put(clazz: Class[_], bi: BeanInfo): Unit = {
+  private def put(clazz: Class[?], bi: BeanInfo): Unit = {
     var done = false
     while (!done) {
       val old = cache
@@ -66,7 +66,7 @@ object BeanInfos {
   }
 
   /** 从 MetaModels（二进制索引）或 MetaLoader（运行时反射）加载 BeanMeta 并构造 BeanInfo。 */
-  private def load(clazz: Class[_]): Option[BeanInfo] = {
+  private def load(clazz: Class[?]): Option[BeanInfo] = {
     MetaModels.get(clazz) match
       case Some(meta) => Some(BeanInfo.from(meta))
       case None =>
@@ -82,12 +82,12 @@ object BeanInfos {
   }
 
   /** 依次尝试二进制索引与运行时反射，返回来源类的 BeanMeta。 */
-  private def loadMeta(source: Class[_]): Option[BeanMeta] =
+  private def loadMeta(source: Class[?]): Option[BeanMeta] =
     MetaModels.get(source).orElse(reflectMeta(source))
 
   /** 经 [[MetaModels.reflect]] 反射加载（native 下自动切换轻量 [[org.beangle.commons.bean.meta.MetaLoaderLite]]，
    * 仅支持可反射的应用类，见 [[MetaLoader.supports]]）。 */
-  private def reflectMeta(clazz: Class[_]): Option[BeanMeta] =
+  private def reflectMeta(clazz: Class[?]): Option[BeanMeta] =
     if MetaLoader.supports(clazz) then Some(MetaModels.reflect(clazz)) else None
 
   /** 定位 `$` 子类的父类，命中后复用父类 BeanMeta：
@@ -95,7 +95,7 @@ object BeanInfos {
    *  - Scala 3 枚举值类（`NoticeStatus$$anon$1`）：父类可反射时直接取父类。
    * 这类子类没有自有属性，仅继承父类；native 下需已注册 allPublicMethods 供 getMethods 查询。
    */
-  private def parentOf(clazz: Class[_]): Class[_] = {
+  private def parentOf(clazz: Class[?]): Class[?] = {
     val name = clazz.getName
     val idx = name.lastIndexOf("$")
     if (idx <= 0) null
@@ -108,7 +108,7 @@ object BeanInfos {
   }
 
   /** Returns true if BeanInfo is cached for the class. */
-  def cached(clazz: Class[_]): Boolean = cache.contains(clazz)
+  def cached(clazz: Class[?]): Boolean = cache.contains(clazz)
 
   /** Registers a pre-built BeanInfo into the cache. */
   def update(bi: BeanInfo): BeanInfo = {
@@ -117,7 +117,7 @@ object BeanInfos {
   }
 
   /** Clears all cached BeanInfo. */
-  def clear(): Unit = CACHE.set(scala.collection.immutable.HashMap.empty[Class[_], BeanInfo])
+  def clear(): Unit = CACHE.set(scala.collection.immutable.HashMap.empty[Class[?], BeanInfo])
 
   /** Registers BeanInfo from BeanMeta into the cache. */
   def register(cm: MetaModel.BeanMeta): BeanInfo = {

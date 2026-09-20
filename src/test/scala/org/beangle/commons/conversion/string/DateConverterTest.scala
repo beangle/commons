@@ -58,22 +58,22 @@ class DateConverterTest extends AnyFunSpec, Matchers {
       val c = TemporalConverter
       val lc = c.getConverter(classOf[LocalDate])
       lc.isDefined should be(true)
-      lc.get.apply("1980-09-09") should be equals LocalDate.parse("1980-09-09")
+      lc.get.apply("1980-09-09") should be `equals` LocalDate.parse("1980-09-09")
 
       val dtc = c.getConverter(classOf[LocalDateTime])
       dtc.isDefined should be(true)
-      dtc.get.apply("1980-09-09T11:12:00") should be equals LocalDateTime.parse("1980-09-09T11:12:00")
-      dtc.get.apply("1980-09-09T11:12") should be equals LocalDateTime.parse("1980-09-09T11:12:00")
+      dtc.get.apply("1980-09-09T11:12:00") should be `equals` LocalDateTime.parse("1980-09-09T11:12:00")
+      dtc.get.apply("1980-09-09T11:12") should be `equals` LocalDateTime.parse("1980-09-09T11:12:00")
 
       val tc = c.getConverter(classOf[LocalTime])
       tc.isDefined should be(true)
-      tc.get.apply("11:12:00") should be equals LocalTime.parse("11:12:00")
-      tc.get.apply("11:12") should be equals LocalTime.parse("11:12:00")
+      tc.get.apply("11:12:00") should be `equals` LocalTime.parse("11:12:00")
+      tc.get.apply("11:12") should be `equals` LocalTime.parse("11:12:00")
 
       val ic = c.getConverter(classOf[Instant])
       ic.isDefined should be(true)
-      ic.get.apply("2017-01-25T06:45:03.595Z") should be equals Instant.parse("2017-01-25T06:45:03.595Z")
-      ic.get.apply("2017-01-25T14:45:03.595") should be equals Instant.parse("2017-01-25T06:45:03.595Z")
+      ic.get.apply("2017-01-25T06:45:03.595Z") should be `equals` Instant.parse("2017-01-25T06:45:03.595Z")
+      ic.get.apply("2017-01-25T14:45:03.595") should be `equals` Instant.parse("2017-01-25T06:45:03.595Z")
     }
   }
 }

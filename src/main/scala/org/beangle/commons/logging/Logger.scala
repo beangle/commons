@@ -19,18 +19,18 @@ package org.beangle.commons.logging
 
 import org.slf4j.{LoggerFactory, Logger as JLogger}
 
-import scala.annotation.elidable
-import scala.annotation.elidable.*
-
 /** SLF4J Logger delegate. */
 object Logger {
   /** Creates a Logger for the given class. */
-  def apply(clazz: Class[_]): Logger = {
-    new Logger(LoggerFactory getLogger clazz)
+  def apply(clazz: Class[?]): Logger = {
+    new Logger(LoggerFactory `getLogger` clazz)
   }
 }
 
-/** SLF4J Logger wrapper with lazy-evaluated messages. */
+/** SLF4J Logger wrapper with lazy-evaluated messages.
+  *
+  * 注：trace/debug 原先标注 @elidable(FINEST/FINE)，Scala 3 不支持 elision（3.8.0 起弃用），
+  * 早已是空操作，故移除；是否真正裁剪由 isTraceEnabled/isDebugEnabled 判断。 */
 class Logger(private val logger: JLogger) {
 
   /** Returns true if debug level is enabled. */
@@ -43,25 +43,21 @@ class Logger(private val logger: JLogger) {
   @inline def isWarnEnabled: Boolean = logger.isWarnEnabled
 
   /** Logs trace message (lazy). */
-  @elidable(FINEST)
   def trace(msg: => String): Unit = {
     if (logger.isTraceEnabled) logger.trace(msg)
   }
 
   /** Logs trace message with throwable (lazy). */
-  @elidable(FINEST)
   def trace(msg: => String, t: => Throwable): Unit = {
     if (logger.isTraceEnabled) logger.trace(msg, t)
   }
 
   /** Logs debug message (lazy). */
-  @elidable(FINE)
   def debug(msg: => String): Unit = {
     if (logger.isDebugEnabled) logger.debug(msg)
   }
 
   /** Logs debug message with throwable (lazy). */
-  @elidable(FINE)
   def debug(msg: => String, t: => Throwable): Unit = {
     if (logger.isDebugEnabled) logger.debug(msg, t)
   }

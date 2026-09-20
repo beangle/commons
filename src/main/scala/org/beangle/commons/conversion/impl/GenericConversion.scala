@@ -33,9 +33,9 @@ import scala.language.existentials
  * @author chaostone
  * @since 3.2.0
  */
-class GenericConversion(private val converters: Map[Class[_], Map[Class[_], GenericConverter]]) extends Conversion {
+class GenericConversion(private val converters: Map[Class[?], Map[Class[?], GenericConverter]]) extends Conversion {
 
-  private val cache = new concurrent.TrieMap[(Class[_], Class[_]), GenericConverter]
+  private val cache = new concurrent.TrieMap[(Class[?], Class[?]), GenericConverter]
 
   override def convert[T](source: Any, target: Class[T]): T = {
     if (null == source) return Objects.default(target)
@@ -62,19 +62,19 @@ class GenericConversion(private val converters: Map[Class[_], Map[Class[_], Gene
     }
   }
 
-  protected def findConverter(sourceType: Class[_], targetType: Class[_]): GenericConverter = {
+  protected def findConverter(sourceType: Class[?], targetType: Class[?]): GenericConverter = {
     val key = (sourceType, targetType)
     cache.getOrElseUpdate(key, resolveConverter(sourceType, targetType))
   }
 
-  private def resolveConverter(sourceType: Class[_], targetType: Class[_]): GenericConverter = {
+  private def resolveConverter(sourceType: Class[?], targetType: Class[?]): GenericConverter = {
     var converter = searchConverter(sourceType, targetType)
     if (null == converter) converter = findCtorConverter(sourceType, targetType)
     if (null == converter) NoneConverter else converter
   }
 
   /** Creates a converter from target's constructor or companion `apply` (cached only). */
-  private def findCtorConverter(sourceType: Class[_], targetType: Class[_]): GenericConverter = {
+  private def findCtorConverter(sourceType: Class[?], targetType: Class[?]): GenericConverter = {
     val ctor = targetType.getConstructors.find { c =>
       val pts = c.getParameterTypes
       pts.length == 1 && pts.contains(sourceType)
@@ -92,9 +92,9 @@ class GenericConversion(private val converters: Map[Class[_], Map[Class[_], Gene
       case Some(ct) => new CtorConverter(sourceType, targetType, ct)
   }
 
-  protected def searchConverter(sourceType: Class[_], targetType: Class[_]): GenericConverter = {
-    val interfaces = new mutable.LinkedHashSet[Class[_]]
-    val classQueue = new mutable.Queue[Class[_]]
+  protected def searchConverter(sourceType: Class[?], targetType: Class[?]): GenericConverter = {
+    val interfaces = new mutable.LinkedHashSet[Class[?]]
+    val classQueue = new mutable.Queue[Class[?]]
     classQueue += sourceType
     while (classQueue.nonEmpty) {
       val currentClass = classQueue.dequeue()
@@ -113,11 +113,11 @@ class GenericConversion(private val converters: Map[Class[_], Map[Class[_], Gene
     getConverter(targetType, getConverters(classOf[AnyRef]))
   }
 
-  private def getConverters(sourceType: Class[_]) = converters.getOrElse(sourceType, Map.empty)
+  private def getConverters(sourceType: Class[?]) = converters.getOrElse(sourceType, Map.empty)
 
-  private def getConverter(targetType: Class[_], converters: Map[Class[_], GenericConverter]): GenericConverter = {
-    val interfaces = new mutable.LinkedHashSet[Class[_]]
-    val queue = new mutable.Queue[Class[_]]()
+  private def getConverter(targetType: Class[?], converters: Map[Class[?], GenericConverter]): GenericConverter = {
+    val interfaces = new mutable.LinkedHashSet[Class[?]]
+    val queue = new mutable.Queue[Class[?]]()
     queue += targetType
     while (queue.nonEmpty) {
       val cur = queue.dequeue()
@@ -136,7 +136,7 @@ class GenericConversion(private val converters: Map[Class[_], Map[Class[_], Gene
     null
   }
 
-  private def addInterfaces(interfaceType: Class[_], interfaces: mutable.Set[Class[_]]): Unit = {
+  private def addInterfaces(interfaceType: Class[?], interfaces: mutable.Set[Class[?]]): Unit = {
     interfaces.add(interfaceType)
     for (inheritedInterface <- interfaceType.getInterfaces) addInterfaces(inheritedInterface, interfaces)
   }

@@ -23,6 +23,7 @@ import org.beangle.commons.config.{Environment, PlaceHolder}
 
 import java.util as ju
 import scala.quoted.*
+import scala.compiletime.uninitialized
 
 /** Compile-time binding macros.
  *
@@ -44,16 +45,16 @@ object BindModule {
    * Build-time (buildTime) only registers BeanMeta via the registry;
    * runtime performs the actual bind against the binder.
    */
-  def bind(clazzesExpr: Expr[Seq[Class[_]]],
+  def bind(clazzesExpr: Expr[Seq[Class[?]]],
            registry: Expr[BindModule],
            binder: Expr[Binder], wiredEagerly: Expr[Boolean])
-          (implicit quotes: Quotes): Expr[BatchBinder] = {
+          (using quotes: Quotes): Expr[BatchBinder] = {
     '{
       if ${ registry }.buildTime then
         ${ MetaRegistrar.registerImpl(clazzesExpr, registry) }
         BindModule.noopBatchBinder
       else
-        ${ binder }.bind(${ clazzesExpr }: _*).wiredEagerly(${ wiredEagerly })
+        ${ binder }.bind(${ clazzesExpr }*).wiredEagerly(${ wiredEagerly })
     }
   }
 
@@ -61,7 +62,7 @@ object BindModule {
   def bind[T: Type](beanName: Expr[String], clazz: Expr[Class[T]],
                     registry: Expr[BindModule],
                     binder: Expr[Binder], wiredEagerly: Expr[Boolean])
-                   (implicit quotes: Quotes): Expr[BatchBinder] = {
+                   (using quotes: Quotes): Expr[BatchBinder] = {
     '{
       if ${ registry }.buildTime then
         ${ MetaRegistrar.registerImpl(Varargs(Seq(clazz)), registry) }
@@ -75,7 +76,7 @@ object BindModule {
   def bean[T: Type](clazz: Expr[Class[T]],
                     registry: Expr[BindModule],
                     binder: Expr[Binder], wiredEagerly: Expr[Boolean])
-                   (implicit quotes: Quotes): Expr[Definition] = {
+                   (using quotes: Quotes): Expr[Definition] = {
     '{
       if ${ registry }.buildTime then
         ${ MetaRegistrar.registerImpl(Varargs(Seq(clazz)), registry) }
@@ -105,9 +106,9 @@ abstract class BindModule extends MetaRegistrar {
     binding()
   }
 
-  private var binder: Binder = _
+  private var binder: Binder = uninitialized
 
-  private var wiredEagerly: Boolean = _
+  private var wiredEagerly: Boolean = uninitialized
 
   /** Configures this module with the given binder. */
   final def configure(binder: Binder): Unit = {
@@ -121,16 +122,16 @@ abstract class BindModule extends MetaRegistrar {
   }
 
   /** Binds the given classes. */
-  protected inline def bind(inline classes: Class[_]*): BatchBinder = ${ BindModule.bind('classes, 'this, 'binder, 'wiredEagerly) }
+  protected inline def bind(inline classes: Class[?]*): BatchBinder = ${ BindModule.bind('classes, 'this, 'binder, 'wiredEagerly) }
 
   /** Returns a reference to a bean by name. */
   protected final def ref(name: String): Reference = Reference(name)
 
   /** Returns an injection by class. */
-  protected final def ref(clazz: Class[_]): Injection[_] = Injection(clazz)
+  protected final def ref(clazz: Class[?]): Injection[?] = Injection(clazz)
 
   /** Creates a map entry. */
-  protected final def entry(key: Any, value: Any): (_, _) = Tuple2(key, value)
+  protected final def entry(key: Any, value: Any): (?, ?) = Tuple2(key, value)
 
   /** Creates an inner bean definition. */
   protected inline def bean[T](clazz: Class[T]): Definition = ${ BindModule.bean('clazz, 'this, 'binder, 'wiredEagerly) }
@@ -156,7 +157,7 @@ abstract class BindModule extends MetaRegistrar {
    * @param datas the items (Class for bean ref, or value)
    * @return the list
    */
-  protected final def list(datas: AnyRef*): List[_] = {
+  protected final def list(datas: AnyRef*): List[?] = {
     datas.map {
       case clazz: Class[_] => buildInnerReference(clazz)
       case obj: Any => obj
@@ -164,12 +165,12 @@ abstract class BindModule extends MetaRegistrar {
   }
 
   /** Builds a list of bean references. */
-  protected final def listref(classes: Class[_]*): List[_] = {
+  protected final def listref(classes: Class[?]*): List[?] = {
     classes.map(clazz => Injection(clazz)).toList
   }
 
   /** Builds a set property. Use set(A.class, B.class) for beans; set("a", "b") for values. */
-  protected final def set(datas: AnyRef*): Set[_] = {
+  protected final def set(datas: AnyRef*): Set[?] = {
     datas.map {
       case clazz: Class[_] => buildInnerReference(clazz)
       case obj: Any => obj
@@ -177,7 +178,7 @@ abstract class BindModule extends MetaRegistrar {
   }
 
   /** Builds a map from key-value entries. */
-  protected final def map(entries: (_, _)*): Map[_, _] = {
+  protected final def map(entries: (?, ?)*): Map[?, ?] = {
     entries.map {
       case (k, v) =>
         v match {
@@ -213,7 +214,7 @@ abstract class BindModule extends MetaRegistrar {
     Environment.isDevMode
   }
 
-  private def buildInnerReference(clazz: Class[_]): Reference = {
+  private def buildInnerReference(clazz: Class[?]): Reference = {
     if buildTime then Reference(clazz.getName)
     else {
       val targetBean = binder.newInnerBeanName(clazz)
@@ -223,12 +224,12 @@ abstract class BindModule extends MetaRegistrar {
   }
 
   /** Condition: class missing bean of clazz. */
-  def missing(clazz: Class[_]): Condition = {
+  def missing(clazz: Class[?]): Condition = {
     Condition.missing(clazz)
   }
 
   /** Condition: class exist bean of clazz. */
-  def exist(clazz: Class[_]): Condition = {
+  def exist(clazz: Class[?]): Condition = {
     Condition.exist(clazz)
   }
 

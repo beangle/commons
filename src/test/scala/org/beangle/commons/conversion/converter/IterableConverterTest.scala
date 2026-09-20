@@ -28,10 +28,10 @@ class IterableConverterTest extends AnyFunSpec, Matchers {
     it("Convert java iterable to scala") {
       val c = IterableConverterFactory
       val seq = c.convert(new util.ArrayList[Integer], classOf[collection.Seq[Integer]])
-      seq.isInstanceOf[collection.Seq[_]] should be(true)
+      seq.isInstanceOf[collection.Seq[?]] should be(true)
 
       val iseq = c.convert(new util.ArrayList[Integer], classOf[collection.immutable.Seq[Integer]])
-      iseq.isInstanceOf[collection.immutable.Seq[_]] should be(true)
+      iseq.isInstanceOf[collection.immutable.Seq[?]] should be(true)
       val mc = MapConverterFactory
       val map = mc.convert(new util.HashMap[String, String], classOf[collection.mutable.Map[String, String]])
       assert(map != null)

@@ -24,6 +24,8 @@ import org.beangle.commons.lang.reflect.TypeInfo.IterableType
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
+import scala.compiletime.uninitialized
+
 class MetaDiggerTest extends AnyFunSpec, Matchers {
   MetaModels.of(classOf[PersonMeta])
   MetaModels.of(classOf[OtherMeta])
@@ -75,7 +77,7 @@ class MetaDiggerTest extends AnyFunSpec, Matchers {
     }
 
     it("digs class literals passed through inline wrappers") {
-      inline def digOne(inline c: Class[_]): List[BeanMeta] = MetaModels.of(c)
+      inline def digOne(inline c: Class[?]): List[BeanMeta] = MetaModels.of(c)
       val list = digOne(classOf[PersonMeta])
       assert(list.map(_.clazz) == Seq(classOf[PersonMeta]))
     }
@@ -350,19 +352,19 @@ class WriteOnlySubBean extends WriteOnlyBean
 
 /** Scala 子类继承 Java 父类：BeanMeta 应合并父类可读属性（进入 beanmeta.idx）。 */
 class ScalaChildBean extends JavaParentBean {
-  var id: Long = _
+  var id: Long = uninitialized
 }
 
 /** 虚拟属性（无字段）：setter 先于 getter 声明，验证 MetaDigger 发现顺序无关。 */
 class VirtualPropsMeta {
-  private var _base: String = _
+  private var _base: String = uninitialized
   def base_=(n: String): Unit = _base = n
   def base: String = _base
 }
 
 /** 虚拟属性（无字段）：getter 先于 setter 声明，对照用例。 */
 class VirtualPropsMeta2 {
-  private var _base: String = _
+  private var _base: String = uninitialized
   def base: String = _base
   def base_=(n: String): Unit = _base = n
 }
@@ -396,21 +398,21 @@ class TermRefMeta {
 /** var name 与 JavaBean 风格 getName 叠加：字段访问器优先，beanmeta（编译期 MetaDigger）
  * 与运行期 MetaLoader 的 getterName 保持一致，用于固定该契约。 */
 class GetterNameMeta {
-  var name: String = _
+  var name: String = uninitialized
   def getName: String = name
 }
 
 /** var writable 与 JavaBean 风格 isWritable 叠加（boolean 属性）：同样字段访问器优先。 */
 class IsWritableMeta {
-  var writable: Boolean = _
+  var writable: Boolean = uninitialized
   def isWritable: Boolean = writable
 }
 
 case class PersonMeta(name: String, age: Int = 18, tags: List[String] = Nil) {
-  var nickname: String = _
-  var email: Option[String] = _
-  var `type`: String = _
-  var scores: Map[String, Int] = _
+  var nickname: String = uninitialized
+  var email: Option[String] = uninitialized
+  var `type`: String = uninitialized
+  var scores: Map[String, Int] = uninitialized
 
   def parents: List[String] = Nil
 
@@ -424,7 +426,7 @@ case class PersonMeta(name: String, age: Int = 18, tags: List[String] = Nil) {
 }
 
 class OtherMeta {
-  var code: Int = _
+  var code: Int = uninitialized
 }
 
 case class CodecMeta(name: String, size: Int = 10, ratio: Double = 0.5)
@@ -435,7 +437,7 @@ case class CodecMeta(name: String, size: Int = 10, ratio: Double = 0.5)
 object ModuleWithNested {
   class Nested1
   class Nested2
-  var value: String = _
+  var value: String = uninitialized
 }
 
 class ModuleWithNestedUser {
@@ -461,7 +463,7 @@ class OverloadedGetterMeta extends OverloadNamed {
 
 /** 同名重载 setter：`value_=(v: String)` 与 `value_=(v: String, extra: Int)`。 */
 class OverloadedSetterMeta extends OverloadNamed {
-  private var stored: String = _
+  private var stored: String = uninitialized
 
   def name: String = "os"
 

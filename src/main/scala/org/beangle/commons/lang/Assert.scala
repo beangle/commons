@@ -164,7 +164,7 @@ object Assert {
    * @throws NullPointerException     if the array is `null`
    * @throws IllegalArgumentException if an element is `null`
    */
-  def noNullElements[T <: java.lang.Iterable[_]](iterable: T, message: String, values: AnyRef*): T = {
+  def noNullElements[T <: java.lang.Iterable[?]](iterable: T, message: String, values: AnyRef*): T = {
     notNull(iterable)
     var i = 0
     val it = iterable.iterator()

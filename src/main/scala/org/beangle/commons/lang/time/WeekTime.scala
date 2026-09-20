@@ -22,22 +22,23 @@ import org.beangle.commons.lang.Objects
 
 import java.time.{LocalDate, LocalDateTime}
 import scala.collection.mutable
+import scala.compiletime.uninitialized
 
 /** Recurring weekly time slot. */
 @component
 class WeekTime extends Ordered[WeekTime] with Serializable {
 
   /** Start date of the year/semester. */
-  var startOn: LocalDate = _
+  var startOn: LocalDate = uninitialized
 
   /** Start time of day. */
-  var beginAt: HourMinute = _
+  var beginAt: HourMinute = uninitialized
 
   /** End time of day. */
-  var endAt: HourMinute = _
+  var endAt: HourMinute = uninitialized
 
   /** Week state bitmap (which weeks). */
-  var weekstate: WeekState = _
+  var weekstate: WeekState = uninitialized
 
   /** Copy constructor. */
   def this(other: WeekTime) = {

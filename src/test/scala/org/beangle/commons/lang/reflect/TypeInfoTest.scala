@@ -27,8 +27,8 @@ class TypeInfoTest extends AnyFunSpec, Matchers {
   describe("TypeInfo") {
     it("naming") {
       assert("Option[Int]" == TypeInfo.get(classOf[Int], true).name)
-      assert("scala.collection.mutable.Buffer[String]" == TypeInfo.get(classOf[mutable.Buffer[_]], classOf[String]).name)
-      assert("scala.collection.mutable.HashMap[String,Int]" == TypeInfo.get(classOf[mutable.HashMap[_, _]], classOf[String], classOf[Int]).name)
+      assert("scala.collection.mutable.Buffer[String]" == TypeInfo.get(classOf[mutable.Buffer[?]], classOf[String]).name)
+      assert("scala.collection.mutable.HashMap[String,Int]" == TypeInfo.get(classOf[mutable.HashMap[?, ?]], classOf[String], classOf[Int]).name)
 
       assert("Array[Int]" == TypeInfo.get(classOf[Array[Int]], false).name)
       assert("Option[Array[Int]]" == TypeInfo.get(classOf[Array[Int]], true).name)
@@ -38,9 +38,9 @@ class TypeInfoTest extends AnyFunSpec, Matchers {
       assert("org.beangle.commons.lang.reflect.D[String]" == TypeInfo.get(classOf[D]).name)
     }
     it("convert") {
-      val ti = TypeInfo.convert(Array(classOf[Map[_, _]], Array(Array(classOf[List[_]], Array(classOf[Int])), classOf[String])))
+      val ti = TypeInfo.convert(Array(classOf[Map[?, ?]], Array(Array(classOf[List[?]], Array(classOf[Int])), classOf[String])))
       assert("Map[List[Int],String]" == ti.toString)
-      val t2 = TypeInfo.convert(Array(classOf[Map[_, _]], Array(classOf[Int], classOf[String])))
+      val t2 = TypeInfo.convert(Array(classOf[Map[?, ?]], Array(classOf[Int], classOf[String])))
       assert("Map[Int,String]" == t2.toString)
 
     }
