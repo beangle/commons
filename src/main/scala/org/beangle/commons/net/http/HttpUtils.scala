@@ -167,6 +167,20 @@ object HttpUtils {
   def download(uri: String, location: File): Boolean = {
     Default.download(uri, location)
   }
+
+  /** Downloads the URI to the given file, sending the request's headers/auth.
+   *
+   * Use this overload to fetch artifacts from a repository that requires a
+   * bearer/basic token (for example micdn's `download-key`).
+   *
+   * @param uri      the URI to download
+   * @param location the destination file
+   * @param request  the request (headers, auth)
+   * @return true if successful
+   */
+  def download(uri: String, location: File, request: Request): Boolean = {
+    Default.download(uri, location, request)
+  }
 }
 
 class HttpUtils private(private val client: HttpClient, fixedUserAgent: Boolean) {
@@ -289,11 +303,26 @@ class HttpUtils private(private val client: HttpClient, fixedUserAgent: Boolean)
    * @return true if successful
    */
   def download(uri: String, location: File): Boolean = {
+    download(uri, location, Request.noBody)
+  }
+
+  /** Downloads the URI to the given file, sending the request's headers/auth.
+   *
+   * The response body is streamed (not buffered in memory), so large artifacts
+   * can be fetched. The content is first written to `<location>.part` and renamed
+   * into place only on success, so a failed or interrupted download never leaves
+   * a partial file at the destination.
+   *
+   * @param uri      the URI
+   * @param location the destination file
+   * @param request  the request (headers, auth)
+   * @return true if the response is 200 and the file was written
+   */
+  def download(uri: String, location: File, request: Request): Boolean = {
     try {
-      val request = HttpRequest.newBuilder(URI.create(uri))
+      val builder = HttpRequest.newBuilder(URI.create(uri))
         .method(HttpMethods.GET, HttpRequest.BodyPublishers.noBody())
-        .build()
-      val response = client.send(request, HttpResponse.BodyHandlers.ofInputStream())
+      val response = client.send(setup(builder, request), HttpResponse.BodyHandlers.ofInputStream())
       if (response.statusCode() == HTTP_OK) {
         location.getParentFile.mkdirs()
         val file = new File(location.toString + ".part")
