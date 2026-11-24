@@ -59,7 +59,7 @@ object Decimal5 {
 
 /** Fixed 5-decimal value type backed by [[Long]]; see [[Decimal5]] companion for range and DB mapping. */
 @value
-class Decimal5(val value: Long) extends Number, Ordered[Decimal5], Serializable {
+class Decimal5(val value: Long) extends Number, DecimalConvertible, Ordered[Decimal5], Serializable {
 
   override def longValue(): Long = ScaledDecimal.integerPartLong(value)
 
@@ -85,7 +85,7 @@ class Decimal5(val value: Long) extends Number, Ordered[Decimal5], Serializable 
 
   override def compare(that: Decimal5): Int = java.lang.Long.compare(value, that.value)
 
-  def toBigDecimal: JBigDecimal = ScaledDecimal.toBigDecimal(value)
+  override def toBigDecimal: JBigDecimal = ScaledDecimal.toBigDecimal(value)
 
   def toTinyDecimal5: TinyDecimal5 = {
     if value > Int.MaxValue || value < Int.MinValue then

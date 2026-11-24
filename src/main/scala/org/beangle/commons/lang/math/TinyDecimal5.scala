@@ -57,7 +57,7 @@ object TinyDecimal5 {
 
 /** Compact fixed 5-decimal value type backed by [[Int]]; see [[TinyDecimal5]] companion. */
 @value
-class TinyDecimal5(val value: Int) extends Number, Ordered[TinyDecimal5], Serializable {
+class TinyDecimal5(val value: Int) extends Number, DecimalConvertible, Ordered[TinyDecimal5], Serializable {
 
   override def longValue(): Long = ScaledDecimal.integerPartInt(value).toLong
 
@@ -83,7 +83,7 @@ class TinyDecimal5(val value: Int) extends Number, Ordered[TinyDecimal5], Serial
 
   override def compare(that: TinyDecimal5): Int = Integer.compare(value, that.value)
 
-  def toBigDecimal: JBigDecimal = ScaledDecimal.toBigDecimal(value)
+  override def toBigDecimal: JBigDecimal = ScaledDecimal.toBigDecimal(value)
 
   def toDecimal5: Decimal5 = Decimal5(value.toLong)
 
