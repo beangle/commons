@@ -18,6 +18,7 @@
 package org.beangle.commons.json
 
 import org.beangle.commons.codec.binary.Base64
+import org.beangle.commons.lang.math.{Decimal5, TinyDecimal5}
 import org.beangle.commons.lang.{Options, Strings}
 
 import java.util as ju
@@ -320,6 +321,9 @@ object Json {
       case n: Int => n.toString
       case f: Float => f.toString
       case d: Double => d.toString
+      // 定点数用十进制字面量输出（5 位精度、去尾零、无科学计数法）；其余 Number/BigDecimal 仍按字符串输出（精度不可控）
+      case d: TinyDecimal5 => d.toBigDecimal.stripTrailingZeros.toPlainString
+      case d: Decimal5 => d.toBigDecimal.stripTrailingZeros.toPlainString
       case l: Long => Json.escape(l.toString)
       case bs: Array[Byte] => s""""${Base64.encode(bs)}""""
       case _ => Json.escape(v.toString)
